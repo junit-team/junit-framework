@@ -14,9 +14,12 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
@@ -38,11 +41,13 @@ public abstract class DynamicNode {
 	private final @Nullable URI testSourceUri;
 
 	private final @Nullable ExecutionMode executionMode;
+	private final @Nullable Function<? super ExtensionContext, ? extends ConditionEvaluationResult> executionCondition;
 
 	DynamicNode(AbstractConfiguration configuration) {
 		this.displayName = Preconditions.notBlank(configuration.displayName, "displayName must not be null or blank");
 		this.testSourceUri = configuration.testSourceUri;
 		this.executionMode = configuration.executionMode;
+		this.executionCondition = configuration.executionCondition;
 	}
 
 	/**
@@ -69,6 +74,10 @@ public abstract class DynamicNode {
 		return Optional.ofNullable(executionMode);
 	}
 
+	public Optional<Function<? super ExtensionContext, ? extends ConditionEvaluationResult>> getExecutionCondition() {
+		return Optional.ofNullable(executionCondition);
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this) //
@@ -83,6 +92,9 @@ public abstract class DynamicNode {
 
 		Configuration source(@Nullable URI testSourceUri);
 
+		Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition);
+
 		Configuration executionMode(ExecutionMode executionMode);
 
 		Configuration executionMode(ExecutionMode executionMode, String reason);
@@ -94,6 +106,7 @@ public abstract class DynamicNode {
 		private @Nullable String displayName;
 		private @Nullable URI testSourceUri;
 		private @Nullable ExecutionMode executionMode;
+		private @Nullable Function<? super ExtensionContext, ? extends ConditionEvaluationResult> executionCondition;
 
 		@Override
 		public Configuration displayName(String displayName) {
@@ -104,6 +117,14 @@ public abstract class DynamicNode {
 		@Override
 		public Configuration source(@Nullable URI testSourceUri) {
 			this.testSourceUri = testSourceUri;
+			return this;
+		}
+
+		@Override
+		public Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition) {
+			// TODO Handle multiple calls
+			this.executionCondition = condition;
 			return this;
 		}
 

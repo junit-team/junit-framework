@@ -16,11 +16,14 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 
@@ -132,6 +135,10 @@ public class DynamicContainer extends DynamicNode {
 		Configuration source(@Nullable URI testSourceUri);
 
 		@Override
+		Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition);
+
+		@Override
 		Configuration executionMode(ExecutionMode executionMode);
 
 		@Override
@@ -170,6 +177,13 @@ public class DynamicContainer extends DynamicNode {
 		@Override
 		public Configuration source(@Nullable URI testSourceUri) {
 			super.source(testSourceUri);
+			return this;
+		}
+
+		@Override
+		public Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition) {
+			super.executionCondition(condition);
 			return this;
 		}
 
