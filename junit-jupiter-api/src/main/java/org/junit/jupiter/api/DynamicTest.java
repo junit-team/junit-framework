@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
 import java.util.Iterator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -24,6 +25,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
@@ -61,7 +63,7 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, Executable executable) {
-		return new DynamicTest(displayName, null, executable);
+		return dynamicTest(config -> config.displayName(displayName).executable(executable));
 	}
 
 	/**
@@ -79,7 +81,13 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		return new DynamicTest(displayName, testSourceUri, executable);
+		return dynamicTest(config -> config.displayName(displayName).source(testSourceUri).executable(executable));
+	}
+
+	public static DynamicTest dynamicTest(Consumer<Configuration> configurer) {
+		var configuration = new DefaultConfiguration();
+		configurer.accept(configuration);
+		return new DynamicTest(configuration);
 	}
 
 	/**
@@ -290,9 +298,9 @@ public class DynamicTest extends DynamicNode {
 
 	private final Executable executable;
 
-	private DynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		super(displayName, testSourceUri);
-		this.executable = Preconditions.notNull(executable, "executable must not be null");
+	private DynamicTest(DefaultConfiguration configuration) {
+		super(configuration);
+		this.executable = Preconditions.notNull(configuration.executable, "executable must not be null");
 	}
 
 	/**
@@ -300,6 +308,58 @@ public class DynamicTest extends DynamicNode {
 	 */
 	public Executable getExecutable() {
 		return this.executable;
+	}
+
+	public interface Configuration extends DynamicNode.Configuration {
+
+		@Override
+		Configuration displayName(String displayName);
+
+		@Override
+		Configuration source(@Nullable URI testSourceUri);
+
+		@Override
+		Configuration execution(ExecutionMode executionMode);
+
+		@Override
+		Configuration execution(ExecutionMode executionMode, String reason);
+
+		Configuration executable(Executable executable);
+	}
+
+	private static class DefaultConfiguration extends AbstractConfiguration implements Configuration {
+
+		private @Nullable Executable executable;
+
+		@Override
+		public Configuration displayName(String displayName) {
+			super.displayName(displayName);
+			return this;
+		}
+
+		@Override
+		public Configuration source(@Nullable URI testSourceUri) {
+			super.source(testSourceUri);
+			return this;
+		}
+
+		@Override
+		public Configuration execution(ExecutionMode executionMode) {
+			super.execution(executionMode);
+			return this;
+		}
+
+		@Override
+		public Configuration execution(ExecutionMode executionMode, String reason) {
+			super.execution(executionMode, reason);
+			return this;
+		}
+
+		@Override
+		public Configuration executable(Executable executable) {
+			this.executable = executable;
+			return this;
+		}
 	}
 
 }
