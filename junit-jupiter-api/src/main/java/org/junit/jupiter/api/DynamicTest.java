@@ -319,10 +319,10 @@ public class DynamicTest extends DynamicNode {
 		Configuration source(@Nullable URI testSourceUri);
 
 		@Override
-		Configuration execution(ExecutionMode executionMode);
+		Configuration executionMode(ExecutionMode executionMode);
 
 		@Override
-		Configuration execution(ExecutionMode executionMode, String reason);
+		Configuration executionMode(ExecutionMode executionMode, String reason);
 
 		Configuration executable(Executable executable);
 	}
@@ -344,14 +344,14 @@ public class DynamicTest extends DynamicNode {
 		}
 
 		@Override
-		public Configuration execution(ExecutionMode executionMode) {
-			super.execution(executionMode);
+		public Configuration executionMode(ExecutionMode executionMode) {
+			super.executionMode(executionMode);
 			return this;
 		}
 
 		@Override
-		public Configuration execution(ExecutionMode executionMode, String reason) {
-			super.execution(executionMode, reason);
+		public Configuration executionMode(ExecutionMode executionMode, String reason) {
+			super.executionMode(executionMode, reason);
 			return this;
 		}
 

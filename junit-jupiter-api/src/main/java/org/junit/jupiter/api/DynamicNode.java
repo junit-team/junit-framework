@@ -83,9 +83,9 @@ public abstract class DynamicNode {
 
 		Configuration source(@Nullable URI testSourceUri);
 
-		Configuration execution(ExecutionMode executionMode);
+		Configuration executionMode(ExecutionMode executionMode);
 
-		Configuration execution(ExecutionMode executionMode, String reason);
+		Configuration executionMode(ExecutionMode executionMode, String reason);
 
 	}
 
@@ -108,14 +108,14 @@ public abstract class DynamicNode {
 		}
 
 		@Override
-		public Configuration execution(ExecutionMode executionMode) {
+		public Configuration executionMode(ExecutionMode executionMode) {
 			this.executionMode = executionMode;
 			return this;
 		}
 
 		@Override
-		public Configuration execution(ExecutionMode executionMode, String reason) {
-			return execution(executionMode);
+		public Configuration executionMode(ExecutionMode executionMode, String reason) {
+			return executionMode(executionMode);
 		}
 	}
 
