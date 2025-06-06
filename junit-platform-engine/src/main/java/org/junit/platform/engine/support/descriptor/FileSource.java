@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.descriptor;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.File;
@@ -77,6 +78,11 @@ public final class FileSource implements FileSystemSource {
 		this.filePosition = filePosition;
 	}
 
+	private FileSource(FileSource fileSource, FilePosition filePosition) {
+		this.file = fileSource.file;
+		this.filePosition = filePosition;
+	}	
+
 	/**
 	 * Get the {@link URI} for the source {@linkplain #getFile file}.
 	 *
@@ -102,6 +108,20 @@ public final class FileSource implements FileSystemSource {
 	 */
 	public Optional<FilePosition> getPosition() {
 		return Optional.ofNullable(this.filePosition);
+	}
+
+	/**
+	* Return a new {@code FileSource} based on this instance but with a different
+	* {@link FilePosition}. This avoids redundant canonical path resolution
+	* by reusing the already-canonical file.
+	*
+	* @param filePosition the new {@code FilePosition}; must not be {@code null}
+	* @return a new {@code FileSource} with the same file and updated position
+	*/
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public FileSource withPosition(FilePosition filePosition) {
+		Preconditions.notNull(filePosition, "filePosition must not be null");
+		return new FileSource(this, filePosition);
 	}
 
 	@Override
