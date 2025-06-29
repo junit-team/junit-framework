@@ -13,11 +13,18 @@ package org.junit.jupiter.api;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
@@ -38,6 +45,8 @@ import org.junit.platform.commons.util.Preconditions;
 @API(status = MAINTAINED, since = "5.3")
 public class DynamicContainer extends DynamicNode {
 
+	private final @Nullable ExecutionMode defaultChildExecutionMode;
+
 	/**
 	 * Factory for creating a new {@code DynamicContainer} for the supplied display
 	 * name and collection of dynamic nodes.
@@ -51,7 +60,7 @@ public class DynamicContainer extends DynamicNode {
 	 * @see #dynamicContainer(String, Stream)
 	 */
 	public static DynamicContainer dynamicContainer(String displayName, Iterable<? extends DynamicNode> dynamicNodes) {
-		return dynamicContainer(displayName, null, StreamSupport.stream(dynamicNodes.spliterator(), false));
+		return dynamicContainer(config -> config.displayName(displayName).children(dynamicNodes));
 	}
 
 	/**
@@ -67,7 +76,7 @@ public class DynamicContainer extends DynamicNode {
 	 * @see #dynamicContainer(String, Iterable)
 	 */
 	public static DynamicContainer dynamicContainer(String displayName, Stream<? extends DynamicNode> dynamicNodes) {
-		return dynamicContainer(displayName, null, dynamicNodes);
+		return dynamicContainer(config -> config.displayName(displayName).children(dynamicNodes));
 	}
 
 	/**
@@ -88,15 +97,21 @@ public class DynamicContainer extends DynamicNode {
 	public static DynamicContainer dynamicContainer(String displayName, @Nullable URI testSourceUri,
 			Stream<? extends DynamicNode> dynamicNodes) {
 
-		return new DynamicContainer(displayName, testSourceUri, dynamicNodes);
+		return dynamicContainer(config -> config.displayName(displayName).source(testSourceUri).children(dynamicNodes));
+	}
+
+	public static DynamicContainer dynamicContainer(Consumer<Configuration> configurer) {
+		var configuration = new DefaultConfiguration();
+		configurer.accept(configuration);
+		return new DynamicContainer(configuration);
 	}
 
 	private final Stream<? extends DynamicNode> children;
 
-	private DynamicContainer(String displayName, @Nullable URI testSourceUri, Stream<? extends DynamicNode> children) {
-		super(displayName, testSourceUri);
-		Preconditions.notNull(children, "children must not be null");
-		this.children = children;
+	private DynamicContainer(DefaultConfiguration configuration) {
+		super(configuration);
+		this.children = Preconditions.notNull(configuration.children, "children must not be null");
+		this.defaultChildExecutionMode = configuration.defaultChildExecutionMode;
 	}
 
 	/**
@@ -107,4 +122,101 @@ public class DynamicContainer extends DynamicNode {
 		return children;
 	}
 
+	public Optional<ExecutionMode> getDefaultChildExecutionMode() {
+		return Optional.ofNullable(defaultChildExecutionMode);
+	}
+
+	public interface Configuration extends DynamicNode.Configuration {
+
+		@Override
+		Configuration displayName(String displayName);
+
+		@Override
+		Configuration source(@Nullable URI testSourceUri);
+
+		@Override
+		Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition);
+
+		@Override
+		Configuration executionMode(ExecutionMode executionMode);
+
+		@Override
+		Configuration executionMode(ExecutionMode executionMode, String reason);
+
+		Configuration defaultChildExecutionMode(ExecutionMode executionMode);
+
+		Configuration defaultChildExecutionMode(ExecutionMode executionMode, String reason);
+
+		default Configuration children(Iterable<? extends DynamicNode> children) {
+			Preconditions.notNull(children, "children must not be null");
+			return children(StreamSupport.stream(children.spliterator(), false));
+		}
+
+		default Configuration children(DynamicNode... children) {
+			Preconditions.notNull(children, "children must not be null");
+			Preconditions.containsNoNullElements(children, "children must not contain null elements");
+			return children(List.of(children));
+		}
+
+		Configuration children(Stream<? extends DynamicNode> children);
+
+	}
+
+	private static class DefaultConfiguration extends AbstractConfiguration implements Configuration {
+
+		private @Nullable Stream<? extends DynamicNode> children;
+		private @Nullable ExecutionMode defaultChildExecutionMode;
+
+		@Override
+		public Configuration displayName(String displayName) {
+			super.displayName(displayName);
+			return this;
+		}
+
+		@Override
+		public Configuration source(@Nullable URI testSourceUri) {
+			super.source(testSourceUri);
+			return this;
+		}
+
+		@Override
+		public Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition) {
+			super.executionCondition(condition);
+			return this;
+		}
+
+		@Override
+		public Configuration executionMode(ExecutionMode executionMode) {
+			super.executionMode(executionMode);
+			return this;
+		}
+
+		@Override
+		public Configuration executionMode(ExecutionMode executionMode, String reason) {
+			super.executionMode(executionMode, reason);
+			return this;
+		}
+
+		@Override
+		public Configuration defaultChildExecutionMode(ExecutionMode executionMode) {
+			this.defaultChildExecutionMode = executionMode;
+			return this;
+		}
+
+		@Override
+		public Configuration defaultChildExecutionMode(ExecutionMode executionMode, String reason) {
+			defaultChildExecutionMode(executionMode);
+			return this;
+		}
+
+		@Override
+		public Configuration children(Stream<? extends DynamicNode> children) {
+			Preconditions.notNull(children, "children must not be null");
+			Preconditions.condition(this.children == null, "children can only be set once");
+			this.children = children;
+			return this;
+		}
+	}
 }

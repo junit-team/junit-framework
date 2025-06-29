@@ -10,8 +10,12 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
@@ -27,11 +31,20 @@ import org.junit.platform.engine.UniqueId;
 abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 
 	protected final int index;
+	private final Optional<ExecutionMode> executionMode;
+	private final Optional<Function<? super ExtensionContext, ? extends ConditionEvaluationResult>> executionCondition;
 
 	DynamicNodeTestDescriptor(UniqueId uniqueId, int index, DynamicNode dynamicNode, @Nullable TestSource testSource,
 			JupiterConfiguration configuration) {
 		super(uniqueId, dynamicNode.getDisplayName(), testSource, configuration);
 		this.index = index;
+		this.executionMode = dynamicNode.getExecutionMode().map(JupiterTestDescriptor::toExecutionMode);
+		this.executionCondition = dynamicNode.getExecutionCondition();
+	}
+
+	@Override
+	Optional<ExecutionMode> getExplicitExecutionMode() {
+		return executionMode;
 	}
 
 	@Override
@@ -58,7 +71,10 @@ abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 
 	@Override
 	public SkipResult shouldBeSkipped(JupiterEngineExecutionContext context) {
-		return SkipResult.doNotSkip();
+		return this.executionCondition //
+				.map(condition -> condition.apply(context.getExtensionContext())) //
+				.map(this::toSkipResult) //
+				.orElse(SkipResult.doNotSkip());
 	}
 
 }
