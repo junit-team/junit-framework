@@ -165,7 +165,7 @@ class CsvReaderFactory {
 			if (!quoted && field.isBlank()) {
 				return NULL_MARKER;
 			}
-			String modifiedField = (!quoted && ignoreLeadingAndTrailingWhitespaces) ? field.strip() : field;
+			String modifiedField = (!quoted && ignoreLeadingAndTrailingWhitespaces) ? field.trim() : field;
 			if (nullValues.contains(modifiedField)) {
 				return NULL_MARKER;
 			}

@@ -127,6 +127,17 @@ class CsvArgumentsProviderTests {
 	}
 
 	@Test
+	void trimsSpacesUsingStringTrim() {
+		// \u0000 (null) removed by trim(), preserved by strip()
+		// \u00A0 (non-breaking space) preserved by trim(), removed by strip()
+		var annotation = csvSource().lines("\u0000foo,\u00A0bar", "\u0000' foo',\u00A0' bar'").build();
+
+		var arguments = provideArguments(annotation);
+
+		assertThat(arguments).containsExactly(array("foo", "\u00A0bar"), array(" foo", "\u00A0' bar'"));
+	}
+
+	@Test
 	void ignoresLeadingAndTrailingSpaces() {
 		var annotation = csvSource().lines("1,a", "2, b", "3,c ", "4, d ") //
 				.ignoreLeadingAndTrailingWhitespace(false).build();

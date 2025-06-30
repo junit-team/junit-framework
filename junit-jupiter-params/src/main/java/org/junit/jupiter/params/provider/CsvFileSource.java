@@ -225,6 +225,9 @@ public @interface CsvFileSource {
 	 * Controls whether leading and trailing whitespace characters of unquoted
 	 * CSV columns should be ignored.
 	 *
+	 * <p>Whitespace refers to characters with Unicode code points less than
+	 * or equal to {@code U+0020}, as defined by {@link String#trim()}.
+	 *
 	 * <p>Defaults to {@code true}.
 	 *
 	 * @since 5.8
