@@ -120,6 +120,10 @@ repository on GitHub.
 * Attributes such as `ignoreLeadingAndTrailingWhitespace`, `nullValues`, and others in
   `@CsvSource` and `@CsvFileSource` now apply to header fields as well as to regular
   fields.
+* Extra characters after a closing quote are no longer allowed in `@CsvSource` and
+  `@CsvFileSource`. For example, if a single quote is used as the quote character,
+  the following CSV value `'foo'INVALID,'bar'` will now cause an exception to be thrown.
+  This helps ensure that malformed input is not silently accepted or misinterpreted.
 * The `junit-jupiter-migrationsupport` artifact and its contained classes are now
   deprecated and will be removed in the next major version.
 * The type bounds of the following methods have been changed to be more flexible and allow
