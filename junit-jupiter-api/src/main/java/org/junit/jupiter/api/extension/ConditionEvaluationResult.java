@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.StringUtils;
 import org.junit.platform.commons.util.ToStringBuilder;
 
@@ -32,7 +33,7 @@ public class ConditionEvaluationResult {
 	 * @param reason the reason why the container or test should be enabled
 	 * @return an enabled {@code ConditionEvaluationResult} with the given reason
 	 */
-	public static ConditionEvaluationResult enabled(String reason) {
+	public static ConditionEvaluationResult enabled(@Nullable String reason) {
 		return new ConditionEvaluationResult(true, reason);
 	}
 
@@ -42,7 +43,7 @@ public class ConditionEvaluationResult {
 	 * @param reason the reason why the container or test should be disabled
 	 * @return a disabled {@code ConditionEvaluationResult} with the given reason
 	 */
-	public static ConditionEvaluationResult disabled(String reason) {
+	public static ConditionEvaluationResult disabled(@Nullable String reason) {
 		return new ConditionEvaluationResult(false, reason);
 	}
 
@@ -67,7 +68,7 @@ public class ConditionEvaluationResult {
 
 	private final Optional<String> reason;
 
-	private ConditionEvaluationResult(boolean enabled, String reason) {
+	private ConditionEvaluationResult(boolean enabled, @Nullable String reason) {
 		this.enabled = enabled;
 		this.reason = Optional.ofNullable(reason);
 	}
