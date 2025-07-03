@@ -18,11 +18,15 @@ plugins {
 
 rewrite {
 	activeRecipe("org.openrewrite.java.migrate.UpgradeToJava17")
+	activeRecipe("org.openrewrite.staticanalysis.RemoveUnusedPrivateMethods")
+	activeRecipe("org.openrewrite.staticanalysis.MissingOverrideAnnotation")
+	failOnDryRunResults = true
 }
 
 dependencies {
 	rewrite(platform("org.openrewrite.recipe:rewrite-recipe-bom:latest.release"))
 	rewrite("org.openrewrite.recipe:rewrite-migrate-java")
+	rewrite("org.openrewrite.recipe:rewrite-static-analysis")
 }
 
 val mavenizedProjects: List<Project> by rootProject.extra
@@ -279,6 +283,9 @@ tasks {
 	}
 	checkstyleTest {
 		config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleTest.xml"))
+	}
+	check {
+		dependsOn("rewriteDryRun")
 	}
 }
 
