@@ -80,7 +80,7 @@ class LauncherFactoryTests {
 
 			NoopTestExecutionListener.called = false;
 
-			launcher.execute(request().build());
+			launcher.execute(request().forExecution().build());
 
 			assertTrue(NoopTestExecutionListener.called);
 		});
@@ -101,7 +101,7 @@ class LauncherFactoryTests {
 				UnusedTestExecutionListener.called = false;
 				AnotherUnusedTestExecutionListener.called = false;
 
-				launcher.execute(request().build());
+				launcher.execute(request().forExecution().build());
 
 				var logMessage = listener.stream(ServiceLoaderRegistry.class) //
 						.map(LogRecord::getMessage) //
@@ -316,19 +316,25 @@ class LauncherFactoryTests {
 					.enableTestEngineAutoRegistration(false) //
 					.addTestEngines(engine) //
 					.build();
-			var launcher = LauncherFactory.create(config);
-			var request = request().configurationParameter(LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME,
-				"false").build();
 
 			AtomicReference<TestExecutionResult> result = new AtomicReference<>();
-			launcher.execute(request, new TestExecutionListener() {
+			var listener = new TestExecutionListener() {
 				@Override
 				public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
 					if (testIdentifier.getParentId().isEmpty()) {
 						result.set(testExecutionResult);
 					}
 				}
-			});
+			};
+
+			var request = request() //
+					.configurationParameter(LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, "false") //
+					.forExecution() //
+					.listeners(listener) //
+					.build();
+
+			var launcher = LauncherFactory.create(config);
+			launcher.execute(request);
 
 			assertThat(requireNonNull(result.get()).getThrowable().orElseThrow()) //
 					.hasRootCauseMessage("from execution") //
@@ -345,16 +351,22 @@ class LauncherFactoryTests {
 				.build();
 
 		try (LauncherSession session = LauncherFactory.openSession(config)) {
-			var launcher = session.getLauncher();
-			var request = request().selectors(selectClass(SessionTrackingTestCase.class)).build();
 
 			AtomicReference<Throwable> errorRef = new AtomicReference<>();
-			launcher.execute(request, new TestExecutionListener() {
+			var listener = new TestExecutionListener() {
 				@Override
 				public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
 					testExecutionResult.getThrowable().ifPresent(errorRef::set);
 				}
-			});
+			};
+
+			var request = request() //
+					.selectors(selectClass(SessionTrackingTestCase.class)) //
+					.forExecution() //
+					.listeners(listener) //
+					.build();
+
+			session.getLauncher().execute(request);
 
 			assertThat(errorRef.get()).isNull();
 		}
@@ -367,16 +379,22 @@ class LauncherFactoryTests {
 				.build();
 
 		try (LauncherSession session = LauncherFactory.openSession(config)) {
-			var launcher = session.getLauncher();
-			var request = request().selectors(selectClass(SessionStoringTestCase.class)).build();
 
 			AtomicReference<Throwable> errorRef = new AtomicReference<>();
-			launcher.execute(request, new TestExecutionListener() {
+			var listener = new TestExecutionListener() {
 				@Override
 				public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
 					testExecutionResult.getThrowable().ifPresent(errorRef::set);
 				}
-			});
+			};
+
+			var request = request() //
+					.selectors(selectClass(SessionStoringTestCase.class)) //
+					.forExecution() //
+					.listeners(listener) //
+					.build();
+
+			session.getLauncher().execute(request);
 
 			assertThat(errorRef.get()).isNull();
 		}
@@ -390,10 +408,12 @@ class LauncherFactoryTests {
 				.build();
 
 		try (LauncherSession session = LauncherFactory.openSession(config)) {
-			var launcher = session.getLauncher();
-			var request = request().selectors(selectClass(SessionResourceAutoCloseTestCase.class)).build();
+			var request = request() //
+					.selectors(selectClass(SessionResourceAutoCloseTestCase.class)) //
+					.forExecution() //
+					.build();
 
-			launcher.execute(request);
+			session.getLauncher().execute(request);
 			assertThat(CloseTrackingResource.closed).isFalse();
 		}
 
@@ -406,10 +426,12 @@ class LauncherFactoryTests {
 		var config = LauncherConfig.builder().build();
 
 		try (LauncherSession session = LauncherFactory.openSession(config)) {
-			var launcher = session.getLauncher();
-			var request = request().selectors(selectClass(RequestResourceAutoCloseTestCase.class)).build();
+			var request = request() //
+					.selectors(selectClass(RequestResourceAutoCloseTestCase.class)) //
+					.forExecution() //
+					.build();
 
-			launcher.execute(request);
+			session.getLauncher().execute(request);
 
 			assertThat(CloseTrackingResource.closed).isTrue();
 		}

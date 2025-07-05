@@ -45,6 +45,7 @@ public class FlightRecordingExecutionListenerIntegrationTests {
 		var request = request() //
 				.selectors(selectClass(TestCase.class)) //
 				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(tempDir)) //
+				.forExecution() //
 				.build();
 
 		launcher.execute(request);

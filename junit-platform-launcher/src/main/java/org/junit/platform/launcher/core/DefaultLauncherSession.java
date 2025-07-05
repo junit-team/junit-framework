@@ -22,6 +22,7 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.LauncherInterceptor;
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
@@ -116,13 +117,20 @@ class DefaultLauncherSession implements LauncherSession {
 			throw new PreconditionViolationException("Launcher session has already been closed");
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
 			throw new PreconditionViolationException("Launcher session has already been closed");
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+			throw new PreconditionViolationException("Launcher session has already been closed");
+		}
+
+		@Override
+		public void execute(LauncherExecutionRequest launcherExecutionRequest) {
 			throw new PreconditionViolationException("Launcher session has already been closed");
 		}
 	}

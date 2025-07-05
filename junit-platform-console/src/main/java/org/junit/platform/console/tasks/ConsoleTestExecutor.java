@@ -143,7 +143,7 @@ public class ConsoleTestExecutor {
 		LauncherDiscoveryRequestBuilder discoveryRequestBuilder = toDiscoveryRequestBuilder(discoveryOptions);
 		reportsDir.ifPresent(dir -> discoveryRequestBuilder.configurationParameter(OUTPUT_DIR_PROPERTY_NAME,
 			dir.toAbsolutePath().toString()));
-		launcher.execute(discoveryRequestBuilder.build());
+		launcher.execute(discoveryRequestBuilder.forExecution().build());
 	}
 
 	private Optional<ClassLoader> createCustomClassLoader() {

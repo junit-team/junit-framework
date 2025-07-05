@@ -257,8 +257,7 @@ public class LauncherConstants {
 	 * <p>If not specified, the {@code Launcher} will report discovery issues
 	 * during the discovery phase if
 	 * {@link Launcher#discover(LauncherDiscoveryRequest)} is called, and during
-	 * the execution phase if
-	 * {@link Launcher#execute(LauncherDiscoveryRequest, TestExecutionListener...)}
+	 * the execution phase if {@link Launcher#execute(LauncherExecutionRequest)}
 	 * is called.
 	 *
 	 * @since 1.13

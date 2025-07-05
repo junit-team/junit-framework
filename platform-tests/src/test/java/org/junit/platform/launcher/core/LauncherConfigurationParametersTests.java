@@ -169,11 +169,14 @@ class LauncherConfigurationParametersTests {
 
 	@Test
 	void getValueInExtensionContext() {
+		var summary = new SummaryGeneratingListener();
 		var request = LauncherDiscoveryRequestBuilder.request() //
 				.configurationParameter("thing", "one else!") //
-				.selectors(DiscoverySelectors.selectClass(Something.class)).build();
-		var summary = new SummaryGeneratingListener();
-		LauncherFactory.create().execute(request, summary);
+				.selectors(DiscoverySelectors.selectClass(Something.class)) //
+				.forExecution() //
+				.listeners(summary) //
+				.build();
+		LauncherFactory.create().execute(request);
 		assertEquals(0, summary.getSummary().getTestsFailedCount());
 	}
 

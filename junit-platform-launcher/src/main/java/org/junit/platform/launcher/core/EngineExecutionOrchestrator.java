@@ -16,6 +16,7 @@ import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_E
 import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
 import static org.junit.platform.launcher.core.ListenerRegistry.forEngineExecutionListeners;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -56,7 +57,7 @@ public class EngineExecutionOrchestrator {
 	}
 
 	void execute(InternalTestPlan internalTestPlan, NamespacedHierarchicalStore<Namespace> requestLevelStore,
-			TestExecutionListener... listeners) {
+			Collection<? extends TestExecutionListener> listeners) {
 		ConfigurationParameters configurationParameters = internalTestPlan.getConfigurationParameters();
 		ListenerRegistry<TestExecutionListener> testExecutionListenerListeners = buildListenerRegistryForExecution(
 			listeners);
@@ -213,8 +214,8 @@ public class EngineExecutionOrchestrator {
 	}
 
 	private ListenerRegistry<TestExecutionListener> buildListenerRegistryForExecution(
-			TestExecutionListener... listeners) {
-		if (listeners.length == 0) {
+			Collection<? extends TestExecutionListener> listeners) {
+		if (listeners.isEmpty()) {
 			return this.listenerRegistry;
 		}
 		return ListenerRegistry.copyOf(this.listenerRegistry).addAll(listeners);

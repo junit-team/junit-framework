@@ -208,13 +208,7 @@ class UniqueIdTrackingListenerIntegrationTests {
 
 	private List<String> executeTests(Map<String, String> configurationParameters, ClassSelector... classSelectors) {
 		List<String> uniqueIds = new ArrayList<>();
-		var request = request()//
-				.selectors(classSelectors)//
-				.filters(includeEngines("junit-jupiter"))//
-				.configurationParameters(configurationParameters)//
-				.configurationParameter(WORKING_DIR_PROPERTY_NAME, workingDir.toAbsolutePath().toString())//
-				.build();
-		LauncherFactory.create().execute(request, new TestExecutionListener() {
+		var listener = new TestExecutionListener() {
 
 			@Nullable
 			private TestPlan testPlan;
@@ -241,7 +235,16 @@ class UniqueIdTrackingListenerIntegrationTests {
 					uniqueIds.add(testIdentifier.getUniqueId());
 				}
 			}
-		});
+		};
+		var request = request()//
+				.selectors(classSelectors)//
+				.filters(includeEngines("junit-jupiter"))//
+				.configurationParameters(configurationParameters)//
+				.configurationParameter(WORKING_DIR_PROPERTY_NAME, workingDir.toAbsolutePath().toString())//
+				.forExecution()//
+				.listeners(listener)//
+				.build();
+		LauncherFactory.create().execute(request);
 		return uniqueIds;
 	}
 

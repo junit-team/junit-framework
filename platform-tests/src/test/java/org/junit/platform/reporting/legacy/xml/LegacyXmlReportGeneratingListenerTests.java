@@ -432,8 +432,12 @@ class LegacyXmlReportGeneratingListenerTests {
 		var reportListener = new LegacyXmlReportGeneratingListener(tempDirectory.toString(), out, clock);
 		var launcher = createLauncher(engine);
 		launcher.registerTestExecutionListeners(reportListener);
-		launcher.execute(request().configurationParameter(LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME,
-			"false").selectors(selectUniqueId(UniqueId.forEngine(engine.getId()))).build());
+		var request = request() //
+				.configurationParameter(LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, "false") //
+				.selectors(selectUniqueId(UniqueId.forEngine(engine.getId()))) //
+				.forExecution() //
+				.build();
+		launcher.execute(request);
 	}
 
 	private Match readValidXmlFile(Path xmlFile) throws Exception {

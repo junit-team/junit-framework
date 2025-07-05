@@ -91,9 +91,12 @@ public class LoggingListenerTests {
 				.build();
 		var request = request() //
 				.selectors(selectClass(TestCase.class)) //
-				.filters(includeEngines("junit-jupiter")).build();
+				.filters(includeEngines("junit-jupiter")) //
+				.forExecution() //
+				.listeners(listener) //
+				.build();
 		LauncherFactory.create(config) //
-				.execute(request, listener);
+				.execute(request);
 	}
 
 	@SuppressWarnings("JUnitMalformedDeclaration")

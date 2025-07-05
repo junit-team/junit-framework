@@ -10,9 +10,12 @@
 
 package org.junit.platform.launcher;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
+import org.junit.platform.launcher.core.LauncherExecutionRequestBuilder;
 
 /**
  * The {@code Launcher} API is the main entry point for client code that
@@ -105,8 +108,16 @@ public interface Launcher {
 	 *
 	 * @param launcherDiscoveryRequest the launcher discovery request; never {@code null}
 	 * @param listeners additional test execution listeners; never {@code null}
+	 * @deprecated Please use {@link #execute(LauncherExecutionRequest)} instead.
 	 */
-	void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners);
+	@Deprecated
+	@API(status = DEPRECATED, since = "6.0")
+	default void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
+		var executionRequest = LauncherExecutionRequestBuilder.request(launcherDiscoveryRequest) //
+				.listeners(listeners) //
+				.build();
+		execute(executionRequest);
+	}
 
 	/**
 	 * Execute the supplied {@link TestPlan} and notify
@@ -123,8 +134,44 @@ public interface Launcher {
 	 * @param testPlan the test plan to execute; never {@code null}
 	 * @param listeners additional test execution listeners; never {@code null}
 	 * @since 1.4
+	 * @deprecated Please use {@link #execute(LauncherExecutionRequest)} instead.
 	 */
-	@API(status = STABLE, since = "1.4")
-	void execute(TestPlan testPlan, TestExecutionListener... listeners);
+	@Deprecated
+	@API(status = DEPRECATED, since = "6.0")
+	default void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan) //
+				.listeners(listeners) //
+				.build();
+		execute(executionRequest);
+	}
+
+	/**
+	 * Execute tests according to the supplied {@link LauncherExecutionRequest}
+	 * {@linkplain #registerTestExecutionListeners registered listeners} about
+	 * the progress and results of the execution.
+	 *
+	 * <p>Test execution listeners supplied
+	 * {@linkplain LauncherExecutionRequest#getAdditionalTestExecutionListeners()
+	 * as part of the request} are registered in addition to already registered
+	 * listeners but only for the supplied execution request.
+	 *
+	 * @apiNote If the execution request contains a {@link TestPlan} rather than
+	 * a {@link LauncherDiscoveryRequest}, it must not have been executed
+	 * previously.
+	 *
+	 * <p>If the execution request contains a {@link LauncherDiscoveryRequest},
+	 * calling this method will cause test discovery to be executed for all
+	 * registered engines. If the same {@link LauncherDiscoveryRequest} was
+	 * previously passed to {@link #discover(LauncherDiscoveryRequest)}, you
+	 * should instead provide the resulting {@link TestPlan} as part of the
+	 * supplied execution request to avoid the potential performance degradation
+	 * (e.g., classpath scanning) of running test discovery twice.
+	 *
+	 * @param launcherExecutionRequest the launcher execution request; never
+	 * {@code null}
+	 * @since 6.0
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	void execute(LauncherExecutionRequest launcherExecutionRequest);
 
 }

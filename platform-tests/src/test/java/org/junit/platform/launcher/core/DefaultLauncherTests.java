@@ -181,7 +181,10 @@ class DefaultLauncherTests {
 		inOrder.verify(discoveryListener).launcherDiscoveryFinished(request);
 
 		var listener = mock(TestExecutionListener.class);
-		launcher.execute(testPlan, listener);
+		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan) //
+				.listeners(listener) //
+				.build();
+		launcher.execute(executionRequest);
 
 		var testExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
 		verify(listener).executionStarted(engineIdentifier);
@@ -216,7 +219,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		var testExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
 		verify(listener).executionStarted(any());
@@ -240,7 +243,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		var testExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
 		verify(listener).executionStarted(any());
@@ -264,7 +267,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		var testExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
 		verify(listener).executionStarted(any());
@@ -289,7 +292,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		var testExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
 		verify(listener).executionStarted(any());
@@ -316,7 +319,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		var testExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
 		verify(listener).executionStarted(any());
@@ -339,7 +342,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		verify(listener).executionSkipped(any(TestIdentifier.class), eq("not today"));
 		verify(listener, times(0)).executionStarted(any());
@@ -359,7 +362,7 @@ class DefaultLauncherTests {
 		};
 
 		var listener = mock(TestExecutionListener.class);
-		createLauncher(engine).execute(request().build(), listener);
+		createLauncher(engine).execute(request().forExecution().listeners(listener).build());
 
 		verify(listener).executionStarted(any());
 		verify(listener).executionFinished(any(), eq(successful()));
@@ -427,7 +430,7 @@ class DefaultLauncherTests {
 		var engine = new TestEngineSpy();
 
 		var launcher = createLauncher(engine);
-		launcher.execute(request().build());
+		launcher.execute(request().forExecution().build());
 
 		var configurationParameters = requireNonNull(engine.requestForExecution).getConfigurationParameters();
 		assertThat(configurationParameters.get("key")).isNotPresent();
@@ -438,7 +441,7 @@ class DefaultLauncherTests {
 		var engine = new TestEngineSpy();
 
 		var launcher = createLauncher(engine);
-		launcher.execute(request().configurationParameter("key", "value").build());
+		launcher.execute(request().configurationParameter("key", "value").forExecution().build());
 
 		var configurationParameters = requireNonNull(engine.requestForExecution).getConfigurationParameters();
 		assertThat(configurationParameters.get("key")).isPresent();
@@ -453,7 +456,7 @@ class DefaultLauncherTests {
 			var engine = new TestEngineSpy();
 
 			var launcher = createLauncher(engine);
-			launcher.execute(request().build());
+			launcher.execute(request().forExecution().build());
 
 			var configurationParameters = requireNonNull(engine.requestForExecution).getConfigurationParameters();
 			var optionalFoo = configurationParameters.get(FOO);
@@ -471,7 +474,7 @@ class DefaultLauncherTests {
 		var listener = new SummaryGeneratingListener();
 
 		var launcher = createLauncher(engine);
-		launcher.execute(request().build(), listener);
+		launcher.execute(request().forExecution().listeners(listener).build());
 
 		assertThat(listener.getSummary()).isNotNull();
 		assertThat(listener.getSummary().getContainersFoundCount()).isEqualTo(1);
@@ -553,7 +556,7 @@ class DefaultLauncherTests {
 
 		var launcher = createLauncher(engine);
 		var listener = mock(TestExecutionListener.class);
-		launcher.execute(request().build(), listener);
+		launcher.execute(request().forExecution().listeners(listener).build());
 
 		var inOrder = inOrder(listener);
 		var testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
@@ -590,10 +593,11 @@ class DefaultLauncherTests {
 		var testPlan = launcher.discover(request().build());
 		verify(engine, times(1)).discover(any(), any());
 
-		launcher.execute(testPlan);
+		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan).build();
+		launcher.execute(executionRequest);
 		verify(engine, times(1)).execute(any());
 
-		var e = assertThrows(PreconditionViolationException.class, () -> launcher.execute(testPlan));
+		var e = assertThrows(PreconditionViolationException.class, () -> launcher.execute(executionRequest));
 		assertEquals("TestPlan must only be executed once", e.getMessage());
 	}
 
@@ -640,7 +644,12 @@ class DefaultLauncherTests {
 		var launcher = createLauncher(engine);
 		TestExecutionListener listener = mock();
 
-		launcher.execute(request().configurationParameter(DRY_RUN_PROPERTY_NAME, "true").build(), listener);
+		var request = request() //
+				.configurationParameter(DRY_RUN_PROPERTY_NAME, "true") //
+				.forExecution() //
+				.listeners(listener) //
+				.build();
+		launcher.execute(request);
 
 		var inOrder = inOrder(listener);
 		inOrder.verify(listener).testPlanExecutionStarted(any());
@@ -994,15 +1003,19 @@ class DefaultLauncherTests {
 			return null;
 		}).when(executionListener).executionFinished(any(), any());
 
-		var builder = request() //
+		var launcher = createLauncher(engine);
+
+		var discoveryRequestBuilder = request() //
 				.enableImplicitConfigurationParameters(false) //
 				.configurationParameter(DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME, "execution") //
 				.configurationParameter(DEFAULT_DISCOVERY_LISTENER_CONFIGURATION_PROPERTY_NAME, "logging");
-		var request = configurer.apply(builder).build();
-		var launcher = createLauncher(engine);
+		var discoveryRequest = configurer.apply(discoveryRequestBuilder).build();
+		var testPlan = launcher.discover(discoveryRequest);
 
-		var testPlan = launcher.discover(request);
-		launcher.execute(testPlan, executionListener);
+		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan) //
+				.listeners(executionListener) //
+				.build();
+		launcher.execute(executionRequest);
 
 		var inOrder = inOrder(executionListener);
 		var testIdentifier = ArgumentCaptor.forClass(TestIdentifier.class);

@@ -324,6 +324,17 @@ public final class LauncherDiscoveryRequestBuilder {
 	}
 
 	/**
+	 * Builds this discovery request and returns a new builder for creating a
+	 * {@link org.junit.platform.launcher.LauncherExecutionRequest} that is
+	 * initialized to contain the resulting discovery request.
+	 *
+	 * @return a new {@link LauncherExecutionRequestBuilder}
+	 */
+	public LauncherExecutionRequestBuilder forExecution() {
+		return LauncherExecutionRequestBuilder.request(build());
+	}
+
+	/**
 	 * Build the {@link LauncherDiscoveryRequest} that has been configured via
 	 * this builder.
 	 */

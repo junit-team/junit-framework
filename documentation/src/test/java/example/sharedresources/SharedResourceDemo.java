@@ -39,7 +39,7 @@ class SharedResourceDemo {
 				// tag::custom_line_break[]
 				.build());
 
-		launcher.execute(request().build());
+		launcher.execute(request().forExecution().build());
 
 		assertSame(firstCustomEngine.socket, secondCustomEngine.socket);
 		assertTrue(firstCustomEngine.socket.isClosed(), "socket should be closed");

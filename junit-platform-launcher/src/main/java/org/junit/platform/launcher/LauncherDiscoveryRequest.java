@@ -43,6 +43,8 @@ import org.junit.platform.engine.EngineDiscoveryRequest;
  * in the test plan.</li>
  * </ul>
  *
+ * <p>This interface is not intended to be implemented by clients.
+ *
  * @since 1.0
  * @see org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder
  * @see EngineDiscoveryRequest

@@ -20,7 +20,7 @@ import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.fakes.TestEngineSpy;
 import org.junit.platform.fakes.TestEngineStub;
 import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 
 /**
  * @since 5.13
@@ -54,8 +54,9 @@ class StoreSharingTests {
 					.addTestEngines(engineWriter, engineReader) //
 					.build());
 
-		LauncherDiscoveryRequest discoveryRequest = LauncherDiscoveryRequestBuilder //
+		LauncherExecutionRequest discoveryRequest = LauncherDiscoveryRequestBuilder //
 				.request() //
+				.forExecution() //
 				.build();
 
 		launcher.execute(discoveryRequest);

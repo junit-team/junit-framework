@@ -23,10 +23,19 @@ repository on GitHub.
 
 * Discontinue `junit-platform-suite-commons` which is now integrated into
   `junit-platform-suite`.
+* Deprecate `Launcher.execute(TestPlan, TestExecutionListener[])` and
+  `Launcher.execute(LauncherDiscoveryRequest, TestExecutionListener[])` in favor of
+  `Launcher.execute(LauncherExecutionRequest)`
 
 [[release-notes-6.0.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
+* Introduce new `Launcher.execute(LauncherExecutionRequest)` API with corresponding
+  `LauncherExecutionRequestBuilder` to enable the addition of parameters to test
+  executions without additional overloads of `execute`.
+* Introduce `LauncherDiscoveryRequestBuilder.forExecution()` method as a convenience
+  method for constructing a `LauncherExecutionRequest` that contains a
+  `LauncherDiscoveryRequest`.
 * Introduce `TestTask.getTestDescriptor()` method for use in
   `HierarchicalTestExecutorService` implementations.
 

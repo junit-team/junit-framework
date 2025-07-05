@@ -13,6 +13,7 @@ package org.junit.platform.launcher.core;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
@@ -42,14 +43,20 @@ class DelegatingLauncher implements Launcher {
 		return delegate.discover(launcherDiscoveryRequest);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
 		delegate.execute(launcherDiscoveryRequest, listeners);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
 		delegate.execute(testPlan, listeners);
 	}
 
+	@Override
+	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		delegate.execute(launcherExecutionRequest);
+	}
 }

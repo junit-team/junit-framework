@@ -22,7 +22,8 @@ import org.junit.platform.engine.reporting.ReportEntry;
 
 /**
  * Register a concrete implementation of this interface with a {@link Launcher}
- * to be notified of events that occur during test execution.
+ * or {@link LauncherExecutionRequest} to be notified of events that occur
+ * during test execution.
  *
  * <p>All methods in this interface have empty <em>default</em> implementations.
  * Concrete implementations may therefore override one or more of these methods

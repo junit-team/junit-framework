@@ -32,8 +32,9 @@ import org.jspecify.annotations.Nullable;
  *     </li>
  *     <li>
  *         calls to {@link Launcher#discover(LauncherDiscoveryRequest)},
- *         {@link Launcher#execute(TestPlan, TestExecutionListener...)}, and
- *         {@link Launcher#execute(LauncherDiscoveryRequest, TestExecutionListener...)}
+ *         {@link Launcher#execute(TestPlan, TestExecutionListener...)},
+ *         {@link Launcher#execute(LauncherDiscoveryRequest, TestExecutionListener...)},
+ *         and {@link Launcher#execute(LauncherExecutionRequest)},
  *     </li>
  * </ul>
  *

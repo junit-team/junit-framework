@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
@@ -263,26 +262,30 @@ class VintageLauncherIntegrationTests {
 
 	private TestPlan discover(LauncherDiscoveryRequestBuilder requestBuilder) {
 		var launcher = LauncherFactory.create();
-		return launcher.discover(toRequest(requestBuilder));
+		return launcher.discover(toDiscoveryRequest(requestBuilder).build());
 	}
 
 	private Map<TestIdentifier, TestExecutionResult> execute(LauncherDiscoveryRequestBuilder requestBuilder) {
 		Map<TestIdentifier, TestExecutionResult> results = new LinkedHashMap<>();
-		var request = toRequest(requestBuilder);
 		var launcher = LauncherFactory.create();
-		launcher.execute(request, new TestExecutionListener() {
+		var listener = new TestExecutionListener() {
 			@Override
 			public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
 				results.put(testIdentifier, testExecutionResult);
 			}
-		});
+		};
+		var executionRequest = toDiscoveryRequest(requestBuilder) //
+				.forExecution() //
+				.listeners(listener) //
+				.build();
+		launcher.execute(executionRequest);
 		return results;
 	}
 
-	private LauncherDiscoveryRequest toRequest(LauncherDiscoveryRequestBuilder requestBuilder) {
-		return requestBuilder.filters(includeEngines(ENGINE_ID)) //
-				.enableImplicitConfigurationParameters(false) //
-				.build();
+	private LauncherDiscoveryRequestBuilder toDiscoveryRequest(LauncherDiscoveryRequestBuilder requestBuilder) {
+		return requestBuilder //
+				.filters(includeEngines(ENGINE_ID)) //
+				.enableImplicitConfigurationParameters(false);
 	}
 
 }
