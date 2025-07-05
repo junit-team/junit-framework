@@ -44,6 +44,7 @@ import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.DisabledInEclipse;
 import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
@@ -943,7 +944,7 @@ class VintageTestEngineExecutionTests {
 		var engineTestDescriptor = testEngine.discover(discoveryRequest, UniqueId.forEngine(testEngine.getId()));
 		testEngine.execute(
 			ExecutionRequest.create(engineTestDescriptor, listener, discoveryRequest.getConfigurationParameters(),
-				dummyOutputDirectoryProvider(), dummyNamespacedHierarchicalStore()));
+				dummyOutputDirectoryProvider(), dummyNamespacedHierarchicalStore(), CancellationToken.create()));
 	}
 
 	private static LauncherDiscoveryRequest request(Class<?> testClass) {

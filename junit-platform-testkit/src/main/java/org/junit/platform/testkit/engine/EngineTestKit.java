@@ -12,6 +12,7 @@ package org.junit.platform.testkit.engine;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNullElseGet;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -30,6 +31,7 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.CollectionUtils;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoverySelector;
@@ -244,16 +246,18 @@ public final class EngineTestKit {
 		Preconditions.notNull(discoveryRequest, "EngineDiscoveryRequest must not be null");
 
 		ExecutionRecorder executionRecorder = new ExecutionRecorder();
-		executeUsingLauncherOrchestration(testEngine, discoveryRequest, executionRecorder);
+		executeUsingLauncherOrchestration(testEngine, discoveryRequest, executionRecorder, CancellationToken.create());
 		return executionRecorder.getExecutionResults();
 	}
 
 	private static void executeUsingLauncherOrchestration(TestEngine testEngine,
-			LauncherDiscoveryRequest discoveryRequest, EngineExecutionListener listener) {
+			LauncherDiscoveryRequest discoveryRequest, EngineExecutionListener listener,
+			CancellationToken cancellationToken) {
 		LauncherDiscoveryResult discoveryResult = discoverUsingOrchestrator(testEngine, discoveryRequest);
 		TestDescriptor engineTestDescriptor = discoveryResult.getEngineTestDescriptor(testEngine);
 		Preconditions.notNull(engineTestDescriptor, "TestEngine did not yield a TestDescriptor");
-		withRequestLevelStore(store -> new EngineExecutionOrchestrator().execute(discoveryResult, listener, store));
+		withRequestLevelStore(
+			store -> new EngineExecutionOrchestrator().execute(discoveryResult, listener, store, cancellationToken));
 	}
 
 	private static void withRequestLevelStore(Consumer<NamespacedHierarchicalStore<Namespace>> action) {
@@ -308,7 +312,10 @@ public final class EngineTestKit {
 		private final LauncherDiscoveryRequestBuilder requestBuilder = LauncherDiscoveryRequestBuilder.request() //
 				.enableImplicitConfigurationParameters(false) //
 				.outputDirectoryProvider(DisabledOutputDirectoryProvider.INSTANCE);
+
 		private final TestEngine testEngine;
+
+		private @Nullable CancellationToken cancellationToken;
 
 		private Builder(TestEngine testEngine) {
 			this.testEngine = testEngine;
@@ -431,6 +438,15 @@ public final class EngineTestKit {
 		}
 
 		/**
+		 * @since 6.0
+		 */
+		@API(status = EXPERIMENTAL, since = "6.0")
+		public Builder cancellationToken(CancellationToken cancellationToken) {
+			this.cancellationToken = Preconditions.notNull(cancellationToken, "cancellationToken must not be null");
+			return this;
+		}
+
+		/**
 		 * Discover tests for the configured {@link TestEngine},
 		 * {@linkplain DiscoverySelector discovery selectors},
 		 * {@linkplain DiscoveryFilter discovery filters}, and
@@ -464,7 +480,8 @@ public final class EngineTestKit {
 		public EngineExecutionResults execute() {
 			LauncherDiscoveryRequest request = this.requestBuilder.build();
 			ExecutionRecorder executionRecorder = new ExecutionRecorder();
-			EngineTestKit.executeUsingLauncherOrchestration(this.testEngine, request, executionRecorder);
+			EngineTestKit.executeUsingLauncherOrchestration(this.testEngine, request, executionRecorder,
+				requireNonNullElseGet(this.cancellationToken, CancellationToken::create));
 			return executionRecorder.getExecutionResults();
 		}
 

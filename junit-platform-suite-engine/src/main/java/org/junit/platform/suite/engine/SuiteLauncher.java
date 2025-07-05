@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
@@ -60,9 +61,10 @@ class SuiteLauncher {
 
 	TestExecutionSummary execute(LauncherDiscoveryResult discoveryResult,
 			EngineExecutionListener parentEngineExecutionListener,
-			NamespacedHierarchicalStore<Namespace> requestLevelStore) {
+			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken) {
 		SummaryGeneratingListener listener = new SummaryGeneratingListener();
-		executionOrchestrator.execute(discoveryResult, parentEngineExecutionListener, listener, requestLevelStore);
+		executionOrchestrator.execute(discoveryResult, parentEngineExecutionListener, listener, requestLevelStore,
+			cancellationToken);
 		return listener.getSummary();
 	}
 

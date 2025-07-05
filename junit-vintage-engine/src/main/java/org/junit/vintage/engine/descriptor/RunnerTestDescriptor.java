@@ -74,6 +74,10 @@ public class RunnerTestDescriptor extends VintageTestDescriptor {
 		return new RunnerRequest(this.runner);
 	}
 
+	public Runner getRunner() {
+		return this.runner;
+	}
+
 	@Override
 	protected boolean tryToExcludeFromRunner(Description description) {
 		boolean excluded = tryToFilterRunner(description);

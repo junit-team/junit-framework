@@ -38,6 +38,7 @@ import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
@@ -644,13 +645,15 @@ class SuiteEngineTests {
 
 		EngineExecutionListener listener = mock(EngineExecutionListener.class);
 		NamespacedHierarchicalStore<Namespace> requestLevelStore = NamespacedHierarchicalStoreProviders.dummyNamespacedHierarchicalStore();
+		CancellationToken cancellationToken = CancellationToken.create();
 
 		ExecutionRequest request = ExecutionRequest.create(engineDescriptor, listener,
-			mock(ConfigurationParameters.class), mock(OutputDirectoryProvider.class), requestLevelStore);
+			mock(ConfigurationParameters.class), mock(OutputDirectoryProvider.class), requestLevelStore,
+			cancellationToken);
 
 		new SuiteTestEngine().execute(request);
 
-		verify(mockDescriptor).execute(same(listener), same(requestLevelStore));
+		verify(mockDescriptor).execute(same(listener), same(requestLevelStore), same(cancellationToken));
 	}
 
 	@Suite

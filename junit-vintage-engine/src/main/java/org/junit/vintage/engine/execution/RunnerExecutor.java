@@ -11,13 +11,13 @@
 package org.junit.vintage.engine.execution;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.platform.commons.util.UnrecoverableExceptions.rethrowIfUnrecoverable;
 import static org.junit.platform.engine.TestExecutionResult.failed;
 
 import org.apiguardian.api.API;
-import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestExecutionResult;
-import org.junit.runner.JUnitCore;
+import org.junit.runner.notification.RunNotifier;
 import org.junit.vintage.engine.descriptor.RunnerTestDescriptor;
 import org.junit.vintage.engine.descriptor.TestSourceProvider;
 
@@ -35,14 +35,17 @@ public class RunnerExecutor {
 	}
 
 	public void execute(RunnerTestDescriptor runnerTestDescriptor) {
-		TestRun testRun = new TestRun(runnerTestDescriptor);
-		JUnitCore core = new JUnitCore();
-		core.addListener(new RunListenerAdapter(testRun, engineExecutionListener, testSourceProvider));
+		var notifier = new RunNotifier();
+		var testRun = new TestRun(runnerTestDescriptor);
+		var listener = new RunListenerAdapter(testRun, engineExecutionListener, testSourceProvider);
+		notifier.addListener(listener);
 		try {
-			core.run(runnerTestDescriptor.toRequest());
+			listener.testRunStarted(runnerTestDescriptor.getDescription());
+			runnerTestDescriptor.getRunner().run(notifier);
+			listener.testRunFinished();
 		}
 		catch (Throwable t) {
-			UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+			rethrowIfUnrecoverable(t);
 			reportUnexpectedFailure(testRun, runnerTestDescriptor, failed(t));
 		}
 	}

@@ -97,6 +97,14 @@ public abstract class AbstractJupiterTestEngineTests {
 		return EngineTestKit.discover(this.engine, request);
 	}
 
+	protected EngineTestKit.Builder jupiterTestEngine() {
+		return EngineTestKit.engine(this.engine) //
+				.outputDirectoryProvider(dummyOutputDirectoryProvider()) //
+				.configurationParameter(STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, String.valueOf(false)) //
+				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.INFO.name()) //
+				.enableImplicitConfigurationParameters(false);
+	}
+
 	protected static LauncherDiscoveryRequestBuilder defaultRequest() {
 		return request() //
 				.outputDirectoryProvider(dummyOutputDirectoryProvider()) //

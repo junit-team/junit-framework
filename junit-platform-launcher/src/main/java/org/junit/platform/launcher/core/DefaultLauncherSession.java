@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.Launcher;
@@ -122,7 +123,19 @@ class DefaultLauncherSession implements LauncherSession {
 		}
 
 		@Override
+		public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, CancellationToken cancellationToken,
+				TestExecutionListener... listeners) {
+			throw new PreconditionViolationException("Launcher session has already been closed");
+		}
+
+		@Override
 		public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+			throw new PreconditionViolationException("Launcher session has already been closed");
+		}
+
+		@Override
+		public void execute(TestPlan testPlan, CancellationToken cancellationToken,
+				TestExecutionListener... listeners) {
 			throw new PreconditionViolationException("Launcher session has already been closed");
 		}
 	}

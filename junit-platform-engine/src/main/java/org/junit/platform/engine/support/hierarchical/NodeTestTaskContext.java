@@ -10,19 +10,22 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 
 /**
  * @since 1.3.1
  */
 record NodeTestTaskContext(EngineExecutionListener listener, HierarchicalTestExecutorService executorService,
-		ThrowableCollector.Factory throwableCollectorFactory, NodeExecutionAdvisor executionAdvisor) {
+		ThrowableCollector.Factory throwableCollectorFactory, NodeExecutionAdvisor executionAdvisor,
+		CancellationToken cancellationToken) {
 
 	NodeTestTaskContext withListener(EngineExecutionListener listener) {
 		if (this.listener == listener) {
 			return this;
 		}
-		return new NodeTestTaskContext(listener, executorService, throwableCollectorFactory, executionAdvisor);
+		return new NodeTestTaskContext(listener, executorService, throwableCollectorFactory, executionAdvisor,
+			cancellationToken);
 	}
 
 }

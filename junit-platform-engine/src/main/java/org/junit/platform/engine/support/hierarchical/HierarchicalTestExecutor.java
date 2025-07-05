@@ -13,6 +13,7 @@ package org.junit.platform.engine.support.hierarchical;
 import java.util.concurrent.Future;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
@@ -51,8 +52,9 @@ class HierarchicalTestExecutor<C extends EngineExecutionContext> {
 		TestDescriptor rootTestDescriptor = this.request.getRootTestDescriptor();
 		EngineExecutionListener executionListener = this.request.getEngineExecutionListener();
 		NodeExecutionAdvisor executionAdvisor = new NodeTreeWalker().walk(rootTestDescriptor);
+		CancellationToken cancellationToken = this.request.getCancellationToken();
 		NodeTestTaskContext taskContext = new NodeTestTaskContext(executionListener, this.executorService,
-			this.throwableCollectorFactory, executionAdvisor);
+			this.throwableCollectorFactory, executionAdvisor, cancellationToken);
 		NodeTestTask<C> rootTestTask = new NodeTestTask<>(taskContext, rootTestDescriptor);
 		rootTestTask.setParentContext(this.rootContext);
 		return this.executorService.submit(rootTestTask);

@@ -27,6 +27,7 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.StringUtils;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.EngineDiscoveryListener;
@@ -149,13 +150,13 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 	}
 
 	void execute(EngineExecutionListener parentEngineExecutionListener,
-			NamespacedHierarchicalStore<Namespace> requestLevelStore) {
+			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken) {
 		parentEngineExecutionListener.executionStarted(this);
 		ThrowableCollector throwableCollector = new OpenTest4JAwareThrowableCollector();
 
 		executeBeforeSuiteMethods(throwableCollector);
 
-		TestExecutionSummary summary = executeTests(parentEngineExecutionListener, requestLevelStore,
+		TestExecutionSummary summary = executeTests(parentEngineExecutionListener, requestLevelStore, cancellationToken,
 			throwableCollector);
 
 		executeAfterSuiteMethods(throwableCollector);
@@ -177,7 +178,8 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 	}
 
 	private @Nullable TestExecutionSummary executeTests(EngineExecutionListener parentEngineExecutionListener,
-			NamespacedHierarchicalStore<Namespace> requestLevelStore, ThrowableCollector throwableCollector) {
+			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken,
+			ThrowableCollector throwableCollector) {
 		if (throwableCollector.isNotEmpty()) {
 			return null;
 		}
@@ -187,7 +189,8 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		// be pruned accordingly.
 		LauncherDiscoveryResult discoveryResult = requireNonNull(this.launcherDiscoveryResult).withRetainedEngines(
 			getChildren()::contains);
-		return requireNonNull(launcher).execute(discoveryResult, parentEngineExecutionListener, requestLevelStore);
+		return requireNonNull(launcher).execute(discoveryResult, parentEngineExecutionListener, requestLevelStore,
+			cancellationToken);
 	}
 
 	private void executeAfterSuiteMethods(ThrowableCollector throwableCollector) {

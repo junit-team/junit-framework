@@ -18,6 +18,7 @@ import static org.junit.platform.launcher.core.LauncherPhase.EXECUTION;
 import java.util.Collection;
 
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
@@ -85,28 +86,42 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		execute(discoveryRequest, CancellationToken.create(), listeners);
+	}
+
+	@Override
+	public void execute(LauncherDiscoveryRequest discoveryRequest, CancellationToken cancellationToken,
+			TestExecutionListener... listeners) {
+
 		Preconditions.notNull(discoveryRequest, "LauncherDiscoveryRequest must not be null");
 		Preconditions.notNull(listeners, "TestExecutionListener array must not be null");
 		Preconditions.containsNoNullElements(listeners, "individual listeners must not be null");
-		execute(InternalTestPlan.from(discover(discoveryRequest, EXECUTION)), listeners);
+		execute(InternalTestPlan.from(discover(discoveryRequest, EXECUTION)), cancellationToken, listeners);
 	}
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		execute(testPlan, CancellationToken.create(), listeners);
+	}
+
+	@Override
+	public void execute(TestPlan testPlan, CancellationToken cancellationToken, TestExecutionListener... listeners) {
 		Preconditions.notNull(testPlan, "TestPlan must not be null");
 		Preconditions.condition(testPlan instanceof InternalTestPlan, "TestPlan was not returned by this Launcher");
+		Preconditions.notNull(cancellationToken, "CancellationToken must not be null");
 		Preconditions.notNull(listeners, "TestExecutionListener array must not be null");
 		Preconditions.containsNoNullElements(listeners, "individual listeners must not be null");
-		execute((InternalTestPlan) testPlan, listeners);
+		execute((InternalTestPlan) testPlan, cancellationToken, listeners);
 	}
 
 	private LauncherDiscoveryResult discover(LauncherDiscoveryRequest discoveryRequest, LauncherPhase phase) {
 		return discoveryOrchestrator.discover(discoveryRequest, phase);
 	}
 
-	private void execute(InternalTestPlan internalTestPlan, TestExecutionListener[] listeners) {
+	private void execute(InternalTestPlan internalTestPlan, CancellationToken cancellationToken,
+			TestExecutionListener[] listeners) {
 		try (NamespacedHierarchicalStore<Namespace> requestLevelStore = createRequestLevelStore()) {
-			executionOrchestrator.execute(internalTestPlan, requestLevelStore, listeners);
+			executionOrchestrator.execute(internalTestPlan, requestLevelStore, cancellationToken, listeners);
 		}
 	}
 

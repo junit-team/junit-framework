@@ -46,6 +46,9 @@ import org.junit.platform.engine.support.hierarchical.Node.SkipResult;
 class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 
 	private static final Logger logger = LoggerFactory.getLogger(NodeTestTask.class);
+
+	private static final SkipResult CANCELLED_SKIP_RESULT = SkipResult.skip("Test execution cancelled");
+
 	private static final Runnable NOOP = () -> {
 	};
 
@@ -106,7 +109,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 			throwableCollector = taskContext.throwableCollectorFactory().create();
 			prepare();
 			if (throwableCollector.isEmpty()) {
-				checkWhetherSkipped();
+				throwableCollector.execute(() -> skipResult = checkWhetherSkipped());
 			}
 			if (throwableCollector.isEmpty() && !requiredSkipResult().isSkipped()) {
 				executeRecursively();
@@ -144,8 +147,10 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		parentContext = null;
 	}
 
-	private void checkWhetherSkipped() {
-		requiredThrowableCollector().execute(() -> skipResult = node.shouldBeSkipped(requiredContext()));
+	private SkipResult checkWhetherSkipped() throws Exception {
+		return taskContext.cancellationToken().isCancellationRequested() //
+				? CANCELLED_SKIP_RESULT //
+				: node.shouldBeSkipped(requiredContext());
 	}
 
 	private void executeRecursively() {

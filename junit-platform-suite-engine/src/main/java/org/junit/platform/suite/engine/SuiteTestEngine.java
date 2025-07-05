@@ -73,7 +73,7 @@ public final class SuiteTestEngine implements TestEngine {
 		suiteEngineDescriptor.getChildren()
 				.stream()
 				.map(SuiteTestDescriptor.class::cast)
-				.forEach(suiteTestDescriptor -> suiteTestDescriptor.execute(engineExecutionListener, requestLevelStore));
+				.forEach(suiteTestDescriptor -> suiteTestDescriptor.execute(engineExecutionListener, requestLevelStore, request.getCancellationToken()));
 		// @formatter:on
 		engineExecutionListener.executionFinished(suiteEngineDescriptor, TestExecutionResult.successful());
 	}

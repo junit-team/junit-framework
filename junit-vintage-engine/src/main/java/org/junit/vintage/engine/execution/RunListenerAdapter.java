@@ -103,6 +103,10 @@ class RunListenerAdapter extends RunListener {
 
 	@Override
 	public void testRunFinished(Result result) {
+		testRunFinished();
+	}
+
+	void testRunFinished() {
 		reportContainerFinished(testRun.getRunnerTestDescriptor());
 	}
 

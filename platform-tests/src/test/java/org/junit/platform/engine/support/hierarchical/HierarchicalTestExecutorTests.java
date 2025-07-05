@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
@@ -81,7 +82,7 @@ class HierarchicalTestExecutorTests {
 	private HierarchicalTestExecutor<MyEngineExecutionContext> createExecutor(
 			HierarchicalTestExecutorService executorService) {
 		var request = ExecutionRequest.create(root, listener, mock(ConfigurationParameters.class),
-			dummyOutputDirectoryProvider(), dummyNamespacedHierarchicalStore());
+			dummyOutputDirectoryProvider(), dummyNamespacedHierarchicalStore(), CancellationToken.create());
 		return new HierarchicalTestExecutor<>(request, rootContext, executorService,
 			OpenTest4JAwareThrowableCollector::new);
 	}

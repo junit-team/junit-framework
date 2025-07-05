@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.Launcher;
@@ -68,9 +69,24 @@ class SessionPerRequestLauncher implements Launcher {
 	}
 
 	@Override
+	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, CancellationToken cancellationToken,
+			TestExecutionListener... listeners) {
+		try (LauncherSession session = createSession()) {
+			session.getLauncher().execute(launcherDiscoveryRequest, cancellationToken, listeners);
+		}
+	}
+
+	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(testPlan, listeners);
+		}
+	}
+
+	@Override
+	public void execute(TestPlan testPlan, CancellationToken cancellationToken, TestExecutionListener... listeners) {
+		try (LauncherSession session = createSession()) {
+			session.getLauncher().execute(testPlan, cancellationToken, listeners);
 		}
 	}
 

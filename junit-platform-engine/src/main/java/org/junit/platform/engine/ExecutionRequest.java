@@ -43,21 +43,21 @@ public class ExecutionRequest {
 	private final TestDescriptor rootTestDescriptor;
 	private final EngineExecutionListener engineExecutionListener;
 	private final ConfigurationParameters configurationParameters;
-
 	private final @Nullable OutputDirectoryProvider outputDirectoryProvider;
-
 	private final @Nullable NamespacedHierarchicalStore<Namespace> requestLevelStore;
+	private final @Nullable CancellationToken cancellationToken;
 
 	@Deprecated
 	@API(status = DEPRECATED, since = "1.11")
 	public ExecutionRequest(TestDescriptor rootTestDescriptor, EngineExecutionListener engineExecutionListener,
 			ConfigurationParameters configurationParameters) {
-		this(rootTestDescriptor, engineExecutionListener, configurationParameters, null, null);
+		this(rootTestDescriptor, engineExecutionListener, configurationParameters, null, null, null);
 	}
 
 	private ExecutionRequest(TestDescriptor rootTestDescriptor, EngineExecutionListener engineExecutionListener,
 			ConfigurationParameters configurationParameters, @Nullable OutputDirectoryProvider outputDirectoryProvider,
-			@Nullable NamespacedHierarchicalStore<Namespace> requestLevelStore) {
+			@Nullable NamespacedHierarchicalStore<Namespace> requestLevelStore,
+			@Nullable CancellationToken cancellationToken) {
 		this.rootTestDescriptor = Preconditions.notNull(rootTestDescriptor, "rootTestDescriptor must not be null");
 		this.engineExecutionListener = Preconditions.notNull(engineExecutionListener,
 			"engineExecutionListener must not be null");
@@ -65,6 +65,7 @@ public class ExecutionRequest {
 			"configurationParameters must not be null");
 		this.outputDirectoryProvider = outputDirectoryProvider;
 		this.requestLevelStore = requestLevelStore;
+		this.cancellationToken = cancellationToken;
 	}
 
 	/**
@@ -105,11 +106,13 @@ public class ExecutionRequest {
 	@API(status = INTERNAL, since = "1.13")
 	public static ExecutionRequest create(TestDescriptor rootTestDescriptor,
 			EngineExecutionListener engineExecutionListener, ConfigurationParameters configurationParameters,
-			OutputDirectoryProvider outputDirectoryProvider, NamespacedHierarchicalStore<Namespace> requestLevelStore) {
+			OutputDirectoryProvider outputDirectoryProvider, NamespacedHierarchicalStore<Namespace> requestLevelStore,
+			CancellationToken cancellationToken) {
 
 		return new ExecutionRequest(rootTestDescriptor, engineExecutionListener, configurationParameters,
 			Preconditions.notNull(outputDirectoryProvider, "outputDirectoryProvider must not be null"),
-			Preconditions.notNull(requestLevelStore, "requestLevelStore must not be null"));
+			Preconditions.notNull(requestLevelStore, "requestLevelStore must not be null"),
+			Preconditions.notNull(cancellationToken, "cancellationToken must not be null"));
 	}
 
 	/**
@@ -169,6 +172,10 @@ public class ExecutionRequest {
 	public NamespacedHierarchicalStore<Namespace> getStore() {
 		return Preconditions.notNull(this.requestLevelStore,
 			"No NamespacedHierarchicalStore was configured for this request");
+	}
+
+	public CancellationToken getCancellationToken() {
+		return Preconditions.notNull(this.cancellationToken, "No CancellationToken was configured for this request");
 	}
 
 }
