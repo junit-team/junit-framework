@@ -29,9 +29,10 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 
-class StringToJavaTimeConverter implements StringToObjectConverter {
+class StringToJavaTimeConverter extends StringToTargetTypeConverter<Object> {
 
 	private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Map.ofEntries( //
 		entry(Duration.class, Duration::parse), //
@@ -51,12 +52,13 @@ class StringToJavaTimeConverter implements StringToObjectConverter {
 	);
 
 	@Override
-	public boolean canConvertTo(Class<?> targetType) {
+	boolean canConvert(Class<?> targetType) {
 		return CONVERTERS.containsKey(targetType);
 	}
 
 	@Override
-	public Object convert(String source, Class<?> targetType) throws Exception {
+	@Nullable
+	Object convert(@Nullable String source, Class<?> targetType) throws ConversionException {
 		Function<String, ?> converter = Preconditions.notNull(CONVERTERS.get(targetType),
 			() -> "No registered converter for %s".formatted(targetType.getName()));
 		return converter.apply(source);

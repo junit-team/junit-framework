@@ -21,6 +21,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.converter.DefaultArgumentConverter;
+import org.junit.platform.commons.support.conversion.TypeDescriptor;
 import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.commons.util.Preconditions;
 
@@ -47,7 +48,7 @@ public class DefaultArgumentsAccessor implements ArgumentsAccessor {
 
 		BiFunction<@Nullable Object, Class<?>, @Nullable Object> converter = (source,
 				targetType) -> new DefaultArgumentConverter(context) //
-						.convert(source, targetType, classLoader);
+						.convert(source, TypeDescriptor.forClass(targetType), classLoader);
 		return new DefaultArgumentsAccessor(converter, invocationIndex, arguments);
 	}
 

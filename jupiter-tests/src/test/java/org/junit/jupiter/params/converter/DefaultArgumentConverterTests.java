@@ -36,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.support.conversion.ConversionException;
+import org.junit.platform.commons.support.conversion.TypeDescriptor;
 import org.junit.platform.commons.test.TestClassLoader;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 
@@ -90,26 +91,17 @@ class DefaultArgumentConverterTests {
 				.isThrownBy(() -> convert(null, type)) //
 				.withMessage("Cannot convert null to primitive value of type " + type.getCanonicalName());
 
-		verify(underTest, never()).convert(any(), any(), any(ClassLoader.class));
-	}
-
-	@Test
-	void throwsExceptionForNonStringsConversion() {
-		assertThatExceptionOfType(ArgumentConversionException.class) //
-				.isThrownBy(() -> convert(new Enigma(), String.class)) //
-				.withMessage("No built-in converter for source type %s and target type java.lang.String",
-					Enigma.class.getName());
-
-		verify(underTest, never()).convert(any(), any(), any(ClassLoader.class));
+		verify(underTest, never()).delegateConversion(any(), any(), any(ClassLoader.class));
 	}
 
 	@Test
 	void delegatesStringsConversion() {
-		doReturn(null).when(underTest).convert(any(), any(), any(ClassLoader.class));
+		doReturn(null).when(underTest).delegateConversion(any(), any(), any(ClassLoader.class));
 
 		convert("value", int.class);
 
-		verify(underTest).convert("value", int.class, getClassLoader(DefaultArgumentConverterTests.class));
+		verify(underTest).delegateConversion("value", TypeDescriptor.forClass(int.class),
+			getClassLoader(DefaultArgumentConverterTests.class));
 	}
 
 	@Test
@@ -139,20 +131,22 @@ class DefaultArgumentConverterTests {
 
 		convert("en", Locale.class);
 
-		verify(underTest).convert("en", Locale.class, getClassLoader(DefaultArgumentConverterTests.class));
+		verify(underTest).convert("en", TypeDescriptor.forClass(Locale.class),
+			getClassLoader(DefaultArgumentConverterTests.class));
 	}
 
 	@Test
 	void throwsExceptionForDelegatedConversionFailure() {
 		ConversionException exception = new ConversionException("fail");
-		doThrow(exception).when(underTest).convert(any(), any(), any(ClassLoader.class));
+		doThrow(exception).when(underTest).delegateConversion(any(), any(), any(ClassLoader.class));
 
 		assertThatExceptionOfType(ArgumentConversionException.class) //
 				.isThrownBy(() -> convert("value", int.class)) //
 				.withCause(exception) //
 				.withMessage(exception.getMessage());
 
-		verify(underTest).convert("value", int.class, getClassLoader(DefaultArgumentConverterTests.class));
+		verify(underTest).delegateConversion("value", TypeDescriptor.forClass(int.class),
+			getClassLoader(DefaultArgumentConverterTests.class));
 	}
 
 	@Test
@@ -165,14 +159,14 @@ class DefaultArgumentConverterTests {
 			var declaringExecutable = ReflectionSupport.findMethod(customType, "foo").orElseThrow();
 			assertThat(declaringExecutable.getDeclaringClass().getClassLoader()).isSameAs(testClassLoader);
 
-			doReturn(customType).when(underTest).convert(any(), any(), any(ClassLoader.class));
+			doReturn(customType).when(underTest).delegateConversion(any(), any(), any(ClassLoader.class));
 
 			var clazz = (Class<?>) convert(customTypeName, Class.class, testClassLoader);
 			assertThat(clazz).isNotEqualTo(Enigma.class);
 			assertThat(clazz).isNotNull().isEqualTo(customType);
 			assertThat(clazz.getClassLoader()).isSameAs(testClassLoader);
 
-			verify(underTest).convert(customTypeName, Class.class, testClassLoader);
+			verify(underTest).delegateConversion(customTypeName, TypeDescriptor.forClass(Class.class), testClassLoader);
 		}
 	}
 
@@ -185,7 +179,7 @@ class DefaultArgumentConverterTests {
 				.describedAs(input + " --(" + targetClass.getName() + ")--> " + expectedOutput) //
 				.isEqualTo(expectedOutput);
 
-		verify(underTest, never()).convert(any(), any(), any(ClassLoader.class));
+		verify(underTest, never()).delegateConversion(any(), any(), any(ClassLoader.class));
 	}
 
 	private @Nullable Object convert(@Nullable Object input, Class<?> targetClass) {
@@ -193,7 +187,7 @@ class DefaultArgumentConverterTests {
 	}
 
 	private @Nullable Object convert(@Nullable Object input, Class<?> targetClass, ClassLoader classLoader) {
-		return underTest.convert(input, targetClass, classLoader);
+		return underTest.convert(input, TypeDescriptor.forClass(targetClass), classLoader);
 	}
 
 	@SuppressWarnings("unused")
