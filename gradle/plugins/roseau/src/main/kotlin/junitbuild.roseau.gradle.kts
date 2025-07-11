@@ -13,8 +13,14 @@ val roseauDependencies = configurations.dependencyScope("roseau")
 val roseauClasspath = configurations.resolvable("roseauClasspath") {
     extendsFrom(roseauDependencies.get())
 }
+
 dependencies {
     roseauDependencies(dependencyFromLibs("roseau-cli"))
+}
+
+repositories {
+    mavenCentral()
+    maven(url = "https://jitpack.io")
 }
 
 val outputDir = layout.buildDirectory.dir("roseau")
@@ -30,7 +36,7 @@ val roseauDiff by tasks.registering(JavaExec::class) {
     javaLauncher = project.javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(21) // version required by roseau
     }
-    mainClass = "io.github.alien.roseau.Roseau"
+    mainClass = "io.github.alien.roseau.cli.RoseauCLI"
     classpath = files(roseauClasspath)
     argumentProviders.add(CommandLineArgumentProvider {
         listOf(
