@@ -63,6 +63,7 @@ openTestReporting-events = { module = "org.opentest4j.reporting:open-test-report
 openTestReporting-tooling-core = { module = "org.opentest4j.reporting:open-test-reporting-tooling-core", version.ref = "openTestReporting" }
 openTestReporting-tooling-spi = { module = "org.opentest4j.reporting:open-test-reporting-tooling-spi", version.ref = "openTestReporting" }
 picocli = { module = "info.picocli:picocli", version = "4.7.7" }
+roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.1.0" }
 slf4j-julBinding = { module = "org.slf4j:slf4j-jdk14", version = "2.0.17" }
 snapshotTests-junit5 = { module = "de.skuzzle.test:snapshot-tests-junit5", version.ref = "snapshotTests" }
 snapshotTests-xml = { module = "de.skuzzle.test:snapshot-tests-xml", version.ref = "snapshotTests" }
@@ -92,6 +93,7 @@ bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.4" }
 commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.4.0" }
 develocity = { id = "com.gradle.develocity", version = "4.2" }
+download = { id = "de.undercouch.download", version = "5.6.0" }
 download = { id = "de.undercouch.download", version = "5.6.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "4.3.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
