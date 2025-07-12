@@ -67,7 +67,7 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 		if (result.getStatus() == FAILED) {
 			this.issues.add(DiscoveryIssue.builder(Severity.ERROR, selector + " resolution failed") //
 					.cause(result.getThrowable()) //
-					.source(toSource(selector)) //
+					.source(toSourceSafely(selector)) //
 					.build());
 		}
 		else if (result.getStatus() == UNRESOLVED && selector instanceof UniqueIdSelector uniqueIdSelector) {
@@ -78,7 +78,17 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 		}
 	}
 
-	static @Nullable TestSource toSource(DiscoverySelector selector) {
+	private static @Nullable TestSource toSourceSafely(DiscoverySelector selector) {
+		try {
+			return toSource(selector);
+		}
+		catch (Exception e) {
+			logger.error(e, () -> "Failed to convert DiscoverySelector [%s] into TestSource".formatted(selector));
+			return null;
+		}
+	}
+
+	private static @Nullable TestSource toSource(DiscoverySelector selector) {
 		if (selector instanceof ClassSelector classSelector) {
 			return ClassSource.from(classSelector.getClassName());
 		}

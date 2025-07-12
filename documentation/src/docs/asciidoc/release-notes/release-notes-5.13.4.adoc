@@ -26,7 +26,8 @@ repository on GitHub.
 [[release-notes-5.13.4-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* `ClasspathResourceSelector` no longer allows to be constructed with a resource name that
+  is blank after removing the leading slash.
 
 [[release-notes-5.13.4-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

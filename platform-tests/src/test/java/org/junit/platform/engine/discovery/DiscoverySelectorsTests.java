@@ -299,8 +299,11 @@ class DiscoverySelectorsTests {
 		void selectClasspathResourcesPreconditions() {
 			assertViolatesPrecondition(() -> selectClasspathResource((String) null));
 			assertViolatesPrecondition(() -> selectClasspathResource(""));
+			assertViolatesPrecondition(() -> selectClasspathResource("/"));
 			assertViolatesPrecondition(() -> selectClasspathResource("    "));
+			assertViolatesPrecondition(() -> selectClasspathResource("/   "));
 			assertViolatesPrecondition(() -> selectClasspathResource("\t"));
+			assertViolatesPrecondition(() -> selectClasspathResource("/\t"));
 			assertViolatesPrecondition(() -> selectClasspathResource((Set<Resource>) null));
 			assertViolatesPrecondition(() -> selectClasspathResource(Collections.emptySet()));
 			assertViolatesPrecondition(() -> selectClasspathResource(Collections.singleton(null)));
