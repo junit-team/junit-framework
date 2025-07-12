@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -70,6 +71,7 @@ public final class AnnotationSupport {
 	 * @see #findRepeatableAnnotations(Optional, Class)
 	 */
 	@API(status = MAINTAINED, since = "1.3")
+	@Contract("null, _ -> false")
 	@SuppressWarnings("NullableOptional")
 	public static boolean isAnnotated(@Nullable Optional<? extends AnnotatedElement> element,
 			Class<? extends Annotation> annotationType) {
@@ -94,6 +96,7 @@ public final class AnnotationSupport {
 	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see #findRepeatableAnnotations(AnnotatedElement, Class)
 	 */
+	@Contract("null, _ -> false")
 	public static boolean isAnnotated(@Nullable AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		return AnnotationUtils.isAnnotated(element, annotationType);
 	}

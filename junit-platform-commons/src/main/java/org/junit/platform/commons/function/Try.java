@@ -24,6 +24,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * A container object which may either contain a nullable value in case of
@@ -364,11 +365,13 @@ public abstract class Try<V extends @Nullable Object> {
 			return Try.of(supplier::get);
 		}
 
+		@Contract(" -> fail")
 		@Override
 		public V get() throws Exception {
 			throw this.cause;
 		}
 
+		@Contract("_ -> fail")
 		@Override
 		public <E extends Exception> V getOrThrow(Function<? super Exception, E> exceptionTransformer) throws E {
 			checkNotNull(exceptionTransformer, "exceptionTransformer");

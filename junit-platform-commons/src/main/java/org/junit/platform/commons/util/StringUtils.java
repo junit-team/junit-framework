@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * Collection of utilities for working with {@link String Strings},
@@ -69,6 +70,7 @@ public final class StringUtils {
 	 * @see String#isBlank()
 	 * @see #isNotBlank(String)
 	 */
+	@Contract("null -> true")
 	public static boolean isBlank(@Nullable String str) {
 		return (str == null || str.isBlank());
 	}
@@ -81,6 +83,7 @@ public final class StringUtils {
 	 * @return {@code true} if the string is not blank
 	 * @see #isBlank(String)
 	 */
+	@Contract("null -> false")
 	public static boolean isNotBlank(@Nullable String str) {
 		return !isBlank(str);
 	}
@@ -93,6 +96,7 @@ public final class StringUtils {
 	 * @see #containsIsoControlCharacter(String)
 	 * @see Character#isWhitespace(int)
 	 */
+	@Contract("null -> false")
 	public static boolean containsWhitespace(@Nullable String str) {
 		return str != null && str.codePoints().anyMatch(Character::isWhitespace);
 	}
@@ -107,6 +111,7 @@ public final class StringUtils {
 	 * @see #containsIsoControlCharacter(String)
 	 * @see Character#isWhitespace(int)
 	 */
+	@Contract("null -> true")
 	public static boolean doesNotContainWhitespace(@Nullable String str) {
 		return !containsWhitespace(str);
 	}
@@ -119,6 +124,7 @@ public final class StringUtils {
 	 * @see #containsWhitespace(String)
 	 * @see Character#isISOControl(int)
 	 */
+	@Contract("null -> false")
 	public static boolean containsIsoControlCharacter(@Nullable String str) {
 		return str != null && str.codePoints().anyMatch(Character::isISOControl);
 	}
@@ -133,6 +139,7 @@ public final class StringUtils {
 	 * @see #containsWhitespace(String)
 	 * @see Character#isISOControl(int)
 	 */
+	@Contract("null -> true")
 	public static boolean doesNotContainIsoControlCharacter(@Nullable String str) {
 		return !containsIsoControlCharacter(str);
 	}
@@ -241,6 +248,7 @@ public final class StringUtils {
 	 * @since 1.4
 	 */
 	@API(status = INTERNAL, since = "1.4")
+	@Contract("null, _ -> null; !null, _ -> !null")
 	public static @Nullable String replaceIsoControlCharacters(@Nullable String str, String replacement) {
 		Preconditions.notNull(replacement, "replacement must not be null");
 		return str == null ? null : ISO_CONTROL_PATTERN.matcher(str).replaceAll(replacement);
@@ -256,6 +264,7 @@ public final class StringUtils {
 	 * @since 1.4
 	 */
 	@API(status = INTERNAL, since = "1.4")
+	@Contract("null, _ -> null; !null, _ -> !null")
 	public static @Nullable String replaceWhitespaceCharacters(@Nullable String str, String replacement) {
 		Preconditions.notNull(replacement, "replacement must not be null");
 		return str == null ? null : WHITESPACE_PATTERN.matcher(str).replaceAll(replacement);

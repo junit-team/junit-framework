@@ -70,7 +70,6 @@ public class ConditionEvaluationResult {
 	 * @see StringUtils#isBlank(String)
 	 */
 	@API(status = STABLE, since = "5.7")
-	@SuppressWarnings("NullAway") // StringUtils.isBlank() does not yet have a nullability @Contract
 	public static ConditionEvaluationResult disabled(@Nullable String reason, @Nullable String customReason) {
 		if (StringUtils.isBlank(reason)) {
 			return disabled(customReason);
@@ -85,7 +84,6 @@ public class ConditionEvaluationResult {
 
 	private final Optional<String> reason;
 
-	@SuppressWarnings("NullAway") // StringUtils.isNotBlank() does not yet have a nullability @Contract
 	private ConditionEvaluationResult(boolean enabled, @Nullable String reason) {
 		this.enabled = enabled;
 		this.reason = StringUtils.isNotBlank(reason) ? Optional.of(reason.strip()) : Optional.empty();

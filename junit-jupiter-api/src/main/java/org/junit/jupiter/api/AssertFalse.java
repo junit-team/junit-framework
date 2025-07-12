@@ -16,6 +16,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * {@code AssertFalse} is a collection of utility methods that support asserting
@@ -29,16 +30,19 @@ class AssertFalse {
 		/* no-op */
 	}
 
+	@Contract("true -> fail")
 	static void assertFalse(boolean condition) {
 		assertFalse(condition, (String) null);
 	}
 
+	@Contract("true, _ -> fail")
 	static void assertFalse(boolean condition, @Nullable String message) {
 		if (condition) {
 			failNotFalse(message);
 		}
 	}
 
+	@Contract("true, _ -> fail")
 	static void assertFalse(boolean condition, Supplier<@Nullable String> messageSupplier) {
 		if (condition) {
 			failNotFalse(messageSupplier);

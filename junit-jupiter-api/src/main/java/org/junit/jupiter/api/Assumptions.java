@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.opentest4j.TestAbortedException;
@@ -68,6 +69,7 @@ public class Assumptions {
 	 * @param assumption the assumption to validate
 	 * @throws TestAbortedException if the assumption is not {@code true}
 	 */
+	@Contract("false -> fail")
 	public static void assumeTrue(boolean assumption) throws TestAbortedException {
 		assumeTrue(assumption, "assumption is not true");
 	}
@@ -103,6 +105,7 @@ public class Assumptions {
 	 * the {@code TestAbortedException} if the assumption is invalid
 	 * @throws TestAbortedException if the assumption is not {@code true}
 	 */
+	@Contract("false, _ -> fail")
 	public static void assumeTrue(boolean assumption, Supplier<@Nullable String> messageSupplier)
 			throws TestAbortedException {
 		if (!assumption) {
@@ -118,6 +121,7 @@ public class Assumptions {
 	 * if the assumption is invalid
 	 * @throws TestAbortedException if the assumption is not {@code true}
 	 */
+	@Contract("false, _ -> fail")
 	public static void assumeTrue(boolean assumption, @Nullable String message) throws TestAbortedException {
 		if (!assumption) {
 			throwAssumptionFailed(message);
@@ -146,6 +150,7 @@ public class Assumptions {
 	 * @param assumption the assumption to validate
 	 * @throws TestAbortedException if the assumption is not {@code false}
 	 */
+	@Contract("true -> fail")
 	public static void assumeFalse(boolean assumption) throws TestAbortedException {
 		assumeFalse(assumption, "assumption is not false");
 	}
@@ -181,6 +186,7 @@ public class Assumptions {
 	 * the {@code TestAbortedException} if the assumption is invalid
 	 * @throws TestAbortedException if the assumption is not {@code false}
 	 */
+	@Contract("true, _ -> fail")
 	public static void assumeFalse(boolean assumption, Supplier<@Nullable String> messageSupplier)
 			throws TestAbortedException {
 		if (assumption) {
@@ -196,6 +202,7 @@ public class Assumptions {
 	 * if the assumption is invalid
 	 * @throws TestAbortedException if the assumption is not {@code false}
 	 */
+	@Contract("true, _ -> fail")
 	public static void assumeFalse(boolean assumption, @Nullable String message) throws TestAbortedException {
 		if (assumption) {
 			throwAssumptionFailed(message);
@@ -277,6 +284,7 @@ public class Assumptions {
 	 * @throws TestAbortedException always
 	 * @since 5.9
 	 */
+	@Contract(" -> fail")
 	@API(status = STABLE, since = "5.9")
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V abort() {
@@ -301,6 +309,7 @@ public class Assumptions {
 	 * @throws TestAbortedException always
 	 * @since 5.9
 	 */
+	@Contract("_ -> fail")
 	@API(status = STABLE, since = "5.9")
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V abort(String message) {
@@ -318,12 +327,14 @@ public class Assumptions {
 	 * @throws TestAbortedException always
 	 * @since 5.9
 	 */
+	@Contract("_ -> fail")
 	@API(status = STABLE, since = "5.9")
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V abort(Supplier<String> messageSupplier) {
 		throw new TestAbortedException(messageSupplier.get());
 	}
 
+	@Contract("_ -> fail")
 	private static void throwAssumptionFailed(@Nullable String message) {
 		throw new TestAbortedException(
 			StringUtils.isNotBlank(message) ? "Assumption failed: " + message : "Assumption failed");

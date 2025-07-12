@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * {@code AssertInstanceOf} is a collection of utility methods that support
@@ -29,14 +30,17 @@ class AssertInstanceOf {
 		/* no-op */
 	}
 
+	@Contract("_, null -> fail")
 	static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue) {
 		return assertInstanceOf(expectedType, actualValue, (Object) null);
 	}
 
+	@Contract("_, null, _ -> fail")
 	static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue, @Nullable String message) {
 		return assertInstanceOf(expectedType, actualValue, (Object) message);
 	}
 
+	@Contract("_, null, _ -> fail")
 	static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			Supplier<@Nullable String> messageSupplier) {
 		return assertInstanceOf(expectedType, actualValue, (Object) messageSupplier);

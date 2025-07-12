@@ -10,8 +10,6 @@
 
 package org.junit.platform.console.tasks;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -97,10 +95,11 @@ class TreeNode {
 		return Optional.ofNullable(identifier);
 	}
 
+	@SuppressWarnings("DataFlowIssue")
 	static String createCaption(String displayName) {
 		boolean normal = displayName.length() <= 80;
 		String caption = normal ? displayName : displayName.substring(0, 80) + "...";
 		String whites = StringUtils.replaceWhitespaceCharacters(caption, " ");
-		return requireNonNull(StringUtils.replaceIsoControlCharacters(whites, "."));
+		return StringUtils.replaceIsoControlCharacters(whites, ".");
 	}
 }

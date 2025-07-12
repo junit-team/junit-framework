@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * {@code AssertNull} is a collection of utility methods that support asserting
@@ -28,16 +29,19 @@ class AssertNull {
 		/* no-op */
 	}
 
+	@Contract("!null -> fail")
 	static void assertNull(@Nullable Object actual) {
 		assertNull(actual, (String) null);
 	}
 
+	@Contract("!null, _ -> fail")
 	static void assertNull(@Nullable Object actual, @Nullable String message) {
 		if (actual != null) {
 			failNotNull(actual, message);
 		}
 	}
 
+	@Contract("!null, _ -> fail")
 	static void assertNull(@Nullable Object actual, Supplier<@Nullable String> messageSupplier) {
 		if (actual != null) {
 			failNotNull(actual, messageSupplier);

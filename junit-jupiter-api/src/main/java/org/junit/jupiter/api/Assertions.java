@@ -25,6 +25,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.function.ThrowingSupplier;
+import org.junit.platform.commons.annotation.Contract;
 import org.opentest4j.MultipleFailuresError;
 
 /**
@@ -115,6 +116,7 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
+	@Contract(" -> fail")
 	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail() {
 		AssertionUtils.fail();
@@ -135,6 +137,7 @@ public class Assertions {
 	 * Stream.of().map(entry -> fail("should not be called"));
 	 * }</pre>
 	 */
+	@Contract("_ -> fail")
 	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(@Nullable String message) {
 		AssertionUtils.fail(message);
@@ -148,6 +151,7 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
+	@Contract("_, _ -> fail")
 	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(@Nullable String message, @Nullable Throwable cause) {
 		AssertionUtils.fail(message, cause);
@@ -160,6 +164,7 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
+	@Contract("_ -> fail")
 	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(@Nullable Throwable cause) {
 		AssertionUtils.fail(cause);
@@ -173,6 +178,7 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
+	@Contract("_ -> fail")
 	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(Supplier<@Nullable String> messageSupplier) {
 		AssertionUtils.fail(messageSupplier);
@@ -184,6 +190,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that the supplied {@code condition} is {@code true}.
 	 */
+	@Contract("false -> fail")
 	public static void assertTrue(boolean condition) {
 		AssertTrue.assertTrue(condition);
 	}
@@ -192,6 +199,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code true}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("false, _ -> fail")
 	public static void assertTrue(boolean condition, Supplier<@Nullable String> messageSupplier) {
 		AssertTrue.assertTrue(condition, messageSupplier);
 	}
@@ -215,6 +223,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code true}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("false, _ -> fail")
 	public static void assertTrue(boolean condition, @Nullable String message) {
 		AssertTrue.assertTrue(condition, message);
 	}
@@ -232,6 +241,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that the supplied {@code condition} is {@code false}.
 	 */
+	@Contract("true -> fail")
 	public static void assertFalse(boolean condition) {
 		AssertFalse.assertFalse(condition);
 	}
@@ -240,6 +250,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code false}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("true, _ -> fail")
 	public static void assertFalse(boolean condition, @Nullable String message) {
 		AssertFalse.assertFalse(condition, message);
 	}
@@ -248,6 +259,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code false}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("true, _ -> fail")
 	public static void assertFalse(boolean condition, Supplier<@Nullable String> messageSupplier) {
 		AssertFalse.assertFalse(condition, messageSupplier);
 	}
@@ -280,6 +292,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that {@code actual} is {@code null}.
 	 */
+	@Contract("!null -> fail")
 	public static void assertNull(@Nullable Object actual) {
 		AssertNull.assertNull(actual);
 	}
@@ -288,6 +301,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is {@code null}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("!null, _ -> fail")
 	public static void assertNull(@Nullable Object actual, @Nullable String message) {
 		AssertNull.assertNull(actual, message);
 	}
@@ -296,6 +310,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is {@code null}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("!null, _ -> fail")
 	public static void assertNull(@Nullable Object actual, Supplier<@Nullable String> messageSupplier) {
 		AssertNull.assertNull(actual, messageSupplier);
 	}
@@ -305,6 +320,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that {@code actual} is not {@code null}.
 	 */
+	@Contract("null -> fail")
 	public static void assertNotNull(@Nullable Object actual) {
 		AssertNotNull.assertNotNull(actual);
 	}
@@ -313,6 +329,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is not {@code null}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("null, _ -> fail")
 	public static void assertNotNull(@Nullable Object actual, @Nullable String message) {
 		AssertNotNull.assertNotNull(actual, message);
 	}
@@ -321,6 +338,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is not {@code null}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("null, _ -> fail")
 	public static void assertNotNull(@Nullable Object actual, Supplier<@Nullable String> messageSupplier) {
 		AssertNotNull.assertNotNull(actual, messageSupplier);
 	}
@@ -3665,6 +3683,7 @@ public class Assertions {
 	 * @since 5.8
 	 */
 	@API(status = STABLE, since = "5.10")
+	@Contract("_, null -> fail")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue) {
 		return AssertInstanceOf.assertInstanceOf(expectedType, actualValue);
 	}
@@ -3681,6 +3700,7 @@ public class Assertions {
 	 * @since 5.8
 	 */
 	@API(status = STABLE, since = "5.10")
+	@Contract("_, null, _ -> fail")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			@Nullable String message) {
 		return AssertInstanceOf.assertInstanceOf(expectedType, actualValue, message);
@@ -3698,6 +3718,7 @@ public class Assertions {
 	 *
 	 * @since 5.8
 	 */
+	@Contract("_, null, _ -> fail")
 	@API(status = STABLE, since = "5.10")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			Supplier<@Nullable String> messageSupplier) {

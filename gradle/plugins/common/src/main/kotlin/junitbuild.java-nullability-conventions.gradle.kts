@@ -54,6 +54,8 @@ tasks.withType<JavaCompile>().configureEach {
 				enable()
 			}
 			isJSpecifyMode = true
+			customContractAnnotations.add("org.junit.platform.commons.annotation.Contract")
+			checkContracts = true
 		}
 	}
 }

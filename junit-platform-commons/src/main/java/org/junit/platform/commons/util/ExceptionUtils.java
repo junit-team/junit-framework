@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * Collection of utilities for working with exceptions.
@@ -69,6 +70,7 @@ public final class ExceptionUtils {
 	 * returns anything; the return type is merely present to allow this
 	 * method to be supplied as the operand in a {@code throw} statement
 	 */
+	@Contract("_ -> fail")
 	public static RuntimeException throwAsUncheckedException(Throwable t) {
 		Preconditions.notNull(t, "Throwable must not be null");
 		// The following line will never actually return an exception but rather
@@ -76,6 +78,7 @@ public final class ExceptionUtils {
 		return ExceptionUtils.throwAs(t);
 	}
 
+	@Contract("_ -> fail")
 	@SuppressWarnings({ "unchecked", "TypeParameterUnusedInFormals" })
 	private static <T extends Throwable> T throwAs(Throwable t) throws T {
 		throw (T) t;

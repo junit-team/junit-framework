@@ -14,7 +14,6 @@ import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.naturalOrder;
-import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -244,7 +243,7 @@ class XmlReportWriter {
 		private void writeSkippedElement(@Nullable String reason, XMLStreamWriter writer) throws XMLStreamException {
 			if (isNotBlank(reason)) {
 				writer.writeStartElement("skipped");
-				writeCDataSafely(requireNonNull(reason));
+				writeCDataSafely(reason);
 				writer.writeEndElement();
 			}
 			else {
