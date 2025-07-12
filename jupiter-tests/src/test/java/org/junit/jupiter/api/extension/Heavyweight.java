@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.api.extension;
 
-import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +32,7 @@ class Heavyweight implements ParameterResolver, BeforeEachCallback {
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext context) {
 		var engineContext = context.getRoot();
 		var store = engineContext.getStore(ExtensionContext.Namespace.GLOBAL);
-		var resource = requireNonNull(store.getOrComputeIfAbsent(ResourceValue.class));
+		var resource = store.computeIfAbsent(ResourceValue.class);
 		resource.usages.incrementAndGet();
 		return resource;
 	}

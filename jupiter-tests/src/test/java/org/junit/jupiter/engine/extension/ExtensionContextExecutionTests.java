@@ -73,7 +73,7 @@ class ExtensionContextExecutionTests extends AbstractJupiterTestEngineTests {
 		@Override
 		public void beforeAll(ExtensionContext context) {
 			ExtensionContext.Store store = getRoot(context).getStore(ExtensionContext.Namespace.GLOBAL);
-			store.getOrComputeIfAbsent("counter", key -> Parent.counter.incrementAndGet());
+			store.computeIfAbsent("counter", key -> Parent.counter.incrementAndGet());
 		}
 
 		private ExtensionContext getRoot(ExtensionContext context) {

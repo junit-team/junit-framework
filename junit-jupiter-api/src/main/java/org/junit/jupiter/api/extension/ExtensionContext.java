@@ -569,10 +569,9 @@ public interface ExtensionContext {
 		 *
 		 * @param key the key; never {@code null}
 		 * @param requiredType the required type of the value; never {@code null}
-		 * @param defaultValue the default value
+		 * @param defaultValue the default value; never {@code null}
 		 * @param <V> the value type
-		 * @return the value; potentially {@code null} if {@code defaultValue}
-		 * is {@code null}
+		 * @return the value; never {@code null}
 		 * @since 5.5
 		 * @see #get(Object, Class)
 		 */
@@ -592,13 +591,13 @@ public interface ExtensionContext {
 		 * the type of object we wish to retrieve from the store.
 		 *
 		 * <pre style="code">
-		 * X x = store.getOrComputeIfAbsent(X.class, key -&gt; new X(), X.class);
+		 * X x = store.computeIfAbsent(X.class, key -&gt; new X(), X.class);
 		 * // Equivalent to:
-		 * // X x = store.getOrComputeIfAbsent(X.class);
+		 * // X x = store.computeIfAbsent(X.class);
 		 * </pre>
 		 *
-		 * <p>See {@link #getOrComputeIfAbsent(Object, Function, Class)} for
-		 * further details.
+		 * <p>See {@link #computeIfAbsent(Object, Function, Class)} for further
+		 * details.
 		 *
 		 * <p>If {@code type} implements {@link CloseableResource} or
 		 * {@link AutoCloseable} (unless the
@@ -610,14 +609,56 @@ public interface ExtensionContext {
 		 * @param <V> the key and value type
 		 * @return the object; never {@code null}
 		 * @since 5.1
-		 * @see #getOrComputeIfAbsent(Object, Function)
-		 * @see #getOrComputeIfAbsent(Object, Function, Class)
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
+		 * @see CloseableResource
+		 * @see AutoCloseable
+		 *
+		 * @deprecated Please use {@link #computeIfAbsent(Class)} instead.
+		 */
+		@Deprecated
+		@API(status = DEPRECATED, since = "6.0")
+		default <V> V getOrComputeIfAbsent(Class<V> type) {
+			return computeIfAbsent(type);
+		}
+
+		/**
+		 * Return the object of type {@code type} if it is present and not
+		 * {@code null} in this {@code Store} (<em>keyed</em> by {@code type});
+		 * otherwise, invoke the default constructor for {@code type} to
+		 * generate the object, store it, and return it.
+		 *
+		 * <p>This method is a shortcut for the following, where {@code X} is
+		 * the type of object we wish to retrieve from the store.
+		 *
+		 * <pre style="code">
+		 * X x = store.computeIfAbsent(X.class, key -&gt; new X(), X.class);
+		 * // Equivalent to:
+		 * // X x = store.computeIfAbsent(X.class);
+		 * </pre>
+		 *
+		 * <p>See {@link #computeIfAbsent(Object, Function, Class)} for further
+		 * details.
+		 *
+		 * <p>If {@code type} implements {@link CloseableResource} or
+		 * {@link AutoCloseable} (unless the
+		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+		 * configuration parameter is set to {@code false}), then the {@code close()}
+		 * method will be invoked on the stored object when the store is closed.
+		 *
+		 * @param type the type of object to retrieve; never {@code null}
+		 * @param <V> the key and value type
+		 * @return the object; never {@code null}
+		 * @since 6.0
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
 		 * @see CloseableResource
 		 * @see AutoCloseable
 		 */
-		@API(status = STABLE, since = "5.1")
-		default <V> @Nullable V getOrComputeIfAbsent(Class<V> type) {
-			return getOrComputeIfAbsent(type, ReflectionSupport::newInstance, type);
+		@API(status = MAINTAINED, since = "6.0")
+		default <V> V computeIfAbsent(Class<V> type) {
+			return computeIfAbsent(type, ReflectionSupport::newInstance, type);
 		}
 
 		/**
@@ -631,7 +672,7 @@ public interface ExtensionContext {
 		 * the {@code key} as input), stored, and returned.
 		 *
 		 * <p>For greater type safety, consider using
-		 * {@link #getOrComputeIfAbsent(Object, Function, Class)} instead.
+		 * {@link #computeIfAbsent(Object, Function, Class)} instead.
 		 *
 		 * <p>If the created value is an instance of {@link CloseableResource} or
 		 * {@link AutoCloseable} (unless the
@@ -645,13 +686,55 @@ public interface ExtensionContext {
 		 * @param <K> the key type
 		 * @param <V> the value type
 		 * @return the value; potentially {@code null}
-		 * @see #getOrComputeIfAbsent(Class)
-		 * @see #getOrComputeIfAbsent(Object, Function, Class)
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
+		 * @see CloseableResource
+		 * @see AutoCloseable
+		 *
+		 * @deprecated Please use {@link #computeIfAbsent(Object, Function)}
+		 * instead.
+		 */
+		@Deprecated
+		@API(status = DEPRECATED, since = "6.0")
+		<K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(K key,
+				Function<? super K, ? extends V> defaultCreator);
+
+		/**
+		 * Return the value of the specified required type that is stored under
+		 * the supplied {@code key}.
+		 *
+		 * <p>If no value is stored in the current {@link ExtensionContext}
+		 * for the supplied {@code key}, ancestors of the context will be queried
+		 * for a value with the same {@code key} in the {@code Namespace} used
+		 * to create this store. If no value is found for the supplied {@code key}
+		 * or the value is {@code null}, a new value will be computed by the
+		 * {@code defaultCreator} (given the {@code key} as input), stored, and
+		 * returned.
+		 *
+		 * <p>For greater type safety, consider using
+		 * {@link #computeIfAbsent(Object, Function, Class)} instead.
+		 *
+		 * <p>If the created value is an instance of {@link CloseableResource} or
+		 * {@link AutoCloseable} (unless the
+		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+		 * configuration parameter is set to {@code false}), then the {@code close()}
+		 * method will be invoked on the stored object when the store is closed.
+		 *
+		 * @param key the key; never {@code null}
+		 * @param defaultCreator the function called with the supplied {@code key}
+		 * to create a new value; never {@code null} and must not return
+		 * {@code null}
+		 * @param <K> the key type
+		 * @param <V> the value type
+		 * @return the value; never {@code null}
+		 * @since 6.0
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function, Class)
 		 * @see CloseableResource
 		 * @see AutoCloseable
 		 */
-		<K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(K key,
-				Function<? super K, ? extends V> defaultCreator);
+		<K, V> Object computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator);
 
 		/**
 		 * Get the value of the specified required type that is stored under the
@@ -664,7 +747,7 @@ public interface ExtensionContext {
 		 * a new value will be computed by the {@code defaultCreator} (given
 		 * the {@code key} as input), stored, and returned.
 		 *
-		 * <p>If {@code requiredType} implements {@link CloseableResource} or
+		 * <p>If the created value implements {@link CloseableResource} or
 		 * {@link AutoCloseable} (unless the
 		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
 		 * configuration parameter is set to {@code false}), then the {@code close()}
@@ -677,13 +760,49 @@ public interface ExtensionContext {
 		 * @param <K> the key type
 		 * @param <V> the value type
 		 * @return the value; potentially {@code null}
-		 * @see #getOrComputeIfAbsent(Class)
-		 * @see #getOrComputeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
 		 * @see CloseableResource
 		 * @see AutoCloseable
 		 */
+		@Deprecated
+		@API(status = DEPRECATED, since = "6.0")
 		<K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(K key,
 				Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
+
+		/**
+		 * Get the value of the specified required type that is stored under the
+		 * supplied {@code key}.
+		 *
+		 * <p>If no value is stored in the current {@link ExtensionContext}
+		 * for the supplied {@code key}, ancestors of the context will be queried
+		 * for a value with the same {@code key} in the {@code Namespace} used
+		 * to create this store. If no value is found for the supplied {@code key}
+		 * or the value is {@code null}, a new value will be computed by the
+		 * {@code defaultCreator} (given the {@code key} as input), stored, and
+		 * returned.
+		 *
+		 * <p>If the created value is an instance of {@link CloseableResource} or
+		 * {@link AutoCloseable} (unless the
+		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+		 * configuration parameter is set to {@code false}), then the {@code close()}
+		 * method will be invoked on the stored object when the store is closed.
+		 *
+		 * @param key the key; never {@code null}
+		 * @param defaultCreator the function called with the supplied {@code key}
+		 * to create a new value; never {@code null} and must not return
+		 * {@code null}
+		 * @param requiredType the required type of the value; never {@code null}
+		 * @param <K> the key type
+		 * @param <V> the value type
+		 * @return the value; never {@code null}
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see CloseableResource
+		 * @see AutoCloseable
+		 */
+		<K, V> V computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
 
 		/**
 		 * Store a {@code value} for later retrieval under the supplied {@code key}.

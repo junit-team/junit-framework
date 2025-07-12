@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.execution;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -77,6 +78,7 @@ class ExtensionContextStoreTests {
 		assertThat(store.getOrDefault(KEY, String.class, VALUE)).isEqualTo(VALUE);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	void getOrComputeIfAbsentWithFailingCreator() {
 		var invocations = new AtomicInteger();
@@ -90,6 +92,15 @@ class ExtensionContextStoreTests {
 
 		assertDoesNotThrow(localStore::close);
 		assertThat(invocations).hasValue(1);
+	}
+
+	@Test
+	void computeIfAbsentWithFailingCreator() {
+		assertThrows(RuntimeException.class, () -> store.computeIfAbsent(KEY, __ -> {
+			throw new RuntimeException();
+		}));
+		assertNull(store.get(KEY));
+		assertDoesNotThrow(localStore::close);
 	}
 
 }

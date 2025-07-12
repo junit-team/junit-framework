@@ -42,7 +42,7 @@ public class NamespaceAwareStore implements Store {
 	public @Nullable Object get(Object key) {
 		Preconditions.notNull(key, "key must not be null");
 		Supplier<@Nullable Object> action = () -> this.valuesStore.get(this.namespace, key);
-		return accessStore(action);
+		return this.<@Nullable Object> accessStore(action);
 	}
 
 	@Override
@@ -50,9 +50,10 @@ public class NamespaceAwareStore implements Store {
 		Preconditions.notNull(key, "key must not be null");
 		Preconditions.notNull(requiredType, "requiredType must not be null");
 		Supplier<@Nullable T> action = () -> this.valuesStore.get(this.namespace, key, requiredType);
-		return accessStore(action);
+		return this.<@Nullable T> accessStore(action);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public <K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(K key,
 			Function<? super K, ? extends V> defaultCreator) {
@@ -60,9 +61,10 @@ public class NamespaceAwareStore implements Store {
 		Preconditions.notNull(defaultCreator, "defaultCreator function must not be null");
 		Supplier<@Nullable Object> action = () -> this.valuesStore.getOrComputeIfAbsent(this.namespace, key,
 			defaultCreator);
-		return accessStore(action);
+		return this.<@Nullable Object> accessStore(action);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public <K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(K key,
 			Function<? super K, ? extends V> defaultCreator, Class<V> requiredType) {
@@ -71,6 +73,23 @@ public class NamespaceAwareStore implements Store {
 		Preconditions.notNull(requiredType, "requiredType must not be null");
 		Supplier<@Nullable V> action = () -> this.valuesStore.getOrComputeIfAbsent(this.namespace, key, defaultCreator,
 			requiredType);
+		return this.<@Nullable V> accessStore(action);
+	}
+
+	@Override
+	public <K, V> Object computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator) {
+		Preconditions.notNull(key, "key must not be null");
+		Preconditions.notNull(defaultCreator, "defaultCreator function must not be null");
+		Supplier<Object> action = () -> this.valuesStore.computeIfAbsent(this.namespace, key, defaultCreator);
+		return accessStore(action);
+	}
+
+	@Override
+	public <K, V> V computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator, Class<V> requiredType) {
+		Preconditions.notNull(key, "key must not be null");
+		Preconditions.notNull(defaultCreator, "defaultCreator function must not be null");
+		Preconditions.notNull(requiredType, "requiredType must not be null");
+		Supplier<V> action = () -> this.valuesStore.computeIfAbsent(this.namespace, key, defaultCreator, requiredType);
 		return accessStore(action);
 	}
 
@@ -78,14 +97,14 @@ public class NamespaceAwareStore implements Store {
 	public void put(Object key, @Nullable Object value) {
 		Preconditions.notNull(key, "key must not be null");
 		Supplier<@Nullable Object> action = () -> this.valuesStore.put(this.namespace, key, value);
-		accessStore(action);
+		this.<@Nullable Object> accessStore(action);
 	}
 
 	@Override
 	public @Nullable Object remove(Object key) {
 		Preconditions.notNull(key, "key must not be null");
 		Supplier<@Nullable Object> action = () -> this.valuesStore.remove(this.namespace, key);
-		return accessStore(action);
+		return this.<@Nullable Object> accessStore(action);
 	}
 
 	@Override
@@ -93,10 +112,10 @@ public class NamespaceAwareStore implements Store {
 		Preconditions.notNull(key, "key must not be null");
 		Preconditions.notNull(requiredType, "requiredType must not be null");
 		Supplier<@Nullable T> action = () -> this.valuesStore.remove(this.namespace, key, requiredType);
-		return accessStore(action);
+		return this.<@Nullable T> accessStore(action);
 	}
 
-	private <T> @Nullable T accessStore(Supplier<@Nullable T> action) {
+	private <T extends @Nullable Object> T accessStore(Supplier<T> action) {
 		try {
 			return action.get();
 		}

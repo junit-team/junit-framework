@@ -29,6 +29,8 @@ repository on GitHub.
 * `ConversionSupport` now converts `String` to `Locale` using the IETF BCP 47 language tag
   format supported by the `Locale.forLanguageTag(String)` factory method instead of the
   format used by the deprecated `Locale(String)` constructor.
+* Deprecate `getOrComputeIfAbsent(...)` methods in `NamespacedHierarchicalStore` in favor
+  of the new `computeIfAbsent(...)` methods.
 
 [[release-notes-6.0.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
@@ -51,6 +53,8 @@ repository on GitHub.
 * Provide cancellation support for the Suite and Vintage test engines
 * Introduce `TestTask.getTestDescriptor()` method for use in
   `HierarchicalTestExecutorService` implementations.
+* Introduce `computeIfAbsent(...)` methods in `NamespacedHierarchicalStore` to simplify
+  working with non-nullable types.
 
 
 [[release-notes-6.0.0-M2-junit-jupiter]]
@@ -72,12 +76,16 @@ repository on GitHub.
   configuration parameter. `Locale` conversions are now always performed using the IETF
   BCP 47 language tag format supported by the `Locale.forLanguageTag(String)` factory
   method.
+* Deprecate `getOrComputeIfAbsent(...)` methods in `ExtensionContext.Store` in favor of
+  the new `computeIfAbsent(...)` methods.
 
 [[release-notes-6.0.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Reason strings supplied to `ConditionEvaluationResult` APIs are now officially declared
   as `@Nullable`.
+* Introduce `computeIfAbsent(...)` methods in `ExtensionContext.Store` to ease simplify
+  with non-nullable types.
 
 
 [[release-notes-6.0.0-M2-junit-vintage]]

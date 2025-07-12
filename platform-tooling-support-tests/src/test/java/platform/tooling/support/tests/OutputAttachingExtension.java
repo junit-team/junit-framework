@@ -40,7 +40,7 @@ class OutputAttachingExtension implements ParameterResolver, AfterTestExecutionC
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		var outputDir = extensionContext.getStore(NAMESPACE).getOrComputeIfAbsent("outputDir", __ -> {
+		var outputDir = extensionContext.getStore(NAMESPACE).computeIfAbsent("outputDir", __ -> {
 			try {
 				return new OutputDir(Files.createTempDirectory("output"));
 			}

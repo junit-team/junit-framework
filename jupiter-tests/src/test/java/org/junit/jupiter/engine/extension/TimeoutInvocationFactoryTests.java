@@ -85,12 +85,13 @@ class TimeoutInvocationFactoryTests {
 				.hasMessage("timeout invocation parameters must not be null");
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	@DisplayName("creates timeout invocation for SAME_THREAD thread mode")
 	void shouldCreateTimeoutInvocationForSameThreadTimeoutThreadMode() {
 		var invocation = timeoutInvocationFactory.create(ThreadMode.SAME_THREAD, parameters);
 		assertThat(invocation).isInstanceOf(SameThreadTimeoutInvocation.class);
-		verify(store).getOrComputeIfAbsent(SingleThreadExecutorResource.class);
+		verify(store).computeIfAbsent(SingleThreadExecutorResource.class);
 	}
 
 	@Test

@@ -32,7 +32,7 @@ public class LocalMavenRepo implements AutoCloseable {
 		@Override
 		public ManagedResource.Scope determineScope(ExtensionContext extensionContext) {
 			var store = extensionContext.getRoot().getStore(NAMESPACE);
-			var fileSystemType = store.getOrComputeIfAbsent("tempFileSystemType", key -> {
+			var fileSystemType = store.computeIfAbsent("tempFileSystemType", key -> {
 				var type = getFileSystemType(Path.of(System.getProperty("java.io.tmpdir")));
 				extensionContext.getRoot().publishReportEntry("tempFileSystemType", type);
 				return type;

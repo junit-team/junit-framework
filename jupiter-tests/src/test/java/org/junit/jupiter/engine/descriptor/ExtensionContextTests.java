@@ -409,7 +409,7 @@ public class ExtensionContextTests {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "deprecation" })
 	void usingStore() {
 		var methodTestDescriptor = methodDescriptor();
 		var classTestDescriptor = outerClassDescriptor(methodTestDescriptor);
@@ -436,14 +436,17 @@ public class ExtensionContextTests {
 
 		final Object key2 = "key 2";
 		final var value2 = "other value";
-		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> value2));
-		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> value2, String.class));
+		assertEquals(value2, childStore.computeIfAbsent(key2, key -> value2));
+		assertEquals(value2, childStore.computeIfAbsent(key2, key -> "a different value", String.class));
+		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> "a different value"));
+		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> "a different value", String.class));
 		assertEquals(value2, childStore.get(key2));
 		assertEquals(value2, childStore.get(key2, String.class));
 
 		final Object parentKey = "parent key";
 		final var parentValue = "parent value";
 		parentStore.put(parentKey, parentValue);
+		assertEquals(parentValue, childStore.computeIfAbsent(parentKey, k -> "a different value"));
 		assertEquals(parentValue, childStore.getOrComputeIfAbsent(parentKey, k -> "a different value"));
 		assertEquals(parentValue, childStore.get(parentKey));
 	}

@@ -78,50 +78,67 @@ public class NamespacedHierarchicalStoreTests {
 		@Test
 		void valueIsComputedIfAbsent() {
 			assertNull(store.get(namespace, key));
-			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, innerKey -> value));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> value));
 			assertEquals(value, store.get(namespace, key));
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void valueIsNotComputedIfPresentLocally() {
 			store.put(namespace, key, value);
 
-			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, innerKey -> "a different value"));
+			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, __ -> "a different value"));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> "a different value"));
 			assertEquals(value, store.get(namespace, key));
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void valueIsNotComputedIfPresentInParent() {
 			parentStore.put(namespace, key, value);
 
-			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, k -> "a different value"));
+			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, __ -> "a different value"));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> "a different value"));
 			assertEquals(value, store.get(namespace, key));
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void valueIsNotComputedIfPresentInGrandParent() {
 			grandParentStore.put(namespace, key, value);
 
-			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, k -> "a different value"));
+			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, __ -> "a different value"));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> "a different value"));
 			assertEquals(value, store.get(namespace, key));
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void nullIsAValidValueToPut() {
 			store.put(namespace, key, null);
 
-			assertNull(store.getOrComputeIfAbsent(namespace, key, innerKey -> "a different value"));
+			assertNull(store.getOrComputeIfAbsent(namespace, key, __ -> "a different value"));
 			assertNull(store.get(namespace, key));
+
+			assertEquals("a different value", store.computeIfAbsent(namespace, key, __ -> "a different value"));
+			assertEquals("a different value", store.get(namespace, key));
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void keysCanBeRemoved() {
 			store.put(namespace, key, value);
 			assertEquals(value, store.remove(namespace, key));
-
 			assertNull(store.get(namespace, key));
-			assertEquals("a different value",
-				store.getOrComputeIfAbsent(namespace, key, innerKey -> "a different value"));
+
+			assertEquals("a different value", store.getOrComputeIfAbsent(namespace, key, __ -> "a different value"));
+			assertEquals("a different value", store.remove(namespace, key));
+			assertNull(store.get(namespace, key));
+
+			assertEquals("another different value",
+				store.computeIfAbsent(namespace, key, __ -> "another different value"));
+			assertEquals("another different value", store.remove(namespace, key));
+			assertNull(store.get(namespace, key));
 		}
 
 		@Test
@@ -144,7 +161,7 @@ public class NamespacedHierarchicalStoreTests {
 			String namespace1 = "ns1";
 			String namespace2 = "ns2";
 
-			assertEquals(value, store.getOrComputeIfAbsent(namespace1, key, innerKey -> value));
+			assertEquals(value, store.computeIfAbsent(namespace1, key, __ -> value));
 			assertEquals(value, store.get(namespace1, key));
 
 			assertNull(store.get(namespace2, key));
@@ -213,6 +230,7 @@ public class NamespacedHierarchicalStoreTests {
 			assertNull(requiredTypeValue);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void getOrComputeIfAbsentWithTypeSafetyAndInvalidRequiredTypeThrowsException() {
 			String key = "pi";
@@ -232,6 +250,25 @@ public class NamespacedHierarchicalStoreTests {
 		}
 
 		@Test
+		void computeIfAbsentWithTypeSafetyAndInvalidRequiredTypeThrowsException() {
+			String key = "pi";
+			Float value = 3.14f;
+
+			// Store a Float...
+			store.put(namespace, key, value);
+
+			// But declare that our function creates a String...
+			Function<String, String> defaultCreator = k -> "enigma";
+
+			Exception exception = assertThrows(NamespacedHierarchicalStoreException.class,
+				() -> store.computeIfAbsent(namespace, key, defaultCreator, String.class));
+			assertEquals(
+				"Object stored under key [pi] is not of required type [java.lang.String], but was [java.lang.Float]: 3.14",
+				exception.getMessage());
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
 		void getOrComputeIfAbsentWithTypeSafety() {
 			Integer key = 42;
 			String value = "enigma";
@@ -241,7 +278,17 @@ public class NamespacedHierarchicalStoreTests {
 			assertEquals(value, computedValue);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@Test
+		void computeIfAbsentWithTypeSafety() {
+			Integer key = 42;
+			String value = "enigma";
+
+			// The fact that we can declare this as a String suffices for testing the required type.
+			String computedValue = store.computeIfAbsent(namespace, key, __ -> value, String.class);
+			assertEquals(value, computedValue);
+		}
+
+		@SuppressWarnings({ "DataFlowIssue", "NullAway", "deprecation" })
 		@Test
 		void getOrComputeIfAbsentWithTypeSafetyAndPrimitiveValueType() {
 			String key = "enigma";
@@ -255,12 +302,34 @@ public class NamespacedHierarchicalStoreTests {
 		}
 
 		@Test
+		void computeIfAbsentWithTypeSafetyAndPrimitiveValueType() {
+			String key = "enigma";
+			int value = 42;
+
+			// The fact that we can declare this as an int/Integer suffices for testing the required type.
+			int computedInt = store.computeIfAbsent(namespace, key, k -> value, int.class);
+			Integer computedInteger = store.computeIfAbsent(namespace, key, k -> value, Integer.class);
+			assertEquals(value, computedInt);
+			assertEquals(value, computedInteger.intValue());
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
 		void getOrComputeIfAbsentWithExceptionThrowingCreatorFunction() {
 			var e = assertThrows(RuntimeException.class, () -> store.getOrComputeIfAbsent(namespace, key, __ -> {
 				throw new RuntimeException("boom");
 			}));
 			assertSame(e, assertThrows(RuntimeException.class, () -> store.get(namespace, key)));
 			assertSame(e, assertThrows(RuntimeException.class, () -> store.remove(namespace, key)));
+		}
+
+		@Test
+		void computeIfAbsentWithExceptionThrowingCreatorFunction() {
+			assertThrows(RuntimeException.class, () -> store.computeIfAbsent(namespace, key, __ -> {
+				throw new RuntimeException("boom");
+			}));
+			assertNull(store.get(namespace, key));
+			assertNull(store.remove(namespace, key));
 		}
 
 		@Test
@@ -316,6 +385,7 @@ public class NamespacedHierarchicalStoreTests {
 			assertNull(store.get(namespace, key));
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void simulateRaceConditionInGetOrComputeIfAbsent() throws Exception {
 			int threads = 10;
@@ -326,6 +396,21 @@ public class NamespacedHierarchicalStoreTests {
 				values = executeConcurrently(threads, //
 					() -> requireNonNull(
 						localStore.getOrComputeIfAbsent(namespace, key, it -> counter.incrementAndGet())));
+			}
+
+			assertEquals(1, counter.get());
+			assertThat(values).hasSize(threads).containsOnly(1);
+		}
+
+		@Test
+		void simulateRaceConditionInComputeIfAbsent() throws Exception {
+			int threads = 10;
+			AtomicInteger counter = new AtomicInteger();
+			List<Object> values;
+
+			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+				values = executeConcurrently(threads, //
+					() -> requireNonNull(localStore.computeIfAbsent(namespace, key, it -> counter.incrementAndGet())));
 			}
 
 			assertEquals(1, counter.get());
@@ -433,9 +518,13 @@ public class NamespacedHierarchicalStoreTests {
 			verifyNoInteractions(closeAction);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void doesNotCallCloseActionForValuesThatThrowExceptionsDuringCleanup() throws Throwable {
 			store.put(namespace, "key1", "value1");
+			assertThrows(RuntimeException.class, () -> store.computeIfAbsent(namespace, "key2", __ -> {
+				throw new RuntimeException("boom");
+			}));
 			assertThrows(RuntimeException.class, () -> store.getOrComputeIfAbsent(namespace, "key2", __ -> {
 				throw new RuntimeException("boom");
 			}));
@@ -447,10 +536,10 @@ public class NamespacedHierarchicalStoreTests {
 			var inOrder = inOrder(closeAction);
 			inOrder.verify(closeAction).close(namespace, "key3", "value3");
 			inOrder.verify(closeAction).close(namespace, "key1", "value1");
-
-			verifyNoMoreInteractions(closeAction);
+			inOrder.verifyNoMoreInteractions();
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void abortsCloseIfAnyStoredValueThrowsAnUnrecoverableExceptionDuringCleanup() throws Throwable {
 			store.put(namespace, "key1", "value1");
@@ -527,6 +616,7 @@ public class NamespacedHierarchicalStoreTests {
 		/**
 		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3944">#3944</a>
 		 */
+		@SuppressWarnings("deprecation")
 		@Test
 		void acceptsQueryAfterClose() {
 			store.put(namespace, key, value);
@@ -535,10 +625,13 @@ public class NamespacedHierarchicalStoreTests {
 
 			assertThat(store.get(namespace, key)).isEqualTo(value);
 			assertThat(store.get(namespace, key, String.class)).isEqualTo(value);
-			assertThat(store.getOrComputeIfAbsent(namespace, key, k -> "new")).isEqualTo(value);
-			assertThat(store.getOrComputeIfAbsent(namespace, key, k -> "new", String.class)).isEqualTo(value);
+			assertThat(store.getOrComputeIfAbsent(namespace, key, __ -> "new")).isEqualTo(value);
+			assertThat(store.getOrComputeIfAbsent(namespace, key, __ -> "new", String.class)).isEqualTo(value);
+			assertThat(store.computeIfAbsent(namespace, key, __ -> "new")).isEqualTo(value);
+			assertThat(store.computeIfAbsent(namespace, key, __ -> "new", String.class)).isEqualTo(value);
 		}
 
+		@SuppressWarnings("deprecation")
 		@Test
 		void rejectsModificationAfterClose() {
 			store.close();
@@ -548,11 +641,16 @@ public class NamespacedHierarchicalStoreTests {
 			assertThrows(NamespacedHierarchicalStoreException.class, () -> store.remove(namespace, key));
 			assertThrows(NamespacedHierarchicalStoreException.class, () -> store.remove(namespace, key, int.class));
 
-			// Since key does not exist, an invocation of getOrComputeIfAbsent(...) will attempt to compute a new value.
+			// Since key does not exist, an invocation of getOrComputeIfAbsent(...) or computeIfAbsent(...) will attempt
+			// to compute a new value.
 			assertThrows(NamespacedHierarchicalStoreException.class,
-				() -> store.getOrComputeIfAbsent(namespace, key, k -> "new"));
+				() -> store.getOrComputeIfAbsent(namespace, key, __ -> "new"));
 			assertThrows(NamespacedHierarchicalStoreException.class,
-				() -> store.getOrComputeIfAbsent(namespace, key, k -> "new", String.class));
+				() -> store.getOrComputeIfAbsent(namespace, key, __ -> "new", String.class));
+			assertThrows(NamespacedHierarchicalStoreException.class,
+				() -> store.computeIfAbsent(namespace, key, __ -> "new"));
+			assertThrows(NamespacedHierarchicalStoreException.class,
+				() -> store.computeIfAbsent(namespace, key, __ -> "new", String.class));
 		}
 
 		private void assertNotClosed() {

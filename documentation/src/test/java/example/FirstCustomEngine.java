@@ -48,9 +48,6 @@ public class FirstCustomEngine implements TestEngine {
 		return new EngineDescriptor(uniqueId, "First Custom Test Engine");
 	}
 
-	//end::user_guide[]
-	@SuppressWarnings("NullAway")
-	//tag::user_guide[]
 	@Override
 	public void execute(ExecutionRequest request) {
 		request.getEngineExecutionListener()
@@ -58,7 +55,7 @@ public class FirstCustomEngine implements TestEngine {
 				.executionStarted(request.getRootTestDescriptor());
 
 		NamespacedHierarchicalStore<Namespace> store = request.getStore();
-		socket = store.getOrComputeIfAbsent(Namespace.GLOBAL, "serverSocket", key -> {
+		socket = store.computeIfAbsent(Namespace.GLOBAL, "serverSocket", key -> {
 			try {
 				return new ServerSocket(0, 50, getLoopbackAddress());
 			}

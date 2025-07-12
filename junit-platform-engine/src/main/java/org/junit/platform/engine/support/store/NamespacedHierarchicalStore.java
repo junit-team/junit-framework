@@ -12,6 +12,7 @@ package org.junit.platform.engine.support.store;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.commons.util.ReflectionUtils.getWrapperType;
@@ -188,7 +189,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * @return the stored value; may be {@code null}
 	 * @throws NamespacedHierarchicalStoreException if this store has already been
 	 * closed
+	 *
+	 * @deprecated Please use
+	 * {@link #computeIfAbsent(Object, Object, Function)} instead.
 	 */
+	@Deprecated
+	@API(status = DEPRECATED, since = "6.0")
 	public <K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(N namespace, K key,
 			Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
@@ -205,6 +211,45 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	}
 
 	/**
+	 * Return the value stored for the supplied namespace and key in this store
+	 * or the parent store, if present and not {@code null}, or call the
+	 * supplied function to compute it.
+	 *
+	 * @param namespace the namespace; never {@code null}
+	 * @param key the key; never {@code null}
+	 * @param defaultCreator the function called with the supplied {@code key}
+	 * to create a new value; never {@code null} and must not return
+	 * {@code null}
+	 * @return the stored value; never {@code null}
+	 * @throws NamespacedHierarchicalStoreException if this store has already been
+	 * closed
+	 * @since 6.0
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
+		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
+		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
+		StoredValue storedValue = getStoredValue(compositeKey);
+		var result = StoredValue.evaluateIfNotNull(storedValue);
+		if (result == null) {
+			StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+				if (StoredValue.evaluateIfNotNull(oldStoredValue) == null) {
+					rejectIfClosed();
+					var computedValue = Preconditions.notNull(defaultCreator.apply(key),
+						"defaultCreator must not return null");
+					return newStoredValue(() -> {
+						rejectIfClosed();
+						return computedValue;
+					});
+				}
+				return oldStoredValue;
+			});
+			return requireNonNull(newStoredValue.evaluate());
+		}
+		return result;
+	}
+
+	/**
 	 * Get the value stored for the supplied namespace and key in this store or
 	 * the parent store, if present, or call the supplied function to compute it
 	 * and, finally, cast it to the supplied required type.
@@ -217,13 +262,43 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * @return the stored value; may be {@code null}
 	 * @throws NamespacedHierarchicalStoreException if the stored value cannot
 	 * be cast to the required type, or if this store has already been closed
+	 *
+	 * @deprecated Please use
+	 * {@link #computeIfAbsent(Object, Object, Function, Class)} instead.
 	 */
+	@Deprecated
+	@API(status = DEPRECATED, since = "6.0")
 	public <K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(N namespace, K key,
 			Function<? super K, ? extends V> defaultCreator, Class<V> requiredType)
 			throws NamespacedHierarchicalStoreException {
 
 		Object value = getOrComputeIfAbsent(namespace, key, defaultCreator);
 		return castToRequiredType(key, value, requiredType);
+	}
+
+	/**
+	 * Return the value stored for the supplied namespace and key in this store
+	 * or the parent store, if present and not {@code null}, or call the
+	 * supplied function to compute it and, finally, cast it to the supplied
+	 * required type.
+	 *
+	 * @param namespace the namespace; never {@code null}
+	 * @param key the key; never {@code null}
+	 * @param defaultCreator the function called with the supplied {@code key}
+	 * to create a new value; never {@code null} and must not return
+	 * {@code null}
+	 * @param requiredType the required type of the value; never {@code null}
+	 * @return the stored value; never {@code null}
+	 * @throws NamespacedHierarchicalStoreException if the stored value cannot
+	 * be cast to the required type, or if this store has already been closed
+	 * @since 6.0
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	public <K, V> V computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator,
+			Class<V> requiredType) throws NamespacedHierarchicalStoreException {
+
+		Object value = computeIfAbsent(namespace, key, defaultCreator);
+		return castNonNullToRequiredType(key, value, requiredType);
 	}
 
 	/**
@@ -302,12 +377,16 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> @Nullable T castToRequiredType(Object key, @Nullable Object value, Class<T> requiredType) {
 		Preconditions.notNull(requiredType, "requiredType must not be null");
 		if (value == null) {
 			return null;
 		}
+		return castNonNullToRequiredType(key, value, requiredType);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T, V> T castNonNullToRequiredType(Object key, V value, Class<T> requiredType) {
 		if (isAssignableTo(value, requiredType)) {
 			if (requiredType.isPrimitive()) {
 				return (T) requireNonNull(getWrapperType(requiredType)).cast(value);

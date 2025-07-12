@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.engine.extension;
 
-import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Timeout.ThreadMode.SAME_THREAD;
 
@@ -172,8 +171,8 @@ class TimeoutExtension implements BeforeAllCallback, BeforeEachCallback, Invocat
 
 	private TimeoutConfiguration getGlobalTimeoutConfiguration(ExtensionContext extensionContext) {
 		ExtensionContext root = extensionContext.getRoot();
-		return requireNonNull(root.getStore(NAMESPACE).getOrComputeIfAbsent(GLOBAL_TIMEOUT_CONFIG_KEY,
-			key -> new TimeoutConfiguration(root), TimeoutConfiguration.class));
+		return root.getStore(NAMESPACE).computeIfAbsent(GLOBAL_TIMEOUT_CONFIG_KEY,
+			key -> new TimeoutConfiguration(root), TimeoutConfiguration.class);
 	}
 
 	private <T extends @Nullable Object> Invocation<T> decorate(Invocation<T> invocation,
