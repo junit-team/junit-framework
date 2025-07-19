@@ -14,9 +14,13 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 
@@ -36,9 +40,14 @@ public abstract class DynamicNode {
 	/** Custom test source {@link URI} associated with this node; potentially {@code null}. */
 	private final @Nullable URI testSourceUri;
 
-	DynamicNode(String displayName, @Nullable URI testSourceUri) {
-		this.displayName = Preconditions.notBlank(displayName, "displayName must not be null or blank");
-		this.testSourceUri = testSourceUri;
+	private final @Nullable ExecutionMode executionMode;
+	private final @Nullable Function<? super ExtensionContext, ? extends ConditionEvaluationResult> executionCondition;
+
+	DynamicNode(AbstractConfiguration configuration) {
+		this.displayName = Preconditions.notBlank(configuration.displayName, "displayName must not be null or blank");
+		this.testSourceUri = configuration.testSourceUri;
+		this.executionMode = configuration.executionMode;
+		this.executionCondition = configuration.executionCondition;
 	}
 
 	/**
@@ -61,12 +70,74 @@ public abstract class DynamicNode {
 		return Optional.ofNullable(testSourceUri);
 	}
 
+	public Optional<ExecutionMode> getExecutionMode() {
+		return Optional.ofNullable(executionMode);
+	}
+
+	public Optional<Function<? super ExtensionContext, ? extends ConditionEvaluationResult>> getExecutionCondition() {
+		return Optional.ofNullable(executionCondition);
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this) //
 				.append("displayName", displayName) //
 				.append("testSourceUri", testSourceUri) //
 				.toString();
+	}
+
+	public interface Configuration {
+
+		Configuration displayName(String displayName);
+
+		Configuration source(@Nullable URI testSourceUri);
+
+		Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition);
+
+		Configuration executionMode(ExecutionMode executionMode);
+
+		Configuration executionMode(ExecutionMode executionMode, String reason);
+
+	}
+
+	abstract static class AbstractConfiguration implements Configuration {
+
+		private @Nullable String displayName;
+		private @Nullable URI testSourceUri;
+		private @Nullable ExecutionMode executionMode;
+		private @Nullable Function<? super ExtensionContext, ? extends ConditionEvaluationResult> executionCondition;
+
+		@Override
+		public Configuration displayName(String displayName) {
+			this.displayName = displayName;
+			return this;
+		}
+
+		@Override
+		public Configuration source(@Nullable URI testSourceUri) {
+			this.testSourceUri = testSourceUri;
+			return this;
+		}
+
+		@Override
+		public Configuration executionCondition(
+				Function<? super ExtensionContext, ? extends ConditionEvaluationResult> condition) {
+			// TODO Handle multiple calls
+			this.executionCondition = condition;
+			return this;
+		}
+
+		@Override
+		public Configuration executionMode(ExecutionMode executionMode) {
+			this.executionMode = executionMode;
+			return this;
+		}
+
+		@Override
+		public Configuration executionMode(ExecutionMode executionMode, String reason) {
+			return executionMode(executionMode);
+		}
 	}
 
 }
