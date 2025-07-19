@@ -27,19 +27,19 @@ import org.junit.platform.commons.PreconditionViolationException;
  */
 class ToStringBuilderTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void withNullObject() {
 		assertThrows(PreconditionViolationException.class, () -> new ToStringBuilder((Object) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void withNullClass() {
 		assertThrows(PreconditionViolationException.class, () -> new ToStringBuilder((Class<?>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void appendWithIllegalName() {
 		var builder = new ToStringBuilder("");

@@ -51,7 +51,7 @@ class TimeoutExceptionFactoryTests {
 				.hasSuppressedException(suppressedException);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway", "ThrowableNotThrown" })
+	@SuppressWarnings({ "DataFlowIssue", "ThrowableNotThrown" })
 	@Nested
 	@DisplayName("throws exception when")
 	class ThrowException {

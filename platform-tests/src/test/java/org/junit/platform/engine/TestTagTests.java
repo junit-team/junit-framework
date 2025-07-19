@@ -28,7 +28,7 @@ import org.junit.platform.commons.PreconditionViolationException;
  */
 class TestTagTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void validSyntax() {
 		// @formatter:off
@@ -66,7 +66,7 @@ class TestTagTests {
 		assertEquals("foo-tag", TestTag.create("\t  foo-tag  \n").getName());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void factoryPreconditions() {
 		assertSyntaxViolation(null);

@@ -33,7 +33,7 @@ class DefaultUriSourceTests extends AbstractTestSourceTests {
 		return Stream.of(new DefaultUriSource(URI.create("sample://instance")));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSourceUriYieldsException() {
 		assertThrows(PreconditionViolationException.class, () -> new DefaultUriSource(null));

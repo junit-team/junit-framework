@@ -773,7 +773,7 @@ class MethodArgumentsProviderTests {
 		return provider.provideArguments(mock(), extensionContext).map(Arguments::get);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	private DefaultExecutableInvoker getExecutableInvoker(ExtensionContext extensionContext) {
 		return new DefaultExecutableInvoker(extensionContext, extensionRegistry);
 	}

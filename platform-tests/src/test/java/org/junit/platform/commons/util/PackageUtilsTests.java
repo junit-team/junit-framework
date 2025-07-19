@@ -33,7 +33,7 @@ import org.opentest4j.ValueWrapper;
  */
 class PackageUtilsTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullType() {
 		var exception = assertThrows(PreconditionViolationException.class,
@@ -41,7 +41,7 @@ class PackageUtilsTests {
 		assertEquals("type must not be null", exception.getMessage());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullFunction() {
 		var exception = assertThrows(PreconditionViolationException.class,
@@ -49,7 +49,7 @@ class PackageUtilsTests {
 		assertEquals("function must not be null", exception.getMessage());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithFunctionReturningNullIsEmpty() {
 		assertFalse(PackageUtils.getAttribute(ValueWrapper.class, p -> null).isPresent());
@@ -78,7 +78,7 @@ class PackageUtilsTests {
 		return () -> assertTrue(PackageUtils.getAttribute(ValueWrapper.class, function).isPresent());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullTypeAndName() {
 		var exception = assertThrows(PreconditionViolationException.class,
@@ -86,7 +86,7 @@ class PackageUtilsTests {
 		assertEquals("type must not be null", exception.getMessage());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullName() {
 		var exception = assertThrows(PreconditionViolationException.class,

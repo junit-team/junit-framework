@@ -207,7 +207,7 @@ public class NamespacedHierarchicalStoreTests {
 			assertEquals(value, requiredTypeValue);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void getWithTypeSafetyAndPrimitiveValueType() {
 			String key = "enigma";
@@ -288,7 +288,7 @@ public class NamespacedHierarchicalStoreTests {
 			assertEquals(value, computedValue);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway", "deprecation" })
+		@SuppressWarnings({ "DataFlowIssue", "deprecation" })
 		@Test
 		void getOrComputeIfAbsentWithTypeSafetyAndPrimitiveValueType() {
 			String key = "enigma";
@@ -357,7 +357,7 @@ public class NamespacedHierarchicalStoreTests {
 			assertNull(store.get(namespace, key));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void removeWithTypeSafetyAndPrimitiveValueType() {
 			String key = "enigma";

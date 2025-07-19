@@ -117,7 +117,7 @@ class ReflectionUtilsTests {
 			assertFalse(ReflectionUtils.returnsPrimitiveVoid(clazz.getDeclaredMethod("methodReturningPrimitive")));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void getAllAssignmentCompatibleClassesWithNullClass() {
 			assertThrows(PreconditionViolationException.class,
@@ -132,7 +132,7 @@ class ReflectionUtilsTests {
 			assertTrue(superclasses.stream().allMatch(clazz -> clazz.isAssignableFrom(B.class)));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void newInstance() {
 			// @formatter:off
@@ -252,7 +252,7 @@ class ReflectionUtilsTests {
 			}
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void getDeclaredConstructorPreconditions() {
 			// @formatter:off
@@ -551,7 +551,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class IsClassAssignableToClassTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullSourceType() {
 			assertThatExceptionOfType(PreconditionViolationException.class)//
@@ -566,7 +566,7 @@ class ReflectionUtilsTests {
 					.withMessage("source type must not be a primitive type");
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullTargetType() {
 			assertThatExceptionOfType(PreconditionViolationException.class)//
@@ -623,7 +623,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class IsObjectAssignableToClassTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullClass() {
 			assertThrows(PreconditionViolationException.class,
@@ -689,7 +689,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class MethodInvocationTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void invokeMethodPreconditions() {
 			// @formatter:off
@@ -756,7 +756,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class ResourceLoadingTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToGetResourcePreconditions() {
 			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetResources(""));
@@ -798,7 +798,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class ClassLoadingTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToLoadClassPreconditions() {
 			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToLoadClass(null));
@@ -965,7 +965,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class FullyQualifiedMethodNameTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void getFullyQualifiedMethodNamePreconditions() {
 			// @formatter:off
@@ -1001,7 +1001,7 @@ class ReflectionUtilsTests {
 			// @formatter:on
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void parseFullyQualifiedMethodNamePreconditions() {
 			// @formatter:off
@@ -1041,7 +1041,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class NestedClassTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void findNestedClassesPreconditions() {
 			// @formatter:off
@@ -1051,7 +1051,7 @@ class ReflectionUtilsTests {
 			// @formatter:on
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isNestedClassPresentPreconditions() {
 			// @formatter:off
@@ -1232,7 +1232,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class MethodUtilitiesTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToGetMethodPreconditions() {
 			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetMethod(null, null));
@@ -1257,7 +1257,7 @@ class ReflectionUtilsTests {
 			assertThat(ReflectionUtils.tryToGetMethod(Object.class, "clone", int.class).toOptional()).isEmpty();
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isMethodPresentPreconditions() {
 			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isMethodPresent(null, m -> true));
@@ -1279,7 +1279,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class FindMethodTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void findMethodByParameterTypesPreconditions() {
 			// @formatter:off
@@ -1468,7 +1468,7 @@ class ReflectionUtilsTests {
 	@Nested
 	class FindMethodsTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void findMethodsPreconditions() {
 			// @formatter:off
@@ -1890,7 +1890,7 @@ class ReflectionUtilsTests {
 				() -> tryToReadFieldValue(MyClass.class, "doesNotExist", new MySubClass(42)).get());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToReadFieldValueOfExistingStaticField() throws Exception {
 			assertThat(tryToReadFieldValue(MyClass.class, "staticField", null).get()).isEqualTo(42);
@@ -1942,7 +1942,7 @@ class ReflectionUtilsTests {
 			assertThat(fields).containsExactly(nonStaticField);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void readFieldValuesPreconditions() {
 			List<Field> fields = new ArrayList<>();

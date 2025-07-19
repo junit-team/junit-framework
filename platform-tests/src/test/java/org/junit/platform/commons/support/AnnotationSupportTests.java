@@ -35,7 +35,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
  */
 class AnnotationSupportTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isAnnotatedPreconditions() {
 		var optional = Optional.of(Probe.class);
@@ -59,7 +59,7 @@ class AnnotationSupportTests {
 			AnnotationSupport.isAnnotated(element, Override.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotationOnElementPreconditions() {
 		var optional = Optional.of(Probe.class);
@@ -84,7 +84,7 @@ class AnnotationSupportTests {
 			AnnotationSupport.findAnnotation(element, Override.class));
 	}
 
-	@SuppressWarnings({ "deprecation", "DataFlowIssue", "NullAway" })
+	@SuppressWarnings({ "deprecation", "DataFlowIssue" })
 	@Test
 	void findAnnotationOnClassWithSearchModePreconditions() {
 		assertPreconditionViolationException("annotationType",
@@ -93,7 +93,7 @@ class AnnotationSupportTests {
 			() -> AnnotationSupport.findAnnotation(Probe.class, Override.class, (SearchOption) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotationOnClassWithEnclosingInstanceTypesPreconditions() {
 		assertPreconditionViolationException("enclosingInstanceTypes",
@@ -135,7 +135,7 @@ class AnnotationSupportTests {
 				.contains(Probe.class.getDeclaredAnnotation(Tag.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsPreconditions() {
 		assertPreconditionViolationException("Class",
@@ -154,7 +154,7 @@ class AnnotationSupportTests {
 			AnnotationSupport.findPublicAnnotatedFields(Probe.class, Throwable.class, Override.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedMethodsPreconditions() {
 		assertPreconditionViolationException("Class",
@@ -199,7 +199,7 @@ class AnnotationSupportTests {
 		assertEquals(expected.toString(), actual.toString(), "expected equal exception toString representation");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findRepeatableAnnotationsPreconditions() {
 		assertPreconditionViolationException("annotationType",
@@ -225,7 +225,7 @@ class AnnotationSupportTests {
 				HierarchyTraversalMode.TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsPreconditions() {
 		assertPreconditionViolationException("Class",
@@ -277,7 +277,7 @@ class AnnotationSupportTests {
 				.containsExactlyInAnyOrder("s1", "s2");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldValuesPreconditions() {
 		assertPreconditionViolationException("instance",

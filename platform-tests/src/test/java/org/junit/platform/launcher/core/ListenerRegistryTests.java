@@ -20,7 +20,7 @@ import org.junit.platform.commons.PreconditionViolationException;
 
 public class ListenerRegistryTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void registerWithNullArray() {
 		var registry = ListenerRegistry.create(List::getFirst);
@@ -39,7 +39,7 @@ public class ListenerRegistryTests {
 		assertThat(exception).hasMessageContaining("listeners array must not be null or empty");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void registerWithArrayContainingNullElements() {
 		var registry = ListenerRegistry.create(List::getFirst);

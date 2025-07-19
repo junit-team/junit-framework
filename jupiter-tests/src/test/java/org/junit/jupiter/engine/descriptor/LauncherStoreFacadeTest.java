@@ -79,7 +79,7 @@ class LauncherStoreFacadeTest {
 		assertNotNull(adapter);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void throwsExceptionWhenNamespaceIsNull() {
 		LauncherStoreFacade facade = new LauncherStoreFacade(requestLevelStore);

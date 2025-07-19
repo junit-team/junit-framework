@@ -16,6 +16,7 @@ plugins {
 dependencyResolutionManagement {
 	repositories {
 		mavenCentral()
+		mavenLocal() // FIXME delete
 	}
 	repositoriesMode = FAIL_ON_PROJECT_REPOS
 }

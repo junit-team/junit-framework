@@ -64,6 +64,8 @@ tasks.withType<JavaCompile>().configureEach {
 			isJSpecifyMode = true
 			customContractAnnotations.add("org.junit.platform.commons.annotation.Contract")
 			checkContracts = true
+			// FIXME a new gradle-nullaway-plugin version is needed for a proper DSL
+			checkOptions.put("NullAway:SuppressionNameAliases", "DataFlowIssue")
 		}
 	}
 }

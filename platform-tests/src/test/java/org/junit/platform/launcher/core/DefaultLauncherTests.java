@@ -134,7 +134,7 @@ class DefaultLauncherTests {
 	void discoverTestPlanForEngineThatReturnsNullForItsRootDescriptor() {
 		TestEngine engine = new TestEngineStub("some-engine-id") {
 
-			@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+			@SuppressWarnings("DataFlowIssue")
 			@Override
 			public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
 				return null;
@@ -155,7 +155,7 @@ class DefaultLauncherTests {
 	void discoverErrorTestDescriptorForEngineThatThrowsInDiscoveryPhase(Class<? extends Throwable> throwableClass) {
 		TestEngine engine = new TestEngineStub("my-engine-id") {
 
-			@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+			@SuppressWarnings("DataFlowIssue")
 			@Override
 			public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
 				try {

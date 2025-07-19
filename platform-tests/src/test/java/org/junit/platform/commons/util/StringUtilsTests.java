@@ -50,7 +50,7 @@ class StringUtilsTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void whitespace() {
 		// @formatter:off
@@ -74,7 +74,7 @@ class StringUtilsTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void controlCharacters() {
 		// @formatter:off
@@ -98,7 +98,7 @@ class StringUtilsTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void replaceControlCharacters() {
 		assertNull(replaceIsoControlCharacters(null, ""));
@@ -112,7 +112,7 @@ class StringUtilsTests {
 		assertThrows(PreconditionViolationException.class, () -> replaceIsoControlCharacters("", null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void replaceWhitespaces() {
 		assertNull(replaceWhitespaceCharacters(null, ""));
