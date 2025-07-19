@@ -77,6 +77,22 @@ class FileSystemSourceTests extends AbstractTestSourceTests {
 	}
 
 	@Test
+	void fileReuseWithPosition() {
+		var file = new File("test.txt");
+		var position = FilePosition.from(42, 23);
+		var source = FileSource.from(file);
+		var sourceWithPosition = source.withPosition(position);
+
+		assertThat(source.getUri()).isEqualTo(file.getAbsoluteFile().toURI());
+		assertThat(source.getFile()).isEqualTo(file.getAbsoluteFile());
+		assertThat(source.getPosition()).isEmpty();
+
+		assertThat(source).isNotSameAs(sourceWithPosition);
+		assertThat(source.getFile()).isSameAs(sourceWithPosition.getFile());
+		assertThat(sourceWithPosition.getPosition()).hasValue(position);
+	}
+
+	@Test
 	void equalsAndHashCodeForFileSource() {
 		var file1 = new File("foo.txt");
 		var file2 = new File("bar.txt");
