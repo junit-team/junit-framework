@@ -71,19 +71,28 @@ class ResourceAutoClosingTests {
 	void shouldLogWarningWhenResourceImplementsCloseableResourceButNotAutoCloseableAndConfigIsTrue(
 			@TrackLogRecords LogRecordListener listener) throws Exception {
 		ExecutionRecorder executionRecorder = new ExecutionRecorder();
-		CloseableResource resource = new CloseableResource();
-		String msg = "Type implements CloseableResource but not AutoCloseable: " + resource.getClass().getName();
+		CloseableResource resource1 = new CloseableResource();
+		CloseableResource resource2 = new CloseableResource();
+		CloseableResource resource3 = new CloseableResource() {
+		};
 		when(configuration.isClosingStoredAutoCloseablesEnabled()).thenReturn(true);
 
 		ExtensionContext extensionContext = new JupiterEngineExtensionContext(executionRecorder, testDescriptor,
 			configuration, extensionRegistry, launcherStoreFacade);
 		ExtensionContext.Store store = extensionContext.getStore(ExtensionContext.Namespace.GLOBAL);
-		store.put("resource", resource);
+		store.put("resource1", resource1);
+		store.put("resource2", resource2);
+		store.put("resource3", resource3);
 
 		((AutoCloseable) extensionContext).close();
 
-		assertThat(listener.stream(Level.WARNING)).map(LogRecord::getMessage).contains(msg);
-		assertThat(resource.closed).isTrue();
+		assertThat(listener.stream(Level.WARNING)).map(LogRecord::getMessage) //
+				.containsExactlyInAnyOrder(
+					"Type implements CloseableResource but not AutoCloseable: " + resource1.getClass().getName(),
+					"Type implements CloseableResource but not AutoCloseable: " + resource3.getClass().getName());
+		assertThat(resource1.closed).isTrue();
+		assertThat(resource2.closed).isTrue();
+		assertThat(resource3.closed).isTrue();
 	}
 
 	@Test

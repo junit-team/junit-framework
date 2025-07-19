@@ -54,6 +54,8 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 abstract class AbstractExtensionContext<T extends TestDescriptor> implements ExtensionContextInternal, AutoCloseable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractExtensionContext.class);
+	private static final Namespace CLOSEABLE_RESOURCE_LOGGING_NAMESPACE = Namespace.create(
+		AbstractExtensionContext.class, "CloseableResourceLogging");
 
 	private final @Nullable ExtensionContext parent;
 	private final EngineExecutionListener engineExecutionListener;
@@ -86,40 +88,37 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 				.collect(collectingAndThen(toCollection(LinkedHashSet::new), Collections::unmodifiableSet));
 		// @formatter:on
 
-		this.valuesStore = createStore(parent, launcherStoreFacade, createCloseAction());
+		this.valuesStore = new NamespacedHierarchicalStore<>(getParentStore(parent), createCloseAction());
+	}
+
+	private NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> getParentStore(
+			@Nullable ExtensionContext parent) {
+		return parent == null //
+				? this.launcherStoreFacade.getRequestLevelStore() //
+				: ((AbstractExtensionContext<?>) parent).valuesStore;
 	}
 
 	@SuppressWarnings("deprecation")
-	private NamespacedHierarchicalStore.CloseAction<org.junit.platform.engine.support.store.Namespace> createCloseAction() {
+	private <N> NamespacedHierarchicalStore.CloseAction<N> createCloseAction() {
+		var store = this.launcherStoreFacade.getSessionLevelStore(CLOSEABLE_RESOURCE_LOGGING_NAMESPACE);
 		return (__, ___, value) -> {
 			boolean isAutoCloseEnabled = this.configuration.isClosingStoredAutoCloseablesEnabled();
 
-			if (value instanceof @SuppressWarnings("resource") AutoCloseable closeable && isAutoCloseEnabled) {
+			if (isAutoCloseEnabled && value instanceof @SuppressWarnings("resource") AutoCloseable closeable) {
 				closeable.close();
 				return;
 			}
 
 			if (value instanceof Store.CloseableResource resource) {
 				if (isAutoCloseEnabled) {
-					LOGGER.warn(
-						() -> "Type implements CloseableResource but not AutoCloseable: " + value.getClass().getName());
+					store.computeIfAbsent(value.getClass(), type -> {
+						LOGGER.warn(() -> "Type implements CloseableResource but not AutoCloseable: " + type.getName());
+						return true;
+					});
 				}
 				resource.close();
 			}
 		};
-	}
-
-	private static NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> createStore(
-			@Nullable ExtensionContext parent, LauncherStoreFacade launcherStoreFacade,
-			NamespacedHierarchicalStore.CloseAction<org.junit.platform.engine.support.store.Namespace> closeAction) {
-		NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> parentStore;
-		if (parent == null) {
-			parentStore = launcherStoreFacade.getRequestLevelStore();
-		}
-		else {
-			parentStore = ((AbstractExtensionContext<?>) parent).valuesStore;
-		}
-		return new NamespacedHierarchicalStore<>(parentStore, closeAction);
 	}
 
 	@Override

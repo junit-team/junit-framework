@@ -58,7 +58,8 @@ repository on GitHub.
 [[release-notes-5.13.4-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* Log only once per implementation type for `CloseableResource` implementations that do
+  not implement `AutoCloseable` to avoid flooding console output with this warning.
 
 
 [[release-notes-5.13.4-junit-vintage]]
