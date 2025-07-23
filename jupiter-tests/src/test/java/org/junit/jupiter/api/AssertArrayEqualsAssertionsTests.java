@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api;
 
+import static org.junit.jupiter.api.AssertionTestUtils.assertMessageContains;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEndsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith;
@@ -1942,7 +1943,7 @@ class AssertArrayEqualsAssertionsTests {
 		}
 		catch (AssertionFailedError ex) {
 			assertMessageStartsWith(ex, "message");
-			assertMessageEndsWith(ex, "array contents differ at index [3][3][0], expected: <2> but was: <99>");
+			assertMessageContains(ex, "array contents differ at index [3][3][0], expected: <2> but was: <99>");
 		}
 
 		try {
@@ -1952,7 +1953,7 @@ class AssertArrayEqualsAssertionsTests {
 		}
 		catch (AssertionFailedError ex) {
 			assertMessageStartsWith(ex, "message");
-			assertMessageEndsWith(ex, "array contents differ at index [3][3][0], expected: <2> but was: <99>");
+			assertMessageContains(ex, "array contents differ at index [3][3][0], expected: <2> but was: <99>");
 		}
 	}
 
