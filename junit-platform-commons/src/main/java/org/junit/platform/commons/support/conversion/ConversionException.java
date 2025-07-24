@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import java.io.Serial;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 
 /**
@@ -33,7 +34,7 @@ public class ConversionException extends JUnitException {
 		super(message);
 	}
 
-	public ConversionException(String message, Throwable cause) {
+	public ConversionException(String message, @Nullable Throwable cause) {
 		super(message, cause);
 	}
 
