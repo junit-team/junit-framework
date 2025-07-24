@@ -23,7 +23,7 @@ import org.junit.platform.commons.PreconditionViolationException;
  */
 class ClassNameFilterTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includeClassNamePatternsChecksPreconditions() {
 		assertThatThrownBy(() -> ClassNameFilter.includeClassNamePatterns((String[]) null)) //
@@ -86,7 +86,7 @@ class ClassNameFilterTests {
 					+ secondRegex + "'");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludeClassNamePatternsChecksPreconditions() {
 		assertThatThrownBy(() -> ClassNameFilter.excludeClassNamePatterns((String[]) null)) //

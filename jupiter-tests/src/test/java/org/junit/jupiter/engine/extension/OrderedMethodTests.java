@@ -744,7 +744,7 @@ class OrderedMethodTests {
 			context.getMethodDescriptors().set(1, createMethodDescriptorImpersonator(method2));
 		}
 
-		@SuppressWarnings({ "unchecked", "DataFlowIssue" })
+		@SuppressWarnings("unchecked")
 		static <T> T createMethodDescriptorImpersonator(MethodDescriptor method) {
 			MethodDescriptor stub = new MethodDescriptor() {
 				@Override

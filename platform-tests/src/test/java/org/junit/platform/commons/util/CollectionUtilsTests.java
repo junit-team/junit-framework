@@ -57,7 +57,7 @@ class CollectionUtilsTests {
 	@Nested
 	class OnlyElement {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullCollection() {
 			var exception = assertThrows(PreconditionViolationException.class,
@@ -90,7 +90,7 @@ class CollectionUtilsTests {
 	@Nested
 	class FirstElement {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullCollection() {
 			var exception = assertThrows(PreconditionViolationException.class,
@@ -183,7 +183,7 @@ class CollectionUtilsTests {
 			assertThat(CollectionUtils.isConvertibleToStream(null)).isFalse();
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void toStreamWithNull() {
 			Exception exception = assertThrows(PreconditionViolationException.class,

@@ -48,7 +48,7 @@ class TypedArgumentConverterTests {
 		/**
 		 * @since 5.8
 		 */
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void preconditions() {
 			assertThatExceptionOfType(PreconditionViolationException.class)//

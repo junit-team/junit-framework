@@ -45,7 +45,7 @@ class MediaTypeTests {
 		assertEquals("Invalid media type: 'invalid'", exception.getMessage());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void parseWithNullMediaType() {
 		var exception = assertThrows(PreconditionViolationException.class, () -> MediaType.parse(null));

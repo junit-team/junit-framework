@@ -168,7 +168,7 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 		);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@ParameterizedTest
 	@MethodSource("compatibleLockCombinations")
 	void canWorkStealTaskWithCompatibleLocks(Set<ExclusiveResource> initialResources,

@@ -61,7 +61,7 @@ class TimeoutInvocationFactoryTests {
 		timeoutInvocationFactory = new TimeoutInvocationFactory(store);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	@DisplayName("throws exception when null store is provided on create")
 	void shouldThrowExceptionWhenInstantiatingWithNullStore() {
@@ -69,7 +69,7 @@ class TimeoutInvocationFactoryTests {
 				.hasMessage("store must not be null");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	@DisplayName("throws exception when null timeout thread mode is provided on create")
 	void shouldThrowExceptionWhenNullTimeoutThreadModeIsProvidedWhenCreate() {
@@ -77,7 +77,7 @@ class TimeoutInvocationFactoryTests {
 				.hasMessage("thread mode must not be null");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	@DisplayName("throws exception when null timeout invocation parameters is provided on create")
 	void shouldThrowExceptionWhenNullTimeoutInvocationParametersIsProvidedWhenCreate() {

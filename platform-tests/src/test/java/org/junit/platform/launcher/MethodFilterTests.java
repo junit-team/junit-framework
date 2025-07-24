@@ -39,7 +39,7 @@ class MethodFilterTests {
 	private static final TestDescriptor CLASS2_TEST1 = methodTestDescriptor("class2", Class2.class, "test1");
 	private static final TestDescriptor CLASS2_TEST2 = methodTestDescriptor("class2", Class2.class, "test2");
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includeMethodNamePatternsChecksPreconditions() {
 		assertThatThrownBy(() -> includeMethodNamePatterns((String[]) null)) //
@@ -87,7 +87,7 @@ class MethodFilterTests {
 				firstRegex, secondRegex));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludeMethodNamePatternsChecksPreconditions() {
 		assertThatThrownBy(() -> excludeMethodNamePatterns((String[]) null)) //

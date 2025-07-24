@@ -63,7 +63,7 @@ import org.junit.platform.launcher.listeners.UnusedTestExecutionListener;
  */
 class LauncherFactoryTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
 		assertThrows(PreconditionViolationException.class, () -> LauncherFactory.create(null));

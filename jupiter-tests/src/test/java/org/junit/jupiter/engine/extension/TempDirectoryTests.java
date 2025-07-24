@@ -357,7 +357,7 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 
 		private static class FactoryNotReturningDirectory implements TempDirFactory {
 
-			@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+			@SuppressWarnings("DataFlowIssue")
 			@Override
 			public Path createTempDirectory(AnnotatedElementContext elementContext, ExtensionContext extensionContext) {
 				return null;
@@ -1475,7 +1475,7 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 			// never called
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		private static class Factory implements TempDirFactory {
 
 			@Override

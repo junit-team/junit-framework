@@ -60,7 +60,7 @@ class LauncherConfigurationParametersTests {
 		System.clearProperty(KEY);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void constructorPreconditions() {
 		assertThrows(PreconditionViolationException.class, () -> fromMap(null));
@@ -69,7 +69,7 @@ class LauncherConfigurationParametersTests {
 		assertThrows(PreconditionViolationException.class, () -> fromMapAndFile(Map.of(), "  "));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getPreconditions() {
 		ConfigurationParameters configParams = fromMap(Map.of());

@@ -34,7 +34,7 @@ class FileSystemSourceTests extends AbstractTestSourceTests {
 			FileSource.from(new File("file.and.position"), FilePosition.from(42, 23)));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSourceFileOrDirectoryYieldsException() {
 		assertThrows(PreconditionViolationException.class, () -> FileSource.from(null));

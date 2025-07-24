@@ -335,14 +335,14 @@ class AnnotationUtilsTests {
 			() -> "Extensions found for class " + clazz.getName());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedMethodsForNullClass() {
 		assertThrows(PreconditionViolationException.class,
 			() -> findAnnotatedMethods(null, Annotation1.class, TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedMethodsForNullAnnotationType() {
 		assertThrows(PreconditionViolationException.class,
@@ -423,21 +423,21 @@ class AnnotationUtilsTests {
 
 	// === findAnnotatedFields() ===============================================
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsForNullClass() {
 		assertThrows(PreconditionViolationException.class,
 			() -> findAnnotatedFields(null, Annotation1.class, isStringField, TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsForNullAnnotationType() {
 		assertThrows(PreconditionViolationException.class,
 			() -> findAnnotatedFields(ClassWithAnnotatedFields.class, null, isStringField, TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsForNullPredicate() {
 		assertThrows(PreconditionViolationException.class,
@@ -534,21 +534,21 @@ class AnnotationUtilsTests {
 
 	// === findPublicAnnotatedFields() =========================================
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsForNullClass() {
 		assertThrows(PreconditionViolationException.class,
 			() -> findPublicAnnotatedFields(null, String.class, Annotation1.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsForNullFieldType() {
 		assertThrows(PreconditionViolationException.class,
 			() -> findPublicAnnotatedFields(getClass(), null, Annotation1.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsForNullAnnotationType() {
 		assertThrows(PreconditionViolationException.class,

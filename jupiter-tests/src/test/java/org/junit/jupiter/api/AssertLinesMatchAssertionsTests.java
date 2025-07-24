@@ -95,7 +95,7 @@ class AssertLinesMatchAssertionsTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes", "DataFlowIssue", "NullAway" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "DataFlowIssue" })
 	void assertLinesMatchWithNullFails() {
 		assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(null, (List) null));
 		assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(null, Collections.emptyList()));
