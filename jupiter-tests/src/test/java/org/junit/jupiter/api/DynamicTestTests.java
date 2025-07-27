@@ -43,7 +43,7 @@ class DynamicTestTests {
 
 	private final List<@Nullable String> assertedValues = new ArrayList<>();
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromStreamPreconditions() {
 		ThrowingConsumer<Object> testExecutor = input -> {
@@ -58,7 +58,7 @@ class DynamicTestTests {
 			() -> DynamicTest.stream(Stream.empty(), displayNameGenerator, null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromIteratorPreconditions() {
 		ThrowingConsumer<Object> testExecutor = input -> {
@@ -73,7 +73,7 @@ class DynamicTestTests {
 			() -> DynamicTest.stream(emptyIterator(), displayNameGenerator, null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromStreamWithNamesPreconditions() {
 		ThrowingConsumer<Object> testExecutor = input -> {
@@ -84,7 +84,7 @@ class DynamicTestTests {
 		assertThrows(PreconditionViolationException.class, () -> DynamicTest.stream(Stream.empty(), null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromIteratorWithNamesPreconditions() {
 		ThrowingConsumer<Object> testExecutor = input -> {
@@ -95,14 +95,14 @@ class DynamicTestTests {
 		assertThrows(PreconditionViolationException.class, () -> DynamicTest.stream(emptyIterator(), null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromStreamWithNamedExecutablesPreconditions() {
 		assertThrows(PreconditionViolationException.class,
 			() -> DynamicTest.stream((Stream<DummyNamedExecutableForTests>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromIteratorWithNamedExecutablesPreconditions() {
 		assertThrows(PreconditionViolationException.class,

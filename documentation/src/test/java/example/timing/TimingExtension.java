@@ -41,7 +41,7 @@ public class TimingExtension implements BeforeTestExecutionCallback, AfterTestEx
 	}
 
 	//end::user_guide[]
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	//tag::user_guide[]
 	@Override
 	public void afterTestExecution(ExtensionContext context) {

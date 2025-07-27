@@ -37,25 +37,25 @@ import org.opentest4j.MultipleFailuresError;
  */
 class AssertAllAssertionsTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableArray() {
 		assertPrecondition("executables array must not be null or empty", () -> assertAll((Executable[]) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableCollection() {
 		assertPrecondition("executables collection must not be null", () -> assertAll((Collection<Executable>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableStream() {
 		assertPrecondition("executables stream must not be null", () -> assertAll((Stream<Executable>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullInExecutableArray() {
 		assertPrecondition("individual executables must not be null", () -> assertAll((Executable) null));

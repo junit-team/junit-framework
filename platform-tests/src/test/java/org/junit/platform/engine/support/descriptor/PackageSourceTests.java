@@ -34,7 +34,7 @@ class PackageSourceTests extends AbstractTestSourceTests {
 		return Stream.of(PackageSource.from("package.source"));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void packageSourceFromNullPackageName() {
 		assertThrows(PreconditionViolationException.class, () -> PackageSource.from((String) null));
@@ -45,7 +45,7 @@ class PackageSourceTests extends AbstractTestSourceTests {
 		assertThrows(PreconditionViolationException.class, () -> PackageSource.from("  "));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void packageSourceFromNullPackageReference() {
 		assertThrows(PreconditionViolationException.class, () -> PackageSource.from((Package) null));

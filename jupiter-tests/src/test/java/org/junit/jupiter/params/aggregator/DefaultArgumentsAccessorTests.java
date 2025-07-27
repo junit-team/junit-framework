@@ -30,7 +30,7 @@ import org.junit.platform.commons.PreconditionViolationException;
  */
 class DefaultArgumentsAccessorTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void argumentsMustNotBeNull() {
 		assertThrows(PreconditionViolationException.class, () -> defaultArgumentsAccessor(1, (Object[]) null));

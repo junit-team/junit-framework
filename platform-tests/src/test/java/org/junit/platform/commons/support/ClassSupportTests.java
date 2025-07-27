@@ -24,7 +24,7 @@ import org.junit.platform.commons.util.ClassUtils;
  */
 class ClassSupportTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSafeToStringPreconditions() {
 		Function<? super Class<?>, ? extends String> mapper = null;

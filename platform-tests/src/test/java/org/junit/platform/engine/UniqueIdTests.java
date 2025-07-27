@@ -123,7 +123,7 @@ class UniqueIdTests {
 			assertSegment(uniqueId.getSegments().get(2), "t2", "v2");
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void appendingNullIsNotAllowed() {
 			var uniqueId = UniqueId.forEngine(ENGINE_ID);
@@ -230,7 +230,7 @@ class UniqueIdTests {
 	@Nested
 	class Prefixing {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullIsNotAPrefix() {
 			var id = UniqueId.forEngine(ENGINE_ID);

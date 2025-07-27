@@ -56,7 +56,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.tryToLoadClass("java.nio.Bits"));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void tryToLoadClassPreconditions() {
 		assertPreconditionViolationExceptionForString("Class name", () -> ReflectionSupport.tryToLoadClass(null));
@@ -81,7 +81,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.10
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void tryToLoadClassWithExplicitClassLoaderPreconditions() {
 		var cl = getClass().getClassLoader();
@@ -110,7 +110,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.12
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void tryToGetResourcesPreconditions() {
 		assertPreconditionViolationExceptionForString("Resource name", () -> ReflectionSupport.tryToGetResources(null));
@@ -133,7 +133,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.tryToGetResources("default-package.resource", getDefaultClassLoader()).toOptional());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInClasspathRootPreconditions() {
 		var path = Path.of(".").toUri();
@@ -167,7 +167,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllResourcesInClasspathRootPreconditions() {
 		var path = Path.of(".").toUri();
@@ -199,7 +199,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamAllResourcesInClasspathRootPreconditions() {
 		var path = Path.of(".").toUri();
@@ -216,7 +216,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.findAllClassesInPackage("org.junit", allTypes, allNames));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInPackagePreconditions() {
 		assertPreconditionViolationExceptionForString("basePackageName",
@@ -241,7 +241,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllResourcesInPackagePreconditions() {
 		assertPreconditionViolationExceptionForString("basePackageName",
@@ -264,7 +264,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamAllResourcesInPackagePreconditions() {
 		assertPreconditionViolationExceptionForString("basePackageName",
@@ -279,7 +279,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", allTypes, allNames));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
@@ -303,7 +303,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllResourcesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
@@ -325,7 +325,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamAllResourcesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
@@ -341,7 +341,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.newInstance(String.class, "foo"));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void newInstancePreconditions() {
 		assertPreconditionViolationException("Class", () -> ReflectionSupport.newInstance(null));
@@ -358,7 +358,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.invokeMethod(method, null, "true"));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void invokeMethodPreconditions() throws Exception {
 		assertPreconditionViolationException("Method", () -> ReflectionSupport.invokeMethod(null, null, "true"));
@@ -382,7 +382,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.findFields(ReflectionSupportTests.class, allFields, HierarchyTraversalMode.TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findFieldsPreconditions() {
 		assertPreconditionViolationException("Class",
@@ -408,7 +408,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.tryToReadFieldValue(instanceField, this));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void tryToReadFieldValuePreconditions() throws Exception {
 		assertPreconditionViolationException("Field", () -> ReflectionSupport.tryToReadFieldValue(null, this));
@@ -430,7 +430,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.findMethod(Boolean.class, "valueOf", String.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findMethodPreconditions() {
 		assertPreconditionViolationException("Class",
@@ -464,7 +464,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.findMethods(ReflectionSupportTests.class, allMethods, HierarchyTraversalMode.TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findMethodsPreconditions() {
 		assertPreconditionViolationException("Class",
@@ -485,7 +485,7 @@ class ReflectionSupportTests {
 			ReflectionSupport.findNestedClasses(ClassWithNestedClasses.class, ReflectionUtils::isStatic));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findNestedClassesPreconditions() {
 		assertPreconditionViolationException("Class",

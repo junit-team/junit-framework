@@ -37,7 +37,7 @@ class PrefixedConfigurationParametersTests {
 	@Mock
 	private ConfigurationParameters delegate;
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
 		assertThrows(PreconditionViolationException.class, () -> new PrefixedConfigurationParameters(null, "example."));

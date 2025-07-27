@@ -61,7 +61,7 @@ class TagFilterTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	private void assertSyntaxViolationForIncludes(@Nullable String tag) {
 		var exception = assertThrows(PreconditionViolationException.class, () -> includeTags(tag));
 		assertThat(exception).hasMessageStartingWith("Unable to parse tag expression");
@@ -79,7 +79,7 @@ class TagFilterTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	private void assertSyntaxViolationForExcludes(@Nullable String tag) {
 		var exception = assertThrows(PreconditionViolationException.class, () -> excludeTags(tag));
 		assertThat(exception).hasMessageStartingWith("Unable to parse tag expression");

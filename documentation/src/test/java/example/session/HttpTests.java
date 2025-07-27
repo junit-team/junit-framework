@@ -50,7 +50,7 @@ class HttpServerParameterResolver implements ParameterResolver {
 	}
 
 	//end::user_guide[]
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	//tag::user_guide[]
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {

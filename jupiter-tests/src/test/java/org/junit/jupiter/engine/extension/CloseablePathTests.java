@@ -167,7 +167,7 @@ class CloseablePathTests extends AbstractJupiterTestEngineTests {
 			delete(closeablePath.get());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@DisplayName("fails if the factory returns null")
 		@ParameterizedTest
 		@ElementTypeSource

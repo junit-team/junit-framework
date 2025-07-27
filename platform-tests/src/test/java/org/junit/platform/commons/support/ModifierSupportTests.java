@@ -34,7 +34,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
  */
 class ModifierSupportTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isPublicPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isPublic((Class<?>) null));
@@ -52,7 +52,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isPublic(method), ModifierSupport.isPublic(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isPrivatePreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isPrivate((Class<?>) null));
@@ -70,7 +70,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isPrivate(method), ModifierSupport.isPrivate(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isNotPrivatePreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isNotPrivate((Class<?>) null));
@@ -88,7 +88,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotPrivate(method), ModifierSupport.isNotPrivate(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isAbstractPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isAbstract((Class<?>) null));
@@ -106,7 +106,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isAbstract(method), ModifierSupport.isAbstract(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isNotAbstractPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isNotAbstract((Class<?>) null));
@@ -124,7 +124,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotAbstract(method), ModifierSupport.isNotAbstract(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isStaticPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isStatic((Class<?>) null));
@@ -142,7 +142,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isStatic(method), ModifierSupport.isStatic(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isNotStaticPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isNotStatic((Class<?>) null));
@@ -160,7 +160,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotStatic(method), ModifierSupport.isNotStatic(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isFinalPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isFinal((Class<?>) null));
@@ -178,7 +178,7 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isFinal(method), ModifierSupport.isFinal(method));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isNotFinalPreconditions() {
 		assertPreconditionViolationException("Class", () -> ModifierSupport.isNotFinal((Class<?>) null));

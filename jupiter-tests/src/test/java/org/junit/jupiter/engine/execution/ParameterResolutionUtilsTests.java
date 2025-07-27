@@ -148,7 +148,7 @@ class ParameterResolutionUtilsTests {
 		assertThat(arguments).containsExactly("something");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void passContextInformationToParameterResolverMethods() {
 		anyTestMethodWithAtLeastOneParameter();
