@@ -297,10 +297,22 @@ class ReflectionSupportTests {
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
-	void findAllClassesInModulePreconditions() {
+	void findAllClassesInModuleByNamePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames));
+			() -> ReflectionSupport.findAllClassesInModule((String) null, allTypes, allNames));
 		assertEquals("Module name must not be null or empty", exception.getMessage());
+		assertPreconditionViolationNotNullFor("class predicate",
+			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", null, allNames));
+		assertPreconditionViolationNotNullFor("name predicate",
+			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", allTypes, null));
+	}
+
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void findAllClassesInModuleByInstancePreconditions() {
+		var exception = assertThrows(PreconditionViolationException.class,
+			() -> ReflectionSupport.findAllClassesInModule((Module) null, allTypes, allNames));
+		assertEquals("Module must not be null", exception.getMessage());
 		assertPreconditionViolationNotNullFor("class predicate",
 			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", null, allNames));
 		assertPreconditionViolationNotNullFor("name predicate",

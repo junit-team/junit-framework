@@ -27,12 +27,14 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.io.ResourceFilter;
@@ -110,6 +112,24 @@ public class ModuleUtils {
 	}
 
 	/**
+	 * Find all {@linkplain Class classes} for the given module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>empty</em>
+	 * @param filter the class filter to apply; never {@code null}
+	 * @return an immutable list of all such classes found; never {@code null}
+	 * but potentially empty
+	 */
+	public static List<Class<?>> findAllClassesInModule(Module module, ClassFilter filter) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.notNull(filter, "Class filter must not be null");
+
+		String name = module.getName();
+		logger.debug(() -> "Looking for classes in module: " + name);
+		var reference = module.getLayer().configuration().findModule(name).orElseThrow().reference();
+		return scan(Set.of(reference), filter, module.getClassLoader());
+	}
+
+	/**
 	 * Find all {@linkplain Resource resources} for the given module name.
 	 *
 	 * @param moduleName the name of the module to scan; never {@code null} or
@@ -131,6 +151,26 @@ public class ModuleUtils {
 				.collect(toSet());
 		// @formatter:on
 		return scan(moduleReferences, filter, ModuleUtils.class.getClassLoader());
+	}
+
+	/**
+	 * Find all {@linkplain Resource resources} for the given module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>empty</em>
+	 * @param filter the class filter to apply; never {@code null}
+	 * @return an immutable list of all such resources found; never {@code null}
+	 * but potentially empty
+	 * @since 6.0
+	 */
+	@API(status = INTERNAL, since = "6.0")
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter filter) {
+		Preconditions.notNull(module, "Module name must not be null");
+		Preconditions.notNull(filter, "Resource filter must not be null");
+
+		String name = module.getName();
+		logger.debug(() -> "Looking for classes in module: " + name);
+		var reference = module.getLayer().configuration().findModule(name).orElseThrow().reference();
+		return scan(Set.of(reference), filter, module.getClassLoader());
 	}
 
 	/**
@@ -196,6 +236,11 @@ public class ModuleUtils {
 	 */
 	static class ModuleReferenceClassScanner {
 
+		/**
+		 * System property set the Java source file launcher.
+		 */
+		private static final boolean SOURCE_MODE = System.getProperty("jdk.launcher.sourcefile") != null;
+
 		private final ClassFilter classFilter;
 		private final ClassLoader classLoader;
 
@@ -211,9 +256,10 @@ public class ModuleUtils {
 			try (ModuleReader reader = reference.open()) {
 				try (Stream<String> names = reader.list()) {
 					// @formatter:off
-					return names.filter(name -> name.endsWith(".class"))
-							.map(this::className)
+					return names.map(this::convertToClassNameOrNull)
+							.filter(Objects::nonNull)
 							.filter(name -> !"module-info".equals(name))
+							.map(name -> name.replace('/', '.'))
 							.filter(classFilter::match)
 							.<Class<?>> map(this::loadClassUnchecked)
 							.filter(classFilter::match)
@@ -228,11 +274,20 @@ public class ModuleUtils {
 
 		/**
 		 * Convert resource name to binary class name.
+		 * <p>
+		 * Always converts names ending with {@code .class} and in source mode,
+		 * this method also converts names ending with {@code .java}.
+		 *
+		 * @return the converted name or {@code null}
 		 */
-		private String className(String resourceName) {
-			resourceName = resourceName.substring(0, resourceName.length() - 6); // 6 = ".class".length()
-			resourceName = resourceName.replace('/', '.');
-			return resourceName;
+		private @Nullable String convertToClassNameOrNull(String resourceName) {
+			if (resourceName.endsWith(".class")) {
+				return resourceName.substring(0, resourceName.length() - 6); // 6 = ".class".length()
+			}
+			if (SOURCE_MODE && resourceName.endsWith(".java")) {
+				return resourceName.substring(0, resourceName.length() - 5); // 5 = ".java".length()
+			}
+			return null;
 		}
 
 		/**

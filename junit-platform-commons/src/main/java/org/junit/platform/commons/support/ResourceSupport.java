@@ -193,6 +193,10 @@ public class ResourceSupport {
 		return ReflectionUtils.findAllResourcesInModule(moduleName, resourceFilter);
 	}
 
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter resourceFilter) {
+		return ReflectionUtils.findAllResourcesInModule(module, resourceFilter);
+	}
+
 	/**
 	 * Find all {@linkplain Resource resources} in the supplied {@code moduleName}
 	 * that match the specified {@code resourceFilter}.
