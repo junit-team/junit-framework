@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.extension;
+package org.junit.jupiter.api;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,14 +18,14 @@ import static org.junit.platform.commons.test.PreconditionAssertions.assertPreco
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for {@link MediaType}.
+ *
+ * @since 6.0
  */
 class MediaTypeTests {
 

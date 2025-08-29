@@ -21,10 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.platform.launcher.core.LauncherFactoryForTestingPurposesOnly;

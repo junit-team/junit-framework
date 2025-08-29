@@ -28,7 +28,6 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExecutableInvoker;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -143,8 +142,8 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 	}
 
 	@Override
-	public void publishFile(String name, MediaType mediaType, ThrowingConsumer<Path> action) {
-		Preconditions.notNull(name, "name must not be null");
+	public void publishFile(String name, org.junit.jupiter.api.MediaType mediaType, ThrowingConsumer<Path> action) {
+		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(mediaType, "mediaType must not be null");
 		Preconditions.notNull(action, "action must not be null");
 
@@ -156,7 +155,7 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 
 	@Override
 	public void publishDirectory(String name, ThrowingConsumer<Path> action) {
-		Preconditions.notNull(name, "name must not be null");
+		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(action, "action must not be null");
 
 		ThrowingConsumer<Path> enhancedAction = path -> {

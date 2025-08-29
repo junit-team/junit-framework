@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExecutableInvoker;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.extension.TemplateInvocationValidationException;
 import org.junit.jupiter.api.extension.TestInstances;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -303,7 +302,8 @@ class ParameterizedTestExtensionTests {
 			}
 
 			@Override
-			public void publishFile(String fileName, MediaType mediaType, ThrowingConsumer<Path> action) {
+			public void publishFile(String fileName, org.junit.jupiter.api.MediaType mediaType,
+					ThrowingConsumer<Path> action) {
 			}
 
 			@Override

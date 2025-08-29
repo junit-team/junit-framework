@@ -12,9 +12,9 @@ package org.junit.platform.suite.engine.testcases;
 
 import java.nio.file.Files;
 
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
-import org.junit.jupiter.api.extension.MediaType;
 
 /**
  * @since 1.8
