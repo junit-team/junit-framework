@@ -11,6 +11,8 @@
 package org.junit.platform.engine.discovery;
 
 import static java.util.Collections.unmodifiableSet;
+import static java.util.stream.Collectors.toCollection;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -24,9 +26,9 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;
-import org.junit.platform.commons.support.Resource;
+import org.junit.platform.commons.io.Resource;
+import org.junit.platform.commons.support.ResourceSupport;
 import org.junit.platform.commons.util.Preconditions;
-import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.DiscoverySelector;
@@ -60,7 +62,7 @@ public final class ClasspathResourceSelector implements DiscoverySelector {
 
 	private final @Nullable FilePosition position;
 
-	private @Nullable Set<Resource> classpathResources;
+	private @Nullable Set<Resource> resources;
 
 	ClasspathResourceSelector(String classpathResourceName, @Nullable FilePosition position) {
 		boolean startsWithSlash = classpathResourceName.startsWith("/");
@@ -70,9 +72,9 @@ public final class ClasspathResourceSelector implements DiscoverySelector {
 		this.position = position;
 	}
 
-	ClasspathResourceSelector(Set<Resource> classpathResources) {
-		this(classpathResources.iterator().next().getName(), null);
-		this.classpathResources = unmodifiableSet(new LinkedHashSet<>(classpathResources));
+	ClasspathResourceSelector(Set<? extends Resource> resources) {
+		this(resources.iterator().next().getName(), null);
+		this.resources = unmodifiableSet(new LinkedHashSet<>(resources));
 	}
 
 	/**
@@ -98,21 +100,41 @@ public final class ClasspathResourceSelector implements DiscoverySelector {
 	 * resource cannot be loaded.
 	 *
 	 * @since 1.12
+	 * @deprecated Please use {{@link #getResources()}} instead.
 	 */
-	@API(status = MAINTAINED, since = "1.13.3")
-	public Set<Resource> getClasspathResources() {
-		if (this.classpathResources == null) {
-			Try<Set<Resource>> tryToGetResource = ReflectionUtils.tryToGetResources(this.classpathResourceName);
-			Set<Resource> classpathResources = tryToGetResource.getOrThrow( //
+	@API(status = DEPRECATED, since = "6.0")
+	@Deprecated(since = "6.0")
+	@SuppressWarnings("removal")
+	public Set<org.junit.platform.commons.support.Resource> getClasspathResources() {
+		return getResources().stream() //
+				.map(org.junit.platform.commons.support.Resource::of) //
+				.collect(toCollection(LinkedHashSet::new));
+	}
+
+	/**
+	 * Get the selected {@link Resource resources}.
+	 *
+	 * <p>If the {@link Resource resources} were not provided, but only their name,
+	 * this method attempts to lazily load the {@link Resource resources} based on
+	 * their name and throws a {@link PreconditionViolationException} if the
+	 * resource cannot be loaded.
+	 *
+	 * @since 6.0
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	public Set<Resource> getResources() {
+		if (this.resources == null) {
+			Try<Set<Resource>> tryToGetResource = ResourceSupport.tryToGetResources(this.classpathResourceName);
+			Set<Resource> classpathResources = tryToGetResource.getNonNullOrThrow( //
 				cause -> new PreconditionViolationException( //
 					"Could not load resource(s) with name: " + this.classpathResourceName, cause));
 			if (classpathResources.isEmpty()) {
 				throw new PreconditionViolationException(
 					"Could not find any resource(s) with name: " + this.classpathResourceName);
 			}
-			this.classpathResources = unmodifiableSet(classpathResources);
+			this.resources = unmodifiableSet(classpathResources);
 		}
-		return this.classpathResources;
+		return this.resources;
 	}
 
 	/**

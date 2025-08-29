@@ -34,9 +34,10 @@ import java.util.stream.Stream;
 
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;
+import org.junit.platform.commons.io.Resource;
+import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.support.scanning.ClassFilter;
 import org.junit.platform.commons.support.scanning.ClasspathScanner;
 
@@ -96,7 +97,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	}
 
 	@Override
-	public List<Resource> scanForResourcesInPackage(String basePackageName, Predicate<Resource> resourceFilter) {
+	public List<Resource> scanForResourcesInPackage(String basePackageName, ResourceFilter resourceFilter) {
 		Preconditions.condition(
 			PackageUtils.DEFAULT_PACKAGE_NAME.equals(basePackageName) || isNotBlank(basePackageName),
 			"basePackageName must not be null or blank");
@@ -108,7 +109,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	}
 
 	@Override
-	public List<Resource> scanForResourcesInClasspathRoot(URI root, Predicate<Resource> resourceFilter) {
+	public List<Resource> scanForResourcesInClasspathRoot(URI root, ResourceFilter resourceFilter) {
 		Preconditions.notNull(root, "root must not be null");
 		Preconditions.notNull(resourceFilter, "resourceFilter must not be null");
 
@@ -142,7 +143,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	 * Recursively scan for resources in all the supplied source directories.
 	 */
 	private List<Resource> findResourcesForUris(List<URI> baseUris, String basePackageName,
-			Predicate<Resource> resourceFilter) {
+			ResourceFilter resourceFilter) {
 		// @formatter:off
 		return baseUris.stream()
 				.map(baseUri -> findResourcesForUri(baseUri, basePackageName, resourceFilter))
@@ -152,8 +153,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 		// @formatter:on
 	}
 
-	private List<Resource> findResourcesForUri(URI baseUri, String basePackageName,
-			Predicate<Resource> resourceFilter) {
+	private List<Resource> findResourcesForUri(URI baseUri, String basePackageName, ResourceFilter resourceFilter) {
 		List<Resource> resources = new ArrayList<>();
 		// @formatter:off
 		walkFilesForUri(baseUri, ClasspathFilters.resourceFiles(),
@@ -205,13 +205,13 @@ class DefaultClasspathScanner implements ClasspathScanner {
 		}
 	}
 
-	private void processResourceFileSafely(Path baseDir, String basePackageName, Predicate<Resource> resourceFilter,
+	private void processResourceFileSafely(Path baseDir, String basePackageName, ResourceFilter resourceFilter,
 			Path resourceFile, Consumer<Resource> resourceConsumer) {
 		try {
 			String fullyQualifiedResourceName = determineFullyQualifiedResourceName(baseDir, basePackageName,
 				resourceFile);
 			Resource resource = Resource.of(fullyQualifiedResourceName, resourceFile.toUri());
-			if (resourceFilter.test(resource)) {
+			if (resourceFilter.match(resource)) {
 				resourceConsumer.accept(resource);
 			}
 			// @formatter:on

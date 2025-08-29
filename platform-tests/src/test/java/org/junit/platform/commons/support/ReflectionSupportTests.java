@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.support.ReflectionSupport.toSupportResourcesList;
+import static org.junit.platform.commons.support.ReflectionSupport.toSupportResourcesStream;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getDefaultClassLoader;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 /**
@@ -38,7 +41,8 @@ import org.junit.platform.commons.util.ReflectionUtils;
 class ReflectionSupportTests {
 
 	private static final Predicate<Class<?>> allTypes = type -> true;
-	private static final Predicate<Resource> allResources = type -> true;
+	@SuppressWarnings("removal")
+	private static final Predicate<Resource> allResources = __ -> true;
 	private static final Predicate<String> allNames = name -> true;
 	private static final Predicate<Method> allMethods = name -> true;
 	private static final Predicate<Field> allFields = name -> true;
@@ -110,7 +114,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.12
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void tryToGetResourcesPreconditions() {
 		assertPreconditionViolationNotNullOrBlankFor("Resource name", () -> ReflectionSupport.tryToGetResources(null));
@@ -124,12 +128,16 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.12
 	 */
+	@SuppressWarnings("removal")
 	@Test
 	void tryToGetResources() {
-		assertEquals(ReflectionUtils.tryToGetResources("default-package.resource").toOptional(),
+		assertEquals(
+			ReflectionUtils.tryToGetResources("default-package.resource").toOptional().map(
+				ReflectionSupport::toSupportResourcesSet),
 			ReflectionSupport.tryToGetResources("default-package.resource").toOptional());
 		assertEquals(
-			ReflectionUtils.tryToGetResources("default-package.resource", getDefaultClassLoader()).toOptional(), //
+			ReflectionUtils.tryToGetResources("default-package.resource", getDefaultClassLoader()).toOptional().map(
+				ReflectionSupport::toSupportResourcesSet), //
 			ReflectionSupport.tryToGetResources("default-package.resource", getDefaultClassLoader()).toOptional());
 	}
 
@@ -148,6 +156,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
+	@SuppressWarnings("removal")
 	@TestFactory
 	List<DynamicTest> findAllResourcesInClasspathRootDelegates() throws Throwable {
 		List<DynamicTest> tests = new ArrayList<>();
@@ -156,8 +165,8 @@ class ReflectionSupportTests {
 		paths.addAll(ReflectionUtils.getAllClasspathRootDirectories());
 		for (var path : paths) {
 			var root = path.toUri();
-			tests.add(DynamicTest.dynamicTest(createDisplayName(root),
-				() -> assertThat(ReflectionUtils.findAllResourcesInClasspathRoot(root, allResources)) //
+			tests.add(DynamicTest.dynamicTest(createDisplayName(root), () -> assertThat(toSupportResourcesList(
+				ReflectionUtils.findAllResourcesInClasspathRoot(root, ResourceFilter.of(__ -> true)))) //
 						.containsExactlyElementsOf(
 							ReflectionSupport.findAllResourcesInClasspathRoot(root, allResources))));
 		}
@@ -167,7 +176,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void findAllResourcesInClasspathRootPreconditions() {
 		var path = Path.of(".").toUri();
@@ -180,6 +189,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
+	@SuppressWarnings("removal")
 	@TestFactory
 	List<DynamicTest> streamAllResourcesInClasspathRootDelegates() throws Throwable {
 		List<DynamicTest> tests = new ArrayList<>();
@@ -188,8 +198,8 @@ class ReflectionSupportTests {
 		paths.addAll(ReflectionUtils.getAllClasspathRootDirectories());
 		for (var path : paths) {
 			var root = path.toUri();
-			tests.add(DynamicTest.dynamicTest(createDisplayName(root),
-				() -> assertThat(ReflectionUtils.streamAllResourcesInClasspathRoot(root, allResources)) //
+			tests.add(DynamicTest.dynamicTest(createDisplayName(root), () -> assertThat(toSupportResourcesStream(
+				ReflectionUtils.streamAllResourcesInClasspathRoot(root, ResourceFilter.of(__ -> true)))) //
 						.containsExactlyElementsOf(
 							ReflectionSupport.streamAllResourcesInClasspathRoot(root, allResources).toList())));
 		}
@@ -199,7 +209,7 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void streamAllResourcesInClasspathRootPreconditions() {
 		var path = Path.of(".").toUri();
@@ -230,18 +240,21 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
+	@SuppressWarnings("removal")
 	@Test
 	void findAllResourcesInPackageDelegates() {
 		assertNotEquals(0, ReflectionSupport.findAllResourcesInPackage("org.junit", allResources).size());
 
-		assertEquals(ReflectionUtils.findAllResourcesInPackage("org.junit", allResources),
+		assertEquals(
+			toSupportResourcesList(
+				ReflectionUtils.findAllResourcesInPackage("org.junit", ResourceFilter.of(__ -> true))),
 			ReflectionSupport.findAllResourcesInPackage("org.junit", allResources));
 	}
 
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void findAllResourcesInPackagePreconditions() {
 		assertPreconditionViolationNotNullOrBlankFor("basePackageName",
@@ -253,18 +266,21 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
+	@SuppressWarnings("removal")
 	@Test
 	void streamAllResourcesInPackageDelegates() {
 		assertNotEquals(0, ReflectionSupport.streamAllResourcesInPackage("org.junit", allResources).count());
 
-		assertEquals(ReflectionUtils.streamAllResourcesInPackage("org.junit", allResources).toList(),
+		assertEquals(
+			toSupportResourcesStream(
+				ReflectionUtils.streamAllResourcesInPackage("org.junit", ResourceFilter.of(__ -> true))).toList(),
 			ReflectionSupport.streamAllResourcesInPackage("org.junit", allResources).toList());
 	}
 
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void streamAllResourcesInPackagePreconditions() {
 		assertPreconditionViolationNotNullOrBlankFor("basePackageName",
@@ -294,44 +310,49 @@ class ReflectionSupportTests {
 	/**
 	 * @since 1.11
 	 */
+	@SuppressWarnings("removal")
 	@Test
 	void findAllResourcesInModuleDelegates() {
-		assertEquals(ReflectionUtils.findAllResourcesInModule("org.junit.platform.commons", allResources),
+		assertEquals(
+			ReflectionUtils.findAllResourcesInModule("org.junit.platform.commons", ResourceFilter.of(__ -> true)),
 			ReflectionSupport.findAllResourcesInModule("org.junit.platform.commons", allResources));
 	}
 
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void findAllResourcesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
 			() -> ReflectionSupport.findAllResourcesInModule(null, allResources));
 		assertEquals("Module name must not be null or empty", exception.getMessage());
-		assertPreconditionViolationNotNullFor("Resource filter",
+		assertPreconditionViolationNotNullFor("resourceFilter",
 			() -> ReflectionSupport.findAllResourcesInModule("org.junit.platform.commons", null));
 	}
 
 	/**
 	 * @since 1.11
 	 */
+	@SuppressWarnings("removal")
 	@Test
 	void streamAllResourcesInModuleDelegates() {
-		assertEquals(ReflectionUtils.streamAllResourcesInModule("org.junit.platform.commons", allResources).toList(),
+		assertEquals(
+			toSupportResourcesStream(ReflectionUtils.streamAllResourcesInModule("org.junit.platform.commons",
+				ResourceFilter.of(__ -> true))).toList(),
 			ReflectionSupport.streamAllResourcesInModule("org.junit.platform.commons", allResources).toList());
 	}
 
 	/**
 	 * @since 1.11
 	 */
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void streamAllResourcesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
 			() -> ReflectionSupport.streamAllResourcesInModule(null, allResources));
 		assertEquals("Module name must not be null or empty", exception.getMessage());
-		assertPreconditionViolationNotNullFor("Resource filter",
+		assertPreconditionViolationNotNullFor("resourceFilter",
 			() -> ReflectionSupport.streamAllResourcesInModule("org.junit.platform.commons", null));
 	}
 

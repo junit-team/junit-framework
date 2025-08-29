@@ -20,6 +20,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  *
  * @since 1.11
  */
+@SuppressWarnings("removal")
 record DefaultResource(String name, URI uri) implements Resource {
 
 	public DefaultResource {
