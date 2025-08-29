@@ -33,6 +33,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
  * @see AnnotationSupport
  * @see ClassSupport
  * @see ReflectionSupport
+ * @see ResourceSupport
  */
 @API(status = MAINTAINED, since = "1.4")
 public final class ModifierSupport {

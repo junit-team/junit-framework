@@ -32,12 +32,36 @@ JUnit repository on GitHub.
   - `LauncherDiscoveryRequestBuilder.outputDirectoryProvider(OutputDirectoryProvider)`
   - `TestPlan.getOutputDirectoryProvider()`
   - `EngineTestKit.Builder.outputDirectoryProvider(OutputDirectoryProvider)`
+* Deprecate `org.junit.platform.commons.support.Resource` interface in favor of the new
+  `org.junit.platform.commons.io.Resource` one.
+* Deprecate `Resource`-related methods in `ReflectionSupport` in favor of corresponding
+  methods in new `ResourceSupport` class:
+  - `findAllResourcesInClasspathRoot(URI, Predicate)`
+  - `findAllResourcesInModule(String, Predicate)`
+  - `findAllResourcesInPackage(String, Predicate)`
+  - `streamAllResourcesInClasspathRoot(URI, Predicate)`
+  - `streamAllResourcesInModule(String, Predicate)`
+  - `streamAllResourcesInPackage(String, Predicate)`
+  - `tryToGetResources(String)`
+  - `tryToGetResources(String, ClassLoader)`
+* Deprecate `DiscoverySelectors.selectClasspathResource(Set)` method in favor of
+  `selectClasspathResourceByName(Set)`.
+* Deprecate `ClasspathResourceSelector.getClasspathResources()` method in favor of
+  `getResources()`.
+* Deprecate
+  `EngineDiscoveryRequestResolver.Builder.addResourceContainerSelectorResolver(Predicate)`
+  method in favor of `addResourceContainerSelectorResolver(ResourceFilter)`.
+* Deprecate `Resource`-related methods in `ClasspathScanner` in favor of new methods using
+  `org.junit.platform.commons.io.Resource` and `ResourceFilter`:
+  - `scanForResourcesInPackage(String, Predicate)`
+  - `scanForResourcesInClasspathRoot(URI, Predicate)`
 
 [[release-notes-6.0.0-RC3-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* New `Resource.from(String, URI)` static factory method for creating an
-  `org.junit.platform.commons.support.Resource`.
+* New classpath resource abstraction in `org.junit.platform.commons.io.Resource` with
+  support class for loading resources or finding them on the classpath via static utility
+  methods in the new `org.junit.platform.commons.support.ResourceSupport` class.
 
 
 [[release-notes-6.0.0-RC3-junit-jupiter]]

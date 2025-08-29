@@ -2,6 +2,7 @@ org.junit.platform.commons@${version} jar:file:.+/junit-platform-commons-\d.+\.j
 exports org.junit.platform.commons
 exports org.junit.platform.commons.annotation
 exports org.junit.platform.commons.function
+exports org.junit.platform.commons.io
 exports org.junit.platform.commons.support
 exports org.junit.platform.commons.support.conversion
 exports org.junit.platform.commons.support.scanning

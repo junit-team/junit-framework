@@ -11,6 +11,7 @@
 package org.junit.platform.engine.support.discovery;
 
 import static java.util.stream.Collectors.toCollection;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -21,7 +22,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
-import org.junit.platform.commons.support.Resource;
+import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.EngineDiscoveryRequest;
@@ -227,9 +228,33 @@ public class EngineDiscoveryRequestResolver<T extends TestDescriptor> {
 		 * {@code null}
 		 * @return this builder for method chaining
 		 * @since 1.12
+		 * @deprecated Please use {@link #addResourceContainerSelectorResolver(ResourceFilter)} instead.
 		 */
-		@API(status = MAINTAINED, since = "1.13.3")
-		public Builder<T> addResourceContainerSelectorResolver(Predicate<Resource> resourceFilter) {
+		@API(status = DEPRECATED, since = "6.0")
+		@Deprecated(since = "6.0", forRemoval = true)
+		@SuppressWarnings("removal")
+		public Builder<T> addResourceContainerSelectorResolver(
+				Predicate<org.junit.platform.commons.support.Resource> resourceFilter) {
+			Preconditions.notNull(resourceFilter, "resourceFilter must not be null");
+			return addResourceContainerSelectorResolver(
+				ResourceFilter.of(r -> resourceFilter.test(org.junit.platform.commons.support.Resource.of(r))));
+		}
+
+		/**
+		 * Add a predefined resolver that resolves {@link ClasspathRootSelector
+		 * ClasspathRootSelectors}, {@link ModuleSelector ModuleSelectors}, and
+		 * {@link PackageSelector PackageSelectors} into
+		 * {@link ClasspathResourceSelector ClasspathResourceSelectors} by
+		 * scanning for resources that match the supplied resource filter in the
+		 * respective class containers to this builder.
+		 *
+		 * @param resourceFilter filter the resolved classes must match; never
+		 * {@code null}
+		 * @return this builder for method chaining
+		 * @since 6.0
+		 */
+		@API(status = MAINTAINED, since = "6.0")
+		public Builder<T> addResourceContainerSelectorResolver(ResourceFilter resourceFilter) {
 			Preconditions.notNull(resourceFilter, "resourceFilter must not be null");
 			return addSelectorResolver(
 				context -> new ResourceContainerSelectorResolver(resourceFilter, context.getPackageFilter()));

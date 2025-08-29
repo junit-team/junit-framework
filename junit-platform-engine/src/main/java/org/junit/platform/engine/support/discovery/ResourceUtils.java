@@ -12,8 +12,8 @@ package org.junit.platform.engine.support.discovery;
 
 import java.util.function.Predicate;
 
+import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.junit.platform.commons.support.Resource;
 
 /**
  * Resource-related utilities to be used in conjunction with {@link ReflectionSupport}.

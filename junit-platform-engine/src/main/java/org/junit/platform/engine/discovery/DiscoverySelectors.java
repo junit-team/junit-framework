@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.discovery;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -30,8 +31,8 @@ import java.util.stream.Stream;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.DiscoverySelector;
@@ -291,7 +292,7 @@ public final class DiscoverySelectors {
 	 * @param classpathResourceName the name of the classpath resource; never
 	 * {@code null} or blank
 	 * @see #selectClasspathResource(String, FilePosition)
-	 * @see #selectClasspathResource(Set)
+	 * @see #selectClasspathResourceByName(Set)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -321,7 +322,7 @@ public final class DiscoverySelectors {
 	 * {@code null} or blank
 	 * @param position the position inside the classpath resource; may be {@code null}
 	 * @see #selectClasspathResource(String)
-	 * @see #selectClasspathResource(Set)
+	 * @see #selectClasspathResourceByName(Set)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -362,9 +363,48 @@ public final class DiscoverySelectors {
 	 * @see #selectClasspathResource(String)
 	 * @see ClasspathResourceSelector
 	 * @see ReflectionSupport#tryToGetResources(String)
+	 * @deprecated Please use {@link #selectClasspathResourceByName(Set)} instead.
 	 */
-	@API(status = MAINTAINED, since = "1.13.3")
-	public static ClasspathResourceSelector selectClasspathResource(Set<Resource> classpathResources) {
+	@API(status = DEPRECATED, since = "6.0")
+	@Deprecated(since = "6.0")
+	@SuppressWarnings("removal")
+	public static ClasspathResourceSelector selectClasspathResource(
+			Set<org.junit.platform.commons.support.Resource> classpathResources) {
+		return selectClasspathResourceByName(classpathResources);
+	}
+
+	/**
+	 * Create a {@code ClasspathResourceSelector} for the supplied classpath
+	 * resources.
+	 *
+	 * <p>Since {@linkplain org.junit.platform.engine.TestEngine engines} are not
+	 * expected to modify the classpath, the supplied resource must be on the
+	 * classpath of the
+	 * {@linkplain Thread#getContextClassLoader() context class loader} of the
+	 * {@linkplain Thread thread} that uses the resulting selector.
+	 *
+	 * <p>Note: Since Java 9, all resources are on the module path. Either in
+	 * named or unnamed modules. These resources are also considered to be
+	 * classpath resources.
+	 *
+	 * <p>The {@link Set} supplied to this method should have a reliable iteration
+	 * order to support reliable discovery and execution order. It is therefore
+	 * recommended that the set be a {@link java.util.SequencedSet} (on Java 21
+	 * or higher), {@link java.util.SortedSet}, {@link java.util.LinkedHashSet},
+	 * or similar. Note that {@link Set#of(Object[])} and related {@code Set.of()}
+	 * methods do not guarantee a reliable iteration order.
+	 *
+	 * @param classpathResources a set of classpath resources; never
+	 * {@code null} or empty. All resources must have the same name, may not
+	 * be {@code null} or blank.
+	 * @since 6.0
+	 * @see #selectClasspathResource(String, FilePosition)
+	 * @see #selectClasspathResource(String)
+	 * @see ClasspathResourceSelector
+	 * @see org.junit.platform.commons.support.ResourceSupport#tryToGetResources(String)
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	public static ClasspathResourceSelector selectClasspathResourceByName(Set<? extends Resource> classpathResources) {
 		Preconditions.notEmpty(classpathResources, "classpath resources must not be null or empty");
 		Preconditions.containsNoNullElements(classpathResources, "individual classpath resources must not be null");
 		List<String> resourceNames = classpathResources.stream().map(Resource::getName).distinct().toList();
