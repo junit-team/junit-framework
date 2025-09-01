@@ -13,12 +13,18 @@ package org.junit.jupiter.api;
 import static org.junit.jupiter.api.AssertionTestUtils.assertExpectedAndActualValues;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEndsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
+import static org.junit.jupiter.api.AssertionTestUtils.assertMessageMatches;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.expectAssertionFailedError;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.logging.LogRecord;
+
+import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.platform.commons.logging.LogRecordListener;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -748,6 +754,35 @@ class AssertEqualsAssertionsTests {
 			assertEquals(wrapper, primitive, () -> "message");
 		}
 
+	}
+
+	@Nested
+	class ArraysAsArguments {
+		@Test
+		void objects(@TrackLogRecords LogRecordListener listener) {
+			Object object = new Object();
+			Object array1 = new Object[] { object };
+			Object array2 = new Object[] { object };
+			try {
+				assertEquals(array1, array2);
+				expectAssertionFailedError();
+			}
+			catch (AssertionFailedError ex) {
+				assertMessageMatches(ex, "expected: " + //
+						"\\Q[Ljava.lang.Object;@\\E" + //
+						".+" + //
+						"\\Q<[java.lang.Object@\\E" + //
+						".+" + //
+						"\\Q]> but was: [Ljava.lang.Object;@\\E" + //
+						".+" + //
+						"\\Q<[java.lang.Object@\\E" + //
+						".+" + //
+						"\\Q]>\\E");
+			}
+			assertLinesMatch("""
+					Should have used `assertArrayEquals()` in method: <TODO>
+					""".lines(), listener.stream(AssertionUtils.class).map(LogRecord::getMessage));
+		}
 	}
 
 	// -------------------------------------------------------------------------
