@@ -142,9 +142,15 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 		this.engineExecutionListener.reportingEntryPublished(this.testDescriptor, ReportEntry.from(values));
 	}
 
+	private static void validateArtifactName(String name) {
+		Preconditions.notBlank(name, "name must not be null or blank");
+		Preconditions.condition(name.indexOf('/') < 0 && name.indexOf('\\') < 0,
+			() -> "name must not contain any path separators: " + name);
+	}
+
 	@Override
 	public void publishFile(String name, MediaType mediaType, ThrowingConsumer<Path> action) {
-		Preconditions.notNull(name, "name must not be null");
+		validateArtifactName(name);
 		Preconditions.notNull(mediaType, "mediaType must not be null");
 		Preconditions.notNull(action, "action must not be null");
 
@@ -156,7 +162,7 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 
 	@Override
 	public void publishDirectory(String name, ThrowingConsumer<Path> action) {
-		Preconditions.notNull(name, "name must not be null");
+		validateArtifactName(name);
 		Preconditions.notNull(action, "action must not be null");
 
 		ThrowingConsumer<Path> enhancedAction = path -> {

@@ -328,7 +328,7 @@ public class ExtensionContextTests {
 
 		var exception = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile(name,
 			MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
-		assertThat(exception).hasMessage("name must not contain path separators: " + name);
+		assertThat(exception).hasMessage("name must not contain any path separators: " + name);
 	}
 
 	@Test
@@ -338,7 +338,7 @@ public class ExtensionContextTests {
 
 		var exception = assertThrows(PreconditionViolationException.class,
 			() -> extensionContext.publishDirectory(name, __ -> fail("should not be called")));
-		assertThat(exception).hasMessage("name must not contain path separators: " + name);
+		assertThat(exception).hasMessage("name must not contain any path separators: " + name);
 	}
 
 	@Test
@@ -449,6 +449,96 @@ public class ExtensionContextTests {
 		assertEquals(parentValue, childStore.computeIfAbsent(parentKey, k -> "a different value"));
 		assertEquals(parentValue, childStore.getOrComputeIfAbsent(parentKey, k -> "a different value"));
 		assertEquals(parentValue, childStore.get(parentKey));
+	}
+
+	@Test
+	@SuppressWarnings("NullAway")
+	void failsWhenAttemptingToPublishFileWithNullName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		var exception = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile(null,
+			MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
+		assertThat(exception).hasMessage("name must not be null or blank");
+	}
+
+	@Test
+	void failsWhenAttemptingToPublishFileWithBlankName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		assertAll(() -> {
+			var ex = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile("",
+				MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
+			assertThat(ex).hasMessage("name must not be null or blank");
+		}, () -> {
+			var ex = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile("   ",
+				MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
+			assertThat(ex).hasMessage("name must not be null or blank");
+		});
+	}
+
+	@Test
+	@SuppressWarnings("NullAway")
+	void failsWhenAttemptingToPublishDirectoryWithNullName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		var exception = assertThrows(PreconditionViolationException.class,
+			() -> extensionContext.publishDirectory(null, __ -> fail("should not be called")));
+		assertThat(exception).hasMessage("name must not be null or blank");
+	}
+
+	@Test
+	void failsWhenAttemptingToPublishDirectoryWithBlankName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		assertAll(() -> {
+			var ex = assertThrows(PreconditionViolationException.class,
+				() -> extensionContext.publishDirectory("", __ -> fail("should not be called")));
+			assertThat(ex).hasMessage("name must not be null or blank");
+		}, () -> {
+			var ex = assertThrows(PreconditionViolationException.class,
+				() -> extensionContext.publishDirectory("   ", __ -> fail("should not be called")));
+			assertThat(ex).hasMessage("name must not be null or blank");
+		});
+	}
+
+	@Test
+	void failsWhenAttemptingToPublishFileWithForwardSlashInName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+		var name = "test/subDir";
+
+		var exception = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile(name,
+			MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
+		assertThat(exception).hasMessage("name must not contain any path separators: " + name);
+	}
+
+	@Test
+	void failsWhenAttemptingToPublishDirectoryWithForwardSlashInName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+		var name = "test/subDir";
+
+		var exception = assertThrows(PreconditionViolationException.class,
+			() -> extensionContext.publishDirectory(name, __ -> fail("should not be called")));
+		assertThat(exception).hasMessage("name must not contain any path separators: " + name);
+	}
+
+	@Test
+	void failsWhenAttemptingToPublishFileWithBackslashInName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+		var name = "test\\subDir";
+
+		var exception = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile(name,
+			MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
+		assertThat(exception).hasMessage("name must not contain any path separators: " + name);
+	}
+
+	@Test
+	void failsWhenAttemptingToPublishDirectoryWithBackslashInName(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+		var name = "test\\subDir";
+
+		var exception = assertThrows(PreconditionViolationException.class,
+			() -> extensionContext.publishDirectory(name, __ -> fail("should not be called")));
+		assertThat(exception).hasMessage("name must not contain any path separators: " + name);
 	}
 
 	@ParameterizedTest
