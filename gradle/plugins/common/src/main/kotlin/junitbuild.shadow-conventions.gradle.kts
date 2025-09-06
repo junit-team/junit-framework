@@ -24,8 +24,9 @@ configurations {
 	}
 }
 
-val javaComponent = components["java"] as AdhocComponentWithVariants
-javaComponent.withVariantsFromConfiguration(configurations.shadowRuntimeElements.get()) { skip() }
+shadow {
+	addShadowVariantIntoJavaComponent = false
+}
 
 tasks {
 	javadoc {
