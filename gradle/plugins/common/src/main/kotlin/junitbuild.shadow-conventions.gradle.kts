@@ -43,6 +43,7 @@ tasks {
 		from(sourceSets.main.get().output.classesDirs) {
 			include("module-info.class")
 		}
+		addMultiReleaseAttribute = false
 	}
 	jar {
 		dependsOn(shadowJar)
