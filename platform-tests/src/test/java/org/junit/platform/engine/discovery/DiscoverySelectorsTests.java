@@ -23,7 +23,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClassesByName;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResource;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResourceByName;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResources;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathRoots;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectDirectory;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectFile;
@@ -307,13 +307,10 @@ class DiscoverySelectorsTests {
 			assertViolatesPrecondition(() -> selectClasspathResource("/   "));
 			assertViolatesPrecondition(() -> selectClasspathResource("\t"));
 			assertViolatesPrecondition(() -> selectClasspathResource("/\t"));
-			assertViolatesPrecondition(() -> selectClasspathResourceByName(null));
-			assertViolatesPrecondition(() -> selectClasspathResourceByName(Collections.emptySet()));
-			assertViolatesPrecondition(() -> selectClasspathResourceByName(Collections.singleton(null)));
-			assertViolatesPrecondition(() -> selectClasspathResourceByName(Set.of(new StubResource(null))));
-			assertViolatesPrecondition(() -> selectClasspathResourceByName(Set.of(new StubResource(""))));
-			assertViolatesPrecondition(
-				() -> selectClasspathResourceByName(Set.of(new StubResource("a"), new StubResource("b"))));
+			assertViolatesPrecondition(() -> selectClasspathResources(null));
+			assertViolatesPrecondition(() -> selectClasspathResources(Collections.singletonList(null)));
+			assertViolatesPrecondition(() -> selectClasspathResources(List.of(new StubResource(null))));
+			assertViolatesPrecondition(() -> selectClasspathResources(List.of(new StubResource(""))));
 		}
 
 		@Test
@@ -325,6 +322,25 @@ class DiscoverySelectorsTests {
 			// standard use case
 			selector = selectClasspathResource("A/B/C/spec.json");
 			assertEquals("A/B/C/spec.json", selector.getClasspathResourceName());
+		}
+
+		@Test
+		void selectMultipleClasspathResources() {
+			var a1 = Resource.of("a", URI.create("a1"));
+			var a2 = Resource.of("a", URI.create("a2"));
+			var b = Resource.of("b", URI.create("b"));
+
+			var selectors = selectClasspathResources(List.of(a1, a2));
+			assertThat(selectors).hasSize(1);
+			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo("a");
+			assertThat(selectors.getFirst().getResources()).containsExactly(a1, a2);
+
+			selectors = selectClasspathResources(List.of(a2, b, a1));
+			assertThat(selectors).hasSize(2);
+			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo("a");
+			assertThat(selectors.getFirst().getResources()).containsExactly(a2, a1);
+			assertThat(selectors.getLast().getClasspathResourceName()).isEqualTo("b");
+			assertThat(selectors.getLast().getResources()).containsExactly(b);
 		}
 
 		@Test

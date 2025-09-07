@@ -10,8 +10,6 @@
 
 package org.junit.platform.engine.support.discovery;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
 import static org.junit.platform.commons.support.ResourceSupport.findAllResourcesInClasspathRoot;
 import static org.junit.platform.commons.support.ResourceSupport.findAllResourcesInModule;
 import static org.junit.platform.commons.support.ResourceSupport.findAllResourcesInPackage;
@@ -21,7 +19,6 @@ import static org.junit.platform.engine.support.discovery.SelectorResolver.Resol
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import org.junit.platform.commons.io.Resource;
@@ -58,18 +55,12 @@ class ResourceContainerSelectorResolver implements SelectorResolver {
 	}
 
 	private Resolution resourceSelectors(List<Resource> resources) {
-		Set<ClasspathResourceSelector> selectors = resources.stream() //
-				.collect(groupingBy(Resource::getName)) //
-				.values() //
-				.stream() //
-				.map(LinkedHashSet::new) //
-				.map(DiscoverySelectors::selectClasspathResourceByName) //
-				.collect(toSet());
+		List<ClasspathResourceSelector> selectors = DiscoverySelectors.selectClasspathResources(resources);
 
 		if (selectors.isEmpty()) {
 			return unresolved();
 		}
-		return selectors(selectors);
+		return selectors(new LinkedHashSet<>(selectors));
 	}
 
 }

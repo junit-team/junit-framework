@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.discovery;
 
+import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
@@ -23,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +37,7 @@ import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.platform.commons.util.StringUtils;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.DiscoverySelectorIdentifier;
 import org.junit.platform.engine.UniqueId;
@@ -292,7 +295,7 @@ public final class DiscoverySelectors {
 	 * @param classpathResourceName the name of the classpath resource; never
 	 * {@code null} or blank
 	 * @see #selectClasspathResource(String, FilePosition)
-	 * @see #selectClasspathResourceByName(Set)
+	 * @see #selectClasspathResources(List)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -322,7 +325,7 @@ public final class DiscoverySelectors {
 	 * {@code null} or blank
 	 * @param position the position inside the classpath resource; may be {@code null}
 	 * @see #selectClasspathResource(String)
-	 * @see #selectClasspathResourceByName(Set)
+	 * @see #selectClasspathResources(List)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -363,14 +366,20 @@ public final class DiscoverySelectors {
 	 * @see #selectClasspathResource(String)
 	 * @see ClasspathResourceSelector
 	 * @see ReflectionSupport#tryToGetResources(String)
-	 * @deprecated Please use {@link #selectClasspathResourceByName(Set)} instead.
+	 * @deprecated Please use {@link #selectClasspathResources(List)} instead.
 	 */
 	@API(status = DEPRECATED, since = "6.0")
 	@Deprecated(since = "6.0")
 	@SuppressWarnings("removal")
 	public static ClasspathResourceSelector selectClasspathResource(
 			Set<org.junit.platform.commons.support.Resource> classpathResources) {
-		return selectClasspathResourceByName(classpathResources);
+
+		Preconditions.notEmpty(classpathResources, "classpath resources must not be null or empty");
+		Preconditions.containsNoNullElements(classpathResources, "individual classpath resources must not be null");
+		List<String> resourceNames = classpathResources.stream().map(Resource::getName).distinct().toList();
+		Preconditions.condition(resourceNames.size() == 1, "all classpath resources must have the same name");
+		Preconditions.notBlank(resourceNames.get(0), "classpath resource names must not be null or blank");
+		return new ClasspathResourceSelector(classpathResources);
 	}
 
 	/**
@@ -404,13 +413,19 @@ public final class DiscoverySelectors {
 	 * @see org.junit.platform.commons.support.ResourceSupport#tryToGetResources(String)
 	 */
 	@API(status = MAINTAINED, since = "6.0")
-	public static ClasspathResourceSelector selectClasspathResourceByName(Set<? extends Resource> classpathResources) {
-		Preconditions.notEmpty(classpathResources, "classpath resources must not be null or empty");
+	public static List<ClasspathResourceSelector> selectClasspathResources(
+			List<? extends Resource> classpathResources) {
+		Preconditions.notNull(classpathResources, "classpath resources must not be null");
 		Preconditions.containsNoNullElements(classpathResources, "individual classpath resources must not be null");
-		List<String> resourceNames = classpathResources.stream().map(Resource::getName).distinct().toList();
-		Preconditions.condition(resourceNames.size() == 1, "all classpath resources must have the same name");
-		Preconditions.notBlank(resourceNames.get(0), "classpath resource names must not be null or blank");
-		return new ClasspathResourceSelector(classpathResources);
+		Preconditions.condition(classpathResources.stream().map(Resource::getName).allMatch(StringUtils::isNotBlank),
+			"classpath resource names must not be null or blank");
+		return classpathResources.stream() //
+				.collect(groupingBy(Resource::getName)) //
+				.values() //
+				.stream() //
+				.map(LinkedHashSet::new) //
+				.map(ClasspathResourceSelector::new) //
+				.toList();
 	}
 
 	/**

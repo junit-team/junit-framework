@@ -45,7 +45,7 @@ JUnit repository on GitHub.
   - `tryToGetResources(String)`
   - `tryToGetResources(String, ClassLoader)`
 * Deprecate `DiscoverySelectors.selectClasspathResource(Set)` method in favor of
-  `selectClasspathResourceByName(Set)`.
+  `selectClasspathResources(List)`.
 * Deprecate `ClasspathResourceSelector.getClasspathResources()` method in favor of
   `getResources()`.
 * Deprecate
