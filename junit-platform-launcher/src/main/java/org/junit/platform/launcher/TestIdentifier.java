@@ -10,13 +10,12 @@
 
 package org.junit.platform.launcher;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
 import static java.util.Collections.unmodifiableSet;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
-import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,7 +39,10 @@ import org.junit.platform.engine.UniqueId;
  * @see TestPlan
  */
 @API(status = STABLE, since = "1.0")
-public final class TestIdentifier {
+public final class TestIdentifier implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
 
 	// These are effectively final but not technically due to late initialization when deserializing
 	private /* final */ UniqueId uniqueId;
@@ -51,7 +53,7 @@ public final class TestIdentifier {
 	private /* final */ String legacyReportingName;
 
 	private /* final */ @Nullable TestSource source;
-	private /* final */ Set<TestTag> tags;
+	private /* final */ LinkedHashSet<TestTag> tags;
 	private /* final */ Type type;
 
 	/**
@@ -77,17 +79,9 @@ public final class TestIdentifier {
 		this.parentId = parentId;
 		this.displayName = displayName;
 		this.source = source;
-		this.tags = copyOf(tags);
+		this.tags = new LinkedHashSet<>(tags);
 		this.type = type;
 		this.legacyReportingName = legacyReportingName;
-	}
-
-	private Set<TestTag> copyOf(Set<TestTag> tags) {
-		return switch (tags.size()) {
-			case 0 -> emptySet();
-			case 1 -> singleton(getOnlyElement(tags));
-			default -> new LinkedHashSet<>(tags);
-		};
 	}
 
 	/**
@@ -258,4 +252,5 @@ public final class TestIdentifier {
 				.toString();
 		// @formatter:on
 	}
+
 }

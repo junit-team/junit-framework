@@ -12,13 +12,10 @@ package org.junit.platform.launcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.util.SerializationUtils.deserialize;
+import static org.junit.platform.commons.util.SerializationUtils.serialize;
 
-import java.io.ByteArrayOutputStream;
-import java.io.NotSerializableException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -60,66 +57,15 @@ class TestIdentifierTests {
 	}
 
 	@Test
-	void currentVersionCanBeSerializedAndDeserialized() {
+	void currentVersionCanBeSerializedAndDeserialized() throws Exception {
 		var originalIdentifier = createOriginalTestIdentifier();
-		var uniqueId = originalIdentifier.getUniqueIdObject();
-		var testSource = ClassSource.from(TestIdentifierTests.class);
-
-		var recreatedDescriptor = new AbstractTestDescriptor(uniqueId, originalIdentifier.getDisplayName(),
-			testSource) {
-			@Override
-			public Type getType() {
-				return Type.TEST;
-			}
-
-			@Override
-			public String getLegacyReportingName() {
-				return originalIdentifier.getLegacyReportingName();
-			}
-
-			@Override
-			public Set<TestTag> getTags() {
-				return Set.of(TestTag.create("aTag"));
-			}
-		};
-		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
-		engineDescriptor.addChild(recreatedDescriptor);
-
-		var rebuiltIdentifier = TestIdentifier.from(recreatedDescriptor);
-		assertDeepEquals(originalIdentifier, rebuiltIdentifier);
+		var deserializedIdentifier = (TestIdentifier) deserialize(serialize(originalIdentifier));
+		assertDeepEquals(originalIdentifier, deserializedIdentifier);
 	}
 
 	@Test
-	void initialVersionCanBeDeserialized() {
-		var expected = createOriginalTestIdentifier();
-		var testSource = ClassSource.from(TestIdentifierTests.class);
-		var descriptor = new AbstractTestDescriptor(expected.getUniqueIdObject(), "displayName", testSource) {
-			@Override
-			public Type getType() {
-				return Type.TEST;
-			}
-
-			@Override
-			public String getLegacyReportingName() {
-				return "reportingName";
-			}
-
-			@Override
-			public Set<TestTag> getTags() {
-				return Set.of(TestTag.create("aTag"));
-			}
-		};
-		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
-		engineDescriptor.addChild(descriptor);
-
-		var actual = TestIdentifier.from(descriptor);
-
-		assertDeepEquals(expected, actual);
-	}
-
-	@Test
-	void identifierWithNoParentCanBeSerializedAndDeserialized() {
-		TestIdentifier first = TestIdentifier.from(
+	void identifierWithNoParentCanBeSerializedAndDeserialized() throws Exception {
+		TestIdentifier originalIdentifier = TestIdentifier.from(
 			new AbstractTestDescriptor(UniqueId.root("example", "id"), "Example") {
 				@Override
 				public Type getType() {
@@ -127,35 +73,9 @@ class TestIdentifierTests {
 				}
 			});
 
-		TestIdentifier second = TestIdentifier.from(
-			new AbstractTestDescriptor(UniqueId.root("example", "id"), "Example") {
-				@Override
-				public Type getType() {
-					return Type.CONTAINER;
-				}
-			});
+		var deserializedIdentifier = (TestIdentifier) deserialize(serialize(originalIdentifier));
 
-		assertDeepEquals(first, second);
-		assertTrue(first.getParentId().isEmpty());
-		assertTrue(second.getParentId().isEmpty());
-	}
-
-	/**
-	 * Negative test case: Verify that TestIdentifier does not implement Serializable
-	 * and attempting to use default Java serialization results in NotSerializableException.
-	 */
-	@SuppressWarnings("ConstantConditions")
-	@Test
-	void serializationIsNotSupported() {
-		assertFalse(Serializable.class.isAssignableFrom(TestIdentifier.class),
-			"TestIdentifier must not implement java.io.Serializable");
-		var identifier = createOriginalTestIdentifier();
-
-		assertThrows(NotSerializableException.class, () -> {
-			try (var baos = new ByteArrayOutputStream(); var oos = new ObjectOutputStream(baos)) {
-				oos.writeObject(identifier);
-			}
-		});
+		assertDeepEquals(originalIdentifier, deserializedIdentifier);
 	}
 
 	private static void assertDeepEquals(TestIdentifier first, TestIdentifier second) {
