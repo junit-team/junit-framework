@@ -60,7 +60,7 @@ class TestIdentifierTests {
 	}
 
 	@Test
-	void currentVersionCanBeSerializedAndDeserialized() throws Exception {
+	void currentVersionCanBeSerializedAndDeserialized() {
 		var originalIdentifier = createOriginalTestIdentifier();
 		var uniqueId = originalIdentifier.getUniqueIdObject();
 		var testSource = ClassSource.from(TestIdentifierTests.class);
@@ -90,7 +90,7 @@ class TestIdentifierTests {
 	}
 
 	@Test
-	void initialVersionCanBeDeserialized() throws Exception {
+	void initialVersionCanBeDeserialized() {
 		var expected = createOriginalTestIdentifier();
 		var testSource = ClassSource.from(TestIdentifierTests.class);
 		var descriptor = new AbstractTestDescriptor(expected.getUniqueIdObject(), "displayName", testSource) {
@@ -118,7 +118,7 @@ class TestIdentifierTests {
 	}
 
 	@Test
-	void identifierWithNoParentCanBeSerializedAndDeserialized() throws Exception {
+	void identifierWithNoParentCanBeSerializedAndDeserialized() {
 		TestIdentifier first = TestIdentifier.from(
 			new AbstractTestDescriptor(UniqueId.root("example", "id"), "Example") {
 				@Override
