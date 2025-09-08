@@ -326,20 +326,25 @@ class DiscoverySelectorsTests {
 
 		@Test
 		void selectMultipleClasspathResources() {
-			var a1 = Resource.of("a", URI.create("a1"));
-			var a2 = Resource.of("a", URI.create("a2"));
+			var a1 = Resource.of("aMuchLongerNameToGetBiggerHashCode", URI.create("a1"));
+			var a2 = Resource.of(a1.getName(), URI.create("a2"));
 			var b = Resource.of("b", URI.create("b"));
 
 			var selectors = selectClasspathResources(List.of(a1, a2));
 			assertThat(selectors).hasSize(1);
-			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo("a");
+			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo(a1.getName());
+			assertThat(selectors.getFirst().getResources()).containsExactly(a1, a2);
+
+			selectors = selectClasspathResources(List.of(a1, a2, a1));
+			assertThat(selectors).hasSize(1);
+			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo(a1.getName());
 			assertThat(selectors.getFirst().getResources()).containsExactly(a1, a2);
 
 			selectors = selectClasspathResources(List.of(a2, b, a1));
 			assertThat(selectors).hasSize(2);
-			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo("a");
+			assertThat(selectors.getFirst().getClasspathResourceName()).isEqualTo(a1.getName());
 			assertThat(selectors.getFirst().getResources()).containsExactly(a2, a1);
-			assertThat(selectors.getLast().getClasspathResourceName()).isEqualTo("b");
+			assertThat(selectors.getLast().getClasspathResourceName()).isEqualTo(b.getName());
 			assertThat(selectors.getLast().getResources()).containsExactly(b);
 		}
 

@@ -10,7 +10,9 @@
 
 package org.junit.platform.engine.discovery;
 
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
 import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
@@ -24,6 +26,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -376,14 +379,11 @@ public final class DiscoverySelectors {
 
 		Preconditions.notEmpty(classpathResources, "classpath resources must not be null or empty");
 		Preconditions.containsNoNullElements(classpathResources, "individual classpath resources must not be null");
-		List<String> resourceNames = classpathResources.stream().map(Resource::getName).distinct().toList();
-		Preconditions.condition(resourceNames.size() == 1, "all classpath resources must have the same name");
-		Preconditions.notBlank(resourceNames.get(0), "classpath resource names must not be null or blank");
-		return new ClasspathResourceSelector(classpathResources);
+		return new ClasspathResourceSelector(new LinkedHashSet<>(classpathResources));
 	}
 
 	/**
-	 * Create a {@code ClasspathResourceSelector} for the supplied classpath
+	 * Create {@code ClasspathResourceSelectors} for the supplied classpath
 	 * resources.
 	 *
 	 * <p>Since {@linkplain org.junit.platform.engine.TestEngine engines} are not
@@ -396,12 +396,13 @@ public final class DiscoverySelectors {
 	 * named or unnamed modules. These resources are also considered to be
 	 * classpath resources.
 	 *
-	 * <p>The {@link Set} supplied to this method should have a reliable iteration
-	 * order to support reliable discovery and execution order. It is therefore
-	 * recommended that the set be a {@link java.util.SequencedSet} (on Java 21
-	 * or higher), {@link java.util.SortedSet}, {@link java.util.LinkedHashSet},
-	 * or similar. Note that {@link Set#of(Object[])} and related {@code Set.of()}
-	 * methods do not guarantee a reliable iteration order.
+	 * <p>The {@link List} supplied to this method may contain duplicates that
+	 * are ignored when converting them to {@code ClasspathResourceSelectors}.
+	 * For example, if the list consists of {@code [r, r]} for a resource
+	 * {@code r}, this method returns {@code [selector(r)]}.
+	 *
+	 * <p>The order of selectors in the returned list corresponds to the order
+	 * of resource names in the supplied list of classpath resources.
 	 *
 	 * @param classpathResources a set of classpath resources; never
 	 * {@code null} or empty. All resources must have the same name, may not
@@ -415,17 +416,17 @@ public final class DiscoverySelectors {
 	@API(status = MAINTAINED, since = "6.0")
 	public static List<ClasspathResourceSelector> selectClasspathResources(
 			List<? extends Resource> classpathResources) {
+
 		Preconditions.notNull(classpathResources, "classpath resources must not be null");
 		Preconditions.containsNoNullElements(classpathResources, "individual classpath resources must not be null");
 		Preconditions.condition(classpathResources.stream().map(Resource::getName).allMatch(StringUtils::isNotBlank),
 			"classpath resource names must not be null or blank");
-		return classpathResources.stream() //
-				.collect(groupingBy(Resource::getName)) //
-				.values() //
-				.stream() //
-				.map(LinkedHashSet::new) //
-				.map(ClasspathResourceSelector::new) //
-				.toList();
+
+		var selectorsByName = classpathResources.stream() //
+				.collect(groupingBy(Resource::getName, LinkedHashMap::new,
+					collectingAndThen(toCollection(LinkedHashSet::new), ClasspathResourceSelector::new)));
+
+		return List.copyOf(selectorsByName.values());
 	}
 
 	/**
