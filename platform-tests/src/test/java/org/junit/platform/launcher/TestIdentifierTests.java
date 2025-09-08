@@ -10,15 +10,19 @@
 
 package org.junit.platform.launcher;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.util.SerializationUtils.deserialize;
 import static org.junit.platform.commons.util.SerializationUtils.serialize;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
@@ -56,11 +60,22 @@ class TestIdentifierTests {
 		assertTrue(identifier.isContainer());
 	}
 
-	@Test
-	void currentVersionCanBeSerializedAndDeserialized() throws Exception {
-		var originalIdentifier = createOriginalTestIdentifier();
-		var deserializedIdentifier = (TestIdentifier) deserialize(serialize(originalIdentifier));
-		assertDeepEquals(originalIdentifier, deserializedIdentifier);
+	@ParameterizedTest
+	@ValueSource(ints = { 0, 1, 2 })
+	void currentVersionCanBeSerializedAndDeserialized_withVariousTagCounts(int tagCount) throws Exception {
+		Set<TestTag> tags = switch (tagCount) {
+			case 0 -> java.util.Collections.emptySet();
+			case 1 -> Set.of(TestTag.create("fast"));
+			default -> Set.of(TestTag.create("fast"), TestTag.create("ui"));
+		};
+
+		var original = createOriginalTestIdentifier(tags);
+
+		byte[] bytes = serialize(original);
+		var roundTripped = (TestIdentifier) deserialize(bytes);
+
+		assertDeepEquals(original, roundTripped);
+		assertThat(original.getTags()).isInstanceOf(Serializable.class);
 	}
 
 	@Test
@@ -91,12 +106,12 @@ class TestIdentifierTests {
 		assertEquals(first.getParentIdObject(), second.getParentIdObject());
 	}
 
-	private static TestIdentifier createOriginalTestIdentifier() {
+	private static TestIdentifier createOriginalTestIdentifier(Set<TestTag> tags) {
 		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
 		var uniqueId = engineDescriptor.getUniqueId().append("child", "child");
 		var testSource = ClassSource.from(TestIdentifierTests.class);
-		var testDescriptor = new AbstractTestDescriptor(uniqueId, "displayName", testSource) {
 
+		var testDescriptor = new AbstractTestDescriptor(uniqueId, "displayName", testSource) {
 			@Override
 			public Type getType() {
 				return Type.TEST;
@@ -109,9 +124,10 @@ class TestIdentifierTests {
 
 			@Override
 			public Set<TestTag> getTags() {
-				return Set.of(TestTag.create("aTag"));
+				return tags;
 			}
 		};
+
 		engineDescriptor.addChild(testDescriptor);
 		return TestIdentifier.from(testDescriptor);
 	}
