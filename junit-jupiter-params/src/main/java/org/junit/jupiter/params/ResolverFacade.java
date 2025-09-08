@@ -58,7 +58,6 @@ import org.junit.jupiter.params.support.AnnotationConsumerInitializer;
 import org.junit.jupiter.params.support.FieldContext;
 import org.junit.jupiter.params.support.ParameterDeclaration;
 import org.junit.jupiter.params.support.ParameterDeclarations;
-import org.junit.jupiter.params.support.ParameterInfo;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;

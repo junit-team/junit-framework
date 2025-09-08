@@ -45,6 +45,8 @@ JUnit repository on GitHub.
 * `MediaType.APPLICATION_JSON_UTF_8` is now deprecated in favor of using
   `MediaType.APPLICATION_JSON`, since the industry considers UTF-8 to be the implicit
   default encoding for the `application/json` media type.
+* `org.junit.jupiter.params.support.ParameterInfo` is now deprecated in favor of
+  `org.junit.jupiter.params.ParameterInfo`
 
 [[release-notes-6.0.0-RC3-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements

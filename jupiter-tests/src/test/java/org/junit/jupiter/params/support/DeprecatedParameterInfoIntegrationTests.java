@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.BeforeClassTemplateInvocationCallback;
@@ -29,7 +30,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * @since 5.13
  */
-class ParameterInfoIntegrationTests extends AbstractJupiterTestEngineTests {
+class DeprecatedParameterInfoIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	@Test
 	void storesParameterInfoInExtensionContextStoreOnDifferentLevels() {
@@ -61,6 +62,8 @@ class ParameterInfoIntegrationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@SuppressWarnings("removal")
+	@NullMarked
 	private static class ParameterInfoConsumingExtension
 			implements BeforeClassTemplateInvocationCallback, BeforeEachCallback {
 
