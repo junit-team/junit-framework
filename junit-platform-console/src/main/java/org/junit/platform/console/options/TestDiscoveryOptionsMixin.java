@@ -10,12 +10,15 @@
 
 package org.junit.platform.console.options;
 
+import static org.apiguardian.api.API.Status.INTERNAL;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.engine.DiscoverySelectorIdentifier;
 import org.junit.platform.engine.discovery.ClassNameFilter;
@@ -34,7 +37,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 
-class TestDiscoveryOptionsMixin {
+@API(status = INTERNAL, since = "6.0")
+public class TestDiscoveryOptionsMixin {
 
 	private static final String CP_OPTION = "cp";
 
@@ -49,7 +53,7 @@ class TestDiscoveryOptionsMixin {
 	@ArgGroup(validate = false, order = 4, heading = "%n@|bold RUNTIME CONFIGURATION|@%n%n")
 	RuntimeConfigurationOptions runtimeConfigurationOptions;
 
-	static class SelectorOptions {
+	public static class SelectorOptions {
 
 		@Nullable
 		@Option(names = { "--scan-classpath",
@@ -136,7 +140,7 @@ class TestDiscoveryOptionsMixin {
 		}
 	}
 
-	static class FilterOptions {
+	public static class FilterOptions {
 
 		@Option(names = { "-n",
 				"--include-classname" }, paramLabel = "PATTERN", defaultValue = ClassNameFilter.STANDARD_INCLUDE_PATTERN, arity = "1", description = "Provide a regular expression to include only classes whose fully qualified names match. " //
@@ -203,7 +207,7 @@ class TestDiscoveryOptionsMixin {
 		}
 	}
 
-	static class RuntimeConfigurationOptions {
+	public static class RuntimeConfigurationOptions {
 
 		@Option(names = { "-" + CP_OPTION, "--classpath",
 				"--class-path" }, converter = ClasspathEntriesConverter.class, paramLabel = "PATH", arity = "1", description = "Provide additional classpath entries "
@@ -253,7 +257,7 @@ class TestDiscoveryOptionsMixin {
 		}
 	}
 
-	TestDiscoveryOptions toTestDiscoveryOptions() {
+	public TestDiscoveryOptions toTestDiscoveryOptions() {
 		TestDiscoveryOptions result = new TestDiscoveryOptions();
 		if (this.selectorOptions != null) {
 			this.selectorOptions.applyTo(result);

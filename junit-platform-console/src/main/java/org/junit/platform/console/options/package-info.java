@@ -1,5 +1,5 @@
 /**
- * Configuration options for JUnit's console launcher.
+ * Command-line option utility classes of JUnit's console launcher.
  */
 
 @NullMarked

@@ -17,8 +17,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
 
-import org.junit.platform.console.options.CommandFacade;
-import org.junit.platform.console.tasks.ConsoleTestExecutor;
+import org.junit.platform.console.command.CommandFacade;
+import org.junit.platform.console.command.ConsoleTestExecutor;
 
 /**
  * @since 1.0

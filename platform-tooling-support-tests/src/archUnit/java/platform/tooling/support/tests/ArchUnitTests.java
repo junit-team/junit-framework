@@ -175,10 +175,6 @@ class ArchUnitTests {
 					Resource.class) //
 
 				// Needs more investigation
-				.ignoreDependency(resideInAPackage("org.junit.platform.console.options"),
-					resideInAPackage("org.junit.platform.console.tasks"))
-
-				// Needs more investigation
 				.ignoreDependency(ParameterInfo.class, ArgumentsAccessor.class)
 
 				// Needs more investigation
@@ -207,7 +203,7 @@ class ArchUnitTests {
 		// ConsoleLauncher, StreamInterceptor, Picocli et al...
 		var subset = classes //
 				.that(are(not(name("org.junit.platform.console.ConsoleLauncher")))) //
-				.that(are(not(name("org.junit.platform.console.tasks.ConsoleTestExecutor")))) //
+				.that(are(not(name("org.junit.platform.console.command.ConsoleTestExecutor")))) //
 				.that(are(not(name("org.junit.platform.launcher.core.StreamInterceptor")))) //
 				.that(are(not(name("org.junit.platform.testkit.engine.Events")))) //
 				.that(are(not(name("org.junit.platform.testkit.engine.Executions")))) //

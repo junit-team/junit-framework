@@ -10,15 +10,19 @@
 
 package org.junit.platform.console.options;
 
+import static org.apiguardian.api.API.Status.INTERNAL;
 import static picocli.CommandLine.Help.defaultColorScheme;
 import static picocli.CommandLine.Spec.Target.MIXEE;
+
+import org.apiguardian.api.API;
 
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-class AnsiColorOptionMixin {
+@API(status = INTERNAL, since = "6.0")
+public class AnsiColorOptionMixin {
 
 	@Spec(MIXEE)
 	CommandSpec commandSpec;

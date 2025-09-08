@@ -8,7 +8,8 @@ requires org.junit.platform.launcher
 requires org.junit.platform.reporting
 provides java.util.spi.ToolProvider with org.junit.platform.console.ConsoleLauncherToolProvider
 contains org.junit.platform.console
+contains org.junit.platform.console.command
 contains org.junit.platform.console.options
+contains org.junit.platform.console.output
 contains org.junit.platform.console.shadow.picocli
-contains org.junit.platform.console.tasks
 main-class org.junit.platform.console.ConsoleLauncher

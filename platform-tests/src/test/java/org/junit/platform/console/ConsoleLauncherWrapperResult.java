@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.console.options.CommandResult;
+import org.junit.platform.console.command.CommandResult;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 /**

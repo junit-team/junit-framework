@@ -16,10 +16,10 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import java.io.PrintWriter;
 
 import org.apiguardian.api.API;
-import org.junit.platform.console.options.CommandFacade;
-import org.junit.platform.console.options.CommandResult;
-import org.junit.platform.console.tasks.ConsoleTestExecutor;
-import org.junit.platform.console.tasks.CustomClassLoaderCloseStrategy;
+import org.junit.platform.console.command.CommandFacade;
+import org.junit.platform.console.command.CommandResult;
+import org.junit.platform.console.command.ConsoleTestExecutor;
+import org.junit.platform.console.command.CustomClassLoaderCloseStrategy;
 
 /**
  * The {@code ConsoleLauncher} is a stand-alone application for launching the
