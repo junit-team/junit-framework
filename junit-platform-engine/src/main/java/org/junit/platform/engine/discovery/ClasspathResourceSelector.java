@@ -18,6 +18,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -72,9 +73,16 @@ public final class ClasspathResourceSelector implements DiscoverySelector {
 		this.position = position;
 	}
 
-	ClasspathResourceSelector(Set<? extends Resource> resources) {
-		this(resources.iterator().next().getName(), null);
-		this.resources = unmodifiableSet(new LinkedHashSet<>(resources));
+	@SuppressWarnings("NonApiType") // A LinkedHashSet is used here to avoid an extra copy
+	ClasspathResourceSelector(LinkedHashSet<? extends Resource> resources) {
+		this(getUniqueClasspathResourceName(resources), null);
+		this.resources = unmodifiableSet(resources);
+	}
+
+	private static String getUniqueClasspathResourceName(Set<? extends Resource> resources) {
+		List<String> resourceNames = resources.stream().map(Resource::getName).distinct().toList();
+		Preconditions.condition(resourceNames.size() == 1, "all classpath resources must have the same name");
+		return Preconditions.notBlank(resourceNames.get(0), "classpath resource name must not be null or blank");
 	}
 
 	/**
