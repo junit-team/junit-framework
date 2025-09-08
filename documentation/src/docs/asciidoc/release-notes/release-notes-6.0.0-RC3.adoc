@@ -21,7 +21,8 @@ JUnit repository on GitHub.
 [[release-notes-6.0.0-RC3-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* ❓
+* Change serialization of `TestIdentifier` in a backwards-incompatible way to simplify
+  its implementation
 
 [[release-notes-6.0.0-RC3-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
