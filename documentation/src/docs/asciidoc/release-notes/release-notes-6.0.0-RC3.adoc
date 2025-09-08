@@ -32,6 +32,8 @@ JUnit repository on GitHub.
   - `LauncherDiscoveryRequestBuilder.outputDirectoryProvider(OutputDirectoryProvider)`
   - `TestPlan.getOutputDirectoryProvider()`
   - `EngineTestKit.Builder.outputDirectoryProvider(OutputDirectoryProvider)`
+* Delete deprecated `OutputDirectoryProvider` interface in favor of
+  `OutputDirectoryCreator`.
 
 [[release-notes-6.0.0-RC3-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements

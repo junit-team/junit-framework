@@ -10,7 +10,6 @@
 
 package org.junit.platform.engine;
 
-import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -83,22 +82,6 @@ public interface EngineDiscoveryRequest {
 	@API(status = STABLE, since = "1.10")
 	default EngineDiscoveryListener getDiscoveryListener() {
 		return EngineDiscoveryListener.NOOP;
-	}
-
-	/**
-	 * Get the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
-	 * this request.
-	 *
-	 * @return the output directory provider; never {@code null}
-	 * @since 1.12
-	 * @deprecated Please use {@link #getOutputDirectoryCreator()} instead
-	 */
-	@SuppressWarnings("removal")
-	@Deprecated(since = "6.0", forRemoval = true)
-	@API(status = DEPRECATED, since = "6.0")
-	default org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
-		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
 	}
 
 	/**

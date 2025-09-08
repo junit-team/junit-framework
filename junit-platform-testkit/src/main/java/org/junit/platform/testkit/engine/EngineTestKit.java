@@ -13,7 +13,6 @@ package org.junit.platform.testkit.engine;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNullElseGet;
-import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -439,31 +438,6 @@ public final class EngineTestKit {
 		public Builder enableImplicitConfigurationParameters(boolean enabled) {
 			this.requestBuilder.enableImplicitConfigurationParameters(enabled);
 			return this;
-		}
-
-		/**
-		 * Set the
-		 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider}
-		 * to use.
-		 *
-		 * <p>If not specified, a default provider will be used that throws an
-		 * exception when attempting to create output directories. This is done
-		 * to avoid accidentally writing output files to the file system.
-		 *
-		 * @param outputDirectoryProvider the output directory provider to use;
-		 * never {@code null}
-		 * @return this builder for method chaining
-		 * @since 1.12
-		 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
-		 * @deprecated Please use
-		 * {@link #outputDirectoryCreator(OutputDirectoryCreator)} instead
-		 */
-		@SuppressWarnings("removal")
-		@Deprecated(since = "6.0", forRemoval = true)
-		@API(status = DEPRECATED, since = "6.0")
-		public Builder outputDirectoryProvider(
-				org.junit.platform.engine.reporting.OutputDirectoryProvider outputDirectoryProvider) {
-			return outputDirectoryCreator(outputDirectoryProvider);
 		}
 
 		/**

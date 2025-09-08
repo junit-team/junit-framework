@@ -262,22 +262,6 @@ public class TestPlan {
 	}
 
 	/**
-	 * Get the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
-	 * this test plan.
-	 *
-	 * @return the output directory provider; never {@code null}
-	 * @since 1.12
-	 * @deprecated Please use {@link #getOutputDirectoryCreator()} instead
-	 */
-	@SuppressWarnings("removal")
-	@API(status = DEPRECATED, since = "6.0")
-	@Deprecated(since = "6.0", forRemoval = true)
-	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
-		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
-	}
-
-	/**
 	 * Get the {@link OutputDirectoryCreator} for this test plan.
 	 *
 	 * @return the output directory creator; never {@code null}

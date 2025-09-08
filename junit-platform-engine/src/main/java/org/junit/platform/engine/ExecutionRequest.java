@@ -147,23 +147,6 @@ public class ExecutionRequest {
 	}
 
 	/**
-	 * {@return the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
-	 * this request for writing reports and other output files}
-	 *
-	 * @throws PreconditionViolationException if the output directory provider
-	 * is not available
-	 * @since 1.12
-	 * @deprecated Please use {@link #getOutputDirectoryCreator()} instead
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@API(status = DEPRECATED, since = "6.0")
-	@SuppressWarnings("removal")
-	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
-		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
-	}
-
-	/**
 	 * {@return the {@link OutputDirectoryCreator} for this request for writing
 	 * reports and other output files}
 	 *

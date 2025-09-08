@@ -10,7 +10,6 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -306,31 +305,6 @@ public final class LauncherDiscoveryRequestBuilder {
 		Preconditions.containsNoNullElements(listeners, "individual discovery listeners must not be null");
 		this.discoveryListeners.addAll(Arrays.asList(listeners));
 		return this;
-	}
-
-	/**
-	 * Set the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} to use for the request.
-	 *
-	 * <p>If not specified, a default provider will be used that can be
-	 * configured via the {@value LauncherConstants#OUTPUT_DIR_PROPERTY_NAME}
-	 * configuration parameter.
-	 *
-	 * @param outputDirectoryProvider the output directory provider to use;
-	 *                                never {@code null}
-	 * @return this builder for method chaining
-	 * @since 1.12
-	 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
-	 * @see LauncherConstants#OUTPUT_DIR_PROPERTY_NAME
-	 * @deprecated Please use
-	 * {@link #outputDirectoryCreator(OutputDirectoryCreator)} instead
-	 */
-	@SuppressWarnings("removal")
-	@API(status = DEPRECATED, since = "6.0")
-	@Deprecated(since = "6.0", forRemoval = true)
-	public LauncherDiscoveryRequestBuilder outputDirectoryProvider(
-			org.junit.platform.engine.reporting.OutputDirectoryProvider outputDirectoryProvider) {
-		return outputDirectoryCreator(outputDirectoryProvider);
 	}
 
 	/**
