@@ -20,7 +20,7 @@ import static org.junit.platform.engine.TestExecutionResult.failed;
 import static org.junit.platform.engine.TestExecutionResult.successful;
 import static org.junit.platform.launcher.LauncherConstants.STDERR_REPORT_ENTRY_KEY;
 import static org.junit.platform.launcher.LauncherConstants.STDOUT_REPORT_ENTRY_KEY;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.junit.platform.reporting.legacy.xml.XmlReportAssertions.assertValidAccordingToJenkinsSchema;
 import static org.junit.platform.reporting.legacy.xml.XmlReportWriter.ILLEGAL_CHARACTER_REPLACEMENT;
 import static org.mockito.Mockito.mock;
@@ -58,7 +58,7 @@ class XmlReportWriterTests {
 
 	@Test
 	void writesTestsuiteElementsWithoutTestcaseElementsWithoutAnyTests() throws Exception {
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 
@@ -76,7 +76,7 @@ class XmlReportWriterTests {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		var testDescriptor = new TestDescriptorStub(uniqueId, "successfulTest");
 		engineDescriptor.addChild(testDescriptor);
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		reportData.addReportEntry(TestIdentifier.from(testDescriptor), ReportEntry.from("myKey", "myValue"));
@@ -94,7 +94,7 @@ class XmlReportWriterTests {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		var testDescriptor = new TestDescriptorStub(uniqueId, "successfulTest");
 		engineDescriptor.addChild(testDescriptor);
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		var reportEntry = ReportEntry.from(Map.of( //
@@ -123,7 +123,7 @@ class XmlReportWriterTests {
 	void writesEmptySkippedElementForSkippedTestWithoutReason() throws Exception {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(uniqueId, "skippedTest"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		reportData.markSkipped(testPlan.getTestIdentifier(uniqueId), null);
@@ -153,7 +153,7 @@ class XmlReportWriterTests {
 				return "failedTest";
 			}
 		});
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		reportData.markFinished(testPlan.getTestIdentifier(uniqueId), failed(null));
@@ -173,7 +173,7 @@ class XmlReportWriterTests {
 	void omitsMessageAttributeForFailedTestWithThrowableWithoutMessage() throws Exception {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(uniqueId, "failedTest"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		reportData.markFinished(testPlan.getTestIdentifier(uniqueId), failed(new NullPointerException()));
@@ -190,7 +190,7 @@ class XmlReportWriterTests {
 	void writesValidXmlEvenIfExceptionMessageContainsCData() throws Exception {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(uniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		var assertionError = new AssertionError("<foo><![CDATA[bar]]></foo>");
@@ -206,7 +206,7 @@ class XmlReportWriterTests {
 	void escapesInvalidCharactersInSystemPropertiesAndExceptionMessages() throws Exception {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(uniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		var assertionError = new AssertionError("expected: <A> but was: <B\0>");
@@ -241,7 +241,7 @@ class XmlReportWriterTests {
 	void writesValidXmlForExceptionMessagesContainingLineBreaks() throws Exception {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(uniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var allWhitespaceCharacters = IntStream.range(0, 0x10000) //
 				.filter(Character::isWhitespace) //

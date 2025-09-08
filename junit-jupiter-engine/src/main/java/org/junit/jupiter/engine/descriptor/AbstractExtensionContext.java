@@ -191,7 +191,7 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 
 	private Path createOutputDirectory() {
 		try {
-			return configuration.getOutputDirectoryProvider().createOutputDirectory(this.testDescriptor);
+			return configuration.getOutputDirectoryCreator().createOutputDirectory(this.testDescriptor);
 		}
 		catch (IOException e) {
 			throw new JUnitException("Failed to create output directory", e);

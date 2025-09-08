@@ -119,7 +119,7 @@ public class EngineDiscoveryOrchestrator {
 			Map<TestEngine, EngineResultInfo> testEngineResults = discoverSafely(delegatingRequest, phase,
 				issueCollector, uniqueIdCreator);
 			discoveryResult = new LauncherDiscoveryResult(testEngineResults, request.getConfigurationParameters(),
-				request.getOutputDirectoryProvider());
+				request.getOutputDirectoryCreator());
 		}
 		finally {
 			listener.launcherDiscoveryFinished(request);

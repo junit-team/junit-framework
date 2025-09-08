@@ -69,8 +69,8 @@ import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.support.scanning.ClasspathScanner;
 import org.junit.platform.commons.util.ModuleUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 @AnalyzeClasses(packages = { "org.junit.platform", "org.junit.jupiter", "org.junit.vintage" })
 class ArchUnitTests {
@@ -157,6 +157,7 @@ class ArchUnitTests {
 		slices().matching("org.junit.(*)..").should().beFreeOfCycles().check(classes);
 	}
 
+	@SuppressWarnings("removal")
 	@ArchTest
 	void freeOfPackageCycles(JavaClasses classes) throws Exception {
 		slices().matching("org.junit.(**)").should().beFreeOfCycles() //
@@ -177,8 +178,13 @@ class ArchUnitTests {
 				// Needs more investigation
 				.ignoreDependency(ParameterInfo.class, ArgumentsAccessor.class)
 
-				// Needs more investigation
-				.ignoreDependency(OutputDirectoryProvider.class, TestDescriptor.class) //
+				// https://github.com/junit-team/junit-framework/issues/4923
+				.ignoreDependency(org.junit.platform.engine.reporting.OutputDirectoryProvider.class,
+					OutputDirectoryCreator.class) //
+				.ignoreDependency(Class.forName("org.junit.platform.engine.reporting.OutputDirectoryProviderAdapter"),
+					OutputDirectoryCreator.class) //
+				.ignoreDependency(Class.forName("org.junit.platform.engine.reporting.OutputDirectoryProviderAdapter"),
+					TestDescriptor.class) //
 
 				.check(classes);
 	}

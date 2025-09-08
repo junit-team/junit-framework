@@ -19,7 +19,7 @@ import static org.junit.platform.engine.TestExecutionResult.successful;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 import static org.junit.platform.launcher.core.LauncherFactoryForTestingPurposesOnly.createLauncher;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.junit.platform.reporting.legacy.xml.XmlReportAssertions.assertValidAccordingToJenkinsSchema;
 import static org.mockito.Mockito.mock;
 
@@ -371,7 +371,7 @@ class LegacyXmlReportGeneratingListenerTests {
 		var out = new StringWriter();
 		var listener = new LegacyXmlReportGeneratingListener(reportsDir, new PrintWriter(out));
 
-		listener.testPlanExecutionStarted(TestPlan.from(true, Set.of(), mock(), dummyOutputDirectoryProvider()));
+		listener.testPlanExecutionStarted(TestPlan.from(true, Set.of(), mock(), dummyOutputDirectoryCreator()));
 
 		assertThat(out.toString()).containsSubsequence("Could not create reports directory",
 			"FileAlreadyExistsException", "at ");
@@ -388,7 +388,7 @@ class LegacyXmlReportGeneratingListenerTests {
 		var listener = new LegacyXmlReportGeneratingListener(tempDirectory, new PrintWriter(out));
 
 		listener.testPlanExecutionStarted(
-			TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryProvider()));
+			TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryCreator()));
 		listener.executionFinished(TestIdentifier.from(engineDescriptor), successful());
 
 		assertThat(out.toString()).containsSubsequence("Could not write XML report", "Exception", "at ");
@@ -399,7 +399,7 @@ class LegacyXmlReportGeneratingListenerTests {
 		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
 		var childUniqueId = UniqueId.root("child", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(childUniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryCreator());
 
 		var out = new StringWriter();
 		var listener = new LegacyXmlReportGeneratingListener(tempDirectory, new PrintWriter(out));

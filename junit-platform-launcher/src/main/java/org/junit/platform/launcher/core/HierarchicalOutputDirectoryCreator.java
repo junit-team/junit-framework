@@ -19,17 +19,17 @@ import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId.Segment;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 /**
- * Hierarchical {@link OutputDirectoryProvider} that creates directories based on
+ * Hierarchical {@link OutputDirectoryCreator} that creates directories based on
  * the unique ID segments of a {@link TestDescriptor}.
  *
  * @since 1.12
  */
-class HierarchicalOutputDirectoryProvider implements OutputDirectoryProvider {
+class HierarchicalOutputDirectoryCreator implements OutputDirectoryCreator {
 
 	private static final Pattern FORBIDDEN_CHARS = Pattern.compile("[^a-z0-9.,_\\-() ]", Pattern.CASE_INSENSITIVE);
 	private static final String REPLACEMENT = "_";
@@ -38,7 +38,7 @@ class HierarchicalOutputDirectoryProvider implements OutputDirectoryProvider {
 
 	private volatile @Nullable Path rootDir;
 
-	HierarchicalOutputDirectoryProvider(Supplier<Path> rootDirSupplier) {
+	HierarchicalOutputDirectoryCreator(Supplier<Path> rootDirSupplier) {
 		this.rootDirSupplier = rootDirSupplier;
 	}
 
@@ -49,7 +49,7 @@ class HierarchicalOutputDirectoryProvider implements OutputDirectoryProvider {
 		List<Segment> segments = testDescriptor.getUniqueId().getSegments();
 		Path relativePath = segments.stream() //
 				.skip(1) //
-				.map(HierarchicalOutputDirectoryProvider::toSanitizedPath) //
+				.map(HierarchicalOutputDirectoryCreator::toSanitizedPath) //
 				.reduce(toSanitizedPath(segments.get(0)), Path::resolve);
 		return Files.createDirectories(getRootDirectory().resolve(relativePath));
 	}

@@ -25,11 +25,11 @@ import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
 import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
 import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
-import org.junit.platform.launcher.core.OutputDirectoryProviders;
+import org.junit.platform.launcher.core.OutputDirectoryCreators;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.engine.testcases.SingleTestTestCase;
 import org.junit.platform.suite.engine.testsuites.SelectClassesSuite;
@@ -48,10 +48,10 @@ class SuiteTestDescriptorTests {
 		"test(%s)".formatted(TestReporter.class.getName()));
 
 	final ConfigurationParameters configurationParameters = new EmptyConfigurationParameters();
-	final OutputDirectoryProvider outputDirectoryProvider = OutputDirectoryProviders.dummyOutputDirectoryProvider();
+	final OutputDirectoryCreator outputDirectoryCreator = OutputDirectoryCreators.dummyOutputDirectoryCreator();
 	final DiscoveryIssueReporter discoveryIssueReporter = DiscoveryIssueReporter.forwarding(mock(), engineId);
 	final SuiteTestDescriptor suite = new SuiteTestDescriptor(suiteId, TestSuite.class, configurationParameters,
-		outputDirectoryProvider, mock(), discoveryIssueReporter);
+		outputDirectoryCreator, mock(), discoveryIssueReporter);
 
 	@Test
 	void suiteIsEmptyBeforeDiscovery() {

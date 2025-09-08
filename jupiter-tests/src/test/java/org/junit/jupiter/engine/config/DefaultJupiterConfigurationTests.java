@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,13 +48,13 @@ class DefaultJupiterConfigurationTests {
 	@Test
 	void getDefaultTestInstanceLifecyclePreconditions() {
 		PreconditionViolationException exception = assertThrows(PreconditionViolationException.class,
-			() -> new DefaultJupiterConfiguration(null, dummyOutputDirectoryProvider(), mock()));
+			() -> new DefaultJupiterConfiguration(null, dummyOutputDirectoryCreator(), mock()));
 		assertThat(exception).hasMessage("ConfigurationParameters must not be null");
 	}
 
 	@Test
 	void getDefaultTestInstanceLifecycleWithNoConfigParamSet() {
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator(),
 			mock());
 		Lifecycle lifecycle = configuration.getDefaultTestInstanceLifecycle();
 		assertThat(lifecycle).isEqualTo(PER_METHOD);
@@ -62,7 +62,7 @@ class DefaultJupiterConfigurationTests {
 
 	@Test
 	void getDefaultTempDirCleanupModeWithNoConfigParamSet() {
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator(),
 			mock());
 		CleanupMode cleanupMode = configuration.getDefaultTempDirCleanupMode();
 		assertThat(cleanupMode).isEqualTo(ALWAYS);
@@ -93,7 +93,7 @@ class DefaultJupiterConfigurationTests {
 		ConfigurationParameters parameters = mock();
 		String key = Constants.DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME;
 		when(parameters.get(key)).thenReturn(Optional.of(CustomDisplayNameGenerator.class.getName()));
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
 			mock());
 
 		DisplayNameGenerator defaultDisplayNameGenerator = configuration.getDefaultDisplayNameGenerator();
@@ -106,7 +106,7 @@ class DefaultJupiterConfigurationTests {
 		ConfigurationParameters parameters = mock();
 		String key = Constants.DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME;
 		when(parameters.get(key)).thenReturn(Optional.empty());
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
 			mock());
 
 		DisplayNameGenerator defaultDisplayNameGenerator = configuration.getDefaultDisplayNameGenerator();
@@ -119,7 +119,7 @@ class DefaultJupiterConfigurationTests {
 		ConfigurationParameters parameters = mock();
 		String key = Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
 		when(parameters.get(key)).thenReturn(Optional.empty());
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
 			mock());
 
 		final Optional<MethodOrderer> defaultTestMethodOrder = configuration.getDefaultTestMethodOrderer();
@@ -132,7 +132,7 @@ class DefaultJupiterConfigurationTests {
 		ConfigurationParameters parameters = mock();
 		String key = Constants.DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME;
 		when(parameters.get(key)).thenReturn(Optional.of(CustomFactory.class.getName()));
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
 			mock());
 
 		Supplier<TempDirFactory> supplier = configuration.getDefaultTempDirFactorySupplier();
@@ -153,7 +153,7 @@ class DefaultJupiterConfigurationTests {
 		ConfigurationParameters parameters = mock();
 		String key = Constants.DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME;
 		when(parameters.get(key)).thenReturn(Optional.empty());
-		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryProvider(),
+		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
 			mock());
 
 		Supplier<TempDirFactory> supplier = configuration.getDefaultTempDirFactorySupplier();
@@ -169,7 +169,7 @@ class DefaultJupiterConfigurationTests {
 	private static Lifecycle getDefaultTestInstanceLifecycleConfigParam(@Nullable String configValue) {
 		ConfigurationParameters configParams = mock();
 		when(configParams.get(KEY)).thenReturn(Optional.ofNullable(configValue));
-		return new DefaultJupiterConfiguration(configParams, dummyOutputDirectoryProvider(),
+		return new DefaultJupiterConfiguration(configParams, dummyOutputDirectoryCreator(),
 			mock()).getDefaultTestInstanceLifecycle();
 	}
 

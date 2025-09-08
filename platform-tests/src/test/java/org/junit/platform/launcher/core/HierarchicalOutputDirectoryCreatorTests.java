@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 @MockitoSettings
-public class HierarchicalOutputDirectoryProviderTests {
+public class HierarchicalOutputDirectoryCreatorTests {
 
 	@TempDir
 	Path tempDir;
@@ -40,7 +40,7 @@ public class HierarchicalOutputDirectoryProviderTests {
 	TestDescriptor testDescriptor;
 
 	@InjectMocks
-	HierarchicalOutputDirectoryProvider provider;
+	HierarchicalOutputDirectoryCreator provider;
 
 	@BeforeEach
 	void prepareMock() {

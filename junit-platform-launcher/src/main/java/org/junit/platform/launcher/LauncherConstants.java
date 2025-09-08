@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
+import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.reporting.ReportEntry;
 
 /**
@@ -201,7 +202,9 @@ public class LauncherConstants {
 	 *
 	 * @since 1.12
 	 * @see #OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER
-	 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
+	 * @see org.junit.platform.engine.OutputDirectoryCreator
+	 * @see EngineDiscoveryRequest#getOutputDirectoryCreator()
+	 * @see TestPlan#getOutputDirectoryCreator()
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String OUTPUT_DIR_PROPERTY_NAME = "junit.platform.reporting.output.dir";

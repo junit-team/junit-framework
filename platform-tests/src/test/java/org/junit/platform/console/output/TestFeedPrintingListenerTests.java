@@ -12,7 +12,7 @@ package org.junit.platform.console.output;
 
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 
 import java.io.PrintWriter;
@@ -45,7 +45,7 @@ public class TestFeedPrintingListenerTests {
 			"%c ool test");
 		engineDescriptor.addChild(testDescriptor);
 
-		testPlan = TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryProvider());
+		testPlan = TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryCreator());
 		testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
 
 		listener.testPlanExecutionStarted(testPlan);

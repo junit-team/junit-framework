@@ -15,7 +15,7 @@ import java.util.List;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -62,8 +62,14 @@ class DelegatingLauncherDiscoveryRequest implements LauncherDiscoveryRequest {
 		return this.request.getConfigurationParameters();
 	}
 
+	@SuppressWarnings("removal")
 	@Override
-	public OutputDirectoryProvider getOutputDirectoryProvider() {
+	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
 		return this.request.getOutputDirectoryProvider();
+	}
+
+	@Override
+	public OutputDirectoryCreator getOutputDirectoryCreator() {
+		return this.request.getOutputDirectoryCreator();
 	}
 }

@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.api.extension.MediaType.TEXT_PLAIN;
 import static org.junit.jupiter.api.extension.MediaType.TEXT_PLAIN_UTF_8;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.hierarchicalOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -91,7 +91,7 @@ public class ExtensionContextTests {
 		when(configuration.getDefaultDisplayNameGenerator()).thenReturn(new DisplayNameGenerator.Standard());
 		when(configuration.getDefaultExecutionMode()).thenReturn(ExecutionMode.SAME_THREAD);
 		when(configuration.getDefaultClassesExecutionMode()).thenReturn(ExecutionMode.SAME_THREAD);
-		when(configuration.getOutputDirectoryProvider()).thenReturn(dummyOutputDirectoryProvider());
+		when(configuration.getOutputDirectoryCreator()).thenReturn(dummyOutputDirectoryCreator());
 	}
 
 	@Test
@@ -395,8 +395,8 @@ public class ExtensionContextTests {
 
 	private ExtensionContext createExtensionContextForFilePublishing(Path tempDir,
 			EngineExecutionListener engineExecutionListener, ClassTestDescriptor classTestDescriptor) {
-		when(configuration.getOutputDirectoryProvider()) //
-				.thenReturn(hierarchicalOutputDirectoryProvider(tempDir));
+		when(configuration.getOutputDirectoryCreator()) //
+				.thenReturn(hierarchicalOutputDirectoryCreator(tempDir));
 		return new ClassExtensionContext(mock(AbstractExtensionContext.class), engineExecutionListener,
 			classTestDescriptor, PER_METHOD, configuration, extensionRegistry, launcherStoreFacade, mock());
 	}
@@ -454,7 +454,7 @@ public class ExtensionContextTests {
 		ConfigurationParameters configurationParameters = mock();
 		when(configurationParameters.get("123")).thenReturn(expected);
 		JupiterConfiguration echo = new DefaultJupiterConfiguration(configurationParameters,
-			dummyOutputDirectoryProvider(), mock());
+			dummyOutputDirectoryCreator(), mock());
 
 		var context = extensionContextFactory.apply(echo);
 

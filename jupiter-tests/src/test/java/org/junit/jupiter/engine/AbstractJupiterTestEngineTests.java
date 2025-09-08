@@ -18,7 +18,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMetho
 import static org.junit.platform.launcher.LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -104,7 +104,7 @@ public abstract class AbstractJupiterTestEngineTests {
 
 	protected EngineTestKit.Builder jupiterTestEngine() {
 		return EngineTestKit.engine(this.engine) //
-				.outputDirectoryProvider(dummyOutputDirectoryProvider()) //
+				.outputDirectoryCreator(dummyOutputDirectoryCreator()) //
 				.configurationParameter(STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, String.valueOf(false)) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.INFO.name()) //
 				.enableImplicitConfigurationParameters(false);
@@ -112,7 +112,7 @@ public abstract class AbstractJupiterTestEngineTests {
 
 	protected static LauncherDiscoveryRequestBuilder defaultRequest() {
 		return request() //
-				.outputDirectoryProvider(dummyOutputDirectoryProvider()) //
+				.outputDirectoryCreator(dummyOutputDirectoryCreator()) //
 				.configurationParameter(STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, String.valueOf(false)) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.INFO.name()) //
 				.enableImplicitConfigurationParameters(false);

@@ -39,7 +39,7 @@ import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 
 /**
@@ -82,13 +82,13 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 		new EnumConfigurationParameterConverter<>(ExtensionContextScope.class, "extension context scope");
 
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 
 	public DefaultJupiterConfiguration(ConfigurationParameters configurationParameters,
-			OutputDirectoryProvider outputDirectoryProvider, DiscoveryIssueReporter issueReporter) {
+			OutputDirectoryCreator outputDirectoryCreator, DiscoveryIssueReporter issueReporter) {
 		this.configurationParameters = Preconditions.notNull(configurationParameters,
 			"ConfigurationParameters must not be null");
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 		validateConfigurationParameters(issueReporter);
 	}
 
@@ -211,7 +211,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	}
 
 	@Override
-	public OutputDirectoryProvider getOutputDirectoryProvider() {
-		return outputDirectoryProvider;
+	public OutputDirectoryCreator getOutputDirectoryCreator() {
+		return outputDirectoryCreator;
 	}
 }

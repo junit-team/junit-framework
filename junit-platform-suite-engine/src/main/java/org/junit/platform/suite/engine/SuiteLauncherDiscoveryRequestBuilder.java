@@ -33,12 +33,12 @@ import org.junit.platform.commons.util.StringUtils;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.Filter;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.discovery.ClassSelector;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.discovery.MethodSelector;
 import org.junit.platform.engine.discovery.PackageNameFilter;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -196,8 +196,8 @@ final class SuiteLauncherDiscoveryRequestBuilder {
 		return this;
 	}
 
-	SuiteLauncherDiscoveryRequestBuilder outputDirectoryProvider(OutputDirectoryProvider outputDirectoryProvider) {
-		delegate.outputDirectoryProvider(outputDirectoryProvider);
+	SuiteLauncherDiscoveryRequestBuilder outputDirectoryCreator(OutputDirectoryCreator outputDirectoryCreator) {
+		delegate.outputDirectoryCreator(outputDirectoryCreator);
 		return this;
 	}
 

@@ -10,14 +10,12 @@
 
 package org.junit.platform.engine.reporting;
 
-import static org.apiguardian.api.API.Status.MAINTAINED;
-
-import java.io.IOException;
-import java.nio.file.Path;
+import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.INTERNAL;
 
 import org.apiguardian.api.API;
 import org.junit.platform.engine.EngineDiscoveryRequest;
-import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.OutputDirectoryCreator;
 
 /**
  * Provider of output directories for test engines to write reports and other
@@ -25,23 +23,25 @@ import org.junit.platform.engine.TestDescriptor;
  *
  * @since 1.12
  * @see EngineDiscoveryRequest#getOutputDirectoryProvider()
+ * @deprecated Please implement {@link OutputDirectoryCreator} instead
  */
-@API(status = MAINTAINED, since = "1.13.3")
-public interface OutputDirectoryProvider {
+@SuppressWarnings("removal")
+@Deprecated(since = "6.0", forRemoval = true)
+@API(status = DEPRECATED, since = "6.0")
+public interface OutputDirectoryProvider extends OutputDirectoryCreator {
 
 	/**
-	 * {@return the root directory for all output files; never {@code null}}
-	 */
-	Path getRootDirectory();
-
-	/**
-	 * Create an output directory for the supplied test descriptor.
+	 * Cast or adapt an {@link OutputDirectoryCreator} to a
+	 * {@code OutputDirectoryProvider}.
 	 *
-	 * @param testDescriptor the test descriptor for which to create an output
-	 * directory; never {@code null}
-	 * @return the output directory
-	 * @throws IOException if the output directory could not be created
+	 * @since 6.0
 	 */
-	Path createOutputDirectory(TestDescriptor testDescriptor) throws IOException;
+	@API(status = INTERNAL, since = "6.0")
+	static OutputDirectoryProvider castOrAdapt(OutputDirectoryCreator outputDirectoryCreator) {
+		if (outputDirectoryCreator instanceof OutputDirectoryProvider provider) {
+			return provider;
+		}
+		return new OutputDirectoryProviderAdapter(outputDirectoryCreator);
+	}
 
 }

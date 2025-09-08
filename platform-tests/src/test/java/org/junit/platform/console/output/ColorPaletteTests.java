@@ -13,7 +13,7 @@ package org.junit.platform.console.output;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 
 import java.io.PrintWriter;
@@ -186,7 +186,7 @@ class ColorPaletteTests {
 
 		private void demoTestRun(TestExecutionListener listener) {
 			TestDescriptor testDescriptor = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "My Test");
-			TestPlan testPlan = TestPlan.from(true, List.of(testDescriptor), mock(), dummyOutputDirectoryProvider());
+			TestPlan testPlan = TestPlan.from(true, List.of(testDescriptor), mock(), dummyOutputDirectoryCreator());
 			listener.testPlanExecutionStarted(testPlan);
 			listener.executionStarted(TestIdentifier.from(testDescriptor));
 			listener.executionFinished(TestIdentifier.from(testDescriptor), TestExecutionResult.successful());

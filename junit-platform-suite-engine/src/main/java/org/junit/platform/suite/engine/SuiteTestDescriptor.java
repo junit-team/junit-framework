@@ -32,12 +32,12 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.EngineDiscoveryListener;
 import org.junit.platform.engine.EngineExecutionListener;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.UniqueId.Segment;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
@@ -68,7 +68,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	private final SuiteLauncherDiscoveryRequestBuilder discoveryRequestBuilder = request();
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 	private final Boolean failIfNoTests;
 	private final Class<?> suiteClass;
 	private final LifecycleMethods lifecycleMethods;
@@ -78,11 +78,11 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 	private @Nullable SuiteLauncher launcher;
 
 	SuiteTestDescriptor(UniqueId id, Class<?> suiteClass, ConfigurationParameters configurationParameters,
-			OutputDirectoryProvider outputDirectoryProvider, EngineDiscoveryListener discoveryListener,
+			OutputDirectoryCreator outputDirectoryCreator, EngineDiscoveryListener discoveryListener,
 			DiscoveryIssueReporter issueReporter) {
 		super(id, getSuiteDisplayName(suiteClass, issueReporter), ClassSource.from(suiteClass));
 		this.configurationParameters = configurationParameters;
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 		this.failIfNoTests = getFailIfNoTests(suiteClass);
 		this.suiteClass = suiteClass;
 		this.lifecycleMethods = new LifecycleMethods(suiteClass, issueReporter);
@@ -122,7 +122,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 				.disableImplicitConfigurationParameters()
 				.parentConfigurationParameters(configurationParameters)
 				.applyConfigurationParametersFromSuite(suiteClass)
-				.outputDirectoryProvider(outputDirectoryProvider)
+				.outputDirectoryCreator(outputDirectoryCreator)
 				.build();
 		// @formatter:on
 		this.launcher = SuiteLauncher.create();

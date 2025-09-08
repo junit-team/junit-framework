@@ -12,7 +12,7 @@ package org.junit.platform.launcher.jfr;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.hierarchicalOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.junit.platform.reporting.testutil.FileUtils.findPath;
 import static org.moditect.jfrunit.ExpectedEvent.event;
 import static org.moditect.jfrunit.JfrEventsAssert.assertThat;
@@ -44,7 +44,7 @@ public class FlightRecordingExecutionListenerIntegrationTests {
 		var launcher = LauncherFactoryForTestingPurposesOnly.createLauncher(new JupiterTestEngine());
 		var request = request() //
 				.selectors(selectClass(TestCase.class)) //
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(tempDir)) //
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(tempDir)) //
 				.forExecution() //
 				.build();
 

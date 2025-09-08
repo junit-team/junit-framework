@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.hierarchicalOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.junit.platform.testkit.engine.EventConditions.fileEntry;
 import static org.junit.platform.testkit.engine.EventConditions.reportEntry;
 
@@ -53,7 +53,7 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 		var request = request() //
 				.selectors(selectClass(MyReportingTestCase.class)) //
 				.configurationParameter(DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME, lifecycle.name()) //
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(tempDir));
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(tempDir));
 
 		var results = executeTests(request);
 

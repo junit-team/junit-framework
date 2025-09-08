@@ -13,7 +13,7 @@ package org.junit.platform.reporting.legacy.xml;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.TestExecutionResult.failed;
 import static org.junit.platform.engine.TestExecutionResult.successful;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 
 import java.time.Clock;
@@ -38,7 +38,7 @@ class XmlReportDataTests {
 		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
 		var childUniqueId = UniqueId.root("child", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(childUniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		var results = reportData.getResults(testPlan.getTestIdentifier(childUniqueId));
@@ -51,7 +51,7 @@ class XmlReportDataTests {
 		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
 		var childUniqueId = UniqueId.root("child", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(childUniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		var failureOfAncestor = failed(new RuntimeException("failed!"));
@@ -67,7 +67,7 @@ class XmlReportDataTests {
 		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("engine"), "Engine");
 		var childUniqueId = UniqueId.root("child", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(childUniqueId, "test"));
-		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryProvider());
+		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
 		reportData.markFinished(testPlan.getTestIdentifier(engineDescriptor.getUniqueId()), successful());
