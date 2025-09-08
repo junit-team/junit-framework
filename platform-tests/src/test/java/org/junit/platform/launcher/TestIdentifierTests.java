@@ -10,6 +10,8 @@
 
 package org.junit.platform.launcher;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -18,8 +20,12 @@ import static org.junit.platform.commons.util.SerializationUtils.deserialize;
 import static org.junit.platform.commons.util.SerializationUtils.serialize;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.IntStream;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -34,6 +40,7 @@ import org.junit.platform.fakes.TestDescriptorStub;
 /**
  * @since 1.0
  */
+@NullMarked
 class TestIdentifierTests {
 
 	@Test
@@ -62,12 +69,10 @@ class TestIdentifierTests {
 
 	@ParameterizedTest
 	@ValueSource(ints = { 0, 1, 2 })
-	void currentVersionCanBeSerializedAndDeserialized_withVariousTagCounts(int tagCount) throws Exception {
-		Set<TestTag> tags = switch (tagCount) {
-			case 0 -> java.util.Collections.emptySet();
-			case 1 -> Set.of(TestTag.create("fast"));
-			default -> Set.of(TestTag.create("fast"), TestTag.create("ui"));
-		};
+	void currentVersionCanBeSerializedAndDeserialized(int tagCount) throws Exception {
+		var tags = IntStream.range(0, tagCount) //
+				.mapToObj(i -> TestTag.create("tag-" + i)) //
+				.collect(collectingAndThen(toSet(), TestIdentifierTests::unserializableSet));
 
 		var original = createOriginalTestIdentifier(tags);
 
@@ -76,6 +81,23 @@ class TestIdentifierTests {
 
 		assertDeepEquals(original, roundTripped);
 		assertThat(original.getTags()).isInstanceOf(Serializable.class);
+	}
+
+	private static <T> Set<T> unserializableSet(Set<T> delegate) {
+		var wrapper = new AbstractSet<T>() {
+
+			@Override
+			public Iterator<T> iterator() {
+				return delegate.iterator();
+			}
+
+			@Override
+			public int size() {
+				return delegate.size();
+			}
+		};
+		assertThat(wrapper).isNotInstanceOf(Serializable.class);
+		return wrapper;
 	}
 
 	@Test
