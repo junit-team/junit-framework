@@ -88,6 +88,14 @@ public final class TestIdentifier implements Serializable {
 		this.legacyReportingName = legacyReportingName;
 	}
 
+	private Set<TestTag> copyOf(Set<TestTag> tags) {
+		return switch (tags.size()) {
+			case 0 -> emptySet();
+			case 1 -> Set.of(getOnlyElement(tags));
+			default -> new LinkedHashSet<>(tags);
+		};
+	}
+
 	/**
 	 * Get the unique ID of the represented test or container as a
 	 * {@code String}.
@@ -100,14 +108,6 @@ public final class TestIdentifier implements Serializable {
 	 */
 	public String getUniqueId() {
 		return this.uniqueId.toString();
-	}
-
-	private Set<TestTag> copyOf(Set<TestTag> tags) {
-		return switch (tags.size()) {
-			case 0 -> emptySet();
-			case 1 -> Set.of(getOnlyElement(tags));
-			default -> new LinkedHashSet<>(tags);
-		};
 	}
 
 	/**
