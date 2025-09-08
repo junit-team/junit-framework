@@ -63,7 +63,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.extension.MediaType;
-import org.junit.platform.commons.support.scanning.ClasspathScanner;
 import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 
@@ -159,9 +158,6 @@ class ArchUnitTests {
 
 				// https://github.com/junit-team/junit-framework/issues/4886
 				.ignoreDependency(TestReporter.class, MediaType.class) //
-
-				// https://github.com/junit-team/junit-framework/issues/4885
-				.ignoreDependency(ClasspathScanner.class, org.junit.platform.commons.support.Resource.class) //
 
 				// https://github.com/junit-team/junit-framework/issues/4919
 				.ignoreDependency(org.junit.jupiter.params.support.ParameterInfo.class,

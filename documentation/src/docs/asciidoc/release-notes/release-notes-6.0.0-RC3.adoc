@@ -51,8 +51,8 @@ JUnit repository on GitHub.
 * Deprecate
   `EngineDiscoveryRequestResolver.Builder.addResourceContainerSelectorResolver(Predicate)`
   method in favor of `addResourceContainerSelectorResolver(ResourceFilter)`.
-* Deprecate `Resource`-related methods in `ClasspathScanner` in favor of new methods using
-  `org.junit.platform.commons.io.Resource` and `ResourceFilter`:
+* Delete deprecated `Resource`-related methods in `ClasspathScanner` in favor of new
+  methods using `org.junit.platform.commons.io.Resource` and `ResourceFilter`:
   - `scanForResourcesInPackage(String, Predicate)`
   - `scanForResourcesInClasspathRoot(URI, Predicate)`
 
