@@ -11,7 +11,6 @@
 package org.junit.jupiter.api;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -96,28 +95,6 @@ public interface TestReporter {
 	 *
 	 * @param file the file to be published; never {@code null} or blank
 	 * @param mediaType the media type of the file; never {@code null}; use
-	 * {@link org.junit.jupiter.api.extension.MediaType#APPLICATION_OCTET_STREAM}
-	 * if unknown
-	 * @since 5.12
-	 * @deprecated Use {@link #publishFile(Path, MediaType)} instead.
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@API(status = DEPRECATED, since = "6.0")
-	@SuppressWarnings("removal")
-	default void publishFile(Path file, org.junit.jupiter.api.extension.MediaType mediaType) {
-		Preconditions.condition(Files.exists(file), () -> "file must exist: " + file);
-		Preconditions.condition(Files.isRegularFile(file), () -> "file must be a regular file: " + file);
-		publishFile(file, MediaType.parse(mediaType.toString()));
-	}
-
-	/**
-	 * Publish the supplied file and attach it to the current test or container.
-	 *
-	 * <p>The file will be copied to the report output directory replacing any
-	 * potentially existing file with the same name.
-	 *
-	 * @param file the file to be published; never {@code null} or blank
-	 * @param mediaType the media type of the file; never {@code null}; use
 	 * {@link MediaType#APPLICATION_OCTET_STREAM} if unknown
 	 * @since 6.0
 	 */
@@ -160,30 +137,6 @@ public interface TestReporter {
 				});
 			}
 		});
-	}
-
-	/**
-	 * Publish a file with the supplied name and media type written by the supplied
-	 * action and attach it to the current test or container.
-	 *
-	 * <p>The {@link Path} passed to the supplied action will be relative to the
-	 * report output directory, but it is up to the action to write the file.
-	 *
-	 * @param name the name of the file to be published; never {@code null} or
-	 * blank and must not contain any path separators
-	 * @param mediaType the media type of the file; never {@code null}; use
-	 * {@link org.junit.jupiter.api.extension.MediaType#APPLICATION_OCTET_STREAM}
-	 * if unknown
-	 * @param action the action to be executed to write the file; never {@code null}
-	 * @since 5.12
-	 * @deprecated Use {@link #publishFile(String, MediaType, ThrowingConsumer)} instead.
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	@API(status = DEPRECATED, since = "6.0")
-	@SuppressWarnings("removal")
-	default void publishFile(String name, org.junit.jupiter.api.extension.MediaType mediaType,
-			ThrowingConsumer<Path> action) {
-		publishFile(name, MediaType.parse(mediaType.toString()), action);
 	}
 
 	/**
