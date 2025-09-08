@@ -17,9 +17,7 @@ import org.junit.jupiter.params.support.ParameterDeclarations;
 /**
  * @since 5.13
  */
-@SuppressWarnings("removal")
-record DefaultParameterInfo(ParameterDeclarations declarations, ArgumentsAccessor arguments)
-		implements org.junit.jupiter.params.support.ParameterInfo {
+record DefaultParameterInfo(ParameterDeclarations declarations, ArgumentsAccessor arguments) implements ParameterInfo {
 
 	@Override
 	public ParameterDeclarations getDeclarations() {
@@ -32,10 +30,7 @@ record DefaultParameterInfo(ParameterDeclarations declarations, ArgumentsAccesso
 	}
 
 	void store(ExtensionContext context) {
-		context.getStore(org.junit.jupiter.params.ParameterInfo.NAMESPACE) //
-				.put(org.junit.jupiter.params.ParameterInfo.KEY, this);
-		context.getStore(org.junit.jupiter.params.support.ParameterInfo.NAMESPACE) //
-				.put(org.junit.jupiter.params.support.ParameterInfo.KEY, this);
+		context.getStore(ParameterInfo.NAMESPACE).put(ParameterInfo.KEY, this);
 	}
 
 }

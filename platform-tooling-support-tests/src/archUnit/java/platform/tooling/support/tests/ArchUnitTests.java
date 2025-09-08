@@ -173,10 +173,6 @@ class ArchUnitTests {
 				.ignoreDependency(Class.forName("org.junit.platform.commons.util.DefaultClasspathScanner"),
 					Resource.class) //
 
-				// https://github.com/junit-team/junit-framework/issues/4919
-				.ignoreDependency(org.junit.jupiter.params.support.ParameterInfo.class,
-					org.junit.jupiter.params.ParameterInfo.class)
-
 				// https://github.com/junit-team/junit-framework/issues/4923
 				.ignoreDependency(org.junit.platform.engine.reporting.OutputDirectoryProvider.class,
 					OutputDirectoryCreator.class) //
