@@ -13,7 +13,6 @@ package example;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -65,7 +64,7 @@ class TestTemplateDemo {
 
 				@Override
 				public List<Extension> getAdditionalExtensions() {
-					return Collections.singletonList(new ParameterResolver() {
+					return List.of(new ParameterResolver() {
 						@Override
 						public boolean supportsParameter(ParameterContext parameterContext,
 								ExtensionContext extensionContext) {

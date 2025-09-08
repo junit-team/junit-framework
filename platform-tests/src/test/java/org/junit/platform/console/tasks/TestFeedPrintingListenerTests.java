@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collections;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,7 @@ public class TestFeedPrintingListenerTests {
 			"%c ool test");
 		engineDescriptor.addChild(testDescriptor);
 
-		testPlan = TestPlan.from(true, Collections.singleton(engineDescriptor), mock(), dummyOutputDirectoryProvider());
+		testPlan = TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryProvider());
 		testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
 
 		listener.testPlanExecutionStarted(testPlan);

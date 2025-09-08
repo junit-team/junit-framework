@@ -19,7 +19,6 @@ import static org.junit.platform.engine.support.discovery.SelectorResolver.Resol
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -120,7 +119,7 @@ class ResourceContainerSelectorResolverTest {
 		var defaultPackageResource = "/default-package.resource";
 		var resourceUri = getClass().getResource(defaultPackageResource).toString();
 		var uri = URI.create(resourceUri.substring(0, resourceUri.length() - defaultPackageResource.length()));
-		return Collections.singleton(Path.of(uri));
+		return Set.of(Path.of(uri));
 	}
 
 	private static class ResourceSelectorResolver implements SelectorResolver {

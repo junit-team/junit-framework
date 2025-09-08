@@ -47,7 +47,7 @@ public interface Resource {
 	 * @since 6.0
 	 */
 	@API(status = MAINTAINED, since = "6.0")
-	static Resource from(String name, URI uri) {
+	static Resource of(String name, URI uri) {
 		return new DefaultResource(name, uri);
 	}
 

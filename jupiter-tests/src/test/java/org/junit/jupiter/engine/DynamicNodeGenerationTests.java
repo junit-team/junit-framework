@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -478,26 +479,26 @@ class DynamicNodeGenerationTests extends AbstractJupiterTestEngineTests {
 
 		@TestFactory
 		Iterable<DynamicNode> dynamicContainerWithIterable() {
-			return singleton(dynamicContainer("box", list));
+			return Set.of(dynamicContainer("box", list));
 		}
 
 		@TestFactory
 		Iterable<DynamicNode> nestedDynamicContainers() {
-			return singleton(dynamicContainer("gift wrap", singleton(dynamicContainer("box", list))));
+			return Set.of(dynamicContainer("gift wrap", Set.of(dynamicContainer("box", list))));
 		}
 
 		@TestFactory
 		Stream<DynamicNode> twoNestedContainersWithTwoTestsEach() {
 			return Stream.of( //
-				dynamicContainer("a", singleton(dynamicContainer("a1", list))), //
-				dynamicContainer("b", singleton(dynamicContainer("b1", list))) //
+				dynamicContainer("a", Set.of(dynamicContainer("a1", list))), //
+				dynamicContainer("b", Set.of(dynamicContainer("b1", list))) //
 			);
 		}
 
 		@TestFactory
 		Iterable<DynamicNode> dynamicContainerWithExceptionThrowingStream() {
 			// @formatter:off
-			return singleton(dynamicContainer("box",
+			return Set.of(dynamicContainer("box",
 					IntStream.rangeClosed(0, 100)
 							.mapToObj(list::get)
 							.onClose(() -> exceptionThrowingStreamClosed.set(true))));
@@ -506,7 +507,7 @@ class DynamicNodeGenerationTests extends AbstractJupiterTestEngineTests {
 
 		@TestFactory
 		Iterable<DynamicNode> dynamicContainerWithNullChildren() {
-			return singleton(dynamicContainer("box", singleton(null)));
+			return Set.of(dynamicContainer("box", singleton(null)));
 		}
 
 		@TestFactory

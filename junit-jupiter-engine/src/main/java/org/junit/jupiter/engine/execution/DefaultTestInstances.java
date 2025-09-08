@@ -26,7 +26,7 @@ import org.junit.platform.commons.util.Preconditions;
 public class DefaultTestInstances implements TestInstances {
 
 	public static DefaultTestInstances of(Object instance) {
-		return new DefaultTestInstances(Collections.singletonList(instance));
+		return new DefaultTestInstances(List.of(instance));
 	}
 
 	public static DefaultTestInstances of(TestInstances testInstances, Object instance) {

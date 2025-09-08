@@ -12,7 +12,6 @@ package org.junit.platform.console.options;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.engine.discovery.ClassNameFilter.STANDARD_INCLUDE_PATTERN;
 
@@ -63,7 +62,7 @@ public class TestDiscoveryOptions {
 	private List<UniqueIdSelector> selectedUniqueIds = emptyList();
 	private List<DiscoverySelectorIdentifier> selectorIdentifiers = emptyList();
 
-	private List<String> includedClassNamePatterns = singletonList(STANDARD_INCLUDE_PATTERN);
+	private List<String> includedClassNamePatterns = List.of(STANDARD_INCLUDE_PATTERN);
 	private List<String> excludedClassNamePatterns = emptyList();
 	private List<String> includedPackages = emptyList();
 	private List<String> excludedPackages = emptyList();

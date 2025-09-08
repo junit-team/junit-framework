@@ -23,7 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -656,6 +655,7 @@ class SuiteLauncherDiscoveryRequestBuilderTests {
 	}
 
 	private static class StubAbstractTestDescriptor extends AbstractTestDescriptor {
+
 		StubAbstractTestDescriptor() {
 			super(UniqueId.forEngine("test"), "stub");
 		}
@@ -667,12 +667,13 @@ class SuiteLauncherDiscoveryRequestBuilderTests {
 
 		@Override
 		public Set<TestTag> getTags() {
-			return Collections.singleton(TestTag.create("test-tag"));
+			return Set.of(TestTag.create("test-tag"));
 		}
 
 	}
 
 	private static class ParentConfigurationParameters implements ConfigurationParameters {
+
 		private final Map<String, String> map;
 
 		ParentConfigurationParameters(String key, String value) {

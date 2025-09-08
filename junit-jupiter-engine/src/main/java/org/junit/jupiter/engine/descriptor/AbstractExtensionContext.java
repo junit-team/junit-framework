@@ -148,9 +148,9 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 		Preconditions.notNull(mediaType, "mediaType must not be null");
 		Preconditions.notNull(action, "action must not be null");
 
-		publishFileEntry(name, action, file -> {
-			Preconditions.condition(Files.isRegularFile(file), () -> "Published path must be a regular file: " + file);
-			return FileEntry.from(file, mediaType.toString());
+		publishFileEntry(name, action, path -> {
+			Preconditions.condition(Files.isRegularFile(path), () -> "Published path must be a regular file: " + path);
+			return FileEntry.from(path, mediaType.toString());
 		});
 	}
 
@@ -165,9 +165,9 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 			}
 			action.accept(path);
 		};
-		publishFileEntry(name, enhancedAction, file -> {
-			Preconditions.condition(Files.isDirectory(file), () -> "Published path must be a directory: " + file);
-			return FileEntry.from(file, null);
+		publishFileEntry(name, enhancedAction, path -> {
+			Preconditions.condition(Files.isDirectory(path), () -> "Published path must be a directory: " + path);
+			return FileEntry.from(path, null);
 		});
 	}
 

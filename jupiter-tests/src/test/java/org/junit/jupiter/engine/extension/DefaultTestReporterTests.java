@@ -12,7 +12,7 @@ package org.junit.jupiter.engine.extension;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -33,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 @MockitoSettings
-public class DefaultTestReporterTests {
+class DefaultTestReporterTests {
 
 	@TempDir
 	Path tempDir;
@@ -108,33 +107,30 @@ public class DefaultTestReporterTests {
 	void failsWhenPublishingMissingFile() {
 		var missingFile = tempDir.resolve("missingFile");
 
-		assertThatThrownBy(() -> testReporter.publishFile(missingFile, MediaType.APPLICATION_OCTET_STREAM)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("file must exist: " + missingFile);
+		assertPreconditionViolationFor(() -> testReporter.publishFile(missingFile, MediaType.APPLICATION_OCTET_STREAM))//
+				.withMessage("file must exist: " + missingFile);
 	}
 
 	@Test
 	void failsWhenPublishingDirectoryAsFile() {
-		assertThatThrownBy(() -> testReporter.publishFile(tempDir, MediaType.APPLICATION_OCTET_STREAM)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("file must be a regular file: " + tempDir);
+		assertPreconditionViolationFor(() -> testReporter.publishFile(tempDir, MediaType.APPLICATION_OCTET_STREAM))//
+				.withMessage("file must be a regular file: " + tempDir);
 	}
 
 	@Test
 	void failsWhenPublishingMissingDirectory() {
 		var missingDir = tempDir.resolve("missingDir");
 
-		assertThatThrownBy(() -> testReporter.publishDirectory(missingDir)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("directory must exist: " + missingDir);
+		assertPreconditionViolationFor(() -> testReporter.publishDirectory(missingDir))//
+				.withMessage("directory must exist: " + missingDir);
 	}
 
 	@Test
 	void failsWhenPublishingFileAsDirectory() throws Exception {
-		var file = Files.createFile(tempDir.resolve("source"));
+		var dir = Files.createFile(tempDir.resolve("source"));
 
-		assertThatThrownBy(() -> testReporter.publishDirectory(file)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("directory must be a directory: " + file);
+		assertPreconditionViolationFor(() -> testReporter.publishDirectory(dir))//
+				.withMessage("path must represent a directory: " + dir);
 	}
+
 }

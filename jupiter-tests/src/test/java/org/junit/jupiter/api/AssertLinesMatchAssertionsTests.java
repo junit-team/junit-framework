@@ -89,7 +89,7 @@ class AssertLinesMatchAssertionsTests {
 
 	@Test
 	void assertLinesMatchUsingFastForwardMarkerWithLimit3() {
-		List<String> expected = Collections.singletonList(">> 3 >>");
+		List<String> expected = List.of(">> 3 >>");
 		List<String> actual = List.of("first line", "skipped", "last line");
 		assertLinesMatch(expected, actual);
 	}

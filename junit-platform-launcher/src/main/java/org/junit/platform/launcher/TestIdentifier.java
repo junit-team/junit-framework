@@ -10,7 +10,6 @@
 
 package org.junit.platform.launcher;
 
-import static java.util.Collections.unmodifiableSet;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
 

@@ -794,7 +794,7 @@ public final class ReflectionUtils {
 			List<URL> resources = Collections.list(classLoader.getResources(canonicalClasspathResourceName));
 			return resources.stream().map(url -> {
 				try {
-					return Resource.from(canonicalClasspathResourceName, url.toURI());
+					return Resource.of(canonicalClasspathResourceName, url.toURI());
 				}
 				catch (URISyntaxException e) {
 					throw ExceptionUtils.throwAsUncheckedException(e);

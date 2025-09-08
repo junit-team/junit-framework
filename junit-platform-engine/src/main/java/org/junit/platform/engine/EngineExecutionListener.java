@@ -57,7 +57,7 @@ public interface EngineExecutionListener {
 	 * has been skipped.
 	 *
 	 * <p>The {@link TestDescriptor} may represent a test or a container. In the
-	 * case of a container, engines must not fire any additional events for its
+	 * case of a container, an engine must not fire any additional events for its
 	 * descendants.
 	 *
 	 * <p>A skipped test or subtree of tests must not be reported as
@@ -76,11 +76,11 @@ public interface EngineExecutionListener {
 	 * is about to be started.
 	 *
 	 * <p>The {@link TestDescriptor} may represent a test or a container. In the
-	 * case of a container, engines have to fire additional events for its
+	 * case of a container, an engine must fire additional events for its
 	 * children.
 	 *
-	 * <p>This method may only be called if the test or container has not
-	 * been {@linkplain #executionSkipped skipped}.
+	 * <p>This method may only be called if the test or container has not been
+	 * {@linkplain #executionSkipped skipped}.
 	 *
 	 * <p>This method must be called for a container {@code TestDescriptor}
 	 * <em>before</em> {@linkplain #executionStarted starting} or
@@ -134,29 +134,31 @@ public interface EngineExecutionListener {
 	 *
 	 * @param testDescriptor the descriptor of the test or container to which
 	 * the reporting entry belongs
-	 * @param entry a {@code ReportEntry} instance to be published
+	 * @param reportEntry the {@link ReportEntry} to be published
 	 */
-	default void reportingEntryPublished(TestDescriptor testDescriptor, ReportEntry entry) {
+	default void reportingEntryPublished(TestDescriptor testDescriptor, ReportEntry reportEntry) {
 	}
 
 	/**
-	 * Can be called for any {@link TestDescriptor} in order to attach a file to
-	 * a test or container &mdash; for example:
+	 * Can be called for any {@link TestDescriptor} in order to publish a file or
+	 * directory by attaching it to a test or container &mdash; for example:
 	 *
 	 * <ul>
 	 *     <li>Screenshots</li>
 	 *     <li>Logs</li>
 	 *     <li>Output files written by the code under test</li>
+	 *     <li>Test output directory</li>
 	 * </ul>
 	 *
 	 * <p>The current lifecycle state of the supplied {@code TestDescriptor} is
 	 * not relevant: file events can occur at any time.
 	 *
 	 * @param testDescriptor the descriptor of the test or container to which
-	* the file entry belongs
-	 * @param file a {@code FileEntry} instance to be attached
+	 * the file entry belongs
+	 * @param fileEntry the {@link FileEntry} to be published
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
-	default void fileEntryPublished(TestDescriptor testDescriptor, FileEntry file) {
+	default void fileEntryPublished(TestDescriptor testDescriptor, FileEntry fileEntry) {
 	}
+
 }

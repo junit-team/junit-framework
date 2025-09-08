@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.engine.discovery;
 
-import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,6 +49,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -526,7 +526,7 @@ class DiscoverySelectorResolverTests extends AbstractJupiterTestEngineTests {
 		Path classpath = Path.of(
 			DiscoverySelectorResolverTests.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
-		List<ClasspathRootSelector> selectors = selectClasspathRoots(singleton(classpath));
+		List<ClasspathRootSelector> selectors = selectClasspathRoots(Set.of(classpath));
 
 		resolve(request().selectors(selectors));
 
@@ -551,7 +551,7 @@ class DiscoverySelectorResolverTests extends AbstractJupiterTestEngineTests {
 	void classpathResolutionForJarFiles() throws Exception {
 		URL jarUrl = requireNonNull(getClass().getResource("/jupiter-testjar.jar"));
 		Path path = Path.of(jarUrl.toURI());
-		List<ClasspathRootSelector> selectors = selectClasspathRoots(singleton(path));
+		List<ClasspathRootSelector> selectors = selectClasspathRoots(Set.of(path));
 
 		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 		try (URLClassLoader classLoader = new URLClassLoader(new URL[] { jarUrl })) {

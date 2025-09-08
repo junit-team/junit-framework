@@ -11,7 +11,6 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
@@ -47,7 +46,7 @@ class LockManager {
 	}
 
 	ResourceLock getLockForResource(ExclusiveResource resource) {
-		return toResourceLock(singletonList(resource));
+		return toResourceLock(List.of(resource));
 	}
 
 	private List<ExclusiveResource> toDistinctSortedResources(Collection<ExclusiveResource> resources) {
@@ -55,7 +54,7 @@ class LockManager {
 			return emptyList();
 		}
 		if (resources.size() == 1) {
-			return singletonList(getOnlyElement(resources));
+			return List.of(getOnlyElement(resources));
 		}
 		// @formatter:off
 		Map<String, List<ExclusiveResource>> resourcesByKey = resources.stream()

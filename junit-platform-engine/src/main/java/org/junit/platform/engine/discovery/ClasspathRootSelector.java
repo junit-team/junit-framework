@@ -10,7 +10,6 @@
 
 package org.junit.platform.engine.discovery;
 
-import static java.util.Collections.singleton;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.commons.util.CollectionUtils.getFirstElement;
@@ -19,6 +18,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.Preconditions;
@@ -114,7 +114,7 @@ public final class ClasspathRootSelector implements DiscoverySelector {
 		@Override
 		public Optional<ClasspathRootSelector> parse(DiscoverySelectorIdentifier identifier, Context context) {
 			Path path = Path.of(URI.create(identifier.getValue()));
-			return getFirstElement(DiscoverySelectors.selectClasspathRoots(singleton(path)));
+			return getFirstElement(DiscoverySelectors.selectClasspathRoots(Set.of(path)));
 		}
 
 	}

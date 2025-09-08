@@ -10,11 +10,10 @@
 
 package example;
 
-import static java.util.Collections.singletonList;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -50,20 +49,19 @@ class TestReporterDemo {
 	@Test
 	void reportFiles(TestReporter testReporter, @TempDir Path tempDir) throws Exception {
 
-		testReporter.publishFile("test1.txt", MediaType.TEXT_PLAIN_UTF_8,
-			file -> Files.write(file, singletonList("Test 1")));
+		testReporter.publishFile("test1.txt", MediaType.TEXT_PLAIN_UTF_8, file -> Files.write(file, List.of("Test 1")));
 
-		Path existingFile = Files.write(tempDir.resolve("test2.txt"), singletonList("Test 2"));
+		Path existingFile = Files.write(tempDir.resolve("test2.txt"), List.of("Test 2"));
 		testReporter.publishFile(existingFile, MediaType.TEXT_PLAIN_UTF_8);
 
 		testReporter.publishDirectory("test3", dir -> {
-			Files.write(dir.resolve("nested1.txt"), singletonList("Nested content 1"));
-			Files.write(dir.resolve("nested2.txt"), singletonList("Nested content 2"));
+			Files.write(dir.resolve("nested1.txt"), List.of("Nested content 1"));
+			Files.write(dir.resolve("nested2.txt"), List.of("Nested content 2"));
 		});
 
 		Path existingDir = Files.createDirectory(tempDir.resolve("test4"));
-		Files.write(existingDir.resolve("nested1.txt"), singletonList("Nested content 1"));
-		Files.write(existingDir.resolve("nested2.txt"), singletonList("Nested content 2"));
+		Files.write(existingDir.resolve("nested1.txt"), List.of("Nested content 1"));
+		Files.write(existingDir.resolve("nested2.txt"), List.of("Nested content 2"));
 		testReporter.publishDirectory(existingDir);
 	}
 }

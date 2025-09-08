@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.engine.descriptor;
 
-import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -46,7 +45,7 @@ class TestTemplateTestDescriptorTests {
 	void inheritsTagsFromParent() throws Exception {
 		var rootUniqueId = UniqueId.root("segment", "template");
 		var parentUniqueId = rootUniqueId.append("class", "myClass");
-		var parent = containerTestDescriptorWithTags(parentUniqueId, singleton(TestTag.create("foo")));
+		var parent = containerTestDescriptorWithTags(parentUniqueId, Set.of(TestTag.create("foo")));
 
 		var testDescriptor = new TestTemplateTestDescriptor(parentUniqueId.append("tmp", "testTemplate()"),
 			MyTestCase.class, MyTestCase.class.getDeclaredMethod("testTemplate"), List::of, jupiterConfiguration);
@@ -60,7 +59,7 @@ class TestTemplateTestDescriptorTests {
 	void shouldUseCustomDisplayNameGeneratorIfPresentFromConfiguration() throws Exception {
 		var rootUniqueId = UniqueId.root("segment", "template");
 		var parentUniqueId = rootUniqueId.append("class", "myClass");
-		var parent = containerTestDescriptorWithTags(parentUniqueId, singleton(TestTag.create("foo")));
+		var parent = containerTestDescriptorWithTags(parentUniqueId, Set.of(TestTag.create("foo")));
 
 		when(jupiterConfiguration.getDefaultDisplayNameGenerator()).thenReturn(new CustomDisplayNameGenerator());
 
@@ -75,7 +74,7 @@ class TestTemplateTestDescriptorTests {
 	void shouldUseStandardDisplayNameGeneratorIfConfigurationNotPresent() throws Exception {
 		var rootUniqueId = UniqueId.root("segment", "template");
 		var parentUniqueId = rootUniqueId.append("class", "myClass");
-		var parent = containerTestDescriptorWithTags(parentUniqueId, singleton(TestTag.create("foo")));
+		var parent = containerTestDescriptorWithTags(parentUniqueId, Set.of(TestTag.create("foo")));
 
 		var testDescriptor = new TestTemplateTestDescriptor(parentUniqueId.append("tmp", "testTemplate()"),
 			MyTestCase.class, MyTestCase.class.getDeclaredMethod("testTemplate"), List::of, jupiterConfiguration);
