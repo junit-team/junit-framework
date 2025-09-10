@@ -18,6 +18,7 @@ dependencies {
 	implementation(libs.plugins.nullaway.markerCoordinates)
 	implementation(libs.plugins.shadow.markerCoordinates)
 	implementation(libs.plugins.spotless.markerCoordinates)
+	runtimeOnly(projects.japicmp)
 }
 
 tasks.compileJava {

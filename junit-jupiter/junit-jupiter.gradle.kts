@@ -14,3 +14,7 @@ dependencies {
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
 }
+
+tasks.checkBackwardCompatibility {
+	enabled = false // already checked by individual projects
+}
