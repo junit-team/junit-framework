@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
 
 import kotlin.Unit;
 import kotlin.coroutines.EmptyCoroutineContext;
@@ -101,6 +102,7 @@ class KotlinSuspendingFunctionUtils {
 					arguments.put(parameter, args[index]);
 					index++;
 				}
+				default -> throw new JUnitException("Unsupported parameter kind: " + parameter.getKind());
 			}
 		}
 		return arguments;
