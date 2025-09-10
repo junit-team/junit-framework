@@ -347,6 +347,7 @@ inline fun <reified T : Throwable> assertThrows(
  * @see Assertions.assertDoesNotThrow
  * @param R the result type of the [executable]
  */
+@Suppress("LESS_VISIBLE_TYPE_ACCESS_IN_INLINE_WARNING")
 @OptIn(ExperimentalContracts::class)
 @API(status = STABLE, since = "5.11")
 inline fun <R> assertDoesNotThrow(executable: () -> R): R {
@@ -395,6 +396,7 @@ inline fun <R> assertDoesNotThrow(
  * @see Assertions.assertDoesNotThrow
  * @param R the result type of the [executable]
  */
+@Suppress("LESS_VISIBLE_TYPE_ACCESS_IN_INLINE_WARNING")
 @OptIn(ExperimentalContracts::class)
 @API(status = STABLE, since = "5.11")
 inline fun <R> assertDoesNotThrow(
