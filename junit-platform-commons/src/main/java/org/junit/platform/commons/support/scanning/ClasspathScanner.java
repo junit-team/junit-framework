@@ -129,10 +129,8 @@ public interface ClasspathScanner {
 	 */
 	@API(status = MAINTAINED, since = "6.0")
 	@SuppressWarnings("removal")
-	default List<Resource> scanForResourcesInPackage(String basePackageName, ResourceFilter resourceFilter) {
-		return scanForResourcesInPackage(basePackageName, resource -> resourceFilter.match(oldToNew(resource))).stream() //
-				.map(ClasspathScanner::oldToNew) //
-				.toList();
+	default List<? extends Resource> scanForResourcesInPackage(String basePackageName, ResourceFilter resourceFilter) {
+		return scanForResourcesInPackage(basePackageName, resourceFilter::match);
 	}
 
 	/**
@@ -151,15 +149,8 @@ public interface ClasspathScanner {
 	 */
 	@API(status = MAINTAINED, since = "6.0")
 	@SuppressWarnings("removal")
-	default List<Resource> scanForResourcesInClasspathRoot(URI root, ResourceFilter resourceFilter) {
-		return scanForResourcesInClasspathRoot(root, r -> resourceFilter.match(oldToNew(r))).stream() //
-				.map(ClasspathScanner::oldToNew) //
-				.toList();
-	}
-
-	@SuppressWarnings("removal")
-	private static Resource oldToNew(org.junit.platform.commons.support.Resource oldResource) {
-		return Resource.of(oldResource.getName(), oldResource.getUri());
+	default List<? extends Resource> scanForResourcesInClasspathRoot(URI root, ResourceFilter resourceFilter) {
+		return scanForResourcesInClasspathRoot(root, resourceFilter::match);
 	}
 
 }
