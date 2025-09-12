@@ -16,7 +16,6 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.annotation.Contract;
-import org.junit.platform.commons.util.ToStringBuilder;
 
 /**
  * Default implementation of {@link Resource}.
@@ -55,14 +54,6 @@ record DefaultResource(String name, URI uri) implements Resource {
 	@Override
 	public int hashCode() {
 		return Objects.hash(name, uri);
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this) //
-				.append("name", name) //
-				.append("uri", uri) //
-				.toString();
 	}
 
 	// Cannot use Preconditions due to package cycle
