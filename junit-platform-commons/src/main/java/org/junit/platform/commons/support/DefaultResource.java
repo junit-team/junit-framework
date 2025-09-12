@@ -11,6 +11,7 @@
 package org.junit.platform.commons.support;
 
 import java.net.URI;
+import java.util.Objects;
 
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
@@ -36,6 +37,23 @@ record DefaultResource(String name, URI uri) implements Resource {
 	@Override
 	public URI getUri() {
 		return uri;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof org.junit.platform.commons.io.Resource that) {
+			return name.equals(that.getName()) //
+					&& uri.equals(that.getUri());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, uri);
 	}
 
 	@Override
