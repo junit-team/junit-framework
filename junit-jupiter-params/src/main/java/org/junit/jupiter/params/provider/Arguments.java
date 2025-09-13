@@ -13,6 +13,10 @@ package org.junit.jupiter.params.provider;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
@@ -126,6 +130,80 @@ public interface Arguments {
 	}
 
 	/**
+	 * Factory method for creating an instance of {@code Arguments} based on
+	 * the supplied {@link List} of {@code arguments}.
+	 *
+	 * @param arguments the arguments to be used for an invocation of the test
+	 * method; must not be {@code null} but may contain {@code null}.
+	 * @return an instance of {@code Arguments}; never {@code null}.
+	 * @since 6.0
+	 * @see #argumentsFrom(List)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	static Arguments from(List<@Nullable Object> arguments) {
+		Preconditions.notNull(arguments, "arguments must not be null");
+		return of(arguments.toArray());
+	}
+
+	/**
+	 * Factory method for creating an instance of {@code Arguments} based on
+	 * the supplied {@link List} of {@code arguments}.
+	 *
+	 * <p>This method is an <em>alias</em> for {@link Arguments#from} and is
+	 * intended to be used when statically imported &mdash; for example, via:
+	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentsFrom;}
+	 *
+	 * @param arguments the arguments to be used for an invocation of the test
+	 * method; must not be {@code null} but may contain {@code null}.
+	 * @return an instance of {@code Arguments}; never {@code null}.
+	 * @since 6.0
+	 * @see #argumentSet(String, Object...)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	static Arguments argumentsFrom(List<@Nullable Object> arguments) {
+		return from(arguments);
+	}
+
+	/**
+	 * Factory method for creating an {@link ArgumentSet} based on the supplied
+	 * {@code name} and {@link List} of {@code arguments}.
+	 *
+	 * <p>This method is a convenient alternative to
+	 * {@link #argumentSet(String, Object...)} when working with {@link List}
+	 * based inputs.
+	 *
+	 * @param name the name of the argument set; must not be {@code null}
+	 * or blank.
+	 * @param arguments the arguments to be used for an invocation of the test
+	 * method; must not be {@code null} but may contain {@code null}.
+	 * @return an {@code ArgumentSet}; never {@code null}.
+	 * @since 6.0
+	 * @see #argumentSet(String, Object...)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	static ArgumentSet argumentSetFrom(String name, List<@Nullable Object> arguments) {
+		Preconditions.notBlank(name, "name must not be null or blank");
+		Preconditions.notNull(arguments, "arguments list must not be null");
+		return new ArgumentSet(name, arguments.toArray());
+	}
+
+	/**
+	 * Convert the arguments to a new mutable {@link List} containing the same
+	 * elements as {@link #get()}.
+	 *
+	 * <p>This is useful for test logic that benefits from {@code List}
+	 * operations such as filtering, transformation, or assertions.
+	 *
+	 * @return a mutable List of arguments; never {@code null} but may contain
+	 * {@code null}.
+	 * @since 6.0
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	default List<@Nullable Object> toList() {
+		return new ArrayList<>(Arrays.asList(get()));
+	}
+
+	/**
 	 * Specialization of {@link Arguments} that associates a {@link #getName() name}
 	 * with a set of {@link #get() arguments}.
 	 *
@@ -171,5 +249,4 @@ public interface Arguments {
 		}
 
 	}
-
 }
