@@ -14,9 +14,14 @@ import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEndsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.expectAssertionFailedError;
+import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.logging.LogRecord;
+
+import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.platform.commons.logging.LogRecordListener;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -622,6 +627,20 @@ class AssertNotEqualsAssertionsTests {
 			assertThrows(NumberFormatException.class, () -> assertNotEquals(obj, obj));
 		}
 
+	}
+
+	@Nested
+	class AssertNotEqualsArrays {
+		@Test
+		void objects(@TrackLogRecords LogRecordListener listener) {
+			Object object = new Object();
+			Object array1 = new Object[] { object };
+			Object array2 = new Object[] { object };
+			assertNotEquals(array1, array2);
+			assertLinesMatch("""
+					Should have used `assertArrayEquals()` in method: <TODO>
+					""".lines(), listener.stream(AssertionUtils.class).map(LogRecord::getMessage));
+		}
 	}
 
 	// -------------------------------------------------------------------------
