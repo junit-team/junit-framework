@@ -60,7 +60,7 @@ JUnit repository on GitHub.
 ==== New Features and Improvements
 
 * New classpath resource abstraction in `org.junit.platform.commons.io.Resource` with
-  support class for loading resources or finding them on the classpath via static utility
+  support for loading resources or finding them on the classpath via static utility
   methods in the new `org.junit.platform.commons.support.ResourceSupport` class.
 
 
