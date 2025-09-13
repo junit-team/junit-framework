@@ -21,9 +21,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
@@ -113,7 +113,8 @@ class DefaultTestReporterTests {
 	@Test
 	@SuppressWarnings("DataFlowIssue") // publishFile() parameters are not @Nullable
 	void failsWhenPublishingFileWithNullMediaType() {
-		assertPreconditionViolationNotNullFor("mediaType", () -> testReporter.publishFile(Path.of("test"), null));
+		assertPreconditionViolationNotNullFor("mediaType",
+			() -> testReporter.publishFile(Path.of("test"), (MediaType) null));
 	}
 
 	@Test

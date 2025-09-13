@@ -13,9 +13,9 @@ package org.junit.jupiter.engine.extension;
 import java.nio.file.Path;
 import java.util.Map;
 
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 
 /**

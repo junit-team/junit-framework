@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -409,12 +410,41 @@ public interface ExtensionContext {
 	 * @param name the name of the file to be published; never {@code null} or
 	 * blank and must not contain any path separators
 	 * @param mediaType the media type of the file; never {@code null}; use
-	 * {@link MediaType#APPLICATION_OCTET_STREAM} if unknown
+	 * {@link org.junit.jupiter.api.extension.MediaType#APPLICATION_OCTET_STREAM}
+	 * if unknown
 	 * @param action the action to be executed to write the file; never {@code null}
 	 * @since 5.12
 	 * @see org.junit.platform.engine.EngineExecutionListener#fileEntryPublished
+	 * @deprecated Use
+	 * {@link #publishFile(String, MediaType, ThrowingConsumer)}
+	 * instead.
 	 */
-	@API(status = MAINTAINED, since = "5.13.3")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@API(status = DEPRECATED, since = "6.0")
+	@SuppressWarnings("removal")
+	default void publishFile(String name, org.junit.jupiter.api.extension.MediaType mediaType,
+			ThrowingConsumer<Path> action) {
+
+		Preconditions.notNull(mediaType, "mediaType must not be null");
+		publishFile(name, MediaType.parse(mediaType.toString()), action);
+	}
+
+	/**
+	 * Publish a file with the supplied name written by the supplied action and
+	 * attach it to the current test or container.
+	 *
+	 * <p>The file will be resolved in the report output directory prior to
+	 * invoking the supplied action.
+	 *
+	 * @param name the name of the file to be attached; never {@code null} or
+	 * blank and must not contain any path separators
+	 * @param mediaType the media type of the file; never {@code null}; use
+	 * {@link MediaType#APPLICATION_OCTET_STREAM} if unknown
+	 * @param action the action to be executed to write the file; never {@code null}
+	 * @since 6.0
+	 * @see org.junit.platform.engine.EngineExecutionListener#fileEntryPublished
+	 */
+	@API(status = MAINTAINED, since = "6.0")
 	void publishFile(String name, MediaType mediaType, ThrowingConsumer<Path> action);
 
 	/**

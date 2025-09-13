@@ -1,4 +1,5 @@
 org.junit.jupiter.api.AssertionsKt
+org.junit.jupiter.api.extension.ExtensionContext#publishFile
 org.junit.jupiter.api.extension.ExtensionContext#getConfigurationParameter
 org.junit.jupiter.api.extension.ExtensionContext$Namespace
 org.junit.jupiter.api.extension.ExtensionContext$Store#computeIfAbsent

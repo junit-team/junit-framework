@@ -21,8 +21,8 @@ JUnit repository on GitHub.
 [[release-notes-6.0.0-RC3-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* Change serialization of `TestIdentifier` in a backwards-incompatible way to simplify
-  its implementation
+* Serialization support for `TestIdentifier` has been changed in a backwards-incompatible
+  way in order to simplify the implementation.
 * Deprecate `OutputDirectoryProvider` interface in favor of the new
   `OutputDirectoryCreator` interface to resolve cyclic package dependency along
   with the following APIs (which all have replacements working with
@@ -62,6 +62,11 @@ JUnit repository on GitHub.
 * New classpath resource abstraction in `org.junit.platform.commons.io.Resource` with
   support for loading resources or finding them on the classpath via static utility
   methods in the new `org.junit.platform.commons.support.ResourceSupport` class.
+* New `Resource.of(String, URI)` static factory method for creating an
+  `org.junit.platform.commons.support.Resource`.
+* New `FileSource.withPosition(FilePosition)` method to avoid the overhead of redundant
+  canonicalization of files when using `FileSource.from(File, FilePosition)` with many
+  different `FilePosition` instances for the same `File`.
 
 
 [[release-notes-6.0.0-RC3-junit-jupiter]]
@@ -78,8 +83,16 @@ JUnit repository on GitHub.
 * `MediaType.APPLICATION_JSON_UTF_8` is now deprecated in favor of using
   `MediaType.APPLICATION_JSON`, since the industry considers UTF-8 to be the implicit
   default encoding for the `application/json` media type.
-* `org.junit.jupiter.params.support.ParameterInfo` is now deprecated in favor of
-  `org.junit.jupiter.params.ParameterInfo`
+* `org.junit.jupiter.api.extension.MediaType` is now deprecated in favor of the new
+  `org.junit.jupiter.api.MediaType`.
+* The `publishFile(...)` methods in `TestReporter` which accept an
+  `org.junit.jupiter.api.extension.MediaType` are now deprecated in favor of new variants
+  which accept an `org.junit.jupiter.api.MediaType`.
+* The `publishFile(...)` method in `ExtensionContext` which accepts an
+  `org.junit.jupiter.api.extension.MediaType` is now deprecated in favor of a new variant
+  which accepts an `org.junit.jupiter.api.MediaType`.
+* `org.junit.jupiter.params.support.ParameterInfo` is now deprecated in favor of the new
+  `org.junit.jupiter.params.ParameterInfo`.
 
 [[release-notes-6.0.0-RC3-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements

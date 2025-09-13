@@ -8,33 +8,45 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.extension;
+package org.junit.jupiter.api;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apiguardian.api.API;
-import org.apiguardian.api.API.Status;
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
  * Represents a media type as defined by
  * <a href="https://tools.ietf.org/html/rfc2045">RFC 2045</a>.
  *
- * @since 5.12
- * @see org.junit.jupiter.api.TestReporter#publishFile(Path, MediaType)
- * @see org.junit.jupiter.api.TestReporter#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
- * @see ExtensionContext#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
- * @deprecated Use {@link org.junit.jupiter.api.MediaType} instead.
+ * <p><strong>WARNING</strong>: This type should not be extended by third parties.
+ *
+ * @since 6.0
+ * @see TestReporter#publishFile(Path, MediaType)
+ * @see TestReporter#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
+ * @see org.junit.jupiter.api.extension.ExtensionContext#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
  */
-@Deprecated(since = "6.0", forRemoval = true)
-@API(status = Status.DEPRECATED, since = "6.0")
-public final class MediaType extends org.junit.jupiter.api.MediaType {
+@API(status = MAINTAINED, since = "6.0")
+public class MediaType {
+
+	private static final Pattern PATTERN;
+
+	static {
+		// https://datatracker.ietf.org/doc/html/rfc2045#section-5.1
+		String whitespace = "[ \t]*";
+		String token = "[0-9A-Za-z!#$%&'*+.^_`|~-]+";
+		String quotedString = "\"(?:[^\"\\\\]|\\.)*\"";
+		String parameter = ";" + whitespace + token + "=" + "(?:" + token + "|" + quotedString + ")";
+		PATTERN = Pattern.compile(token + "/" + token + "(?:" + whitespace + parameter + ")*");
+	}
 
 	/**
 	 * The {@code text/plain} media type.
@@ -52,14 +64,6 @@ public final class MediaType extends org.junit.jupiter.api.MediaType {
 	public static final MediaType APPLICATION_JSON = create("application", "json");
 
 	/**
-	 * The {@code application/json; charset=UTF-8} media type.
-	 * @deprecated Use {@link #APPLICATION_JSON} instead.
-	 */
-	@Deprecated(since = "6.0")
-	@API(status = DEPRECATED, since = "6.0")
-	public static final MediaType APPLICATION_JSON_UTF_8 = create("application", "json", UTF_8);
-
-	/**
 	 * The {@code application/octet-stream} media type.
 	 */
 	public static final MediaType APPLICATION_OCTET_STREAM = create("application", "octet-stream");
@@ -74,6 +78,8 @@ public final class MediaType extends org.junit.jupiter.api.MediaType {
 	 */
 	public static final MediaType IMAGE_PNG = create("image", "png");
 
+	private final String value;
+
 	/**
 	 * Parse the given media type value.
 	 *
@@ -82,7 +88,6 @@ public final class MediaType extends org.junit.jupiter.api.MediaType {
 	 *
 	 * @param value the media type value to parse; never {@code null} or blank
 	 * @return the parsed media type
-	 * @throws PreconditionViolationException if the value is not a valid media type
 	 */
 	public static MediaType parse(String value) {
 		return new MediaType(value);
@@ -112,12 +117,43 @@ public final class MediaType extends org.junit.jupiter.api.MediaType {
 		return new MediaType(type, subtype, charset);
 	}
 
-	private MediaType(String type, String subtype, @Nullable Charset charset) {
-		super(type, subtype, charset);
+	protected MediaType(String type, String subtype, @Nullable Charset charset) {
+		this("%s/%s%s".formatted(//
+			Preconditions.notBlank(type, "type must not be null or blank").strip(),
+			Preconditions.notBlank(subtype, "subtype must not be null or blank").strip(),
+			(charset != null ? ("; charset=" + charset.name()) : "")));
 	}
 
-	private MediaType(String value) {
-		super(value);
+	protected MediaType(String value) {
+		// Mimic sealed types, permitting only this class and api.extension.MediaType.
+		if (getClass() != MediaType.class
+				&& !getClass().getName().equals("org.junit.jupiter.api.extension.MediaType")) {
+			throw new IllegalStateException(
+				"Type '%s' is not permitted to extend MediaType".formatted(getClass().getName()));
+		}
+
+		String strippedValue = Preconditions.notBlank(value, "value must not be null or blank").strip();
+		Matcher matcher = PATTERN.matcher(strippedValue);
+		Preconditions.condition(matcher.matches(), () -> "Invalid media type: '" + strippedValue + "'");
+		this.value = strippedValue;
+	}
+
+	/**
+	 * {@return a string representation of this media type}
+	 */
+	@Override
+	public final String toString() {
+		return this.value;
+	}
+
+	@Override
+	public final boolean equals(Object obj) {
+		return this == obj || (obj instanceof MediaType that && this.value.equals(that.value));
+	}
+
+	@Override
+	public final int hashCode() {
+		return Objects.hashCode(this.value);
 	}
 
 }

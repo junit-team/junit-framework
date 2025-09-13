@@ -62,7 +62,6 @@ import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.TestReporter;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.platform.commons.support.scanning.ClasspathScanner;
 import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
@@ -158,7 +157,7 @@ class ArchUnitTests {
 		slices().matching("org.junit.(**)").should().beFreeOfCycles() //
 
 				// https://github.com/junit-team/junit-framework/issues/4886
-				.ignoreDependency(TestReporter.class, MediaType.class) //
+				.ignoreDependency(TestReporter.class, org.junit.jupiter.api.extension.MediaType.class) //
 
 				// https://github.com/junit-team/junit-framework/issues/4885
 				.ignoreDependency(ClasspathScanner.class, org.junit.platform.commons.support.Resource.class) //
