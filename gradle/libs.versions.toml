@@ -18,7 +18,7 @@ opentest4j = "1.3.0"
 openTestReporting = "0.2.4"
 snapshotTests = "1.11.0"
 surefire = "3.5.4"
-xmlunit = "2.10.3"
+xmlunit = "2.10.4"
 
 [libraries]
 ant = { module = "org.apache.ant:ant", version.ref = "ant" }
