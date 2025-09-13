@@ -54,6 +54,7 @@ public final class FileSource implements FileSystemSource {
 	 *
 	 * @param file the source file; must not be {@code null}
 	 * @param filePosition the position in the source file; may be {@code null}
+	 * @see #withPosition(FilePosition)
 	 */
 	public static FileSource from(File file, @Nullable FilePosition filePosition) {
 		return new FileSource(file, filePosition);
