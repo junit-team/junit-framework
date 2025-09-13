@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.descriptor;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.File;
@@ -53,6 +54,7 @@ public final class FileSource implements FileSystemSource {
 	 *
 	 * @param file the source file; must not be {@code null}
 	 * @param filePosition the position in the source file; may be {@code null}
+	 * @see #withPosition(FilePosition)
 	 */
 	public static FileSource from(File file, @Nullable FilePosition filePosition) {
 		return new FileSource(file, filePosition);
@@ -74,6 +76,11 @@ public final class FileSource implements FileSystemSource {
 		catch (IOException ex) {
 			throw new JUnitException("Failed to retrieve canonical path for file: " + file, ex);
 		}
+		this.filePosition = filePosition;
+	}
+
+	private FileSource(FileSource fileSource, @Nullable FilePosition filePosition) {
+		this.file = fileSource.file;
 		this.filePosition = filePosition;
 	}
 
@@ -102,6 +109,30 @@ public final class FileSource implements FileSystemSource {
 	 */
 	public Optional<FilePosition> getPosition() {
 		return Optional.ofNullable(this.filePosition);
+	}
+
+	/**
+	 * {@return a {@code FileSource} based on this instance but with the
+	 * supplied {@link FilePosition}}
+	 *
+	 * <p>If the supplied {@code FilePosition}
+	 * {@linkplain Objects#equals(Object, Object) equals} the existing one, this
+	 * method returns {@code this}. Otherwise, a new instance is created and
+	 * returned.
+	 *
+	 * <p>Calling this method rather than creating a new {@code FileSource} via
+	 * {@link #from(File, FilePosition)} avoids the overhead of redundant
+	 * canonical path resolution.
+	 *
+	 * @param filePosition the position in the source file; may be {@code null}
+	 * @since 6.0
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public FileSource withPosition(@Nullable FilePosition filePosition) {
+		if (Objects.equals(this.filePosition, filePosition)) {
+			return this;
+		}
+		return new FileSource(this, filePosition);
 	}
 
 	@Override
