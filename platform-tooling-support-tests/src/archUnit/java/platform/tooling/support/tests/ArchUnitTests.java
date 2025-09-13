@@ -151,8 +151,8 @@ class ArchUnitTests {
 		slices().matching("org.junit.(*)..").should().beFreeOfCycles().check(classes);
 	}
 
-	@SuppressWarnings("removal")
 	@ArchTest
+	@SuppressWarnings("removal")
 	void freeOfPackageCycles(JavaClasses classes) throws Exception {
 		slices().matching("org.junit.(**)").should().beFreeOfCycles() //
 
