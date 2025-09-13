@@ -112,8 +112,13 @@ public final class FileSource implements FileSystemSource {
 	}
 
 	/**
-	 * {@return a new {@code FileSource} based on this instance but with the
+	 * {@return a {@code FileSource} based on this instance but with the
 	 * supplied {@link FilePosition}}
+	 *
+	 * <p>If the supplied {@code FilePosition}
+	 * {@linkplain Objects#equals(Object, Object) equals} the existing one, this
+	 * method returns {@code this}. Otherwise, a new instance is created and
+	 * returned.
 	 *
 	 * <p>Calling this method rather than creating a new {@code FileSource} via
 	 * {@link #from(File, FilePosition)} avoids the overhead of redundant
@@ -124,6 +129,9 @@ public final class FileSource implements FileSystemSource {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public FileSource withPosition(@Nullable FilePosition filePosition) {
+		if (Objects.equals(this.filePosition, filePosition)) {
+			return this;
+		}
 		return new FileSource(this, filePosition);
 	}
 

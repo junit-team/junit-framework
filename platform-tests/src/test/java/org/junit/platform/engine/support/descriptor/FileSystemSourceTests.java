@@ -90,6 +90,11 @@ class FileSystemSourceTests extends AbstractTestSourceTests {
 		assertThat(source).isNotSameAs(sourceWithPosition);
 		assertThat(source.getFile()).isSameAs(sourceWithPosition.getFile());
 		assertThat(sourceWithPosition.getPosition()).hasValue(position);
+
+		assertThat(sourceWithPosition.withPosition(null).getPosition()).isEmpty();
+
+		assertThat(source.withPosition(null)).isSameAs(source);
+		assertThat(sourceWithPosition.withPosition(position)).isSameAs(sourceWithPosition);
 	}
 
 	@Test
