@@ -78,10 +78,10 @@ public final class FileSource implements FileSystemSource {
 		this.filePosition = filePosition;
 	}
 
-	private FileSource(FileSource fileSource, FilePosition filePosition) {
+	private FileSource(FileSource fileSource, @Nullable FilePosition filePosition) {
 		this.file = fileSource.file;
 		this.filePosition = filePosition;
-	}	
+	}
 
 	/**
 	 * Get the {@link URI} for the source {@linkplain #getFile file}.
@@ -111,16 +111,18 @@ public final class FileSource implements FileSystemSource {
 	}
 
 	/**
-	* Return a new {@code FileSource} based on this instance but with a different
-	* {@link FilePosition}. This avoids redundant canonical path resolution
-	* by reusing the already-canonical file.
-	*
-	* @param filePosition the new {@code FilePosition}; must not be {@code null}
-	* @return a new {@code FileSource} with the same file and updated position
-	*/
+	 * {@return a new {@code FileSource} based on this instance but with the
+	 * supplied {@link FilePosition}}
+	 *
+	 * <p>Calling this method rather than creating a new {@code FileSource} via
+	 * {@link #from(File, FilePosition)} avoids the overhead of redundant
+	 * canonical path resolution.
+	 *
+	 * @param filePosition the position in the source file; may be {@code null}
+	 * @since 6.0
+	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
-	public FileSource withPosition(FilePosition filePosition) {
-		Preconditions.notNull(filePosition, "filePosition must not be null");
+	public FileSource withPosition(@Nullable FilePosition filePosition) {
 		return new FileSource(this, filePosition);
 	}
 
