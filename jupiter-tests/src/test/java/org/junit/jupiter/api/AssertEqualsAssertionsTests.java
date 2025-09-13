@@ -11,6 +11,7 @@
 package org.junit.jupiter.api;
 
 import static org.junit.jupiter.api.AssertionTestUtils.assertExpectedAndActualValues;
+import static org.junit.jupiter.api.AssertionTestUtils.assertMessageContains;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEndsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith;
@@ -48,6 +49,21 @@ class AssertEqualsAssertionsTests {
 		catch (AssertionFailedError ex) {
 			assertMessageEquals(ex, "expected: <1> but was: <2>");
 			assertExpectedAndActualValues(ex, expected, actual);
+		}
+	}
+
+	@Test
+	void assertEqualsStringWithUnequalSpaceTabs() {
+		String expected = "a			c";
+		String actual = "a	c";
+		try {
+			assertEquals(expected, actual, "message");
+			expectAssertionFailedError();
+		}
+		catch (AssertionFailedError ex) {
+			assertMessageStartsWith(ex, "message");
+			assertMessageContains(ex, "expected: <a			c> but was: <a	c>");
+			assertMessageContains(ex, "diff: a[\\t\\t\\t]c");
 		}
 	}
 
