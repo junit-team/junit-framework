@@ -38,6 +38,9 @@ JUnit repository on GitHub.
 
 * New `Resource.from(String, URI)` static factory method for creating an
   `org.junit.platform.commons.support.Resource`.
+* New `FileSource.withPosition(FilePosition)` method to avoid the overhead of redundant
+  canonicalization of files when using `FileSource.from(File, FilePosition)` with many
+  different `FilePosition` instances for the same `File`.
 
 
 [[release-notes-6.0.0-RC3-junit-jupiter]]
