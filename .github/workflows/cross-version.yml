@@ -28,7 +28,8 @@ jobs:
       matrix:
         jdk:
         - version: 25
-          type: ea
+          type: ga
+          distribution: oracle
         - version: 26
           type: ea
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
