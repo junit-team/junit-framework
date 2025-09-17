@@ -265,7 +265,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 					testDescriptor, () -> unfinishedTasks.remove(uniqueId));
 				nodeTestTask.setParentContext(context);
 				unfinishedTasks.put(uniqueId, DynamicTaskState.unscheduled());
-				Future<@Nullable Void> future = taskContext.executorService().submit(nodeTestTask);
+				var future = taskContext.executorService().submit(nodeTestTask);
 				unfinishedTasks.computeIfPresent(uniqueId, (__, state) -> DynamicTaskState.scheduled(future));
 				return future;
 			}

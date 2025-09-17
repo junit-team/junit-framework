@@ -314,7 +314,7 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 		private volatile String threadName;
 
 		private final CountDownLatch started = new CountDownLatch(1);
-		private final CompletableFuture<@Nullable Void> completion = new CompletableFuture<>();
+		private final CompletableFuture<?> completion = new CompletableFuture<>();
 
 		DummyTestTask(String identifier, ResourceLock resourceLock, Executable action) {
 			this.identifier = identifier;

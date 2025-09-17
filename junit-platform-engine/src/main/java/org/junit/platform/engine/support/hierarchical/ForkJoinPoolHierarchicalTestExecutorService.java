@@ -100,7 +100,6 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public Future<@Nullable Void> submit(TestTask testTask) {
 		ExclusiveTask exclusiveTask = new ExclusiveTask(testTask);
 		if (!isAlreadyRunningInForkJoinPool()) {
@@ -195,7 +194,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 
 	// this class cannot not be serialized because TestTask is not Serializable
 	@SuppressWarnings({ "serial", "RedundantSuppression" })
-	class ExclusiveTask extends ForkJoinTask<Void> {
+	class ExclusiveTask extends ForkJoinTask<@Nullable Void> {
 
 		@Serial
 		private static final long serialVersionUID = 1;

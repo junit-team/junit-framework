@@ -104,7 +104,6 @@ class FieldArgumentsProvider extends AnnotationBasedArgumentsProvider<FieldSourc
 		return field;
 	}
 
-	@SuppressWarnings("NullAway")
 	private static Object readField(Field field, @Nullable Object testInstance) {
 		Object value = ReflectionSupport.tryToReadFieldValue(field, testInstance).getOrThrow(
 			cause -> new JUnitException("Could not read field [%s]".formatted(field.getName()), cause));

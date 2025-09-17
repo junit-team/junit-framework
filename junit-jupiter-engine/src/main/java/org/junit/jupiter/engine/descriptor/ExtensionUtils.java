@@ -139,7 +139,6 @@ final class ExtensionUtils {
 	/**
 	 * @since 5.11
 	 */
-	@SuppressWarnings("NullAway")
 	private static Extension readAndValidateExtensionFromField(Field field, @Nullable Object instance,
 			List<Class<? extends Extension>> declarativeExtensionTypes) {
 		Object value = tryToReadFieldValue(field, instance) //
