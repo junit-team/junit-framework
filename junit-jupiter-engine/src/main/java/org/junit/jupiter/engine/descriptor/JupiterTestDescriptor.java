@@ -191,7 +191,7 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 		return toSkipResult(evaluationResult);
 	}
 
-	private SkipResult toSkipResult(ConditionEvaluationResult evaluationResult) {
+	protected SkipResult toSkipResult(ConditionEvaluationResult evaluationResult) {
 		if (evaluationResult.isDisabled()) {
 			return SkipResult.skip(evaluationResult.getReason().orElse("<unknown>"));
 		}

@@ -59,6 +59,11 @@ class DynamicContainerTestDescriptor extends DynamicNodeTestDescriptor {
 	}
 
 	@Override
+	Optional<ExecutionMode> getDefaultChildExecutionMode() {
+		return this.dynamicContainer.getDefaultChildExecutionMode().map(JupiterTestDescriptor::toExecutionMode);
+	}
+
+	@Override
 	public JupiterEngineExecutionContext execute(JupiterEngineExecutionContext context,
 			DynamicTestExecutor dynamicTestExecutor) throws Exception {
 
