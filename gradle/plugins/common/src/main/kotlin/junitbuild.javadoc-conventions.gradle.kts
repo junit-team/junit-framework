@@ -28,6 +28,7 @@ tasks.javadoc {
 		(this as StandardJavadocDocletOptions).apply {
 			addBooleanOption("Xdoclint:all,-missing", true)
 			addBooleanOption("html5", true)
+			addBooleanOption("Werror", true)
 			addMultilineStringsOption("tag").value = listOf(
 				"apiNote:a:API Note:",
 				"implNote:a:Implementation Note:"
