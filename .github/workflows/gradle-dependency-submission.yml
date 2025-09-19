@@ -25,8 +25,8 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
       with:
-        distribution: temurin
-        java-version: 24
+        distribution: oracle
+        java-version: 25
         check-latest: true
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3

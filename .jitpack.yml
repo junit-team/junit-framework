@@ -1,7 +1,7 @@
 before_install:
   - sdk update
-  - sdk install java 24-open
-  - sdk use java 24-open
+  - sdk install java 25-open
+  - sdk use java 25-open
 install:
   - |
     ./gradlew \

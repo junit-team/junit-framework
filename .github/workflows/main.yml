@@ -35,7 +35,7 @@ jobs:
       with:
         distribution: graalvm-community
         version: 'latest'
-        java-version: '21'
+        java-version: '25'
     - name: Build
       uses: ./.github/actions/main-build
       with:

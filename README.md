@@ -70,7 +70,7 @@ task outputs from previous CI builds.
 
 ## Building from Source
 
-You need [JDK 24] to build JUnit. [Gradle toolchains] are used to detect and
+You need [JDK 25] to build JUnit. [Gradle toolchains] are used to detect and
 potentially download additional JDKs for compilation and test execution.
 
 All modules can be _built_ and _tested_ with the [Gradle Wrapper] using the following command:
@@ -100,7 +100,7 @@ of the JUnit Platform, JUnit Jupiter, and JUnit Vintage.
 [Gradle Wrapper]: https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:using_wrapper
 [JaCoCo]: https://www.eclemma.org/jacoco/
 [Javadoc]: https://docs.junit.org/current/api/
-[JDK 24]: https://javaalmanac.io/jdk/24/
+[JDK 25]: https://javaalmanac.io/jdk/25/
 [Release Notes]: https://docs.junit.org/current/release-notes/
 [Examples]: https://github.com/junit-team/junit-examples
 [StackOverflow]: https://stackoverflow.com/questions/tagged/junit5
