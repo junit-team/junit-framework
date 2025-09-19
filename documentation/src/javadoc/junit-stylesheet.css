@@ -18,11 +18,13 @@
     --navbar-background-color: #25a162;
     /* Background color for subnavigation and various headers */
     --subnav-background-color: #e8e8e8;
+    --subnav-link-color: var(--link-color);
     /* Background and text colors for selected tabs and navigation items */
     --selected-background-color: #dc524a;
     --selected-text-color: #fff;
     --selected-link-color: #651410;
     /* Background colors for generated tables */
+    --table-header-color: #ebeff4;
     --even-row-color: #fff;
     --odd-row-color: #eee;
     /* Text color for page title */
@@ -32,7 +34,7 @@
     --link-color-active: #b62b23;
     /* Table of contents */
     --toc-background-color: var(--section-background-color);
-    --toc-link-color: #000;
+    --toc-hover-color: #eee;
     /* Snippet colors */
     --snippet-background-color: #ebecee;
     --snippet-text-color: var(--block-text-color);
@@ -42,6 +44,8 @@
     --table-border-color: #999;
     /* Highlight color for active search tag target */
     --search-tag-highlight-color: #ffff00;
+    /* Copy button colors and filters */
+    --button-border-color: #b0b8c8;
 }
 
 .title {
