@@ -20,5 +20,3 @@ public class Calculator {
     }
 }
 //inside feature
-
-
