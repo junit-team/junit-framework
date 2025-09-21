@@ -29,7 +29,6 @@ jobs:
         jdk:
         - version: 25
           type: ga
-          distribution: oracle
         - version: 26
           type: ea
         - version: 26
