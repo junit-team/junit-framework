@@ -27,10 +27,7 @@ nullaway {
 
 tasks.withType<JavaCompile>().configureEach {
 	options.errorprone {
-		val onJ9 = java.toolchain.implementation.orNull == JvmImplementation.J9
-		// Workaround for https://github.com/google/error-prone/issues/5200
-		val onJdk26 = java.toolchain.languageVersion.get() >= JavaLanguageVersion.of(26)
-		val shouldDisableErrorProne = onJ9 || onJdk26
+		val shouldDisableErrorProne = java.toolchain.implementation.orNull == JvmImplementation.J9
 		if (name == "compileJava" && !shouldDisableErrorProne) {
 			disable(
 
