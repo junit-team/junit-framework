@@ -25,10 +25,7 @@ ant = { module = "org.apache.ant:ant", version.ref = "ant" }
 ant-junit = { module = "org.apache.ant:ant-junit", version.ref = "ant" }
 ant-junitlauncher = { module = "org.apache.ant:ant-junitlauncher", version.ref = "ant" }
 apiguardian = { module = "org.apiguardian:apiguardian-api", version.ref = "apiguardian" }
-
-# check whether the Java condition in platform-tooling-support-tests.gradle.kts can be changed when updating
 archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.4.1" }
-
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
