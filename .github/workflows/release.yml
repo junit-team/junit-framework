@@ -92,7 +92,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: 25
-          distribution: oracle
+          distribution: temurin
       - uses: sbt/setup-sbt@17575ea4e18dd928fe5968dbe32294b97923d65b # v1.1.13
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
@@ -228,7 +228,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: 25
-          distribution: oracle
+          distribution: temurin
       - uses: sbt/setup-sbt@17575ea4e18dd928fe5968dbe32294b97923d65b # v1.1.13
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}

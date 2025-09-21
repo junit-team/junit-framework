@@ -4,7 +4,7 @@ inputs:
   distribution:
     required: true
     description: 'The JDK distribution to use'
-    default: 'liberica'
+    default: 'temurin'
 runs:
   using: "composite"
   steps:
