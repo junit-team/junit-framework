@@ -28,6 +28,10 @@ javadocConventions {
 	addExtraModuleReferences(projects.junitPlatformEngine, projects.junitPlatformLauncher, projects.junitJupiterParams)
 }
 
+eclipseClasspath {
+	hideModularity = false
+}
+
 tasks {
 	compileJava {
 		options.compilerArgs.add("-Xlint:-module") // due to qualified exports

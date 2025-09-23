@@ -25,6 +25,10 @@ javadocConventions {
 	addExtraModuleReferences(projects.junitPlatformEngine)
 }
 
+eclipseClasspath {
+	hideModularity = false
+}
+
 tasks.compileJava {
 	options.compilerArgs.add("-Xlint:-module") // due to qualified exports
 	val moduleName = javaModuleName
