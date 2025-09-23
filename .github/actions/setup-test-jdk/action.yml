@@ -4,20 +4,19 @@ inputs:
   distribution:
     required: true
     description: 'The JDK distribution to use'
-    default: 'temurin'
 runs:
   using: "composite"
   steps:
     - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
       with:
-        distribution: ${{ inputs.distribution }}
+        distribution: ${{ inputs.distribution || 'liberica' }}
         java-version: 8
         check-latest: true
     - shell: bash
       run: echo "JDK8=$JAVA_HOME" >> $GITHUB_ENV # zizmor: ignore[github-env]
     - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
       with:
-        distribution: ${{ inputs.distribution }}
+        distribution: ${{ inputs.distribution || 'temurin' }}
         java-version: 17
         check-latest: true
     - shell: bash
