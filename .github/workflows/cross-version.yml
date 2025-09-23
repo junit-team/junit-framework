@@ -34,7 +34,7 @@ jobs:
           type: ea
         - version: 26
           type: ea
-          release: leyden
+          release: leydenpremain
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
     runs-on: ubuntu-latest
     steps:
