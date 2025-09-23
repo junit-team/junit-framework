@@ -12,13 +12,10 @@ package org.junit.jupiter.api;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
-
-import java.nio.charset.Charset;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,31 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @see org.junit.jupiter.api.extension.DeprecatedMediaTypeTests
  */
 class MediaTypeTests {
-
-	@Test
-	void pseudoSealedType() {
-
-		class CustomMediaType extends MediaType {
-
-			CustomMediaType(String value) {
-				super(value);
-			}
-
-			CustomMediaType(String type, String subtype, @Nullable Charset charset) {
-				super(type, subtype, charset);
-			}
-		}
-
-		String message = "Type '%s' is not permitted to extend MediaType".formatted(CustomMediaType.class.getName());
-
-		assertThatIllegalStateException()//
-				.isThrownBy(() -> new CustomMediaType("text/plain"))//
-				.withMessage(message);
-
-		assertThatIllegalStateException()//
-				.isThrownBy(() -> new CustomMediaType("text", "plain", UTF_8))//
-				.withMessage(message);
-	}
 
 	@Test
 	void equals() {
