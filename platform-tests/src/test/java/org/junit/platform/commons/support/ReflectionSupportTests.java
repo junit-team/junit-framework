@@ -299,7 +299,7 @@ class ReflectionSupportTests {
 	@Test
 	void findAllClassesInModulePreconditions() {
 		assertPreconditionViolationNotNullOrEmptyFor("Module name",
-			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames));
+			() -> ReflectionSupport.findAllClassesInModule((String) null, allTypes, allNames));
 		assertPreconditionViolationNotNullFor("class predicate",
 			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", null, allNames));
 		assertPreconditionViolationNotNullFor("name predicate",

@@ -200,6 +200,26 @@ public class ResourceSupport {
 	 * <p>The module-path scanning algorithm searches recursively in all
 	 * packages contained in the module.
 	 *
+	 * @param module the module to scan; never {@code null} or <em>empty</em>
+	 * @param resourceFilter the resource type filter; never {@code null}
+	 * @return an immutable list of all such resources found; never {@code null}
+	 * but potentially empty
+	 * @see #findAllResourcesInClasspathRoot(URI, ResourceFilter)
+	 * @see #findAllResourcesInPackage(String, ResourceFilter)
+	 * @see ReflectionSupport#findAllClassesInModule(String, Predicate, Predicate)
+	 */
+	@API(status = MAINTAINED, since = "6.1")
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter resourceFilter) {
+		return ReflectionUtils.findAllResourcesInModule(module, resourceFilter);
+	}
+
+	/**
+	 * Find all {@linkplain Resource resources} in the supplied {@code moduleName}
+	 * that match the specified {@code resourceFilter}.
+	 *
+	 * <p>The module-path scanning algorithm searches recursively in all
+	 * packages contained in the module.
+	 *
 	 * @param moduleName the name of the module to scan; never {@code null} or
 	 * <em>empty</em>
 	 * @param resourceFilter the resource type filter; never {@code null}
