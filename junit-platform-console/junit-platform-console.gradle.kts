@@ -46,7 +46,7 @@ tasks {
 		}
 	}
 	shadowJar {
-		exclude("META-INF/versions/9/module-info.class")
+		exclude("META-INF/**/module-info.class")
 		relocate("picocli", "org.junit.platform.console.shadow.picocli")
 		from(projectDir) {
 			include("LICENSE-picocli.md")

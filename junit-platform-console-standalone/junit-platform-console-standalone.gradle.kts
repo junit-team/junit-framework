@@ -92,7 +92,6 @@ tasks {
 		failOnDuplicateEntries = true
 
 		manifest.apply {
-			inheritFrom(jar.get().manifest)
 			attributes(mapOf(
 					"Specification-Title" to project.name,
 					"Implementation-Title" to project.name,
