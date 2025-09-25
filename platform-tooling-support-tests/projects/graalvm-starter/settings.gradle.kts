@@ -1,7 +1,7 @@
 pluginManagement {
 	plugins {
 		// TODO Check if classes can be removed from `initializeAtBuildTime` in build.gradle.kts when upgrading
-		id("org.graalvm.buildtools.native") version "0.11.0"
+		id("org.graalvm.buildtools.native") version "0.11.1"
 	}
 	repositories {
 		mavenCentral()
