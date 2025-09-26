@@ -82,6 +82,7 @@ if (project in mavenizedProjects) {
 			(this as StandardJavadocDocletOptions).apply {
 				addBooleanOption("Xdoclint:all,-missing,-reference", true)
 				addBooleanOption("XD-Xlint:none", true)
+				addBooleanOption("Werror", true)
 				addBooleanOption("html5", true)
 				addMultilineStringsOption("tag").value = listOf(
 						"apiNote:a:API Note:",
