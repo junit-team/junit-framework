@@ -1,5 +1,5 @@
-
 import de.undercouch.gradle.tasks.download.Download
+import junitbuild.extensions.javaModuleName
 import junitbuild.japicmp.InternalApiFilter
 import junitbuild.japicmp.JApiCmpExtension
 import junitbuild.japicmp.UnacceptedIncompatibilityRule
@@ -18,7 +18,8 @@ val extension = extensions.create<JApiCmpExtension>("japicmp").apply {
 	acceptedIncompatibilities.apply {
 		val acceptedBreakingChangesFile = rootProject.layout.projectDirectory.file("gradle/config/japicmp/accepted-breaking-changes.txt")
 		if (acceptedBreakingChangesFile.asFile.exists()) {
-			convention(providers.fileContents(acceptedBreakingChangesFile).asText.map { it.lines() })
+			convention(providers.fileContents(acceptedBreakingChangesFile).asText
+				.map { it.lineSequence().filter { it.startsWith(project.javaModuleName) }.toList() })
 		} else {
 			empty()
 		}
