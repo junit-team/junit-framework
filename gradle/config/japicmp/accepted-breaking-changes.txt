@@ -1,5 +1,4 @@
 org.junit.jupiter.api.AssertionsKt
-org.junit.jupiter.api.extension.ExtensionContext#publishFile
 org.junit.jupiter.api.extension.ExtensionContext#getConfigurationParameter
 org.junit.jupiter.api.extension.ExtensionContext$Namespace
 org.junit.jupiter.api.extension.ExtensionContext$Store#computeIfAbsent
@@ -16,8 +15,6 @@ org.junit.jupiter.params.provider.CsvFileSource#lineSeparator
 org.junit.jupiter.params.ResolutionCache$Concurrent#resolve
 org.junit.platform.commons.PreconditionViolationException
 org.junit.platform.commons.support.ReflectionSupport#loadClass
-org.junit.platform.commons.support.scanning.ClasspathScanner#scanForResourcesInClasspathRoot
-org.junit.platform.commons.support.scanning.ClasspathScanner#scanForResourcesInPackage
 org.junit.platform.commons.util.BlacklistedExceptions
 org.junit.platform.commons.util.PreconditionViolationException
 org.junit.platform.console.ConsoleLauncher#ConsoleLauncher
