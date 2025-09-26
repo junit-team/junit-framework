@@ -25,7 +25,7 @@ javadocConventions {
 	addExtraModuleReferences(projects.junitPlatformEngine)
 }
 
-eclipseClasspath {
+eclipseConventions {
 	hideModularity = false
 }
 

@@ -1,4 +1,4 @@
-import junitbuild.eclipse.EclipseClasspathExtension
+import junitbuild.eclipse.EclipseConventionsExtension
 import org.gradle.plugins.ide.eclipse.model.Classpath
 import org.gradle.plugins.ide.eclipse.model.Library
 import org.gradle.plugins.ide.eclipse.model.ProjectDependency
@@ -8,7 +8,7 @@ plugins {
 	eclipse
 }
 
-val extension = extensions.create<EclipseClasspathExtension>("eclipseClasspath").apply {
+val extension = extensions.create<EclipseConventionsExtension>("eclipseConventions").apply {
 	hideModularity.convention(true)
 }
 
