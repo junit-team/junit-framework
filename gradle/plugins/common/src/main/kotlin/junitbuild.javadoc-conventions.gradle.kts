@@ -14,16 +14,15 @@ tasks.javadoc {
 		locale = "en"
 		(this as StandardJavadocDocletOptions).apply {
 			addBooleanOption("Xdoclint:all,-missing,-reference", true)
-			addBooleanOption("XD-Xlint:none", true)
 			addBooleanOption("html5", true)
-			addMultilineStringsOption("tag").value = listOf(
-				"apiNote:a:API Note:",
-				"implNote:a:Implementation Note:"
-			)
-			use(true)
-			noTimestamp(true)
-		}
-	}
+            addMultilineStringsOption("tag").value = listOf(
+                "apiNote:a:API Note:",
+                "implNote:a:Implementation Note:"
+            )
+            use(true)
+            noTimestamp(true)
+        }
+    }
 }
 
 tasks.named<Jar>("javadocJar").configure {
