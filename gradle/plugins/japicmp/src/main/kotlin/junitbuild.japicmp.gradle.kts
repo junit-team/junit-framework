@@ -1,10 +1,13 @@
 import de.undercouch.gradle.tasks.download.Download
 import junitbuild.extensions.javaModuleName
+import junitbuild.japicmp.AcceptedViolationSuppressor
+import junitbuild.japicmp.AcceptedViolationsPostProcessRule
+import junitbuild.japicmp.BreakingSuperClassChangeRule
 import junitbuild.japicmp.InternalApiFilter
 import junitbuild.japicmp.JApiCmpExtension
-import junitbuild.japicmp.UnacceptedIncompatibilityRule
-import junitbuild.japicmp.UnacceptedSuperClassChangeRule
+import junitbuild.japicmp.SourceIncompatibleRule
 import me.champeau.gradle.japicmp.JapicmpTask
+import me.champeau.gradle.japicmp.report.stdrules.BinaryIncompatibleRule
 import me.champeau.gradle.japicmp.report.stdrules.RecordSeenMembersSetup
 
 plugins {
@@ -19,7 +22,7 @@ val extension = extensions.create<JApiCmpExtension>("japicmp").apply {
 		val acceptedBreakingChangesFile = rootProject.layout.projectDirectory.file("gradle/config/japicmp/accepted-breaking-changes.txt")
 		if (acceptedBreakingChangesFile.asFile.exists()) {
 			convention(providers.fileContents(acceptedBreakingChangesFile).asText
-				.map { it.lineSequence().filter { it.startsWith(project.javaModuleName) }.toList() })
+				.map { it.lineSequence().filter { line -> line.startsWith(project.javaModuleName) }.toList() })
 		} else {
 			empty()
 		}
@@ -50,15 +53,18 @@ val checkBackwardCompatibility by tasks.registering(JapicmpTask::class) {
 	newClasspath.from(tasks.jar)
 	onlyModified = true
 	ignoreMissingClasses = true
-	txtOutputFile = layout.buildDirectory.file("reports/japicmp/plain-report.txt")
-	mdOutputFile = layout.buildDirectory.file("reports/japicmp/plain-report.md")
 	htmlOutputFile = layout.buildDirectory.file("reports/japicmp/plain-report.html")
 	addExcludeFilter(InternalApiFilter::class.java)
 	packageExcludes.add("*.shadow.*")
 	inputs.property("acceptedIncompatibilities", extension.acceptedIncompatibilities)
 	richReport {
+		title = "Compatibility report"
+		description = extension.previousVersion.map { "and source compatibility compared against $it" }
 		destinationDir = layout.buildDirectory.dir("reports/japicmp")
 		addSetupRule(RecordSeenMembersSetup::class.java)
+		addRule(BreakingSuperClassChangeRule::class.java)
+		addRule(BinaryIncompatibleRule::class.java)
+		addRule(SourceIncompatibleRule::class.java)
 	}
 }
 
@@ -72,8 +78,8 @@ afterEvaluate {
 	)
 	checkBackwardCompatibility {
 		richReport {
-			addRule(UnacceptedIncompatibilityRule::class.java, params)
-			addRule(UnacceptedSuperClassChangeRule::class.java, params)
+			addViolationTransformer(AcceptedViolationSuppressor::class.java, params)
+			addPostProcessRule(AcceptedViolationsPostProcessRule::class.java, params)
 		}
 	}
 }
