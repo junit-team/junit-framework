@@ -24,6 +24,10 @@ dependencies {
 	osgiVerification(projects.junitPlatformLauncher)
 }
 
+javadocConventions {
+	addExtraModuleReferences(projects.junitPlatformEngine, projects.junitPlatformLauncher, projects.junitJupiterParams)
+}
+
 tasks {
 	compileJava {
 		options.compilerArgs.add("-Xlint:-module") // due to qualified exports

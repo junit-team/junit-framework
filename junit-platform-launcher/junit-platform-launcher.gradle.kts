@@ -16,6 +16,10 @@ dependencies {
 	osgiVerification(projects.junitJupiterEngine)
 }
 
+javadocConventions {
+	addExtraModuleReferences(projects.junitPlatformReporting)
+}
+
 tasks {
 	jar {
 		bundle {

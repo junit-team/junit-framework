@@ -21,6 +21,10 @@ dependencies {
 	testFixturesImplementation(libs.assertj)
 }
 
+javadocConventions {
+	addExtraModuleReferences(projects.junitPlatformEngine)
+}
+
 tasks.compileJava {
 	options.compilerArgs.add("-Xlint:-module") // due to qualified exports
 	val moduleName = javaModuleName
