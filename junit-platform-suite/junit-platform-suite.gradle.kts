@@ -12,7 +12,3 @@ dependencies {
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
 }
-
-japicmp {
-	acceptedIncompatibilities.empty()
-}

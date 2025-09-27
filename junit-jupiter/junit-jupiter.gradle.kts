@@ -14,7 +14,3 @@ dependencies {
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
 }
-
-japicmp {
-	enabled = false // already checked by individual projects
-}

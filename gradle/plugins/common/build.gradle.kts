@@ -8,6 +8,7 @@ plugins {
 dependencies {
 	implementation("junitbuild.base:dsl-extensions")
 	implementation(projects.buildParameters)
+	implementation(projects.japicmp)
 	implementation(libs.plugins.kotlin.markerCoordinates)
 	implementation(libs.plugins.bnd.markerCoordinates)
 	implementation(libs.plugins.commonCustomUserData.markerCoordinates)
@@ -18,7 +19,6 @@ dependencies {
 	implementation(libs.plugins.nullaway.markerCoordinates)
 	implementation(libs.plugins.shadow.markerCoordinates)
 	implementation(libs.plugins.spotless.markerCoordinates)
-	runtimeOnly(projects.japicmp)
 }
 
 tasks.compileJava {
