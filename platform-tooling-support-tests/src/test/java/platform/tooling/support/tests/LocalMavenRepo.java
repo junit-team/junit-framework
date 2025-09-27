@@ -69,7 +69,7 @@ public class LocalMavenRepo implements AutoCloseable {
 	@Override
 	public void close() throws IOException {
 		try (var files = Files.walk(tempDir)) {
-			files.sorted(Comparator.<Path> naturalOrder().reversed()) //
+			files.sorted(Comparator.reverseOrder()) //
 					.forEach(path -> {
 						try {
 							Files.delete(path);

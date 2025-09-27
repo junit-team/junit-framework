@@ -7,6 +7,7 @@ plugins {
 	id("junitbuild.jacoco-aggregation-conventions")
 	id("junitbuild.maven-central-publishing")
 	id("junitbuild.temp-maven-repo")
+	id("org.openrewrite.rewrite") version "7.17.0" apply false
 }
 
 description = "JUnit"
@@ -54,3 +55,5 @@ dependencies {
 	jacocoAggregation(projects.jupiterTests)
 	jacocoAggregation(projects.platformTests)
 }
+
+apply(from = "$rootDir/gradle/rewrite.gradle")

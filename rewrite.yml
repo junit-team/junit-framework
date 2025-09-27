@@ -1,0 +1,50 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.junit.jupiter.openrewrite.SanityCheck
+displayName: Apply all Java & Gradle best practices
+description: Comprehensive code quality recipe combining modernization, security, and best practices.
+tags:
+  - java
+  - gradle
+  - static-analysis
+  - cleanup
+recipeList:
+  - org.openrewrite.java.security.JavaSecurityBestPractices
+  - org.openrewrite.staticanalysis.NoFinalizer
+  - org.openrewrite.staticanalysis.RemoveUnusedPrivateMethods
+  - tech.picnic.errorprone.refasterrules.BigDecimalRulesRecipes
+  - tech.picnic.errorprone.refasterrules.CharSequenceRulesRecipes
+  - tech.picnic.errorprone.refasterrules.ClassRulesRecipes
+  - tech.picnic.errorprone.refasterrules.CollectionRulesRecipes
+  - tech.picnic.errorprone.refasterrules.ComparatorRulesRecipes
+  - tech.picnic.errorprone.refasterrules.FileRulesRecipes
+  - tech.picnic.errorprone.refasterrules.MicrometerRulesRecipes
+  - tech.picnic.errorprone.refasterrules.PatternRulesRecipes
+  - tech.picnic.errorprone.refasterrules.PreconditionsRulesRecipes
+  - tech.picnic.errorprone.refasterrules.PrimitiveRulesRecipes
+  - tech.picnic.errorprone.refasterrules.StreamRulesRecipes
+  - tech.picnic.errorprone.refasterrules.TimeRulesRecipes
+  # - org.openrewrite.staticanalysis.EqualsAvoidsNull
+  # - org.openrewrite.staticanalysis.ModifierOrder
+  # - org.checkstyle.CheckstyleAutoFix # await release
+  # - org.openrewrite.gradle.GradleBestPractices
+  # - org.openrewrite.java.RemoveUnusedImports
+  # - org.openrewrite.java.format.RemoveTrailingWhitespace
+  # - org.openrewrite.java.migrate.UpgradeToJava17
+  # - org.openrewrite.java.recipes.JavaRecipeBestPractices
+  # - org.openrewrite.java.recipes.RecipeTestingBestPractices
+  # - org.openrewrite.staticanalysis.CodeCleanup # bug
+  # - org.openrewrite.staticanalysis.CommonStaticAnalysis
+  # - org.openrewrite.staticanalysis.JavaApiBestPractices
+  # - org.openrewrite.staticanalysis.LowercasePackage
+  # - org.openrewrite.staticanalysis.MissingOverrideAnnotation
+  # - org.openrewrite.staticanalysis.NoToStringOnStringType
+  # - org.openrewrite.staticanalysis.NoValueOfOnStringType
+  # - org.openrewrite.staticanalysis.RemoveUnusedLocalVariables
+  # - org.openrewrite.staticanalysis.RemoveUnusedPrivateFields
+  # - org.openrewrite.staticanalysis.UnnecessaryCloseInTryWithResources
+  # - org.openrewrite.staticanalysis.UnnecessaryExplicitTypeArguments
+  # - org.openrewrite.staticanalysis.UnnecessaryParentheses
+  # - org.openrewrite.staticanalysis.UnnecessaryReturnAsLastStatement
+  # - org.openrewrite.staticanalysis.UnnecessaryThrows # bug
+---

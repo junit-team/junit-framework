@@ -66,7 +66,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 			BigDecimal factor = configurationParameters.get(CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME,
 				BigDecimal::new).orElse(BigDecimal.ONE);
 
-			Preconditions.condition(factor.compareTo(BigDecimal.ZERO) > 0,
+			Preconditions.condition(factor.signum() == 1,
 				() -> "Factor '%s' specified via configuration parameter '%s' must be greater than 0".formatted(factor,
 					CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME));
 

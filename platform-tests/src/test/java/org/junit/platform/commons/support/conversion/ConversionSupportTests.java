@@ -268,7 +268,7 @@ class ConversionSupportTests {
 	@Test
 	void convertsStringsToJavaTimeInstances() {
 		assertConverts("PT1234.5678S", Duration.class, Duration.ofSeconds(1234, 567800000));
-		assertConverts("1970-01-01T00:00:00Z", Instant.class, Instant.ofEpochMilli(0));
+		assertConverts("1970-01-01T00:00:00Z", Instant.class, Instant.EPOCH);
 		assertConverts("2017-03-14", LocalDate.class, LocalDate.of(2017, 3, 14));
 		assertConverts("2017-03-14T12:34:56.789", LocalDateTime.class,
 			LocalDateTime.of(2017, 3, 14, 12, 34, 56, 789_000_000));

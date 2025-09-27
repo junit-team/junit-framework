@@ -60,7 +60,7 @@ abstract class AbstractTestSourceTests {
 			var serialized = serialize(instance);
 			var deserialized = deserialize(serialized);
 
-			assertTrue(type.isAssignableFrom(deserialized.getClass()));
+			assertTrue(type.isInstance(deserialized));
 			assertEquals(instance, deserialized);
 		}
 		catch (Exception e) {
