@@ -186,7 +186,7 @@ class ResourceSupportTests {
 	@Test
 	void findAllResourcesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ResourceSupport.findAllResourcesInModule(null, allResources));
+			() -> ResourceSupport.findAllResourcesInModule((String) null, allResources));
 		assertEquals("Module name must not be null or empty", exception.getMessage());
 		assertPreconditionViolationNotNullFor("Resource filter",
 			() -> ResourceSupport.findAllResourcesInModule("org.junit.platform.commons", null));
