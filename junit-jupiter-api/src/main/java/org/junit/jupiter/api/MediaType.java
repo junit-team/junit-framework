@@ -34,8 +34,9 @@ import org.junit.platform.commons.util.Preconditions;
  * @see TestReporter#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
  * @see org.junit.jupiter.api.extension.ExtensionContext#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
  */
+@SuppressWarnings("removal")
 @API(status = MAINTAINED, since = "5.14")
-public class MediaType {
+public sealed class MediaType permits org.junit.jupiter.api.extension.MediaType {
 
 	private static final Pattern PATTERN;
 
@@ -125,13 +126,6 @@ public class MediaType {
 	}
 
 	protected MediaType(String value) {
-		// Mimic sealed types, permitting only this class and api.extension.MediaType.
-		if (getClass() != MediaType.class
-				&& !getClass().getName().equals("org.junit.jupiter.api.extension.MediaType")) {
-			throw new IllegalStateException(
-				"Type '%s' is not permitted to extend MediaType".formatted(getClass().getName()));
-		}
-
 		String strippedValue = Preconditions.notBlank(value, "value must not be null or blank").strip();
 		Matcher matcher = PATTERN.matcher(strippedValue);
 		Preconditions.condition(matcher.matches(), () -> "Invalid media type: '" + strippedValue + "'");
