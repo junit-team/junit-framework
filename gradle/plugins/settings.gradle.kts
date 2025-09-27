@@ -24,6 +24,5 @@ include("common")
 include("code-generator")
 include("japicmp")
 include("publishing")
-include("roseau")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
