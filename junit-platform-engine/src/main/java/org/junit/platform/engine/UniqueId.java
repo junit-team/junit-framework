@@ -110,7 +110,7 @@ public final class UniqueId implements Cloneable, Serializable {
 	}
 
 	Optional<Segment> getRoot() {
-		return this.segments.isEmpty() ? Optional.empty() : Optional.of(this.segments.get(0));
+		return this.segments.stream().findFirst();
 	}
 
 	/**

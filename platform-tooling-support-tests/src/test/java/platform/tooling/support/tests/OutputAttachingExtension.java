@@ -82,7 +82,7 @@ class OutputAttachingExtension implements ParameterResolver, AfterTestExecutionC
 
 		@Override
 		public void close() throws Exception {
-			try (var stream = Files.walk(root).sorted(Comparator.<Path> naturalOrder().reversed())) {
+			try (var stream = Files.walk(root).sorted(Comparator.reverseOrder())) {
 				stream.forEach(path -> {
 					try {
 						Files.delete(path);

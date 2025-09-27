@@ -174,7 +174,7 @@ class IsTestFactoryMethodTests {
 
 		@TestFactory
 		Stream<?> unboundStreamFactory() {
-			return Stream.of();
+			return Stream.empty();
 		}
 
 	}

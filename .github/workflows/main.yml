@@ -49,6 +49,11 @@ jobs:
       uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: rewriteDryRun
+      uses: ./.github/actions/main-build
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        arguments: rewriteDryRun
 
   Windows:
     runs-on: windows-latest

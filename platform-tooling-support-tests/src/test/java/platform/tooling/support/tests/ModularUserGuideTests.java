@@ -181,7 +181,7 @@ class ModularUserGuideTests {
 		try (var stream = Files.walk(root)) {
 			stream.map(root::relativize) //
 					.map(path -> path.toString().replace('\\', '/')) //
-					.sorted().filter(Predicate.not(String::isEmpty)) //
+					.filter(Predicate.not(String::isEmpty)).sorted() //
 					.forEach(out);
 		}
 		catch (Exception e) {

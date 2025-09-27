@@ -140,7 +140,7 @@ public class OutputDir {
 			return false;
 		};
 		try (Stream<Path> pathStream = Files.find(dir, 1, matcher)) {
-			return pathStream.findFirst().isPresent();
+			return pathStream.findAny().isPresent();
 		}
 	}
 }

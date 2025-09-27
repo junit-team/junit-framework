@@ -126,7 +126,7 @@ public class EngineFilter implements Filter<TestEngine> {
 		Preconditions.notBlank(engineId, "TestEngine ID must not be null or blank");
 
 		if (this.type == Type.INCLUDE) {
-			return includedIf(this.engineIds.stream().anyMatch(engineId::equals), //
+			return includedIf(this.engineIds.contains(engineId), //
 				() -> "Engine ID [%s] is in included list [%s]".formatted(engineId, this.engineIds), //
 				() -> "Engine ID [%s] is not in included list [%s]".formatted(engineId, this.engineIds));
 		}
