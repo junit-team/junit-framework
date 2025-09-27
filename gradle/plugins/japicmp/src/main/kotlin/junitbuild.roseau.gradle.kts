@@ -8,9 +8,6 @@ plugins {
 	`java-library`
 }
 
-// TODO make configurable
-val previousVersion = if (group == "org.junit.platform") "1.13.3" else "5.13.3"
-
 val roseauDependencies = configurations.dependencyScope("roseau")
 val roseauClasspath = configurations.resolvable("roseauClasspath") {
 	extendsFrom(roseauDependencies.get())
