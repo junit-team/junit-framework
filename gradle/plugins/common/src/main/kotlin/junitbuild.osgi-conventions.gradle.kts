@@ -61,7 +61,7 @@ tasks.withType<Jar>().named {
 				-removeheaders: Private-Package
 
 				# Instruct the APIGuardianAnnotations how to operate.
-				# See https://bnd.bndtools.org/instructions/export-apiguardian.html
+				# See https://bnd.bndtools.org/instructions/export_apiguardian.html
 				-export-apiguardian: *;version=${'$'}{versionmask;===;${'$'}{version_cleanup;${'$'}{task.archiveVersion}}}
 
 				# Avoid including java packages in Import-Package header to maximize compatibility with older OSGi runtimes.
