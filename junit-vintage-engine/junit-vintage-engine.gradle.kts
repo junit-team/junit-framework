@@ -38,8 +38,8 @@ tasks {
 	}
 	compileTestFixturesGroovy {
 		javaLauncher = project.javaToolchains.launcherFor {
-			// Groovy 2.x (used for Spock tests) does not support current JDKs
-			languageVersion = JavaLanguageVersion.of(8)
+			// Groovy 2.x (used for Spock tests) does not run on more recent JDKs
+			languageVersion = JavaLanguageVersion.of(17)
 		}
 	}
 	jar {
