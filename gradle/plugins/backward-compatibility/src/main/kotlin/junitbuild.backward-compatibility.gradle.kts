@@ -87,13 +87,15 @@ val roseau by tasks.registering(JavaExec::class) {
 		.withPropertyName("report")
 
 	argumentProviders.add(CommandLineArgumentProvider {
-		listOf(
+		val args = listOf(
 			"--classpath", configurations.compileClasspath.get().asPath,
 			"--v1", v1Jar.get().absolutePath,
 			"--v2", v2Jar.get().absolutePath,
 			"--diff",
 			"--report", roseauCsvFile.get().asFile.absolutePath,
 		)
+		println(args)
+		args
 	})
 
 	doFirst {
