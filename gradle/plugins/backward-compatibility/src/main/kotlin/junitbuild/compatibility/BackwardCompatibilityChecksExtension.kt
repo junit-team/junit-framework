@@ -1,9 +1,9 @@
-package junitbuild.japicmp
+package junitbuild.compatibility
 
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 
-abstract class JApiCmpExtension {
+abstract class BackwardCompatibilityChecksExtension {
 
     abstract val enabled: Property<Boolean>
 

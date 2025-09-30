@@ -1,11 +1,12 @@
+
 import de.undercouch.gradle.tasks.download.Download
+import junitbuild.compatibility.BackwardCompatibilityChecksExtension
+import junitbuild.compatibility.japicmp.AcceptedViolationSuppressor
+import junitbuild.compatibility.japicmp.AcceptedViolationsPostProcessRule
+import junitbuild.compatibility.japicmp.BreakingSuperClassChangeRule
+import junitbuild.compatibility.japicmp.InternalApiFilter
+import junitbuild.compatibility.japicmp.SourceIncompatibleRule
 import junitbuild.extensions.javaModuleName
-import junitbuild.japicmp.AcceptedViolationSuppressor
-import junitbuild.japicmp.AcceptedViolationsPostProcessRule
-import junitbuild.japicmp.BreakingSuperClassChangeRule
-import junitbuild.japicmp.InternalApiFilter
-import junitbuild.japicmp.JApiCmpExtension
-import junitbuild.japicmp.SourceIncompatibleRule
 import me.champeau.gradle.japicmp.JapicmpTask
 import me.champeau.gradle.japicmp.report.stdrules.BinaryIncompatibleRule
 import me.champeau.gradle.japicmp.report.stdrules.RecordSeenMembersSetup
@@ -16,7 +17,7 @@ plugins {
 	id("me.champeau.gradle.japicmp")
 }
 
-val extension = extensions.create<JApiCmpExtension>("japicmp").apply {
+val extension = extensions.create<BackwardCompatibilityChecksExtension>("backwardCompatibilityChecks").apply {
 	enabled.convention(true)
 	acceptedIncompatibilities.apply {
 		val acceptedBreakingChangesFile = rootProject.layout.projectDirectory.file("gradle/config/japicmp/accepted-breaking-changes.txt")

@@ -1,4 +1,4 @@
-import junitbuild.japicmp.JApiCmpExtension
+import junitbuild.compatibility.BackwardCompatibilityChecksExtension
 
 plugins {
 	id("junitbuild.java-library-conventions")
@@ -10,6 +10,6 @@ tasks.javadoc {
 	enabled = false
 }
 
-the<JApiCmpExtension>().apply {
+the<BackwardCompatibilityChecksExtension>().apply {
 	enabled = false // already checked by individual projects
 }

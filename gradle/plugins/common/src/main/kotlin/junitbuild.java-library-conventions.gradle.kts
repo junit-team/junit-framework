@@ -26,7 +26,7 @@ if (project in mavenizedProjects) {
 	apply(plugin = "junitbuild.javadoc-conventions")
 	apply(plugin = "junitbuild.publishing-conventions")
 	apply(plugin = "junitbuild.osgi-conventions")
-	apply(plugin = "junitbuild.japicmp")
+	apply(plugin = "junitbuild.backward-compatibility")
 
 	java {
 		withSourcesJar()
