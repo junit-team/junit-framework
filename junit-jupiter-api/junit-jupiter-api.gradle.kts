@@ -36,7 +36,7 @@ tasks {
 	compileJava {
 		options.compilerArgs.add("-Xlint:-module") // due to qualified exports
 	}
-	checkBackwardCompatibility {
+	japicmp {
 		classExcludes.addAll($$"*.AssertionsKt$assert*", $$"*.AssertionsKt$evaluate*")
 	}
 	jar {
