@@ -6,6 +6,7 @@ import junitbuild.compatibility.japicmp.AcceptedViolationsPostProcessRule
 import junitbuild.compatibility.japicmp.BreakingSuperClassChangeRule
 import junitbuild.compatibility.japicmp.InternalApiFilter
 import junitbuild.compatibility.japicmp.SourceIncompatibleRule
+import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.javaModuleName
 import me.champeau.gradle.japicmp.JapicmpTask
 import me.champeau.gradle.japicmp.report.stdrules.BinaryIncompatibleRule
@@ -15,6 +16,14 @@ plugins {
 	java
 	id("de.undercouch.download")
 	id("me.champeau.gradle.japicmp")
+}
+
+val roseauDependencies = configurations.dependencyScope("roseau")
+val roseauClasspath = configurations.resolvable("roseauClasspath") {
+	extendsFrom(roseauDependencies.get())
+}
+dependencies {
+	roseauDependencies(dependencyFromLibs("roseau-cli"))
 }
 
 val extension = extensions.create<BackwardCompatibilityChecksExtension>("backwardCompatibilityChecks").apply {
@@ -49,11 +58,56 @@ val downloadPreviousReleaseJar by tasks.registering(Download::class) {
 	outputs.cacheIf { true }
 }
 
-val checkBackwardCompatibility by tasks.registering(JapicmpTask::class) {
+val roseauCsvFile = layout.buildDirectory.file("reports/roseau/breaking-changes.csv")
+
+val roseau by tasks.registering(JavaExec::class) {
 	if (gradle.startParameter.isOffline) {
 		enabled = false
 	}
 	onlyIf { extension.enabled.get() }
+
+	mainClass = "io.github.alien.roseau.cli.RoseauCLI"
+	classpath = files(roseauClasspath)
+
+	inputs.files(configurations.compileClasspath)
+		.withNormalizer(CompileClasspathNormalizer::class)
+		.withPropertyName("apiClasspath")
+
+	val v1Jar = downloadPreviousReleaseJar.map { it.outputFiles.single() }
+	inputs.file(v1Jar)
+		.withNormalizer(CompileClasspathNormalizer::class)
+		.withPropertyName("v1")
+
+	val v2Jar = tasks.jar.flatMap { it.archiveFile }.map { it.asFile }
+	inputs.file(v2Jar)
+		.withNormalizer(CompileClasspathNormalizer::class)
+		.withPropertyName("v2")
+
+	outputs.file(roseauCsvFile)
+		.withPropertyName("report")
+
+	argumentProviders.add(CommandLineArgumentProvider {
+		listOf(
+			"--classpath", configurations.compileClasspath.get().asPath,
+			"--v1", v1Jar.get().absolutePath,
+			"--v2", v2Jar.get().absolutePath,
+			"--diff",
+			"--report", roseauCsvFile.get().asFile.absolutePath,
+		)
+	})
+
+	doFirst {
+		roseauCsvFile.get().asFile.parentFile.mkdirs()
+	}
+}
+
+val japicmp by tasks.registering(JapicmpTask::class) {
+	if (gradle.startParameter.isOffline) {
+		enabled = false
+	}
+	onlyIf { extension.enabled.get() }
+	shouldRunAfter(roseau)
+
 	oldClasspath.from(downloadPreviousReleaseJar.map { it.outputFiles })
 	newClasspath.from(tasks.jar)
 	onlyModified = true
@@ -73,6 +127,10 @@ val checkBackwardCompatibility by tasks.registering(JapicmpTask::class) {
 	}
 }
 
+val checkBackwardCompatibility by tasks.registering {
+	dependsOn(roseau, japicmp)
+}
+
 tasks.check {
 	dependsOn(checkBackwardCompatibility)
 }
@@ -81,7 +139,7 @@ afterEvaluate {
 	val params = mapOf(
 		"acceptedIncompatibilities" to extension.acceptedIncompatibilities.get().joinToString(",")
 	)
-	checkBackwardCompatibility {
+	japicmp {
 		richReport {
 			addViolationTransformer(AcceptedViolationSuppressor::class.java, params)
 			addPostProcessRule(AcceptedViolationsPostProcessRule::class.java, params)
