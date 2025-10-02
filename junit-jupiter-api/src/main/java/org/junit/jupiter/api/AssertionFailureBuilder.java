@@ -181,7 +181,91 @@ public class AssertionFailureBuilder {
 			return "expected: %s but was: %s".formatted(formatClassAndValue(expected, expectedString),
 				formatClassAndValue(actual, actualString));
 		}
+
+		// Check if both are strings and have whitespace differences
+		if (expected instanceof String expectedStr && actual instanceof String actualStr) {
+			String baseMessage = "expected: <%s> but was: <%s>".formatted(expectedString, actualString);
+			String diff = createWhitespaceDiff(expectedStr, actualStr);
+			if (diff != null) {
+				return baseMessage + "\n" + diff;
+			}
+			return baseMessage;
+		}
+
 		return "expected: <%s> but was: <%s>".formatted(expectedString, actualString);
+	}
+
+	/**
+	 * Creates a diff showing whitespace differences between two strings.
+	 * Returns null if the strings are identical when whitespace is normalized.
+	 */
+	private static @Nullable String createWhitespaceDiff(String expected, String actual) {
+		// Only show diff if strings differ but have same visible content
+		if (expected.replaceAll("\\s+", " ").trim().equals(actual.replaceAll("\\s+", " ").trim())) {
+			return "diff: " + visualizeWhitespace(expected) + "\n" + "      " + visualizeWhitespace(actual);
+		}
+
+		// Show diff for any string comparison to help identify whitespace issues
+		return "diff: " + visualizeWhitespace(expected) + "\n" + "      " + visualizeWhitespace(actual);
+	}
+
+	/**
+	 * Converts whitespace characters to their visual representations.
+	 */
+	private static String visualizeWhitespace(String str) {
+		StringBuilder sb = new StringBuilder();
+		boolean inWhitespace = false;
+		StringBuilder whitespaceBuffer = new StringBuilder();
+
+		for (int i = 0; i < str.length(); i++) {
+			char c = str.charAt(i);
+
+			if (isVisualizableWhitespace(c)) {
+				if (!inWhitespace) {
+					inWhitespace = true;
+					whitespaceBuffer.setLength(0);
+					whitespaceBuffer.append("[");
+				}
+				whitespaceBuffer.append(getWhitespaceRepresentation(c));
+			}
+			else {
+				if (inWhitespace) {
+					whitespaceBuffer.append("]");
+					sb.append(whitespaceBuffer.toString());
+					inWhitespace = false;
+				}
+				sb.append(c);
+			}
+		}
+
+		// Handle case where string ends with whitespace
+		if (inWhitespace) {
+			whitespaceBuffer.append("]");
+			sb.append(whitespaceBuffer.toString());
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * Checks if a character should be visualized as whitespace
+	 */
+	private static boolean isVisualizableWhitespace(char c) {
+		return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || (Character.isWhitespace(c) && c != ' ');
+	}
+
+	/**
+	 * Gets the string representation of a whitespace character
+	 */
+	private static String getWhitespaceRepresentation(char c) {
+		return switch (c) {
+			case ' ' -> " ";
+			case '\t' -> "\\t";
+			case '\n' -> "\\n";
+			case '\r' -> "\\r";
+			case '\f' -> "\\f";
+			default -> "\\u" + "%04X".formatted((int) c);
+		};
 	}
 
 	private static String formatClassAndValue(@Nullable Object value, String valueString) {
