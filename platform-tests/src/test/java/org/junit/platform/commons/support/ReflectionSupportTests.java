@@ -299,7 +299,7 @@ class ReflectionSupportTests {
 	@Test
 	void findAllClassesInModulePreconditions() {
 		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames));
+			() -> ReflectionSupport.findAllClassesInModule((String) null, allTypes, allNames));
 		assertEquals("Module name must not be null or empty", exception.getMessage());
 		assertPreconditionViolationNotNullFor("class predicate",
 			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", null, allNames));
