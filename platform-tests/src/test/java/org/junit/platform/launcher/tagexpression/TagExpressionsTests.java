@@ -11,7 +11,7 @@
 package org.junit.platform.launcher.tagexpression;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.TestTag.create;
 import static org.junit.platform.launcher.tagexpression.TagExpressions.and;
 import static org.junit.platform.launcher.tagexpression.TagExpressions.any;
@@ -23,7 +23,6 @@ import static org.junit.platform.launcher.tagexpression.TagExpressions.tag;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.TestTag;
 
 class TagExpressionsTests {
@@ -38,9 +37,8 @@ class TagExpressionsTests {
 
 	@Test
 	void rejectInvalidTestTags() {
-		RuntimeException expected = assertThrows(PreconditionViolationException.class,
-			() -> tag("tags with spaces are not allowed"));
-		assertThat(expected).hasMessageContaining("tags with spaces are not allowed");
+		assertPreconditionViolationFor(() -> tag("tags with spaces are not allowed")).withMessageContaining(
+			"tags with spaces are not allowed");
 	}
 
 	@Test

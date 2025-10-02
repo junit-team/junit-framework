@@ -11,11 +11,10 @@
 package org.junit.platform.engine.discovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link ClassSelector}.
@@ -38,10 +37,8 @@ class ClassSelectorTests {
 	void preservesOriginalExceptionWhenTryingToLoadClass() {
 		var selector = new ClassSelector(null, "org.example.TestClass");
 
-		var e = assertThrows(PreconditionViolationException.class, selector::getJavaClass);
-
-		assertThat(e).hasMessage("Could not load class with name: org.example.TestClass").hasCauseInstanceOf(
-			ClassNotFoundException.class);
+		assertPreconditionViolationFor(selector::getJavaClass).withMessage(
+			"Could not load class with name: org.example.TestClass").withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test

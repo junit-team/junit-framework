@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -63,19 +63,19 @@ class LauncherConfigurationParametersTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void constructorPreconditions() {
-		assertThrows(PreconditionViolationException.class, () -> fromMap(null));
-		assertThrows(PreconditionViolationException.class, () -> fromMapAndFile(Map.of(), null));
-		assertThrows(PreconditionViolationException.class, () -> fromMapAndFile(Map.of(), ""));
-		assertThrows(PreconditionViolationException.class, () -> fromMapAndFile(Map.of(), "  "));
+		assertPreconditionViolationFor(() -> fromMap(null));
+		assertPreconditionViolationFor(() -> fromMapAndFile(Map.of(), null));
+		assertPreconditionViolationFor(() -> fromMapAndFile(Map.of(), ""));
+		assertPreconditionViolationFor(() -> fromMapAndFile(Map.of(), "  "));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getPreconditions() {
 		ConfigurationParameters configParams = fromMap(Map.of());
-		assertThrows(PreconditionViolationException.class, () -> configParams.get(null));
-		assertThrows(PreconditionViolationException.class, () -> configParams.get(""));
-		assertThrows(PreconditionViolationException.class, () -> configParams.get("  "));
+		assertPreconditionViolationFor(() -> configParams.get(null));
+		assertPreconditionViolationFor(() -> configParams.get(""));
+		assertPreconditionViolationFor(() -> configParams.get("  "));
 	}
 
 	@Test

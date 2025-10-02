@@ -11,15 +11,14 @@
 package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.support.descriptor.ClasspathResourceSource.CLASSPATH_SCHEME;
 
 import java.net.URI;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link ClasspathResourceSource}.
@@ -41,13 +40,12 @@ class ClasspathResourceSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
-		assertThrows(PreconditionViolationException.class, () -> ClasspathResourceSource.from((String) null));
-		assertThrows(PreconditionViolationException.class, () -> ClasspathResourceSource.from(""));
-		assertThrows(PreconditionViolationException.class, () -> ClasspathResourceSource.from("   "));
+		assertPreconditionViolationFor(() -> ClasspathResourceSource.from((String) null));
+		assertPreconditionViolationFor(() -> ClasspathResourceSource.from(""));
+		assertPreconditionViolationFor(() -> ClasspathResourceSource.from("   "));
 
-		assertThrows(PreconditionViolationException.class, () -> ClasspathResourceSource.from((URI) null));
-		assertThrows(PreconditionViolationException.class,
-			() -> ClasspathResourceSource.from(URI.create("file:/foo.txt")));
+		assertPreconditionViolationFor(() -> ClasspathResourceSource.from((URI) null));
+		assertPreconditionViolationFor(() -> ClasspathResourceSource.from(URI.create("file:/foo.txt")));
 	}
 
 	@Test

@@ -13,15 +13,14 @@ package org.junit.platform.engine.support.descriptor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link MethodSource}.
@@ -60,34 +59,33 @@ class MethodSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void instantiatingWithNullNamesShouldThrowPreconditionViolationException() {
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from("foo", null));
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from(null, "foo"));
+		assertPreconditionViolationFor(() -> MethodSource.from("foo", null));
+		assertPreconditionViolationFor(() -> MethodSource.from(null, "foo"));
 	}
 
 	@Test
 	void instantiatingWithEmptyNamesShouldThrowPreconditionViolationException() {
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from("foo", ""));
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from("", "foo"));
+		assertPreconditionViolationFor(() -> MethodSource.from("foo", ""));
+		assertPreconditionViolationFor(() -> MethodSource.from("", "foo"));
 	}
 
 	@Test
 	void instantiatingWithBlankNamesShouldThrowPreconditionViolationException() {
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from("foo", "  "));
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from("  ", "foo"));
+		assertPreconditionViolationFor(() -> MethodSource.from("foo", "  "));
+		assertPreconditionViolationFor(() -> MethodSource.from("  ", "foo"));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void instantiationWithNullMethodShouldThrowPreconditionViolationException() {
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from(null));
+		assertPreconditionViolationFor(() -> MethodSource.from(null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void instantiationWithNullClassOrMethodShouldThrowPreconditionViolationException() {
-		assertThrows(PreconditionViolationException.class,
-			() -> MethodSource.from(null, String.class.getDeclaredMethod("getBytes")));
-		assertThrows(PreconditionViolationException.class, () -> MethodSource.from(String.class, null));
+		assertPreconditionViolationFor(() -> MethodSource.from(null, String.class.getDeclaredMethod("getBytes")));
+		assertPreconditionViolationFor(() -> MethodSource.from(String.class, null));
 	}
 
 	@Test
@@ -222,7 +220,7 @@ class MethodSourceTests extends AbstractTestSourceTests {
 	void getJavaClassShouldThrowExceptionIfClassNotFound() {
 		var source = MethodSource.from(getClass().getName() + "X", "method1");
 
-		assertThrows(PreconditionViolationException.class, source::getJavaClass);
+		assertPreconditionViolationFor(source::getJavaClass);
 	}
 
 	@Test
@@ -253,21 +251,21 @@ class MethodSourceTests extends AbstractTestSourceTests {
 	void getJavaMethodFromStringShouldThrowExceptionIfParameterTypesAreNotSupplied() {
 		var source = MethodSource.from(getClass().getName(), "method3");
 
-		assertThrows(PreconditionViolationException.class, source::getJavaMethod);
+		assertPreconditionViolationFor(source::getJavaMethod);
 	}
 
 	@Test
 	void getJavaMethodFromStringShouldThrowExceptionIfParameterTypesDoNotMatch() {
 		var source = MethodSource.from(getClass().getName(), "method3", double.class);
 
-		assertThrows(PreconditionViolationException.class, source::getJavaMethod);
+		assertPreconditionViolationFor(source::getJavaMethod);
 	}
 
 	@Test
 	void getJavaMethodFromStringShouldThrowExceptionIfMethodDoesNotExist() {
 		var source = MethodSource.from(getClass().getName(), "methodX");
 
-		assertThrows(PreconditionViolationException.class, source::getJavaMethod);
+		assertPreconditionViolationFor(source::getJavaMethod);
 	}
 
 	private Method getMethod(String name) throws Exception {

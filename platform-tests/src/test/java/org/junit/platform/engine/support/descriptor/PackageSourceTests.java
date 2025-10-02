@@ -11,8 +11,8 @@
 package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
@@ -20,7 +20,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link PackageSource}.
@@ -37,18 +36,18 @@ class PackageSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void packageSourceFromNullPackageName() {
-		assertThrows(PreconditionViolationException.class, () -> PackageSource.from((String) null));
+		assertPreconditionViolationFor(() -> PackageSource.from((String) null));
 	}
 
 	@Test
 	void packageSourceFromEmptyPackageName() {
-		assertThrows(PreconditionViolationException.class, () -> PackageSource.from("  "));
+		assertPreconditionViolationFor(() -> PackageSource.from("  "));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void packageSourceFromNullPackageReference() {
-		assertThrows(PreconditionViolationException.class, () -> PackageSource.from((Package) null));
+		assertPreconditionViolationFor(() -> PackageSource.from((Package) null));
 	}
 
 	@ParameterizedTest

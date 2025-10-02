@@ -13,7 +13,7 @@ package org.junit.platform.commons.support;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.lang.annotation.ElementType;
@@ -26,7 +26,6 @@ import java.util.Optional;
 import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -191,9 +190,9 @@ class AnnotationSupportTests {
 		var bMethod = Probe.class.getDeclaredMethod("bMethod");
 		assertEquals(AnnotationUtils.findRepeatableAnnotations(bMethod, Tag.class),
 			AnnotationSupport.findRepeatableAnnotations(bMethod, Tag.class));
-		Object expected = assertThrows(PreconditionViolationException.class,
+		var expected = assertPreconditionViolationFor(
 			() -> AnnotationUtils.findRepeatableAnnotations(bMethod, Override.class));
-		Object actual = assertThrows(PreconditionViolationException.class,
+		var actual = assertPreconditionViolationFor(
 			() -> AnnotationSupport.findRepeatableAnnotations(bMethod, Override.class));
 		assertSame(expected.getClass(), actual.getClass(), "expected same exception class");
 		assertEquals(expected.toString(), actual.toString(), "expected equal exception toString representation");

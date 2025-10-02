@@ -16,6 +16,7 @@ import static org.junit.jupiter.params.provider.EnumArgumentsProviderTests.EnumW
 import static org.junit.jupiter.params.provider.EnumArgumentsProviderTests.EnumWithFourConstants.BAZ;
 import static org.junit.jupiter.params.provider.EnumArgumentsProviderTests.EnumWithFourConstants.FOO;
 import static org.junit.jupiter.params.provider.EnumArgumentsProviderTests.EnumWithFourConstants.QUX;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.junit.jupiter.params.support.ParameterDeclaration;
 import org.junit.jupiter.params.support.ParameterDeclarations;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * @since 5.0
@@ -62,23 +62,22 @@ class EnumArgumentsProviderTests {
 
 	@Test
 	void duplicateConstantNameIsDetected() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(EnumWithFourConstants.class, "FOO", "BAR", "FOO").findAny());
-		assertThat(exception).hasMessageContaining("Duplicate enum constant name(s) found");
+		assertPreconditionViolationFor(
+			() -> provideArguments(EnumWithFourConstants.class, "FOO", "BAR", "FOO").findAny()).withMessageContaining(
+				"Duplicate enum constant name(s) found");
 	}
 
 	@Test
 	void invalidConstantNameIsDetected() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(EnumWithFourConstants.class, "FO0", "B4R").findAny());
-		assertThat(exception).hasMessageContaining("Invalid enum constant name(s) in");
+		assertPreconditionViolationFor(
+			() -> provideArguments(EnumWithFourConstants.class, "FO0", "B4R").findAny()).withMessageContaining(
+				"Invalid enum constant name(s) in");
 	}
 
 	@Test
 	void invalidPatternIsDetected() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(EnumWithFourConstants.class, Mode.MATCH_ALL, "(", ")").findAny());
-		assertThat(exception).hasMessageContaining("Pattern compilation failed");
+		assertPreconditionViolationFor(() -> provideArguments(EnumWithFourConstants.class, Mode.MATCH_ALL, "(",
+			")").findAny()).withMessageContaining("Pattern compilation failed");
 	}
 
 	@Test
@@ -99,18 +98,16 @@ class EnumArgumentsProviderTests {
 		when(firstParameterDeclaration.getParameterType()).thenAnswer(__ -> Object.class);
 		when(parameters.getFirst()).thenReturn(Optional.of(firstParameterDeclaration));
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(NullEnum.class).findAny());
-		assertThat(exception).hasMessageStartingWith("First parameter must reference an Enum type");
+		assertPreconditionViolationFor(() -> provideArguments(NullEnum.class).findAny()).withMessageStartingWith(
+			"First parameter must reference an Enum type");
 	}
 
 	@Test
 	void methodsWithoutParametersAreDetected() {
 		when(parameters.getSourceElementDescription()).thenReturn("method");
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(NullEnum.class).findAny());
-		assertThat(exception).hasMessageStartingWith("There must be at least one declared parameter for method");
+		assertPreconditionViolationFor(() -> provideArguments(NullEnum.class).findAny()).withMessageStartingWith(
+			"There must be at least one declared parameter for method");
 	}
 
 	@Test
@@ -150,9 +147,8 @@ class EnumArgumentsProviderTests {
 
 	@Test
 	void invalidConstantNameIsDetectedInRange() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(EnumWithFourConstants.class, "FOO", "BAZ", Mode.EXCLUDE, "QUX").findAny());
-		assertThat(exception).hasMessageContaining("Invalid enum constant name(s) in");
+		assertPreconditionViolationFor(() -> provideArguments(EnumWithFourConstants.class, "FOO", "BAZ", Mode.EXCLUDE,
+			"QUX").findAny()).withMessageContaining("Invalid enum constant name(s) in");
 	}
 
 	@Test
@@ -171,16 +167,14 @@ class EnumArgumentsProviderTests {
 
 	@Test
 	void invalidRangeOrderIsDetected() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(EnumWithFourConstants.class, "BAR", "FOO", Mode.INCLUDE).findAny());
-		assertThat(exception).hasMessageContaining("Invalid enum range");
+		assertPreconditionViolationFor(() -> provideArguments(EnumWithFourConstants.class, "BAR", "FOO",
+			Mode.INCLUDE).findAny()).withMessageContaining("Invalid enum range");
 	}
 
 	@Test
 	void invalidRangeIsDetectedWhenEnumWithNoConstantIsProvided() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(EnumWithNoConstant.class, "BAR", "FOO", Mode.INCLUDE).findAny());
-		assertThat(exception).hasMessageContaining("No enum constant");
+		assertPreconditionViolationFor(() -> provideArguments(EnumWithNoConstant.class, "BAR", "FOO",
+			Mode.INCLUDE).findAny()).withMessageContaining("No enum constant");
 	}
 
 	static class TestCase {

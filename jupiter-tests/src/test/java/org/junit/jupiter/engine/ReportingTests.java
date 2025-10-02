@@ -10,8 +10,8 @@
 
 package org.junit.jupiter.engine;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.reporting.FileEntry;
 
 /**
@@ -123,20 +122,20 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 			Map<String, String> map = new HashMap<>();
 
 			map.put("key", null);
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry(map));
+			assertPreconditionViolationFor(() -> reporter.publishEntry(map));
 
 			map.clear();
 			map.put(null, "value");
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry(map));
+			assertPreconditionViolationFor(() -> reporter.publishEntry(map));
 
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry((Map<String, String>) null));
+			assertPreconditionViolationFor(() -> reporter.publishEntry((Map<String, String>) null));
 
 			// Key-Value pair
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry(null, "bar"));
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry("foo", null));
+			assertPreconditionViolationFor(() -> reporter.publishEntry(null, "bar"));
+			assertPreconditionViolationFor(() -> reporter.publishEntry("foo", null));
 
 			// Value
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry((String) null));
+			assertPreconditionViolationFor(() -> reporter.publishEntry((String) null));
 		}
 
 	}

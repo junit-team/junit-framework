@@ -11,7 +11,7 @@
 package org.junit.platform.engine.support.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,7 +21,6 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,10 +39,10 @@ class PrefixedConfigurationParametersTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
-		assertThrows(PreconditionViolationException.class, () -> new PrefixedConfigurationParameters(null, "example."));
-		assertThrows(PreconditionViolationException.class, () -> new PrefixedConfigurationParameters(delegate, null));
-		assertThrows(PreconditionViolationException.class, () -> new PrefixedConfigurationParameters(delegate, ""));
-		assertThrows(PreconditionViolationException.class, () -> new PrefixedConfigurationParameters(delegate, "    "));
+		assertPreconditionViolationFor(() -> new PrefixedConfigurationParameters(null, "example."));
+		assertPreconditionViolationFor(() -> new PrefixedConfigurationParameters(delegate, null));
+		assertPreconditionViolationFor(() -> new PrefixedConfigurationParameters(delegate, ""));
+		assertPreconditionViolationFor(() -> new PrefixedConfigurationParameters(delegate, "    "));
 	}
 
 	@Test

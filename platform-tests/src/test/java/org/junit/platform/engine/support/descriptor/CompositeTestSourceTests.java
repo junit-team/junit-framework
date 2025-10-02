@@ -13,6 +13,7 @@ package org.junit.platform.engine.support.descriptor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link CompositeTestSource}.
@@ -40,12 +40,12 @@ class CompositeTestSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void createCompositeTestSourceFromNullList() {
-		assertThrows(PreconditionViolationException.class, () -> CompositeTestSource.from(null));
+		assertPreconditionViolationFor(() -> CompositeTestSource.from(null));
 	}
 
 	@Test
 	void createCompositeTestSourceFromEmptyList() {
-		assertThrows(PreconditionViolationException.class, () -> CompositeTestSource.from(List.of()));
+		assertPreconditionViolationFor(() -> CompositeTestSource.from(List.of()));
 	}
 
 	@Test

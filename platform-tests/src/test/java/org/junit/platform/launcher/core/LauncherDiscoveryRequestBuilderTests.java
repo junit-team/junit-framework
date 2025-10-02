@@ -11,8 +11,8 @@
 package org.junit.platform.launcher.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.FilterResult.excluded;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
@@ -32,7 +32,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
@@ -226,12 +225,10 @@ class LauncherDiscoveryRequestBuilderTests {
 
 		@Test
 		void exceptionForIllegalFilterClass() {
-			Exception exception = assertThrows(PreconditionViolationException.class,
-				() -> discoveryRequest().filters(o -> excluded("reason")));
-
-			assertThat(exception).hasMessageStartingWith("Filter");
-			assertThat(exception).hasMessageEndingWith(
-				"must implement EngineFilter, PostDiscoveryFilter, or DiscoveryFilter.");
+			assertPreconditionViolationFor(
+				() -> discoveryRequest().filters(o -> excluded("reason"))).withMessageStartingWith(
+					"Filter").withMessageEndingWith(
+						"must implement EngineFilter, PostDiscoveryFilter, or DiscoveryFilter.");
 		}
 	}
 

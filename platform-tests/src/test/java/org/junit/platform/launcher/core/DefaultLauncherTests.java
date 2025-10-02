@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.SelectorResolutionResult.unresolved;
 import static org.junit.platform.engine.TestExecutionResult.Status.ABORTED;
@@ -56,7 +57,6 @@ import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.CancellationToken;
@@ -105,10 +105,8 @@ class DefaultLauncherTests {
 	void constructLauncherWithoutAnyEngines() {
 		var launcher = createLauncher();
 
-		Throwable exception = assertThrows(PreconditionViolationException.class,
-			() -> launcher.discover(request().build()));
-
-		assertThat(exception).hasMessageContaining("Cannot create Launcher without at least one TestEngine");
+		assertPreconditionViolationFor(() -> launcher.discover(request().build())).withMessageContaining(
+			"Cannot create Launcher without at least one TestEngine");
 	}
 
 	@Test
@@ -602,8 +600,8 @@ class DefaultLauncherTests {
 		launcher.execute(executionRequest);
 		verify(engine, times(1)).execute(any());
 
-		var e = assertThrows(PreconditionViolationException.class, () -> launcher.execute(executionRequest));
-		assertEquals("TestPlan must only be executed once", e.getMessage());
+		assertPreconditionViolationFor(() -> launcher.execute(executionRequest)).withMessage(
+			"TestPlan must only be executed once");
 	}
 
 	@Test

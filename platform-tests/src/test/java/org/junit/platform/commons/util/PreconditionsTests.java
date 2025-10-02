@@ -11,9 +11,8 @@
 package org.junit.platform.commons.util;
 
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.Preconditions.condition;
 import static org.junit.platform.commons.util.Preconditions.containsNoNullElements;
 import static org.junit.platform.commons.util.Preconditions.notBlank;
@@ -24,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link Preconditions}.
@@ -44,9 +42,7 @@ class PreconditionsTests {
 	void notNullThrowsForNullObject() {
 		var message = "argument is null";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notNull(null, message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notNull(null, message)).withMessage(message);
 	}
 
 	@Test
@@ -54,9 +50,7 @@ class PreconditionsTests {
 		var message = "argument is null";
 		Object object = null;
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notNull(object, () -> message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notNull(object, () -> message)).withMessage(message);
 	}
 
 	@Test
@@ -87,37 +81,28 @@ class PreconditionsTests {
 	void notEmptyThrowsForNullArray() {
 		var message = "array is empty";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notEmpty((Object[]) null, message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notEmpty((Object[]) null, message)).withMessage(message);
 	}
 
 	@Test
 	void notEmptyThrowsForNullCollection() {
 		var message = "collection is empty";
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> notEmpty((Collection<?>) null, message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notEmpty((Collection<?>) null, message)).withMessage(message);
 	}
 
 	@Test
 	void notEmptyThrowsForEmptyArray() {
 		var message = "array is empty";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notEmpty(new Object[0], message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notEmpty(new Object[0], message)).withMessage(message);
 	}
 
 	@Test
 	void notEmptyThrowsForEmptyCollection() {
 		var message = "collection is empty";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notEmpty(List.of(), message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notEmpty(List.of(), message)).withMessage(message);
 	}
 
 	@Test
@@ -160,20 +145,14 @@ class PreconditionsTests {
 		var message = "array contains null elements";
 		Object[] array = { new Object(), null, new Object() };
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> containsNoNullElements(array, message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> containsNoNullElements(array, message)).withMessage(message);
 	}
 
 	@Test
 	void containsNoNullElementsThrowsForCollectionContainingNullElements() {
 		var message = "collection contains null elements";
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> containsNoNullElements(singletonList(null), message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> containsNoNullElements(singletonList(null), message)).withMessage(message);
 	}
 
 	@Test
@@ -187,54 +166,42 @@ class PreconditionsTests {
 	void notBlankThrowsForNullString() {
 		var message = "string shouldn't be blank";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notBlank(null, message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notBlank(null, message)).withMessage(message);
 	}
 
 	@Test
 	void notBlankThrowsForNullStringWithMessageSupplier() {
 		var message = "string shouldn't be blank";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notBlank(null, () -> message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notBlank(null, () -> message)).withMessage(message);
 	}
 
 	@Test
 	void notBlankThrowsForEmptyString() {
 		var message = "string shouldn't be blank";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notBlank("", message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notBlank("", message)).withMessage(message);
 	}
 
 	@Test
 	void notBlankThrowsForEmptyStringWithMessageSupplier() {
 		var message = "string shouldn't be blank";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notBlank("", () -> message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notBlank("", () -> message)).withMessage(message);
 	}
 
 	@Test
 	void notBlankThrowsForBlankString() {
 		var message = "string shouldn't be blank";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notBlank("          ", message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notBlank("          ", message)).withMessage(message);
 	}
 
 	@Test
 	void notBlankThrowsForBlankStringWithMessageSupplier() {
 		var message = "string shouldn't be blank";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> notBlank("          ", () -> message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> notBlank("          ", () -> message)).withMessage(message);
 	}
 
 	@Test
@@ -251,18 +218,14 @@ class PreconditionsTests {
 	void conditionThrowsForFalsePredicate() {
 		var message = "condition does not hold";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> condition(false, message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> condition(false, message)).withMessage(message);
 	}
 
 	@Test
 	void conditionThrowsForFalsePredicateWithMessageSupplier() {
 		var message = "condition does not hold";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> condition(false, () -> message));
-
-		assertEquals(message, exception.getMessage());
+		assertPreconditionViolationFor(() -> condition(false, () -> message)).withMessage(message);
 	}
 
 }

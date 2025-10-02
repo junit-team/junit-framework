@@ -11,8 +11,8 @@
 package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -20,7 +20,6 @@ import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link ClassSource}.
@@ -42,15 +41,15 @@ class ClassSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from((String) null));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from("    "));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from((String) null, null));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from("    ", null));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from((Class<?>) null));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from((Class<?>) null, null));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from((URI) null));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from(new URI("badscheme:/com.foo.Bar")));
-		assertThrows(PreconditionViolationException.class, () -> ClassSource.from(new URI("class:?line=1")));
+		assertPreconditionViolationFor(() -> ClassSource.from((String) null));
+		assertPreconditionViolationFor(() -> ClassSource.from("    "));
+		assertPreconditionViolationFor(() -> ClassSource.from((String) null, null));
+		assertPreconditionViolationFor(() -> ClassSource.from("    ", null));
+		assertPreconditionViolationFor(() -> ClassSource.from((Class<?>) null));
+		assertPreconditionViolationFor(() -> ClassSource.from((Class<?>) null, null));
+		assertPreconditionViolationFor(() -> ClassSource.from((URI) null));
+		assertPreconditionViolationFor(() -> ClassSource.from(new URI("badscheme:/com.foo.Bar")));
+		assertPreconditionViolationFor(() -> ClassSource.from(new URI("class:?line=1")));
 	}
 
 	@Test
@@ -61,8 +60,8 @@ class ClassSourceTests extends AbstractTestSourceTests {
 		assertThat(source.getClassName()).isEqualTo(testClassName);
 		assertThat(source.getPosition()).isEmpty();
 
-		var exception = assertThrows(PreconditionViolationException.class, source::getJavaClass);
-		assertThat(exception).hasMessage("Could not load class with name: " + testClassName);
+		assertPreconditionViolationFor(source::getJavaClass).withMessage(
+			"Could not load class with name: " + testClassName);
 	}
 
 	@Test

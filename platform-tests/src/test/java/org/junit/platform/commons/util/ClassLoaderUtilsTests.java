@@ -11,15 +11,12 @@
 package org.junit.platform.commons.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.test.TestClassLoader;
 
 /**
@@ -103,8 +100,7 @@ class ClassLoaderUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getLocationFromNullFails() {
-		var exception = assertThrows(PreconditionViolationException.class, () -> ClassLoaderUtils.getLocation(null));
-		assertEquals("object must not be null", exception.getMessage());
+		assertPreconditionViolationFor(() -> ClassLoaderUtils.getLocation(null)).withMessage("object must not be null");
 	}
 
 	@Test

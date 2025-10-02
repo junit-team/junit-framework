@@ -12,9 +12,9 @@ package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.util.stream.Stream;
 
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link FilePosition}.
@@ -41,8 +40,8 @@ class FilePositionTests extends AbstractTestSourceTests {
 	@Test
 	@DisplayName("factory method preconditions")
 	void preconditions() {
-		assertThrows(PreconditionViolationException.class, () -> FilePosition.from(-1));
-		assertThrows(PreconditionViolationException.class, () -> FilePosition.from(0, -1));
+		assertPreconditionViolationFor(() -> FilePosition.from(-1));
+		assertPreconditionViolationFor(() -> FilePosition.from(0, -1));
 	}
 
 	@Test

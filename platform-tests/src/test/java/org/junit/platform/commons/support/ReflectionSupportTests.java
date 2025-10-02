@@ -13,9 +13,9 @@ package org.junit.platform.commons.support;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.platform.commons.support.ReflectionSupport.toSupportResourcesList;
 import static org.junit.platform.commons.support.ReflectionSupport.toSupportResourcesStream;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getDefaultClassLoader;
@@ -31,7 +31,6 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -298,9 +297,9 @@ class ReflectionSupportTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInModulePreconditions() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames));
-		assertEquals("Module name must not be null or empty", exception.getMessage());
+		assertPreconditionViolationFor(
+			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames)).withMessage(
+				"Module name must not be null or empty");
 		assertPreconditionViolationNotNullFor("class predicate",
 			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", null, allNames));
 		assertPreconditionViolationNotNullFor("name predicate",
@@ -324,9 +323,9 @@ class ReflectionSupportTests {
 	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void findAllResourcesInModulePreconditions() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.findAllResourcesInModule(null, allResources));
-		assertEquals("Module name must not be null or empty", exception.getMessage());
+		assertPreconditionViolationFor(
+			() -> ReflectionSupport.findAllResourcesInModule(null, allResources)).withMessage(
+				"Module name must not be null or empty");
 		assertPreconditionViolationNotNullFor("resourceFilter",
 			() -> ReflectionSupport.findAllResourcesInModule("org.junit.platform.commons", null));
 	}
@@ -349,9 +348,9 @@ class ReflectionSupportTests {
 	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void streamAllResourcesInModulePreconditions() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.streamAllResourcesInModule(null, allResources));
-		assertEquals("Module name must not be null or empty", exception.getMessage());
+		assertPreconditionViolationFor(
+			() -> ReflectionSupport.streamAllResourcesInModule(null, allResources)).withMessage(
+				"Module name must not be null or empty");
 		assertPreconditionViolationNotNullFor("resourceFilter",
 			() -> ReflectionSupport.streamAllResourcesInModule("org.junit.platform.commons", null));
 	}
@@ -385,10 +384,8 @@ class ReflectionSupportTests {
 		assertPreconditionViolationNotNullFor("Method", () -> ReflectionSupport.invokeMethod(null, null, "true"));
 
 		var method = Boolean.class.getMethod("toString");
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.invokeMethod(method, null));
-		assertEquals("Cannot invoke non-static method [" + method.toGenericString() + "] on a null target.",
-			exception.getMessage());
+		assertPreconditionViolationFor(() -> ReflectionSupport.invokeMethod(method, null)).withMessage(
+			"Cannot invoke non-static method [" + method.toGenericString() + "] on a null target.");
 	}
 
 	@Test
@@ -435,11 +432,9 @@ class ReflectionSupportTests {
 		assertPreconditionViolationNotNullFor("Field", () -> ReflectionSupport.tryToReadFieldValue(null, this));
 
 		var instanceField = getClass().getDeclaredField("instanceField");
-		Exception exception = assertThrows(PreconditionViolationException.class,
-			() -> ReflectionSupport.tryToReadFieldValue(instanceField, null));
-		assertThat(exception)//
-				.hasMessageStartingWith("Cannot read non-static field")//
-				.hasMessageEndingWith("on a null instance.");
+		assertPreconditionViolationFor(
+			() -> ReflectionSupport.tryToReadFieldValue(instanceField, null)).withMessageStartingWith(
+				"Cannot read non-static field").withMessageEndingWith("on a null instance.");
 	}
 
 	@Test

@@ -10,16 +10,14 @@
 
 package org.junit.platform.engine;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link TestTag}.
@@ -99,9 +97,8 @@ class TestTagTests {
 	}
 
 	private void assertSyntaxViolation(String tag) {
-		var exception = assertThrows(PreconditionViolationException.class, () -> TestTag.create(tag));
-		assertThat(exception).hasMessageStartingWith("Tag name");
-		assertThat(exception).hasMessageEndingWith("must be syntactically valid");
+		assertPreconditionViolationFor(() -> TestTag.create(tag)).withMessageStartingWith(
+			"Tag name").withMessageEndingWith("must be syntactically valid");
 	}
 
 }

@@ -16,9 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.engine.discovery.JupiterUniqueIdBuilder.uniqueIdForMethod;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClassesByName;
@@ -55,7 +55,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.test.TestClassLoader;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -738,8 +737,7 @@ class DiscoverySelectorsTests {
 		@MethodSource("invalidFullyQualifiedMethodNames")
 		@DisplayName("Preconditions: selectMethod(FQMN)")
 		void selectMethodByFullyQualifiedNamePreconditions(String fqmn, String message) {
-			Exception exception = assertThrows(PreconditionViolationException.class, () -> selectMethod(fqmn));
-			assertThat(exception).hasMessageContaining(message);
+			assertPreconditionViolationFor(() -> selectMethod(fqmn)).withMessageContaining(message);
 		}
 
 		static Stream<Arguments> invalidFullyQualifiedMethodNames() {
@@ -1525,7 +1523,7 @@ class DiscoverySelectorsTests {
 	// -------------------------------------------------------------------------
 
 	private void assertViolatesPrecondition(Executable precondition) {
-		assertThrows(PreconditionViolationException.class, precondition);
+		assertPreconditionViolationFor(precondition::execute);
 	}
 
 	private static DiscoverySelector parseIdentifier(DiscoverySelector selector) {

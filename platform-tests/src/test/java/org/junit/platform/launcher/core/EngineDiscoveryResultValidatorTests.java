@@ -10,10 +10,9 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
@@ -34,13 +33,11 @@ class EngineDiscoveryResultValidatorTests {
 		validator.validate(testEngine, root);
 
 		root.addChild(root);
-		assertThatThrownBy(() -> validator.validate(testEngine, root)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("""
-						The discover() method for TestEngine with ID 'my-engine' returned a cyclic graph; \
-						[engine:root] exists in at least two paths:
-						(1) [engine:root]
-						(2) [engine:root] -> [engine:root]""");
+		assertPreconditionViolationFor(() -> validator.validate(testEngine, root)).withMessage("""
+				The discover() method for TestEngine with ID 'my-engine' returned a cyclic graph; \
+				[engine:root] exists in at least two paths:
+				(1) [engine:root]
+				(2) [engine:root] -> [engine:root]""");
 	}
 
 	@Test
@@ -54,13 +51,11 @@ class EngineDiscoveryResultValidatorTests {
 		validator.validate(testEngine, root);
 
 		group2.addChild(group1);
-		assertThatThrownBy(() -> validator.validate(testEngine, root)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("""
-						The discover() method for TestEngine with ID 'my-engine' returned a cyclic graph; \
-						[engine:root]/[group:1] exists in at least two paths:
-						(1) [engine:root] -> [engine:root]/[group:1]
-						(2) [engine:root] -> [engine:root]/[group:2] -> [engine:root]/[group:1]""");
+		assertPreconditionViolationFor(() -> validator.validate(testEngine, root)).withMessage("""
+				The discover() method for TestEngine with ID 'my-engine' returned a cyclic graph; \
+				[engine:root]/[group:1] exists in at least two paths:
+				(1) [engine:root] -> [engine:root]/[group:1]
+				(2) [engine:root] -> [engine:root]/[group:2] -> [engine:root]/[group:1]""");
 	}
 
 	@Test
@@ -78,13 +73,11 @@ class EngineDiscoveryResultValidatorTests {
 		validator.validate(testEngine, root);
 
 		group2.addChild(test1);
-		assertThatThrownBy(() -> validator.validate(testEngine, root)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("""
-						The discover() method for TestEngine with ID 'my-engine' returned a cyclic graph; \
-						[engine:root]/[group:1]/[test:1] exists in at least two paths:
-						(1) [engine:root] -> [engine:root]/[group:1] -> [engine:root]/[group:1]/[test:1]
-						(2) [engine:root] -> [engine:root]/[group:2] -> [engine:root]/[group:1]/[test:1]""");
+		assertPreconditionViolationFor(() -> validator.validate(testEngine, root)).withMessage("""
+				The discover() method for TestEngine with ID 'my-engine' returned a cyclic graph; \
+				[engine:root]/[group:1]/[test:1] exists in at least two paths:
+				(1) [engine:root] -> [engine:root]/[group:1] -> [engine:root]/[group:1]/[test:1]
+				(2) [engine:root] -> [engine:root]/[group:2] -> [engine:root]/[group:1]/[test:1]""");
 	}
 
 }

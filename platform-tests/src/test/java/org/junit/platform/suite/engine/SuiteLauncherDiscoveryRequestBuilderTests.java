@@ -14,9 +14,9 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuilder.request;
 
 import java.lang.annotation.Retention;
@@ -34,7 +34,6 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.engine.JupiterTestEngine;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.CollectionUtils;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.TestDescriptor;
@@ -288,12 +287,10 @@ class SuiteLauncherDiscoveryRequestBuilderTests {
 		class Suite {
 		}
 
-		var e = assertThrows(PreconditionViolationException.class,
-			() -> builder.applySelectorsAndFiltersFromSuite(Suite.class));
-
-		assertThat(e).hasMessageMatching(
-			"@SelectClasses on class \\[" + Pattern.quote(SuiteLauncherDiscoveryRequestBuilderTests.class.getName())
-					+ "\\$\\d+Suite] must declare at least one class reference or name");
+		assertPreconditionViolationFor(
+			() -> builder.applySelectorsAndFiltersFromSuite(Suite.class)).withMessageMatching(
+				"@SelectClasses on class \\[" + Pattern.quote(SuiteLauncherDiscoveryRequestBuilderTests.class.getName())
+						+ "\\$\\d+Suite] must declare at least one class reference or name");
 	}
 
 	static class NonLocalTestCase {
@@ -430,11 +427,9 @@ class SuiteLauncherDiscoveryRequestBuilderTests {
 					Class<?> suiteClassName = entry.getKey();
 					var expectedFailureMessage = entry.getValue();
 					return dynamicTest(suiteClassName.getSimpleName(), () -> {
-						var ex = assertThrows(PreconditionViolationException.class,
-							() -> request().applySelectorsAndFiltersFromSuite(suiteClassName));
-						assertEquals(
-							"@SelectMethod on class [" + suiteClassName.getName() + "]: " + expectedFailureMessage,
-							ex.getMessage());
+						assertPreconditionViolationFor(
+							() -> request().applySelectorsAndFiltersFromSuite(suiteClassName)).withMessage(
+								"@SelectMethod on class [" + suiteClassName.getName() + "]: " + expectedFailureMessage);
 					});
 				});
 	}

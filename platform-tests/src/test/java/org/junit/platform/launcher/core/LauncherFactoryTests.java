@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TemporaryClasspathExecutor.withAdditionalClasspathRoot;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.launcher.LauncherConstants.DEACTIVATE_LISTENERS_PATTERN_PROPERTY_NAME;
@@ -33,7 +34,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.StoreScope;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.engine.JupiterTestEngine;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
@@ -67,7 +67,7 @@ class LauncherFactoryTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
-		assertThrows(PreconditionViolationException.class, () -> LauncherFactory.create(null));
+		assertPreconditionViolationFor(() -> LauncherFactory.create(null));
 	}
 
 	@Test

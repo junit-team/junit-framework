@@ -11,13 +11,11 @@
 package org.junit.platform.commons.util;
 
 import static java.util.function.Predicate.isEqual;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link FunctionUtils}.
@@ -29,15 +27,15 @@ class FunctionUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void whereWithNullFunction() {
-		var exception = assertThrows(PreconditionViolationException.class, () -> FunctionUtils.where(null, o -> true));
-		assertEquals("function must not be null", exception.getMessage());
+		assertPreconditionViolationFor(() -> FunctionUtils.where(null, o -> true)).withMessage(
+			"function must not be null");
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void whereWithNullPredicate() {
-		var exception = assertThrows(PreconditionViolationException.class, () -> FunctionUtils.where(o -> o, null));
-		assertEquals("predicate must not be null", exception.getMessage());
+		assertPreconditionViolationFor(() -> FunctionUtils.where(o -> o, null)).withMessage(
+			"predicate must not be null");
 	}
 
 	@Test

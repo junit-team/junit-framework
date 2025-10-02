@@ -12,14 +12,13 @@ package org.junit.platform.engine.support.descriptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.net.URI;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link DefaultUriSource}.
@@ -36,7 +35,7 @@ class DefaultUriSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSourceUriYieldsException() {
-		assertThrows(PreconditionViolationException.class, () -> new DefaultUriSource(null));
+		assertPreconditionViolationFor(() -> new DefaultUriSource(null));
 	}
 
 	@Test

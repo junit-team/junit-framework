@@ -12,8 +12,8 @@ package org.junit.platform.launcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.launcher.TagFilter.excludeTags;
 import static org.junit.platform.launcher.TagFilter.includeTags;
 
@@ -23,7 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.FilterResult;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
@@ -63,8 +62,8 @@ class TagFilterTests {
 
 	@SuppressWarnings("DataFlowIssue")
 	private void assertSyntaxViolationForIncludes(@Nullable String tag) {
-		var exception = assertThrows(PreconditionViolationException.class, () -> includeTags(tag));
-		assertThat(exception).hasMessageStartingWith("Unable to parse tag expression");
+		assertPreconditionViolationFor(() -> includeTags(tag)).withMessageStartingWith(
+			"Unable to parse tag expression");
 	}
 
 	@Test
@@ -81,8 +80,8 @@ class TagFilterTests {
 
 	@SuppressWarnings("DataFlowIssue")
 	private void assertSyntaxViolationForExcludes(@Nullable String tag) {
-		var exception = assertThrows(PreconditionViolationException.class, () -> excludeTags(tag));
-		assertThat(exception).hasMessageStartingWith("Unable to parse tag expression");
+		assertPreconditionViolationFor(() -> excludeTags(tag)).withMessageStartingWith(
+			"Unable to parse tag expression");
 	}
 
 	@Test
@@ -136,17 +135,16 @@ class TagFilterTests {
 	@Test
 	void rejectSingleUnparsableTagExpressions() {
 		var brokenTagExpression = "tag & ";
-		RuntimeException expected = assertThrows(PreconditionViolationException.class,
-			() -> TagFilter.includeTags(brokenTagExpression));
-		assertThat(expected).hasMessageStartingWith("Unable to parse tag expression \"" + brokenTagExpression + "\"");
+		assertPreconditionViolationFor(() -> TagFilter.includeTags(brokenTagExpression)).withMessageStartingWith(
+			"Unable to parse tag expression \"" + brokenTagExpression + "\"");
 	}
 
 	@Test
 	void rejectUnparsableTagExpressionFromArray() {
 		var brokenTagExpression = "tag & ";
-		RuntimeException expected = assertThrows(PreconditionViolationException.class,
-			() -> TagFilter.excludeTags(brokenTagExpression, "foo", "bar"));
-		assertThat(expected).hasMessageStartingWith("Unable to parse tag expression \"" + brokenTagExpression + "\"");
+		assertPreconditionViolationFor(
+			() -> TagFilter.excludeTags(brokenTagExpression, "foo", "bar")).withMessageStartingWith(
+				"Unable to parse tag expression \"" + brokenTagExpression + "\"");
 	}
 
 	private void includeSingleTag(PostDiscoveryFilter filter) {

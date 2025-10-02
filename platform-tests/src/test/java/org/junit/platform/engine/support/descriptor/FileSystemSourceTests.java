@@ -11,14 +11,13 @@
 package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.File;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link FileSource} and {@link DirectorySource}.
@@ -37,7 +36,7 @@ class FileSystemSourceTests extends AbstractTestSourceTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSourceFileOrDirectoryYieldsException() {
-		assertThrows(PreconditionViolationException.class, () -> FileSource.from(null));
+		assertPreconditionViolationFor(() -> FileSource.from(null));
 	}
 
 	@Test

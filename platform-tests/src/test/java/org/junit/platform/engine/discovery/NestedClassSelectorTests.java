@@ -11,13 +11,12 @@
 package org.junit.platform.engine.discovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link NestedClassSelector}.
@@ -43,10 +42,9 @@ class NestedClassSelectorTests {
 		var selector = new NestedClassSelector(null, List.of("org.example.EnclosingTestClass"),
 			"org.example.NestedTestClass");
 
-		var exception = assertThrows(PreconditionViolationException.class, selector::getEnclosingClasses);
-
-		assertThat(exception).hasMessage("Could not load class with name: org.example.EnclosingTestClass") //
-				.hasCauseInstanceOf(ClassNotFoundException.class);
+		assertPreconditionViolationFor(selector::getEnclosingClasses).withMessage(
+			"Could not load class with name: org.example.EnclosingTestClass").withCauseInstanceOf(
+				ClassNotFoundException.class);
 	}
 
 	@Test
@@ -54,10 +52,9 @@ class NestedClassSelectorTests {
 		var selector = new NestedClassSelector(null, List.of("org.example.EnclosingTestClass"),
 			"org.example.NestedTestClass");
 
-		var exception = assertThrows(PreconditionViolationException.class, selector::getNestedClass);
-
-		assertThat(exception).hasMessage("Could not load class with name: org.example.NestedTestClass") //
-				.hasCauseInstanceOf(ClassNotFoundException.class);
+		assertPreconditionViolationFor(selector::getNestedClass).withMessage(
+			"Could not load class with name: org.example.NestedTestClass").withCauseInstanceOf(
+				ClassNotFoundException.class);
 	}
 
 	@Test

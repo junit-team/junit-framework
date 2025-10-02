@@ -11,7 +11,7 @@
 package org.junit.jupiter.params.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * @since 5.0
@@ -28,22 +27,18 @@ class ValueArgumentsProviderTests {
 
 	@Test
 	void multipleInputsAreNotAllowed() {
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> provideArguments(new short[1], new byte[0], new int[1], new long[0], new float[0], new double[0],
-				new char[0], new boolean[0], new String[0], new Class<?>[0]).findAny());
-
-		assertThat(exception).hasMessageContaining(
-			"Exactly one type of input must be provided in the @ValueSource annotation, but there were 2");
+				new char[0], new boolean[0], new String[0], new Class<?>[0]).findAny()).withMessageContaining(
+					"Exactly one type of input must be provided in the @ValueSource annotation, but there were 2");
 	}
 
 	@Test
 	void onlyEmptyInputsAreNotAllowed() {
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> provideArguments(new short[0], new byte[0], new int[0], new long[0], new float[0], new double[0],
-				new char[0], new boolean[0], new String[0], new Class<?>[0]).findAny());
-
-		assertThat(exception).hasMessageContaining(
-			"Exactly one type of input must be provided in the @ValueSource annotation, but there were 0");
+				new char[0], new boolean[0], new String[0], new Class<?>[0]).findAny()).withMessageContaining(
+					"Exactly one type of input must be provided in the @ValueSource annotation, but there were 0");
 	}
 
 	/**
