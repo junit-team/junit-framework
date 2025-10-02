@@ -55,7 +55,8 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void exceptionsFromInvalidConfigurationAreNotSwallowed() {
-		var configuration = new DefaultParallelExecutionConfiguration(2, 1, 1, 1, 0, __ -> true);
+		var configuration = new DefaultParallelExecutionConfiguration(2, 1, 1, 1, 0, __ -> true,
+			ParallelExecutionInterceptor.Default.class);
 
 		JUnitException exception = assertThrows(JUnitException.class, () -> {
 			try (var pool = new ForkJoinPoolHierarchicalTestExecutorService(configuration)) {
@@ -214,7 +215,8 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 		var incompatibleTask2 = taskFactory.create("incompatibleTask2", incompatibleLock2);
 		deferred.put(incompatibleTask2, new CountDownLatch(1));
 
-		var configuration = new DefaultParallelExecutionConfiguration(2, 2, 2, 2, 1, __1 -> true);
+		var configuration = new DefaultParallelExecutionConfiguration(2, 2, 2, 2, 1, __1 -> true,
+			ParallelExecutionInterceptor.Default.class);
 
 		withForkJoinPoolHierarchicalTestExecutorService(configuration, taskEventListener, service -> {
 
@@ -246,7 +248,8 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 	private Map<String, DummyTestTask> runWithAttemptedWorkStealing(TaskEventListener taskEventListener,
 			DummyTestTask taskToBeStolen, ResourceLock initialLock, Runnable waitAction) throws Throwable {
 
-		var configuration = new DefaultParallelExecutionConfiguration(2, 2, 2, 2, 1, __ -> true);
+		var configuration = new DefaultParallelExecutionConfiguration(2, 2, 2, 2, 1, __ -> true,
+			ParallelExecutionInterceptor.Default.class);
 
 		withForkJoinPoolHierarchicalTestExecutorService(configuration, taskEventListener, service -> {
 

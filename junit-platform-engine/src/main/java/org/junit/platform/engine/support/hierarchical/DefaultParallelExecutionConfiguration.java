@@ -16,24 +16,10 @@ import java.util.function.Predicate;
 /**
  * @since 1.3
  */
-class DefaultParallelExecutionConfiguration implements ParallelExecutionConfiguration {
-
-	private final int parallelism;
-	private final int minimumRunnable;
-	private final int maxPoolSize;
-	private final int corePoolSize;
-	private final int keepAliveSeconds;
-	private final Predicate<? super ForkJoinPool> saturate;
-
-	DefaultParallelExecutionConfiguration(int parallelism, int minimumRunnable, int maxPoolSize, int corePoolSize,
-			int keepAliveSeconds, Predicate<? super ForkJoinPool> saturate) {
-		this.parallelism = parallelism;
-		this.minimumRunnable = minimumRunnable;
-		this.maxPoolSize = maxPoolSize;
-		this.corePoolSize = corePoolSize;
-		this.keepAliveSeconds = keepAliveSeconds;
-		this.saturate = saturate;
-	}
+record DefaultParallelExecutionConfiguration(int parallelism, int minimumRunnable, int maxPoolSize, int corePoolSize,
+		int keepAliveSeconds, Predicate<? super ForkJoinPool> saturate,
+		Class<? extends ParallelExecutionInterceptor> executionInterceptorClass)
+		implements ParallelExecutionConfiguration {
 
 	@Override
 	public int getParallelism() {
@@ -63,5 +49,10 @@ class DefaultParallelExecutionConfiguration implements ParallelExecutionConfigur
 	@Override
 	public Predicate<? super ForkJoinPool> getSaturatePredicate() {
 		return saturate;
+	}
+
+	@Override
+	public Class<? extends ParallelExecutionInterceptor> getExecutionInterceptorClass() {
+		return executionInterceptorClass;
 	}
 }

@@ -74,4 +74,8 @@ public interface ParallelExecutionConfiguration {
 		return null;
 	}
 
+	default Class<? extends ParallelExecutionInterceptor> getExecutionInterceptorClass() {
+		return ParallelExecutionInterceptor.Default.class;
+	}
+
 }

@@ -18,6 +18,7 @@ import static org.junit.platform.engine.support.hierarchical.DefaultParallelExec
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_SATURATE_PROPERTY_NAME;
+import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME;
 
 import org.apiguardian.api.API;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelExecutionInterceptor;
 
 /**
  * Collection of constants related to the {@link JupiterTestEngine}.
@@ -317,6 +319,17 @@ public final class Constants {
 	@API(status = STABLE, since = "5.10")
 	public static final String PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ CONFIG_CUSTOM_CLASS_PROPERTY_NAME;
+
+	/**
+	 * Property name used to specify the fully qualified class name of the
+	 * {@link ParallelExecutionInterceptor} to be used regardless of the
+	 * configuration strategy: {@value}
+	 *
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static final String PARALLEL_CONFIG_CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+			+ CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME;
 
 	/**
 	 * Property name used to set the default timeout for all testable and

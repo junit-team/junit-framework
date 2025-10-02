@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 import static org.junit.jupiter.engine.Constants.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.DEFAULT_PARALLEL_EXECUTION_MODE;
+import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME;
@@ -41,16 +42,21 @@ import java.net.URLClassLoader;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
@@ -66,6 +72,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.engine.TestDescriptor;
@@ -80,7 +88,21 @@ import org.junit.platform.testkit.engine.Events;
  * @since 1.3
  */
 @SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
+@ParameterizedClass
+@ValueSource(classes = { ParallelExecutionInterceptor.Default.class,
+		ParallelExecutionInterceptor.FixedThreadPoolForTests.class })
 class ParallelExecutionIntegrationTests {
+
+	@Parameter
+	Class<? extends ParallelExecutionInterceptor> interceptorClass;
+
+	@Test
+	void forkJoinPoolCompensatesWhenUserCodeBlocks() {
+		var events = executeConcurrentlySuccessfully(1, BlockingTestCase.class).list();
+
+		assertThat(ThreadReporter.getThreadNames(events)) //
+				.hasSize(interceptorClass == ParallelExecutionInterceptor.Default.class ? 2 : 1);
+	}
 
 	@Test
 	void successfulParallelTest(TestReporter reporter) {
@@ -95,7 +117,16 @@ class ParallelExecutionIntegrationTests {
 		assertThat(finishedTimestamps).hasSize(3);
 		assertThat(startedTimestamps).allMatch(startTimestamp -> finishedTimestamps.stream().noneMatch(
 			finishedTimestamp -> finishedTimestamp.isBefore(startTimestamp)));
-		assertThat(ThreadReporter.getThreadNames(events)).hasSize(3);
+
+		var threadNames = ThreadReporter.getThreadNames(events).toList();
+		assertThat(threadNames).hasSize(3);
+
+		if (interceptorClass == ParallelExecutionInterceptor.Default.class) {
+			assertThat(threadNames).allSatisfy(it -> assertThat(it).startsWith("ForkJoinPool"));
+		}
+		else {
+			assertThat(threadNames).noneSatisfy(it -> assertThat(it).startsWith("ForkJoinPool"));
+		}
 	}
 
 	@Test
@@ -188,7 +219,8 @@ class ParallelExecutionIntegrationTests {
 		var events = executeConcurrentlySuccessfully(2, ConcurrentTemplateTestCase.class).list();
 
 		assertThat(events.stream().filter(event(test(), finishedSuccessfully())::matches)).hasSize(10);
-		assertThat(ThreadReporter.getThreadNames(events)).hasSize(1);
+		assertThat(ThreadReporter.getThreadNames(events)).hasSize(1) //
+				.first(InstanceOfAssertFactories.STRING).startsWith("ForkJoinPool");
 	}
 
 	@Test
@@ -559,6 +591,8 @@ class ParallelExecutionIntegrationTests {
 				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, String.valueOf(true)) //
 				.configurationParameter(PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME, "fixed") //
 				.configurationParameter(PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, String.valueOf(parallelism)) //
+				.configurationParameter(PARALLEL_CONFIG_CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME,
+					interceptorClass.getName()) //
 				.configurationParameters(configParams) //
 				.execute();
 	}
@@ -1006,6 +1040,34 @@ class ParallelExecutionIntegrationTests {
 		public void afterTestExecution(ExtensionContext context) {
 			context.publishReportEntry("thread", Thread.currentThread().getName());
 			context.publishReportEntry("loader", Thread.currentThread().getContextClassLoader().getName());
+		}
+	}
+
+	@ExtendWith(ThreadReporter.class)
+	static class BlockingTestCase {
+
+		@AutoClose
+		private static ExecutorService executorService;
+
+		final CountDownLatch latch = new CountDownLatch(2);
+
+		@BeforeAll
+		static void createForkJoinPool() {
+			executorService = Executors.newWorkStealingPool(1);
+		}
+
+		@SuppressWarnings("ResultOfMethodCallIgnored")
+		@RepeatedTest(2)
+		void test() throws Exception {
+			CompletableFuture.runAsync(() -> {
+				try {
+					latch.countDown();
+					latch.await(100, MILLISECONDS);
+				}
+				catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}, executorService).get();
 		}
 	}
 

@@ -17,6 +17,7 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
 import java.io.Serial;
+import java.lang.reflect.Constructor;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -30,8 +31,10 @@ import java.util.concurrent.TimeUnit;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ExceptionUtils;
+import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.ConfigurationParameters;
 
 /**
@@ -52,6 +55,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	private final TaskEventListener taskEventListener;
 	private final int parallelism;
 	private final ThreadLocal<ThreadLock> threadLocks = ThreadLocal.withInitial(ThreadLock::new);
+	private final ParallelExecutionInterceptor interceptor;
 
 	/**
 	 * Create a new {@code ForkJoinPoolHierarchicalTestExecutorService} based on
@@ -76,9 +80,10 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 
 	ForkJoinPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration,
 			TaskEventListener taskEventListener) {
-		forkJoinPool = createForkJoinPool(configuration);
+		this.forkJoinPool = createForkJoinPool(configuration);
+		this.interceptor = instantiateInterceptor(configuration);
 		this.taskEventListener = taskEventListener;
-		parallelism = forkJoinPool.getParallelism();
+		this.parallelism = forkJoinPool.getParallelism();
 		LoggerFactory.getLogger(getClass()).config(() -> "Using ForkJoinPool with parallelism of " + parallelism);
 	}
 
@@ -97,6 +102,30 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 		catch (Exception cause) {
 			throw new JUnitException("Failed to create ForkJoinPool", cause);
 		}
+	}
+
+	private static ParallelExecutionInterceptor instantiateInterceptor(ParallelExecutionConfiguration configuration) {
+
+		Class<? extends ParallelExecutionInterceptor> interceptorClass = configuration.getExecutionInterceptorClass();
+
+		if (interceptorClass.equals(ParallelExecutionInterceptor.Default.class)) {
+			return ParallelExecutionInterceptor.Default.INSTANCE;
+		}
+
+		Constructor<? extends ParallelExecutionInterceptor> constructor = ReflectionUtils.getDeclaredConstructor(
+			interceptorClass);
+		var parameters = constructor.getParameters();
+		var arguments = new Object[parameters.length];
+		for (int i = 0; i < arguments.length; i++) {
+			if (ParallelExecutionInterceptor.Context.class.isAssignableFrom(parameters[i].getType())) {
+				arguments[i] = new DefaultParallelExecutionInterceptorContext(configuration);
+			}
+			else {
+				throw new PreconditionViolationException("Unable to resolve [%s] in constructor [%s].".formatted(
+					parameters[i], constructor.toGenericString()));
+			}
+		}
+		return ReflectionUtils.newInstance(constructor, arguments);
 	}
 
 	@Override
@@ -189,6 +218,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 
 	@Override
 	public void close() {
+		interceptor.close();
 		forkJoinPool.shutdownNow();
 	}
 
@@ -250,7 +280,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 					@SuppressWarnings("unused")
 					ThreadLock.NestedResourceLock nested = threadLock.withNesting(lock) //
 			) {
-				testTask.execute();
+				interceptor.execute(testTask);
 				return true;
 			}
 			catch (InterruptedException e) {

@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import java.math.BigDecimal;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
@@ -51,7 +52,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 				Boolean::valueOf).orElse(true);
 
 			return new DefaultParallelExecutionConfiguration(parallelism, parallelism, maxPoolSize, parallelism,
-				KEEP_ALIVE_SECONDS, __ -> saturate);
+				KEEP_ALIVE_SECONDS, __ -> saturate, getExecutionInterceptorClass(configurationParameters));
 		}
 	},
 
@@ -85,7 +86,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 				Boolean::valueOf).orElse(true);
 
 			return new DefaultParallelExecutionConfiguration(parallelism, parallelism, maxPoolSize, parallelism,
-				KEEP_ALIVE_SECONDS, __ -> saturate);
+				KEEP_ALIVE_SECONDS, __ -> saturate, getExecutionInterceptorClass(configurationParameters));
 		}
 	},
 
@@ -97,8 +98,8 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	CUSTOM {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-			String className = configurationParameters.get(CONFIG_CUSTOM_CLASS_PROPERTY_NAME).orElseThrow(
-				() -> new JUnitException(CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " must be set"));
+			String className = configurationParameters.get(CONFIG_CUSTOM_CLASS_PROPERTY_NAME) //
+					.orElseThrow(() -> new JUnitException(CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " must be set"));
 			return ReflectionSupport.tryToLoadClass(className) //
 					.andThenTry(strategyClass -> {
 						Preconditions.condition(
@@ -112,6 +113,27 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 						"Could not create configuration for strategy class: " + className, cause));
 		}
 	};
+
+	protected Class<? extends ParallelExecutionInterceptor> getExecutionInterceptorClass(
+			ConfigurationParameters configurationParameters) {
+		return getExecutionInterceptorClassFromConfig(configurationParameters) //
+				.orElse(ParallelExecutionInterceptor.Default.class);
+	}
+
+	private static Optional<Class<? extends ParallelExecutionInterceptor>> getExecutionInterceptorClassFromConfig(
+			ConfigurationParameters configurationParameters) {
+		return configurationParameters.get(CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME) //
+				.map(className -> {
+					Class<?> interceptorClass = ReflectionSupport.tryToLoadClass(className) //
+							.getNonNullOrThrow(cause -> new JUnitException(
+								"Failed to load execution interceptor class: " + className, cause));
+					Preconditions.condition(
+						ParallelExecutionInterceptor.class.isAssignableFrom(requireNonNull(interceptorClass)),
+						CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME + " does not implement "
+								+ ParallelExecutionConfigurationStrategy.class);
+					return interceptorClass.asSubclass(ParallelExecutionInterceptor.class);
+				});
+	}
 
 	private static final int KEEP_ALIVE_SECONDS = 30;
 
@@ -215,6 +237,15 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * @see #CUSTOM
 	 */
 	public static final String CONFIG_CUSTOM_CLASS_PROPERTY_NAME = "custom.class";
+
+	/**
+	 * Property name used to specify the fully qualified class name of the
+	 * {@link ParallelExecutionInterceptor} to be used regardless of the
+	 * configuration strategy: {@value}
+	 *
+	 * @since 6.1
+	 */
+	public static final String CONFIG_INTERCEPTOR_CLASS_PROPERTY_NAME = "interceptor.class";
 
 	static ParallelExecutionConfigurationStrategy getStrategy(ConfigurationParameters configurationParameters) {
 		return valueOf(
