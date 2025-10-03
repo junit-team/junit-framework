@@ -1,4 +1,4 @@
-package junitbuild.japicmp
+package junitbuild.compatibility.japicmp
 
 import japicmp.model.JApiCompatibility
 import me.champeau.gradle.japicmp.report.Violation
