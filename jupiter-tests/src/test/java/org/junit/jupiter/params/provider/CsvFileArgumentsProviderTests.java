@@ -117,9 +117,9 @@ class CsvFileArgumentsProviderTests {
 				.delimiterString(";")//
 				.build();
 
-		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny()).withMessageStartingWith(
-			"The delimiter and delimiterString attributes cannot be set simultaneously in").withMessageContaining(
-				"CsvFileSource");
+		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny())//
+				.withMessageStartingWith("The delimiter and delimiterString attributes cannot be set simultaneously in")//
+				.withMessageContaining("CsvFileSource");
 	}
 
 	@Test
@@ -325,9 +325,8 @@ class CsvFileArgumentsProviderTests {
 				.resources("/does-not-exist.csv")//
 				.build();
 
-		assertPreconditionViolationFor(
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray()).withMessageContaining(
-				"Classpath resource [/does-not-exist.csv] does not exist");
+		assertPreconditionViolationFor(() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray())//
+				.withMessageContaining("Classpath resource [/does-not-exist.csv] does not exist");
 	}
 
 	@Test
@@ -380,9 +379,9 @@ class CsvFileArgumentsProviderTests {
 				.resources("/bogus-charset.csv")//
 				.build();
 
-		assertPreconditionViolationFor(
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray()).withMessageContaining(
-				"The charset supplied in Mock for CsvFileSource").withMessageEndingWith("is invalid");
+		assertPreconditionViolationFor(() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray())//
+				.withMessageContaining("The charset supplied in Mock for CsvFileSource")//
+				.withMessageEndingWith("is invalid");
 	}
 
 	@Test

@@ -213,12 +213,12 @@ class AssertLinesMatchAssertionsTests {
 			() -> assertEquals(9, parseFastForwardLimit(">> 9 >>")),
 			() -> assertEquals(9, parseFastForwardLimit(" >> 9 >> ")),
 			() -> assertEquals(9, parseFastForwardLimit("  >> 9 >>  ")));
-		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>0>>")).withMessage(
-			"fast-forward(0) limit must be greater than zero");
-		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>-1>>")).withMessage(
-			"fast-forward(-1) limit must be greater than zero");
-		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>-2147483648>>")).withMessage(
-			"fast-forward(-2147483648) limit must be greater than zero");
+		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>0>>"))//
+				.withMessage("fast-forward(0) limit must be greater than zero");
+		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>-1>>"))//
+				.withMessage("fast-forward(-1) limit must be greater than zero");
+		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>-2147483648>>"))//
+				.withMessage("fast-forward(-2147483648) limit must be greater than zero");
 	}
 
 	@Test

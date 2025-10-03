@@ -44,9 +44,10 @@ class TypeBasedParameterResolverTests {
 
 	@Test
 	void missingTypeTypeBasedParameterResolver() {
-		assertPreconditionViolationFor(MissingTypeTypeBasedParameterResolver::new).withMessage(
-			"Failed to discover parameter type supported by " + MissingTypeTypeBasedParameterResolver.class.getName()
-					+ "; potentially caused by lacking parameterized type in class declaration.");
+		assertPreconditionViolationFor(MissingTypeTypeBasedParameterResolver::new)//
+				.withMessage("Failed to discover parameter type supported by "
+						+ MissingTypeTypeBasedParameterResolver.class.getName()
+						+ "; potentially caused by lacking parameterized type in class declaration.");
 	}
 
 	@Test

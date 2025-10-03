@@ -170,8 +170,9 @@ class ParameterizedTestExtensionTests {
 		var extensionContext = getExtensionContextReturningSingleMethod(new TestCaseWithNoArgumentsSource());
 
 		assertPreconditionViolationFor(
-			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext)).withMessage(
-				"Configuration error: You must configure at least one arguments source for this @ParameterizedTest");
+			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext))//
+					.withMessage(
+						"Configuration error: You must configure at least one arguments source for this @ParameterizedTest");
 	}
 
 	@Test

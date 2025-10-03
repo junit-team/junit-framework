@@ -61,8 +61,8 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	 */
 	@Test
 	void missingOsAndArchitectureDeclaration() {
-		assertPreconditionViolationFor(this::evaluateCondition).withMessageContaining(
-			"You must declare at least one OS or architecture");
+		assertPreconditionViolationFor(this::evaluateCondition)//
+				.withMessageContaining("You must declare at least one OS or architecture");
 	}
 
 	/**
