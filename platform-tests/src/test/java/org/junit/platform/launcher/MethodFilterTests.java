@@ -13,6 +13,7 @@ package org.junit.platform.launcher;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 import static org.junit.platform.launcher.MethodFilter.excludeMethodNamePatterns;
 import static org.junit.platform.launcher.MethodFilter.includeMethodNamePatterns;
 
@@ -41,10 +42,9 @@ class MethodFilterTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includeMethodNamePatternsChecksPreconditions() {
-		assertPreconditionViolationFor(() -> includeMethodNamePatterns((String[]) null)).withMessage(
-			"patterns array must not be null or empty");
-		assertPreconditionViolationFor(() -> includeMethodNamePatterns(new String[0])).withMessage(
-			"patterns array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> includeMethodNamePatterns((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array", () -> includeMethodNamePatterns(new String[0]));
 		assertPreconditionViolationFor(() -> includeMethodNamePatterns(new String[] { null })).withMessage(
 			"patterns array must not contain null elements");
 	}
@@ -86,10 +86,9 @@ class MethodFilterTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludeMethodNamePatternsChecksPreconditions() {
-		assertPreconditionViolationFor(() -> excludeMethodNamePatterns((String[]) null)).withMessage(
-			"patterns array must not be null or empty");
-		assertPreconditionViolationFor(() -> excludeMethodNamePatterns(new String[0])).withMessage(
-			"patterns array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> excludeMethodNamePatterns((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array", () -> excludeMethodNamePatterns(new String[0]));
 		assertPreconditionViolationFor(() -> excludeMethodNamePatterns(new String[] { null })).withMessage(
 			"patterns array must not contain null elements");
 	}

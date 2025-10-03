@@ -32,8 +32,20 @@ public final class PreconditionAssertions {
 		assertPreconditionViolationFor(throwingCallable).withMessage("%s must not be null", name);
 	}
 
+	public static void assertPreconditionViolationNotBlankFor(String name, ThrowingCallable throwingCallable) {
+		assertPreconditionViolationFor(throwingCallable).withMessageContaining("%s must not be blank", name);
+	}
+
+	public static void assertPreconditionViolationNotEmptyFor(String name, ThrowingCallable throwingCallable) {
+		assertPreconditionViolationFor(throwingCallable).withMessage("%s must not be empty", name);
+	}
+
 	public static void assertPreconditionViolationNotNullOrBlankFor(String name, ThrowingCallable throwingCallable) {
 		assertPreconditionViolationFor(throwingCallable).withMessage("%s must not be null or blank", name);
+	}
+
+	public static void assertPreconditionViolationNotNullOrEmptyFor(String name, ThrowingCallable throwingCallable) {
+		assertPreconditionViolationFor(throwingCallable).withMessage("%s must not be null or empty", name);
 	}
 
 	public static ThrowableAssertAlternative<PreconditionViolationException> assertPreconditionViolationFor(

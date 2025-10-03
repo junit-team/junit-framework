@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegr
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.ENIGMA;
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.KEY1;
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.KEY2;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotBlankFor;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -67,8 +67,7 @@ class EnabledIfEnvironmentVariableConditionTests extends AbstractExecutionCondit
 	 */
 	@Test
 	void blankNamedAttribute() {
-		assertPreconditionViolationFor(this::evaluateCondition).withMessageContaining(
-			"The 'named' attribute must not be blank");
+		assertPreconditionViolationNotBlankFor("The 'named' attribute", this::evaluateCondition);
 	}
 
 	/**
@@ -76,8 +75,7 @@ class EnabledIfEnvironmentVariableConditionTests extends AbstractExecutionCondit
 	 */
 	@Test
 	void blankMatchesAttribute() {
-		assertPreconditionViolationFor(this::evaluateCondition).withMessageContaining(
-			"The 'matches' attribute must not be blank");
+		assertPreconditionViolationNotBlankFor("The 'matches' attribute", this::evaluateCondition);
 	}
 
 	/**

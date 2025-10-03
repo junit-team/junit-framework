@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 import static org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode.BOTTOM_UP;
 import static org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode.TOP_DOWN;
 import static org.junit.platform.commons.util.ReflectionUtils.findFields;
@@ -553,8 +555,8 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullSourceType() {
-			assertPreconditionViolationFor(() -> ReflectionUtils.isAssignableTo(null, getClass()))//
-					.withMessage("source type must not be null");
+			assertPreconditionViolationNotNullFor("source type",
+				() -> ReflectionUtils.isAssignableTo(null, getClass()));
 		}
 
 		@Test
@@ -566,8 +568,8 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullTargetType() {
-			assertPreconditionViolationFor(() -> ReflectionUtils.isAssignableTo(getClass(), null))//
-					.withMessage("target type must not be null");
+			assertPreconditionViolationNotNullFor("target type",
+				() -> ReflectionUtils.isAssignableTo(getClass(), null));
 		}
 
 		@Test
@@ -1288,20 +1290,18 @@ class ReflectionUtilsTests {
 			assertPreconditionViolationFor(() -> findMethod(null, null));
 			assertPreconditionViolationFor(() -> findMethod(null, "method"));
 
-			assertPreconditionViolationFor(() -> findMethod(String.class, null))
-				.withMessage("Method name must not be null or blank");
+			assertPreconditionViolationNotNullOrBlankFor("Method name", () -> findMethod(String.class, null));
 
-			assertPreconditionViolationFor(() -> findMethod(String.class, "   "))
-				.withMessage("Method name must not be null or blank");
+			assertPreconditionViolationNotNullOrBlankFor("Method name", () -> findMethod(String.class, "   "));
 
-			assertPreconditionViolationFor(() -> findMethod(Files.class, "copy", (Class<?>[]) null))
-				.withMessage("Parameter types array must not be null");
+			assertPreconditionViolationNotNullFor("Parameter types array",//
+					() -> findMethod(Files.class, "copy", (Class<?>[]) null));
 
-			assertPreconditionViolationFor(() -> findMethod(Files.class, "copy", (Class<?>) null))
-				.withMessage("Individual parameter types must not be null");
+			assertPreconditionViolationNotNullFor("Individual parameter types",//
+					() -> findMethod(Files.class, "copy", (Class<?>) null));
 
-			assertPreconditionViolationFor(() -> findMethod(Files.class, "copy", new Class<?>[] { Path.class, null }))
-				.withMessage("Individual parameter types must not be null");
+			assertPreconditionViolationNotNullFor("Individual parameter types",//
+					() -> findMethod(Files.class, "copy", new Class<?>[] { Path.class, null }));
 			// @formatter:on
 		}
 

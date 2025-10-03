@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.condition;
 
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotBlankFor;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -62,8 +62,7 @@ class DisabledIfSystemPropertyConditionTests extends AbstractExecutionConditionT
 	 */
 	@Test
 	void blankNamedAttribute() {
-		assertPreconditionViolationFor(this::evaluateCondition).withMessageContaining(
-			"The 'named' attribute must not be blank");
+		assertPreconditionViolationNotBlankFor("The 'named' attribute", this::evaluateCondition);
 	}
 
 	/**
@@ -71,8 +70,7 @@ class DisabledIfSystemPropertyConditionTests extends AbstractExecutionConditionT
 	 */
 	@Test
 	void blankMatchesAttribute() {
-		assertPreconditionViolationFor(this::evaluateCondition).withMessageContaining(
-			"The 'matches' attribute must not be blank");
+		assertPreconditionViolationNotBlankFor("The 'matches' attribute", this::evaluateCondition);
 	}
 
 	/**

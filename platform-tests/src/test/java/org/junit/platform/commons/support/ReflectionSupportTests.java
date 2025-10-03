@@ -18,6 +18,7 @@ import static org.junit.platform.commons.support.ReflectionSupport.toSupportReso
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getDefaultClassLoader;
 
 import java.lang.reflect.Field;
@@ -297,9 +298,8 @@ class ReflectionSupportTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInModulePreconditions() {
-		assertPreconditionViolationFor(
-			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames)).withMessage(
-				"Module name must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
+			() -> ReflectionSupport.findAllClassesInModule(null, allTypes, allNames));
 		assertPreconditionViolationNotNullFor("class predicate",
 			() -> ReflectionSupport.findAllClassesInModule("org.junit.platform.commons", null, allNames));
 		assertPreconditionViolationNotNullFor("name predicate",
@@ -323,9 +323,8 @@ class ReflectionSupportTests {
 	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void findAllResourcesInModulePreconditions() {
-		assertPreconditionViolationFor(
-			() -> ReflectionSupport.findAllResourcesInModule(null, allResources)).withMessage(
-				"Module name must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
+			() -> ReflectionSupport.findAllResourcesInModule(null, allResources));
 		assertPreconditionViolationNotNullFor("resourceFilter",
 			() -> ReflectionSupport.findAllResourcesInModule("org.junit.platform.commons", null));
 	}
@@ -348,9 +347,8 @@ class ReflectionSupportTests {
 	@SuppressWarnings({ "DataFlowIssue", "removal" })
 	@Test
 	void streamAllResourcesInModulePreconditions() {
-		assertPreconditionViolationFor(
-			() -> ReflectionSupport.streamAllResourcesInModule(null, allResources)).withMessage(
-				"Module name must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
+			() -> ReflectionSupport.streamAllResourcesInModule(null, allResources));
 		assertPreconditionViolationNotNullFor("resourceFilter",
 			() -> ReflectionSupport.streamAllResourcesInModule("org.junit.platform.commons", null));
 	}

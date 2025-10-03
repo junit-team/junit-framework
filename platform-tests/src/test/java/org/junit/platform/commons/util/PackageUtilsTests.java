@@ -13,7 +13,8 @@ package org.junit.platform.commons.util;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotBlankFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.util.List;
 import java.util.function.Function;
@@ -34,16 +35,14 @@ class PackageUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullType() {
-		assertPreconditionViolationFor(() -> PackageUtils.getAttribute(null, p -> "any")).withMessage(
-			"type must not be null");
+		assertPreconditionViolationNotNullFor("type", () -> PackageUtils.getAttribute(null, p -> "any"));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullFunction() {
-		assertPreconditionViolationFor(
-			() -> PackageUtils.getAttribute(getClass(), (Function<Package, String>) null)).withMessage(
-				"function must not be null");
+		assertPreconditionViolationNotNullFor("function",
+			() -> PackageUtils.getAttribute(getClass(), (Function<Package, String>) null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -78,20 +77,17 @@ class PackageUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullTypeAndName() {
-		assertPreconditionViolationFor(() -> PackageUtils.getAttribute(null, "foo")).withMessage(
-			"type must not be null");
+		assertPreconditionViolationNotNullFor("type", () -> PackageUtils.getAttribute(null, "foo"));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullName() {
-		assertPreconditionViolationFor(() -> PackageUtils.getAttribute(getClass(), (String) null)).withMessage(
-			"name must not be blank");
+		assertPreconditionViolationNotBlankFor("name", () -> PackageUtils.getAttribute(getClass(), (String) null));
 	}
 
 	@Test
 	void getAttributeWithEmptyName() {
-		assertPreconditionViolationFor(() -> PackageUtils.getAttribute(getClass(), "")).withMessage(
-			"name must not be blank");
+		assertPreconditionViolationNotBlankFor("name", () -> PackageUtils.getAttribute(getClass(), ""));
 	}
 }

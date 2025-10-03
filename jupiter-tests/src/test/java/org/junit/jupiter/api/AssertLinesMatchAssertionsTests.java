@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,10 +107,8 @@ class AssertLinesMatchAssertionsTests {
 		var list = List.of("1", "2", "3");
 		var withNullElement = Arrays.asList("1", null, "3"); // List.of() doesn't permit null values.
 		assertDoesNotThrow(() -> assertLinesMatch(withNullElement, withNullElement));
-		assertPreconditionViolationFor(() -> assertLinesMatch(withNullElement, list)).withMessage(
-			"expected line must not be null");
-		assertPreconditionViolationFor(() -> assertLinesMatch(list, withNullElement)).withMessage(
-			"actual line must not be null");
+		assertPreconditionViolationNotNullFor("expected line", () -> assertLinesMatch(withNullElement, list));
+		assertPreconditionViolationNotNullFor("actual line", () -> assertLinesMatch(list, withNullElement));
 	}
 
 	private void assertError(AssertionFailedError error, String expectedMessage, List<String> expectedLines,

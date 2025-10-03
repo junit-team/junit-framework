@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,10 +26,10 @@ class ClassNameFilterTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includeClassNamePatternsChecksPreconditions() {
-		assertPreconditionViolationFor(() -> ClassNameFilter.includeClassNamePatterns((String[]) null)).withMessage(
-			"patterns array must not be null or empty");
-		assertPreconditionViolationFor(() -> ClassNameFilter.includeClassNamePatterns(new String[0])).withMessage(
-			"patterns array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.includeClassNamePatterns((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.includeClassNamePatterns(new String[0]));
 		assertPreconditionViolationFor(
 			() -> ClassNameFilter.includeClassNamePatterns(new String[] { null })).withMessage(
 				"patterns array must not contain null elements");
@@ -86,10 +87,10 @@ class ClassNameFilterTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludeClassNamePatternsChecksPreconditions() {
-		assertPreconditionViolationFor(() -> ClassNameFilter.excludeClassNamePatterns((String[]) null)).withMessage(
-			"patterns array must not be null or empty");
-		assertPreconditionViolationFor(() -> ClassNameFilter.excludeClassNamePatterns(new String[0])).withMessage(
-			"patterns array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.excludeClassNamePatterns((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.excludeClassNamePatterns(new String[0]));
 		assertPreconditionViolationFor(
 			() -> ClassNameFilter.excludeClassNamePatterns(new String[] { null })).withMessage(
 				"patterns array must not contain null elements");

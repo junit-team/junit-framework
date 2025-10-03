@@ -13,6 +13,7 @@ package org.junit.platform.testkit.engine;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.displayName;
@@ -43,8 +44,7 @@ class NestedContainerEventConditionTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
-		assertPreconditionViolationFor(() -> nestedContainer(null))//
-				.withMessage("Class must not be null");
+		assertPreconditionViolationNotNullFor("Class", () -> nestedContainer(null));
 
 		assertPreconditionViolationFor(() -> nestedContainer(NestedContainerEventConditionTests.class))//
 				.withMessage(NestedContainerEventConditionTests.class.getName() + " must be a nested class");

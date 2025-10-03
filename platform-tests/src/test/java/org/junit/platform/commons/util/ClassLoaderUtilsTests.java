@@ -13,7 +13,7 @@ package org.junit.platform.commons.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
@@ -29,8 +29,7 @@ class ClassLoaderUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getClassLoaderPreconditions() {
-		assertPreconditionViolationFor(() -> ClassLoaderUtils.getClassLoader(null))//
-				.withMessage("Class must not be null");
+		assertPreconditionViolationNotNullFor("Class", () -> ClassLoaderUtils.getClassLoader(null));
 	}
 
 	@Test
@@ -100,7 +99,7 @@ class ClassLoaderUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getLocationFromNullFails() {
-		assertPreconditionViolationFor(() -> ClassLoaderUtils.getLocation(null)).withMessage("object must not be null");
+		assertPreconditionViolationNotNullFor("object", () -> ClassLoaderUtils.getLocation(null));
 	}
 
 	@Test

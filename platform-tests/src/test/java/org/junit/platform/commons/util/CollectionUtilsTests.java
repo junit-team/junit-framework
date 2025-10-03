@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -59,8 +60,7 @@ class CollectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullCollection() {
-			assertPreconditionViolationFor(() -> CollectionUtils.getOnlyElement(null)).withMessage(
-				"collection must not be null");
+			assertPreconditionViolationNotNullFor("collection", () -> CollectionUtils.getOnlyElement(null));
 		}
 
 		@Test
@@ -89,8 +89,7 @@ class CollectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullCollection() {
-			assertPreconditionViolationFor(() -> CollectionUtils.getFirstElement(null)).withMessage(
-				"collection must not be null");
+			assertPreconditionViolationNotNullFor("collection", () -> CollectionUtils.getFirstElement(null));
 		}
 
 		@Test
@@ -181,7 +180,7 @@ class CollectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void toStreamWithNull() {
-			assertPreconditionViolationFor(() -> CollectionUtils.toStream(null)).withMessage("Object must not be null");
+			assertPreconditionViolationNotNullFor("Object", () -> CollectionUtils.toStream(null));
 		}
 
 		@Test

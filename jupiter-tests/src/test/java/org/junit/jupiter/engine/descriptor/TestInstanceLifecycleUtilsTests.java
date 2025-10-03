@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.descriptor.TestInstanceLifecycleUtils.getTestInstanceLifecycle;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,12 +50,10 @@ class TestInstanceLifecycleUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getTestInstanceLifecyclePreconditions() {
-		assertPreconditionViolationFor(() -> getTestInstanceLifecycle(null,
-			new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator(), mock()))).withMessage(
-				"testClass must not be null");
+		assertPreconditionViolationNotNullFor("testClass", () -> getTestInstanceLifecycle(null,
+			new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator(), mock())));
 
-		assertPreconditionViolationFor(() -> getTestInstanceLifecycle(getClass(), null)).withMessage(
-			"configuration must not be null");
+		assertPreconditionViolationNotNullFor("configuration", () -> getTestInstanceLifecycle(getClass(), null));
 	}
 
 	@Test

@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -39,42 +40,36 @@ class AssertAllAssertionsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableArray() {
-		assertPreconditionViolationFor(() -> assertAll((Executable[]) null)).withMessage(
-			"executables array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("executables array", () -> assertAll((Executable[]) null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableCollection() {
-		assertPreconditionViolationFor(() -> assertAll((Collection<Executable>) null)).withMessage(
-			"executables collection must not be null");
+		assertPreconditionViolationNotNullFor("executables collection", () -> assertAll((Collection<Executable>) null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableStream() {
-		assertPreconditionViolationFor(() -> assertAll((Stream<Executable>) null)).withMessage(
-			"executables stream must not be null");
+		assertPreconditionViolationNotNullFor("executables stream", () -> assertAll((Stream<Executable>) null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullInExecutableArray() {
-		assertPreconditionViolationFor(() -> assertAll((Executable) null)).withMessage(
-			"individual executables must not be null");
+		assertPreconditionViolationNotNullFor("individual executables", () -> assertAll((Executable) null));
 	}
 
 	@Test
 	void assertAllWithNullInExecutableCollection() {
-		assertPreconditionViolationFor(() -> assertAll(asList((Executable) null))).withMessage(
-			"individual executables must not be null");
+		assertPreconditionViolationNotNullFor("individual executables", () -> assertAll(asList((Executable) null)));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullInExecutableStream() {
-		assertPreconditionViolationFor(() -> assertAll(Stream.of((Executable) null))).withMessage(
-			"individual executables must not be null");
+		assertPreconditionViolationNotNullFor("individual executables", () -> assertAll(Stream.of((Executable) null)));
 	}
 
 	@Test

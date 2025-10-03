@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,10 +26,10 @@ class PackageNameFilterTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includePackageChecksPreconditions() {
-		assertPreconditionViolationFor(() -> PackageNameFilter.includePackageNames((String[]) null)).withMessage(
-			"packageNames array must not be null or empty");
-		assertPreconditionViolationFor(() -> PackageNameFilter.includePackageNames(new String[0])).withMessage(
-			"packageNames array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames array",
+			() -> PackageNameFilter.includePackageNames((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames array",
+			() -> PackageNameFilter.includePackageNames(new String[0]));
 		assertPreconditionViolationFor(() -> PackageNameFilter.includePackageNames(new String[] { null })).withMessage(
 			"packageNames array must not contain null elements");
 	}
@@ -74,10 +75,10 @@ class PackageNameFilterTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludePackageChecksPreconditions() {
-		assertPreconditionViolationFor(() -> PackageNameFilter.excludePackageNames((String[]) null)).withMessage(
-			"packageNames must not be null or empty");
-		assertPreconditionViolationFor(() -> PackageNameFilter.excludePackageNames(new String[0])).withMessage(
-			"packageNames must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames",
+			() -> PackageNameFilter.excludePackageNames((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames",
+			() -> PackageNameFilter.excludePackageNames(new String[0]));
 		assertPreconditionViolationFor(() -> PackageNameFilter.excludePackageNames(new String[] { null })).withMessage(
 			"packageNames must not contain null elements");
 	}

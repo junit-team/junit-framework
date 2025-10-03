@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.CsvArgumentsProviderTests.isCsvParseException;
 import static org.junit.jupiter.params.provider.MockCsvAnnotationBuilder.csvFileSource;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotEmptyFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -334,9 +336,8 @@ class CsvFileArgumentsProviderTests {
 				.resources("    ")//
 				.build();
 
-		assertPreconditionViolationFor(
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray()).withMessageContaining(
-				"Classpath resource [    ] must not be null or blank");
+		assertPreconditionViolationNotNullOrBlankFor("Classpath resource [    ]",
+			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
 	}
 
 	@Test
@@ -357,9 +358,8 @@ class CsvFileArgumentsProviderTests {
 				.files("    ")//
 				.build();
 
-		assertPreconditionViolationFor(
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray()).withMessageContaining(
-				"File [    ] must not be null or blank");
+		assertPreconditionViolationNotNullOrBlankFor("File [    ]",
+			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
 	}
 
 	@Test
@@ -369,9 +369,8 @@ class CsvFileArgumentsProviderTests {
 				.files()//
 				.build();
 
-		assertPreconditionViolationFor(
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray()).withMessageContaining(
-				"Resources or files must not be empty");
+		assertPreconditionViolationNotEmptyFor("Resources or files",
+			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
 	}
 
 	@Test

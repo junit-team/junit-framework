@@ -12,7 +12,7 @@ package org.junit.vintage.engine.descriptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotEmptyFor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
@@ -33,7 +33,7 @@ class OrFilterTests {
 
 	@Test
 	void exceptionWithoutAnyFilters() {
-		assertPreconditionViolationFor(() -> new OrFilter(Set.of())).withMessage("filters must not be empty");
+		assertPreconditionViolationNotEmptyFor("filters", () -> new OrFilter(Set.of()));
 	}
 
 	@Test

@@ -13,9 +13,9 @@ package org.junit.platform.commons.support;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getDefaultClassLoader;
 
 import java.net.URI;
@@ -184,8 +184,8 @@ class ResourceSupportTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllResourcesInModulePreconditions() {
-		assertPreconditionViolationFor(() -> ResourceSupport.findAllResourcesInModule(null, allResources)).withMessage(
-			"Module name must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
+			() -> ResourceSupport.findAllResourcesInModule(null, allResources));
 		assertPreconditionViolationNotNullFor("Resource filter",
 			() -> ResourceSupport.findAllResourcesInModule("org.junit.platform.commons", null));
 	}
@@ -205,9 +205,8 @@ class ResourceSupportTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamAllResourcesInModulePreconditions() {
-		assertPreconditionViolationFor(
-			() -> ResourceSupport.streamAllResourcesInModule(null, allResources)).withMessage(
-				"Module name must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
+			() -> ResourceSupport.streamAllResourcesInModule(null, allResources));
 		assertPreconditionViolationNotNullFor("Resource filter",
 			() -> ResourceSupport.streamAllResourcesInModule("org.junit.platform.commons", null));
 	}
