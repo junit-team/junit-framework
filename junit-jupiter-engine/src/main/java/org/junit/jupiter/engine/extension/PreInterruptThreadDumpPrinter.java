@@ -49,7 +49,7 @@ final class PreInterruptThreadDumpPrinter implements PreInterruptCallback {
 					sb.append(NL);
 					// Use the same prefix as java.lang.Throwable.printStackTrace(PrintStreamOrWriter)
 					sb.append("\tat ");
-					sb.append(stackTraceElement.toString());
+					sb.append(stackTraceElement);
 				}
 				sb.append(NL);
 			}
