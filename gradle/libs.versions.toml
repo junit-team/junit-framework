@@ -10,6 +10,7 @@ eclipse = "4.37.0"
 jackson = "2.20.0"
 jacoco = "0.8.13"
 jmh = "1.37"
+jruby = "10.0.2.0"
 junit4 = "4.13.2"
 junit4Min = "4.12"
 ktlint = "1.7.1"
@@ -76,6 +77,7 @@ woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.1.1" 
 asciidoctorj-pdf = { module = "org.asciidoctor:asciidoctorj-pdf", version.ref = "asciidoctorj-pdf" }
 eclipse-platform = { module = "org.eclipse.platform:org.eclipse.platform", version.ref = "eclipse" }
 jacoco = { module = "org.jacoco:jacoco", version.ref = "jacoco" }
+jruby = { module = "org.jruby:jruby", version.ref = "jruby" }
 junit4-latest = { module = "junit:junit", version.ref = "junit4" }
 junit4-bundle = { module = "org.apache.servicemix.bundles:org.apache.servicemix.bundles.junit", version = "4.13.2_1" }
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
