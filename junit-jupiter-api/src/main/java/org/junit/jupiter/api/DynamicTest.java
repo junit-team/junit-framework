@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
 import java.util.Iterator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -61,7 +62,7 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, Executable executable) {
-		return new DynamicTest(displayName, null, executable);
+		return dynamicTest(config -> config.displayName(displayName).executable(executable));
 	}
 
 	/**
@@ -79,7 +80,13 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		return new DynamicTest(displayName, testSourceUri, executable);
+		return dynamicTest(config -> config.displayName(displayName).source(testSourceUri).executable(executable));
+	}
+
+	public static DynamicTest dynamicTest(Consumer<Configuration> configurer) {
+		var configuration = new DefaultConfiguration();
+		configurer.accept(configuration);
+		return new DynamicTest(configuration);
 	}
 
 	/**
@@ -290,9 +297,9 @@ public class DynamicTest extends DynamicNode {
 
 	private final Executable executable;
 
-	private DynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		super(displayName, testSourceUri);
-		this.executable = Preconditions.notNull(executable, "executable must not be null");
+	private DynamicTest(DefaultConfiguration configuration) {
+		super(configuration);
+		this.executable = Preconditions.notNull(configuration.executable, "executable must not be null");
 	}
 
 	/**
@@ -300,6 +307,28 @@ public class DynamicTest extends DynamicNode {
 	 */
 	public Executable getExecutable() {
 		return this.executable;
+	}
+
+	public sealed interface Configuration extends DynamicNode.Configuration<Configuration> {
+
+		Configuration executable(Executable executable);
+
+	}
+
+	static final class DefaultConfiguration extends AbstractConfiguration<Configuration> implements Configuration {
+
+		private @Nullable Executable executable;
+
+		@Override
+		public Configuration executable(Executable executable) {
+			this.executable = executable;
+			return this;
+		}
+
+		@Override
+		protected Configuration self() {
+			return this;
+		}
 	}
 
 }

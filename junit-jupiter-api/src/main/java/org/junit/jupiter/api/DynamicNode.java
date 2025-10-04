@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 
@@ -36,9 +37,12 @@ public abstract class DynamicNode {
 	/** Custom test source {@link URI} associated with this node; potentially {@code null}. */
 	private final @Nullable URI testSourceUri;
 
-	DynamicNode(String displayName, @Nullable URI testSourceUri) {
-		this.displayName = Preconditions.notBlank(displayName, "displayName must not be null or blank");
-		this.testSourceUri = testSourceUri;
+	private final @Nullable ExecutionMode executionMode;
+
+	DynamicNode(AbstractConfiguration<?> configuration) {
+		this.displayName = Preconditions.notBlank(configuration.displayName, "displayName must not be null or blank");
+		this.testSourceUri = configuration.testSourceUri;
+		this.executionMode = configuration.executionMode;
 	}
 
 	/**
@@ -61,12 +65,62 @@ public abstract class DynamicNode {
 		return Optional.ofNullable(testSourceUri);
 	}
 
+	public Optional<ExecutionMode> getExecutionMode() {
+		return Optional.ofNullable(executionMode);
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this) //
 				.append("displayName", displayName) //
 				.append("testSourceUri", testSourceUri) //
 				.toString();
+	}
+
+	public sealed interface Configuration<T extends Configuration<T>>
+			permits DynamicTest.Configuration, DynamicContainer.Configuration, AbstractConfiguration {
+
+		T displayName(String displayName);
+
+		T source(@Nullable URI testSourceUri);
+
+		T executionMode(ExecutionMode executionMode);
+
+		T executionMode(ExecutionMode executionMode, String reason);
+
+	}
+
+	abstract static sealed class AbstractConfiguration<T extends Configuration<T>> implements Configuration<T>
+			permits DynamicTest.DefaultConfiguration, DynamicContainer.DefaultConfiguration {
+
+		private @Nullable String displayName;
+		private @Nullable URI testSourceUri;
+		private @Nullable ExecutionMode executionMode;
+
+		@Override
+		public T displayName(String displayName) {
+			this.displayName = displayName;
+			return self();
+		}
+
+		@Override
+		public T source(@Nullable URI testSourceUri) {
+			this.testSourceUri = testSourceUri;
+			return self();
+		}
+
+		@Override
+		public T executionMode(ExecutionMode executionMode) {
+			this.executionMode = executionMode;
+			return self();
+		}
+
+		@Override
+		public T executionMode(ExecutionMode executionMode, String reason) {
+			return executionMode(executionMode);
+		}
+
+		protected abstract T self();
 	}
 
 }
