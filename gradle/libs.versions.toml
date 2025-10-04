@@ -51,7 +51,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
 maven = { module = "org.apache.maven:apache-maven", version = "3.9.11" }
 mavenSurefirePlugin = { module = "org.apache.maven.plugins:maven-surefire-plugin", version.ref = "surefire" }
-memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version = "2.8.1" }
+memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version = "2.8.2" }
 mockito-bom = { module = "org.mockito:mockito-bom", version = "5.20.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
