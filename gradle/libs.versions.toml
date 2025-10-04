@@ -1,7 +1,7 @@
 [versions]
 ant = "1.10.15"
 apiguardian = "1.1.2"
-asciidoctorj-pdf = "2.3.19"
+asciidoctorj-pdf = "2.3.20"
 asciidoctor-plugins = "4.0.5" # Check if workaround in documentation.gradle.kts can be removed when upgrading
 assertj = "3.27.6"
 bnd = "7.1.0"
