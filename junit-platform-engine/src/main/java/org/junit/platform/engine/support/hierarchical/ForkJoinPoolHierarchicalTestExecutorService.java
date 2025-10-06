@@ -34,6 +34,7 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ExceptionUtils;
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.ConfigurationParameters;
 
@@ -158,10 +159,17 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 
 	@Override
 	public void invokeAll(List<? extends TestTask> tasks) {
+
 		if (tasks.size() == 1) {
 			new ExclusiveTask(tasks.get(0)).execSync();
 			return;
 		}
+
+		// If this method is called from outside the used ForkJoinPool,
+		// calls to fork() will schedule tasks in the commonPool
+		Preconditions.condition(isAlreadyRunningInForkJoinPool(),
+			"invokeAll() must be called from a thread in the ForkJoinPool");
+
 		Deque<ExclusiveTask> isolatedTasks = new ArrayDeque<>();
 		Deque<ExclusiveTask> sameThreadTasks = new ArrayDeque<>();
 		Deque<ExclusiveTask> concurrentTasksInReverseOrder = new ArrayDeque<>();
