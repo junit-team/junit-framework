@@ -430,14 +430,14 @@ class CsvArgumentsProviderTests {
 
 	static Stream<Arguments> invalidControlCharacterCombinations() {
 		return Stream.of(
-				// delimiter
-				Arguments.of('#', '#', '#'), //
-				Arguments.of('#', '#', '*'), //
-				Arguments.of('*', '#', '#'), //
-				Arguments.of('#', '*', '#'), //
-				// delimiterString
-				Arguments.of("#", '#', '*'), //
-				Arguments.of("#", '*', '#') //
+			// delimiter
+			Arguments.of('#', '#', '#'), //
+			Arguments.of('#', '#', '*'), //
+			Arguments.of('*', '#', '#'), //
+			Arguments.of('#', '*', '#'), //
+			// delimiterString
+			Arguments.of("#", '#', '*'), //
+			Arguments.of("#", '*', '#') //
 		);
 	}
 

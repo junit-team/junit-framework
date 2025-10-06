@@ -132,10 +132,10 @@ class CsvReaderFactory {
 				.distinct() //
 				.count();
 
-		String message =
-				"(delimiter|delimiterString): '%s', quoteCharacter: '%s', and commentCharacter: '%s' must all differ";
+		String message = //
+			"(delimiter|delimiterString): '%s', quoteCharacter: '%s', and commentCharacter: '%s' must all differ";
 		Preconditions.condition(uniqueCharacterCount == 3,
-				() -> message.formatted(delimiter, quoteCharacter, commentCharacter));
+			() -> message.formatted(delimiter, quoteCharacter, commentCharacter));
 	}
 
 	private static CsvCallbackHandler<? extends CsvRecord> createCallbackHandler(String emptyValue,

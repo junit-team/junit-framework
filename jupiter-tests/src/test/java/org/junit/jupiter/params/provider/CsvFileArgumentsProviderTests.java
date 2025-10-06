@@ -150,7 +150,7 @@ class CsvFileArgumentsProviderTests {
 	@ParameterizedTest
 	@MethodSource("org.junit.jupiter.params.provider.CsvArgumentsProviderTests#invalidControlCharacterCombinations")
 	void throwsExceptionWhenControlCharactersNotDiffer(Object delimiter, char quoteCharacter, char commentCharacter) {
-		var builder = csvFileSource().resources("test.csv")
+		var builder = csvFileSource().resources("test.csv") //
 				.quoteCharacter(quoteCharacter).commentCharacter(commentCharacter);
 
 		var annotation = delimiter instanceof Character c //
