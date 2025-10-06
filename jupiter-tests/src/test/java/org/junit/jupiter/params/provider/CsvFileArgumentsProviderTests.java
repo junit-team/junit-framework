@@ -135,6 +135,34 @@ class CsvFileArgumentsProviderTests {
 	}
 
 	@Test
+	void honorsCustomCommentCharacter() {
+		var annotation = csvFileSource()//
+				.resources("test.csv")//
+				.commentCharacter(';')//
+				.delimiter(',')//
+				.build();
+
+		var arguments = provideArguments(annotation, "foo, bar \n;baz, qux");
+
+		assertThat(arguments).containsExactly(array("foo", "bar"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("org.junit.jupiter.params.provider.CsvArgumentsProviderTests#invalidControlCharacterCombinations")
+	void throwsExceptionWhenControlCharactersNotDiffer(Object delimiter, char quoteCharacter, char commentCharacter) {
+		var builder = csvFileSource().resources("test.csv")
+				.quoteCharacter(quoteCharacter).commentCharacter(commentCharacter);
+
+		var annotation = delimiter instanceof Character c //
+				? builder.delimiter(c).build() //
+				: builder.delimiterString(delimiter.toString()).build();
+
+		var message = "(delimiter|delimiterString): '%s', quoteCharacter: '%s', and commentCharacter: '%s' must all differ";
+		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny()) //
+				.withMessage(message.formatted(delimiter, quoteCharacter, commentCharacter));
+	}
+
+	@Test
 	void closesInputStreamForClasspathResource() {
 		var closed = new AtomicBoolean(false);
 		InputStream inputStream = new ByteArrayInputStream("foo".getBytes()) {

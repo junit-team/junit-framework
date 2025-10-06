@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -295,5 +296,18 @@ public @interface CsvSource {
 	 */
 	@API(status = STABLE, since = "5.10")
 	boolean ignoreLeadingAndTrailingWhitespace() default true;
+
+	/**
+	 * The character used to denote comments in a {@linkplain #textBlock text block}.
+	 *
+	 * <p>Any line that begins with this character will be treated as a comment and ignored
+	 * during parsing.
+	 *
+	 * <p>Defaults to a hash tag {@code #}.
+	 *
+	 * @since 6.0.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0.1")
+	char commentCharacter() default '#';
 
 }
