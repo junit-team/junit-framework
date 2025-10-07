@@ -3106,6 +3106,29 @@ implementations.
 `UriSource` ::
   If none of the above `TestSource` implementations are applicable.
 
+[[writing-tests-dynamic-tests-parallel-execution]]
+==== Parallel Execution
+
+Dynamic tests and containers support
+<<writing-tests-parallel-execution, parallel execution>>. You can configure their
+`ExecutionMode` by using the `dynamicTest(Consumer)` and `dynamicContainer(Consumer)`
+factory methods as illustrated by the following example.
+
+[source,java,indent=0]
+----
+include::{testDir}/example/DynamicTestsDemo.java[tags=execution_mode]
+----
+
+Executing the above test factory method results in the following test tree and execution
+modes:
+
+* dynamicTestsWithConfiguredExecutionMode() -- `CONCURRENT` (from `@Execution` annotation)
+** Container A -- `CONCURRENT` (from `@Execution` annotation)
+*** not null -- `SAME_THREAD` (from `executionMode(...)` call)
+*** properties -- `CONCURRENT` (from `@Execution` annotation)
+**** length > 0 -- `CONCURRENT` (from `executionMode(...)` call)
+**** not empty -- `SAME_THREAD` (from `childExecutionMode(...)` call)
+** ... (same for "Container B" and "Container C")
 
 [[writing-tests-declarative-timeouts]]
 === Timeouts
