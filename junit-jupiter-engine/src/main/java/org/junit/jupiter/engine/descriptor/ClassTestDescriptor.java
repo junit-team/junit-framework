@@ -83,9 +83,8 @@ public class ClassTestDescriptor extends ClassBasedTestDescriptor {
 	// --- Node ----------------------------------------------------------------
 
 	@Override
-	public ExecutionMode getExecutionMode() {
-		return getExplicitExecutionMode().orElseGet(
-			() -> JupiterTestDescriptor.toExecutionMode(configuration.getDefaultClassesExecutionMode()));
+	ExecutionMode getDefaultExecutionMode() {
+		return toExecutionMode(configuration.getDefaultClassesExecutionMode());
 	}
 
 	// --- ClassBasedTestDescriptor --------------------------------------------

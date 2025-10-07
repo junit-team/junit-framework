@@ -133,10 +133,10 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	// --- Node ----------------------------------------------------------------
 
 	@Override
-	public ExecutionMode getExecutionMode() {
+	public final ExecutionMode getExecutionMode() {
 		return getExplicitExecutionMode() //
 				.or(this::determineExecutionModeFromAncestors) //
-				.orElseGet(() -> toExecutionMode(configuration.getDefaultExecutionMode()));
+				.orElseGet(this::getDefaultExecutionMode);
 	}
 
 	private Optional<ExecutionMode> determineExecutionModeFromAncestors() {
@@ -167,6 +167,10 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 
 	Optional<ExecutionMode> getDefaultChildExecutionMode() {
 		return getExplicitChildExecutionMode();
+	}
+
+	ExecutionMode getDefaultExecutionMode() {
+		return toExecutionMode(configuration.getDefaultExecutionMode());
 	}
 
 	Optional<ExecutionMode> getExecutionModeFromAnnotation(AnnotatedElement element) {
