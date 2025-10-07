@@ -81,7 +81,8 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		return dynamicTest(config -> config.displayName(displayName).source(testSourceUri).executable(executable));
+		return dynamicTest(
+			config -> config.displayName(displayName).testSourceUri(testSourceUri).executable(executable));
 	}
 
 	/**

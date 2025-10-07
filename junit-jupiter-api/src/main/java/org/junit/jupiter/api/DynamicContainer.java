@@ -95,7 +95,8 @@ public class DynamicContainer extends DynamicNode {
 	public static DynamicContainer dynamicContainer(String displayName, @Nullable URI testSourceUri,
 			Stream<? extends DynamicNode> dynamicNodes) {
 
-		return dynamicContainer(config -> config.displayName(displayName).source(testSourceUri).children(dynamicNodes));
+		return dynamicContainer(
+			config -> config.displayName(displayName).testSourceUri(testSourceUri).children(dynamicNodes));
 	}
 
 	/**

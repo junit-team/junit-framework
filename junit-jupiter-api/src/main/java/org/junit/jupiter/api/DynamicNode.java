@@ -111,7 +111,7 @@ public abstract class DynamicNode {
 		 *
 		 * @return this configuration for method chaining
 		 */
-		T source(@Nullable URI testSourceUri);
+		T testSourceUri(@Nullable URI testSourceUri);
 
 		/**
 		 * Set the {@linkplain DynamicNode#getExecutionMode() execution mode} to
@@ -137,7 +137,7 @@ public abstract class DynamicNode {
 		}
 
 		@Override
-		public T source(@Nullable URI testSourceUri) {
+		public T testSourceUri(@Nullable URI testSourceUri) {
 			this.testSourceUri = testSourceUri;
 			return self();
 		}
