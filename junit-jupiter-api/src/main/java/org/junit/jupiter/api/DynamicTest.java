@@ -334,6 +334,7 @@ public class DynamicTest extends DynamicNode {
 		 * Set the {@linkplain DynamicTest#getExecutable() executable} to use
 		 * for the configured {@link DynamicTest}.
 		 *
+		 * @param executable the executable; never {@code null} or blank
 		 * @return this configuration for method chaining
 		 */
 		Configuration executable(Executable executable);
@@ -346,7 +347,7 @@ public class DynamicTest extends DynamicNode {
 
 		@Override
 		public Configuration executable(Executable executable) {
-			this.executable = executable;
+			this.executable = Preconditions.notNull(executable, "executable must not be null");
 			return this;
 		}
 

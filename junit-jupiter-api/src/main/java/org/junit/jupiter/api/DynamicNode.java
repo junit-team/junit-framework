@@ -101,6 +101,7 @@ public abstract class DynamicNode {
 		 * Set the {@linkplain DynamicNode#getDisplayName() display name} to use
 		 * for the configured {@link DynamicNode}.
 		 *
+		 * @param displayName the display name; never {@code null} or blank
 		 * @return this configuration for method chaining
 		 */
 		T displayName(String displayName);
@@ -109,6 +110,7 @@ public abstract class DynamicNode {
 		 * Set the {@linkplain DynamicNode#getTestSourceUri() test source URI}
 		 * to use for the configured {@link DynamicNode}.
 		 *
+		 * @param testSourceUri the test source URI; may be {@code null}
 		 * @return this configuration for method chaining
 		 */
 		T testSourceUri(@Nullable URI testSourceUri);
@@ -117,6 +119,7 @@ public abstract class DynamicNode {
 		 * Set the {@linkplain DynamicNode#getExecutionMode() execution mode} to
 		 * use for the configured {@link DynamicNode}.
 		 *
+		 * @param executionMode the execution mode; never {@code null}
 		 * @return this configuration for method chaining
 		 */
 		T executionMode(ExecutionMode executionMode);
@@ -132,7 +135,7 @@ public abstract class DynamicNode {
 
 		@Override
 		public T displayName(String displayName) {
-			this.displayName = displayName;
+			this.displayName = Preconditions.notBlank(displayName, "displayName must not be null or blank");
 			return self();
 		}
 
@@ -144,7 +147,7 @@ public abstract class DynamicNode {
 
 		@Override
 		public T executionMode(ExecutionMode executionMode) {
-			this.executionMode = executionMode;
+			this.executionMode = Preconditions.notNull(executionMode, "executionMode must not be null");
 			return self();
 		}
 

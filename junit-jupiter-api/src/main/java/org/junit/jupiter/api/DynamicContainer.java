@@ -169,6 +169,8 @@ public class DynamicContainer extends DynamicNode {
 		 *
 		 * <p>Any previously configured value is overridden.
 		 *
+		 * @param children the children; never {@code null} or containing
+		 * {@code null} elements
 		 * @return this configuration for method chaining
 		 */
 		default Configuration children(Iterable<? extends DynamicNode> children) {
@@ -182,6 +184,8 @@ public class DynamicContainer extends DynamicNode {
 		 *
 		 * <p>Any previously configured value is overridden.
 		 *
+		 * @param children the children; never {@code null} or containing
+		 * {@code null} elements
 		 * @return this configuration for method chaining
 		 */
 		default Configuration children(DynamicNode... children) {
@@ -196,6 +200,8 @@ public class DynamicContainer extends DynamicNode {
 		 *
 		 * <p>Any previously configured value is overridden.
 		 *
+		 * @param children the children; never {@code null} or containing
+		 * {@code null} elements
 		 * @return this configuration for method chaining
 		 */
 		Configuration children(Stream<? extends DynamicNode> children);
@@ -209,7 +215,7 @@ public class DynamicContainer extends DynamicNode {
 
 		@Override
 		public Configuration childExecutionMode(ExecutionMode executionMode) {
-			this.childExecutionMode = executionMode;
+			this.childExecutionMode = Preconditions.notNull(executionMode, "executionMode must not be null");
 			return this;
 		}
 
