@@ -94,7 +94,7 @@ public class DynamicTest extends DynamicNode {
 	 * @since 6.1
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	public static DynamicTest dynamicTest(Consumer<Configuration> configurer) {
+	public static DynamicTest dynamicTest(Consumer<? super Configuration> configurer) {
 		var configuration = new DefaultConfiguration();
 		configurer.accept(configuration);
 		return new DynamicTest(configuration);

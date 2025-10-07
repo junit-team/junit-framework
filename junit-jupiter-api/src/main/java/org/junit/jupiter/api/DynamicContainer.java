@@ -108,7 +108,7 @@ public class DynamicContainer extends DynamicNode {
 	 * @since 6.1
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	public static DynamicContainer dynamicContainer(Consumer<Configuration> configurer) {
+	public static DynamicContainer dynamicContainer(Consumer<? super Configuration> configurer) {
 		var configuration = new DefaultConfiguration();
 		configurer.accept(configuration);
 		return new DynamicContainer(configuration);
