@@ -14,6 +14,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_STRATEGY_PROPER
 import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_KEY;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.event;
@@ -46,12 +48,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Nested;
@@ -61,13 +67,16 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.MethodSource;
@@ -284,6 +293,19 @@ class ParallelExecutionIntegrationTests {
 		List<Event> events = executeConcurrentlySuccessfully(1, testClass).list();
 
 		assertThat(ThreadReporter.getThreadNames(events)).hasSize(1);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "testFactoryImplicitContainerAndExplicitChildExecutionMode",
+			"testFactoryExplicitContainerAndExplicitChildExecutionModeOnContainer",
+			"testFactoryExplicitContainerAndExplicitChildExecutionModeOnEachChild" })
+	void allowsToControlExecutionModeOfDynamicTestsAndContainers(String methodName) {
+
+		var results = executeWithFixedParallelism(3, Map.of(),
+			List.of(selectMethod(ConcurrentDynamicContainerTestCase.class, methodName)));
+
+		results.testEvents().assertStatistics(it -> it.succeeded(4));
+		assertThat(ThreadReporter.getThreadNames(results.testEvents().list())).hasSize(2);
 	}
 
 	@Isolated("testing")
@@ -554,8 +576,13 @@ class ParallelExecutionIntegrationTests {
 
 	private EngineExecutionResults executeWithFixedParallelism(int parallelism, Map<String, String> configParams,
 			Class<?>... testClasses) {
+		return executeWithFixedParallelism(parallelism, configParams, selectClasses(testClasses));
+	}
+
+	private static EngineExecutionResults executeWithFixedParallelism(int parallelism, Map<String, String> configParams,
+			List<? extends DiscoverySelector> selectors) {
 		return EngineTestKit.engine("junit-jupiter") //
-				.selectors(selectClasses(testClasses)) //
+				.selectors(selectors) //
 				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, String.valueOf(true)) //
 				.configurationParameter(PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME, "fixed") //
 				.configurationParameter(PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, String.valueOf(parallelism)) //
@@ -941,6 +968,63 @@ class ParallelExecutionIntegrationTests {
 	static class ParallelMethodsTestCaseC extends ParallelMethodsTestCase {
 	}
 
+	@ExtendWith(ThreadReporter.class)
+	static class ConcurrentDynamicContainerTestCase {
+
+		@TestFactory
+		@Execution(CONCURRENT)
+		Stream<DynamicContainer> testFactoryImplicitContainerAndExplicitChildExecutionMode() {
+			return testFactory(container -> container.childExecutionMode(SAME_THREAD), UnaryOperator.identity());
+		}
+
+		@TestFactory
+		Stream<DynamicContainer> testFactoryExplicitContainerAndExplicitChildExecutionModeOnContainer() {
+			return testFactory(container -> container.executionMode(CONCURRENT).childExecutionMode(SAME_THREAD),
+				UnaryOperator.identity());
+		}
+
+		@TestFactory
+		Stream<DynamicContainer> testFactoryExplicitContainerAndExplicitChildExecutionModeOnEachChild() {
+			return testFactory(container -> container.executionMode(CONCURRENT),
+				test -> test.executionMode(SAME_THREAD));
+		}
+
+		private Stream<DynamicContainer> testFactory(UnaryOperator<DynamicContainer.Configuration> containerConfigurer,
+				UnaryOperator<DynamicTest.Configuration> testsConfigurer) {
+
+			var sharedResource1 = new AtomicInteger();
+			var latch1 = new CountDownLatch(2);
+
+			var sharedResource2 = new AtomicInteger();
+			var latch2 = new CountDownLatch(2);
+
+			var tests1 = Stream.of( //
+				dynamicTest(config -> testsConfigurer.apply(config) //
+						.displayName("test1") //
+						.executable(() -> incrementAndBlock(sharedResource1, latch1))), //
+				dynamicTest(config -> testsConfigurer.apply(config) //
+						.displayName("test2") //
+						.executable(() -> incrementAndBlock(sharedResource2, latch2))));
+
+			var tests2 = Stream.of( //
+				dynamicTest(config -> testsConfigurer.apply(config) //
+						.displayName("test3") //
+						.executable(() -> incrementAndBlock(sharedResource1, latch1))), //
+				dynamicTest(config -> testsConfigurer.apply(config) //
+						.displayName("test4") //
+						.executable(() -> incrementAndBlock(sharedResource2, latch2))));
+
+			return Stream.of( //
+				dynamicContainer(config -> containerConfigurer.apply(config) //
+						.displayName("suite1") //
+						.children(tests1)), //
+				dynamicContainer(config -> containerConfigurer.apply(config) //
+						.displayName("suite2") //
+						.children(tests2)));
+		}
+
+	}
+
 	private static void incrementBlockAndCheck(AtomicInteger sharedResource, CountDownLatch countDownLatch)
 			throws InterruptedException {
 		var value = incrementAndBlock(sharedResource, countDownLatch);
@@ -980,7 +1064,8 @@ class ParallelExecutionIntegrationTests {
 		return runningInCi ? 1000 : 100;
 	}
 
-	static class ThreadReporter implements AfterTestExecutionCallback {
+	@NullMarked
+	static class ThreadReporter implements AfterTestExecutionCallback, InvocationInterceptor {
 
 		private static Stream<String> getLoaderNames(List<Event> events) {
 			return getValues(events, "loader");
@@ -1004,6 +1089,22 @@ class ParallelExecutionIntegrationTests {
 
 		@Override
 		public void afterTestExecution(ExtensionContext context) {
+			publishReportEntries(context);
+		}
+
+		@Override
+		public void interceptDynamicTest(Invocation<@Nullable Void> invocation,
+				DynamicTestInvocationContext invocationContext, ExtensionContext extensionContext) throws Throwable {
+
+			try {
+				invocation.proceed();
+			}
+			finally {
+				publishReportEntries(extensionContext);
+			}
+		}
+
+		private static void publishReportEntries(ExtensionContext context) {
 			context.publishReportEntry("thread", Thread.currentThread().getName());
 			context.publishReportEntry("loader", Thread.currentThread().getContextClassLoader().getName());
 		}

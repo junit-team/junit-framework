@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
@@ -42,7 +43,7 @@ import org.junit.platform.commons.util.Preconditions;
 @API(status = MAINTAINED, since = "5.3")
 public class DynamicContainer extends DynamicNode {
 
-	private final @Nullable ExecutionMode defaultChildExecutionMode;
+	private final @Nullable ExecutionMode childExecutionMode;
 
 	/**
 	 * Factory for creating a new {@code DynamicContainer} for the supplied display
@@ -97,6 +98,16 @@ public class DynamicContainer extends DynamicNode {
 		return dynamicContainer(config -> config.displayName(displayName).source(testSourceUri).children(dynamicNodes));
 	}
 
+	/**
+	 * Factory for creating a new {@code DynamicTest} that is configured via the
+	 * supplied {@link Consumer} of {@link DynamicTest.Configuration}.
+	 *
+	 * @param configurer callback for configuring the resulting
+	 * {@code DynamicTest}; never {@code null}.
+	 *
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public static DynamicContainer dynamicContainer(Consumer<Configuration> configurer) {
 		var configuration = new DefaultConfiguration();
 		configurer.accept(configuration);
@@ -108,7 +119,7 @@ public class DynamicContainer extends DynamicNode {
 	private DynamicContainer(DefaultConfiguration configuration) {
 		super(configuration);
 		this.children = Preconditions.notNull(configuration.children, "children must not be null");
-		this.defaultChildExecutionMode = configuration.defaultChildExecutionMode;
+		this.childExecutionMode = configuration.childExecutionMode;
 	}
 
 	/**
@@ -119,27 +130,73 @@ public class DynamicContainer extends DynamicNode {
 		return children;
 	}
 
-	public Optional<ExecutionMode> getDefaultChildExecutionMode() {
-		return Optional.ofNullable(defaultChildExecutionMode);
+	/**
+	 * {@return the {@link ExecutionMode} for
+	 * {@linkplain #getChildren() children} of this {@code DynamicContainer}
+	 * that is used unless they are
+	 * {@linkplain DynamicTest#getExecutionMode() configured} differently}.
+	 *
+	 * @since 6.1
+	 * @see DynamicTest#getExecutionMode()
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public Optional<ExecutionMode> getChildExecutionMode() {
+		return Optional.ofNullable(childExecutionMode);
 	}
 
+	/**
+	 * {@code Configuration} of a {@link DynamicContainer}.
+	 *
+	 * @since 6.1
+	 * @see DynamicContainer#dynamicContainer(Consumer)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public sealed interface Configuration extends DynamicNode.Configuration<Configuration> {
 
-		Configuration defaultChildExecutionMode(ExecutionMode executionMode);
+		/**
+		 * Set the
+		 * {@linkplain DynamicContainer#getChildExecutionMode() child execution mode}
+		 * to use for the configured {@link DynamicContainer}.
+		 *
+		 * @return this configuration for method chaining
+		 */
+		Configuration childExecutionMode(ExecutionMode executionMode);
 
-		Configuration defaultChildExecutionMode(ExecutionMode executionMode, String reason);
-
+		/**
+		 * Set the {@linkplain DynamicContainer#getChildren() children} of the
+		 * configured {@link DynamicContainer}.
+		 *
+		 * <p>Any previously configured value is overridden.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		default Configuration children(Iterable<? extends DynamicNode> children) {
 			Preconditions.notNull(children, "children must not be null");
 			return children(StreamSupport.stream(children.spliterator(), false));
 		}
 
+		/**
+		 * Set the {@linkplain DynamicContainer#getChildren() children} of the
+		 * configured {@link DynamicContainer}.
+		 *
+		 * <p>Any previously configured value is overridden.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		default Configuration children(DynamicNode... children) {
 			Preconditions.notNull(children, "children must not be null");
 			Preconditions.containsNoNullElements(children, "children must not contain null elements");
 			return children(List.of(children));
 		}
 
+		/**
+		 * Set the {@linkplain DynamicContainer#getChildren() children} of the
+		 * configured {@link DynamicContainer}.
+		 *
+		 * <p>Any previously configured value is overridden.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		Configuration children(Stream<? extends DynamicNode> children);
 
 	}
@@ -147,17 +204,11 @@ public class DynamicContainer extends DynamicNode {
 	static final class DefaultConfiguration extends AbstractConfiguration<Configuration> implements Configuration {
 
 		private @Nullable Stream<? extends DynamicNode> children;
-		private @Nullable ExecutionMode defaultChildExecutionMode;
+		private @Nullable ExecutionMode childExecutionMode;
 
 		@Override
-		public Configuration defaultChildExecutionMode(ExecutionMode executionMode) {
-			this.defaultChildExecutionMode = executionMode;
-			return this;
-		}
-
-		@Override
-		public Configuration defaultChildExecutionMode(ExecutionMode executionMode, String reason) {
-			defaultChildExecutionMode(executionMode);
+		public Configuration childExecutionMode(ExecutionMode executionMode) {
+			this.childExecutionMode = executionMode;
 			return this;
 		}
 

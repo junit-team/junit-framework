@@ -12,6 +12,7 @@ package org.junit.jupiter.api;
 
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
@@ -83,6 +84,16 @@ public class DynamicTest extends DynamicNode {
 		return dynamicTest(config -> config.displayName(displayName).source(testSourceUri).executable(executable));
 	}
 
+	/**
+	 * Factory for creating a new {@code DynamicTest} that is configured via the
+	 * supplied {@link Consumer} of {@link Configuration}.
+	 *
+	 * @param configurer callback for configuring the resulting
+	 * {@code DynamicTest}; never {@code null}.
+	 *
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public static DynamicTest dynamicTest(Consumer<Configuration> configurer) {
 		var configuration = new DefaultConfiguration();
 		configurer.accept(configuration);
@@ -309,8 +320,21 @@ public class DynamicTest extends DynamicNode {
 		return this.executable;
 	}
 
+	/**
+	 * {@code Configuration} of a {@link DynamicTest}.
+	 *
+	 * @since 6.1
+	 * @see DynamicTest#dynamicTest(Consumer)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public sealed interface Configuration extends DynamicNode.Configuration<Configuration> {
 
+		/**
+		 * Set the {@linkplain DynamicTest#getExecutable() executable} to use
+		 * for the configured {@link DynamicTest}.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		Configuration executable(Executable executable);
 
 	}

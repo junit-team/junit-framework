@@ -59,8 +59,8 @@ class DynamicContainerTestDescriptor extends DynamicNodeTestDescriptor {
 	}
 
 	@Override
-	Optional<ExecutionMode> getDefaultChildExecutionMode() {
-		return this.dynamicContainer.getDefaultChildExecutionMode().map(JupiterTestDescriptor::toExecutionMode);
+	Optional<ExecutionMode> getExplicitChildExecutionMode() {
+		return this.dynamicContainer.getChildExecutionMode().map(JupiterTestDescriptor::toExecutionMode);
 	}
 
 	@Override

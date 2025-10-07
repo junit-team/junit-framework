@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
@@ -65,6 +66,13 @@ public abstract class DynamicNode {
 		return Optional.ofNullable(testSourceUri);
 	}
 
+	/**
+	 * {@return the {@link ExecutionMode} of this {@code DynamicNode}}
+	 *
+	 * @since 6.1
+	 * @see DynamicContainer#getChildExecutionMode()
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public Optional<ExecutionMode> getExecutionMode() {
 		return Optional.ofNullable(executionMode);
 	}
@@ -77,16 +85,41 @@ public abstract class DynamicNode {
 				.toString();
 	}
 
+	/**
+	 * {@code Configuration} of a {@link DynamicNode} or one of its
+	 * subinterfaces.
+	 *
+	 * @since 6.1
+	 * @see DynamicTest.Configuration
+	 * @see DynamicContainer.Configuration
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public sealed interface Configuration<T extends Configuration<T>>
 			permits DynamicTest.Configuration, DynamicContainer.Configuration, AbstractConfiguration {
 
+		/**
+		 * Set the {@linkplain DynamicNode#getDisplayName() display name} to use
+		 * for the configured {@link DynamicNode}.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		T displayName(String displayName);
 
+		/**
+		 * Set the {@linkplain DynamicNode#getTestSourceUri() test source URI}
+		 * to use for the configured {@link DynamicNode}.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		T source(@Nullable URI testSourceUri);
 
+		/**
+		 * Set the {@linkplain DynamicNode#getExecutionMode() execution mode} to
+		 * use for the configured {@link DynamicNode}.
+		 *
+		 * @return this configuration for method chaining
+		 */
 		T executionMode(ExecutionMode executionMode);
-
-		T executionMode(ExecutionMode executionMode, String reason);
 
 	}
 
@@ -113,11 +146,6 @@ public abstract class DynamicNode {
 		public T executionMode(ExecutionMode executionMode) {
 			this.executionMode = executionMode;
 			return self();
-		}
-
-		@Override
-		public T executionMode(ExecutionMode executionMode, String reason) {
-			return executionMode(executionMode);
 		}
 
 		protected abstract T self();
