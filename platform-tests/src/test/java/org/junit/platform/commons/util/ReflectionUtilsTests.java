@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 import static org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode.BOTTOM_UP;
 import static org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode.TOP_DOWN;
 import static org.junit.platform.commons.util.ReflectionUtils.findFields;
@@ -68,7 +70,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.commons.test.TestClassLoader;
@@ -121,8 +122,7 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void getAllAssignmentCompatibleClassesWithNullClass() {
-			assertThrows(PreconditionViolationException.class,
-				() -> ReflectionUtils.getAllAssignmentCompatibleClasses(null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.getAllAssignmentCompatibleClasses(null));
 		}
 
 		@Test
@@ -140,10 +140,10 @@ class ReflectionUtilsTests {
 			assertThat(ReflectionUtils.newInstance(C.class, "one", "two")).isNotNull();
 			assertThat(ReflectionUtils.newInstance(C.class)).isNotNull();
 
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.newInstance(C.class, "one", null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.newInstance(C.class, null, "two"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.newInstance(C.class, null, null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.newInstance(C.class, ((Object[]) null)));
+			assertPreconditionViolationFor(() -> ReflectionUtils.newInstance(C.class, "one", null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.newInstance(C.class, null, "two"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.newInstance(C.class, null, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.newInstance(C.class, ((Object[]) null)));
 
 			var exception = assertThrows(RuntimeException.class, () -> ReflectionUtils.newInstance(Exploder.class));
 			assertThat(exception).hasMessage("boom");
@@ -257,8 +257,8 @@ class ReflectionUtilsTests {
 		@Test
 		void getDeclaredConstructorPreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.getDeclaredConstructor(null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.getDeclaredConstructor(ClassWithTwoConstructors.class));
+			assertPreconditionViolationFor(() -> ReflectionUtils.getDeclaredConstructor(null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.getDeclaredConstructor(ClassWithTwoConstructors.class));
 			// @formatter:on
 		}
 
@@ -555,8 +555,8 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullSourceType() {
-			assertPreconditionViolationFor(() -> ReflectionUtils.isAssignableTo(null, getClass()))//
-					.withMessage("source type must not be null");
+			assertPreconditionViolationNotNullFor("source type",
+				() -> ReflectionUtils.isAssignableTo(null, getClass()));
 		}
 
 		@Test
@@ -568,8 +568,8 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullTargetType() {
-			assertPreconditionViolationFor(() -> ReflectionUtils.isAssignableTo(getClass(), null))//
-					.withMessage("target type must not be null");
+			assertPreconditionViolationNotNullFor("target type",
+				() -> ReflectionUtils.isAssignableTo(getClass(), null));
 		}
 
 		@Test
@@ -624,8 +624,7 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isAssignableToForNullClass() {
-			assertThrows(PreconditionViolationException.class,
-				() -> ReflectionUtils.isAssignableTo(new Object(), null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isAssignableTo(new Object(), null));
 		}
 
 		@Test
@@ -691,8 +690,8 @@ class ReflectionUtilsTests {
 		@Test
 		void invokeMethodPreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> invokeMethod(null, new Object()));
-			assertThrows(PreconditionViolationException.class, () -> invokeMethod(Object.class.getMethod("hashCode"), null));
+			assertPreconditionViolationFor(() -> invokeMethod(null, new Object()));
+			assertPreconditionViolationFor(() -> invokeMethod(Object.class.getMethod("hashCode"), null));
 			// @formatter:on
 		}
 
@@ -757,11 +756,11 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToGetResourcePreconditions() {
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetResources(""));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetResources("   "));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToGetResources(""));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToGetResources("   "));
 
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetResources(null));
-			assertThrows(PreconditionViolationException.class,
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToGetResources(null));
+			assertPreconditionViolationFor(
 				() -> ReflectionUtils.tryToGetResources("org/junit/platform/commons/example.resource", null));
 		}
 
@@ -799,13 +798,12 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToLoadClassPreconditions() {
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToLoadClass(null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToLoadClass(""));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToLoadClass("   "));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToLoadClass(null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToLoadClass(""));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToLoadClass("   "));
 
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToLoadClass(null, null));
-			assertThrows(PreconditionViolationException.class,
-				() -> ReflectionUtils.tryToLoadClass(getClass().getName(), null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToLoadClass(null, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToLoadClass(getClass().getName(), null));
 		}
 
 		@Test
@@ -967,9 +965,9 @@ class ReflectionUtilsTests {
 		@Test
 		void getFullyQualifiedMethodNamePreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.getFullyQualifiedMethodName(null, null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.getFullyQualifiedMethodName(null, "testMethod"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.getFullyQualifiedMethodName(Object.class, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.getFullyQualifiedMethodName(null, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.getFullyQualifiedMethodName(null, "testMethod"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.getFullyQualifiedMethodName(Object.class, null));
 			// @formatter:on
 		}
 
@@ -1003,16 +1001,16 @@ class ReflectionUtilsTests {
 		@Test
 		void parseFullyQualifiedMethodNamePreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName(null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName(""));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("   "));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("java.lang.Object#"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("#equals"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("#"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("java.lang.Object"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("equals"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("()"));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.parseFullyQualifiedMethodName("(int, java.lang.Object)"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName(null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName(""));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("   "));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("java.lang.Object#"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("#equals"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("#"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("java.lang.Object"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("equals"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("()"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.parseFullyQualifiedMethodName("(int, java.lang.Object)"));
 			// @formatter:on
 		}
 
@@ -1043,9 +1041,9 @@ class ReflectionUtilsTests {
 		@Test
 		void findNestedClassesPreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.findNestedClasses(null, null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.findNestedClasses(null, clazz -> true));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.findNestedClasses(getClass(), null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.findNestedClasses(null, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.findNestedClasses(null, clazz -> true));
+			assertPreconditionViolationFor(() -> ReflectionUtils.findNestedClasses(getClass(), null));
 			// @formatter:on
 		}
 
@@ -1053,10 +1051,10 @@ class ReflectionUtilsTests {
 		@Test
 		void isNestedClassPresentPreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isNestedClassPresent(null, null, null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isNestedClassPresent(null, clazz -> true, CycleErrorHandling.THROW_EXCEPTION));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isNestedClassPresent(getClass(), null, CycleErrorHandling.ABORT_VISIT));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isNestedClassPresent(getClass(), clazz -> true, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isNestedClassPresent(null, null, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isNestedClassPresent(null, clazz -> true, CycleErrorHandling.THROW_EXCEPTION));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isNestedClassPresent(getClass(), null, CycleErrorHandling.ABORT_VISIT));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isNestedClassPresent(getClass(), clazz -> true, null));
 			// @formatter:on
 		}
 
@@ -1242,10 +1240,9 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void tryToGetMethodPreconditions() {
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetMethod(null, null));
-			assertThrows(PreconditionViolationException.class,
-				() -> ReflectionUtils.tryToGetMethod(String.class, null));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.tryToGetMethod(null, "hashCode"));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToGetMethod(null, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToGetMethod(String.class, null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.tryToGetMethod(null, "hashCode"));
 		}
 
 		@Test
@@ -1267,8 +1264,8 @@ class ReflectionUtilsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void isMethodPresentPreconditions() {
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isMethodPresent(null, m -> true));
-			assertThrows(PreconditionViolationException.class, () -> ReflectionUtils.isMethodPresent(getClass(), null));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isMethodPresent(null, m -> true));
+			assertPreconditionViolationFor(() -> ReflectionUtils.isMethodPresent(getClass(), null));
 		}
 
 		@Test
@@ -1290,23 +1287,21 @@ class ReflectionUtilsTests {
 		@Test
 		void findMethodByParameterTypesPreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> findMethod(null, null));
-			assertThrows(PreconditionViolationException.class, () -> findMethod(null, "method"));
+			assertPreconditionViolationFor(() -> findMethod(null, null));
+			assertPreconditionViolationFor(() -> findMethod(null, "method"));
 
-			RuntimeException exception = assertThrows(PreconditionViolationException.class, () -> findMethod(String.class, null));
-			assertThat(exception).hasMessage("Method name must not be null or blank");
+			assertPreconditionViolationNotNullOrBlankFor("Method name", () -> findMethod(String.class, null));
 
-			exception = assertThrows(PreconditionViolationException.class, () -> findMethod(String.class, "   "));
-			assertThat(exception).hasMessage("Method name must not be null or blank");
+			assertPreconditionViolationNotNullOrBlankFor("Method name", () -> findMethod(String.class, "   "));
 
-			exception = assertThrows(PreconditionViolationException.class, () -> findMethod(Files.class, "copy", (Class<?>[]) null));
-			assertThat(exception).hasMessage("Parameter types array must not be null");
+			assertPreconditionViolationNotNullFor("Parameter types array",
+					() -> findMethod(Files.class, "copy", (Class<?>[]) null));
 
-			exception = assertThrows(PreconditionViolationException.class, () -> findMethod(Files.class, "copy", (Class<?>) null));
-			assertThat(exception).hasMessage("Individual parameter types must not be null");
+			assertPreconditionViolationNotNullFor("Individual parameter types",
+					() -> findMethod(Files.class, "copy", (Class<?>) null));
 
-			exception = assertThrows(PreconditionViolationException.class, () -> findMethod(Files.class, "copy", new Class<?>[] { Path.class, null }));
-			assertThat(exception).hasMessage("Individual parameter types must not be null");
+			assertPreconditionViolationNotNullFor("Individual parameter types",
+					() -> findMethod(Files.class, "copy", new Class<?>[] { Path.class, null }));
 			// @formatter:on
 		}
 
@@ -1479,14 +1474,14 @@ class ReflectionUtilsTests {
 		@Test
 		void findMethodsPreconditions() {
 			// @formatter:off
-			assertThrows(PreconditionViolationException.class, () -> findMethods(null, null));
-			assertThrows(PreconditionViolationException.class, () -> findMethods(null, clazz -> true));
-			assertThrows(PreconditionViolationException.class, () -> findMethods(String.class, null));
+			assertPreconditionViolationFor(() -> findMethods(null, null));
+			assertPreconditionViolationFor(() -> findMethods(null, clazz -> true));
+			assertPreconditionViolationFor(() -> findMethods(String.class, null));
 
-			assertThrows(PreconditionViolationException.class, () -> findMethods(null, null, null));
-			assertThrows(PreconditionViolationException.class, () -> findMethods(null, clazz -> true, BOTTOM_UP));
-			assertThrows(PreconditionViolationException.class, () -> findMethods(String.class, null, BOTTOM_UP));
-			assertThrows(PreconditionViolationException.class, () -> findMethods(String.class, clazz -> true, null));
+			assertPreconditionViolationFor(() -> findMethods(null, null, null));
+			assertPreconditionViolationFor(() -> findMethods(null, clazz -> true, BOTTOM_UP));
+			assertPreconditionViolationFor(() -> findMethods(String.class, null, BOTTOM_UP));
+			assertPreconditionViolationFor(() -> findMethods(String.class, clazz -> true, null));
 			// @formatter:on
 		}
 
@@ -1915,11 +1910,9 @@ class ReflectionUtilsTests {
 			var field = MyClass.class.getDeclaredField("instanceField");
 			assertThat(tryToReadFieldValue(field, instance).getNonNull()).isEqualTo(42);
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> tryToReadFieldValue(field, null).get());
-			assertThat(exception)//
-					.hasMessageStartingWith("Cannot read non-static field")//
-					.hasMessageEndingWith("on a null instance.");
+			assertPreconditionViolationFor(() -> tryToReadFieldValue(field, null).get())//
+					.withMessageStartingWith("Cannot read non-static field")//
+					.withMessageEndingWith("on a null instance.");
 		}
 
 	}
@@ -1953,9 +1946,9 @@ class ReflectionUtilsTests {
 		@Test
 		void readFieldValuesPreconditions() {
 			List<Field> fields = new ArrayList<>();
-			assertThrows(PreconditionViolationException.class, () -> readFieldValues(null, new Object()));
-			assertThrows(PreconditionViolationException.class, () -> readFieldValues(fields, null, null));
-			assertThrows(PreconditionViolationException.class, () -> readFieldValues(fields, new Object(), null));
+			assertPreconditionViolationFor(() -> readFieldValues(null, new Object()));
+			assertPreconditionViolationFor(() -> readFieldValues(fields, null, null));
+			assertPreconditionViolationFor(() -> readFieldValues(fields, new Object(), null));
 		}
 
 		@Test

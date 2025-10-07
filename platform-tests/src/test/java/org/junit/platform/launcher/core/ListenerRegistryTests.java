@@ -10,13 +10,12 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 public class ListenerRegistryTests {
 
@@ -25,18 +24,14 @@ public class ListenerRegistryTests {
 	void registerWithNullArray() {
 		var registry = ListenerRegistry.create(List::getFirst);
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> registry.addAll((Object[]) null));
-
-		assertThat(exception).hasMessageContaining("listeners array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("listeners array", () -> registry.addAll((Object[]) null));
 	}
 
 	@Test
 	void registerWithEmptyArray() {
 		var registry = ListenerRegistry.create(List::getFirst);
 
-		var exception = assertThrows(PreconditionViolationException.class, registry::addAll);
-
-		assertThat(exception).hasMessageContaining("listeners array must not be null or empty");
+		assertPreconditionViolationNotNullOrEmptyFor("listeners array", registry::addAll);
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -44,9 +39,6 @@ public class ListenerRegistryTests {
 	void registerWithArrayContainingNullElements() {
 		var registry = ListenerRegistry.create(List::getFirst);
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> registry.addAll(new Object[] { null }));
-
-		assertThat(exception).hasMessageContaining("individual listeners must not be null");
+		assertPreconditionViolationNotNullFor("individual listeners", () -> registry.addAll(new Object[] { null }));
 	}
 }

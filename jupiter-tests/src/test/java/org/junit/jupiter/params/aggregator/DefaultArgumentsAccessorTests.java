@@ -16,12 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.util.Arrays;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link DefaultArgumentsAccessor}.
@@ -33,21 +33,19 @@ class DefaultArgumentsAccessorTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void argumentsMustNotBeNull() {
-		assertThrows(PreconditionViolationException.class, () -> defaultArgumentsAccessor(1, (Object[]) null));
+		assertPreconditionViolationFor(() -> defaultArgumentsAccessor(1, (Object[]) null));
 	}
 
 	@Test
 	void indexMustNotBeNegative() {
 		ArgumentsAccessor arguments = defaultArgumentsAccessor(1, 1, 2);
-		Exception exception = assertThrows(PreconditionViolationException.class, () -> arguments.get(-1));
-		assertThat(exception.getMessage()).containsSubsequence("index must be", ">= 0");
+		assertPreconditionViolationFor(() -> arguments.get(-1)).withMessage("index must be >= 0 and < 2");
 	}
 
 	@Test
 	void indexMustBeSmallerThanLength() {
 		ArgumentsAccessor arguments = defaultArgumentsAccessor(1, 1, 2);
-		Exception exception = assertThrows(PreconditionViolationException.class, () -> arguments.get(2));
-		assertThat(exception.getMessage()).containsSubsequence("index must be", "< 2");
+		assertPreconditionViolationFor(() -> arguments.get(2)).withMessage("index must be >= 0 and < 2");
 	}
 
 	@Test

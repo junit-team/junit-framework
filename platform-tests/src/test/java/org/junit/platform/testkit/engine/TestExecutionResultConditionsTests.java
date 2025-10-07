@@ -12,6 +12,7 @@ package org.junit.platform.testkit.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.rootCause;
 
@@ -33,8 +34,7 @@ class TestExecutionResultConditionsTests {
 
 	@Test
 	void rootCauseFailsForNullThrowable() {
-		assertPreconditionViolationFor(() -> rootCauseCondition.matches(null))//
-				.withMessage("Throwable must not be null");
+		assertPreconditionViolationNotNullFor("Throwable", () -> rootCauseCondition.matches(null));
 	}
 
 	@Test

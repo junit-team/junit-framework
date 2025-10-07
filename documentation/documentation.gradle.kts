@@ -86,6 +86,7 @@ dependencies {
 }
 
 asciidoctorj {
+	setJrubyVersion(libs.versions.jruby)
 	modules {
 		pdf.version(libs.versions.asciidoctorj.pdf)
 	}

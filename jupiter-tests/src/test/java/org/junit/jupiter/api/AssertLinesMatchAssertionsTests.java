@@ -12,7 +12,6 @@ package org.junit.jupiter.api;
 
 import static org.junit.jupiter.api.AssertLinesMatch.isFastForwardLine;
 import static org.junit.jupiter.api.AssertLinesMatch.parseFastForwardLimit;
-import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -97,9 +97,9 @@ class AssertLinesMatchAssertionsTests {
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes", "DataFlowIssue" })
 	void assertLinesMatchWithNullFails() {
-		assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(null, (List) null));
-		assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(null, Collections.emptyList()));
-		assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(Collections.emptyList(), null));
+		assertPreconditionViolationFor(() -> assertLinesMatch(null, (List) null));
+		assertPreconditionViolationFor(() -> assertLinesMatch(null, Collections.emptyList()));
+		assertPreconditionViolationFor(() -> assertLinesMatch(Collections.emptyList(), null));
 	}
 
 	@Test
@@ -107,10 +107,8 @@ class AssertLinesMatchAssertionsTests {
 		var list = List.of("1", "2", "3");
 		var withNullElement = Arrays.asList("1", null, "3"); // List.of() doesn't permit null values.
 		assertDoesNotThrow(() -> assertLinesMatch(withNullElement, withNullElement));
-		var e1 = assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(withNullElement, list));
-		assertEquals("expected line must not be null", e1.getMessage());
-		var e2 = assertThrows(PreconditionViolationException.class, () -> assertLinesMatch(list, withNullElement));
-		assertEquals("actual line must not be null", e2.getMessage());
+		assertPreconditionViolationNotNullFor("expected line", () -> assertLinesMatch(withNullElement, list));
+		assertPreconditionViolationNotNullFor("actual line", () -> assertLinesMatch(list, withNullElement));
 	}
 
 	private void assertError(AssertionFailedError error, String expectedMessage, List<String> expectedLines,
@@ -215,12 +213,12 @@ class AssertLinesMatchAssertionsTests {
 			() -> assertEquals(9, parseFastForwardLimit(">> 9 >>")),
 			() -> assertEquals(9, parseFastForwardLimit(" >> 9 >> ")),
 			() -> assertEquals(9, parseFastForwardLimit("  >> 9 >>  ")));
-		Throwable error = assertThrows(PreconditionViolationException.class, () -> parseFastForwardLimit(">>0>>"));
-		assertMessageEquals(error, "fast-forward(0) limit must be greater than zero");
-		error = assertThrows(PreconditionViolationException.class, () -> parseFastForwardLimit(">>-1>>"));
-		assertMessageEquals(error, "fast-forward(-1) limit must be greater than zero");
-		error = assertThrows(PreconditionViolationException.class, () -> parseFastForwardLimit(">>-2147483648>>"));
-		assertMessageEquals(error, "fast-forward(-2147483648) limit must be greater than zero");
+		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>0>>"))//
+				.withMessage("fast-forward(0) limit must be greater than zero");
+		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>-1>>"))//
+				.withMessage("fast-forward(-1) limit must be greater than zero");
+		assertPreconditionViolationFor(() -> parseFastForwardLimit(">>-2147483648>>"))//
+				.withMessage("fast-forward(-2147483648) limit must be greater than zero");
 	}
 
 	@Test

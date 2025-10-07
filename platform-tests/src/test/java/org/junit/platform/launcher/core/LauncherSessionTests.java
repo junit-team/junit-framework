@@ -10,7 +10,7 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
 import static org.junit.platform.launcher.core.LauncherExecutionRequestBuilder.executionRequest;
 import static org.junit.platform.launcher.core.LauncherFactoryForTestingPurposesOnly.createLauncherConfigBuilderWithDisabledServiceLoading;
@@ -19,7 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.fakes.TestEngineStub;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherSession;
@@ -122,12 +121,11 @@ class LauncherSessionTests {
 
 		session.close();
 
-		assertThrows(PreconditionViolationException.class, () -> launcher.discover(discoveryRequest));
-		assertThrows(PreconditionViolationException.class, () -> launcher.execute(testPlan));
-		assertThrows(PreconditionViolationException.class, () -> launcher.execute(discoveryRequest));
-		assertThrows(PreconditionViolationException.class, () -> launcher.execute(executionRequest(testPlan).build()));
-		assertThrows(PreconditionViolationException.class,
-			() -> launcher.execute(executionRequest(discoveryRequest).build()));
+		assertPreconditionViolationFor(() -> launcher.discover(discoveryRequest));
+		assertPreconditionViolationFor(() -> launcher.execute(testPlan));
+		assertPreconditionViolationFor(() -> launcher.execute(discoveryRequest));
+		assertPreconditionViolationFor(() -> launcher.execute(executionRequest(testPlan).build()));
+		assertPreconditionViolationFor(() -> launcher.execute(executionRequest(discoveryRequest).build()));
 	}
 
 }

@@ -449,8 +449,9 @@ class CsvArgumentsProviderTests {
 				banana, 2, BOOM!
 				""").build();
 
-		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny()).withMessage(
-			"The number of columns (3) exceeds the number of supplied headers (2) in CSV record: [banana, 2, BOOM!]");
+		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny())//
+				.withMessage(
+					"The number of columns (3) exceeds the number of supplied headers (2) in CSV record: [banana, 2, BOOM!]");
 	}
 
 	private Stream<Object[]> provideArguments(CsvSource annotation) {

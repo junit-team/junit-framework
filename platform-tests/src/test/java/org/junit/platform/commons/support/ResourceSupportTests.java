@@ -13,9 +13,9 @@ package org.junit.platform.commons.support;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getDefaultClassLoader;
 
 import java.net.URI;
@@ -26,7 +26,6 @@ import java.util.List;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -185,9 +184,8 @@ class ResourceSupportTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllResourcesInModulePreconditions() {
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
 			() -> ResourceSupport.findAllResourcesInModule(null, allResources));
-		assertEquals("Module name must not be null or empty", exception.getMessage());
 		assertPreconditionViolationNotNullFor("Resource filter",
 			() -> ResourceSupport.findAllResourcesInModule("org.junit.platform.commons", null));
 	}
@@ -207,9 +205,8 @@ class ResourceSupportTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamAllResourcesInModulePreconditions() {
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotNullOrEmptyFor("Module name",
 			() -> ResourceSupport.streamAllResourcesInModule(null, allResources));
-		assertEquals("Module name must not be null or empty", exception.getMessage());
 		assertPreconditionViolationNotNullFor("Resource filter",
 			() -> ResourceSupport.streamAllResourcesInModule("org.junit.platform.commons", null));
 	}

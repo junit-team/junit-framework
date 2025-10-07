@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 
@@ -32,7 +33,6 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.function.ThrowingConsumer;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.opentest4j.AssertionFailedError;
 
@@ -53,12 +53,9 @@ class DynamicTestTests {
 		};
 		Function<Object, String> displayNameGenerator = Object::toString;
 
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream((Stream<?>) null, displayNameGenerator, testExecutor));
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream(Stream.empty(), null, testExecutor));
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream(Stream.empty(), displayNameGenerator, null));
+		assertPreconditionViolationFor(() -> DynamicTest.stream((Stream<?>) null, displayNameGenerator, testExecutor));
+		assertPreconditionViolationFor(() -> DynamicTest.stream(Stream.empty(), null, testExecutor));
+		assertPreconditionViolationFor(() -> DynamicTest.stream(Stream.empty(), displayNameGenerator, null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -68,12 +65,10 @@ class DynamicTestTests {
 		};
 		Function<Object, String> displayNameGenerator = Object::toString;
 
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> DynamicTest.stream((Iterator<?>) null, displayNameGenerator, testExecutor));
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream(emptyIterator(), null, testExecutor));
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream(emptyIterator(), displayNameGenerator, null));
+		assertPreconditionViolationFor(() -> DynamicTest.stream(emptyIterator(), null, testExecutor));
+		assertPreconditionViolationFor(() -> DynamicTest.stream(emptyIterator(), displayNameGenerator, null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -82,9 +77,8 @@ class DynamicTestTests {
 		ThrowingConsumer<Object> testExecutor = input -> {
 		};
 
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream((Stream<? extends Named<Object>>) null, testExecutor));
-		assertThrows(PreconditionViolationException.class, () -> DynamicTest.stream(Stream.empty(), null));
+		assertPreconditionViolationFor(() -> DynamicTest.stream((Stream<? extends Named<Object>>) null, testExecutor));
+		assertPreconditionViolationFor(() -> DynamicTest.stream(Stream.empty(), null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -93,23 +87,21 @@ class DynamicTestTests {
 		ThrowingConsumer<Object> testExecutor = input -> {
 		};
 
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> DynamicTest.stream((Iterator<? extends Named<Object>>) null, testExecutor));
-		assertThrows(PreconditionViolationException.class, () -> DynamicTest.stream(emptyIterator(), null));
+		assertPreconditionViolationFor(() -> DynamicTest.stream(emptyIterator(), null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromStreamWithNamedExecutablesPreconditions() {
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream((Stream<DummyNamedExecutableForTests>) null));
+		assertPreconditionViolationFor(() -> DynamicTest.stream((Stream<DummyNamedExecutableForTests>) null));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void streamFromIteratorWithNamedExecutablesPreconditions() {
-		assertThrows(PreconditionViolationException.class,
-			() -> DynamicTest.stream((Iterator<DummyNamedExecutableForTests>) null));
+		assertPreconditionViolationFor(() -> DynamicTest.stream((Iterator<DummyNamedExecutableForTests>) null));
 	}
 
 	@Test

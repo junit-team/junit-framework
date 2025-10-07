@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.platform.commons.test.ConcurrencyTestingUtils.executeConcurrently;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +46,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.DisabledInEclipse;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;
 import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.io.ResourceFilter;
@@ -445,33 +445,29 @@ class DefaultClasspathScannerTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void scanForClassesInPackageForNullBasePackage() {
-		assertThrows(PreconditionViolationException.class,
-			() -> classpathScanner.scanForClassesInPackage(null, allClasses));
+		assertPreconditionViolationFor(() -> classpathScanner.scanForClassesInPackage(null, allClasses));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void scanForResourcesInPackageForNullBasePackage() {
-		assertThrows(PreconditionViolationException.class,
-			() -> classpathScanner.scanForResourcesInPackage(null, allResources));
+		assertPreconditionViolationFor(() -> classpathScanner.scanForResourcesInPackage(null, allResources));
 	}
 
 	@Test
 	void scanForClassesInPackageForWhitespaceBasePackage() {
-		assertThrows(PreconditionViolationException.class,
-			() -> classpathScanner.scanForClassesInPackage("    ", allClasses));
+		assertPreconditionViolationFor(() -> classpathScanner.scanForClassesInPackage("    ", allClasses));
 	}
 
 	@Test
 	void scanForResourcesInPackageForWhitespaceBasePackage() {
-		assertThrows(PreconditionViolationException.class,
-			() -> classpathScanner.scanForResourcesInPackage("    ", allResources));
+		assertPreconditionViolationFor(() -> classpathScanner.scanForResourcesInPackage("    ", allResources));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void scanForClassesInPackageForNullClassFilter() {
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> classpathScanner.scanForClassesInPackage("org.junit.platform.commons", null));
 	}
 
@@ -555,20 +551,19 @@ class DefaultClasspathScannerTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInClasspathRootForNullRoot() {
-		assertThrows(PreconditionViolationException.class,
-			() -> classpathScanner.scanForClassesInClasspathRoot(null, allClasses));
+		assertPreconditionViolationFor(() -> classpathScanner.scanForClassesInClasspathRoot(null, allClasses));
 	}
 
 	@Test
 	void findAllClassesInClasspathRootForNonExistingRoot() {
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> classpathScanner.scanForClassesInClasspathRoot(Path.of("does_not_exist").toUri(), allClasses));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAllClassesInClasspathRootForNullClassFilter() {
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> classpathScanner.scanForClassesInClasspathRoot(getTestClasspathRoot(), null));
 	}
 

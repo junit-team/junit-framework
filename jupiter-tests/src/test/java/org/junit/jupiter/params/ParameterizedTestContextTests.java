@@ -11,14 +11,13 @@
 package org.junit.jupiter.params;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.aggregator.AggregatorIntegrationTests.CsvToPerson;
 import org.junit.jupiter.params.aggregator.AggregatorIntegrationTests.Person;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 /**
@@ -38,8 +37,7 @@ class ParameterizedTestContextTests {
 	@ParameterizedTest
 	@ValueSource(strings = { "twoAggregatorsWithPrimitiveInTheMiddle", "twoAggregatorsWithTestInfoInTheMiddle" })
 	void invalidSignatures(String methodName) {
-		assertThrows(PreconditionViolationException.class,
-			() -> createMethodContext(InvalidTestCase.class, methodName));
+		assertPreconditionViolationFor(() -> createMethodContext(InvalidTestCase.class, methodName));
 	}
 
 	private ParameterizedTestContext createMethodContext(Class<?> testClass, String methodName) {

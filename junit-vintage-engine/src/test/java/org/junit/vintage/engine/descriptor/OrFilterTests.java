@@ -11,8 +11,8 @@
 package org.junit.vintage.engine.descriptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotEmptyFor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
 
@@ -34,8 +33,7 @@ class OrFilterTests {
 
 	@Test
 	void exceptionWithoutAnyFilters() {
-		var actual = assertThrows(PreconditionViolationException.class, () -> new OrFilter(Set.of()));
-		assertEquals("filters must not be empty", actual.getMessage());
+		assertPreconditionViolationNotEmptyFor("filters", () -> new OrFilter(Set.of()));
 	}
 
 	@Test

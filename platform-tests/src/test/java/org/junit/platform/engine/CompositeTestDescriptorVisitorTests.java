@@ -11,12 +11,11 @@
 package org.junit.platform.engine;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.TestDescriptor.Visitor;
 import org.mockito.InOrder;
 
@@ -25,9 +24,9 @@ class CompositeTestDescriptorVisitorTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void checksPreconditions() {
-		assertThrows(PreconditionViolationException.class, Visitor::composite);
-		assertThrows(PreconditionViolationException.class, () -> Visitor.composite((Visitor[]) null));
-		assertThrows(PreconditionViolationException.class, () -> Visitor.composite((Visitor) null));
+		assertPreconditionViolationFor(Visitor::composite);
+		assertPreconditionViolationFor(() -> Visitor.composite((Visitor[]) null));
+		assertPreconditionViolationFor(() -> Visitor.composite((Visitor) null));
 	}
 
 	@Test

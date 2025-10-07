@@ -10,11 +10,11 @@
 
 package org.junit.platform.commons.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotBlankFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.util.List;
 import java.util.function.Function;
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.opentest4j.ValueWrapper;
 
 /**
@@ -36,17 +35,14 @@ class PackageUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullType() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> PackageUtils.getAttribute(null, p -> "any"));
-		assertEquals("type must not be null", exception.getMessage());
+		assertPreconditionViolationNotNullFor("type", () -> PackageUtils.getAttribute(null, p -> "any"));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullFunction() {
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotNullFor("function",
 			() -> PackageUtils.getAttribute(getClass(), (Function<Package, String>) null));
-		assertEquals("function must not be null", exception.getMessage());
 	}
 
 	@SuppressWarnings("DataFlowIssue")
@@ -81,23 +77,17 @@ class PackageUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullTypeAndName() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> PackageUtils.getAttribute(null, "foo"));
-		assertEquals("type must not be null", exception.getMessage());
+		assertPreconditionViolationNotNullFor("type", () -> PackageUtils.getAttribute(null, "foo"));
 	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getAttributeWithNullName() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> PackageUtils.getAttribute(getClass(), (String) null));
-		assertEquals("name must not be blank", exception.getMessage());
+		assertPreconditionViolationNotBlankFor("name", () -> PackageUtils.getAttribute(getClass(), (String) null));
 	}
 
 	@Test
 	void getAttributeWithEmptyName() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> PackageUtils.getAttribute(getClass(), ""));
-		assertEquals("name must not be blank", exception.getMessage());
+		assertPreconditionViolationNotBlankFor("name", () -> PackageUtils.getAttribute(getClass(), ""));
 	}
 }

@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.engine.extension.MutableExtensionRegistry.createRegistryWithDefaultExtensions;
 import static org.junit.platform.commons.support.ReflectionSupport.findMethod;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,7 +38,6 @@ import org.junit.jupiter.engine.execution.DefaultExecutableInvoker;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.test.TestClassLoader;
 
@@ -317,11 +317,12 @@ class FieldArgumentsProviderTests {
 		@Test
 		void throwsExceptionWhenNonStaticLocalFieldIsReferencedWithLifecyclePerMethodSemantics() {
 			var lifecyclePerClass = false;
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(NonStaticTestCase.class, lifecyclePerClass,
-					"nonStaticStringStreamSupplier").toArray());
-
-			assertStaticIsRequired(exception);
+			assertPreconditionViolationFor(() -> provideArguments(NonStaticTestCase.class, lifecyclePerClass,
+				"nonStaticStringStreamSupplier").toArray())//
+						.withMessageContainingAll("Field '",
+							"' must be static: local @FieldSource fields must be static ",
+							"unless the PER_CLASS @TestInstance lifecycle mode is used; ",
+							"external @FieldSource fields must always be static.");
 		}
 
 		@Test
@@ -329,10 +330,10 @@ class FieldArgumentsProviderTests {
 			var factoryClass = NonStaticTestCase.class.getName();
 			var field = factoryClass + "#nonStaticStringStreamSupplier";
 			var lifecyclePerClass = false;
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(TestCase.class, lifecyclePerClass, field).toArray());
-
-			assertStaticIsRequired(exception);
+			assertPreconditionViolationFor(() -> provideArguments(TestCase.class, lifecyclePerClass, field).toArray())//
+					.withMessageContainingAll("Field '", "' must be static: local @FieldSource fields must be static ",
+						"unless the PER_CLASS @TestInstance lifecycle mode is used; ",
+						"external @FieldSource fields must always be static.");
 		}
 
 		@Test
@@ -340,29 +341,20 @@ class FieldArgumentsProviderTests {
 			var factoryClass = NonStaticTestCase.class.getName();
 			var field = factoryClass + "#nonStaticStringStreamSupplier";
 			boolean lifecyclePerClass = true;
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(TestCase.class, lifecyclePerClass, field).toArray());
-
-			assertStaticIsRequired(exception);
-		}
-
-		private static void assertStaticIsRequired(PreconditionViolationException exception) {
-			assertThat(exception).hasMessageContainingAll("Field '",
-				"' must be static: local @FieldSource fields must be static ",
-				"unless the PER_CLASS @TestInstance lifecycle mode is used; ",
-				"external @FieldSource fields must always be static.");
+			assertPreconditionViolationFor(() -> provideArguments(TestCase.class, lifecyclePerClass, field).toArray())//
+					.withMessageContainingAll("Field '", "' must be static: local @FieldSource fields must be static ",
+						"unless the PER_CLASS @TestInstance lifecycle mode is used; ",
+						"external @FieldSource fields must always be static.");
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = { "org.example.MyUtils", "org.example.MyUtils#", "#fieldName" })
 		void throwsExceptionWhenFullyQualifiedFieldNameSyntaxIsInvalid(String fieldName) {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(fieldName).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo("""
-					[%s] is not a valid fully qualified field name: \
-					it must start with a fully qualified class name followed by a \
-					'#' and then the field name.""", fieldName, TestCase.class.getName());
+			assertPreconditionViolationFor(() -> provideArguments(fieldName).toArray())//
+					.withMessage("""
+							[%s] is not a valid fully qualified field name: \
+							it must start with a fully qualified class name followed by a \
+							'#' and then the field name.""", fieldName, TestCase.class.getName());
 		}
 
 		@Test
@@ -375,11 +367,9 @@ class FieldArgumentsProviderTests {
 
 		@Test
 		void throwsExceptionWhenLocalFieldDoesNotExist() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments("nonExistentField").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo("Could not find field named [nonExistentField] in class [%s]",
-				TestCase.class.getName());
+			assertPreconditionViolationFor(() -> provideArguments("nonExistentField").toArray())//
+					.withMessage("Could not find field named [nonExistentField] in class [%s]",
+						TestCase.class.getName());
 		}
 
 		@ParameterizedTest
@@ -387,11 +377,8 @@ class FieldArgumentsProviderTests {
 		void throwsExceptionWhenExternalFieldDoesNotExist(String fieldName) {
 			String factoryClass = ExternalFields.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(factoryClass + "#" + fieldName).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo("Could not find field named [%s] in class [%s]", fieldName,
-				factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(factoryClass + "#" + fieldName).toArray())//
+					.withMessage("Could not find field named [%s] in class [%s]", fieldName, factoryClass);
 		}
 
 		@Test
@@ -399,10 +386,8 @@ class FieldArgumentsProviderTests {
 			String field = "nullList";
 			String factoryClass = TestCase.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class, () -> provideArguments(field).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo("The value of field [%s] in class [%s] must not be null",
-				field, factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(field).toArray())//
+					.withMessage("The value of field [%s] in class [%s] must not be null", field, factoryClass);
 		}
 
 		@Test
@@ -410,10 +395,9 @@ class FieldArgumentsProviderTests {
 			String field = "object";
 			String factoryClass = TestCase.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class, () -> provideArguments(field).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"The value of field [%s] in class [%s] must be convertible to a Stream", field, factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(field).toArray())//
+					.withMessage("The value of field [%s] in class [%s] must be convertible to a Stream", field,
+						factoryClass);
 		}
 
 		@Test
@@ -422,11 +406,9 @@ class FieldArgumentsProviderTests {
 			String fieldName = "object";
 			String field = factoryClass + "#" + fieldName;
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(TestCase.class, false, field).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"The value of field [%s] in class [%s] must be convertible to a Stream", fieldName, factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(TestCase.class, false, field).toArray())//
+					.withMessage("The value of field [%s] in class [%s] must be convertible to a Stream", fieldName,
+						factoryClass);
 		}
 
 		@ParameterizedTest
@@ -434,10 +416,8 @@ class FieldArgumentsProviderTests {
 		void throwsExceptionWhenLocalFieldHasStreamReturnType(String field) {
 			String factoryClass = TestCase.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class, () -> provideArguments(field).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo("The value of field [%s] in class [%s] must not be a stream",
-				field, factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(field).toArray())//
+					.withMessage("The value of field [%s] in class [%s] must not be a stream", field, factoryClass);
 		}
 
 		@Test
@@ -445,10 +425,8 @@ class FieldArgumentsProviderTests {
 			String field = "iterator";
 			String factoryClass = TestCase.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class, () -> provideArguments(field).toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"The value of field [%s] in class [%s] must not be an Iterator", field, factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(field).toArray())//
+					.withMessage("The value of field [%s] in class [%s] must not be an Iterator", field, factoryClass);
 		}
 
 	}

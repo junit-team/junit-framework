@@ -12,12 +12,12 @@ package org.junit.jupiter.migrationsupport.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.adapter.AbstractTestRuleAdapter;
 import org.junit.jupiter.migrationsupport.rules.member.TestRuleAnnotatedMember;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
@@ -36,11 +36,9 @@ public class AbstractTestRuleAdapterTests {
 
 	@Test
 	void constructionWithUnassignableArgumentsFails() {
-		PreconditionViolationException exception = assertThrows(PreconditionViolationException.class,
-			() -> new TestableTestRuleAdapter(new SimpleRuleAnnotatedMember(new TemporaryFolder()), Verifier.class));
-
-		assertEquals(exception.getMessage(),
-			"class org.junit.rules.Verifier is not assignable from class org.junit.rules.TemporaryFolder");
+		assertPreconditionViolationFor(() -> new TestableTestRuleAdapter(
+			new SimpleRuleAnnotatedMember(new TemporaryFolder()), Verifier.class)).withMessage(
+				"class org.junit.rules.Verifier is not assignable from class org.junit.rules.TemporaryFolder");
 	}
 
 	@Test

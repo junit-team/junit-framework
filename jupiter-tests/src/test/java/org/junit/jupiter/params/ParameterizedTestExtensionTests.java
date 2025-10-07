@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.ParameterizedInvocationContextProvider.arguments;
 import static org.junit.jupiter.params.ParameterizedTestExtension.DECLARATION_CONTEXT_KEY;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.mock;
 
 import java.io.FileNotFoundException;
@@ -48,7 +49,6 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
@@ -103,7 +103,7 @@ class ParameterizedTestExtensionTests {
 	@Test
 	void emptyDisplayNameIsIllegal() {
 		var extensionContext = getExtensionContextReturningSingleMethod(new EmptyDisplayNameProviderTestCase());
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext));
 	}
 
@@ -121,7 +121,7 @@ class ParameterizedTestExtensionTests {
 		};
 		var extensionContext = getExtensionContextReturningSingleMethod(new DefaultDisplayNameProviderTestCase(),
 			configurationSupplier);
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext));
 		assertEquals(1, invocations.get());
 	}
@@ -169,9 +169,10 @@ class ParameterizedTestExtensionTests {
 	void throwsExceptionWhenParameterizedTestHasNoArgumentsSource() {
 		var extensionContext = getExtensionContextReturningSingleMethod(new TestCaseWithNoArgumentsSource());
 
-		assertThrows(PreconditionViolationException.class,
-			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext),
-			"Configuration error: You must configure at least one arguments source for this @ParameterizedTest");
+		assertPreconditionViolationFor(
+			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext))//
+					.withMessage(
+						"Configuration error: You must configure at least one arguments source for this @ParameterizedTest");
 	}
 
 	@Test

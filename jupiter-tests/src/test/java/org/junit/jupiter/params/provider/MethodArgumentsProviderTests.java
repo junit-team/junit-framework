@@ -13,6 +13,7 @@ package org.junit.jupiter.params.provider;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.engine.extension.MutableExtensionRegistry.createRegistryWithDefaultExtensions;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ReflectionUtils.findMethod;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
@@ -42,7 +43,6 @@ import org.junit.jupiter.engine.execution.DefaultExecutableInvoker;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.test.TestClassLoader;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -179,11 +179,15 @@ class MethodArgumentsProviderTests {
 	@Test
 	void throwsExceptionWhenNonStaticLocalFactoryMethodIsReferencedWithLifecyclePerMethodSemantics() {
 		var lifecyclePerClass = false;
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(//
 			() -> provideArguments(NonStaticTestCase.class, lifecyclePerClass,
-				"nonStaticStringStreamProvider").toArray());
-
-		assertStaticIsRequired(exception);
+				"nonStaticStringStreamProvider").toArray())//
+						.withMessageContainingAll(//
+							"Method '", //
+							"' must be static: local factory methods must be static ", //
+							"unless the PER_CLASS @TestInstance lifecycle mode is used; ", //
+							"external factory methods must always be static."//
+						);
 	}
 
 	@Test
@@ -191,10 +195,14 @@ class MethodArgumentsProviderTests {
 		var factoryClass = NonStaticTestCase.class.getName();
 		var factoryMethod = factoryClass + "#nonStaticStringStreamProvider";
 		var lifecyclePerClass = false;
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(TestCase.class, lifecyclePerClass, factoryMethod).toArray());
-
-		assertStaticIsRequired(exception);
+		assertPreconditionViolationFor(//
+			() -> provideArguments(TestCase.class, lifecyclePerClass, factoryMethod).toArray())//
+					.withMessageContainingAll(//
+						"Method '", //
+						"' must be static: local factory methods must be static ", //
+						"unless the PER_CLASS @TestInstance lifecycle mode is used; ", //
+						"external factory methods must always be static."//
+					);
 	}
 
 	@Test
@@ -202,17 +210,14 @@ class MethodArgumentsProviderTests {
 		var factoryClass = NonStaticTestCase.class.getName();
 		var factoryMethod = factoryClass + "#nonStaticStringStreamProvider";
 		boolean lifecyclePerClass = true;
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(TestCase.class, lifecyclePerClass, factoryMethod).toArray());
-
-		assertStaticIsRequired(exception);
-	}
-
-	private static void assertStaticIsRequired(PreconditionViolationException exception) {
-		assertThat(exception).hasMessageContainingAll("Method '",
-			"' must be static: local factory methods must be static ",
-			"unless the PER_CLASS @TestInstance lifecycle mode is used; ",
-			"external factory methods must always be static.");
+		assertPreconditionViolationFor(//
+			() -> provideArguments(TestCase.class, lifecyclePerClass, factoryMethod).toArray())//
+					.withMessageContainingAll(//
+						"Method '", //
+						"' must be static: local factory methods must be static ", //
+						"unless the PER_CLASS @TestInstance lifecycle mode is used; ", //
+						"external factory methods must always be static."//
+					);
 	}
 
 	@Test
@@ -480,23 +485,19 @@ class MethodArgumentsProviderTests {
 		@Test
 		void failsToProvideArgumentsUsingFullyQualifiedNameSpecifyingIncorrectParameterType() {
 			String method = TestCase.class.getName() + "#stringStreamProviderWithParameter(java.lang.Integer)";
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(method).toArray());
-
-			assertThat(exception).hasMessage("""
-					Could not find factory method [stringStreamProviderWithParameter(java.lang.Integer)] in \
-					class [org.junit.jupiter.params.provider.MethodArgumentsProviderTests$TestCase]""");
+			assertPreconditionViolationFor(() -> provideArguments(method).toArray())//
+					.withMessage("""
+							Could not find factory method [stringStreamProviderWithParameter(java.lang.Integer)] in \
+							class [org.junit.jupiter.params.provider.MethodArgumentsProviderTests$TestCase]""");
 		}
 
 		@Test
 		void failsToProvideArgumentsUsingLocalQualifiedNameSpecifyingIncorrectParameterType() {
 			var method = "stringStreamProviderWithParameter(java.lang.Integer)";
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(this.testMethod, method).toArray());
-
-			assertThat(exception).hasMessage("""
-					Could not find factory method [stringStreamProviderWithParameter(java.lang.Integer)] in \
-					class [org.junit.jupiter.params.provider.MethodArgumentsProviderTests$TestCase]""");
+			assertPreconditionViolationFor(() -> provideArguments(this.testMethod, method).toArray())//
+					.withMessage("""
+							Could not find factory method [stringStreamProviderWithParameter(java.lang.Integer)] in \
+							class [org.junit.jupiter.params.provider.MethodArgumentsProviderTests$TestCase]""");
 		}
 
 		@ParameterizedTest
@@ -580,13 +581,12 @@ class MethodArgumentsProviderTests {
 
 		@Test
 		void throwsExceptionWhenFullyQualifiedMethodNameSyntaxIsInvalid() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments("org.example.wrongSyntax").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"[org.example.wrongSyntax] is not a valid fully qualified method name: "
-						+ "it must start with a fully qualified class name followed by a '#' and then the method name, "
-						+ "optionally followed by a parameter list enclosed in parentheses.");
+			assertPreconditionViolationFor(() -> provideArguments("org.example.wrongSyntax").toArray())//
+					.withMessage(//
+						"[org.example.wrongSyntax] is not a valid fully qualified method name: "//
+								+ "it must start with a fully qualified class name followed by a '#' and then the method name, "//
+								+ "optionally followed by a parameter list enclosed in parentheses."//
+					);
 		}
 
 		@Test
@@ -601,61 +601,49 @@ class MethodArgumentsProviderTests {
 		void throwsExceptionWhenExternalFactoryMethodDoesNotExist() {
 			String factoryClass = ExternalFactoryMethods.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(factoryClass + "#nonExistentMethod").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"Could not find factory method [nonExistentMethod] in class [%s]", factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(factoryClass + "#nonExistentMethod").toArray())//
+					.withMessage("Could not find factory method [nonExistentMethod] in class [%s]", factoryClass);
 		}
 
 		@Test
 		void throwsExceptionWhenLocalFactoryMethodDoesNotExist() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments("nonExistentMethod").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"Could not find factory method [nonExistentMethod] in class [%s]", TestCase.class.getName());
+			assertPreconditionViolationFor(() -> provideArguments("nonExistentMethod").toArray())//
+					.withMessage("Could not find factory method [nonExistentMethod] in class [%s]",
+						TestCase.class.getName());
 		}
 
 		@Test
 		void throwsExceptionWhenExternalFactoryMethodAcceptingSingleArgumentDoesNotExist() {
 			String factoryClass = ExternalFactoryMethods.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(factoryClass + "#nonExistentMethod(int)").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"Could not find factory method [nonExistentMethod(int)] in class [%s]", factoryClass);
+			assertPreconditionViolationFor(() -> provideArguments(factoryClass + "#nonExistentMethod(int)").toArray())//
+					.withMessage("Could not find factory method [nonExistentMethod(int)] in class [%s]", factoryClass);
 		}
 
 		@Test
 		void throwsExceptionWhenLocalFactoryMethodAcceptingSingleArgumentDoesNotExist() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments("nonExistentMethod(int)").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"Could not find factory method [nonExistentMethod(int)] in class [%s]", TestCase.class.getName());
+			assertPreconditionViolationFor(() -> provideArguments("nonExistentMethod(int)").toArray())//
+					.withMessage("Could not find factory method [nonExistentMethod(int)] in class [%s]",
+						TestCase.class.getName());
 		}
 
 		@Test
 		void throwsExceptionWhenExternalFactoryMethodAcceptingMultipleArgumentsDoesNotExist() {
 			String factoryClass = ExternalFactoryMethods.class.getName();
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(factoryClass + "#nonExistentMethod(int, java.lang.String)").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"Could not find factory method [nonExistentMethod(int, java.lang.String)] in class [%s]", factoryClass);
+			assertPreconditionViolationFor(
+				() -> provideArguments(factoryClass + "#nonExistentMethod(int, java.lang.String)").toArray())//
+						.withMessage(
+							"Could not find factory method [nonExistentMethod(int, java.lang.String)] in class [%s]",
+							factoryClass);
 		}
 
 		@Test
 		void throwsExceptionWhenLocalFactoryMethodAcceptingMultipleArgumentsDoesNotExist() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments("nonExistentMethod(java.lang.String,int)").toArray());
-
-			assertThat(exception.getMessage()).isEqualTo(
-				"Could not find factory method [nonExistentMethod(java.lang.String,int)] in class [%s]",
-				TestCase.class.getName());
+			assertPreconditionViolationFor(() -> provideArguments("nonExistentMethod(java.lang.String,int)").toArray())//
+					.withMessage(
+						"Could not find factory method [nonExistentMethod(java.lang.String,int)] in class [%s]",
+						TestCase.class.getName());
 		}
 
 		@Test
@@ -664,14 +652,12 @@ class MethodArgumentsProviderTests {
 			String factoryClass = ExternalFactoryMethods.class.getName();
 			String factoryMethod = factoryClass + "#factoryWithInvalidReturnType";
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(TestCase.class, false, factoryMethod).toArray());
-
-			assertThat(exception).hasMessage("""
-					Could not find valid factory method [%s] for test class [%s] \
-					but found the following invalid candidate: \
-					static java.lang.Object %s.factoryWithInvalidReturnType()\
-					""".formatted(factoryMethod, testClass, factoryClass));
+			assertPreconditionViolationFor(() -> provideArguments(TestCase.class, false, factoryMethod).toArray())//
+					.withMessage("""
+							Could not find valid factory method [%s] for test class [%s] \
+							but found the following invalid candidate: \
+							static java.lang.Object %s.factoryWithInvalidReturnType()\
+							""".formatted(factoryMethod, testClass, factoryClass));
 		}
 
 		@Test
@@ -680,14 +666,12 @@ class MethodArgumentsProviderTests {
 			String factoryClass = testClass;
 			String factoryMethod = "factoryWithInvalidReturnType";
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(factoryMethod).toArray());
-
-			assertThat(exception.getMessage())//
-					.containsSubsequence("Could not find valid factory method [" + factoryMethod + "] for test class [",
-						factoryClass + "]", //
-						"but found the following invalid candidate: ", //
-						"static java.lang.Object " + factoryClass + ".factoryWithInvalidReturnType()");
+			assertPreconditionViolationFor(() -> provideArguments(factoryMethod).toArray())//
+					.withMessage("""
+							Could not find valid factory method [%s] for test class [%s] \
+							but found the following invalid candidate: \
+							static java.lang.Object %s.factoryWithInvalidReturnType()\
+							""".formatted(factoryMethod, factoryClass, factoryClass));
 		}
 
 		@Test
@@ -696,14 +680,12 @@ class MethodArgumentsProviderTests {
 			var methodName = "test";
 			var testMethod = findMethod(testClass, methodName, String.class).get();
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(testClass, testMethod, false, "").toArray());
-
-			assertThat(exception.getMessage()).contains(//
-				"2 factory methods named [test] were found in class [", testClass.getName() + "]: ", //
-				"$MultipleDefaultFactoriesTestCase.test()", //
-				"$MultipleDefaultFactoriesTestCase.test(int)"//
-			);
+			assertPreconditionViolationFor(() -> provideArguments(testClass, testMethod, false, "").toArray())//
+					.withMessageContainingAll(//
+						"2 factory methods named [test] were found in class [", testClass.getName() + "]: ", //
+						"$MultipleDefaultFactoriesTestCase.test()", //
+						"$MultipleDefaultFactoriesTestCase.test(int)"//
+					);
 		}
 
 		@Test
@@ -712,15 +694,13 @@ class MethodArgumentsProviderTests {
 			var methodName = "test";
 			var testMethod = findMethod(testClass, methodName, String.class).get();
 
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> provideArguments(testClass, testMethod, false, "").toArray());
-
-			assertThat(exception.getMessage()).contains(//
-				"Could not find valid factory method [test] in class [", testClass.getName() + "]", //
-				"but found the following invalid candidates: ", //
-				"$MultipleInvalidDefaultFactoriesTestCase.test()", //
-				"$MultipleInvalidDefaultFactoriesTestCase.test(int)"//
-			);
+			assertPreconditionViolationFor(() -> provideArguments(testClass, testMethod, false, "").toArray())//
+					.withMessageContainingAll(//
+						"Could not find valid factory method [test] in class [", testClass.getName() + "]", //
+						"but found the following invalid candidates: ", //
+						"$MultipleInvalidDefaultFactoriesTestCase.test()", //
+						"$MultipleInvalidDefaultFactoriesTestCase.test(int)"//
+					);
 		}
 
 	}

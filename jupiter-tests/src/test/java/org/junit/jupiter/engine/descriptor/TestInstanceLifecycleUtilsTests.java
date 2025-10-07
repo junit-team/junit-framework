@@ -11,11 +11,11 @@
 package org.junit.jupiter.engine.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.descriptor.TestInstanceLifecycleUtils.getTestInstanceLifecycle;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.engine.config.DefaultJupiterConfiguration;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.ConfigurationParameters;
 
 /**
@@ -51,14 +50,10 @@ class TestInstanceLifecycleUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getTestInstanceLifecyclePreconditions() {
-		PreconditionViolationException exception = assertThrows(PreconditionViolationException.class,
-			() -> getTestInstanceLifecycle(null,
-				new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator(), mock())));
-		assertThat(exception).hasMessage("testClass must not be null");
+		assertPreconditionViolationNotNullFor("testClass", () -> getTestInstanceLifecycle(null,
+			new DefaultJupiterConfiguration(mock(), dummyOutputDirectoryCreator(), mock())));
 
-		exception = assertThrows(PreconditionViolationException.class,
-			() -> getTestInstanceLifecycle(getClass(), null));
-		assertThat(exception).hasMessage("configuration must not be null");
+		assertPreconditionViolationNotNullFor("configuration", () -> getTestInstanceLifecycle(getClass(), null));
 	}
 
 	@Test

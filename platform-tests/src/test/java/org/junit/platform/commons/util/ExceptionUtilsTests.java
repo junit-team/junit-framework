@@ -12,6 +12,7 @@ package org.junit.platform.commons.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.findNestedThrowables;
 import static org.junit.platform.commons.util.ExceptionUtils.pruneStackTrace;
 import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link ExceptionUtils}.
@@ -37,7 +37,7 @@ class ExceptionUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void throwAsUncheckedExceptionWithNullException() {
-		assertThrows(PreconditionViolationException.class, () -> throwAsUncheckedException(null));
+		assertPreconditionViolationFor(() -> throwAsUncheckedException(null));
 	}
 
 	@Test
@@ -53,7 +53,7 @@ class ExceptionUtilsTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void readStackTraceForNullThrowable() {
-		assertThrows(PreconditionViolationException.class, () -> readStackTrace(null));
+		assertPreconditionViolationFor(() -> readStackTrace(null));
 	}
 
 	@Test

@@ -13,7 +13,7 @@ package org.junit.platform.console.command;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.ClassNameFilter.STANDARD_INCLUDE_PATTERN;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResource;
@@ -36,7 +36,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.console.options.TestDiscoveryOptions;
 import org.junit.platform.engine.Filter;
@@ -109,9 +108,7 @@ class DiscoveryRequestCreatorTests {
 		options.setScanClasspath(true);
 		options.setSelectedClasses(List.of(selectClass("SomeTest")));
 
-		Throwable cause = assertThrows(PreconditionViolationException.class, this::convert);
-
-		assertThat(cause).hasMessageContaining("not supported");
+		assertPreconditionViolationFor(this::convert).withMessageContaining("not supported");
 	}
 
 	@Test

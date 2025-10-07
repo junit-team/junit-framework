@@ -13,11 +13,11 @@ package org.junit.jupiter.engine.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.engine.Constants;
 import org.junit.jupiter.engine.descriptor.CustomDisplayNameGenerator;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.ConfigurationParameters;
 
 class DefaultJupiterConfigurationTests {
@@ -47,9 +46,8 @@ class DefaultJupiterConfigurationTests {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getDefaultTestInstanceLifecyclePreconditions() {
-		PreconditionViolationException exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotNullFor("ConfigurationParameters",
 			() -> new DefaultJupiterConfiguration(null, dummyOutputDirectoryCreator(), mock()));
-		assertThat(exception).hasMessage("ConfigurationParameters must not be null");
 	}
 
 	@Test
