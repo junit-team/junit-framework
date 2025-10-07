@@ -165,11 +165,6 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 			return;
 		}
 
-		// If this method is called from outside the used ForkJoinPool,
-		// calls to fork() will schedule tasks in the commonPool
-		Preconditions.condition(isAlreadyRunningInForkJoinPool(),
-			"invokeAll() must be called from a thread in the ForkJoinPool");
-
 		Deque<ExclusiveTask> isolatedTasks = new ArrayDeque<>();
 		Deque<ExclusiveTask> sameThreadTasks = new ArrayDeque<>();
 		Deque<ExclusiveTask> concurrentTasksInReverseOrder = new ArrayDeque<>();
@@ -208,6 +203,31 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 
 	private void joinConcurrentTasksInReverseOrderToEnableWorkStealing(
 			Deque<ExclusiveTask> concurrentTasksInReverseOrder) {
+		if (concurrentTasksInReverseOrder.isEmpty()) {
+			return;
+		}
+		if (isAlreadyRunningInForkJoinPool()) {
+			joinConcurrentTasksInReverseOrderToEnableWorkStealingInForkJoinPool(concurrentTasksInReverseOrder);
+		}
+		else {
+			joinConcurrentTasksInReverseOrderToEnableWorkStealingOutsideForkJoinPool(concurrentTasksInReverseOrder);
+		}
+	}
+
+	private void joinConcurrentTasksInReverseOrderToEnableWorkStealingOutsideForkJoinPool(
+			Deque<ExclusiveTask> concurrentTasksInReverseOrder) {
+		ForkJoinTask<?> task = ForkJoinTask.adapt(
+			() -> joinConcurrentTasksInReverseOrderToEnableWorkStealingInForkJoinPool(concurrentTasksInReverseOrder));
+		forkJoinPool.invoke(task);
+	}
+
+	private void joinConcurrentTasksInReverseOrderToEnableWorkStealingInForkJoinPool(
+			Deque<ExclusiveTask> concurrentTasksInReverseOrder) {
+		// If this method is called from outside the used ForkJoinPool,
+		// calls to fork() will schedule tasks in the commonPool
+		Preconditions.condition(isAlreadyRunningInForkJoinPool(),
+			"invokeAll() must be called from a thread in the ForkJoinPool");
+
 		for (ExclusiveTask forkedTask : concurrentTasksInReverseOrder) {
 			forkedTask.join();
 			resubmitDeferredTasks();

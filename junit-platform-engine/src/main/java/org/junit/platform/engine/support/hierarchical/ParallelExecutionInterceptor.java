@@ -11,7 +11,6 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
-import static org.junit.platform.engine.TestDescriptor.Type.TEST;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 
 import java.util.concurrent.CompletableFuture;
@@ -107,11 +106,13 @@ public interface ParallelExecutionInterceptor extends AutoCloseable {
 	 * @since 6.1
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
+	// TODO: Rename, update docs
 	final class FixedThreadPoolForTests implements ParallelExecutionInterceptor {
 
 		private final ExecutorService executorService;
 
 		FixedThreadPoolForTests(Context context) {
+			// TODO: Is this the right value?
 			this.executorService = Executors.newFixedThreadPool(context.getConfiguration().getParallelism());
 		}
 
@@ -126,8 +127,7 @@ public interface ParallelExecutionInterceptor extends AutoCloseable {
 		}
 
 		private boolean shouldRunInSeparateThread(TestTask task) {
-			return task.getExecutionMode() == CONCURRENT //
-					&& task.getTestDescriptor().getType() == TEST;
+			return task.getExecutionMode() == CONCURRENT;
 		}
 
 		private void executeInThreadPool(TestTask testTask) throws InterruptedException {
@@ -137,6 +137,7 @@ public interface ParallelExecutionInterceptor extends AutoCloseable {
 				testTask.execute();
 			};
 			try {
+				// TODO: Some diagnostics in case the executor service is full would be useful here
 				CompletableFuture.runAsync(runnable, executorService).get();
 			}
 			catch (ExecutionException ex) {
