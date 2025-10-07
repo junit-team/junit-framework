@@ -10,8 +10,8 @@
 
 package org.junit.platform.commons.support;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.reflect.Field;
