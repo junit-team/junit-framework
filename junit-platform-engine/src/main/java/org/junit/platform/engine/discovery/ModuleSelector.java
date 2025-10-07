@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.discovery;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -49,9 +50,12 @@ public final class ModuleSelector implements DiscoverySelector {
 	}
 
 	/**
-	 * @return the selected module wrapped in an {@link Optional}.
+	 * {@return the selected {@link Module}, if available}
+	 *
+	 * @since 6.1
+	 * @see DiscoverySelectors#selectModule(Module)
 	 */
-	@API(status = STABLE, since = "6.1")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public Optional<Module> getModule() {
 		return Optional.ofNullable(module);
 	}

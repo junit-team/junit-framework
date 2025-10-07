@@ -433,11 +433,11 @@ public final class DiscoverySelectors {
 	 *
 	 * <p>The unnamed module is not supported.
 	 *
-	 * @param module the module to select; never {@code null} or blank
+	 * @param module the module to select; never {@code null} or <em>unnamed</em>
 	 * @since 6.1
 	 * @see ModuleSelector
 	 */
-	@API(status = STABLE, since = "6.1")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public static ModuleSelector selectModule(Module module) {
 		Preconditions.notNull(module, "Module must not be null");
 		Preconditions.condition(module.isNamed(), "Module must be named");

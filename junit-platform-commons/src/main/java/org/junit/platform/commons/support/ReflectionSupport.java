@@ -10,6 +10,7 @@
 
 package org.junit.platform.commons.support;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
@@ -399,7 +400,7 @@ public final class ReflectionSupport {
 	 * <p>The module-path scanning algorithm searches recursively in all
 	 * packages contained in the module.
 	 *
-	 * @param module the module to scan; never {@code null} or <em>empty</em>
+	 * @param module the module to scan; never {@code null} or <em>unnamed</em>
 	 * @param classFilter the class type filter; never {@code null}
 	 * @param classNameFilter the class name filter; never {@code null}
 	 * @return an immutable list of all such classes found; never {@code null}
@@ -409,7 +410,7 @@ public final class ReflectionSupport {
 	 * @see #findAllClassesInPackage(String, Predicate, Predicate)
 	 * @see ResourceSupport#findAllResourcesInModule(String, ResourceFilter)
 	 */
-	@API(status = MAINTAINED, since = "6.1")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	public static List<Class<?>> findAllClassesInModule(Module module, Predicate<Class<?>> classFilter,
 			Predicate<String> classNameFilter) {
 
