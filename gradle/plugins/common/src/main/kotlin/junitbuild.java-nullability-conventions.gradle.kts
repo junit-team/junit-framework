@@ -11,14 +11,6 @@ plugins {
 dependencies {
 	errorprone(dependencyFromLibs("errorProne-core"))
 	errorprone(dependencyFromLibs("nullaway"))
-	constraints {
-		errorprone("com.google.guava:guava") {
-			version {
-				require("33.4.8-jre")
-			}
-			because("Older versions use deprecated methods in sun.misc.Unsafe")
-		}
-	}
 }
 
 nullaway {
@@ -27,8 +19,9 @@ nullaway {
 
 tasks.withType<JavaCompile>().configureEach {
 	options.errorprone {
-		val shouldDisableErrorProne = java.toolchain.implementation.orNull == JvmImplementation.J9
-		if (name == "compileJava" && !shouldDisableErrorProne) {
+		disableWarningsInGeneratedCode = true
+		disableAllChecks = !(name == "compileJava" && java.toolchain.implementation.orNull != JvmImplementation.J9)
+		if (!disableAllChecks.get()) {
 			disable(
 
 				// This check is opinionated wrt. which method names it considers unsuitable for import which includes
@@ -52,11 +45,9 @@ tasks.withType<JavaCompile>().configureEach {
 				"MissingSummary",
 			)
 			error("PackageLocation")
-		} else {
-			disableAllChecks = true
 		}
 		nullaway {
-			if (shouldDisableErrorProne) {
+			if (disableAllChecks.get()) {
 				disable()
 			} else {
 				enable()
