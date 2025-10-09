@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,7 +50,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration, ClassLoader classLoader) {
 		ThreadFactory threadFactory = new CustomThreadFactory(classLoader);
 		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
-			configuration.getKeepAliveSeconds(), SECONDS, new LinkedBlockingQueue<>(), threadFactory);
+			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
 	}
 
 	@Override
@@ -101,7 +102,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 						// nothing to do -> done
 						break;
 					}
-					entry.execute();
+					executeEntry(entry);
 				}
 				catch (InterruptedException ignore) {
 					// ignore spurious interrupts
@@ -233,18 +234,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future) {
-			void execute() {
-				try {
-					executeTask(task);
-				}
-				catch (Throwable t) {
-					future.completeExceptionally(t);
-				}
-				finally {
-					future.complete(null);
-				}
-			}
-
 			boolean tryExecute() {
 				try {
 					var executed = tryExecuteTask(task);
@@ -262,8 +251,20 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	}
 
+	private void executeEntry(WorkQueue.Entry entry) {
+		try {
+			executeTask(entry.task);
+		}
+		catch (Throwable t) {
+			entry.future.completeExceptionally(t);
+		}
+		finally {
+			entry.future.complete(null);
+		}
+	}
+
 	@SuppressWarnings("try")
-	private static void executeTask(TestTask testTask) {
+	private void executeTask(TestTask testTask) {
 		var executed = tryExecuteTask(testTask);
 		if (!executed) {
 			// TODO start another worker to compensate?

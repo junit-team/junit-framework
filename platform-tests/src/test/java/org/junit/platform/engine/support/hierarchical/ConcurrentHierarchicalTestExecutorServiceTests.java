@@ -10,8 +10,12 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingLong;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.isEqual;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
@@ -27,10 +31,16 @@ import static org.mockito.Mockito.when;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -173,12 +183,50 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		verifyNoMoreInteractions(resourceLock);
 	}
 
+	@Test
+	void runsTasksWithoutConflictingLocksConcurrently() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(3));
+
+		var resourceLock = new SingleLock(exclusiveResource(), new ReentrantLock());
+
+		var latch = new CountDownLatch(3);
+		ThrowingSupplier<Boolean> behavior = () -> {
+			latch.countDown();
+			return latch.await(100, TimeUnit.MILLISECONDS);
+		};
+		var child1 = TestTaskStub.withResult(CONCURRENT, behavior).withResourceLock(resourceLock).withName("child1");
+		var child2 = TestTaskStub.withoutResult(SAME_THREAD).withResourceLock(resourceLock).withName("child2");
+		var leaf1 = TestTaskStub.withResult(CONCURRENT, behavior).withName("leaf1");
+		var leaf2 = TestTaskStub.withResult(CONCURRENT, behavior).withName("leaf2");
+		var leafs = List.of(leaf1, leaf2);
+		var child3 = TestTaskStub.withoutResult(CONCURRENT, () -> requiredService().invokeAll(leafs)).withName(
+			"child3");
+		var children = List.of(child1, child2, child3);
+		var root = TestTaskStub.withoutResult(SAME_THREAD, () -> requiredService().invokeAll(children)).withName(
+			"root");
+
+		service.submit(root).get();
+
+		printTimeline(Stream.concat(Stream.of(root), Stream.concat(children.stream(), leafs.stream())));
+
+		assertThat(root.executionThread()).isNotNull();
+		assertThat(children).extracting(TestTaskStub::executionThread).doesNotContainNull();
+		assertThat(leafs).extracting(TestTaskStub::executionThread).doesNotContainNull();
+		assertThat(Stream.concat(Stream.of(child1), leafs.stream())).extracting(TestTaskStub::result) //
+				.containsOnly(
+			true);
+	}
+
+	private static ExclusiveResource exclusiveResource() {
+		return new ExclusiveResource("key", ExclusiveResource.LockMode.READ_WRITE);
+	}
+
 	private ConcurrentHierarchicalTestExecutorService requiredService() {
 		return requireNonNull(service);
 	}
 
 	private static ParallelExecutionConfiguration configuration(int parallelism) {
-		return new DefaultParallelExecutionConfiguration(parallelism, parallelism, parallelism, parallelism, 0,
+		return new DefaultParallelExecutionConfiguration(parallelism, parallelism, 256 + parallelism, parallelism, 0,
 			__ -> true);
 	}
 
@@ -187,9 +235,14 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		private final ExecutionMode executionMode;
 		private final ThrowingSupplier<T> behavior;
+
 		private ResourceLock resourceLock = NopLock.INSTANCE;
-		private @Nullable Thread executionThread;
+		private @Nullable String name;
+
 		private final CompletableFuture<@Nullable T> result = new CompletableFuture<>();
+		private @Nullable Instant startTime;
+		private @Nullable Instant endTime;
+		private @Nullable Thread executionThread;
 
 		static TestTaskStub<?> withoutResult(ExecutionMode executionMode) {
 			return new TestTaskStub<@Nullable Void>(executionMode, () -> null);
@@ -202,9 +255,9 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			});
 		}
 
-		@SuppressWarnings({ "SameParameterValue", "DataFlowIssue" })
+		@SuppressWarnings("SameParameterValue")
 		static <T> TestTaskStub<T> withResult(ExecutionMode executionMode, ThrowingSupplier<T> supplier) {
-			return new TestTaskStub<>(executionMode, supplier::get);
+			return new TestTaskStub<>(executionMode, supplier);
 		}
 
 		TestTaskStub(ExecutionMode executionMode, ThrowingSupplier<T> behavior) {
@@ -229,27 +282,90 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		@Override
 		public void execute() {
-			Preconditions.condition(!result.isDone(), "task was already executed");
-
-			executionThread = Thread.currentThread();
+			startTime = Instant.now();
 			try {
-				result.complete(behavior.get());
+				Preconditions.condition(!result.isDone(), "task was already executed");
+
+				executionThread = Thread.currentThread();
+				try {
+					result.complete(behavior.get());
+				}
+				catch (Throwable t) {
+					result.completeExceptionally(t);
+					throw throwAsUncheckedException(t);
+				}
 			}
-			catch (Throwable t) {
-				result.completeExceptionally(t);
-				throw throwAsUncheckedException(t);
+			finally {
+				endTime = Instant.now();
 			}
 		}
 
-		public @Nullable Thread executionThread() {
+		@Nullable Thread executionThread() {
 			return executionThread;
 		}
 
-		public T result() {
+		T result() {
 			Preconditions.condition(result.isDone(), "task was not executed");
 			return result.getNow(null);
 		}
 
+		TestTaskStub<T> withName(String name) {
+			this.name = name;
+			return this;
+		}
+	}
+
+	static void printTimeline(Stream<TestTaskStub<?>> taskStream) {
+		var allTasks = taskStream.toList();
+		assertThat(allTasks.stream().filter(task -> task.executionThread() == null)) //
+				.describedAs(				"Unexecuted tasks").isEmpty();
+		var statistics = allTasks.stream() //
+				.flatMap(task -> Stream.concat(Stream.of(task.startTime),
+						Optional.ofNullable(task.endTime).stream())).mapToLong(
+						instant -> requireNonNull(instant).toEpochMilli()) //
+				.summaryStatistics();
+		var rangeMillis = statistics.getMax() - statistics.getMin();
+		var width = 100;
+		var scale = (double) width / rangeMillis;
+		var sortedTasks = allTasks.stream() //
+				.sorted(comparing(task -> requireNonNull(task.startTime))) //
+				.toList();
+		var tasksByThread = sortedTasks.stream() //
+				.sorted(comparingLong(
+						testTaskStub -> requireNonNull(testTaskStub.executionThread()).threadId())).collect(
+						groupingBy(task -> requireNonNull(task.executionThread), LinkedHashMap::new, toList()));
+		ToIntFunction<@Nullable Instant> indexFunction = instant -> (int) ((requireNonNull(
+				instant).toEpochMilli() - statistics.getMin()) * scale);
+		tasksByThread.forEach((thread, tasks) -> printTimelineForThread(requireNonNull(thread), tasks, width, indexFunction));
+	}
+
+	private static void printTimelineForThread(Thread thread, List<TestTaskStub<?>> tasks, int width, ToIntFunction<@Nullable Instant> indexFunction) {
+		System.out.printf("%n%s (%d)%n", thread.getName(), tasks.size());
+		StringBuilder builder = new StringBuilder();
+		for (var task : tasks) {
+			builder.append(".".repeat(width + 1));
+			int startIndex = indexFunction.applyAsInt(task.startTime);
+			builder.setCharAt(startIndex, '<');
+			if (task.endTime == null) {
+				builder.setCharAt(startIndex + 1, '-');
+				builder.setCharAt(startIndex + 2, '?');
+			}
+			else {
+				int endIndex = indexFunction.applyAsInt(task.endTime);
+				if (endIndex == startIndex) {
+					builder.setCharAt(endIndex, 'O');
+				}
+				else {
+					for (int i = startIndex + 1; i < endIndex; i++) {
+						builder.setCharAt(i, '-');
+					}
+					builder.setCharAt(endIndex, '>');
+				}
+			}
+			builder.append("   ").append(task.name);
+			System.out.println(builder);
+			builder.setLength(0);
+		}
 	}
 
 }
