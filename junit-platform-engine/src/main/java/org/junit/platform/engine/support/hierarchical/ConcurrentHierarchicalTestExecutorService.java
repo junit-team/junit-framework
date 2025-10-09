@@ -85,8 +85,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private WorkQueue.Entry enqueue(TestTask testTask) {
 		// TODO check if worker needs to be started
+		var entry = workQueue.add(testTask);
 		startWorker();
-		return workQueue.add(testTask);
+		return entry;
 	}
 
 	private void startWorker() {
