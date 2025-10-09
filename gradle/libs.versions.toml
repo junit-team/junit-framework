@@ -33,7 +33,7 @@ checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checks
 classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.181" }
 commons-io = { module = "commons-io:commons-io", version = "2.20.0" }
 errorProne-core = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
-fastcsv = { module = "de.siegmar:fastcsv", version = "4.0.0" }
+fastcsv = { module = "de.siegmar:fastcsv", version = "4.1.0" }
 groovy = { module = "org.apache.groovy:groovy", version = "5.0.1" }
 groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
