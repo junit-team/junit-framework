@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
@@ -17,14 +18,13 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apiguardian.api.API;
@@ -39,23 +39,21 @@ import org.junit.platform.commons.util.Preconditions;
 public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	private final WorkQueue workQueue = new WorkQueue();
-	private final ExecutorService executorService;
+	private final ExecutorService threadPool;
 
 	public ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
 	ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration, ClassLoader classLoader) {
-		executorService = Executors.newFixedThreadPool(configuration.getParallelism(),
-			new CustomThreadFactory(classLoader));
-		for (var i = 0; i < configuration.getParallelism(); i++) {
-			startWorker();
-		}
+		ThreadFactory threadFactory = new CustomThreadFactory(classLoader);
+		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
+			configuration.getKeepAliveSeconds(), SECONDS, new LinkedBlockingQueue<>(), threadFactory);
 	}
 
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
-		return enqueue(testTask).completion.thenApply(__ -> null);
+		return enqueue(testTask).future();
 	}
 
 	@Override
@@ -80,6 +78,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		if (!concurrentlyExecutedChildren.isEmpty()) {
 			// TODO give up worker lease
 			toCompletableFuture(concurrentlyExecutedChildren).join();
+			// TODO get worker lease
 		}
 	}
 
@@ -90,15 +89,15 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	private void startWorker() {
-		executorService.execute(() -> {
-			while (!executorService.isShutdown()) {
+		threadPool.execute(() -> {
+			while (!threadPool.isShutdown()) {
 				try {
 					// TODO get worker lease
-					var entry = workQueue.poll(30, TimeUnit.SECONDS);
+					var entry = workQueue.poll();
 					if (entry == null) {
 						// TODO give up worker lease
-						// nothing to do -> exiting
-						return;
+						// nothing to do -> done
+						break;
 					}
 					entry.execute();
 				}
@@ -128,7 +127,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				entry.execute();
 			}
 			else {
-				futures.add(entry.completion);
+				futures.add(entry.future);
 			}
 		}
 		return futures;
@@ -159,13 +158,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 	}
 
-	private static void executeTask(TestTask testTask) {
-		testTask.execute();
-	}
-
 	@Override
 	public void close() {
-		executorService.shutdown();
+		threadPool.shutdownNow();
 	}
 
 	private class CustomThreadFactory implements ThreadFactory {
@@ -208,35 +203,44 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private static class WorkQueue {
 
-		private final BlockingQueue<Entry> queue = new ArrayBlockingQueue<>(1024);
+		private final BlockingQueue<Entry> queue = new LinkedBlockingQueue<>();
 
 		Entry add(TestTask task) {
 			var entry = new Entry(task, new CompletableFuture<>());
-			queue.add(entry);
+			var added = queue.add(entry);
+			if (!added) {
+				throw new IllegalStateException("Could not add entry to the queue for task: " + task);
+			}
 			return entry;
 		}
 
 		@Nullable
-		Entry poll(long timeout, TimeUnit unit) throws InterruptedException {
-			return queue.poll(timeout, unit);
+		Entry poll() throws InterruptedException {
+			return queue.poll(1, SECONDS);
 		}
 
 		boolean remove(Entry entry) {
 			return queue.remove(entry);
 		}
 
-		private record Entry(TestTask task, CompletableFuture<?> completion) {
+		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future) {
 			void execute() {
 				try {
 					executeTask(task);
-					completion.complete(null);
 				}
 				catch (Throwable t) {
-					completion.completeExceptionally(t);
+					future.completeExceptionally(t);
+				}
+				finally {
+					future.complete(null);
 				}
 			}
 		}
 
+	}
+
+	private static void executeTask(TestTask testTask) {
+		testTask.execute();
 	}
 
 }
