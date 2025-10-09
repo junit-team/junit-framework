@@ -56,6 +56,15 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		Preconditions.condition(CustomThread.getExecutor() == this,
 			"invokeAll() must not be called from a thread that is not part of this executor");
 
+		if (testTasks.isEmpty()) {
+			return;
+		}
+
+		if (testTasks.size() == 1) {
+			executeTask(testTasks.get(0));
+			return;
+		}
+
 		var childrenByExecutionMode = testTasks.stream().collect(groupingBy(TestTask::getExecutionMode));
 		var concurrentChildren = forkConcurrentChildren(childrenByExecutionMode.get(CONCURRENT));
 		executeSameThreadChildren(childrenByExecutionMode.get(SAME_THREAD));
@@ -75,13 +84,17 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	private void executeSameThreadChildren(@Nullable List<? extends TestTask> children) {
 		if (children != null) {
 			for (var testTask : children) {
-				testTask.execute();
+				executeTask(testTask);
 			}
 		}
 	}
 
 	private CompletableFuture<@Nullable Void> submitInternal(TestTask testTask) {
-		return toNullable(CompletableFuture.runAsync(testTask::execute, executorService));
+		return toNullable(CompletableFuture.runAsync(() -> executeTask(testTask), executorService));
+	}
+
+	private static void executeTask(TestTask testTask) {
+		testTask.execute();
 	}
 
 	@Override

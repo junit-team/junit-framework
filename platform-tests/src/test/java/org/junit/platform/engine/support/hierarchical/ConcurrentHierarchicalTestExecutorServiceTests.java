@@ -70,6 +70,23 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.withMessage("invokeAll() must not be called from a thread that is not part of this executor");
 	}
 
+	@ParameterizedTest
+	@EnumSource(ExecutionMode.class)
+	@SuppressWarnings("NullAway")
+	void executesSingleChildInSameThreadRegardlessOfItsExecutionMode(ExecutionMode childExecutionMode)
+			throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService();
+
+		var child = TestTaskStub.withoutResult(childExecutionMode);
+		var root = new TestTaskStub<@Nullable Void>(CONCURRENT,
+			Behavior.ofVoid(() -> service.invokeAll(List.of(child))));
+
+		service.submit(root).get();
+
+		assertThat(root.executionThread()).isNotNull();
+		assertThat(child.executionThread()).isSameAs(root.executionThread());
+	}
+
 	@Test
 	@SuppressWarnings("NullAway")
 	void executesTwoChildrenConcurrently() throws Exception {
@@ -138,6 +155,8 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		@Override
 		public void execute() {
+			Preconditions.condition(!result.isDone(), "task was already executed");
+
 			executionThread = Thread.currentThread();
 			try {
 				result.complete(behavior.execute());
