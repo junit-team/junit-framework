@@ -27,6 +27,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -37,6 +38,7 @@ import org.junit.platform.engine.support.hierarchical.Node.ExecutionMode;
 /**
  * @since 6.1
  */
+@Timeout(5)
 class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@AutoClose
