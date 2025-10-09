@@ -43,15 +43,19 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
-		return toNullable(CompletableFuture.runAsync(testTask::execute, executorService));
+		return submitInternal(testTask);
 	}
 
 	@Override
 	public void invokeAll(List<? extends TestTask> testTasks) {
 		Preconditions.condition(CustomThread.getExecutor() == this,
 			"invokeAll() must not be called from a thread that is not part of this executor");
-		testTasks.forEach(TestTask::execute);
-		throw new UnsupportedOperationException("Not supported yet.");
+		var futures = testTasks.stream().map(this::submitInternal).toArray(CompletableFuture[]::new);
+		CompletableFuture.allOf(futures).join();
+	}
+
+	private CompletableFuture<@Nullable Void> submitInternal(TestTask testTask) {
+		return toNullable(CompletableFuture.runAsync(testTask::execute, executorService));
 	}
 
 	@Override
@@ -60,8 +64,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	@SuppressWarnings("NullAway")
-	private static Future<@Nullable Void> toNullable(Future<Void> voidCompletableFuture) {
-		return voidCompletableFuture;
+	private static CompletableFuture<@Nullable Void> toNullable(CompletableFuture<Void> future) {
+		return future;
 	}
 
 	private class CustomThreadFactory implements ThreadFactory {
