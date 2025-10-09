@@ -10,7 +10,11 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
+import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -48,10 +52,32 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	@Override
 	public void invokeAll(List<? extends TestTask> testTasks) {
+
 		Preconditions.condition(CustomThread.getExecutor() == this,
 			"invokeAll() must not be called from a thread that is not part of this executor");
-		var futures = testTasks.stream().map(this::submitInternal).toArray(CompletableFuture[]::new);
-		CompletableFuture.allOf(futures).join();
+
+		var childrenByExecutionMode = testTasks.stream().collect(groupingBy(TestTask::getExecutionMode));
+		var concurrentChildren = forkConcurrentChildren(childrenByExecutionMode.get(CONCURRENT));
+		executeSameThreadChildren(childrenByExecutionMode.get(SAME_THREAD));
+		concurrentChildren.join();
+	}
+
+	private CompletableFuture<?> forkConcurrentChildren(@Nullable List<? extends TestTask> children) {
+		if (children == null) {
+			return completedFuture(null);
+		}
+		CompletableFuture<?>[] futures = children.stream() //
+				.map(this::submitInternal) //
+				.toArray(CompletableFuture[]::new);
+		return CompletableFuture.allOf(futures);
+	}
+
+	private void executeSameThreadChildren(@Nullable List<? extends TestTask> children) {
+		if (children != null) {
+			for (var testTask : children) {
+				testTask.execute();
+			}
+		}
 	}
 
 	private CompletableFuture<@Nullable Void> submitInternal(TestTask testTask) {

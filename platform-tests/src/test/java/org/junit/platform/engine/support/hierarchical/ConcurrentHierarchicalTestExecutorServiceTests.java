@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
+import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -86,6 +87,20 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service.submit(root).get();
 
 		assertThat(children).extracting(TestTaskStub::result).containsOnly(true);
+	}
+
+	@Test
+	@SuppressWarnings("NullAway")
+	void executesTwoChildrenInSameThread() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService();
+
+		var children = List.of(TestTaskStub.withoutResult(SAME_THREAD), TestTaskStub.withoutResult(SAME_THREAD));
+		var root = new TestTaskStub<@Nullable Void>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
+
+		service.submit(root).get();
+
+		assertThat(root.executionThread()).isNotNull();
+		assertThat(children).extracting(TestTaskStub::executionThread).containsOnly(root.executionThread());
 	}
 
 	@NullMarked
