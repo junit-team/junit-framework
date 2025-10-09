@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.ClassLoaderUtils;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * @since 6.1
@@ -47,6 +48,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	@Override
 	public void invokeAll(List<? extends TestTask> testTasks) {
+		Preconditions.condition(CustomThread.getExecutor() == this,
+			"invokeAll() must not be called from a thread that is not part of this executor");
 		testTasks.forEach(TestTask::execute);
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
@@ -61,7 +64,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		return voidCompletableFuture;
 	}
 
-	static class CustomThreadFactory implements ThreadFactory {
+	private class CustomThreadFactory implements ThreadFactory {
 
 		private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
 
@@ -69,16 +72,31 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private final int poolNumber;
 		private final ClassLoader classLoader;
 
-		public CustomThreadFactory(ClassLoader classLoader) {
+		CustomThreadFactory(ClassLoader classLoader) {
 			this.classLoader = classLoader;
 			this.poolNumber = POOL_NUMBER.getAndIncrement();
 		}
 
 		@Override
 		public Thread newThread(Runnable r) {
-			var thread = new Thread(r, "junit-%d-worker-%d".formatted(poolNumber, threadNumber.getAndIncrement()));
+			var thread = new CustomThread(r,
+				"junit-%d-worker-%d".formatted(poolNumber, threadNumber.getAndIncrement()));
 			thread.setContextClassLoader(classLoader);
 			return thread;
+		}
+	}
+
+	private class CustomThread extends Thread {
+		CustomThread(Runnable task, String name) {
+			super(task, name);
+		}
+
+		static @Nullable ConcurrentHierarchicalTestExecutorService getExecutor() {
+			return Thread.currentThread() instanceof CustomThread c ? c.executor() : null;
+		}
+
+		private ConcurrentHierarchicalTestExecutorService executor() {
+			return ConcurrentHierarchicalTestExecutorService.this;
 		}
 	}
 }

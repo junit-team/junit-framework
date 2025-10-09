@@ -11,13 +11,17 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService.TestTask;
@@ -49,6 +53,16 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(task.executionThread.getContextClassLoader()).isSameAs(customClassLoader);
 	}
 
+	@Test
+	@SuppressWarnings("NullAway")
+	void invokeAllMustBeExecutedFromWithinThreadPool() {
+		var tasks = List.of(new TestTaskStub(CONCURRENT));
+		service = new ConcurrentHierarchicalTestExecutorService();
+
+		assertPreconditionViolationFor(() -> service.invokeAll(tasks)) //
+				.withMessage("invokeAll() must not be called from a thread that is not part of this executor");
+	}
+
 	@NullMarked
 	private static class TestTaskStub implements TestTask {
 
@@ -78,6 +92,10 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		@Override
 		public void execute() {
 			executionThread = Thread.currentThread();
+		}
+
+		public @Nullable Thread executionThread() {
+			return executionThread;
 		}
 	}
 }
