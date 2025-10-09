@@ -51,7 +51,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		var customClassLoader = new URLClassLoader(new URL[0], this.getClass().getClassLoader());
 		try (customClassLoader) {
-			service = new ConcurrentHierarchicalTestExecutorService(customClassLoader);
+			service = new ConcurrentHierarchicalTestExecutorService(configuration(1), customClassLoader);
 			service.submit(task).get();
 		}
 
@@ -64,7 +64,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@SuppressWarnings("NullAway")
 	void invokeAllMustBeExecutedFromWithinThreadPool() {
 		var tasks = List.of(TestTaskStub.withoutResult(CONCURRENT));
-		service = new ConcurrentHierarchicalTestExecutorService();
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		assertPreconditionViolationFor(() -> service.invokeAll(tasks)) //
 				.withMessage("invokeAll() must not be called from a thread that is not part of this executor");
@@ -75,7 +75,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@SuppressWarnings("NullAway")
 	void executesSingleChildInSameThreadRegardlessOfItsExecutionMode(ExecutionMode childExecutionMode)
 			throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService();
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		var child = TestTaskStub.withoutResult(childExecutionMode);
 		var root = new TestTaskStub<@Nullable Void>(CONCURRENT,
@@ -90,7 +90,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@Test
 	@SuppressWarnings("NullAway")
 	void executesTwoChildrenConcurrently() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService();
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(3));
 
 		var latch = new CountDownLatch(2);
 		Behavior<Boolean> behavior = () -> {
@@ -109,7 +109,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@Test
 	@SuppressWarnings("NullAway")
 	void executesTwoChildrenInSameThread() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService();
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		var children = List.of(TestTaskStub.withoutResult(SAME_THREAD), TestTaskStub.withoutResult(SAME_THREAD));
 		var root = new TestTaskStub<@Nullable Void>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
@@ -118,6 +118,10 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		assertThat(root.executionThread()).isNotNull();
 		assertThat(children).extracting(TestTaskStub::executionThread).containsOnly(root.executionThread());
+	}
+
+	private static ParallelExecutionConfiguration configuration(int parallelism) {
+		return new DefaultParallelExecutionConfiguration(parallelism, parallelism, parallelism, parallelism, 0, __ -> true);
 	}
 
 	@NullMarked

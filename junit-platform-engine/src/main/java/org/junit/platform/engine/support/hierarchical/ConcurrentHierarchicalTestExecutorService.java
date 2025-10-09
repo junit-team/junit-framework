@@ -37,12 +37,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private final ExecutorService executorService;
 
-	public ConcurrentHierarchicalTestExecutorService() {
-		this(ClassLoaderUtils.getDefaultClassLoader());
+	public ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
+		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
-	ConcurrentHierarchicalTestExecutorService(ClassLoader classLoader) {
-		executorService = Executors.newCachedThreadPool(new CustomThreadFactory(classLoader));
+	ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration, ClassLoader classLoader) {
+		executorService = Executors.newFixedThreadPool(configuration.getParallelism(), new CustomThreadFactory(classLoader));
 	}
 
 	@Override
