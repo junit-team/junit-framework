@@ -90,7 +90,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@Test
 	@SuppressWarnings("NullAway")
 	void executesTwoChildrenConcurrently() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(3));
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 
 		var latch = new CountDownLatch(2);
 		Behavior<Boolean> behavior = () -> {
@@ -121,7 +121,8 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	}
 
 	private static ParallelExecutionConfiguration configuration(int parallelism) {
-		return new DefaultParallelExecutionConfiguration(parallelism, parallelism, parallelism, parallelism, 0, __ -> true);
+		return new DefaultParallelExecutionConfiguration(parallelism, parallelism, parallelism, parallelism, 0,
+			__ -> true);
 	}
 
 	@NullMarked
