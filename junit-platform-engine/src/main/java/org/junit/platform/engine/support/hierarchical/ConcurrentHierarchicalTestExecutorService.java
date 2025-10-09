@@ -13,6 +13,7 @@ package org.junit.platform.engine.support.hierarchical;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
@@ -124,7 +125,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		for (var entry = iterator.previous(); iterator.hasPrevious(); entry = iterator.previous()) {
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
-				entry.execute();
+				var executed = entry.tryExecute();
+				if (!executed) {
+					workQueue.add(entry);
+					futures.add(entry.future);
+				}
 			}
 			else {
 				futures.add(entry.future);
@@ -206,10 +211,13 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private final BlockingQueue<Entry> queue = new LinkedBlockingQueue<>();
 
 		Entry add(TestTask task) {
-			var entry = new Entry(task, new CompletableFuture<>());
+			return add(new Entry(task, new CompletableFuture<>()));
+		}
+
+		Entry add(Entry entry) {
 			var added = queue.add(entry);
 			if (!added) {
-				throw new IllegalStateException("Could not add entry to the queue for task: " + task);
+				throw new IllegalStateException("Could not add entry to the queue for task: " + entry.task);
 			}
 			return entry;
 		}
@@ -235,12 +243,47 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					future.complete(null);
 				}
 			}
+
+			boolean tryExecute() {
+				try {
+					var executed = tryExecuteTask(task);
+					if (executed) {
+						future.complete(null);
+					}
+					return executed;
+				}
+				catch (Throwable t) {
+					future.completeExceptionally(t);
+					return true;
+				}
+			}
 		}
 
 	}
 
+	@SuppressWarnings("try")
 	private static void executeTask(TestTask testTask) {
-		testTask.execute();
+		var executed = tryExecuteTask(testTask);
+		if (!executed) {
+			// TODO start another worker to compensate?
+			try (var ignored = testTask.getResourceLock().acquire()) {
+				testTask.execute();
+			}
+			catch (InterruptedException ex) {
+				throw throwAsUncheckedException(ex);
+			}
+		}
+	}
+
+	private static boolean tryExecuteTask(TestTask testTask) {
+		var resourceLock = testTask.getResourceLock();
+		if (resourceLock.tryAcquire()) {
+			try (resourceLock) {
+				testTask.execute();
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

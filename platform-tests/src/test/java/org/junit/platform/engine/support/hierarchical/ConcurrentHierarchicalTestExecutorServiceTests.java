@@ -15,6 +15,13 @@ import static org.junit.platform.commons.test.PreconditionAssertions.assertPreco
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -49,7 +56,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@EnumSource(ExecutionMode.class)
 	void executesSingleTask(ExecutionMode executionMode) throws Exception {
 
-		TestTaskStub<@Nullable Object> task = TestTaskStub.withoutResult(executionMode);
+		var task = TestTaskStub.withoutResult(executionMode);
 
 		var customClassLoader = new URLClassLoader(new URL[0], this.getClass().getClassLoader());
 		try (customClassLoader) {
@@ -80,7 +87,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		var child = TestTaskStub.withoutResult(childExecutionMode);
-		var root = new TestTaskStub<@Nullable Void>(CONCURRENT,
+		var root = new TestTaskStub<>(CONCURRENT,
 			Behavior.ofVoid(() -> service.invokeAll(List.of(child))));
 
 		service.submit(root).get();
@@ -101,7 +108,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		};
 
 		var children = List.of(new TestTaskStub<>(CONCURRENT, behavior), new TestTaskStub<>(CONCURRENT, behavior));
-		var root = new TestTaskStub<@Nullable Void>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
+		var root = new TestTaskStub<>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
 
 		service.submit(root).get();
 
@@ -114,12 +121,50 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		var children = List.of(TestTaskStub.withoutResult(SAME_THREAD), TestTaskStub.withoutResult(SAME_THREAD));
-		var root = new TestTaskStub<@Nullable Void>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
+		var root = new TestTaskStub<>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
 
 		service.submit(root).get();
 
 		assertThat(root.executionThread()).isNotNull();
 		assertThat(children).extracting(TestTaskStub::executionThread).containsOnly(root.executionThread());
+	}
+
+	@Test
+	void acquiresResourceLockForRootTask() throws Exception {
+		var resourceLock = mock(ResourceLock.class);
+		when(resourceLock.acquire()).thenReturn(resourceLock);
+
+		var task = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
+
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
+		service.submit(task).get();
+
+		var inOrder = inOrder(resourceLock);
+		inOrder.verify(resourceLock).acquire();
+		inOrder.verify(resourceLock).close();
+		inOrder.verifyNoMoreInteractions();
+	}
+
+	@Test
+	@SuppressWarnings("NullAway")
+	void acquiresResourceLockForChildTasks() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+
+		var resourceLock = mock(ResourceLock.class);
+		when(resourceLock.tryAcquire()).thenReturn(true, false);
+		when(resourceLock.acquire()).thenReturn(resourceLock);
+
+		var child1 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
+		var child2 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
+		var children = List.of(child1, child2);
+		var task = new TestTaskStub<>(SAME_THREAD, Behavior.ofVoid(() -> service.invokeAll(children)));
+
+		service.submit(task).get();
+
+		verify(resourceLock, atLeast(2)).tryAcquire();
+		verify(resourceLock).acquire();
+		verify(resourceLock, times(2)).close();
+		verifyNoMoreInteractions(resourceLock);
 	}
 
 	private static ParallelExecutionConfiguration configuration(int parallelism) {
@@ -132,22 +177,22 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		private final ExecutionMode executionMode;
 		private final Behavior<T> behavior;
-		private final ResourceLock resourceLock;
+		private ResourceLock resourceLock = NopLock.INSTANCE;
 		private @Nullable Thread executionThread;
 		private final CompletableFuture<@Nullable T> result = new CompletableFuture<>();
 
-		static <T> TestTaskStub<@Nullable T> withoutResult(ExecutionMode executionMode) {
-			return new TestTaskStub<@Nullable T>(executionMode, () -> null);
+		static TestTaskStub<?> withoutResult(ExecutionMode executionMode) {
+			return new TestTaskStub<@Nullable Void>(executionMode, () -> null);
 		}
 
 		TestTaskStub(ExecutionMode executionMode, Behavior<T> behavior) {
-			this(executionMode, behavior, NopLock.INSTANCE);
-		}
-
-		TestTaskStub(ExecutionMode executionMode, Behavior<T> behavior, ResourceLock resourceLock) {
 			this.executionMode = executionMode;
 			this.behavior = behavior;
+		}
+
+		TestTaskStub<T> withResourceLock(ResourceLock resourceLock) {
 			this.resourceLock = resourceLock;
+			return this;
 		}
 
 		@Override
