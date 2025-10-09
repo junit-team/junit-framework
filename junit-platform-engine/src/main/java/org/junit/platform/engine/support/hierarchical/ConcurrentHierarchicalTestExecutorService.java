@@ -66,14 +66,17 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		var childrenByExecutionMode = testTasks.stream().collect(groupingBy(TestTask::getExecutionMode));
-		var concurrentChildren = forkConcurrentChildren(childrenByExecutionMode.get(CONCURRENT));
-		executeSameThreadChildren(childrenByExecutionMode.get(SAME_THREAD));
+		var concurrentChildren = forkAll(childrenByExecutionMode.get(CONCURRENT));
+		executeAll(childrenByExecutionMode.get(SAME_THREAD));
 		concurrentChildren.join();
 	}
 
-	private CompletableFuture<?> forkConcurrentChildren(@Nullable List<? extends TestTask> children) {
+	private CompletableFuture<?> forkAll(@Nullable List<? extends TestTask> children) {
 		if (children == null) {
 			return completedFuture(null);
+		}
+		if (children.size() == 1) {
+			return submitInternal(children.get(0));
 		}
 		CompletableFuture<?>[] futures = children.stream() //
 				.map(this::submitInternal) //
@@ -81,11 +84,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		return CompletableFuture.allOf(futures);
 	}
 
-	private void executeSameThreadChildren(@Nullable List<? extends TestTask> children) {
-		if (children != null) {
-			for (var testTask : children) {
-				executeTask(testTask);
-			}
+	private void executeAll(@Nullable List<? extends TestTask> children) {
+		if (children == null) {
+			return;
+		}
+		if (children.size() == 1) {
+			executeTask(children.get(0));
+			return;
+		}
+		for (var testTask : children) {
+			executeTask(testTask);
 		}
 	}
 
