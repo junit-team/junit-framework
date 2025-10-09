@@ -15,6 +15,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -31,10 +32,26 @@ import org.junit.platform.engine.support.hierarchical.ExclusiveResource.LockMode
 class CompositeLockTests {
 
 	@Test
+	@SuppressWarnings({ "resource", "ResultOfMethodCallIgnored" })
+	void triesToAcquireAllLocksInOrder() {
+		var lock1 = mock(Lock.class, "lock1");
+		var lock2 = mock(Lock.class, "lock2");
+
+		when(lock1.tryLock()).thenReturn(true);
+		when(lock2.tryLock()).thenReturn(true);
+
+		new CompositeLock(anyResources(2), List.of(lock1, lock2)).tryAcquire();
+
+		var inOrder = inOrder(lock1, lock2);
+		inOrder.verify(lock1).tryLock();
+		inOrder.verify(lock2).tryLock();
+	}
+
+	@Test
 	@SuppressWarnings("resource")
 	void acquiresAllLocksInOrder() throws Exception {
-		var lock1 = mock(Lock.class);
-		var lock2 = mock(Lock.class);
+		var lock1 = mock(Lock.class, "lock1");
+		var lock2 = mock(Lock.class, "lock2");
 
 		new CompositeLock(anyResources(2), List.of(lock1, lock2)).acquire();
 
@@ -46,8 +63,8 @@ class CompositeLockTests {
 	@Test
 	@SuppressWarnings("resource")
 	void releasesAllLocksInReverseOrder() throws Exception {
-		var lock1 = mock(Lock.class);
-		var lock2 = mock(Lock.class);
+		var lock1 = mock(Lock.class, "lock1");
+		var lock2 = mock(Lock.class, "lock2");
 
 		new CompositeLock(anyResources(2), List.of(lock1, lock2)).acquire().close();
 
@@ -76,6 +93,25 @@ class CompositeLockTests {
 		firstTwoLocksWereLocked.await();
 		thread.interrupt();
 		thread.join();
+
+		var inOrder = inOrder(firstLock, secondLock);
+		inOrder.verify(secondLock).unlock();
+		inOrder.verify(firstLock).unlock();
+		verify(unavailableLock, never()).unlock();
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void releasesLocksInReverseOrderOnUnsuccessfulAttempt() {
+		var firstLock = mock(Lock.class, "firstLock");
+		var secondLock = mock(Lock.class, "secondLock");
+		var unavailableLock = mock(Lock.class, "unavailableLock");
+
+		when(firstLock.tryLock()).thenReturn(true);
+		when(secondLock.tryLock()).thenReturn(true);
+		when(unavailableLock.tryLock()).thenReturn(false);
+
+		new CompositeLock(anyResources(3), List.of(firstLock, secondLock, unavailableLock)).tryAcquire();
 
 		var inOrder = inOrder(firstLock, secondLock);
 		inOrder.verify(secondLock).unlock();

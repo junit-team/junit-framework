@@ -42,6 +42,11 @@ class SingleLock implements ResourceLock {
 	}
 
 	@Override
+	public boolean tryAcquire() {
+		return this.lock.tryLock();
+	}
+
+	@Override
 	public ResourceLock acquire() throws InterruptedException {
 		ForkJoinPool.managedBlock(new SingleLockManagedBlocker());
 		return this;
