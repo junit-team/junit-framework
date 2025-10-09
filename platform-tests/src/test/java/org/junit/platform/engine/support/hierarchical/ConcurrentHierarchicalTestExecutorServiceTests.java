@@ -10,6 +10,8 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.function.Predicate.isEqual;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.commons.util.Preconditions;
@@ -45,6 +48,7 @@ import org.junit.platform.engine.support.hierarchical.Node.ExecutionMode;
 /**
  * @since 6.1
  */
+@SuppressWarnings("resource")
 @Timeout(5)
 class ConcurrentHierarchicalTestExecutorServiceTests {
 
@@ -70,25 +74,22 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings("NullAway")
 	void invokeAllMustBeExecutedFromWithinThreadPool() {
 		var tasks = List.of(TestTaskStub.withoutResult(CONCURRENT));
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
-		assertPreconditionViolationFor(() -> service.invokeAll(tasks)) //
+		assertPreconditionViolationFor(() -> requiredService().invokeAll(tasks)) //
 				.withMessage("invokeAll() must not be called from a thread that is not part of this executor");
 	}
 
 	@ParameterizedTest
 	@EnumSource(ExecutionMode.class)
-	@SuppressWarnings("NullAway")
 	void executesSingleChildInSameThreadRegardlessOfItsExecutionMode(ExecutionMode childExecutionMode)
 			throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		var child = TestTaskStub.withoutResult(childExecutionMode);
-		var root = new TestTaskStub<>(CONCURRENT,
-			Behavior.ofVoid(() -> service.invokeAll(List.of(child))));
+		var root = TestTaskStub.withoutResult(CONCURRENT, () -> requiredService().invokeAll(List.of(child)));
 
 		service.submit(root).get();
 
@@ -97,18 +98,18 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings("NullAway")
 	void executesTwoChildrenConcurrently() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 
 		var latch = new CountDownLatch(2);
-		Behavior<Boolean> behavior = () -> {
+		ThrowingSupplier<Boolean> behavior = () -> {
 			latch.countDown();
 			return latch.await(100, TimeUnit.MILLISECONDS);
 		};
 
-		var children = List.of(new TestTaskStub<>(CONCURRENT, behavior), new TestTaskStub<>(CONCURRENT, behavior));
-		var root = new TestTaskStub<>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
+		var children = List.of(TestTaskStub.withResult(CONCURRENT, behavior),
+			TestTaskStub.withResult(CONCURRENT, behavior));
+		var root = TestTaskStub.withoutResult(CONCURRENT, () -> requiredService().invokeAll(children));
 
 		service.submit(root).get();
 
@@ -116,12 +117,11 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings("NullAway")
 	void executesTwoChildrenInSameThread() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		var children = List.of(TestTaskStub.withoutResult(SAME_THREAD), TestTaskStub.withoutResult(SAME_THREAD));
-		var root = new TestTaskStub<>(CONCURRENT, Behavior.ofVoid(() -> service.invokeAll(children)));
+		var root = TestTaskStub.withoutResult(CONCURRENT, () -> requiredService().invokeAll(children));
 
 		service.submit(root).get();
 
@@ -139,6 +139,8 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 		service.submit(task).get();
 
+		assertThat(task.executionThread()).isNotNull();
+
 		var inOrder = inOrder(resourceLock);
 		inOrder.verify(resourceLock).acquire();
 		inOrder.verify(resourceLock).close();
@@ -146,7 +148,6 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings("NullAway")
 	void acquiresResourceLockForChildTasks() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 
@@ -157,14 +158,23 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		var child1 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
 		var child2 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
 		var children = List.of(child1, child2);
-		var task = new TestTaskStub<>(SAME_THREAD, Behavior.ofVoid(() -> service.invokeAll(children)));
+		var root = TestTaskStub.withoutResult(SAME_THREAD, () -> requiredService().invokeAll(children));
 
-		service.submit(task).get();
+		service.submit(root).get();
+
+		assertThat(root.executionThread()).isNotNull();
+		assertThat(children).extracting(TestTaskStub::executionThread) //
+				.doesNotContainNull() //
+				.filteredOn(isEqual(root.executionThread())).hasSizeLessThan(2);
 
 		verify(resourceLock, atLeast(2)).tryAcquire();
 		verify(resourceLock).acquire();
 		verify(resourceLock, times(2)).close();
 		verifyNoMoreInteractions(resourceLock);
+	}
+
+	private ConcurrentHierarchicalTestExecutorService requiredService() {
+		return requireNonNull(service);
 	}
 
 	private static ParallelExecutionConfiguration configuration(int parallelism) {
@@ -176,7 +186,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	private static final class TestTaskStub<T extends @Nullable Object> implements TestTask {
 
 		private final ExecutionMode executionMode;
-		private final Behavior<T> behavior;
+		private final ThrowingSupplier<T> behavior;
 		private ResourceLock resourceLock = NopLock.INSTANCE;
 		private @Nullable Thread executionThread;
 		private final CompletableFuture<@Nullable T> result = new CompletableFuture<>();
@@ -185,7 +195,19 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			return new TestTaskStub<@Nullable Void>(executionMode, () -> null);
 		}
 
-		TestTaskStub(ExecutionMode executionMode, Behavior<T> behavior) {
+		static TestTaskStub<?> withoutResult(ExecutionMode executionMode, Executable executable) {
+			return new TestTaskStub<@Nullable Void>(executionMode, () -> {
+				executable.execute();
+				return null;
+			});
+		}
+
+		@SuppressWarnings({ "SameParameterValue", "DataFlowIssue" })
+		static <T> TestTaskStub<T> withResult(ExecutionMode executionMode, ThrowingSupplier<T> supplier) {
+			return new TestTaskStub<>(executionMode, supplier::get);
+		}
+
+		TestTaskStub(ExecutionMode executionMode, ThrowingSupplier<T> behavior) {
 			this.executionMode = executionMode;
 			this.behavior = behavior;
 		}
@@ -211,7 +233,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 			executionThread = Thread.currentThread();
 			try {
-				result.complete(behavior.execute());
+				result.complete(behavior.get());
 			}
 			catch (Throwable t) {
 				result.completeExceptionally(t);
@@ -227,18 +249,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			Preconditions.condition(result.isDone(), "task was not executed");
 			return result.getNow(null);
 		}
+
 	}
 
-	@FunctionalInterface
-	interface Behavior<T extends @Nullable Object> {
-
-		static Behavior<@Nullable Void> ofVoid(Executable executable) {
-			return () -> {
-				executable.execute();
-				return null;
-			};
-		}
-
-		T execute() throws Throwable;
-	}
 }
