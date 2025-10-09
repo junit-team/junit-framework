@@ -17,13 +17,9 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.r
 
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.util.function.UnaryOperator;
-import java.util.spi.ToolProvider;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
@@ -34,44 +30,23 @@ public final class JUnit {
 	}
 
 	public static void run(Object instance) {
-		if (instance instanceof Class<?> testClass) {
-			run(testClass);
-			return;
-		}
-		if (instance instanceof Module testModule) {
-			run(testModule);
-			return;
-		}
-		run(instance.getClass());
-	}
-
-	public static void run(Class<?> testClass) {
-		run(discovery -> discovery.selectors(selectClass(testClass)));
-	}
-
-	public enum ModuleSelectionMode {
-		PLATFORM_DEFAULT, AGGREGATOR_LOCAL
-	}
-
-	public static void run(Module testModule) {
-		run(testModule, ModuleSelectionMode.PLATFORM_DEFAULT);
-	}
-
-	public static void run(Module testModule, ModuleSelectionMode mode) {
-		switch (mode) {
-			case PLATFORM_DEFAULT -> run(discovery -> discovery.selectors(selectModule(testModule)));
-			case AGGREGATOR_LOCAL -> {
-				var selectors = ModuleSupport.listClassesInModule(testModule).stream() //
-						.map(DiscoverySelectors::selectClass).toList();
-				run(discovery -> discovery.selectors(selectors));
-			}
-		}
-	}
-
-	// Don't transitively expose types from org.junit.platform.launcher module
-	private static void run(UnaryOperator<LauncherDiscoveryRequestBuilder> discovery) {
 		var listener = new SummaryGeneratingListener();
-		var request = discovery.apply(request()).forExecution() //
+		var builder = request();
+
+		if (instance instanceof Class<?> testClass) {
+			// handling `JUnit.run(getClass())`
+			builder.selectors(selectClass(testClass));
+		}
+		else if (instance instanceof Module testModule) {
+			// handling `JUnit.run(getClass().getModule())`
+			builder.selectors(selectModule(testModule));
+		}
+		else {
+			// handling `JUnit.run(this)`
+			builder.selectors(selectClass(instance.getClass()));
+		}
+
+		var request = builder.forExecution() //
 				.listeners(listener, new ContainerFeedPrintingListener()) //
 				.build();
 		var launcher = LauncherFactory.create();
@@ -85,11 +60,5 @@ public final class JUnit {
 		throw new JUnitException("JUnit run finished with %d failure%s".formatted( //
 			summary.getTotalFailureCount(), //
 			summary.getTotalFailureCount() == 1 ? "" : "s"));
-	}
-
-	public static void main(String[] args) {
-		var junit = ToolProvider.findFirst("junit").orElseThrow();
-		var exitCode = junit.run(System.out, System.err, args);
-		System.exit(exitCode);
 	}
 }

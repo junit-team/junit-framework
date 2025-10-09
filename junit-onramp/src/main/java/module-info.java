@@ -26,16 +26,11 @@
  * }</pre>
  */
 module org.junit.onramp {
-
 	requires static transitive org.apiguardian.api;
 	requires static transitive org.jspecify;
 
 	requires transitive org.junit.jupiter;
 	requires org.junit.platform.launcher;
-	requires org.junit.platform.console;
 
 	exports org.junit.onramp;
-
-	uses java.util.spi.ToolProvider;
-
 }
