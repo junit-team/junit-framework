@@ -16,7 +16,7 @@
  * import module org.junit.onramp;
  *
  *  void main() {
- *    JUnit.run(this);
+ *    JUnit.run();
  *  }
  *
  *  @Test
@@ -31,6 +31,7 @@ module org.junit.onramp {
 
 	requires transitive org.junit.jupiter;
 	requires org.junit.platform.launcher;
+	requires org.junit.platform.console;
 
 	exports org.junit.onramp;
 }

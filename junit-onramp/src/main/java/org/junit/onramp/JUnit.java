@@ -10,6 +10,7 @@
 
 package org.junit.onramp;
 
+import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectModule;
@@ -20,34 +21,44 @@ import java.nio.charset.Charset;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.console.output.ColorPalette;
+import org.junit.platform.console.output.TestFeedPrintingListener;
+import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
 @API(status = EXPERIMENTAL, since = "6.0")
 public final class JUnit {
-
-	private JUnit() {
+	/**
+	 * Run all tests defined in the caller class.
+	 */
+	public static void run() {
+		var walker = StackWalker.getInstance(RETAIN_CLASS_REFERENCE);
+		run(selectClass(walker.getCallerClass()));
 	}
 
-	public static void run(Object instance) {
+	/**
+	 * Run all tests defined in the given test class.
+	 * @param testClass  the class to discover and execute tests in
+	 */
+	public static void run(Class<?> testClass) {
+		run(selectClass(testClass));
+	}
+
+	/**
+	 * Run all tests defined in the given module.
+	 * @param testModule the module to discover and execute tests in
+	 */
+	public static void run(Module testModule) {
+		run(selectModule(testModule));
+	}
+
+	private static void run(DiscoverySelector selector) {
 		var listener = new SummaryGeneratingListener();
-		var builder = request();
-
-		if (instance instanceof Class<?> testClass) {
-			// handling `JUnit.run(getClass())`
-			builder.selectors(selectClass(testClass));
-		}
-		else if (instance instanceof Module testModule) {
-			// handling `JUnit.run(getClass().getModule())`
-			builder.selectors(selectModule(testModule));
-		}
-		else {
-			// handling `JUnit.run(this)`
-			builder.selectors(selectClass(instance.getClass()));
-		}
-
-		var request = builder.forExecution() //
-				.listeners(listener, new ContainerFeedPrintingListener()) //
+		var writer = new PrintWriter(System.out, true, Charset.defaultCharset());
+		var printer = new TestFeedPrintingListener(writer, ColorPalette.DEFAULT);
+		var request = request().selectors(selector).forExecution() //
+				.listeners(listener, printer) //
 				.build();
 		var launcher = LauncherFactory.create();
 		launcher.execute(request);
@@ -60,5 +71,8 @@ public final class JUnit {
 		throw new JUnitException("JUnit run finished with %d failure%s".formatted( //
 			summary.getTotalFailureCount(), //
 			summary.getTotalFailureCount() == 1 ? "" : "s"));
+	}
+
+	private JUnit() {
 	}
 }

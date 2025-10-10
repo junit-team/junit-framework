@@ -16,6 +16,7 @@ dependencies {
 	compileOnlyApi(projects.junitJupiterEngine)
 
 	implementation(projects.junitPlatformLauncher)
+	implementation(projects.junitPlatformConsole)
 }
 
 japicmp {

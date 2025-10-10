@@ -28,6 +28,7 @@ dependencies {
 tasks {
 	compileJava {
 		options.compilerArgs.addAll(listOf(
+			"-Xlint:-module", // due to qualified exports
 			"--add-modules", "info.picocli",
 			"--add-reads", "${javaModuleName}=info.picocli"
 		))
