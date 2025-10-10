@@ -14,12 +14,14 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -75,7 +77,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
 		LOGGER.trace(() -> "submit: " + testTask);
-		return enqueue(testTask).future();
+		return new BlockingAwareFuture<@Nullable Void>(enqueue(testTask).future(), WorkerThread.BlockHandler.INSTANCE);
 	}
 
 	@Override
@@ -364,6 +366,26 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return ConcurrentHierarchicalTestExecutorService.this;
 		}
 
+		private static class BlockHandler implements BlockingAwareFuture.BlockHandler {
+
+			private static final BlockHandler INSTANCE = new BlockHandler();
+
+			@Override
+			public <T> T handle(Callable<T> callable) throws Exception {
+				var workerThread = get();
+				if (workerThread == null) {
+					return callable.call();
+				}
+				return workerThread.runBlocking(() -> {
+					try {
+						return callable.call();
+					}
+					catch (Exception ex) {
+						throw throwAsUncheckedException(ex);
+					}
+				});
+			}
+		}
 	}
 
 	private static class WorkQueue {
