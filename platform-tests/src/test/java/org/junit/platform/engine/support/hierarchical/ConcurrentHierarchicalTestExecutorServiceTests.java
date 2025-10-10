@@ -52,6 +52,7 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService.TestTask;
 import org.junit.platform.engine.support.hierarchical.Node.ExecutionMode;
 
@@ -165,10 +166,11 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		when(resourceLock.tryAcquire()).thenReturn(true, false);
 		when(resourceLock.acquire()).thenReturn(resourceLock);
 
-		var child1 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
-		var child2 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock);
+		var child1 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock).withName("child1");
+		var child2 = TestTaskStub.withoutResult(CONCURRENT).withResourceLock(resourceLock).withName("child2");
 		var children = List.of(child1, child2);
-		var root = TestTaskStub.withoutResult(SAME_THREAD, () -> requiredService().invokeAll(children));
+		var root = TestTaskStub.withoutResult(SAME_THREAD, () -> requiredService().invokeAll(children)).withName(
+			"root");
 
 		service.submit(root).get();
 
@@ -213,8 +215,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(children).extracting(TestTaskStub::executionThread).doesNotContainNull();
 		assertThat(leafs).extracting(TestTaskStub::executionThread).doesNotContainNull();
 		assertThat(Stream.concat(Stream.of(child1), leafs.stream())).extracting(TestTaskStub::result) //
-				.containsOnly(
-			true);
+				.containsOnly(true);
 	}
 
 	private static ExclusiveResource exclusiveResource() {
@@ -240,9 +241,9 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		private @Nullable String name;
 
 		private final CompletableFuture<@Nullable T> result = new CompletableFuture<>();
-		private @Nullable Instant startTime;
-		private @Nullable Instant endTime;
-		private @Nullable Thread executionThread;
+		private volatile @Nullable Instant startTime;
+		private volatile @Nullable Instant endTime;
+		private volatile @Nullable Thread executionThread;
 
 		static TestTaskStub<?> withoutResult(ExecutionMode executionMode) {
 			return new TestTaskStub<@Nullable Void>(executionMode, () -> null);
@@ -300,7 +301,8 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			}
 		}
 
-		@Nullable Thread executionThread() {
+		@Nullable
+		Thread executionThread() {
 			return executionThread;
 		}
 
@@ -313,15 +315,20 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			this.name = name;
 			return this;
 		}
+
+		@Override
+		public String toString() {
+			return "%s @ %s".formatted(new ToStringBuilder(this).append("name", name), Integer.toHexString(hashCode()));
+		}
 	}
 
 	static void printTimeline(Stream<TestTaskStub<?>> taskStream) {
 		var allTasks = taskStream.toList();
 		assertThat(allTasks.stream().filter(task -> task.executionThread() == null)) //
-				.describedAs(				"Unexecuted tasks").isEmpty();
+				.describedAs("Unexecuted tasks").isEmpty();
 		var statistics = allTasks.stream() //
 				.flatMap(task -> Stream.concat(Stream.of(task.startTime),
-						Optional.ofNullable(task.endTime).stream())).mapToLong(
+					Optional.ofNullable(task.endTime).stream())).mapToLong(
 						instant -> requireNonNull(instant).toEpochMilli()) //
 				.summaryStatistics();
 		var rangeMillis = statistics.getMax() - statistics.getMin();
@@ -331,15 +338,16 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.sorted(comparing(task -> requireNonNull(task.startTime))) //
 				.toList();
 		var tasksByThread = sortedTasks.stream() //
-				.sorted(comparingLong(
-						testTaskStub -> requireNonNull(testTaskStub.executionThread()).threadId())).collect(
-						groupingBy(task -> requireNonNull(task.executionThread), LinkedHashMap::new, toList()));
-		ToIntFunction<@Nullable Instant> indexFunction = instant -> (int) ((requireNonNull(
-				instant).toEpochMilli() - statistics.getMin()) * scale);
-		tasksByThread.forEach((thread, tasks) -> printTimelineForThread(requireNonNull(thread), tasks, width, indexFunction));
+				.sorted(comparingLong(testTaskStub -> requireNonNull(testTaskStub.executionThread()).threadId())) //
+				.collect(groupingBy(task -> requireNonNull(task.executionThread), LinkedHashMap::new, toList()));
+		ToIntFunction<@Nullable Instant> indexFunction = instant -> (int) ((requireNonNull(instant).toEpochMilli()
+				- statistics.getMin()) * scale);
+		tasksByThread.forEach(
+			(thread, tasks) -> printTimelineForThread(requireNonNull(thread), tasks, width, indexFunction));
 	}
 
-	private static void printTimelineForThread(Thread thread, List<TestTaskStub<?>> tasks, int width, ToIntFunction<@Nullable Instant> indexFunction) {
+	private static void printTimelineForThread(Thread thread, List<TestTaskStub<?>> tasks, int width,
+			ToIntFunction<@Nullable Instant> indexFunction) {
 		System.out.printf("%n%s (%d)%n", thread.getName(), tasks.size());
 		StringBuilder builder = new StringBuilder();
 		for (var task : tasks) {

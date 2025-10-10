@@ -10,10 +10,10 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
-import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
@@ -24,13 +24,18 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 
@@ -40,8 +45,11 @@ import org.junit.platform.commons.util.Preconditions;
 @API(status = EXPERIMENTAL, since = "6.1")
 public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentHierarchicalTestExecutorService.class);
+
 	private final WorkQueue workQueue = new WorkQueue();
 	private final ExecutorService threadPool;
+	private final WorkerLeaseManager workerLeaseManager;
 
 	public ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
@@ -51,6 +59,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		ThreadFactory threadFactory = new CustomThreadFactory(classLoader);
 		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
+		workerLeaseManager = new WorkerLeaseManager(configuration.getParallelism());
 	}
 
 	@Override
@@ -60,13 +69,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
+		LOGGER.trace(() -> "submit: " + testTask);
 		return enqueue(testTask).future();
 	}
 
 	@Override
 	public void invokeAll(List<? extends TestTask> testTasks) {
+		LOGGER.trace(() -> "invokeAll: " + testTasks);
 
-		Preconditions.condition(WorkerThread.getExecutor() == this,
+		var workerThread = WorkerThread.get();
+		Preconditions.condition(workerThread != null && workerThread.executor() == this,
 			"invokeAll() must not be called from a thread that is not part of this executor");
 
 		if (testTasks.isEmpty()) {
@@ -81,68 +93,83 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		var childrenByExecutionMode = testTasks.stream().collect(groupingBy(TestTask::getExecutionMode));
 		var queueEntries = forkAll(childrenByExecutionMode.get(CONCURRENT));
 		executeAll(childrenByExecutionMode.get(SAME_THREAD));
-		var concurrentlyExecutedChildren = stealWork(queueEntries);
-		if (!concurrentlyExecutedChildren.isEmpty()) {
-			// TODO give up worker lease
-			toCompletableFuture(concurrentlyExecutedChildren).join();
-			// TODO get worker lease
+		var remainingForkedChildren = stealWork(queueEntries);
+		waitFor(remainingForkedChildren);
+	}
+
+	private static void waitFor(List<WorkQueue.Entry> children) {
+		if (children.isEmpty()) {
+			return;
+		}
+		var future = toCombinedFuture(children);
+		try {
+			if (future.isDone()) {
+				// no need to release worker lease
+				future.join();
+			}
+			else {
+				WorkerThread.getOrThrow().runBlocking(() -> {
+					LOGGER.trace(() -> "blocking for forked children: " + children);
+					return future.join();
+				});
+			}
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 
 	private WorkQueue.Entry enqueue(TestTask testTask) {
-		// TODO check if worker needs to be started
 		var entry = workQueue.add(testTask);
-		startWorker();
+		maybeStartWorker();
 		return entry;
 	}
 
-	private void startWorker() {
-		threadPool.execute(() -> {
-			while (!threadPool.isShutdown()) {
-				try {
-					// TODO get worker lease
-					var entry = workQueue.poll();
-					if (entry == null) {
-						// TODO give up worker lease
-						// nothing to do -> done
-						break;
-					}
-					executeEntry(entry);
-				}
-				catch (InterruptedException ignore) {
-					// ignore spurious interrupts
-				}
-			}
-		});
-	}
-
-	private static CompletableFuture<?> toCompletableFuture(List<CompletableFuture<?>> futures) {
-		if (futures.size() == 1) {
-			return futures.get(0);
+	private void maybeStartWorker() {
+		if (threadPool.isShutdown() || !workerLeaseManager.isLeaseAvailable() || workQueue.isEmpty()) {
+			return;
 		}
-		return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+		try {
+			threadPool.execute(() -> WorkerThread.getOrThrow().processQueueEntries());
+		}
+		catch (RejectedExecutionException e) {
+			if (threadPool.isShutdown()) {
+				return;
+			}
+			throw e;
+		}
 	}
 
-	private List<CompletableFuture<?>> stealWork(List<WorkQueue.Entry> queueEntries) {
+	private static CompletableFuture<?> toCombinedFuture(List<WorkQueue.Entry> entries) {
+		if (entries.size() == 1) {
+			return entries.get(0).future();
+		}
+		var futures = entries.stream().map(WorkQueue.Entry::future).toArray(CompletableFuture<?>[]::new);
+		return CompletableFuture.allOf(futures);
+	}
+
+	private List<WorkQueue.Entry> stealWork(List<WorkQueue.Entry> queueEntries) {
 		if (queueEntries.isEmpty()) {
 			return List.of();
 		}
-		List<CompletableFuture<?>> futures = new ArrayList<>(queueEntries.size());
+		List<WorkQueue.Entry> concurrentlyExecutedChildren = new ArrayList<>(queueEntries.size());
 		var iterator = queueEntries.listIterator(queueEntries.size());
-		for (var entry = iterator.previous(); iterator.hasPrevious(); entry = iterator.previous()) {
+		while (iterator.hasPrevious()) {
+			var entry = iterator.previous();
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
+				LOGGER.trace(() -> "stole work: " + entry);
 				var executed = tryExecute(entry);
 				if (!executed) {
 					workQueue.add(entry);
-					futures.add(entry.future);
+					concurrentlyExecutedChildren.add(entry);
 				}
 			}
 			else {
-				futures.add(entry.future);
+				concurrentlyExecutedChildren.add(entry);
 			}
 		}
-		return futures;
+		return concurrentlyExecutedChildren;
 	}
 
 	private List<WorkQueue.Entry> forkAll(@Nullable List<? extends TestTask> children) {
@@ -161,6 +188,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		if (children == null) {
 			return;
 		}
+		LOGGER.trace(() -> "Running SAME_THREAD children: " + children);
 		if (children.size() == 1) {
 			executeTask(children.get(0));
 			return;
@@ -200,12 +228,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	private void executeTask(TestTask testTask) {
 		var executed = tryExecuteTask(testTask);
 		if (!executed) {
-			// TODO start another worker to compensate?
-			try (var ignored = testTask.getResourceLock().acquire()) {
-				testTask.execute();
+			var resourceLock = testTask.getResourceLock();
+			var workerThread = WorkerThread.getOrThrow();
+			try (var ignored = workerThread.runBlocking(() -> {
+				LOGGER.trace(() -> "blocking for resource lock: " + resourceLock);
+				return resourceLock.acquire();
+			})) {
+				doExecute(testTask);
 			}
 			catch (InterruptedException ex) {
-				throw throwAsUncheckedException(ex);
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
@@ -214,11 +246,21 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		var resourceLock = testTask.getResourceLock();
 		if (resourceLock.tryAcquire()) {
 			try (resourceLock) {
-				testTask.execute();
+				doExecute(testTask);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	private static void doExecute(TestTask testTask) {
+		LOGGER.trace(() -> "executing: " + testTask);
+		try {
+			testTask.execute();
+		}
+		finally {
+			LOGGER.trace(() -> "finished executing: " + testTask);
+		}
 	}
 
 	private class CustomThreadFactory implements ThreadFactory {
@@ -245,12 +287,72 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private class WorkerThread extends Thread {
 
+		@Nullable
+		WorkerLease workerLease;
+
 		WorkerThread(Runnable runnable, String name) {
 			super(runnable, name);
 		}
 
-		static @Nullable ConcurrentHierarchicalTestExecutorService getExecutor() {
-			return Thread.currentThread() instanceof WorkerThread c ? c.executor() : null;
+		static @Nullable WorkerThread get() {
+			if (Thread.currentThread() instanceof WorkerThread workerThread) {
+				return workerThread;
+			}
+			return null;
+		}
+
+		static WorkerThread getOrThrow() {
+			var workerThread = get();
+			if (workerThread == null) {
+				throw new IllegalStateException("Not on a worker thread");
+			}
+			return workerThread;
+		}
+
+		void processQueueEntries() {
+			while (!threadPool.isShutdown()) {
+				try {
+					var entry = workQueue.poll();
+					if (entry == null) {
+						break;
+					}
+					LOGGER.trace(() -> "processing: " + entry);
+					workerLease = workerLeaseManager.tryAcquire();
+					if (workerLease == null) {
+						workQueue.add(entry);
+						break;
+					}
+					try {
+						executeEntry(entry);
+					}
+					finally {
+						workerLease.release();
+					}
+				}
+				catch (InterruptedException ignore) {
+					// ignore spurious interrupts
+				}
+			}
+		}
+
+		<T> T runBlocking(BlockingAction<T> blockingAction) throws InterruptedException {
+			var workerLease = requireNonNull(this.workerLease);
+			workerLease.release();
+			try {
+				return blockingAction.run();
+			}
+			finally {
+				try {
+					workerLease.reacquire();
+				}
+				catch (InterruptedException e) {
+					interrupt();
+				}
+			}
+		}
+
+		interface BlockingAction<T> {
+			T run() throws InterruptedException;
 		}
 
 		private ConcurrentHierarchicalTestExecutorService executor() {
@@ -268,6 +370,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		Entry add(Entry entry) {
+			LOGGER.trace(() -> "forking: " + entry);
 			var added = queue.add(entry);
 			if (!added) {
 				throw new IllegalStateException("Could not add entry to the queue for task: " + entry.task);
@@ -284,9 +387,91 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queue.remove(entry);
 		}
 
-		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future) {
+		boolean isEmpty() {
+			return queue.isEmpty();
 		}
 
+		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future) {
+			@SuppressWarnings("FutureReturnValueIgnored")
+			Entry {
+				future.whenComplete((__, t) -> {
+					if (t == null) {
+						LOGGER.trace(() -> "completed normally: " + this.task());
+					}
+					else {
+						LOGGER.trace(t, () -> "completed exceptionally: " + this.task());
+					}
+				});
+			}
+		}
+
+	}
+
+	private class WorkerLeaseManager {
+
+		private final Semaphore semaphore;
+
+		WorkerLeaseManager(int parallelism) {
+			semaphore = new Semaphore(parallelism);
+		}
+
+		@Nullable
+		WorkerLease tryAcquire() {
+			try {
+				boolean acquired = semaphore.tryAcquire(1, SECONDS);
+				return acquired ? new WorkerLease(this::release) : null;
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return null;
+			}
+		}
+
+		private ReacquisitionToken release() {
+			LOGGER.trace(() -> "releasing worker lease");
+			semaphore.release();
+			maybeStartWorker();
+			return new ReacquisitionToken();
+		}
+
+		boolean isLeaseAvailable() {
+			return semaphore.availablePermits() > 0;
+		}
+
+		private class ReacquisitionToken {
+
+			private boolean used = false;
+
+			void reacquire() throws InterruptedException {
+				Preconditions.condition(!used, "Lease was already reacquired");
+				used = true;
+				LOGGER.trace(() -> "reacquiring worker lease");
+				semaphore.acquire();
+			}
+		}
+	}
+
+	private static class WorkerLease {
+
+		private final Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction;
+		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
+
+		WorkerLease(Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction) {
+			LOGGER.trace(() -> "acquiring worker lease");
+			this.releaseAction = releaseAction;
+		}
+
+		void release() {
+			if (reacquisitionToken == null) {
+				reacquisitionToken = releaseAction.get();
+			}
+		}
+
+		void reacquire() throws InterruptedException {
+			Preconditions.notNull(reacquisitionToken, "Cannot reacquire an unreleased WorkerLease");
+			reacquisitionToken.reacquire();
+			reacquisitionToken = null;
+		}
 	}
 
 }
