@@ -30,7 +30,7 @@ archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.4.1" 
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
-classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.181" }
+classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.184" }
 commons-io = { module = "commons-io:commons-io", version = "2.20.0" }
 errorProne-core = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
 fastcsv = { module = "de.siegmar:fastcsv", version = "4.1.0" }
