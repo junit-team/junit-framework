@@ -54,6 +54,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	@Override
+	public void close() {
+		threadPool.shutdownNow();
+	}
+
+	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
 		return enqueue(testTask).future();
 	}
@@ -127,7 +132,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		for (var entry = iterator.previous(); iterator.hasPrevious(); entry = iterator.previous()) {
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
-				var executed = entry.tryExecute();
+				var executed = tryExecute(entry);
 				if (!executed) {
 					workQueue.add(entry);
 					futures.add(entry.future);
@@ -165,9 +170,55 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 	}
 
-	@Override
-	public void close() {
-		threadPool.shutdownNow();
+	private static boolean tryExecute(WorkQueue.Entry entry) {
+		try {
+			var executed = tryExecuteTask(entry.task);
+			if (executed) {
+				entry.future.complete(null);
+			}
+			return executed;
+		}
+		catch (Throwable t) {
+			entry.future.completeExceptionally(t);
+			return true;
+		}
+	}
+
+	private void executeEntry(WorkQueue.Entry entry) {
+		try {
+			executeTask(entry.task);
+		}
+		catch (Throwable t) {
+			entry.future.completeExceptionally(t);
+		}
+		finally {
+			entry.future.complete(null);
+		}
+	}
+
+	@SuppressWarnings("try")
+	private void executeTask(TestTask testTask) {
+		var executed = tryExecuteTask(testTask);
+		if (!executed) {
+			// TODO start another worker to compensate?
+			try (var ignored = testTask.getResourceLock().acquire()) {
+				testTask.execute();
+			}
+			catch (InterruptedException ex) {
+				throw throwAsUncheckedException(ex);
+			}
+		}
+	}
+
+	private static boolean tryExecuteTask(TestTask testTask) {
+		var resourceLock = testTask.getResourceLock();
+		if (resourceLock.tryAcquire()) {
+			try (resourceLock) {
+				testTask.execute();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private class CustomThreadFactory implements ThreadFactory {
@@ -234,58 +285,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future) {
-			boolean tryExecute() {
-				try {
-					var executed = tryExecuteTask(task);
-					if (executed) {
-						future.complete(null);
-					}
-					return executed;
-				}
-				catch (Throwable t) {
-					future.completeExceptionally(t);
-					return true;
-				}
-			}
 		}
 
-	}
-
-	private void executeEntry(WorkQueue.Entry entry) {
-		try {
-			executeTask(entry.task);
-		}
-		catch (Throwable t) {
-			entry.future.completeExceptionally(t);
-		}
-		finally {
-			entry.future.complete(null);
-		}
-	}
-
-	@SuppressWarnings("try")
-	private void executeTask(TestTask testTask) {
-		var executed = tryExecuteTask(testTask);
-		if (!executed) {
-			// TODO start another worker to compensate?
-			try (var ignored = testTask.getResourceLock().acquire()) {
-				testTask.execute();
-			}
-			catch (InterruptedException ex) {
-				throw throwAsUncheckedException(ex);
-			}
-		}
-	}
-
-	private static boolean tryExecuteTask(TestTask testTask) {
-		var resourceLock = testTask.getResourceLock();
-		if (resourceLock.tryAcquire()) {
-			try (resourceLock) {
-				testTask.execute();
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
