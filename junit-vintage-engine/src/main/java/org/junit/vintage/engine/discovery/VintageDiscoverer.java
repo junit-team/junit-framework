@@ -58,7 +58,7 @@ public class VintageDiscoverer {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static Boolean isDiscoveryIssueReportingEnabled(EngineDiscoveryRequest discoveryRequest) {
+	private static boolean isDiscoveryIssueReportingEnabled(EngineDiscoveryRequest discoveryRequest) {
 		return discoveryRequest.getConfigurationParameters() //
 				.getBoolean(Constants.DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME) //
 				.orElse(true);
