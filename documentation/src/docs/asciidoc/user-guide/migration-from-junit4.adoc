@@ -19,9 +19,18 @@ classpath does not lead to any conflicts. It is therefore safe to maintain exist
 [[migrating-from-junit4-running]]
 === Running JUnit 4 Tests on the JUnit Platform
 
-WARNING: The JUnit Vintage engine is deprecated and should only be used temporarily while
+[WARNING]
+====
+The JUnit Vintage engine is deprecated and should only be used temporarily while
 migrating tests to JUnit Jupiter or another testing framework with native JUnit Platform
 support.
+
+By default, if the JUnit Vintage engine is registered and discovers at least one test
+class, it reports a <<running-tests-discovery-issues, discovery issue>> of INFO severity.
+You can prevent this discovery issue from being reported by setting the
+`junit.vintage.discovery.issue.reporting.enabled`
+<<running-tests-config-params, configuration parameter>> to `false`.
+====
 
 Make sure that the `junit-vintage-engine` artifact is in your test runtime path. In that
 case JUnit 3 and JUnit 4 tests will automatically be picked up by the JUnit Platform

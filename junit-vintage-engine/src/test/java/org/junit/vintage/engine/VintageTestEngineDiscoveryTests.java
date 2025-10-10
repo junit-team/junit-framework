@@ -713,7 +713,7 @@ class VintageTestEngineDiscoveryTests {
 	}
 
 	@Test
-	void reportDiscoveryIssueWhenTestsAreFound() {
+	void reportDiscoveryIssueWhenTestsAreFoundByDefault() {
 		var request = discoveryRequestForClass(PlainJUnit4TestCaseWithSingleTestWhichFails.class);
 
 		var results = discover(request);
@@ -723,6 +723,18 @@ class VintageTestEngineDiscoveryTests {
 		var issue = results.getDiscoveryIssues().getFirst();
 		assertThat(issue.severity()).isEqualTo(Severity.INFO);
 		assertThat(issue.message()).contains("JUnit Vintage engine is deprecated");
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	void reportNoDiscoveryIssueWhenTestsAreFoundButConfigurationParameterIsSet() {
+		var request = request() //
+				.selectors(selectClass(PlainJUnit4TestCaseWithSingleTestWhichFails.class)) //
+				.configurationParameter(Constants.DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME, "false").build();
+
+		var results = discover(request);
+
+		assertThat(results.getDiscoveryIssues()).isEmpty();
 	}
 
 	private TestDescriptor findChildByDisplayName(TestDescriptor runnerDescriptor, String displayName) {
