@@ -38,6 +38,7 @@ import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.ConfigurationParameters;
 
 /**
  * @since 6.1
@@ -50,6 +51,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	private final WorkQueue workQueue = new WorkQueue();
 	private final ExecutorService threadPool;
 	private final WorkerLeaseManager workerLeaseManager;
+
+	public ConcurrentHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
+		this(DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters));
+	}
 
 	public ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());

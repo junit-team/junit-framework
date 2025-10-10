@@ -60,7 +60,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 * @see DefaultParallelExecutionConfigurationStrategy
 	 */
 	public ForkJoinPoolHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
-		this(createConfiguration(configurationParameters));
+		this(DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters));
 	}
 
 	/**
@@ -80,12 +80,6 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 		this.taskEventListener = taskEventListener;
 		parallelism = forkJoinPool.getParallelism();
 		LoggerFactory.getLogger(getClass()).config(() -> "Using ForkJoinPool with parallelism of " + parallelism);
-	}
-
-	private static ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.getStrategy(
-			configurationParameters);
-		return strategy.createConfiguration(configurationParameters);
 	}
 
 	private ForkJoinPool createForkJoinPool(ParallelExecutionConfiguration configuration) {
