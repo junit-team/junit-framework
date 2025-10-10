@@ -22,7 +22,8 @@ import java.nio.charset.Charset;
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.console.output.ColorPalette;
-import org.junit.platform.console.output.TestFeedPrintingListener;
+import org.junit.platform.console.output.Theme;
+import org.junit.platform.console.output.TreePrintingListener;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
@@ -55,8 +56,9 @@ public final class JUnit {
 
 	private static void run(DiscoverySelector selector) {
 		var listener = new SummaryGeneratingListener();
-		var writer = new PrintWriter(System.out, true, Charset.defaultCharset());
-		var printer = new TestFeedPrintingListener(writer, ColorPalette.DEFAULT);
+		var charset = Charset.defaultCharset();
+		var writer = new PrintWriter(System.out, true, charset);
+		var printer = new TreePrintingListener(writer, ColorPalette.DEFAULT, Theme.valueOf(charset));
 		var request = request().selectors(selector).forExecution() //
 				.listeners(listener, printer) //
 				.build();
@@ -67,7 +69,7 @@ public final class JUnit {
 		if (summary.getTotalFailureCount() == 0)
 			return;
 
-		summary.printFailuresTo(new PrintWriter(System.err, true, Charset.defaultCharset()));
+		summary.printFailuresTo(new PrintWriter(System.err, true, charset));
 		throw new JUnitException("JUnit run finished with %d failure%s".formatted( //
 			summary.getTotalFailureCount(), //
 			summary.getTotalFailureCount() == 1 ? "" : "s"));
