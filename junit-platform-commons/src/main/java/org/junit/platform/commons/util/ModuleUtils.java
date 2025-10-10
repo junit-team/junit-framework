@@ -253,9 +253,10 @@ public class ModuleUtils {
 			try (ModuleReader reader = reference.open()) {
 				try (Stream<String> names = reader.list()) {
 					// @formatter:off
-					return names.filter(name -> name.endsWith(".class"))
-							.map(this::className)
-							.filter(name -> !"module-info".equals(name))
+					return names.filter(ClasspathFilters::isClassOrSourceFileName)
+							.map(DefaultClasspathScanner::determineSimpleClassName)
+							.map(name -> name.replace('/', '.'))
+							.filter(name -> !"package-info".equals(name))
 							.filter(classFilter::match)
 							.<Class<?>> map(this::loadClassUnchecked)
 							.filter(classFilter::match)
@@ -266,15 +267,6 @@ public class ModuleUtils {
 			catch (IOException e) {
 				throw new JUnitException("Failed to read contents of " + reference + ".", e);
 			}
-		}
-
-		/**
-		 * Convert resource name to binary class name.
-		 */
-		private String className(String resourceName) {
-			resourceName = resourceName.substring(0, resourceName.length() - 6); // 6 = ".class".length()
-			resourceName = resourceName.replace('/', '.');
-			return resourceName;
 		}
 
 		/**
