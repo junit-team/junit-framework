@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -132,24 +133,32 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	// --- Node ----------------------------------------------------------------
 
 	@Override
-	public ExecutionMode getExecutionMode() {
-		Optional<ExecutionMode> executionMode = getExplicitExecutionMode();
-		if (executionMode.isPresent()) {
-			return executionMode.get();
-		}
-		Optional<TestDescriptor> parent = getParent();
-		while (parent.isPresent() && parent.get() instanceof JupiterTestDescriptor jupiterParent) {
-			executionMode = jupiterParent.getExplicitExecutionMode();
-			if (executionMode.isPresent()) {
-				return executionMode.get();
-			}
-			executionMode = jupiterParent.getDefaultChildExecutionMode();
-			if (executionMode.isPresent()) {
-				return executionMode.get();
-			}
-			parent = jupiterParent.getParent();
-		}
-		return toExecutionMode(configuration.getDefaultExecutionMode());
+	public final ExecutionMode getExecutionMode() {
+		return getExplicitExecutionMode() //
+				.or(this::determineExecutionModeFromAncestors) //
+				.orElseGet(this::getDefaultExecutionMode);
+	}
+
+	private Optional<ExecutionMode> determineExecutionModeFromAncestors() {
+		return ancestors() //
+				.takeWhile(it -> it instanceof JupiterTestDescriptor) //
+				.flatMap(ancestor -> determineExecutionModeFromAncestor((JupiterTestDescriptor) ancestor).stream()) //
+				.findFirst();
+	}
+
+	private static Optional<ExecutionMode> determineExecutionModeFromAncestor(JupiterTestDescriptor ancestor) {
+		return ancestor.getExplicitChildExecutionMode() //
+				.or(ancestor::getExplicitExecutionMode) //
+				.or(ancestor::getDefaultChildExecutionMode);
+	}
+
+	Stream<TestDescriptor> ancestors() {
+		return Stream.iterate(getParent(), Optional::isPresent, it -> it.flatMap(TestDescriptor::getParent)) //
+				.map(Optional::orElseThrow);
+	}
+
+	Optional<ExecutionMode> getExplicitChildExecutionMode() {
+		return Optional.empty();
 	}
 
 	Optional<ExecutionMode> getExplicitExecutionMode() {
@@ -157,7 +166,11 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	}
 
 	Optional<ExecutionMode> getDefaultChildExecutionMode() {
-		return Optional.empty();
+		return getExplicitChildExecutionMode();
+	}
+
+	ExecutionMode getDefaultExecutionMode() {
+		return toExecutionMode(configuration.getDefaultExecutionMode());
 	}
 
 	Optional<ExecutionMode> getExecutionModeFromAnnotation(AnnotatedElement element) {

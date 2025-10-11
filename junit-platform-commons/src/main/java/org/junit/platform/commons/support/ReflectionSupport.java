@@ -11,6 +11,7 @@
 package org.junit.platform.commons.support;
 
 import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.reflect.Field;
@@ -389,6 +390,31 @@ public final class ReflectionSupport {
 			Predicate<String> classNameFilter) {
 
 		return ReflectionUtils.findAllClassesInModule(moduleName, classFilter, classNameFilter);
+	}
+
+	/**
+	 * Find all {@linkplain Class classes} in the supplied {@code module}
+	 * that match the specified {@code classFilter} and {@code classNameFilter}
+	 * predicates.
+	 *
+	 * <p>The module-path scanning algorithm searches recursively in all
+	 * packages contained in the module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>unnamed</em>
+	 * @param classFilter the class type filter; never {@code null}
+	 * @param classNameFilter the class name filter; never {@code null}
+	 * @return an immutable list of all such classes found; never {@code null}
+	 * but potentially empty
+	 * @since 6.1
+	 * @see #findAllClassesInClasspathRoot(URI, Predicate, Predicate)
+	 * @see #findAllClassesInPackage(String, Predicate, Predicate)
+	 * @see ResourceSupport#findAllResourcesInModule(String, ResourceFilter)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static List<Class<?>> findAllClassesInModule(Module module, Predicate<Class<?>> classFilter,
+			Predicate<String> classNameFilter) {
+
+		return ReflectionUtils.findAllClassesInModule(module, classFilter, classNameFilter);
 	}
 
 	/**

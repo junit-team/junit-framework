@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.engine.discovery.JupiterUniqueIdBuilder.uniqueIdForMethod;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
@@ -422,7 +423,7 @@ class DiscoverySelectorsTests {
 		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectModuleByNamePreconditions() {
-			assertPreconditionViolationFor(() -> selectModule(null));
+			assertPreconditionViolationFor(() -> selectModule((String) null));
 			assertPreconditionViolationFor(() -> selectModule(""));
 			assertPreconditionViolationFor(() -> selectModule("   "));
 		}
@@ -431,6 +432,21 @@ class DiscoverySelectorsTests {
 		void selectModuleByName() {
 			var selector = selectModule("java.base");
 			assertEquals("java.base", selector.getModuleName());
+		}
+
+		@SuppressWarnings("DataFlowIssue")
+		@Test
+		void selectModuleByInstancePreconditions() {
+			assertPreconditionViolationFor(() -> selectModule((Module) null));
+			assertPreconditionViolationFor(() -> selectModule(getClass().getClassLoader().getUnnamedModule()));
+		}
+
+		@Test
+		void selectModuleByInstance() {
+			var module = Object.class.getModule();
+			var selector = selectModule(module);
+			assertEquals("java.base", selector.getModuleName());
+			assertSame(module, selector.getModule().orElseThrow());
 		}
 
 		@SuppressWarnings("DataFlowIssue")

@@ -55,6 +55,7 @@ class AssertInstanceOf {
 					.reason(actualValue == null ? "Unexpected null value" : "Unexpected type") //
 					.expected(expectedType) //
 					.actual(actualValue == null ? null : actualValue.getClass()) //
+					.cause(actualValue instanceof Throwable t ? t : null) //
 					.buildAndThrow();
 		}
 		return expectedType.cast(actualValue);

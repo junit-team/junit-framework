@@ -278,6 +278,32 @@ class JupiterTestDescriptorTests {
 		assertThat(nestedDescriptor.getEnclosingTestClasses()).containsExactly(StaticTestCase.class);
 	}
 
+	@Test
+	void ancestorsAreConsistent() throws Exception {
+		ClassBasedTestDescriptor parentDescriptor = new ClassTestDescriptor(uniqueId, StaticTestCase.class,
+			configuration);
+
+		ClassBasedTestDescriptor nestedDescriptor = new NestedClassTestDescriptor(uniqueId, NestedTestCase.class,
+			List::of, configuration);
+		parentDescriptor.addChild(nestedDescriptor);
+
+		TestMethodTestDescriptor methodDescriptor = new TestMethodTestDescriptor(uniqueId, TestCase.class,
+			NestedTestCase.class.getDeclaredMethod("test"), List::of, configuration);
+		nestedDescriptor.addChild(methodDescriptor);
+
+		assertThat(methodDescriptor.ancestors()) //
+				.containsExactlyElementsOf(methodDescriptor.getAncestors()) //
+				.containsExactly(nestedDescriptor, parentDescriptor);
+
+		assertThat(nestedDescriptor.ancestors()) //
+				.containsExactlyElementsOf(nestedDescriptor.getAncestors()) //
+				.containsExactly(parentDescriptor);
+
+		assertThat(parentDescriptor.ancestors()) //
+				.containsExactlyElementsOf(parentDescriptor.getAncestors()) //
+				.isEmpty();
+	}
+
 	// -------------------------------------------------------------------------
 
 	@Test
@@ -392,6 +418,10 @@ class JupiterTestDescriptorTests {
 
 	@Nested
 	class NestedTestCase {
+
+		@Test
+		void test() {
+		}
 	}
 
 	static class StaticTestCase {

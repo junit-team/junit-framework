@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="WARN"
+			   xmlns="https://logging.apache.org/xml/ns"
+			   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			   xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.junit" level="warn" />
-		<Logger name="org.junit.jupiter.api" level="off" />
-		<Logger name="org.junit.jupiter.engine" level="off" />
-		<Logger name="org.junit.platform.launcher.core.DiscoveryIssueNotifier" level="off" />
-		<Logger name="org.junit.platform.launcher.listeners.discovery.LoggingLauncherDiscoveryListener" level="off" />
-		<Logger name="org.junit.jupiter.engine.extension.MutableExtensionRegistry" level="off" />
-		<Logger name="org.junit.jupiter.engine.extension.TempDirectory$CloseablePath" level="off" />
-		<Root level="error">
-			<AppenderRef ref="Console" />
+		<Logger name="org.junit" level="WARN"/>
+		<Logger name="org.junit.jupiter.api" level="OFF"/>
+		<Logger name="org.junit.jupiter.engine" level="OFF"/>
+		<Logger name="org.junit.platform.launcher.core.DiscoveryIssueNotifier" level="OFF"/>
+		<Logger name="org.junit.platform.launcher.listeners.discovery.LoggingLauncherDiscoveryListener" level="OFF"/>
+		<Logger name="org.junit.jupiter.engine.extension.MutableExtensionRegistry" level="OFF"/>
+		<Logger name="org.junit.jupiter.engine.extension.TempDirectory$CloseablePath" level="OFF"/>
+		<Root level="ERROR">
+			<AppenderRef ref="Console"/>
 		</Root>
 	</Loggers>
 </Configuration>

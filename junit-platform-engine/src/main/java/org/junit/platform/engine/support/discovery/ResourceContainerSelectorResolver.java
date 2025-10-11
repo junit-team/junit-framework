@@ -49,6 +49,10 @@ class ResourceContainerSelectorResolver implements SelectorResolver {
 
 	@Override
 	public Resolution resolve(ModuleSelector selector, Context context) {
+		if (selector.getModule().isPresent()) {
+			Module module = selector.getModule().get();
+			return resourceSelectors(findAllResourcesInModule(module, resourceFilter));
+		}
 		return resourceSelectors(findAllResourcesInModule(selector.getModuleName(), resourceFilter));
 	}
 

@@ -185,7 +185,9 @@ class ResourceSupportTests {
 	@Test
 	void findAllResourcesInModulePreconditions() {
 		assertPreconditionViolationNotNullOrEmptyFor("Module name",
-			() -> ResourceSupport.findAllResourcesInModule(null, allResources));
+			() -> ResourceSupport.findAllResourcesInModule((String) null, allResources));
+		assertPreconditionViolationNotNullFor("Module",
+			() -> ResourceSupport.findAllResourcesInModule((Module) null, allResources));
 		assertPreconditionViolationNotNullFor("Resource filter",
 			() -> ResourceSupport.findAllResourcesInModule("org.junit.platform.commons", null));
 	}

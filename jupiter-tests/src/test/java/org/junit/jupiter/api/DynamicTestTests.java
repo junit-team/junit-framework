@@ -15,7 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -215,6 +218,42 @@ class DynamicTestTests {
 		assertThat(container.getTestSourceUri()).containsSame(containerSourceUri);
 		assertThat(container.toString()).isEqualTo(
 			"DynamicContainer [displayName = 'bar', testSourceUri = other://container]");
+	}
+
+	@Test
+	void appliesConfiguration() {
+		Executable executable = Assertions::fail;
+
+		var test = dynamicTest(config -> config //
+				.displayName("Container") //
+				.testSourceUri(URI.create("https://junit.org")) //
+				.executionMode(CONCURRENT).executable(executable));
+
+		assertThat(test.getDisplayName()).isEqualTo("Container");
+		assertThat(test.getTestSourceUri()).contains(URI.create("https://junit.org"));
+		assertThat(test.getExecutionMode()).contains(CONCURRENT);
+		assertThat(test.getExecutable()).isSameAs(executable);
+	}
+
+	@Test
+	void displayNameMustNotBeBlank() {
+		assertPreconditionViolationNotNullOrBlankFor("displayName", () -> dynamicTest(__ -> {
+		}));
+		assertPreconditionViolationNotNullOrBlankFor("displayName",
+			() -> dynamicTest(config -> config.displayName("")));
+	}
+
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void executionModeMustNotBeNull() {
+		assertPreconditionViolationNotNullFor("executionMode", () -> dynamicTest(config -> config.executionMode(null)));
+	}
+
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void executableModeMustNotBeNull() {
+		assertPreconditionViolationNotNullFor("executable", () -> dynamicTest(config -> config.displayName("test")));
+		assertPreconditionViolationNotNullFor("executable", () -> dynamicTest(config -> config.executable(null)));
 	}
 
 	private void assert1Equals48Directly() {

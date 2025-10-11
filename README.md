@@ -84,9 +84,9 @@ projects via the following command:
 
 ## Dependency Metadata
 
-[![JUnit Jupiter version](https://img.shields.io/maven-central/v/org.junit.jupiter/junit-jupiter/5..svg?color=25a162&label=Jupiter)](https://central.sonatype.com/search?namespace=org.junit.jupiter)
-[![JUnit Vintage version](https://img.shields.io/maven-central/v/org.junit.vintage/junit-vintage-engine/5..svg?color=25a162&label=Vintage)](https://central.sonatype.com/search?namespace=org.junit.vintage)
-[![JUnit Platform version](https://img.shields.io/maven-central/v/org.junit.platform/junit-platform-commons/1..svg?color=25a162&label=Platform)](https://central.sonatype.com/search?namespace=org.junit.platform)
+[![JUnit Jupiter version](https://img.shields.io/maven-central/v/org.junit.jupiter/junit-jupiter/6..svg?color=25a162&label=Jupiter)](https://central.sonatype.com/search?namespace=org.junit.jupiter)
+[![JUnit Vintage version](https://img.shields.io/maven-central/v/org.junit.vintage/junit-vintage-engine/6..svg?color=25a162&label=Vintage)](https://central.sonatype.com/search?namespace=org.junit.vintage)
+[![JUnit Platform version](https://img.shields.io/maven-central/v/org.junit.platform/junit-platform-commons/6..svg?color=25a162&label=Platform)](https://central.sonatype.com/search?namespace=org.junit.platform)
 
 Consult the [Dependency Metadata] section of the [User Guide] for a list of all artifacts
 of the JUnit Platform, JUnit Jupiter, and JUnit Vintage.

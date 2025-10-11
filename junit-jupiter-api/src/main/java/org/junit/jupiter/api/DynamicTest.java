@@ -12,10 +12,12 @@ package org.junit.jupiter.api;
 
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
 import java.util.Iterator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -61,7 +63,7 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, Executable executable) {
-		return new DynamicTest(displayName, null, executable);
+		return dynamicTest(config -> config.displayName(displayName).executable(executable));
 	}
 
 	/**
@@ -79,7 +81,24 @@ public class DynamicTest extends DynamicNode {
 	 * @see #stream(Iterator, Function, ThrowingConsumer)
 	 */
 	public static DynamicTest dynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		return new DynamicTest(displayName, testSourceUri, executable);
+		return dynamicTest(
+			config -> config.displayName(displayName).testSourceUri(testSourceUri).executable(executable));
+	}
+
+	/**
+	 * Factory for creating a new {@code DynamicTest} that is configured via the
+	 * supplied {@link Consumer} of {@link Configuration}.
+	 *
+	 * @param configurer callback for configuring the resulting
+	 * {@code DynamicTest}; never {@code null}.
+	 *
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static DynamicTest dynamicTest(Consumer<? super Configuration> configurer) {
+		var configuration = new DefaultConfiguration();
+		configurer.accept(configuration);
+		return new DynamicTest(configuration);
 	}
 
 	/**
@@ -290,9 +309,9 @@ public class DynamicTest extends DynamicNode {
 
 	private final Executable executable;
 
-	private DynamicTest(String displayName, @Nullable URI testSourceUri, Executable executable) {
-		super(displayName, testSourceUri);
-		this.executable = Preconditions.notNull(executable, "executable must not be null");
+	private DynamicTest(DefaultConfiguration configuration) {
+		super(configuration);
+		this.executable = Preconditions.notNull(configuration.executable, "executable must not be null");
 	}
 
 	/**
@@ -300,6 +319,42 @@ public class DynamicTest extends DynamicNode {
 	 */
 	public Executable getExecutable() {
 		return this.executable;
+	}
+
+	/**
+	 * {@code Configuration} of a {@link DynamicTest}.
+	 *
+	 * @since 6.1
+	 * @see DynamicTest#dynamicTest(Consumer)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public sealed interface Configuration extends DynamicNode.Configuration<Configuration> {
+
+		/**
+		 * Set the {@linkplain DynamicTest#getExecutable() executable} to use
+		 * for the configured {@link DynamicTest}.
+		 *
+		 * @param executable the executable; never {@code null} or blank
+		 * @return this configuration for method chaining
+		 */
+		Configuration executable(Executable executable);
+
+	}
+
+	static final class DefaultConfiguration extends AbstractConfiguration<Configuration> implements Configuration {
+
+		private @Nullable Executable executable;
+
+		@Override
+		public Configuration executable(Executable executable) {
+			this.executable = Preconditions.notNull(executable, "executable must not be null");
+			return this;
+		}
+
+		@Override
+		protected Configuration self() {
+			return this;
+		}
 	}
 
 }

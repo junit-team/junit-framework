@@ -96,15 +96,19 @@ class AssertInstanceOfAssertionsTests {
 		String valueType = actualValue == null ? "null" : actualValue.getClass().getCanonicalName();
 		String expectedMessage = "Unexpected %s, expected: <%s> but was: <%s>".formatted(unexpectedSort,
 			expectedType.getCanonicalName(), valueType);
+		Throwable expectedCause = actualValue instanceof Throwable throwable ? throwable : null;
 
-		assertThrowsWithMessage(expectedMessage, () -> assertInstanceOf(expectedType, actualValue));
-		assertThrowsWithMessage("extra ==> " + expectedMessage,
+		assertThrowsWithMessage(expectedMessage, expectedCause, () -> assertInstanceOf(expectedType, actualValue));
+		assertThrowsWithMessage("extra ==> " + expectedMessage, expectedCause,
 			() -> assertInstanceOf(expectedType, actualValue, "extra"));
-		assertThrowsWithMessage("extra ==> " + expectedMessage,
+		assertThrowsWithMessage("extra ==> " + expectedMessage, expectedCause,
 			() -> assertInstanceOf(expectedType, actualValue, () -> "extra"));
 	}
 
-	private void assertThrowsWithMessage(String expectedMessage, Executable executable) {
-		assertEquals(expectedMessage, assertThrows(AssertionFailedError.class, executable).getMessage());
+	private void assertThrowsWithMessage(String expectedMessage, @Nullable Throwable expectedCause,
+			Executable executable) {
+		Throwable throwable = assertThrows(AssertionFailedError.class, executable);
+		assertEquals(expectedMessage, throwable.getMessage());
+		assertSame(expectedCause, throwable.getCause());
 	}
 }

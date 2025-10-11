@@ -1062,6 +1062,16 @@ public final class ReflectionUtils {
 	}
 
 	/**
+	 * @since 6.1
+	 * @see org.junit.platform.commons.support.ReflectionSupport#findAllClassesInModule(Module, Predicate, Predicate)
+	 */
+	public static List<Class<?>> findAllClassesInModule(Module module, Predicate<Class<?>> classFilter,
+			Predicate<String> classNameFilter) {
+		// unmodifiable since returned by public, non-internal method(s)
+		return findAllClassesInModule(module, ClassFilter.of(classNameFilter, classFilter));
+	}
+
+	/**
 	 * @since 1.10
 	 * @see org.junit.platform.commons.support.ReflectionSupport#streamAllClassesInModule(String, Predicate, Predicate)
 	 */
@@ -1078,10 +1088,24 @@ public final class ReflectionUtils {
 	}
 
 	/**
+	 * @since 6.1
+	 */
+	public static List<Class<?>> findAllClassesInModule(Module module, ClassFilter classFilter) {
+		return List.copyOf(ModuleUtils.findAllClassesInModule(module, classFilter));
+	}
+
+	/**
 	 * @since 1.11
 	 */
 	public static List<Resource> findAllResourcesInModule(String moduleName, ResourceFilter resourceFilter) {
 		return List.copyOf(ModuleUtils.findAllResourcesInModule(moduleName, resourceFilter));
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter resourceFilter) {
+		return List.copyOf(ModuleUtils.findAllResourcesInModule(module, resourceFilter));
 	}
 
 	/**

@@ -429,6 +429,22 @@ public final class DiscoverySelectors {
 	}
 
 	/**
+	 * Create a {@code ModuleSelector} for the supplied module.
+	 *
+	 * <p>The unnamed module is not supported.
+	 *
+	 * @param module the module to select; never {@code null} or <em>unnamed</em>
+	 * @since 6.1
+	 * @see ModuleSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static ModuleSelector selectModule(Module module) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.condition(module.isNamed(), "Module must be named");
+		return new ModuleSelector(module);
+	}
+
+	/**
 	 * Create a list of {@code ModuleSelectors} for the supplied module names.
 	 *
 	 * <p>The unnamed module is not supported.

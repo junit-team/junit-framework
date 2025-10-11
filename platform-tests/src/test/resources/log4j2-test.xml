@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="WARN"
+			   xmlns="https://logging.apache.org/xml/ns"
+			   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			   xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.junit" level="warn" />
-		<Logger name="org.junit.platform.commons.util.DefaultClasspathScanner" level="error" />
-		<Logger name="org.junit.platform.engine.support.descriptor.DemoClassTestDescriptor" level="error" />
-		<Logger name="org.junit.platform.launcher.core.CompositeEngineExecutionListener" level="error" />
-		<Logger name="org.junit.platform.launcher.core.CompositeTestExecutionListener" level="error" />
-		<Logger name="org.junit.platform.launcher.core.DiscoveryIssueCollector" level="off" />
-		<Logger name="org.junit.platform.launcher.core.DiscoveryIssueNotifier" level="off" />
-		<Logger name="org.junit.platform.launcher.core.EngineIdValidator" level="fatal" />
-		<Logger name="org.junit.platform.launcher.core.EngineFilterer" level="error" />
-		<Logger name="org.junit.platform.launcher.core.InternalTestPlan" level="error" />
-		<Logger name="org.junit.platform.launcher.core.LauncherConfigurationParameters" level="error" />
-		<Logger name="org.junit.platform.launcher.listeners.discovery.LoggingLauncherDiscoveryListener" level="off" />
-		<Logger name="org.junit.vintage.engine" level="error" />
-		<Logger name="org.junit.jupiter.engine" level="error" />
-		<Root level="error">
-			<AppenderRef ref="Console" />
+		<Logger name="org.junit" level="WARN"/>
+		<Logger name="org.junit.platform.commons.util.DefaultClasspathScanner" level="ERROR"/>
+		<Logger name="org.junit.platform.engine.support.descriptor.DemoClassTestDescriptor" level="ERROR"/>
+		<Logger name="org.junit.platform.launcher.core.CompositeEngineExecutionListener" level="ERROR"/>
+		<Logger name="org.junit.platform.launcher.core.CompositeTestExecutionListener" level="ERROR"/>
+		<Logger name="org.junit.platform.launcher.core.DiscoveryIssueCollector" level="OFF"/>
+		<Logger name="org.junit.platform.launcher.core.DiscoveryIssueNotifier" level="OFF"/>
+		<Logger name="org.junit.platform.launcher.core.EngineIdValidator" level="FATAL"/>
+		<Logger name="org.junit.platform.launcher.core.EngineFilterer" level="ERROR"/>
+		<Logger name="org.junit.platform.launcher.core.InternalTestPlan" level="ERROR"/>
+		<Logger name="org.junit.platform.launcher.core.LauncherConfigurationParameters" level="ERROR"/>
+		<Logger name="org.junit.platform.launcher.listeners.discovery.LoggingLauncherDiscoveryListener" level="OFF"/>
+		<Logger name="org.junit.vintage.engine" level="ERROR"/>
+		<Logger name="org.junit.jupiter.engine" level="ERROR"/>
+		<Root level="ERROR">
+			<AppenderRef ref="Console"/>
 		</Root>
 	</Loggers>
 </Configuration>

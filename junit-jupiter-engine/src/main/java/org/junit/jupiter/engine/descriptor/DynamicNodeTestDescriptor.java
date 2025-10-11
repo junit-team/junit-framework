@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import java.util.Optional;
+
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -27,11 +29,18 @@ import org.junit.platform.engine.UniqueId;
 abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 
 	protected final int index;
+	private final Optional<ExecutionMode> executionMode;
 
 	DynamicNodeTestDescriptor(UniqueId uniqueId, int index, DynamicNode dynamicNode, @Nullable TestSource testSource,
 			JupiterConfiguration configuration) {
 		super(uniqueId, dynamicNode.getDisplayName(), testSource, configuration);
 		this.index = index;
+		this.executionMode = dynamicNode.getExecutionMode().map(JupiterTestDescriptor::toExecutionMode);
+	}
+
+	@Override
+	Optional<ExecutionMode> getExplicitExecutionMode() {
+		return executionMode;
 	}
 
 	@Override

@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.api.parallel.Execution;
 
 // end::user_guide[]
 // @formatter:off
@@ -163,6 +166,44 @@ class DynamicTestsDemo {
 			)));
 	}
 
+	// end::user_guide[]
+	// tag::execution_mode[]
+	@TestFactory
+	@Execution(CONCURRENT) // <1>
+	Stream<DynamicNode> dynamicTestsWithConfiguredExecutionMode() {
+		return Stream.of("A", "B", "C")
+				.map(input ->
+					dynamicContainer(outer -> outer
+						.displayName("Container " + input)
+						.children(
+							dynamicTest(config -> config
+								.displayName("not null")
+								.executionMode(SAME_THREAD) // <2>
+								.executable(() -> assertNotNull(input))
+							),
+							dynamicContainer(inner -> inner
+								.displayName("properties")
+								.executionMode(CONCURRENT) // <3>
+								.childExecutionMode(SAME_THREAD) // <4>
+								.children(
+									dynamicTest(config -> config
+										.displayName("length > 0")
+										.executionMode(CONCURRENT) // <5>
+										.executable(() -> assertTrue(input.length() > 0))
+									),
+									dynamicTest(config -> config
+										.displayName("not empty")
+										.executable(() -> assertFalse(input.isEmpty()))
+									)
+								)
+							)
+						)
+					)
+				);
+	}
+	// end::execution_mode[]
+
+	// tag::user_guide[]
 	@TestFactory
 	DynamicNode dynamicNodeSingleTest() {
 		return dynamicTest("'pop' is a palindrome", () -> assertTrue(isPalindrome("pop")));

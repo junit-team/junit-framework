@@ -110,6 +110,27 @@ public class ModuleUtils {
 	}
 
 	/**
+	 * Find all {@linkplain Class classes} for the given module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>unnamed</em>
+	 * @param filter the class filter to apply; never {@code null}
+	 * @return an immutable list of all such classes found; never {@code null}
+	 * but potentially empty
+	 * @since 6.1
+	 */
+	@API(status = INTERNAL, since = "6.1")
+	public static List<Class<?>> findAllClassesInModule(Module module, ClassFilter filter) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.condition(module.isNamed(), "Module must not be unnamed");
+		Preconditions.notNull(filter, "Class filter must not be null");
+
+		String name = module.getName();
+		logger.debug(() -> "Looking for classes in module: " + name);
+		var reference = module.getLayer().configuration().findModule(name).orElseThrow().reference();
+		return scan(Set.of(reference), filter, module.getClassLoader());
+	}
+
+	/**
 	 * Find all {@linkplain Resource resources} for the given module name.
 	 *
 	 * @param moduleName the name of the module to scan; never {@code null} or
@@ -124,13 +145,34 @@ public class ModuleUtils {
 		Preconditions.notBlank(moduleName, "Module name must not be null or empty");
 		Preconditions.notNull(filter, "Resource filter must not be null");
 
-		logger.debug(() -> "Looking for classes in module: " + moduleName);
+		logger.debug(() -> "Looking for resources in module: " + moduleName);
 		// @formatter:off
 		Set<ModuleReference> moduleReferences = streamResolvedModules(isEqual(moduleName))
 				.map(ResolvedModule::reference)
 				.collect(toSet());
 		// @formatter:on
 		return scan(moduleReferences, filter, ModuleUtils.class.getClassLoader());
+	}
+
+	/**
+	 * Find all {@linkplain Resource resources} for the given module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>empty</em>
+	 * @param filter the class filter to apply; never {@code null}
+	 * @return an immutable list of all such resources found; never {@code null}
+	 * but potentially empty
+	 * @since 6.1
+	 */
+	@API(status = INTERNAL, since = "6.1")
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter filter) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.condition(module.isNamed(), "Module must not be unnamed");
+		Preconditions.notNull(filter, "Resource filter must not be null");
+
+		String name = module.getName();
+		logger.debug(() -> "Looking for resources in module: " + name);
+		var reference = module.getLayer().configuration().findModule(name).orElseThrow().reference();
+		return scan(Set.of(reference), filter, module.getClassLoader());
 	}
 
 	/**
@@ -175,18 +217,18 @@ public class ModuleUtils {
 	}
 
 	/**
-	 * Scan for classes using the supplied set of module references, class
+	 * Scan for resources using the supplied set of module references, class
 	 * filter, and loader.
 	 */
 	private static List<Resource> scan(Set<ModuleReference> references, ResourceFilter filter, ClassLoader loader) {
 		logger.debug(() -> "Scanning " + references.size() + " module references: " + references);
 		ModuleReferenceResourceScanner scanner = new ModuleReferenceResourceScanner(filter, loader);
-		List<Resource> classes = new ArrayList<>();
+		List<Resource> resources = new ArrayList<>();
 		for (ModuleReference reference : references) {
-			classes.addAll(scanner.scan(reference));
+			resources.addAll(scanner.scan(reference));
 		}
-		logger.debug(() -> "Found " + classes.size() + " classes: " + classes);
-		return List.copyOf(classes);
+		logger.debug(() -> "Found " + resources.size() + " resources: " + resources);
+		return List.copyOf(resources);
 	}
 
 	/**

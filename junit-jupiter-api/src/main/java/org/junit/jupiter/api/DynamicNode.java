@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.net.URI;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 
@@ -36,9 +38,12 @@ public abstract class DynamicNode {
 	/** Custom test source {@link URI} associated with this node; potentially {@code null}. */
 	private final @Nullable URI testSourceUri;
 
-	DynamicNode(String displayName, @Nullable URI testSourceUri) {
-		this.displayName = Preconditions.notBlank(displayName, "displayName must not be null or blank");
-		this.testSourceUri = testSourceUri;
+	private final @Nullable ExecutionMode executionMode;
+
+	DynamicNode(AbstractConfiguration<?> configuration) {
+		this.displayName = Preconditions.notBlank(configuration.displayName, "displayName must not be null or blank");
+		this.testSourceUri = configuration.testSourceUri;
+		this.executionMode = configuration.executionMode;
 	}
 
 	/**
@@ -61,12 +66,92 @@ public abstract class DynamicNode {
 		return Optional.ofNullable(testSourceUri);
 	}
 
+	/**
+	 * {@return the {@link ExecutionMode} of this {@code DynamicNode}}
+	 *
+	 * @since 6.1
+	 * @see DynamicContainer#getChildExecutionMode()
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public Optional<ExecutionMode> getExecutionMode() {
+		return Optional.ofNullable(executionMode);
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this) //
 				.append("displayName", displayName) //
 				.append("testSourceUri", testSourceUri) //
 				.toString();
+	}
+
+	/**
+	 * {@code Configuration} of a {@link DynamicNode} or one of its
+	 * subinterfaces.
+	 *
+	 * @since 6.1
+	 * @see DynamicTest.Configuration
+	 * @see DynamicContainer.Configuration
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public sealed interface Configuration<T extends Configuration<T>>
+			permits DynamicTest.Configuration, DynamicContainer.Configuration, AbstractConfiguration {
+
+		/**
+		 * Set the {@linkplain DynamicNode#getDisplayName() display name} to use
+		 * for the configured {@link DynamicNode}.
+		 *
+		 * @param displayName the display name; never {@code null} or blank
+		 * @return this configuration for method chaining
+		 */
+		T displayName(String displayName);
+
+		/**
+		 * Set the {@linkplain DynamicNode#getTestSourceUri() test source URI}
+		 * to use for the configured {@link DynamicNode}.
+		 *
+		 * @param testSourceUri the test source URI; may be {@code null}
+		 * @return this configuration for method chaining
+		 */
+		T testSourceUri(@Nullable URI testSourceUri);
+
+		/**
+		 * Set the {@linkplain DynamicNode#getExecutionMode() execution mode} to
+		 * use for the configured {@link DynamicNode}.
+		 *
+		 * @param executionMode the execution mode; never {@code null}
+		 * @return this configuration for method chaining
+		 */
+		T executionMode(ExecutionMode executionMode);
+
+	}
+
+	abstract static sealed class AbstractConfiguration<T extends Configuration<T>> implements Configuration<T>
+			permits DynamicTest.DefaultConfiguration, DynamicContainer.DefaultConfiguration {
+
+		private @Nullable String displayName;
+		private @Nullable URI testSourceUri;
+		private @Nullable ExecutionMode executionMode;
+
+		@Override
+		public T displayName(String displayName) {
+			this.displayName = Preconditions.notBlank(displayName, "displayName must not be null or blank");
+			return self();
+		}
+
+		@Override
+		public T testSourceUri(@Nullable URI testSourceUri) {
+			this.testSourceUri = testSourceUri;
+			return self();
+		}
+
+		@Override
+		public T executionMode(ExecutionMode executionMode) {
+			this.executionMode = Preconditions.notNull(executionMode, "executionMode must not be null");
+			return self();
+		}
+
+		protected abstract T self();
 	}
 
 }

@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.discovery;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.DiscoverySelectorIdentifier;
@@ -33,10 +35,29 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
 @API(status = STABLE, since = "1.1")
 public final class ModuleSelector implements DiscoverySelector {
 
+	@Nullable
+	private final Module module;
 	private final String moduleName;
 
+	ModuleSelector(Module module) {
+		this.module = module;
+		this.moduleName = module.getName();
+	}
+
 	ModuleSelector(String moduleName) {
+		this.module = null;
 		this.moduleName = moduleName;
+	}
+
+	/**
+	 * {@return the selected {@link Module}, if available}
+	 *
+	 * @since 6.1
+	 * @see DiscoverySelectors#selectModule(Module)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public Optional<Module> getModule() {
+		return Optional.ofNullable(module);
 	}
 
 	/**
