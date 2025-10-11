@@ -158,8 +158,8 @@ class CsvFileArgumentsProviderTests {
 				? builder.delimiter(c).build() //
 				: builder.delimiterString(delimiter.toString()).build();
 
-		var message = "delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " +
-				"must all differ";
+		var message = "delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' "
+				+ "must all differ";
 		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny()) //
 				.withMessage(message.formatted(delimiter, quoteCharacter, commentCharacter));
 	}

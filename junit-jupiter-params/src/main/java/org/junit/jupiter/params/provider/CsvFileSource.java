@@ -64,6 +64,10 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * column is trimmed by default. This behavior can be changed by setting the
  * {@link #ignoreLeadingAndTrailingWhitespace} attribute to {@code true}.
  *
+ * <p>Note that {@link #delimiter} (or {@link #delimiterString}), {@link #quoteCharacter},
+ * and {@link #commentCharacter} are treated as <i>control characters</i>
+ * and must all be distinct.
+ *
  * <h2>Inheritance</h2>
  *
  * <p>This annotation is inherited to subclasses.
@@ -241,6 +245,9 @@ public @interface CsvFileSource {
 	 *
 	 * <p>Any line that begins with this character will be treated as a comment and ignored
 	 * during parsing.
+	 *
+	 * <p>Note that the comment character must be the first character on the line
+	 * without any leading whitespace.
 	 *
 	 * <p>Defaults to a hashtag {@code #}.
 	 *
