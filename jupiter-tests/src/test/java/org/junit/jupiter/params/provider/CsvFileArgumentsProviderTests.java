@@ -148,7 +148,8 @@ class CsvFileArgumentsProviderTests {
 	}
 
 	@ParameterizedTest
-	@MethodSource("org.junit.jupiter.params.provider.CsvArgumentsProviderTests#invalidControlCharacterCombinations")
+	@MethodSource("org.junit.jupiter.params.provider.CsvArgumentsProviderTests#"
+			+ "invalidDelimiterQuoteCharacterAndCommentCharacterCombinations")
 	void throwsExceptionWhenControlCharactersNotDiffer(Object delimiter, char quoteCharacter, char commentCharacter) {
 		var builder = csvFileSource().resources("test.csv") //
 				.quoteCharacter(quoteCharacter).commentCharacter(commentCharacter);
@@ -157,7 +158,8 @@ class CsvFileArgumentsProviderTests {
 				? builder.delimiter(c).build() //
 				: builder.delimiterString(delimiter.toString()).build();
 
-		var message = "(delimiter|delimiterString): '%s', quoteCharacter: '%s', and commentCharacter: '%s' must all differ";
+		var message = "delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " +
+				"must all differ";
 		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny()) //
 				.withMessage(message.formatted(delimiter, quoteCharacter, commentCharacter));
 	}

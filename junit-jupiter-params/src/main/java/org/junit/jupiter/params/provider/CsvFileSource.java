@@ -36,8 +36,8 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * that the first record may optionally be used to supply CSV headers (see
  * {@link #useHeadersInDisplayName}).
  *
- * <p>Any line beginning with a {@code #} symbol will be interpreted as a comment
- * and will be ignored.
+ * <p>Any line beginning with a {@link #commentCharacter()}
+ * will be interpreted as a comment and will be ignored.
  *
  * <p>The column delimiter (which defaults to a comma ({@code ,})) can be customized
  * via either {@link #delimiter} or {@link #delimiterString}.
@@ -242,7 +242,7 @@ public @interface CsvFileSource {
 	 * <p>Any line that begins with this character will be treated as a comment and ignored
 	 * during parsing.
 	 *
-	 * <p>Defaults to a hash tag {@code #}.
+	 * <p>Defaults to a hashtag {@code #}.
 	 *
 	 * @since 6.0.1
 	 */
