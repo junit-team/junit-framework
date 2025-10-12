@@ -354,7 +354,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					if (entry == null) {
 						break;
 					}
-					LOGGER.trace(() -> "processing: " + entry);
+					LOGGER.trace(() -> "processing: " + entry.task);
 					workerLease = workerLeaseManager.tryAcquire();
 					if (workerLease == null) {
 						workQueue.add(entry);
@@ -424,11 +424,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private final BlockingQueue<Entry> queue = new LinkedBlockingQueue<>();
 
 		Entry add(TestTask task) {
-			return add(new Entry(task, new CompletableFuture<>()));
+			LOGGER.trace(() -> "forking: " + task);
+			return doAdd(new Entry(task, new CompletableFuture<>()));
 		}
 
-		Entry add(Entry entry) {
-			LOGGER.trace(() -> "forking: " + entry);
+		void add(Entry entry) {
+			LOGGER.trace(() -> "re-enqueuing: " + entry.task);
+			doAdd(entry);
+		}
+
+		private Entry doAdd(Entry entry) {
 			var added = queue.add(entry);
 			if (!added) {
 				throw new IllegalStateException("Could not add entry to the queue for task: " + entry.task);
