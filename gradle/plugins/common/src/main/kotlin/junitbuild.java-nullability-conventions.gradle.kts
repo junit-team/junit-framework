@@ -28,11 +28,11 @@ tasks.withType<JavaCompile>().configureEach {
 		val shouldDisableErrorProne = java.toolchain.implementation.orNull == JvmImplementation.J9
 		if (name == "compileJava" && !shouldDisableErrorProne) {
 			disable(
-				"AnnotateFormatMethod", // We don`t want to use ErrorProne`s annotations.
+				"AnnotateFormatMethod", // We don`t want to use ErrorProne's annotations.
 				"BadImport", // This check is opinionated wrt. which method names it considers unsuitable for import which includes a few of our own methods in `ReflectionUtils` etc.
-				"DoNotCallSuggester",
-				"ImmutableEnumChecker",
-				"InlineMeSuggester",
+				"DoNotCallSuggester", // We don`t want to use ErrorProne's annotations.
+				"ImmutableEnumChecker", // We don`t want to use ErrorProne's annotations.
+				"InlineMeSuggester", // We don`t want to use ErrorProne's annotations.
 				"MissingSummary", // Produces a lot of findings that we consider to be false positives, for example for package-private classes and methods.
 				"StringSplitter", // We don`t want to use Guava.
 				"UnnecessaryLambda", // The findings of this check are subjective because a named constant can be more readable in many cases.
