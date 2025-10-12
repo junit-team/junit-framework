@@ -140,7 +140,7 @@ class CsvReaderFactory {
 
 		if (commentStrategy == NONE) {
 			Preconditions.condition(stringValuesUnique(delimiter, quoteCharacter),
-				() -> ("delimiter or delimiterString: '%s', and quoteCharacter: '%s' " + //
+				() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
 						"must differ").formatted(delimiter, quoteCharacter));
 		}
 		else {

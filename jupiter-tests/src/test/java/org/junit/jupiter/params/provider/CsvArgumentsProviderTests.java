@@ -433,7 +433,7 @@ class CsvArgumentsProviderTests {
 				? builder.delimiter(c).build() //
 				: builder.delimiterString(delimiter.toString()).build();
 
-		var message = "delimiter or delimiterString: '%s', and quoteCharacter: '%s' must differ";
+		var message = "delimiter or delimiterString: '%s' and quoteCharacter: '%s' must differ";
 		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny()) //
 				.withMessage(message.formatted(delimiter, quoteCharacter));
 	}
