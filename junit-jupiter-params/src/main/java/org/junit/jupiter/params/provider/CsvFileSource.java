@@ -245,7 +245,7 @@ public @interface CsvFileSource {
 	 *
 	 * <p>Any line that begins with this character will be treated as a comment
 	 * and ignored during parsing. Note that there is one exception to this rule:
-	 * if the comment character appears within a quoted field, it looses its
+	 * if the comment character appears within a quoted field, it loses its
 	 * special meaning.
 	 *
 	 * <p>The comment character must be the first character on the line without

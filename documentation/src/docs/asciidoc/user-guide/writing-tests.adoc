@@ -2272,7 +2272,7 @@ The generated display names for the previous example include the CSV header name
 In contrast to CSV records supplied via the `value` attribute, a text block can contain
 comments. Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
 by default) will be treated as a comment and ignored. Note that there is one exception
-to this rule: if the comment character appears within a quoted field, it looses
+to this rule: if the comment character appears within a quoted field, it loses
 its special meaning.
 
 The comment character must be the first character on the line without any leading
