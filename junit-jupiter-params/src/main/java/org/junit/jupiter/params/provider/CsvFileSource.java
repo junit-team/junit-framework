@@ -65,7 +65,7 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * {@link #ignoreLeadingAndTrailingWhitespace} attribute to {@code true}.
  *
  * <p>Note that {@link #delimiter} (or {@link #delimiterString}), {@link #quoteCharacter},
- * and {@link #commentCharacter} are treated as <i>control characters</i>
+ * and {@link #commentCharacter} are treated as <em>control characters</em>
  * and must all be distinct.
  *
  * <h2>Inheritance</h2>

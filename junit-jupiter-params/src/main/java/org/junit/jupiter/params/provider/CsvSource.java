@@ -65,7 +65,7 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  *
  * <p>Note that {@link #delimiter} (or {@link #delimiterString}), {@link #quoteCharacter},
  * and {@link #commentCharacter} (when {@link #textBlock} is used) are treated
- * as <i>control characters</i> and must all be distinct.
+ * as <em>control characters</em> and must all be distinct.
  *
  * <h2>Inheritance</h2>
  *
