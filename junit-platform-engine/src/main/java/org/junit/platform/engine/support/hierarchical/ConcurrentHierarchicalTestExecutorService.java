@@ -349,26 +349,21 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		void processQueueEntries() {
 			while (!threadPool.isShutdown()) {
-				try {
-					var entry = workQueue.poll();
-					if (entry == null) {
-						break;
-					}
-					LOGGER.trace(() -> "processing: " + entry.task);
-					workerLease = workerLeaseManager.tryAcquire();
-					if (workerLease == null) {
-						workQueue.add(entry);
-						break;
-					}
-					try {
-						executeEntry(entry);
-					}
-					finally {
-						workerLease.release();
-					}
+				var entry = workQueue.poll();
+				if (entry == null) {
+					break;
 				}
-				catch (InterruptedException ignore) {
-					// ignore spurious interrupts
+				LOGGER.trace(() -> "processing: " + entry.task);
+				workerLease = workerLeaseManager.tryAcquire();
+				if (workerLease == null) {
+					workQueue.add(entry);
+					break;
+				}
+				try {
+					executeEntry(entry);
+				}
+				finally {
+					workerLease.release();
 				}
 			}
 		}
@@ -407,6 +402,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				if (workerThread == null) {
 					return callable.call();
 				}
+				LOGGER.trace(() -> "blocking for child task");
 				return workerThread.runBlocking(() -> {
 					try {
 						return callable.call();
@@ -442,8 +438,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		@Nullable
-		Entry poll() throws InterruptedException {
-			return queue.poll(1, SECONDS);
+		Entry poll() {
+			return queue.poll();
 		}
 
 		boolean remove(Entry entry) {
@@ -480,14 +476,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		@Nullable
 		WorkerLease tryAcquire() {
-			try {
-				boolean acquired = semaphore.tryAcquire(1, SECONDS);
-				return acquired ? new WorkerLease(this::release) : null;
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				return null;
-			}
+			boolean acquired = semaphore.tryAcquire();
+			return acquired ? new WorkerLease(this::release) : null;
 		}
 
 		private ReacquisitionToken release() {
@@ -520,7 +510,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
 		WorkerLease(Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction) {
-			LOGGER.trace(() -> "acquiring worker lease");
+			LOGGER.trace(() -> "acquired worker lease");
 			this.releaseAction = releaseAction;
 		}
 
