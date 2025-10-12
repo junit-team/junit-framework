@@ -36,7 +36,7 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * that the first record may optionally be used to supply CSV headers (see
  * {@link #useHeadersInDisplayName}).
  *
- * <p>Any line beginning with a {@link #commentCharacter()}
+ * <p>Any line beginning with a {@link #commentCharacter}
  * will be interpreted as a comment and will be ignored.
  *
  * <p>The column delimiter (which defaults to a comma ({@code ,})) can be customized

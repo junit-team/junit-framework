@@ -137,7 +137,7 @@ public @interface CsvSource {
 	 * {@link #useHeadersInDisplayName}).
 	 *
 	 * <p>In contrast to CSV records supplied via {@link #value}, a text block
-	 * can contain comments. Any line beginning with a {@link #commentCharacter()}
+	 * can contain comments. Any line beginning with a {@link #commentCharacter}
 	 * will be treated as a comment and ignored. Note that there is one exception
 	 * to this rule: if the comment character appears within a quoted field,
 	 * it loses its special meaning.
