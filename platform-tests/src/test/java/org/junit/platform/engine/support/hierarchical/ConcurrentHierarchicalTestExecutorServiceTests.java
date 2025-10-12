@@ -26,7 +26,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URL;
@@ -180,9 +179,8 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.filteredOn(isEqual(root.executionThread())).hasSizeLessThan(2);
 
 		verify(resourceLock, atLeast(2)).tryAcquire();
-		verify(resourceLock).acquire();
+		verify(resourceLock, atLeast(1)).acquire();
 		verify(resourceLock, times(2)).close();
-		verifyNoMoreInteractions(resourceLock);
 	}
 
 	@Test

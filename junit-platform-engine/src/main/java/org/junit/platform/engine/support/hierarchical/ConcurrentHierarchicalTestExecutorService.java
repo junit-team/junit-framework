@@ -13,10 +13,9 @@ package org.junit.platform.engine.support.hierarchical;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
-import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
+import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
@@ -105,11 +105,13 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return;
 		}
 
-		var childrenByExecutionMode = testTasks.stream().collect(groupingBy(TestTask::getExecutionMode));
-		var queueEntries = forkAll(childrenByExecutionMode.get(CONCURRENT));
-		executeAll(childrenByExecutionMode.get(SAME_THREAD));
+		List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
+		List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
+		var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks::add);
+		executeAll(sameThreadTasks);
 		var remainingForkedChildren = stealWork(queueEntries);
 		waitFor(remainingForkedChildren);
+		executeAll(isolatedTasks);
 	}
 
 	private static void waitFor(List<WorkQueue.Entry> children) {
@@ -145,7 +147,15 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return;
 		}
 		try {
-			threadPool.execute(() -> WorkerThread.getOrThrow().processQueueEntries());
+			threadPool.execute(() -> {
+				LOGGER.trace(() -> "starting worker");
+				try {
+					WorkerThread.getOrThrow().processQueueEntries();
+				}
+				finally {
+					LOGGER.trace(() -> "stopping worker");
+				}
+			});
 		}
 		catch (RejectedExecutionException e) {
 			if (threadPool.isShutdown()) {
@@ -187,20 +197,33 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		return concurrentlyExecutedChildren;
 	}
 
-	private List<WorkQueue.Entry> forkAll(@Nullable List<? extends TestTask> children) {
-		if (children == null) {
+	private List<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
+			Consumer<TestTask> isolatedTaskCollector, Consumer<TestTask> sameThreadTaskCollector) {
+
+		if (children.isEmpty()) {
 			return List.of();
 		}
-		if (children.size() == 1) {
-			return List.of(enqueue(children.get(0)));
+		List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
+		for (TestTask child : children) {
+			if (requiresGlobalReadWriteLock(child)) {
+				isolatedTaskCollector.accept(child);
+			}
+			else if (child.getExecutionMode() == SAME_THREAD) {
+				sameThreadTaskCollector.accept(child);
+			}
+			else {
+				queueEntries.add(enqueue(child));
+			}
 		}
-		return children.stream() //
-				.map(ConcurrentHierarchicalTestExecutorService.this::enqueue) //
-				.toList();
+		return queueEntries;
 	}
 
-	private void executeAll(@Nullable List<? extends TestTask> children) {
-		if (children == null) {
+	private static boolean requiresGlobalReadWriteLock(TestTask testTask) {
+		return testTask.getResourceLock().getResources().contains(GLOBAL_READ_WRITE);
+	}
+
+	private void executeAll(List<? extends TestTask> children) {
+		if (children.isEmpty()) {
 			return;
 		}
 		LOGGER.trace(() -> "Running SAME_THREAD children: " + children);
