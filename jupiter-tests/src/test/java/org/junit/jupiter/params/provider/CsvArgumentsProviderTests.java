@@ -424,7 +424,9 @@ class CsvArgumentsProviderTests {
 
 	@ParameterizedTest
 	@MethodSource("invalidDelimiterAndQuoteCharacterCombinations")
-	void throwsExceptionWhenControlCharactersTheSameWhenUsingValueAttribute(Object delimiter, char quoteCharacter) {
+	void doesNotThrowExceptionWhenDelimiterAndCommentCharacterAreTheSameWhenUsingValueAttribute(Object delimiter,
+			char quoteCharacter) {
+
 		var builder = csvSource().lines("foo").quoteCharacter(quoteCharacter);
 
 		var annotation = delimiter instanceof Character c //
@@ -446,8 +448,8 @@ class CsvArgumentsProviderTests {
 
 	@ParameterizedTest
 	@MethodSource("invalidDelimiterQuoteCharacterAndCommentCharacterCombinations")
-	void throwsExceptionWhenControlCharactersTheSameWhenUsingTextBlockAttribute(Object delimiter, char quoteCharacter,
-			char commentCharacter) {
+	void throwsExceptionWhenControlCharactersAreTheSameWhenUsingTextBlockAttribute(Object delimiter,
+			char quoteCharacter, char commentCharacter) {
 
 		var builder = csvSource().textBlock("""
 				foo""").quoteCharacter(quoteCharacter).commentCharacter(commentCharacter);
