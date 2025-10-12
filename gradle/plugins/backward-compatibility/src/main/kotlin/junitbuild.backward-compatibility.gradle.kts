@@ -11,6 +11,7 @@ import junitbuild.extensions.javaModuleName
 import me.champeau.gradle.japicmp.JapicmpTask
 import me.champeau.gradle.japicmp.report.stdrules.BinaryIncompatibleRule
 import me.champeau.gradle.japicmp.report.stdrules.RecordSeenMembersSetup
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
 	java
@@ -65,6 +66,7 @@ val roseau by tasks.registering(JavaExec::class) {
 		enabled = false
 	}
 	onlyIf { extension.enabled.get() }
+	onlyIf("https://github.com/alien-tools/roseau/issues/90") { !OperatingSystem.current().isWindows }
 
 	mainClass = "io.github.alien.roseau.cli.RoseauCLI"
 	classpath = files(roseauClasspath)

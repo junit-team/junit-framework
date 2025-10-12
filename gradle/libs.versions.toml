@@ -64,6 +64,7 @@ openTestReporting-events = { module = "org.opentest4j.reporting:open-test-report
 openTestReporting-tooling-core = { module = "org.opentest4j.reporting:open-test-reporting-tooling-core", version.ref = "openTestReporting" }
 openTestReporting-tooling-spi = { module = "org.opentest4j.reporting:open-test-reporting-tooling-spi", version.ref = "openTestReporting" }
 picocli = { module = "info.picocli:picocli", version = "4.7.7" }
+# Enable `roseau` tasks on Windows when upgrading (in junitbuild.backward-compatibility.gradle.kts)
 roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.3.0" }
 slf4j-julBinding = { module = "org.slf4j:slf4j-jdk14", version = "2.0.17" }
 snapshotTests-junit5 = { module = "de.skuzzle.test:snapshot-tests-junit5", version.ref = "snapshotTests" }
