@@ -243,11 +243,13 @@ public @interface CsvFileSource {
 	/**
 	 * The character used to denote comments when reading the CSV files.
 	 *
-	 * <p>Any line that begins with this character will be treated as a comment and ignored
-	 * during parsing.
+	 * <p>Any line that begins with this character will be treated as a comment
+	 * and ignored during parsing. Note that there is one exception to this rule:
+	 * if the comment character appears within a quoted field, it looses its
+	 * special meaning.
 	 *
-	 * <p>Note that the comment character must be the first character on the line
-	 * without any leading whitespace.
+	 * <p>The comment character must be the first character on the line without
+	 * any leading whitespace.
 	 *
 	 * <p>Defaults to a hashtag {@code #}.
 	 *

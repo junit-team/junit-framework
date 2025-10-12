@@ -137,10 +137,13 @@ public @interface CsvSource {
 	 * {@link #useHeadersInDisplayName}).
 	 *
 	 * <p>In contrast to CSV records supplied via {@link #value}, a text block
-	 * can contain comments. Any line beginning with a {@link #commentCharacter()} will
-	 * be treated as a comment and ignored. Note, however, that the comment character
-	 * must be the first character on the line without any leading
-	 * whitespace. It is therefore recommended that the closing text block
+	 * can contain comments. Any line beginning with a {@link #commentCharacter()}
+	 * will be treated as a comment and ignored. Note that there is one exception
+	 * to this rule: if the comment character appears within a quoted field,
+	 * it looses its special meaning.
+	 *
+	 * <p>The comment character must be the first character on the line without
+	 * any leading whitespace. It is therefore recommended that the closing text block
 	 * delimiter {@code """} be placed either at the end of the last line of
 	 * input or on the following line, vertically aligned with the rest of the
 	 * input (as can be seen in the example below).
@@ -304,11 +307,13 @@ public @interface CsvSource {
 	/**
 	 * The character used to denote comments in a {@linkplain #textBlock text block}.
 	 *
-	 * <p>Any line that begins with this character will be treated as a comment and ignored
-	 * during parsing.
+	 * <p>Any line that begins with this character will be treated as a comment
+	 * and ignored during parsing. Note that there is one exception to this rule:
+	 * if the comment character appears within a quoted field, it looses its
+	 * special meaning.
 	 *
-	 * <p>Note that the comment character must be the first character on the line
-	 * without any leading whitespace.
+	 * <p>The comment character must be the first character on the line without
+	 * any leading whitespace.
 	 *
 	 * <p>Defaults to a hashtag {@code #}.
 	 *
