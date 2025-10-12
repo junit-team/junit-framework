@@ -70,8 +70,7 @@ class CsvReaderFactory {
 		var commentStrategy = csvSource.textBlock().isEmpty() ? NONE : SKIP;
 		// @formatter:off
 		validateControlCharactersDiffer(
-				delimiter, csvSource.quoteCharacter(), csvSource.commentCharacter(), commentStrategy
-		);
+				delimiter, csvSource.quoteCharacter(), csvSource.commentCharacter(), commentStrategy);
 
 		var builder = CsvReader.builder()
 				.skipEmptyLines(SKIP_EMPTY_LINES)
@@ -101,8 +100,7 @@ class CsvReaderFactory {
 		var commentStrategy = SKIP;
 		// @formatter:off
 		validateControlCharactersDiffer(
-				delimiter, csvFileSource.quoteCharacter(), csvFileSource.commentCharacter(), commentStrategy
-		);
+				delimiter, csvFileSource.quoteCharacter(), csvFileSource.commentCharacter(), commentStrategy);
 
 		var builder = CsvReader.builder()
 				.skipEmptyLines(SKIP_EMPTY_LINES)
