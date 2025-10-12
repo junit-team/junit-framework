@@ -2270,8 +2270,8 @@ The generated display names for the previous example include the CSV header name
 ----
 
 In contrast to CSV records supplied via the `value` attribute, a text block can contain
-comments. Any line beginning with the value of `commentCharacter` attribute (`+++#+++` by
-default) will be treated as a comment and ignored. Note that there is one exception
+comments. Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be treated as a comment and ignored. Note that there is one exception
 to this rule: if the comment character appears within a quoted field, it looses
 its special meaning.
 
@@ -2329,8 +2329,8 @@ The default delimiter is a comma (`,`), but you can use another character by set
 cannot be set simultaneously.
 
 .Comments in CSV files
-NOTE: Any line beginning with the value of `commentCharacter` attribute (`+++#+++` by
-default) will be interpreted as a comment and will be ignored.
+NOTE: Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be interpreted as a comment and will be ignored.
 
 [source,java,indent=0]
 ----

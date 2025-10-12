@@ -251,7 +251,7 @@ public @interface CsvFileSource {
 	 * <p>The comment character must be the first character on the line without
 	 * any leading whitespace.
 	 *
-	 * <p>Defaults to a hashtag {@code #}.
+	 * <p>Defaults to {@code #}.
 	 *
 	 * @since 6.0.1
 	 */
