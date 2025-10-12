@@ -63,9 +63,15 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * physical line within the text block. Thus, if a CSV column wraps across a
  * new line in a text block, the column must be a quoted string.
  *
- * <p>Note that {@link #delimiter} (or {@link #delimiterString}), {@link #quoteCharacter},
- * and {@link #commentCharacter} (when {@link #textBlock} is used) are treated
- * as <em>control characters</em> and must all be distinct.
+ * <p>Note that {@link #delimiter} (or {@link #delimiterString}),
+ * {@link #quoteCharacter}, and {@link #commentCharacter} (when
+ * {@link #textBlock} is used) are treated as <em>control characters</em>.
+ *
+ * <ul>
+ *   <li>{@link #delimiter} and {@link #quoteCharacter} must always be distinct.</li>
+ *   <li>{@link #commentCharacter} must be distinct from the others only when
+ *   {@link #textBlock} is used.</li>
+ * </ul>
  *
  * <h2>Inheritance</h2>
  *
