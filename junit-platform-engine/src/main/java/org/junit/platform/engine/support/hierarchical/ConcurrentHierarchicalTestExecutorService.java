@@ -11,6 +11,7 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
@@ -77,6 +78,13 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
 		LOGGER.trace(() -> "submit: " + testTask);
+		if (WorkerThread.get() == null) {
+			return enqueue(testTask).future();
+		}
+		if (testTask.getExecutionMode() == SAME_THREAD) {
+			executeTask(testTask);
+			return completedFuture(null);
+		}
 		return new BlockingAwareFuture<@Nullable Void>(enqueue(testTask).future(), WorkerThread.BlockHandler.INSTANCE);
 	}
 
