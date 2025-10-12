@@ -64,9 +64,9 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * column is trimmed by default. This behavior can be changed by setting the
  * {@link #ignoreLeadingAndTrailingWhitespace} attribute to {@code true}.
  *
- * <p>Note that {@link #delimiter} (or {@link #delimiterString}), {@link #quoteCharacter},
- * and {@link #commentCharacter} are treated as <em>control characters</em>
- * and must all be distinct.
+ * <p>Note that {@link #delimiter} (or {@link #delimiterString}),
+ * {@link #quoteCharacter}, and {@link #commentCharacter} are treated as
+ * <em>control characters</em> and must all be distinct.
  *
  * <h2>Inheritance</h2>
  *
