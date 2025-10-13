@@ -214,6 +214,29 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.containsOnly(true);
 	}
 
+	@Test
+	void prioritizesChildrenOfStartedContainers() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+
+		var leavesStarted = new CountDownLatch(2);
+		var leaf = TestTaskStub.withoutResult(CONCURRENT, leavesStarted::countDown) //
+				.withName("leaf").withLevel(3);
+		var child1 = TestTaskStub.withoutResult(CONCURRENT, () -> requiredService().submit(leaf).get()) //
+				.withName("child1").withLevel(2);
+		var child2 = TestTaskStub.withoutResult(CONCURRENT, leavesStarted::countDown) //
+				.withName("child2").withLevel(2);
+		var child3 = TestTaskStub.withoutResult(SAME_THREAD, leavesStarted::await) //
+				.withName("child3").withLevel(2);
+
+		var root = TestTaskStub.withoutResult(SAME_THREAD,
+			() -> requiredService().invokeAll(List.of(child1, child2, child3))) //
+				.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(leaf.startTime).isBeforeOrEqualTo(child2.startTime);
+	}
+
 	private static ExclusiveResource exclusiveResource() {
 		return new ExclusiveResource("key", ExclusiveResource.LockMode.READ_WRITE);
 	}
@@ -240,6 +263,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		private volatile @Nullable Instant startTime;
 		private volatile @Nullable Instant endTime;
 		private volatile @Nullable Thread executionThread;
+		private int level = 1;
 
 		static TestTaskStub<?> withoutResult(ExecutionMode executionMode) {
 			return new TestTaskStub<@Nullable Void>(executionMode, () -> null);
@@ -278,6 +302,16 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		}
 
 		@Override
+		public TestDescriptor getTestDescriptor() {
+			var name = String.valueOf(this.name);
+			var uniqueId = UniqueId.root("root", name);
+			for (var i = 1; i < level; i++) {
+				uniqueId = uniqueId.append("child", name);
+			}
+			return new TestDescriptorStub(uniqueId, name);
+		}
+
+		@Override
 		public void execute() {
 			startTime = Instant.now();
 			try {
@@ -309,6 +343,11 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		TestTaskStub<T> withName(String name) {
 			this.name = name;
+			return this;
+		}
+
+		TestTaskStub<T> withLevel(int level) {
+			this.level = level;
 			return this;
 		}
 

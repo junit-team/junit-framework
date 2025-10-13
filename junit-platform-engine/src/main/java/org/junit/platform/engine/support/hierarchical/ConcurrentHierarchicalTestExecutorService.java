@@ -20,12 +20,12 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
@@ -417,16 +417,17 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private static class WorkQueue {
 
-		private final BlockingQueue<Entry> queue = new LinkedBlockingQueue<>();
+		private final Queue<Entry> queue = new PriorityBlockingQueue<>();
 
 		Entry add(TestTask task) {
 			LOGGER.trace(() -> "forking: " + task);
-			return doAdd(new Entry(task, new CompletableFuture<>()));
+			int level = task.getTestDescriptor().getUniqueId().getSegments().size();
+			return doAdd(new Entry(task, new CompletableFuture<>(), level, 0));
 		}
 
 		void add(Entry entry) {
 			LOGGER.trace(() -> "re-enqueuing: " + entry.task);
-			doAdd(entry);
+			doAdd(entry.incrementAttempts());
 		}
 
 		private Entry doAdd(Entry entry) {
@@ -450,7 +451,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queue.isEmpty();
 		}
 
-		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future) {
+		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, int attempts)
+				implements Comparable<Entry> {
 			@SuppressWarnings("FutureReturnValueIgnored")
 			Entry {
 				future.whenComplete((__, t) -> {
@@ -461,6 +463,19 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 						LOGGER.trace(t, () -> "completed exceptionally: " + this.task());
 					}
 				});
+			}
+
+			Entry incrementAttempts() {
+				return new Entry(task(), future, level, attempts + 1);
+			}
+
+			@Override
+			public int compareTo(Entry that) {
+				var result = Integer.compare(that.level, this.level);
+				if (result == 0) {
+					return Integer.compare(that.attempts, this.attempts);
+				}
+				return result;
 			}
 		}
 
