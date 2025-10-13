@@ -64,7 +64,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration, ClassLoader classLoader) {
-		ThreadFactory threadFactory = new CustomThreadFactory(classLoader);
+		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
 		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
 		workerLeaseManager = new WorkerLeaseManager(configuration.getParallelism());
@@ -301,7 +301,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 	}
 
-	private class CustomThreadFactory implements ThreadFactory {
+	private class WorkerThreadFactory implements ThreadFactory {
 
 		private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
 
@@ -309,7 +309,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private final int poolNumber;
 		private final ClassLoader classLoader;
 
-		CustomThreadFactory(ClassLoader classLoader) {
+		WorkerThreadFactory(ClassLoader classLoader) {
 			this.classLoader = classLoader;
 			this.poolNumber = POOL_NUMBER.getAndIncrement();
 		}
