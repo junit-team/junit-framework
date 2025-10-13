@@ -68,10 +68,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
 		workerLeaseManager = new WorkerLeaseManager(configuration.getParallelism());
+		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
 	}
 
 	@Override
 	public void close() {
+		LOGGER.trace(() -> "shutting down thread pool");
 		threadPool.shutdownNow();
 	}
 
@@ -226,7 +228,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		if (children.isEmpty()) {
 			return;
 		}
-		LOGGER.trace(() -> "Running SAME_THREAD children: " + children);
+		LOGGER.trace(() -> "running %d SAME_THREAD children".formatted(children.size()));
 		if (children.size() == 1) {
 			executeTask(children.get(0));
 			return;
@@ -492,12 +494,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		@Nullable
 		WorkerLease tryAcquire() {
 			boolean acquired = semaphore.tryAcquire();
-			return acquired ? new WorkerLease(this::release) : null;
+			if (acquired) {
+				LOGGER.trace(() -> "acquired worker lease (available: %d)".formatted(semaphore.availablePermits()));
+				return new WorkerLease(this::release);
+			}
+			return null;
 		}
 
 		private ReacquisitionToken release() {
-			LOGGER.trace(() -> "releasing worker lease");
 			semaphore.release();
+			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			maybeStartWorker();
 			return new ReacquisitionToken();
 		}
@@ -513,8 +519,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			void reacquire() throws InterruptedException {
 				Preconditions.condition(!used, "Lease was already reacquired");
 				used = true;
-				LOGGER.trace(() -> "reacquiring worker lease");
 				semaphore.acquire();
+				LOGGER.trace(() -> "reacquired worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			}
 		}
 	}
@@ -525,7 +531,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
 		WorkerLease(Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction) {
-			LOGGER.trace(() -> "acquired worker lease");
 			this.releaseAction = releaseAction;
 		}
 
