@@ -207,8 +207,6 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		service.submit(root).get();
 
-		printTimeline(Stream.concat(Stream.of(root), Stream.concat(children.stream(), leafs.stream())));
-
 		assertThat(root.executionThread()).isNotNull();
 		assertThat(children).extracting(TestTaskStub::executionThread).doesNotContainNull();
 		assertThat(leafs).extracting(TestTaskStub::executionThread).doesNotContainNull();
@@ -317,60 +315,6 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		@Override
 		public String toString() {
 			return "%s @ %s".formatted(new ToStringBuilder(this).append("name", name), Integer.toHexString(hashCode()));
-		}
-	}
-
-	static void printTimeline(Stream<TestTaskStub<?>> taskStream) {
-		var allTasks = taskStream.toList();
-		assertThat(allTasks.stream().filter(task -> task.executionThread() == null)) //
-				.describedAs("Unexecuted tasks").isEmpty();
-		var statistics = allTasks.stream() //
-				.flatMap(task -> Stream.concat(Stream.of(task.startTime),
-					Optional.ofNullable(task.endTime).stream())).mapToLong(
-						instant -> requireNonNull(instant).toEpochMilli()) //
-				.summaryStatistics();
-		var rangeMillis = statistics.getMax() - statistics.getMin();
-		var width = 100;
-		var scale = (double) width / rangeMillis;
-		var sortedTasks = allTasks.stream() //
-				.sorted(comparing(task -> requireNonNull(task.startTime))) //
-				.toList();
-		var tasksByThread = sortedTasks.stream() //
-				.sorted(comparingLong(testTaskStub -> requireNonNull(testTaskStub.executionThread()).threadId())) //
-				.collect(groupingBy(task -> requireNonNull(task.executionThread), LinkedHashMap::new, toList()));
-		ToIntFunction<@Nullable Instant> indexFunction = instant -> (int) ((requireNonNull(instant).toEpochMilli()
-				- statistics.getMin()) * scale);
-		tasksByThread.forEach(
-			(thread, tasks) -> printTimelineForThread(requireNonNull(thread), tasks, width, indexFunction));
-	}
-
-	private static void printTimelineForThread(Thread thread, List<TestTaskStub<?>> tasks, int width,
-			ToIntFunction<@Nullable Instant> indexFunction) {
-		System.out.printf("%n%s (%d)%n", thread.getName(), tasks.size());
-		StringBuilder builder = new StringBuilder();
-		for (var task : tasks) {
-			builder.append(".".repeat(width + 1));
-			int startIndex = indexFunction.applyAsInt(task.startTime);
-			builder.setCharAt(startIndex, '<');
-			if (task.endTime == null) {
-				builder.setCharAt(startIndex + 1, '-');
-				builder.setCharAt(startIndex + 2, '?');
-			}
-			else {
-				int endIndex = indexFunction.applyAsInt(task.endTime);
-				if (endIndex == startIndex) {
-					builder.setCharAt(endIndex, 'O');
-				}
-				else {
-					for (int i = startIndex + 1; i < endIndex; i++) {
-						builder.setCharAt(i, '-');
-					}
-					builder.setCharAt(endIndex, '>');
-				}
-			}
-			builder.append("   ").append(task.name);
-			System.out.println(builder);
-			builder.setLength(0);
 		}
 	}
 
