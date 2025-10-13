@@ -351,17 +351,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		void processQueueEntries() {
 			while (!threadPool.isShutdown()) {
-				var entry = workQueue.poll();
-				if (entry == null) {
-					break;
-				}
-				LOGGER.trace(() -> "processing: " + entry.task);
 				workerLease = workerLeaseManager.tryAcquire();
 				if (workerLease == null) {
-					workQueue.add(entry);
 					break;
 				}
 				try {
+					var entry = workQueue.poll();
+					if (entry == null) {
+						break;
+					}
+					LOGGER.trace(() -> "processing: " + entry.task);
 					executeEntry(entry);
 				}
 				finally {
