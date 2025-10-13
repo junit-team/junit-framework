@@ -25,6 +25,7 @@ import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_MAX_POOL_
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
+import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_EXECUTOR_PROPERTY_NAME;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
@@ -74,6 +75,7 @@ import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.engine.DiscoverySelector;
@@ -89,7 +91,10 @@ import org.junit.platform.testkit.engine.Events;
  * @since 1.3
  */
 @SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
-class ParallelExecutionIntegrationTests {
+@ParameterizedClass
+@ValueSource(classes = { ForkJoinPoolHierarchicalTestExecutorService.class,
+		ConcurrentHierarchicalTestExecutorService.class })
+record ParallelExecutionIntegrationTests(Class<? extends HierarchicalTestExecutorService> implementation) {
 
 	@Test
 	void successfulParallelTest(TestReporter reporter) {
@@ -579,11 +584,12 @@ class ParallelExecutionIntegrationTests {
 		return executeWithFixedParallelism(parallelism, configParams, selectClasses(testClasses));
 	}
 
-	private static EngineExecutionResults executeWithFixedParallelism(int parallelism, Map<String, String> configParams,
+	private EngineExecutionResults executeWithFixedParallelism(int parallelism, Map<String, String> configParams,
 			List<? extends DiscoverySelector> selectors) {
 		return EngineTestKit.engine("junit-jupiter") //
 				.selectors(selectors) //
 				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, String.valueOf(true)) //
+				.configurationParameter(PARALLEL_EXECUTION_EXECUTOR_PROPERTY_NAME, implementation.getName()) //
 				.configurationParameter(PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME, "fixed") //
 				.configurationParameter(PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, String.valueOf(parallelism)) //
 				.configurationParameters(configParams) //
