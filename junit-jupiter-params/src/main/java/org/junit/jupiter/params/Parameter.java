@@ -38,10 +38,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  * @see org.junit.jupiter.params.converter.ArgumentConverter
  * @see org.junit.jupiter.params.converter.ConvertWith
  */
+@API(status = EXPERIMENTAL, since = "6.0")
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD })
-@Documented
-@API(status = EXPERIMENTAL, since = "6.0")
 public @interface Parameter {
 
 	/**

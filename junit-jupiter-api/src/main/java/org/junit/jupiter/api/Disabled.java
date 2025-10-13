@@ -58,10 +58,10 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.api.condition.DisabledInNativeImage
  * @see org.junit.jupiter.api.extension.ExecutionCondition
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.0")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface Disabled {
 
 	/**

@@ -34,9 +34,9 @@ import org.apiguardian.api.API;
  * @since 5.3
  */
 @API(status = STABLE, since = "5.10")
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-@Inherited
 public @interface ResourceLocks {
 
 	/**

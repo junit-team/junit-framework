@@ -75,10 +75,10 @@ import org.junit.platform.commons.annotation.Testable;
  * @see BeforeEach
  * @see AfterEach
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.0")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
 @Testable
 public @interface Test {
 }

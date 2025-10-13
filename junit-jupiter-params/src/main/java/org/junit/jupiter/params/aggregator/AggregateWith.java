@@ -41,10 +41,10 @@ import org.apiguardian.api.API;
  * @see ArgumentsAggregator
  * @see org.junit.jupiter.params.ParameterizedTest
  */
+@API(status = STABLE, since = "5.7")
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.PARAMETER, ElementType.FIELD })
-@Documented
-@API(status = STABLE, since = "5.7")
 public @interface AggregateWith {
 
 	Class<? extends ArgumentsAggregator> value();

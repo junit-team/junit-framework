@@ -118,8 +118,8 @@ public interface TestInstantiationAwareExtension extends Extension {
 		 *
 		 * @see #DEFAULT_SCOPE_PROPERTY_NAME
 		 */
-		@Deprecated(since = "5.12") //
-		@API(status = DEPRECATED, since = "5.12")
+		@API(status = DEPRECATED, since = "5.12") //
+		@Deprecated(since = "5.12")
 		DEFAULT,
 
 		/**

@@ -50,12 +50,12 @@ import org.junit.jupiter.migrationsupport.rules.VerifierSupport;
  * @deprecated Please migrate to Jupiter extensions and use
  * {@link org.junit.jupiter.api.Disabled @Disabled} instead.
  */
-@SuppressWarnings("removal")
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
 @API(status = DEPRECATED, since = "6.0")
 @Deprecated(since = "6.0", forRemoval = true)
 @EnableRuleMigrationSupport
 @ExtendWith(IgnoreCondition.class)
+@Retention(RetentionPolicy.RUNTIME)
+@SuppressWarnings("removal")
+@Target(ElementType.TYPE)
 public @interface EnableJUnit4MigrationSupport {
 }

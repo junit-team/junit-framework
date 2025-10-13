@@ -50,8 +50,8 @@ import org.junit.platform.commons.util.Preconditions;
  * @see org.junit.jupiter.params.provider.ArgumentsProvider
  * @see org.junit.jupiter.params.converter.ArgumentConverter
  */
-@FunctionalInterface
 @API(status = STABLE, since = "5.7")
+@FunctionalInterface
 public interface Arguments {
 
 	/**

@@ -36,10 +36,10 @@ import org.apiguardian.api.API;
  * @see EnabledIfSystemProperty
  * @see java.lang.annotation.Repeatable
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.6")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface EnabledIfSystemProperties {
 
 	/**

@@ -53,8 +53,8 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
  * @see org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
  */
-@FunctionalInterface
 @API(status = STABLE, since = "5.0")
+@FunctionalInterface
 public interface ExecutionCondition extends Extension {
 
 	/**

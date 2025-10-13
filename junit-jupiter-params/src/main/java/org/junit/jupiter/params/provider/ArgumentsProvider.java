@@ -54,8 +54,8 @@ public interface ArgumentsProvider {
 	 * @deprecated Please implement
 	 * {@link #provideArguments(ParameterDeclarations, ExtensionContext)} instead.
 	 */
-	@Deprecated(since = "5.13")
 	@API(status = DEPRECATED, since = "5.13")
+	@Deprecated(since = "5.13")
 	default Stream<? extends Arguments> provideArguments(@SuppressWarnings("unused") ExtensionContext context)
 			throws Exception {
 		throw new UnsupportedOperationException(

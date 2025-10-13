@@ -44,8 +44,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * @since 5.10
  * @see TempDir @TempDir
  */
-@FunctionalInterface
 @API(status = MAINTAINED, since = "5.13.3")
+@FunctionalInterface
 public interface TempDirFactory extends Closeable {
 
 	/**

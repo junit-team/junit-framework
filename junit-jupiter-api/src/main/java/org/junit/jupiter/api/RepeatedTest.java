@@ -79,10 +79,10 @@ import org.apiguardian.api.API;
  * @see TestInfo
  * @see Test
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.0")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
 @TestTemplate
 public @interface RepeatedTest {
 

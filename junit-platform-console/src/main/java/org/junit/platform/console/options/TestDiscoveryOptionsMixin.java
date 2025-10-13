@@ -55,13 +55,13 @@ public class TestDiscoveryOptionsMixin {
 
 	public static class SelectorOptions {
 
-		@Nullable
 		@Option(names = { "--scan-classpath",
 				"--scan-class-path" }, converter = ClasspathEntriesConverter.class, paramLabel = "PATH", arity = "0..1", description = "Scan all directories on the classpath or explicit classpath roots. " //
 						+ "Without arguments, only directories on the system classpath as well as additional classpath " //
 						+ "entries supplied via -" + CP_OPTION + " (directories and JAR files) are scanned. " //
 						+ "Explicit classpath roots that are not on the classpath will be silently ignored. " //
 						+ "This option can be repeated.")
+		@Nullable
 		private List<Path> selectedClasspathEntries;
 
 		@Option(names = "--scan-modules", description = "Scan all resolved modules for test discovery.")

@@ -337,9 +337,9 @@ public interface DisplayNameGenerator {
 		 *
 		 * @since 5.13
 		 */
-		@Target({ ElementType.TYPE, ElementType.METHOD })
-		@Retention(RetentionPolicy.RUNTIME)
 		@API(status = EXPERIMENTAL, since = "6.0")
+		@Retention(RetentionPolicy.RUNTIME)
+		@Target({ ElementType.TYPE, ElementType.METHOD })
 		public @interface SentenceFragment {
 
 			/**

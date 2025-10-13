@@ -148,11 +148,11 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  * @see AfterParameterizedClassInvocation
  * @see org.junit.jupiter.api.TestInstance
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = EXPERIMENTAL, since = "6.0")
 @ClassTemplateInvocationLifecycleMethod(classTemplateAnnotation = ParameterizedClass.class, lifecycleMethodAnnotation = BeforeParameterizedClassInvocation.class)
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
 public @interface BeforeParameterizedClassInvocation {
 
 	/**

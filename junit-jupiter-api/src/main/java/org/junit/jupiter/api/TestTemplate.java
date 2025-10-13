@@ -83,10 +83,10 @@ import org.junit.platform.commons.annotation.Testable;
  * @see org.junit.jupiter.api.extension.TestTemplateInvocationContext
  * @see org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.0")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
 @Testable
 public @interface TestTemplate {
 }

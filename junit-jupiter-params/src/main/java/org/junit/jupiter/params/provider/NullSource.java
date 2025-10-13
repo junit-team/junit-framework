@@ -41,12 +41,12 @@ import org.apiguardian.api.API;
  * @see EmptySource
  * @see NullAndEmptySource
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
 @API(status = STABLE, since = "5.7")
 @ArgumentsSource(NullArgumentsProvider.class)
+@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("exports")
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
 public @interface NullSource {
 }

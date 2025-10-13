@@ -34,10 +34,10 @@ import org.apiguardian.api.API;
  * @see DisplayNameGeneration
  * @see DisplayNameGenerator
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.0")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface DisplayName {
 
 	/**

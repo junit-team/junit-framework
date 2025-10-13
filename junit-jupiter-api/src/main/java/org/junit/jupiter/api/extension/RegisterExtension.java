@@ -138,9 +138,9 @@ import org.apiguardian.api.API;
  * @see Extension
  * @see org.junit.jupiter.api.Order @Order
  */
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.1")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface RegisterExtension {
 }

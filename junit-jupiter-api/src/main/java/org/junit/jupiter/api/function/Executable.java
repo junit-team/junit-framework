@@ -40,8 +40,8 @@ import org.apiguardian.api.API;
  * @see ThrowingConsumer
  * @see ThrowingSupplier
  */
-@FunctionalInterface
 @API(status = STABLE, since = "5.0")
+@FunctionalInterface
 public interface Executable {
 
 	void execute() throws Throwable;

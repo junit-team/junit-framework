@@ -203,8 +203,8 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 		return () -> supplier.get().orElse(TempDirFactory.Standard.INSTANCE);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	public ExtensionContextScope getDefaultTestInstantiationExtensionContextScope() {
 		return extensionContextScopeConverter.getOrDefault(configurationParameters,
 			DEFAULT_TEST_INSTANTIATION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, ExtensionContextScope.DEFAULT);

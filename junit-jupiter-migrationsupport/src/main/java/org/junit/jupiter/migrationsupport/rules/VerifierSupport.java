@@ -38,9 +38,9 @@ import org.junit.rules.Verifier;
  * @see org.junit.Rule
  * @deprecated Please implement {@link org.junit.jupiter.api.extension.AfterTestExecutionCallback} instead.
  */
-@SuppressWarnings("removal")
 @API(status = DEPRECATED, since = "6.0")
 @Deprecated(since = "6.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class VerifierSupport implements AfterEachCallback {
 
 	private final TestRuleSupport support = new TestRuleSupport(VerifierAdapter::new, Verifier.class);

@@ -3718,8 +3718,8 @@ public class Assertions {
 	 *
 	 * @since 5.8
 	 */
-	@Contract("_, null, _ -> fail")
 	@API(status = STABLE, since = "5.10")
+	@Contract("_, null, _ -> fail")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			Supplier<@Nullable String> messageSupplier) {
 		return AssertInstanceOf.assertInstanceOf(expectedType, actualValue, messageSupplier);

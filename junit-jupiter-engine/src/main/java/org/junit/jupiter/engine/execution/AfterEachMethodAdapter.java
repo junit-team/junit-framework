@@ -24,8 +24,8 @@ import org.junit.jupiter.engine.extension.ExtensionRegistry;
  *
  * @since 5.0
  */
-@FunctionalInterface
 @API(status = INTERNAL, since = "5.0")
+@FunctionalInterface
 public interface AfterEachMethodAdapter extends Extension {
 
 	void invokeAfterEachMethod(ExtensionContext context, ExtensionRegistry registry) throws Throwable;

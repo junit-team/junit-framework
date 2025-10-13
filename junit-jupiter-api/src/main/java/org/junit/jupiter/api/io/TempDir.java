@@ -85,10 +85,10 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
  *
  * @since 5.4
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.10")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER })
 public @interface TempDir {
 
 	/**

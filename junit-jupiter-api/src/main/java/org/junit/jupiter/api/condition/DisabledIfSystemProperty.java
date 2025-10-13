@@ -73,13 +73,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * @see org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
  * @see org.junit.jupiter.api.Disabled
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Repeatable(DisabledIfSystemProperties.class)
-@ExtendWith(DisabledIfSystemPropertyCondition.class)
 @API(status = STABLE, since = "5.1")
+@Documented
+@ExtendWith(DisabledIfSystemPropertyCondition.class)
+@Repeatable(DisabledIfSystemProperties.class)
+@Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("exports")
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface DisabledIfSystemProperty {
 
 	/**

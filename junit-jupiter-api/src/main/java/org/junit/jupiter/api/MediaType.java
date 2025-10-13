@@ -34,8 +34,8 @@ import org.junit.platform.commons.util.Preconditions;
  * @see TestReporter#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
  * @see org.junit.jupiter.api.extension.ExtensionContext#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
  */
-@SuppressWarnings("removal")
 @API(status = MAINTAINED, since = "5.14")
+@SuppressWarnings("removal")
 public sealed class MediaType permits org.junit.jupiter.api.extension.MediaType {
 
 	private static final Pattern PATTERN;

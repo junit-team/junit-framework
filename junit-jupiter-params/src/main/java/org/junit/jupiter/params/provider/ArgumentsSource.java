@@ -40,12 +40,12 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.7")
 @Documented
 @Inherited
 @Repeatable(ArgumentsSources.class)
-@API(status = STABLE, since = "5.7")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
 public @interface ArgumentsSource {
 
 	/**

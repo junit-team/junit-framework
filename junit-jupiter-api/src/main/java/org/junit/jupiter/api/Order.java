@@ -43,10 +43,10 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.api.extension.RegisterExtension @RegisterExtension
  * @see org.junit.jupiter.api.extension.ExtendWith @ExtendWith
  */
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.9")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 public @interface Order {
 
 	/**

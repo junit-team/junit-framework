@@ -129,14 +129,14 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.params.ParameterizedTest
  * @see org.junit.jupiter.api.TestInstance
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = MAINTAINED, since = "5.13.3")
+@ArgumentsSource(FieldArgumentsProvider.class)
 @Documented
 @Inherited
 @Repeatable(FieldSources.class)
-@API(status = MAINTAINED, since = "5.13.3")
-@ArgumentsSource(FieldArgumentsProvider.class)
+@Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("exports")
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
 public @interface FieldSource {
 
 	/**

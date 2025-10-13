@@ -36,10 +36,10 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.params.ParameterizedTest
  * @see org.junit.jupiter.params.converter.ArgumentConverter
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.PARAMETER, ElementType.FIELD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = STABLE, since = "5.7")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.PARAMETER, ElementType.FIELD })
 public @interface ConvertWith {
 
 	/**

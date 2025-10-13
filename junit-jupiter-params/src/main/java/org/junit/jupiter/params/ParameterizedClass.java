@@ -145,14 +145,14 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * @see org.junit.jupiter.params.converter.ArgumentConverter
  * @see org.junit.jupiter.params.converter.ConvertWith
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
 @API(status = EXPERIMENTAL, since = "6.0")
 @ClassTemplate
+@Documented
 @ExtendWith(ParameterizedClassExtension.class)
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("exports")
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.TYPE })
 public @interface ParameterizedClass {
 
 	/**

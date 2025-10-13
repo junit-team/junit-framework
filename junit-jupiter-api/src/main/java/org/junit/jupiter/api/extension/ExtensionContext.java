@@ -419,8 +419,8 @@ public interface ExtensionContext {
 	 * {@link #publishFile(String, MediaType, ThrowingConsumer)}
 	 * instead.
 	 */
-	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14", forRemoval = true)
 	@SuppressWarnings("removal")
 	default void publishFile(String name, org.junit.jupiter.api.extension.MediaType mediaType,
 			ThrowingConsumer<Path> action) {
@@ -539,8 +539,8 @@ public interface ExtensionContext {
 		 * @since 5.1
 		 * @deprecated Please extend {@code AutoCloseable} directly.
 		 */
-		@Deprecated(since = "5.13")
 		@API(status = DEPRECATED, since = "5.13")
+		@Deprecated(since = "5.13")
 		interface CloseableResource {
 
 			/**
@@ -649,8 +649,8 @@ public interface ExtensionContext {
 		 * @see AutoCloseable
 		 * @deprecated Please use {@link #computeIfAbsent(Class)} instead.
 		 */
-		@Deprecated(since = "6.0")
 		@API(status = DEPRECATED, since = "6.0")
+		@Deprecated(since = "6.0")
 		default <V> V getOrComputeIfAbsent(Class<V> type) {
 			return computeIfAbsent(type);
 		}
@@ -725,8 +725,8 @@ public interface ExtensionContext {
 		 * @see AutoCloseable
 		 * @deprecated Please use {@link #computeIfAbsent(Object, Function)} instead.
 		 */
-		@Deprecated(since = "6.0")
 		@API(status = DEPRECATED, since = "6.0")
+		@Deprecated(since = "6.0")
 		<K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(K key,
 				Function<? super K, ? extends V> defaultCreator);
 
@@ -798,8 +798,8 @@ public interface ExtensionContext {
 		 * @see AutoCloseable
 		 * @deprecated Please use {@link #computeIfAbsent(Object, Function, Class)} instead.
 		 */
-		@Deprecated(since = "6.0")
 		@API(status = DEPRECATED, since = "6.0")
+		@Deprecated(since = "6.0")
 		<K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(K key,
 				Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
 

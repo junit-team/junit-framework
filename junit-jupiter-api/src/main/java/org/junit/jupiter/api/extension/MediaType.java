@@ -32,8 +32,8 @@ import org.junit.platform.commons.util.Preconditions;
  * @see ExtensionContext#publishFile(String, MediaType, org.junit.jupiter.api.function.ThrowingConsumer)
  * @deprecated Use {@link org.junit.jupiter.api.MediaType} instead.
  */
-@Deprecated(since = "5.14", forRemoval = true)
 @API(status = Status.DEPRECATED, since = "5.14")
+@Deprecated(since = "5.14", forRemoval = true)
 public final class MediaType extends org.junit.jupiter.api.MediaType {
 
 	/**
@@ -55,8 +55,8 @@ public final class MediaType extends org.junit.jupiter.api.MediaType {
 	 * The {@code application/json; charset=UTF-8} media type.
 	 * @deprecated Use {@link #APPLICATION_JSON} instead.
 	 */
-	@Deprecated(since = "5.14")
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14")
 	public static final MediaType APPLICATION_JSON_UTF_8 = create("application", "json", UTF_8);
 
 	/**

@@ -49,8 +49,8 @@ import org.junit.jupiter.params.ParameterizedTest;
  * @see ParameterizedTest
  * @deprecated Please use {@link org.junit.jupiter.params.ParameterInfo} instead
  */
-@Deprecated(since = "5.14", forRemoval = true)
 @API(status = DEPRECATED, since = "5.14")
+@Deprecated(since = "5.14", forRemoval = true)
 public interface ParameterInfo extends org.junit.jupiter.params.ParameterInfo {
 
 	/**
@@ -59,8 +59,8 @@ public interface ParameterInfo extends org.junit.jupiter.params.ParameterInfo {
 	 * @deprecated Please use
 	 * {@link org.junit.jupiter.params.ParameterInfo#NAMESPACE} instead
 	 */
-	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14", forRemoval = true)
 	Namespace NAMESPACE = Namespace.create(ParameterInfo.class);
 
 	/**
@@ -69,8 +69,8 @@ public interface ParameterInfo extends org.junit.jupiter.params.ParameterInfo {
 	 * @deprecated Please use
 	 * {@link org.junit.jupiter.params.ParameterInfo#KEY} instead
 	 */
-	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14", forRemoval = true)
 	Object KEY = ParameterInfo.class;
 
 	/**
@@ -80,8 +80,8 @@ public interface ParameterInfo extends org.junit.jupiter.params.ParameterInfo {
 	 * {@link org.junit.jupiter.params.ParameterInfo#get(ExtensionContext)}
 	 * instead
 	 */
-	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14", forRemoval = true)
 	static @Nullable ParameterInfo get(ExtensionContext context) {
 		return context.getStore(NAMESPACE).get(KEY, ParameterInfo.class);
 	}

@@ -75,10 +75,10 @@ import org.apiguardian.api.API;
  *
  * @since 5.11
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
 @API(status = MAINTAINED, since = "5.13.3")
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD })
 public @interface AutoClose {
 
 	/**

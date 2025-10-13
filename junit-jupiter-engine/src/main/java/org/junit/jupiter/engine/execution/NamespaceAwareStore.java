@@ -53,8 +53,8 @@ public class NamespaceAwareStore implements Store {
 		return this.<@Nullable T> accessStore(action);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	public <K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(K key,
 			Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(key, "key must not be null");
@@ -64,8 +64,8 @@ public class NamespaceAwareStore implements Store {
 		return this.<@Nullable Object> accessStore(action);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	public <K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(K key,
 			Function<? super K, ? extends V> defaultCreator, Class<V> requiredType) {
 		Preconditions.notNull(key, "key must not be null");

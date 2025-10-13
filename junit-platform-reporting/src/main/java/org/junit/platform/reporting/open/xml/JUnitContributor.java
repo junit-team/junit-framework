@@ -32,8 +32,8 @@ import org.w3c.dom.NodeList;
  *
  * @since 1.12
  */
-@SuppressWarnings("exports") // we don't want to export 'org.opentest4j.reporting.tooling.spi' transitively
-@API(status = INTERNAL, since = "1.12")
+@API(status = INTERNAL, since = "1.12") // we don't want to export 'org.opentest4j.reporting.tooling.spi' transitively
+@SuppressWarnings("exports")
 public class JUnitContributor implements Contributor {
 
 	public JUnitContributor() {

@@ -50,8 +50,8 @@ import org.junit.jupiter.api.TestInstance;
  * @see TestInstancePreDestroyCallback
  * @see ParameterResolver
  */
-@FunctionalInterface
 @API(status = STABLE, since = "5.7")
+@FunctionalInterface
 public interface TestInstanceFactory extends TestInstantiationAwareExtension {
 
 	/**

@@ -62,8 +62,8 @@ import org.apiguardian.api.API;
  * @see BeforeClassTemplateInvocationCallback
  * @see AfterClassTemplateInvocationCallback
  */
-@FunctionalInterface
 @API(status = STABLE, since = "5.0")
+@FunctionalInterface
 public interface BeforeEachCallback extends Extension {
 
 	/**

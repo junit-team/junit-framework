@@ -89,12 +89,12 @@ import org.apiguardian.api.API;
  * @see RegisterExtension
  * @see Extension
  */
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.0")
 @Documented
 @Inherited
 @Repeatable(Extensions.class)
-@API(status = STABLE, since = "5.0")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 public @interface ExtendWith {
 
 	/**

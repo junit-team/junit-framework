@@ -33,11 +33,11 @@ import org.apiguardian.api.API;
  * @see ExtendWith
  * @see java.lang.annotation.Repeatable
  */
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.0")
 @Documented
 @Inherited
-@API(status = STABLE, since = "5.0")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 public @interface Extensions {
 
 	/**

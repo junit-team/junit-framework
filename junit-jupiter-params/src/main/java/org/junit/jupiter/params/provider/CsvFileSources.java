@@ -37,11 +37,11 @@ import org.apiguardian.api.API;
  * @see CsvFileSource
  * @see java.lang.annotation.Repeatable
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.11")
 @Documented
 @Inherited
-@API(status = STABLE, since = "5.11")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
 public @interface CsvFileSources {
 
 	/**

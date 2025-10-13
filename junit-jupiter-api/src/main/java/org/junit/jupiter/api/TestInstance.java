@@ -67,11 +67,11 @@ import org.junit.jupiter.api.parallel.Execution;
  * @see Nested @Nested
  * @see Execution @Execution
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Documented
 @API(status = STABLE, since = "5.0")
+@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface TestInstance {
 
 	/**

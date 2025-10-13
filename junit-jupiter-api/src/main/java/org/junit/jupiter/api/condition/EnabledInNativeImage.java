@@ -73,11 +73,11 @@ import org.apiguardian.api.API;
  * @see org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
  * @see org.junit.jupiter.api.Disabled
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.9.1")
 @Documented
 @EnabledIfSystemProperty(named = "org.graalvm.nativeimage.imagecode", matches = ".+", //
 		disabledReason = "Not currently executing within a GraalVM native image")
-@API(status = STABLE, since = "5.9.1")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface EnabledInNativeImage {
 }

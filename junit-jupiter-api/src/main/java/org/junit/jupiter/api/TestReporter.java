@@ -42,8 +42,8 @@ import org.junit.platform.commons.util.Preconditions;
  * @see #publishEntry(Map)
  * @see #publishEntry(String, String)
  */
-@FunctionalInterface
 @API(status = STABLE, since = "5.0")
+@FunctionalInterface
 public interface TestReporter {
 
 	/**
@@ -101,8 +101,8 @@ public interface TestReporter {
 	 * @since 5.12
 	 * @deprecated Use {@link #publishFile(Path, MediaType)} instead.
 	 */
-	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14", forRemoval = true)
 	@SuppressWarnings("removal")
 	default void publishFile(Path file, org.junit.jupiter.api.extension.MediaType mediaType) {
 		Preconditions.notNull(mediaType, "mediaType must not be null");
@@ -180,8 +180,8 @@ public interface TestReporter {
 	 * @since 5.12
 	 * @deprecated Use {@link #publishFile(String, MediaType, ThrowingConsumer)} instead.
 	 */
-	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")
+	@Deprecated(since = "5.14", forRemoval = true)
 	@SuppressWarnings("removal")
 	default void publishFile(String name, org.junit.jupiter.api.extension.MediaType mediaType,
 			ThrowingConsumer<Path> action) {

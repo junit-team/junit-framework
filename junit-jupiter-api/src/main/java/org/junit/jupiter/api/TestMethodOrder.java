@@ -74,11 +74,11 @@ import org.junit.jupiter.api.parallel.Execution;
  * @see MethodOrderer
  * @see TestClassOrder
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.7")
 @Documented
 @Inherited
-@API(status = STABLE, since = "5.7")
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface TestMethodOrder {
 
 	/**

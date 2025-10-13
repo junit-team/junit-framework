@@ -37,11 +37,11 @@ import org.apiguardian.api.API;
  * @see FieldSource
  * @see java.lang.annotation.Repeatable
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = MAINTAINED, since = "5.13.3")
 @Documented
 @Inherited
-@API(status = MAINTAINED, since = "5.13.3")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
 public @interface FieldSources {
 
 	/**

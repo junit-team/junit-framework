@@ -41,9 +41,9 @@ import org.junit.rules.ExpectedException;
  * {@link org.junit.jupiter.api.Assertions#assertThrows(Class, Executable)}
  * instead.
  */
-@SuppressWarnings("removal")
 @API(status = DEPRECATED, since = "6.0")
 @Deprecated(since = "6.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class ExpectedExceptionSupport implements AfterEachCallback, TestExecutionExceptionHandler {
 
 	private static final String EXCEPTION_WAS_HANDLED = "exceptionWasHandled";

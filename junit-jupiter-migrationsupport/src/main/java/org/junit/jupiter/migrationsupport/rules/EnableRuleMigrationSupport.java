@@ -38,13 +38,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * @see org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport
  * @deprecated Please migrate to Jupiter extensions.
  */
-@SuppressWarnings("removal")
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
 @API(status = DEPRECATED, since = "6.0")
 @Deprecated(since = "6.0", forRemoval = true)
+@ExtendWith(ExpectedExceptionSupport.class)
 @ExtendWith(ExternalResourceSupport.class)
 @ExtendWith(VerifierSupport.class)
-@ExtendWith(ExpectedExceptionSupport.class)
+@Retention(RetentionPolicy.RUNTIME)
+@SuppressWarnings("removal")
+@Target(ElementType.TYPE)
 public @interface EnableRuleMigrationSupport {
 }

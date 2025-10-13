@@ -83,10 +83,10 @@ import org.junit.jupiter.api.ClassTemplate;
  * @since 5.3
  */
 @API(status = STABLE, since = "5.10")
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
 @Inherited
 @Repeatable(ResourceLocks.class)
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface ResourceLock {
 
 	/**

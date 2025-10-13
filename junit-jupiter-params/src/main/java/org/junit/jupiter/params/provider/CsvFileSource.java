@@ -73,14 +73,14 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
+@API(status = STABLE, since = "5.7")
+@ArgumentsSource(CsvFileArgumentsProvider.class)
 @Documented
 @Inherited
 @Repeatable(CsvFileSources.class)
-@API(status = STABLE, since = "5.7")
-@ArgumentsSource(CsvFileArgumentsProvider.class)
+@Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("exports")
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE })
 public @interface CsvFileSource {
 
 	/**

@@ -284,8 +284,8 @@ public class Assumptions {
 	 * @throws TestAbortedException always
 	 * @since 5.9
 	 */
-	@Contract(" -> fail")
 	@API(status = STABLE, since = "5.9")
+	@Contract(" -> fail")
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V abort() {
 		throw new TestAbortedException();
@@ -309,8 +309,8 @@ public class Assumptions {
 	 * @throws TestAbortedException always
 	 * @since 5.9
 	 */
-	@Contract("_ -> fail")
 	@API(status = STABLE, since = "5.9")
+	@Contract("_ -> fail")
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V abort(String message) {
 		throw new TestAbortedException(message);
@@ -327,8 +327,8 @@ public class Assumptions {
 	 * @throws TestAbortedException always
 	 * @since 5.9
 	 */
-	@Contract("_ -> fail")
 	@API(status = STABLE, since = "5.9")
+	@Contract("_ -> fail")
 	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V abort(Supplier<String> messageSupplier) {
 		throw new TestAbortedException(messageSupplier.get());

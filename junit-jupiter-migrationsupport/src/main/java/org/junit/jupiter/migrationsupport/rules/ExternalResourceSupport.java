@@ -39,9 +39,9 @@ import org.junit.rules.ExternalResource;
  * @see org.junit.Rule
  * @deprecated Please use {@link org.junit.jupiter.api.AutoClose @AutoClose} instead.
  */
-@SuppressWarnings("removal")
 @API(status = DEPRECATED, since = "6.0")
 @Deprecated(since = "6.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class ExternalResourceSupport implements BeforeEachCallback, AfterEachCallback {
 
 	private final TestRuleSupport support = new TestRuleSupport(ExternalResourceAdapter::new, ExternalResource.class);
