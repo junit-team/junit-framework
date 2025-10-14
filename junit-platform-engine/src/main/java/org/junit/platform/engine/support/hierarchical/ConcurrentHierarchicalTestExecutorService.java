@@ -473,10 +473,18 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			public int compareTo(Entry that) {
 				var result = Integer.compare(that.level, this.level);
 				if (result == 0) {
-					return Integer.compare(that.attempts, this.attempts);
+					result = Boolean.compare(this.isContainer(), that.isContainer());
+					if (result == 0) {
+						result = Integer.compare(that.attempts, this.attempts);
+					}
 				}
 				return result;
 			}
+
+			private boolean isContainer() {
+				return task.getTestDescriptor().isContainer();
+			}
+
 		}
 
 	}

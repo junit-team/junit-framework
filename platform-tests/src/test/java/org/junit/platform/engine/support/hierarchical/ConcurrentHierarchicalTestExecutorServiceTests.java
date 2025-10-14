@@ -16,6 +16,8 @@ import static java.util.function.Predicate.isEqual;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
+import static org.junit.platform.engine.TestDescriptor.Type.CONTAINER;
+import static org.junit.platform.engine.TestDescriptor.Type.TEST;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -245,6 +247,33 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(leaf.startTime).isBeforeOrEqualTo(child2.startTime);
 	}
 
+	@Test
+	void prioritizesTestsOverContainers() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+
+		var leavesStarted = new CountDownLatch(2);
+		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
+				.withName("leaf").withLevel(3).withType(TEST);
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().submit(leaf).get()) //
+				.withName("child1").withLevel(2).withType(CONTAINER);
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
+				.withName("child2").withLevel(2).withType(TEST);
+		var child3 = new TestTaskStub(ExecutionMode.SAME_THREAD, leavesStarted::await) //
+				.withName("child3").withLevel(2).withType(TEST);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
+			() -> requiredService().invokeAll(List.of(child1, child2, child3))) //
+					.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		root.assertExecutedSuccessfully();
+		assertThat(List.of(child1, child2, child3)).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		leaf.assertExecutedSuccessfully();
+
+		assertThat(child2.startTime).isBeforeOrEqualTo(child1.startTime);
+	}
+
 	private static ExclusiveResource exclusiveResource() {
 		return new ExclusiveResource("key", ExclusiveResource.LockMode.READ_WRITE);
 	}
@@ -267,6 +296,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		private ResourceLock resourceLock = NopLock.INSTANCE;
 		private @Nullable String name;
 		private int level = 1;
+		private TestDescriptor.Type type = TEST;
 
 		private final CompletableFuture<@Nullable Void> result = new CompletableFuture<>();
 		private volatile @Nullable Instant startTime;
@@ -292,6 +322,11 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			return this;
 		}
 
+		TestTaskStub withType(TestDescriptor.Type type) {
+			this.type = type;
+			return this;
+		}
+
 		TestTaskStub withResourceLock(ResourceLock resourceLock) {
 			this.resourceLock = resourceLock;
 			return this;
@@ -314,7 +349,12 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 			for (var i = 1; i < level; i++) {
 				uniqueId = uniqueId.append("child", name);
 			}
-			return new TestDescriptorStub(uniqueId, name);
+			return new TestDescriptorStub(uniqueId, name) {
+				@Override
+				public Type getType() {
+					return type;
+				}
+			};
 		}
 
 		@Override
