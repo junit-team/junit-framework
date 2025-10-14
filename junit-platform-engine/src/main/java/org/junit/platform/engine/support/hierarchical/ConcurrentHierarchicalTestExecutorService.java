@@ -351,20 +351,18 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		void processQueueEntries() {
 			while (!threadPool.isShutdown()) {
-				workerLease = workerLeaseManager.tryAcquire();
+				var workerLease = workerLeaseManager.tryAcquire();
 				if (workerLease == null) {
 					break;
 				}
-				try {
+				try (workerLease) {
 					var entry = workQueue.poll();
 					if (entry == null) {
 						break;
 					}
 					LOGGER.trace(() -> "processing: " + entry.task);
+					this.workerLease = workerLease;
 					executeEntry(entry);
-				}
-				finally {
-					workerLease.release();
 				}
 			}
 		}
@@ -524,13 +522,18 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 	}
 
-	private static class WorkerLease {
+	private static class WorkerLease implements AutoCloseable {
 
 		private final Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction;
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
 		WorkerLease(Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction) {
 			this.releaseAction = releaseAction;
+		}
+
+		@Override
+		public void close() {
+			release();
 		}
 
 		void release() {
