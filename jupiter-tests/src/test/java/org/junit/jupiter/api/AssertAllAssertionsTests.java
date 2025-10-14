@@ -12,10 +12,10 @@ package org.junit.jupiter.api;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.AssertionTestUtils.assertExpectedExceptionTypes;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
@@ -23,7 +23,6 @@ import static org.junit.platform.commons.test.PreconditionAssertions.assertPreco
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.function.Executable;
@@ -196,25 +195,6 @@ class AssertAllAssertionsTests {
 			() -> assertAll(Stream.generate(() -> executable).parallel().limit(100)));
 
 		assertThat(multipleFailuresError.getFailures()).hasSize(100).doesNotContainNull();
-	}
-
-	@SafeVarargs
-	static void assertExpectedExceptionTypes(MultipleFailuresError multipleFailuresError,
-			Class<? extends Throwable>... exceptionTypes) {
-
-		assertNotNull(multipleFailuresError, "MultipleFailuresError");
-		List<Throwable> failures = multipleFailuresError.getFailures();
-		assertEquals(exceptionTypes.length, failures.size(), "number of failures");
-
-		// Verify that exceptions are also present as suppressed exceptions.
-		// https://github.com/junit-team/junit-framework/issues/1602
-		Throwable[] suppressed = multipleFailuresError.getSuppressed();
-		assertEquals(exceptionTypes.length, suppressed.length, "number of suppressed exceptions");
-
-		for (int i = 0; i < exceptionTypes.length; i++) {
-			assertEquals(exceptionTypes[i], failures.get(i).getClass(), "exception type [" + i + "]");
-			assertEquals(exceptionTypes[i], suppressed[i].getClass(), "suppressed exception type [" + i + "]");
-		}
 	}
 
 	@SuppressWarnings("serial")
