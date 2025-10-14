@@ -267,7 +267,7 @@ record ParallelExecutionIntegrationTests(Class<? extends HierarchicalTestExecuto
 	void runsIsolatedTestsLastToMaximizeParallelism() {
 		var configParams = Map.of( //
 			DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent", //
-			PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME, "4" //
+			PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME, "3" //
 		);
 		Class<?>[] testClasses = { IsolatedTestCase.class, SuccessfulParallelTestCase.class };
 		var events = executeWithFixedParallelism(3, configParams, testClasses) //
