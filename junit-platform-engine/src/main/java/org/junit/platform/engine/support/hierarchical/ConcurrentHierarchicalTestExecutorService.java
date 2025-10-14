@@ -96,8 +96,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return completedFuture(null);
 		}
 
-		var entry = enqueue(testTask);
-		return new BlockingAwareFuture<@Nullable Void>(entry.future(), new WorkerThread.BlockHandler(entry));
+		return new WorkStealingFuture(enqueue(testTask));
 	}
 
 	@Override
@@ -434,28 +433,36 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			T run() throws InterruptedException;
 		}
 
-		private record BlockHandler(WorkQueue.Entry entry) implements BlockingAwareFuture.BlockHandler {
+	}
 
-			@Override
-			public <T> T handle(Supplier<Boolean> blockingUnnecessary, Callable<T> callable) throws Exception {
-				var workerThread = get();
-				if (workerThread == null || entry.future.isDone()) {
-					return callable.call();
-				}
-				workerThread.tryToStealWork(entry);
-				if (entry.future.isDone()) {
-					return callable.call();
-				}
-				LOGGER.trace(() -> "blocking for child task");
-				return workerThread.runBlocking(() -> {
-					try {
-						return callable.call();
-					}
-					catch (Exception ex) {
-						throw throwAsUncheckedException(ex);
-					}
-				});
+	private static class WorkStealingFuture extends BlockingAwareFuture<@Nullable Void> {
+
+		private final WorkQueue.Entry entry;
+
+		WorkStealingFuture(WorkQueue.Entry entry) {
+			super(entry.future);
+			this.entry = entry;
+		}
+
+		@Override
+		protected @Nullable Void handle(Callable<@Nullable Void> callable) throws Exception {
+			var workerThread = WorkerThread.get();
+			if (workerThread == null || entry.future.isDone()) {
+				return callable.call();
 			}
+			workerThread.tryToStealWork(entry);
+			if (entry.future.isDone()) {
+				return callable.call();
+			}
+			LOGGER.trace(() -> "blocking for child task");
+			return workerThread.runBlocking(() -> {
+				try {
+					return callable.call();
+				}
+				catch (Exception ex) {
+					throw throwAsUncheckedException(ex);
+				}
+			});
 		}
 
 	}
@@ -612,5 +619,4 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			reacquisitionToken = null;
 		}
 	}
-
 }

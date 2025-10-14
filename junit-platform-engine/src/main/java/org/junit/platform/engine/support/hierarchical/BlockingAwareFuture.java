@@ -17,17 +17,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
-class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T> {
+abstract class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T> {
 
-	private final BlockHandler handler;
-
-	BlockingAwareFuture(Future<T> delegate, BlockHandler handler) {
+	BlockingAwareFuture(Future<T> delegate) {
 		super(delegate);
-		this.handler = handler;
 	}
 
 	@Override
@@ -35,7 +31,7 @@ class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T
 		if (delegate.isDone()) {
 			return delegate.get();
 		}
-		return handle(delegate::get);
+		return handleSafely(delegate::get);
 	}
 
 	@Override
@@ -43,22 +39,18 @@ class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T
 		if (delegate.isDone()) {
 			return delegate.get();
 		}
-		return handle(() -> delegate.get(timeout, unit));
+		return handleSafely(() -> delegate.get(timeout, unit));
 	}
 
-	private T handle(Callable<T> callable) {
+	private T handleSafely(Callable<T> callable) {
 		try {
-			return handler.handle(delegate::isDone, callable);
+			return handle(callable);
 		}
 		catch (Exception e) {
 			throw throwAsUncheckedException(e);
 		}
 	}
 
-	interface BlockHandler {
+	protected abstract T handle(Callable<T> callable) throws Exception;
 
-		<T extends @Nullable Object> T handle(Supplier<Boolean> blockingUnnecessary, Callable<T> callable)
-				throws Exception;
-
-	}
 }
