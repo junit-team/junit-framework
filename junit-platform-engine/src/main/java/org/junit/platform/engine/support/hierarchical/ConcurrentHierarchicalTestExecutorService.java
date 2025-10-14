@@ -117,6 +117,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	private void forkAll(Collection<WorkQueue.Entry> entries) {
+		if (entries.isEmpty()) {
+			return;
+		}
 		workQueue.addAll(entries);
 		// start at most (parallelism - 1) new workers as this method is called from a worker thread holding a lease
 		for (int i = 0; i < Math.min(parallelism - 1, entries.size()); i++) {
