@@ -41,6 +41,8 @@ repository on GitHub.
   option to change it. To resolve this, a new `commentCharacter` attribute has been added
   to both annotations. Its default value remains `+++#+++`, but it can now be customized
   to avoid conflicts with other control characters.
+* Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
+  assertion.
 
 [[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
