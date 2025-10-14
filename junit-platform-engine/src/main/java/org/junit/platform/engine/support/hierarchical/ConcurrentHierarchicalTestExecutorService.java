@@ -245,9 +245,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var concurrentTasks = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			var allForkedChildren = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var remainingForkedChildren = stealWork(concurrentTasks);
+			var remainingForkedChildren = stealWork(allForkedChildren);
 			waitFor(remainingForkedChildren);
 			executeAll(isolatedTasks);
 		}
@@ -279,10 +279,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queueEntries;
 		}
 
-		private List<WorkQueue.Entry> stealWork(Queue<WorkQueue.Entry> concurrentTasks) {
-			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(concurrentTasks.size());
+		private List<WorkQueue.Entry> stealWork(Queue<WorkQueue.Entry> forkedChildren) {
+			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(forkedChildren.size());
 			WorkQueue.Entry entry;
-			while ((entry = concurrentTasks.poll()) != null) {
+			while ((entry = forkedChildren.poll()) != null) {
 				var executed = tryToStealWork(entry);
 				if (!executed) {
 					concurrentlyExecutingChildren.add(entry);
