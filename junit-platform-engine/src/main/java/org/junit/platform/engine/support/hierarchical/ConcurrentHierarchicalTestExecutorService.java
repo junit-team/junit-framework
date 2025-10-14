@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.Comparator.reverseOrder;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -19,7 +20,9 @@ import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.G
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -175,37 +178,35 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		return CompletableFuture.allOf(futures);
 	}
 
-	private List<WorkQueue.Entry> stealWork(List<WorkQueue.Entry> queueEntries) {
+	private List<WorkQueue.Entry> stealWork(Collection<WorkQueue.Entry> queueEntries) {
 		if (queueEntries.isEmpty()) {
 			return List.of();
 		}
-		List<WorkQueue.Entry> concurrentlyExecutedChildren = new ArrayList<>(queueEntries.size());
-		var iterator = queueEntries.listIterator(queueEntries.size());
-		while (iterator.hasPrevious()) {
-			var entry = iterator.previous();
+		List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(queueEntries.size());
+		for (var entry : queueEntries) {
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
 				LOGGER.trace(() -> "stole work: " + entry);
 				var executed = tryExecute(entry);
 				if (!executed) {
 					workQueue.add(entry);
-					concurrentlyExecutedChildren.add(entry);
+					concurrentlyExecutingChildren.add(entry);
 				}
 			}
 			else {
-				concurrentlyExecutedChildren.add(entry);
+				concurrentlyExecutingChildren.add(entry);
 			}
 		}
-		return concurrentlyExecutedChildren;
+		return concurrentlyExecutingChildren;
 	}
 
-	private List<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
+	private Collection<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
 			Consumer<TestTask> isolatedTaskCollector, Consumer<TestTask> sameThreadTaskCollector) {
 
 		if (children.isEmpty()) {
 			return List.of();
 		}
-		List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
+		Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
 		for (TestTask child : children) {
 			if (requiresGlobalReadWriteLock(child)) {
 				isolatedTaskCollector.accept(child);
