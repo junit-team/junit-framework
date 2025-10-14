@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
@@ -31,7 +32,7 @@ class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T
 
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
-		if (isDone()) {
+		if (delegate.isDone()) {
 			return delegate.get();
 		}
 		return handle(delegate::get);
@@ -39,15 +40,15 @@ class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T
 
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		if (isDone()) {
-			return delegate.get(timeout, unit);
+		if (delegate.isDone()) {
+			return delegate.get();
 		}
 		return handle(() -> delegate.get(timeout, unit));
 	}
 
 	private T handle(Callable<T> callable) {
 		try {
-			return handler.handle(callable);
+			return handler.handle(delegate::isDone, callable);
 		}
 		catch (Exception e) {
 			throw throwAsUncheckedException(e);
@@ -56,7 +57,8 @@ class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T
 
 	interface BlockHandler {
 
-		<T extends @Nullable Object> T handle(Callable<T> callable) throws Exception;
+		<T extends @Nullable Object> T handle(Supplier<Boolean> blockingUnnecessary, Callable<T> callable)
+				throws Exception;
 
 	}
 }

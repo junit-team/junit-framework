@@ -245,6 +245,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		leaf.assertExecutedSuccessfully();
 
 		assertThat(leaf.startTime).isBeforeOrEqualTo(child2.startTime);
+		assertThat(leaf.executionThread).isSameAs(child1.executionThread);
 	}
 
 	@Test

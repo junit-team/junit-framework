@@ -19,8 +19,10 @@ import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedExc
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -85,14 +87,20 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
 		LOGGER.trace(() -> "submit: " + testTask);
-		if (WorkerThread.get() == null) {
+
+		var workerThread = WorkerThread.get();
+		if (workerThread == null) {
 			return enqueue(testTask).future();
 		}
+
 		if (testTask.getExecutionMode() == SAME_THREAD) {
-			executeTask(testTask);
+			workerThread.executeTask(testTask);
 			return completedFuture(null);
 		}
-		return new BlockingAwareFuture<@Nullable Void>(enqueue(testTask).future(), WorkerThread.BlockHandler.INSTANCE);
+
+		var entry = enqueue(testTask);
+		workerThread.addForkedChild(entry);
+		return new BlockingAwareFuture<@Nullable Void>(entry.future(), WorkerThread.BlockHandler.INSTANCE);
 	}
 
 	@Override
@@ -143,45 +151,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 	}
 
-	@SuppressWarnings("try")
-	private void executeTask(TestTask testTask) {
-		var executed = tryExecuteTask(testTask);
-		if (!executed) {
-			var resourceLock = testTask.getResourceLock();
-			var workerThread = WorkerThread.getOrThrow();
-			try (var ignored = workerThread.runBlocking(() -> {
-				LOGGER.trace(() -> "blocking for resource lock: " + resourceLock);
-				return resourceLock.acquire();
-			})) {
-				doExecute(testTask);
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-		}
-	}
-
-	private static boolean tryExecuteTask(TestTask testTask) {
-		var resourceLock = testTask.getResourceLock();
-		if (resourceLock.tryAcquire()) {
-			try (resourceLock) {
-				doExecute(testTask);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static void doExecute(TestTask testTask) {
-		LOGGER.trace(() -> "executing: " + testTask);
-		try {
-			testTask.execute();
-		}
-		finally {
-			LOGGER.trace(() -> "finished executing: " + testTask);
-		}
-	}
-
 	private class WorkerThreadFactory implements ThreadFactory {
 
 		private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
@@ -206,6 +175,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private class WorkerThread extends Thread {
 
+		private final Deque<State> state = new ArrayDeque<>();
+
 		@Nullable
 		WorkerLease workerLease;
 
@@ -226,6 +197,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				throw new IllegalStateException("Not on a worker thread");
 			}
 			return workerThread;
+		}
+
+		ConcurrentHierarchicalTestExecutorService executor() {
+			return ConcurrentHierarchicalTestExecutorService.this;
 		}
 
 		void processQueueEntries() {
@@ -275,15 +250,19 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var remainingForkedChildren = stealWork(queueEntries);
+			var remainingForkedChildren = stealWork();
 			waitFor(remainingForkedChildren);
 			executeAll(isolatedTasks);
 		}
 
-		private Collection<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
-				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
+		void addForkedChild(WorkQueue.Entry entry) {
+			getForkedChildren().add(entry);
+		}
+
+		private void forkConcurrentChildren(List<? extends TestTask> children, Consumer<TestTask> isolatedTaskCollector,
+				List<TestTask> sameThreadTasks) {
 
 			Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
 			for (TestTask child : children) {
@@ -303,38 +282,42 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					sameThreadTasks.add(queueEntries.poll().task);
 				}
 				forkAll(queueEntries);
+				getForkedChildren().addAll(queueEntries);
 			}
-			return queueEntries;
 		}
 
-		private static CompletableFuture<?> toCombinedFuture(List<WorkQueue.Entry> entries) {
-			if (entries.size() == 1) {
-				return entries.get(0).future();
-			}
-			var futures = entries.stream().map(WorkQueue.Entry::future).toArray(CompletableFuture<?>[]::new);
-			return CompletableFuture.allOf(futures);
-		}
-
-		private List<WorkQueue.Entry> stealWork(Collection<WorkQueue.Entry> queueEntries) {
-			if (queueEntries.isEmpty()) {
-				return List.of();
-			}
-			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(queueEntries.size());
-			for (var entry : queueEntries) {
-				var claimed = workQueue.remove(entry);
-				if (claimed) {
-					LOGGER.trace(() -> "stole work: " + entry);
-					var executed = tryExecute(entry);
-					if (!executed) {
-						workQueue.reAdd(entry);
+		private List<WorkQueue.Entry> stealWork() {
+			var forkedChildren = getForkedChildren();
+			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(forkedChildren.size());
+			WorkQueue.Entry entry;
+			while ((entry = forkedChildren.poll()) != null) {
+				if (entry.future.isDone()) {
+					concurrentlyExecutingChildren.add(entry);
+				}
+				else {
+					var claimed = workQueue.remove(entry);
+					if (claimed) {
+						var executed = tryExecuteStolenEntry(entry);
+						if (!executed) {
+							workQueue.reAdd(entry);
+							concurrentlyExecutingChildren.add(entry);
+						}
+					}
+					else {
 						concurrentlyExecutingChildren.add(entry);
 					}
 				}
-				else {
-					concurrentlyExecutingChildren.add(entry);
-				}
 			}
 			return concurrentlyExecutingChildren;
+		}
+
+		private Queue<WorkQueue.Entry> getForkedChildren() {
+			return currentState().forkedChildren;
+		}
+
+		private boolean tryExecuteStolenEntry(WorkQueue.Entry entry) {
+			LOGGER.trace(() -> "stole work: " + entry);
+			return tryExecute(entry);
 		}
 
 		private void waitFor(List<WorkQueue.Entry> children) {
@@ -349,7 +332,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				}
 				else {
 					runBlocking(() -> {
-						LOGGER.trace(() -> "blocking for forked children: " + children);
+						LOGGER.trace(() -> "blocking for forked children of %s: %s".formatted(
+							currentState().executingTask, children));
 						return future.join();
 					});
 				}
@@ -367,7 +351,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (children.isEmpty()) {
 				return;
 			}
-			LOGGER.trace(() -> "running %d children directly".formatted(children.size()));
+			LOGGER.trace(
+				() -> "running %d children of %s directly".formatted(children.size(), currentState().executingTask));
 			if (children.size() == 1) {
 				executeTask(children.get(0));
 				return;
@@ -377,7 +362,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 		}
 
-		private static boolean tryExecute(WorkQueue.Entry entry) {
+		private boolean tryExecute(WorkQueue.Entry entry) {
 			try {
 				var executed = tryExecuteTask(entry.task);
 				if (executed) {
@@ -403,12 +388,77 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 		}
 
-		interface BlockingAction<T> {
-			T run() throws InterruptedException;
+		@SuppressWarnings("try")
+		private void executeTask(TestTask testTask) {
+			var executed = tryExecuteTask(testTask);
+			if (!executed) {
+				var resourceLock = testTask.getResourceLock();
+				try (var ignored = runBlocking(() -> {
+					LOGGER.trace(() -> "blocking for resource lock: " + resourceLock);
+					return resourceLock.acquire();
+				})) {
+					LOGGER.trace(() -> "acquired resource lock: " + resourceLock);
+					doExecute(testTask);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+				finally {
+					LOGGER.trace(() -> "released resource lock: " + resourceLock);
+				}
+			}
 		}
 
-		private ConcurrentHierarchicalTestExecutorService executor() {
-			return ConcurrentHierarchicalTestExecutorService.this;
+		private boolean tryExecuteTask(TestTask testTask) {
+			var resourceLock = testTask.getResourceLock();
+			if (resourceLock.tryAcquire()) {
+				LOGGER.trace(() -> "acquired resource lock: " + resourceLock);
+				try (resourceLock) {
+					doExecute(testTask);
+					return true;
+				}
+				finally {
+					LOGGER.trace(() -> "released resource lock: " + resourceLock);
+				}
+			}
+			else {
+				LOGGER.trace(() -> "failed to acquire resource lock: " + resourceLock);
+			}
+			return false;
+		}
+
+		private void doExecute(TestTask testTask) {
+			LOGGER.trace(() -> "executing: " + testTask);
+			this.state.push(new State(testTask));
+			try {
+				testTask.execute();
+			}
+			finally {
+				this.state.pop();
+				LOGGER.trace(() -> "finished executing: " + testTask);
+			}
+		}
+
+		private State currentState() {
+			return state.element();
+		}
+
+		private static CompletableFuture<?> toCombinedFuture(List<WorkQueue.Entry> entries) {
+			if (entries.size() == 1) {
+				return entries.get(0).future();
+			}
+			var futures = entries.stream().map(WorkQueue.Entry::future).toArray(CompletableFuture<?>[]::new);
+			return CompletableFuture.allOf(futures);
+		}
+
+		private record State(TestTask executingTask, Queue<WorkQueue.Entry> forkedChildren) {
+			State(TestTask executingTask) {
+				this(executingTask, new PriorityQueue<>(reverseOrder()));
+			}
+		}
+
+		private interface BlockingAction<T> {
+			T run() throws InterruptedException;
 		}
 
 		private static class BlockHandler implements BlockingAwareFuture.BlockHandler {
@@ -416,9 +466,13 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			private static final BlockHandler INSTANCE = new BlockHandler();
 
 			@Override
-			public <T> T handle(Callable<T> callable) throws Exception {
+			public <T> T handle(Supplier<Boolean> blockingUnnecessary, Callable<T> callable) throws Exception {
 				var workerThread = get();
-				if (workerThread == null) {
+				if (workerThread == null || blockingUnnecessary.get()) {
+					return callable.call();
+				}
+				workerThread.stealWork();
+				if (blockingUnnecessary.get()) {
 					return callable.call();
 				}
 				LOGGER.trace(() -> "blocking for child task");
