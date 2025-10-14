@@ -19,10 +19,8 @@ import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedExc
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -99,8 +97,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		var entry = enqueue(testTask);
-		workerThread.addForkedChild(entry);
-		return new BlockingAwareFuture<@Nullable Void>(entry.future(), WorkerThread.BlockHandler.INSTANCE);
+		return new BlockingAwareFuture<@Nullable Void>(entry.future(), new WorkerThread.BlockHandler(entry));
 	}
 
 	@Override
@@ -175,8 +172,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private class WorkerThread extends Thread {
 
-		private final Deque<State> state = new ArrayDeque<>();
-
 		@Nullable
 		WorkerLease workerLease;
 
@@ -250,19 +245,15 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			var concurrentTasks = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var remainingForkedChildren = stealWork();
+			var remainingForkedChildren = stealWork(concurrentTasks);
 			waitFor(remainingForkedChildren);
 			executeAll(isolatedTasks);
 		}
 
-		void addForkedChild(WorkQueue.Entry entry) {
-			getForkedChildren().add(entry);
-		}
-
-		private void forkConcurrentChildren(List<? extends TestTask> children, Consumer<TestTask> isolatedTaskCollector,
-				List<TestTask> sameThreadTasks) {
+		private Queue<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
+				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
 			Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
 			for (TestTask child : children) {
@@ -276,48 +267,44 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					queueEntries.add(WorkQueue.Entry.create(child));
 				}
 			}
+
 			if (!queueEntries.isEmpty()) {
 				if (sameThreadTasks.isEmpty()) {
 					// hold back one task for this thread
 					sameThreadTasks.add(queueEntries.poll().task);
 				}
 				forkAll(queueEntries);
-				getForkedChildren().addAll(queueEntries);
 			}
+
+			return queueEntries;
 		}
 
-		private List<WorkQueue.Entry> stealWork() {
-			var forkedChildren = getForkedChildren();
-			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(forkedChildren.size());
+		private List<WorkQueue.Entry> stealWork(Queue<WorkQueue.Entry> concurrentTasks) {
+			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(concurrentTasks.size());
 			WorkQueue.Entry entry;
-			while ((entry = forkedChildren.poll()) != null) {
-				if (entry.future.isDone()) {
+			while ((entry = concurrentTasks.poll()) != null) {
+				var executed = tryToStealWork(entry);
+				if (!executed) {
 					concurrentlyExecutingChildren.add(entry);
-				}
-				else {
-					var claimed = workQueue.remove(entry);
-					if (claimed) {
-						var executed = tryExecuteStolenEntry(entry);
-						if (!executed) {
-							workQueue.reAdd(entry);
-							concurrentlyExecutingChildren.add(entry);
-						}
-					}
-					else {
-						concurrentlyExecutingChildren.add(entry);
-					}
 				}
 			}
 			return concurrentlyExecutingChildren;
 		}
 
-		private Queue<WorkQueue.Entry> getForkedChildren() {
-			return currentState().forkedChildren;
-		}
-
-		private boolean tryExecuteStolenEntry(WorkQueue.Entry entry) {
-			LOGGER.trace(() -> "stole work: " + entry);
-			return tryExecute(entry);
+		private boolean tryToStealWork(WorkQueue.Entry entry) {
+			if (entry.future.isDone()) {
+				return false;
+			}
+			var claimed = workQueue.remove(entry);
+			if (claimed) {
+				LOGGER.trace(() -> "stole work: " + entry);
+				var executed = tryExecute(entry);
+				if (!executed) {
+					workQueue.reAdd(entry);
+				}
+				return executed;
+			}
+			return false;
 		}
 
 		private void waitFor(List<WorkQueue.Entry> children) {
@@ -332,8 +319,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				}
 				else {
 					runBlocking(() -> {
-						LOGGER.trace(() -> "blocking for forked children of %s: %s".formatted(
-							currentState().executingTask, children));
+						LOGGER.trace(() -> "blocking for forked children : %s".formatted(children));
 						return future.join();
 					});
 				}
@@ -351,8 +337,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (children.isEmpty()) {
 				return;
 			}
-			LOGGER.trace(
-				() -> "running %d children of %s directly".formatted(children.size(), currentState().executingTask));
+			LOGGER.trace(() -> "running %d children directly".formatted(children.size()));
 			if (children.size() == 1) {
 				executeTask(children.get(0));
 				return;
@@ -429,18 +414,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		private void doExecute(TestTask testTask) {
 			LOGGER.trace(() -> "executing: " + testTask);
-			this.state.push(new State(testTask));
 			try {
 				testTask.execute();
 			}
 			finally {
-				this.state.pop();
 				LOGGER.trace(() -> "finished executing: " + testTask);
 			}
-		}
-
-		private State currentState() {
-			return state.element();
 		}
 
 		private static CompletableFuture<?> toCombinedFuture(List<WorkQueue.Entry> entries) {
@@ -451,28 +430,20 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return CompletableFuture.allOf(futures);
 		}
 
-		private record State(TestTask executingTask, Queue<WorkQueue.Entry> forkedChildren) {
-			State(TestTask executingTask) {
-				this(executingTask, new PriorityQueue<>(reverseOrder()));
-			}
-		}
-
 		private interface BlockingAction<T> {
 			T run() throws InterruptedException;
 		}
 
-		private static class BlockHandler implements BlockingAwareFuture.BlockHandler {
-
-			private static final BlockHandler INSTANCE = new BlockHandler();
+		private record BlockHandler(WorkQueue.Entry entry) implements BlockingAwareFuture.BlockHandler {
 
 			@Override
 			public <T> T handle(Supplier<Boolean> blockingUnnecessary, Callable<T> callable) throws Exception {
 				var workerThread = get();
-				if (workerThread == null || blockingUnnecessary.get()) {
+				if (workerThread == null || entry.future.isDone()) {
 					return callable.call();
 				}
-				workerThread.stealWork();
-				if (blockingUnnecessary.get()) {
+				workerThread.tryToStealWork(entry);
+				if (entry.future.isDone()) {
 					return callable.call();
 				}
 				LOGGER.trace(() -> "blocking for child task");
@@ -486,6 +457,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				});
 			}
 		}
+
 	}
 
 	private static class WorkQueue {
