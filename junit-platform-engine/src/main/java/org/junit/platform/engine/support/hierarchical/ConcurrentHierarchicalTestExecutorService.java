@@ -56,6 +56,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private final WorkQueue workQueue = new WorkQueue();
 	private final ExecutorService threadPool;
+	private final int parallelism;
 	private final WorkerLeaseManager workerLeaseManager;
 
 	public ConcurrentHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
@@ -70,7 +71,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
 		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
-		workerLeaseManager = new WorkerLeaseManager(configuration.getParallelism());
+		parallelism = configuration.getParallelism();
+		workerLeaseManager = new WorkerLeaseManager(parallelism);
 		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
 	}
 
@@ -108,6 +110,14 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		var entry = workQueue.add(testTask);
 		maybeStartWorker();
 		return entry;
+	}
+
+	private void forkAll(Collection<WorkQueue.Entry> entries) {
+		workQueue.addAll(entries);
+		// start at most (parallelism - 1) new workers as this method is called from a worker thread holding a lease
+		for (int i = 1; i < parallelism; i++) {
+			maybeStartWorker();
+		}
 	}
 
 	private void maybeStartWorker() {
@@ -265,7 +275,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks::add);
+			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
 			var remainingForkedChildren = stealWork(queueEntries);
 			waitFor(remainingForkedChildren);
@@ -273,11 +283,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		private Collection<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
-				Consumer<TestTask> isolatedTaskCollector, Consumer<TestTask> sameThreadTaskCollector) {
-
-			if (children.isEmpty()) {
-				return List.of();
-			}
+				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
 			Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
 			for (TestTask child : children) {
@@ -285,11 +291,18 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					isolatedTaskCollector.accept(child);
 				}
 				else if (child.getExecutionMode() == SAME_THREAD) {
-					sameThreadTaskCollector.accept(child);
+					sameThreadTasks.add(child);
 				}
 				else {
-					queueEntries.add(enqueue(child));
+					queueEntries.add(WorkQueue.Entry.create(child));
 				}
+			}
+			if (!queueEntries.isEmpty()) {
+				if (sameThreadTasks.isEmpty()) {
+					// hold back one task for this thread
+					sameThreadTasks.add(queueEntries.poll().task);
+				}
+				forkAll(queueEntries);
 			}
 			return queueEntries;
 		}
@@ -313,7 +326,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					LOGGER.trace(() -> "stole work: " + entry);
 					var executed = tryExecute(entry);
 					if (!executed) {
-						workQueue.add(entry);
+						workQueue.reAdd(entry);
 						concurrentlyExecutingChildren.add(entry);
 					}
 				}
@@ -354,7 +367,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (children.isEmpty()) {
 				return;
 			}
-			LOGGER.trace(() -> "running %d SAME_THREAD children".formatted(children.size()));
+			LOGGER.trace(() -> "running %d children directly".formatted(children.size()));
 			if (children.size() == 1) {
 				executeTask(children.get(0));
 				return;
@@ -426,12 +439,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private final Queue<Entry> queue = new PriorityBlockingQueue<>();
 
 		Entry add(TestTask task) {
-			LOGGER.trace(() -> "forking: " + task);
-			int level = task.getTestDescriptor().getUniqueId().getSegments().size();
-			return doAdd(new Entry(task, new CompletableFuture<>(), level, 0));
+			Entry entry = Entry.create(task);
+			LOGGER.trace(() -> "forking: " + entry.task);
+			return doAdd(entry);
 		}
 
-		void add(Entry entry) {
+		void addAll(Collection<Entry> entries) {
+			entries.forEach(this::doAdd);
+		}
+
+		void reAdd(Entry entry) {
 			LOGGER.trace(() -> "re-enqueuing: " + entry.task);
 			doAdd(entry.incrementAttempts());
 		}
@@ -459,6 +476,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, int attempts)
 				implements Comparable<Entry> {
+
+			static Entry create(TestTask task) {
+				int level = task.getTestDescriptor().getUniqueId().getSegments().size();
+				return new Entry(task, new CompletableFuture<>(), level, 0);
+			}
+
 			@SuppressWarnings("FutureReturnValueIgnored")
 			Entry {
 				future.whenComplete((__, t) -> {
