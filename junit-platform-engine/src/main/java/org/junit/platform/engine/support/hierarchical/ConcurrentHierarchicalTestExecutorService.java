@@ -101,44 +101,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		Preconditions.condition(workerThread != null && workerThread.executor() == this,
 			"invokeAll() must be called from a worker thread that belongs to this executor");
 
-		if (testTasks.isEmpty()) {
-			return;
-		}
-
-		if (testTasks.size() == 1) {
-			executeTask(testTasks.get(0));
-			return;
-		}
-
-		List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
-		List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-		var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks::add);
-		executeAll(sameThreadTasks);
-		var remainingForkedChildren = stealWork(queueEntries);
-		waitFor(remainingForkedChildren);
-		executeAll(isolatedTasks);
-	}
-
-	private static void waitFor(List<WorkQueue.Entry> children) {
-		if (children.isEmpty()) {
-			return;
-		}
-		var future = toCombinedFuture(children);
-		try {
-			if (future.isDone()) {
-				// no need to release worker lease
-				future.join();
-			}
-			else {
-				WorkerThread.getOrThrow().runBlocking(() -> {
-					LOGGER.trace(() -> "blocking for forked children: " + children);
-					return future.join();
-				});
-			}
-		}
-		catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+		workerThread.invokeAll(testTasks);
 	}
 
 	private WorkQueue.Entry enqueue(TestTask testTask) {
@@ -167,101 +130,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				return;
 			}
 			throw e;
-		}
-	}
-
-	private static CompletableFuture<?> toCombinedFuture(List<WorkQueue.Entry> entries) {
-		if (entries.size() == 1) {
-			return entries.get(0).future();
-		}
-		var futures = entries.stream().map(WorkQueue.Entry::future).toArray(CompletableFuture<?>[]::new);
-		return CompletableFuture.allOf(futures);
-	}
-
-	private List<WorkQueue.Entry> stealWork(Collection<WorkQueue.Entry> queueEntries) {
-		if (queueEntries.isEmpty()) {
-			return List.of();
-		}
-		List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(queueEntries.size());
-		for (var entry : queueEntries) {
-			var claimed = workQueue.remove(entry);
-			if (claimed) {
-				LOGGER.trace(() -> "stole work: " + entry);
-				var executed = tryExecute(entry);
-				if (!executed) {
-					workQueue.add(entry);
-					concurrentlyExecutingChildren.add(entry);
-				}
-			}
-			else {
-				concurrentlyExecutingChildren.add(entry);
-			}
-		}
-		return concurrentlyExecutingChildren;
-	}
-
-	private Collection<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
-			Consumer<TestTask> isolatedTaskCollector, Consumer<TestTask> sameThreadTaskCollector) {
-
-		if (children.isEmpty()) {
-			return List.of();
-		}
-		Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
-		for (TestTask child : children) {
-			if (requiresGlobalReadWriteLock(child)) {
-				isolatedTaskCollector.accept(child);
-			}
-			else if (child.getExecutionMode() == SAME_THREAD) {
-				sameThreadTaskCollector.accept(child);
-			}
-			else {
-				queueEntries.add(enqueue(child));
-			}
-		}
-		return queueEntries;
-	}
-
-	private static boolean requiresGlobalReadWriteLock(TestTask testTask) {
-		return testTask.getResourceLock().getResources().contains(GLOBAL_READ_WRITE);
-	}
-
-	private void executeAll(List<? extends TestTask> children) {
-		if (children.isEmpty()) {
-			return;
-		}
-		LOGGER.trace(() -> "running %d SAME_THREAD children".formatted(children.size()));
-		if (children.size() == 1) {
-			executeTask(children.get(0));
-			return;
-		}
-		for (var testTask : children) {
-			executeTask(testTask);
-		}
-	}
-
-	private static boolean tryExecute(WorkQueue.Entry entry) {
-		try {
-			var executed = tryExecuteTask(entry.task);
-			if (executed) {
-				entry.future.complete(null);
-			}
-			return executed;
-		}
-		catch (Throwable t) {
-			entry.future.completeExceptionally(t);
-			return true;
-		}
-	}
-
-	private void executeEntry(WorkQueue.Entry entry) {
-		try {
-			executeTask(entry.task);
-		}
-		catch (Throwable t) {
-			entry.future.completeExceptionally(t);
-		}
-		finally {
-			entry.future.complete(null);
 		}
 	}
 
@@ -363,7 +231,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					}
 					LOGGER.trace(() -> "processing: " + entry.task);
 					this.workerLease = workerLease;
-					executeEntry(entry);
+					execute(entry);
 				}
 			}
 		}
@@ -381,6 +249,144 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				catch (InterruptedException e) {
 					interrupt();
 				}
+			}
+		}
+
+		void invokeAll(List<? extends TestTask> testTasks) {
+
+			if (testTasks.isEmpty()) {
+				return;
+			}
+
+			if (testTasks.size() == 1) {
+				executeTask(testTasks.get(0));
+				return;
+			}
+
+			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
+			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
+			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks::add);
+			executeAll(sameThreadTasks);
+			var remainingForkedChildren = stealWork(queueEntries);
+			waitFor(remainingForkedChildren);
+			executeAll(isolatedTasks);
+		}
+
+		private Collection<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
+				Consumer<TestTask> isolatedTaskCollector, Consumer<TestTask> sameThreadTaskCollector) {
+
+			if (children.isEmpty()) {
+				return List.of();
+			}
+
+			Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
+			for (TestTask child : children) {
+				if (requiresGlobalReadWriteLock(child)) {
+					isolatedTaskCollector.accept(child);
+				}
+				else if (child.getExecutionMode() == SAME_THREAD) {
+					sameThreadTaskCollector.accept(child);
+				}
+				else {
+					queueEntries.add(enqueue(child));
+				}
+			}
+			return queueEntries;
+		}
+
+		private static CompletableFuture<?> toCombinedFuture(List<WorkQueue.Entry> entries) {
+			if (entries.size() == 1) {
+				return entries.get(0).future();
+			}
+			var futures = entries.stream().map(WorkQueue.Entry::future).toArray(CompletableFuture<?>[]::new);
+			return CompletableFuture.allOf(futures);
+		}
+
+		private List<WorkQueue.Entry> stealWork(Collection<WorkQueue.Entry> queueEntries) {
+			if (queueEntries.isEmpty()) {
+				return List.of();
+			}
+			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(queueEntries.size());
+			for (var entry : queueEntries) {
+				var claimed = workQueue.remove(entry);
+				if (claimed) {
+					LOGGER.trace(() -> "stole work: " + entry);
+					var executed = tryExecute(entry);
+					if (!executed) {
+						workQueue.add(entry);
+						concurrentlyExecutingChildren.add(entry);
+					}
+				}
+				else {
+					concurrentlyExecutingChildren.add(entry);
+				}
+			}
+			return concurrentlyExecutingChildren;
+		}
+
+		private void waitFor(List<WorkQueue.Entry> children) {
+			if (children.isEmpty()) {
+				return;
+			}
+			var future = toCombinedFuture(children);
+			try {
+				if (future.isDone()) {
+					// no need to release worker lease
+					future.join();
+				}
+				else {
+					runBlocking(() -> {
+						LOGGER.trace(() -> "blocking for forked children: " + children);
+						return future.join();
+					});
+				}
+			}
+			catch (InterruptedException e) {
+				currentThread().interrupt();
+			}
+		}
+
+		private static boolean requiresGlobalReadWriteLock(TestTask testTask) {
+			return testTask.getResourceLock().getResources().contains(GLOBAL_READ_WRITE);
+		}
+
+		private void executeAll(List<? extends TestTask> children) {
+			if (children.isEmpty()) {
+				return;
+			}
+			LOGGER.trace(() -> "running %d SAME_THREAD children".formatted(children.size()));
+			if (children.size() == 1) {
+				executeTask(children.get(0));
+				return;
+			}
+			for (var testTask : children) {
+				executeTask(testTask);
+			}
+		}
+
+		private static boolean tryExecute(WorkQueue.Entry entry) {
+			try {
+				var executed = tryExecuteTask(entry.task);
+				if (executed) {
+					entry.future.complete(null);
+				}
+				return executed;
+			}
+			catch (Throwable t) {
+				entry.future.completeExceptionally(t);
+				return true;
+			}
+		}
+
+		private void execute(WorkQueue.Entry entry) {
+			try {
+				executeTask(entry.task);
+			}
+			catch (Throwable t) {
+				entry.future.completeExceptionally(t);
+			}
+			finally {
+				entry.future.complete(null);
 			}
 		}
 
