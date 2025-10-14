@@ -85,7 +85,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
 
 		assertPreconditionViolationFor(() -> requiredService().invokeAll(tasks)) //
-				.withMessage("invokeAll() must not be called from a thread that is not part of this executor");
+				.withMessage("invokeAll() must be called from a worker thread that belongs to this executor");
 	}
 
 	@ParameterizedTest

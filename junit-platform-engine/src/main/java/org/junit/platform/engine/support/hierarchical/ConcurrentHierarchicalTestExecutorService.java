@@ -96,7 +96,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		var workerThread = WorkerThread.get();
 		Preconditions.condition(workerThread != null && workerThread.executor() == this,
-			"invokeAll() must not be called from a thread that is not part of this executor");
+			"invokeAll() must be called from a worker thread that belongs to this executor");
 
 		if (testTasks.isEmpty()) {
 			return;
