@@ -16,6 +16,6 @@ dependencies {
 	implementation(projects.junitPlatformConsole)
 }
 
-japicmp {
-	enabled = false // no previous version, yet
+backwardCompatibilityChecks {
+	enabled = false // already checked by individual projects
 }
