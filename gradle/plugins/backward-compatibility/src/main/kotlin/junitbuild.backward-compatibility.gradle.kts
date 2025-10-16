@@ -1,14 +1,18 @@
+
 import de.undercouch.gradle.tasks.download.Download
+import junitbuild.compatibility.BackwardCompatibilityChecksExtension
+import junitbuild.compatibility.japicmp.AcceptedViolationSuppressor
+import junitbuild.compatibility.japicmp.AcceptedViolationsPostProcessRule
+import junitbuild.compatibility.japicmp.BreakingSuperClassChangeRule
+import junitbuild.compatibility.japicmp.InternalApiFilter
+import junitbuild.compatibility.japicmp.SourceIncompatibleRule
+import junitbuild.compatibility.roseau.RoseauDiff
+import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.javaModuleName
-import junitbuild.japicmp.AcceptedViolationSuppressor
-import junitbuild.japicmp.AcceptedViolationsPostProcessRule
-import junitbuild.japicmp.BreakingSuperClassChangeRule
-import junitbuild.japicmp.InternalApiFilter
-import junitbuild.japicmp.JApiCmpExtension
-import junitbuild.japicmp.SourceIncompatibleRule
 import me.champeau.gradle.japicmp.JapicmpTask
 import me.champeau.gradle.japicmp.report.stdrules.BinaryIncompatibleRule
 import me.champeau.gradle.japicmp.report.stdrules.RecordSeenMembersSetup
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
 	java
@@ -16,7 +20,23 @@ plugins {
 	id("me.champeau.gradle.japicmp")
 }
 
-val extension = extensions.create<JApiCmpExtension>("japicmp").apply {
+val roseauDependencies = configurations.dependencyScope("roseau")
+val roseauClasspath = configurations.resolvable("roseauClasspath") {
+	extendsFrom(roseauDependencies.get())
+}
+dependencies {
+	roseauDependencies(dependencyFromLibs("roseau-cli"))
+	constraints {
+		roseauDependencies("org.apache.commons:commons-lang3") {
+			version {
+				require("3.18.0")
+			}
+			because("Workaround for CVE-2025-48924")
+		}
+	}
+}
+
+val extension = extensions.create<BackwardCompatibilityChecksExtension>("backwardCompatibilityChecks").apply {
 	enabled.convention(true)
 	acceptedIncompatibilities.apply {
 		val acceptedBreakingChangesFile = rootProject.layout.projectDirectory.file("gradle/config/japicmp/accepted-breaking-changes.txt")
@@ -48,11 +68,29 @@ val downloadPreviousReleaseJar by tasks.registering(Download::class) {
 	outputs.cacheIf { true }
 }
 
-val checkBackwardCompatibility by tasks.registering(JapicmpTask::class) {
+val roseauCsvFile = layout.buildDirectory.file("reports/roseau/breaking-changes.csv")
+
+val roseau by tasks.registering(RoseauDiff::class) {
 	if (gradle.startParameter.isOffline) {
 		enabled = false
 	}
 	onlyIf { extension.enabled.get() }
+	onlyIf("https://github.com/alien-tools/roseau/issues/90") { !OperatingSystem.current().isWindows }
+
+	toolClasspath.from(roseauClasspath)
+	libraryClasspath.from(configurations.compileClasspath)
+	v1 = downloadPreviousReleaseJar.map { it.outputFiles.single() }
+	v2 = tasks.jar.flatMap { it.archiveFile }.map { it.asFile }
+	csvReport = layout.buildDirectory.file("reports/roseau/breaking-changes.csv")
+}
+
+val japicmp by tasks.registering(JapicmpTask::class) {
+	if (gradle.startParameter.isOffline) {
+		enabled = false
+	}
+	onlyIf { extension.enabled.get() }
+	shouldRunAfter(roseau)
+
 	oldClasspath.from(downloadPreviousReleaseJar.map { it.outputFiles })
 	newClasspath.from(tasks.jar)
 	onlyModified = true
@@ -72,6 +110,10 @@ val checkBackwardCompatibility by tasks.registering(JapicmpTask::class) {
 	}
 }
 
+val checkBackwardCompatibility by tasks.registering {
+	dependsOn(roseau, japicmp)
+}
+
 tasks.check {
 	dependsOn(checkBackwardCompatibility)
 }
@@ -80,7 +122,7 @@ afterEvaluate {
 	val params = mapOf(
 		"acceptedIncompatibilities" to extension.acceptedIncompatibilities.get().joinToString(",")
 	)
-	checkBackwardCompatibility {
+	japicmp {
 		richReport {
 			addViolationTransformer(AcceptedViolationSuppressor::class.java, params)
 			addPostProcessRule(AcceptedViolationsPostProcessRule::class.java, params)

@@ -3,7 +3,6 @@ import net.ltgt.gradle.errorprone.errorprone
 import net.ltgt.gradle.nullaway.nullaway
 
 plugins {
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.shadow-conventions")
 	id("junitbuild.jmh-conventions")

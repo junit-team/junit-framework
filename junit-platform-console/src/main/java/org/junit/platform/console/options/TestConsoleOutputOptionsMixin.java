@@ -32,9 +32,8 @@ public class TestConsoleOutputOptionsMixin {
 
 	public static class ConsoleOutputOptions {
 
-		@Nullable
 		@Option(names = "--color-palette", paramLabel = "FILE", description = "Specify a path to a properties file to customize ANSI style of output (not supported by all terminals).")
-		private Path colorPalette;
+		private @Nullable Path colorPalette;
 
 		@Option(names = "--single-color", description = "Style test output using only text attributes, no color (not supported by all terminals).")
 		private boolean singleColorPalette;
@@ -48,13 +47,11 @@ public class TestConsoleOutputOptionsMixin {
 				+ "Use one of: ${COMPLETION-CANDIDATES}. Default is detected based on default character encoding.")
 		private final Theme theme = DEFAULT_THEME;
 
-		@Nullable
 		@Option(names = "--redirect-stdout", paramLabel = "FILE", description = "Redirect test output to stdout to a file.")
-		private Path stdout;
+		private @Nullable Path stdout;
 
-		@Nullable
 		@Option(names = "--redirect-stderr", paramLabel = "FILE", description = "Redirect test output to stderr to a file.")
-		private Path stderr;
+		private @Nullable Path stderr;
 
 		private void applyTo(TestConsoleOutputOptions result) {
 			result.setColorPalettePath(colorPalette);

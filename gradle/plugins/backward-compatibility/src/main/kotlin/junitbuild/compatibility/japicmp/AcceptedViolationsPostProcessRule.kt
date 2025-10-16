@@ -1,4 +1,4 @@
-package junitbuild.japicmp
+package junitbuild.compatibility.japicmp
 
 import me.champeau.gradle.japicmp.report.PostProcessViolationsRule
 import me.champeau.gradle.japicmp.report.Severity.accepted

@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -35,8 +36,8 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * that the first record may optionally be used to supply CSV headers (see
  * {@link #useHeadersInDisplayName}).
  *
- * <p>Any line beginning with a {@code #} symbol will be interpreted as a comment
- * and will be ignored.
+ * <p>Any line beginning with a {@link #commentCharacter}
+ * will be interpreted as a comment and will be ignored.
  *
  * <p>The column delimiter (which defaults to a comma ({@code ,})) can be customized
  * via either {@link #delimiter} or {@link #delimiterString}.
@@ -62,6 +63,10 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  * <p>Except within a quoted string, leading and trailing whitespace in a CSV
  * column is trimmed by default. This behavior can be changed by setting the
  * {@link #ignoreLeadingAndTrailingWhitespace} attribute to {@code true}.
+ *
+ * <p>Note that {@link #delimiter} (or {@link #delimiterString}),
+ * {@link #quoteCharacter}, and {@link #commentCharacter} are treated as
+ * <em>control characters</em> and must all be distinct.
  *
  * <h2>Inheritance</h2>
  *
@@ -234,5 +239,23 @@ public @interface CsvFileSource {
 	 */
 	@API(status = STABLE, since = "5.10")
 	boolean ignoreLeadingAndTrailingWhitespace() default true;
+
+	/**
+	 * The character used to denote comments when reading the CSV files.
+	 *
+	 * <p>Any line that begins with this character will be treated as a comment
+	 * and ignored during parsing. Note that there is one exception to this rule:
+	 * if the comment character appears within a quoted field, it loses its
+	 * special meaning.
+	 *
+	 * <p>The comment character must be the first character on the line without
+	 * any leading whitespace.
+	 *
+	 * <p>Defaults to {@code '#'}.
+	 *
+	 * @since 6.0.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0.1")
+	char commentCharacter() default '#';
 
 }

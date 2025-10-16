@@ -1,6 +1,5 @@
 plugins {
 	id("junitbuild.kotlin-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.code-generator")
 	`java-test-fixtures`
 }
@@ -36,7 +35,7 @@ tasks {
 	compileJava {
 		options.compilerArgs.add("-Xlint:-module") // due to qualified exports
 	}
-	checkBackwardCompatibility {
+	japicmp {
 		classExcludes.addAll($$"*.AssertionsKt$assert*", $$"*.AssertionsKt$evaluate*")
 	}
 	jar {

@@ -513,32 +513,21 @@ include::{kotlinTestDir}/example/KotlinAssertionsDemo.kt[tags=user_guide]
 ==== Third-party Assertion Libraries
 
 Even though the assertion facilities provided by JUnit Jupiter are sufficient for many
-testing scenarios, there are times when more power and additional functionality such as
-_matchers_ are desired or required. In such cases, the JUnit team recommends the use of
-third-party assertion libraries such as {AssertJ}, {Hamcrest}, {Truth}, etc. Developers
-are therefore free to use the assertion library of their choice.
+testing scenarios, there are times when more power and additional functionality are
+desired or required. In such cases, the JUnit team recommends the use of third-party
+assertion libraries such as {AssertJ}, {Hamcrest}, {Truth}, etc. Developers are therefore
+free to use the assertion library of their choice.
 
-For example, the combination of _matchers_ and a fluent API can be used to make
-assertions more descriptive and readable. However, JUnit Jupiter's `{Assertions}` class
-does not provide an
-https://junit.org/junit4/javadoc/latest/org/junit/Assert.html#assertThat[`assertThat()`]
-method like the one found in JUnit 4's `org.junit.Assert` class which accepts a Hamcrest
-https://junit.org/junit4/javadoc/latest/org/hamcrest/Matcher.html[`Matcher`]. Instead,
-developers are encouraged to use the built-in support for matchers provided by third-party
-assertion libraries.
-
-The following example demonstrates how to use the `assertThat()` support from Hamcrest in
-a JUnit Jupiter test. As long as the Hamcrest library has been added to the classpath,
-you can statically import methods such as `assertThat()`, `is()`, and `equalTo()` and
-then use them in tests like in the `assertWithHamcrestMatcher()` method below.
+For example, the following demonstrates how to use the `assertThat()` support from AssertJ
+in a JUnit Jupiter test. As long as the AssertJ library has been added to the classpath,
+you can statically import methods such as `assertThat()`, `assertThatException()`, etc.
+from `org.assertj.core.api.Assertions` and then use them in tests like in the
+`assertWithAssertJ()` method below.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/HamcrestAssertionsDemo.java[tags=user_guide]
+include::{testDir}/example/AssertJAssertionsDemo.java[tags=user_guide]
 ----
-
-Naturally, legacy tests based on the JUnit 4 programming model can continue using
-`org.junit.Assert#assertThat`.
 
 [TIP]
 .Excluding Jupiter’s Assertions From a Project’s Classpath
@@ -593,6 +582,11 @@ include::{testDir}/example/AssumptionsDemo.java[tags=user_guide]
 NOTE: It is also possible to use methods from JUnit 4's `org.junit.Assume` class for
 assumptions. Specifically, JUnit Jupiter supports JUnit 4's `AssumptionViolatedException`
 to signal that a test should be aborted instead of marked as a failure.
+
+TIP: If you use AssertJ for assertions, you may also wish to use AssertJ for assumptions.
+To do so, you can statically import the `assumeThat()` method from
+`org.assertj.core.api.Assumptions` and then use AssertJ's fluent API to specify your
+assumptions.
 
 [[writing-tests-exceptions]]
 === Exception Handling
@@ -2276,12 +2270,16 @@ The generated display names for the previous example include the CSV header name
 ----
 
 In contrast to CSV records supplied via the `value` attribute, a text block can contain
-comments. Any line beginning with a `+++#+++` symbol will be treated as a comment and
-ignored. Note, however, that the `+++#+++` symbol must be the first character on the line
-without any leading whitespace. It is therefore recommended that the closing text block
-delimiter (`"""`) be placed either at the end of the last line of input or on the
-following line, left aligned with the rest of the input (as can be seen in the example
-below which demonstrates formatting similar to a table).
+comments. Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be treated as a comment and ignored. Note that there is one exception
+to this rule: if the comment character appears within a quoted field, it loses
+its special meaning.
+
+The comment character must be the first character on the line without any leading
+whitespace. It is therefore recommended that the closing text block delimiter (`"""`)
+be placed either at the end of the last line of input or on the following line,
+left aligned with the rest of the input (as can be seen in the example below which
+demonstrates formatting similar to a table).
 
 [source,java,indent=0]
 ----
@@ -2331,8 +2329,8 @@ The default delimiter is a comma (`,`), but you can use another character by set
 cannot be set simultaneously.
 
 .Comments in CSV files
-NOTE: Any line beginning with a `+++#+++` symbol will be interpreted as a comment and will
-be ignored.
+NOTE: Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be interpreted as a comment and will be ignored.
 
 [source,java,indent=0]
 ----

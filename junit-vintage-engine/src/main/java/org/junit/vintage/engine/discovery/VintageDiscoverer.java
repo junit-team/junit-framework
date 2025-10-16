@@ -19,6 +19,7 @@ import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.discovery.EngineDiscoveryRequestResolver;
+import org.junit.vintage.engine.Constants;
 import org.junit.vintage.engine.descriptor.RunnerTestDescriptor;
 import org.junit.vintage.engine.descriptor.VintageEngineDescriptor;
 
@@ -46,7 +47,7 @@ public class VintageDiscoverer {
 			RunnerTestDescriptor runnerTestDescriptor = (RunnerTestDescriptor) testDescriptor;
 			postProcessor.applyFiltersAndCreateDescendants(runnerTestDescriptor);
 		}
-		if (!engineDescriptor.getChildren().isEmpty()) {
+		if (isDiscoveryIssueReportingEnabled(discoveryRequest) && !engineDescriptor.getChildren().isEmpty()) {
 			var issue = DiscoveryIssue.create(DiscoveryIssue.Severity.INFO, //
 				"The JUnit Vintage engine is deprecated and should only be " //
 						+ "used temporarily while migrating tests to JUnit Jupiter or another testing " //
@@ -54,6 +55,13 @@ public class VintageDiscoverer {
 			discoveryRequest.getDiscoveryListener().issueEncountered(uniqueId, issue);
 		}
 		return engineDescriptor;
+	}
+
+	@SuppressWarnings("deprecation")
+	private static boolean isDiscoveryIssueReportingEnabled(EngineDiscoveryRequest discoveryRequest) {
+		return discoveryRequest.getConfigurationParameters() //
+				.getBoolean(Constants.DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME) //
+				.orElse(true);
 	}
 
 }

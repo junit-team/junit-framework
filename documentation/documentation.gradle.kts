@@ -16,7 +16,6 @@ plugins {
 	alias(libs.plugins.gitPublish)
 	alias(libs.plugins.plantuml)
 	id("junitbuild.build-parameters")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.testing-conventions")
 }

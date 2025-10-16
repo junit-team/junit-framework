@@ -6,7 +6,6 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.junit4-compatibility")
 	id("junitbuild.testing-conventions")
 	id("junitbuild.jmh-conventions")

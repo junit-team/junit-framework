@@ -22,7 +22,7 @@ dependencies {
 	osgiVerification(libs.openTestReporting.tooling.spi)
 }
 
-japicmp {
+backwardCompatibilityChecks {
 	enabled = false // already checked by individual projects
 }
 

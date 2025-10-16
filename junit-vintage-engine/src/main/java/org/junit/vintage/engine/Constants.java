@@ -72,6 +72,18 @@ public final class Constants {
 	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String PARALLEL_METHOD_EXECUTION = "junit.vintage.execution.parallel.methods";
 
+	/**
+	 * Property name used to configure whether the JUnit Vintage engine should
+	 * report discovery issues such as deprecation notices.
+	 *
+	 * <p>Set this property to {@code false} to disable reporting of discovery
+	 * issues. Defaults to {@code true}.
+	 *
+	 * @since 6.0.1
+	 */
+	@API(status = MAINTAINED, since = "6.0.1")
+	public static final String DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME = "junit.vintage.discovery.issue.reporting.enabled";
+
 	private Constants() {
 		/* no-op */
 	}

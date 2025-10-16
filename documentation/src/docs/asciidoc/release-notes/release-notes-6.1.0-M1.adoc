@@ -52,7 +52,9 @@ repository on GitHub.
 * Introduce new `dynamicContainer(Consumer<? super Configuration>)` factory method for
   dynamic containers. It allows configuring the `ExecutionMode` of the dynamic container
   and/or its children in addition to its display name, test source URI, and children.
-
+* Enrich `assertInstanceOf` failure using the test subject `Throwable` as cause. It
+  results in the stack trace of the test subject `Throwable` to get reported along with
+  the failure.
 
 [[release-notes-6.1.0-M1-junit-vintage]]
 === JUnit Vintage

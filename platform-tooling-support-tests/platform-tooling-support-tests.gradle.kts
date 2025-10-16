@@ -9,7 +9,6 @@ import java.time.Duration
 
 plugins {
 	id("junitbuild.build-parameters")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.testing-conventions")
 }

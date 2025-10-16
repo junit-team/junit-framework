@@ -8,6 +8,7 @@ plugins {
 	id("junitbuild.checkstyle-conventions")
 	id("junitbuild.eclipse-conventions")
 	id("junitbuild.jacoco-java-conventions")
+	id("junitbuild.java-errorprone-conventions")
 }
 
 val mavenizedProjects: List<Project> by rootProject.extra
@@ -26,7 +27,7 @@ if (project in mavenizedProjects) {
 	apply(plugin = "junitbuild.javadoc-conventions")
 	apply(plugin = "junitbuild.publishing-conventions")
 	apply(plugin = "junitbuild.osgi-conventions")
-	apply(plugin = "junitbuild.japicmp")
+	apply(plugin = "junitbuild.backward-compatibility")
 
 	java {
 		withSourcesJar()

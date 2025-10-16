@@ -5,7 +5,6 @@ import net.ltgt.gradle.nullaway.nullaway
 
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.shadow-conventions")
 }
 
