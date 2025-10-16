@@ -2238,10 +2238,11 @@ by default. This behavior can be changed by setting the
 |===
 
 If the programming language you are using supports _text blocks_ you can alternatively use
-the `textBlock` attribute of `@CsvSource`. Each record within a text block represents a CSV record
-and results in one invocation of the parameterized class or test. The first record
-may optionally be used to supply CSV headers by setting the `useHeadersInDisplayName` attribute to `true`
-as in the example below.
+the `textBlock` attribute of `@CsvSource`. Each record within a text block represents a
+CSV record and results in one invocation of the parameterized class or test. The first record
+may optionally be used to supply CSV headers by setting the `useHeadersInDisplayName` attribute
+to `true` as in the example below. or one of its superclasses, field injection will be used.
+Otherwise, constructor injection
 
 Using a text block, the previous example can be implemented as follows.
 
