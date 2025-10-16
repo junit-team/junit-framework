@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2015-2025 the original author or authors.
  *
@@ -8,6 +7,7 @@
  *
  * https://www.eclipse.org/legal/epl-v20.html
  */
+
 import module org.junit.onramp;
 
 void main() {
