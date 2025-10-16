@@ -72,7 +72,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
 		parallelism = configuration.getParallelism();
-		workerLeaseManager = new WorkerLeaseManager(parallelism);
+		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
 		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
 	}
 
@@ -554,12 +554,14 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	}
 
-	private class WorkerLeaseManager {
+	static class WorkerLeaseManager {
 
 		private final Semaphore semaphore;
+		private final Runnable onRelease;
 
-		WorkerLeaseManager(int parallelism) {
-			semaphore = new Semaphore(parallelism);
+		WorkerLeaseManager(int parallelism, Runnable onRelease) {
+			this.semaphore = new Semaphore(parallelism);
+			this.onRelease = onRelease;
 		}
 
 		@Nullable
@@ -575,7 +577,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private ReacquisitionToken release() {
 			semaphore.release();
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
-			maybeStartWorker();
+			onRelease.run();
 			return new ReacquisitionToken();
 		}
 
@@ -596,7 +598,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 	}
 
-	private static class WorkerLease implements AutoCloseable {
+	static class WorkerLease implements AutoCloseable {
 
 		private final Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction;
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
