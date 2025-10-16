@@ -128,21 +128,29 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	private void maybeStartWorker() {
-		if (threadPool.isShutdown() || !workerLeaseManager.isLeaseAvailable() || workQueue.isEmpty()) {
+		if (threadPool.isShutdown() || workQueue.isEmpty()) {
+			return;
+		}
+		var workerLease = workerLeaseManager.tryAcquire();
+		if (workerLease == null) {
 			return;
 		}
 		try {
 			threadPool.execute(() -> {
 				LOGGER.trace(() -> "starting worker");
-				try {
-					WorkerThread.getOrThrow().processQueueEntries();
+				try (workerLease) {
+					WorkerThread.getOrThrow().processQueueEntries(workerLease);
 				}
 				finally {
 					LOGGER.trace(() -> "stopping worker");
 				}
+				// An attempt to start a worker might have failed due to no worker lease being
+				// available while this worker was stopping due to lack of work
+				maybeStartWorker();
 			});
 		}
 		catch (RejectedExecutionException e) {
+			workerLease.release();
 			if (threadPool.isShutdown()) {
 				return;
 			}
@@ -200,21 +208,15 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return ConcurrentHierarchicalTestExecutorService.this;
 		}
 
-		void processQueueEntries() {
+		void processQueueEntries(WorkerLease workerLease) {
+			this.workerLease = workerLease;
 			while (!threadPool.isShutdown()) {
-				var workerLease = workerLeaseManager.tryAcquire();
-				if (workerLease == null) {
+				var entry = workQueue.poll();
+				if (entry == null) {
 					break;
 				}
-				try (workerLease) {
-					var entry = workQueue.poll();
-					if (entry == null) {
-						break;
-					}
-					LOGGER.trace(() -> "processing: " + entry.task);
-					this.workerLease = workerLease;
-					execute(entry);
-				}
+				LOGGER.trace(() -> "processing: " + entry.task);
+				execute(entry);
 			}
 		}
 
@@ -579,10 +581,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			onRelease.run();
 			return new ReacquisitionToken();
-		}
-
-		boolean isLeaseAvailable() {
-			return semaphore.availablePermits() > 0;
 		}
 
 		private class ReacquisitionToken {
