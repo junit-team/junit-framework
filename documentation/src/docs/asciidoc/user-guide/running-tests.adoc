@@ -1,8 +1,11 @@
 [[running-tests]]
 == Running Tests
+[[running-tests-build-bazel]]
+==== Bazel
 
 [[running-tests-ide]]
 === IDE Support
+Bazel provides support for running tests on the JUnit Platform through the rules_jvm_external extension and test configuration.
 
 [[running-tests-ide-intellij-idea]]
 ==== IntelliJ IDEA
@@ -192,7 +195,6 @@ dependencies {
 Even though pre-8.0 versions of Gradle don't require declaring an explicit
 dependency on `junit-platform-launcher`, it is recommended to do so to ensure the versions
 of JUnit artifacts on the test runtime classpath are aligned.
-
 Moreover, doing so is recommended and in some cases even required when importing the
 project into an IDE like <<running-tests-ide-eclipse>> or
 <<running-tests-ide-intellij-idea>>.
@@ -567,9 +569,7 @@ single test class (i.e., `com.example.project.CalculatorTests`).
 		<!-- The location where you have your compiled classes -->
 		<pathelement location="${build.classes.dir}" />
 	</path>
-
 	<!-- ... -->
-
 	<junitlauncher>
 		<classpath refid="test.classpath" />
 		<test name="com.example.project.CalculatorTests" />
@@ -652,6 +652,7 @@ With Maven you can override the JUnit Jupiter version by including the following
 		<junit-jupiter.version>{version}</junit-jupiter.version>
 	</properties>
 ----
+For a complete working example of how to set up JUnit 5 with Bazel, see the https://github.com/junit-team/junit5-samples/tree/main/junit5-jupiter-starter-bazel[JUnit 5 + Bazel Starter Sample] project.
 
 [[running-tests-console-launcher]]
 === Console Launcher
@@ -672,12 +673,10 @@ include::{standaloneConsoleLauncherShadowedArtifactsFile}[]
 ====
 Since the `junit-platform-console-standalone` JAR contains the contents of all of its
 dependencies, its Maven POM does not declare any dependencies.
-
 Furthermore, it is not very likely that you would need to include a dependency on the
 `junit-platform-console-standalone` artifact in your project's Maven POM or Gradle build
 script. On the contrary, the executable `junit-platform-console-standalone` JAR is
 typically invoked directly from the command line or a shell script without a build script.
-
 If you need to declare dependencies in your build script on some of the artifacts
 contained in the `junit-platform-console-standalone` artifact, you should declare
 dependencies only on the JUnit artifacts that are used in your project. To simplify
@@ -692,7 +691,6 @@ standalone `ConsoleLauncher` as shown below.
 [source,console,subs=attributes+]
 ----
 $ java -jar junit-platform-console-standalone-{version}.jar execute <OPTIONS>
-
 ├─ JUnit Vintage
 │  └─ example.JUnit4Tests
 │     └─ standardJUnit4Test ✔
@@ -704,7 +702,6 @@ $ java -jar junit-platform-console-standalone-{version}.jar execute <OPTIONS>
       ├─ Custom test name containing spaces ✔
       ├─ ╯°□°)╯ ✔
       └─ 😱 ✔
-
 Test run finished after 64 ms
 [         5 containers found      ]
 [         0 containers skipped    ]
@@ -809,7 +806,6 @@ $ java -jar junit-platform-console-standalone-{version}.jar <OPTIONS> \
 ====
 If the `--redirect-stdout` and `--redirect-stderr` arguments point to the same file, both
 output streams will be redirected to that file.
-
 The default charset is used for writing to the files.
 ====
 
