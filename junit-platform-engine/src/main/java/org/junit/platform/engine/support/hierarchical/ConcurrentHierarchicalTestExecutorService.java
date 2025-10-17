@@ -41,7 +41,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -155,9 +155,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			});
 		}
 		catch (RejectedExecutionException e) {
-			if (threadPool.isShutdown()) {
+			workerLease.release(false);
+			if (threadPool.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()) {
 				return;
 			}
+			LOGGER.error(e, () -> "failed to submit worker to thread pool");
 			throw e;
 		}
 	}
@@ -227,7 +229,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		<T> T runBlocking(BlockingAction<T> blockingAction) throws InterruptedException {
 			var workerLease = requireNonNull(this.workerLease);
-			workerLease.release();
+			workerLease.release(true);
 			try {
 				return blockingAction.run();
 			}
@@ -611,29 +613,38 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	static class WorkerLeaseManager {
 
+		private final int parallelism;
 		private final Semaphore semaphore;
-		private final Runnable onRelease;
+		private final Runnable compensation;
 
-		WorkerLeaseManager(int parallelism, Runnable onRelease) {
+		WorkerLeaseManager(int parallelism, Runnable compensation) {
+			this.parallelism = parallelism;
 			this.semaphore = new Semaphore(parallelism);
-			this.onRelease = onRelease;
+			this.compensation = compensation;
 		}
 
 		@Nullable
 		WorkerLease tryAcquire() {
 			boolean acquired = semaphore.tryAcquire();
 			if (acquired) {
-				LOGGER.trace(() -> "acquired worker lease (available: %d)".formatted(semaphore.availablePermits()));
+				LOGGER.trace(() -> "acquired worker lease for new worker (available: %d)".formatted(
+					semaphore.availablePermits()));
 				return new WorkerLease(this::release);
 			}
 			return null;
 		}
 
-		private ReacquisitionToken release() {
+		private ReacquisitionToken release(boolean compensate) {
 			semaphore.release();
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
-			onRelease.run();
+			if (compensate) {
+				compensation.run();
+			}
 			return new ReacquisitionToken();
+		}
+
+		public boolean isAtLeastOneLeaseTaken() {
+			return semaphore.availablePermits() < parallelism;
 		}
 
 		private class ReacquisitionToken {
@@ -651,21 +662,21 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	static class WorkerLease implements AutoCloseable {
 
-		private final Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction;
+		private final Function<Boolean, WorkerLeaseManager.ReacquisitionToken> releaseAction;
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
-		WorkerLease(Supplier<WorkerLeaseManager.ReacquisitionToken> releaseAction) {
+		WorkerLease(Function<Boolean, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
 			this.releaseAction = releaseAction;
 		}
 
 		@Override
 		public void close() {
-			release();
+			release(true);
 		}
 
-		void release() {
+		void release(boolean compensate) {
 			if (reacquisitionToken == null) {
-				reacquisitionToken = releaseAction.get();
+				reacquisitionToken = releaseAction.apply(compensate);
 			}
 		}
 
