@@ -37,19 +37,18 @@ class ParameterizedInvocationContextProvider<T> {
 			declarationContext);
 		AtomicLong invocationCount = new AtomicLong(0);
 
-		// @formatter:off
-		return argumentsSources
-				.stream()
-				.map(ArgumentsSource::value)
-				.map(clazz -> ParameterizedTestSpiInstantiator.instantiate(ArgumentsProvider.class, clazz, extensionContext))
-				.map(provider -> AnnotationConsumerInitializer.initialize(declarationContext.getAnnotatedElement(), provider))
-				.flatMap(provider -> arguments(provider, parameters, extensionContext))
+		return argumentsSources.stream() //
+				.map(ArgumentsSource::value) //
+				.map(clazz -> ParameterizedTestSpiInstantiator.instantiate(ArgumentsProvider.class, clazz,
+					extensionContext)) //
+				.map(provider -> AnnotationConsumerInitializer.initialize(declarationContext.getAnnotatedElement(),
+					provider)) //
+				.flatMap(provider -> arguments(provider, parameters, extensionContext)) //
 				.map(arguments -> {
 					invocationCount.incrementAndGet();
 					return declarationContext.createInvocationContext(formatter, arguments, invocationCount.intValue());
-				})
-				.onClose(() -> validateInvokedAtLeastOnce(invocationCount.get(),declarationContext ));
-		// @formatter:on
+				}) //
+				.onClose(() -> validateInvokedAtLeastOnce(invocationCount.get(), declarationContext));
 	}
 
 	private static <T> void validateInvokedAtLeastOnce(long invocationCount,

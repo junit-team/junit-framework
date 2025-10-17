@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
  * Interface for {@link Extension Extensions} that are aware and can influence
  * the instantiation of test instances.
  *
- * <p>This interface is not indented to be implemented directly. Instead, extend
+ * <p>This interface is not intended to be implemented directly. Instead, extend
  * one of its sub-interfaces.
  *
  * @since 5.12
