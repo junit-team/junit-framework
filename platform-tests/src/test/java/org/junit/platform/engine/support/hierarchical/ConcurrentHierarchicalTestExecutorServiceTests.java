@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
@@ -276,7 +277,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(child2.startTime).isBeforeOrEqualTo(child1.startTime);
 	}
 
-	@Test
+	@RepeatedTest(value = 100, failureThreshold = 1)
 	void limitsWorkerThreadsToMaxPoolSize() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(3, 3));
 
