@@ -150,7 +150,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			});
 		}
 		catch (RejectedExecutionException e) {
-			workerLease.release();
 			if (threadPool.isShutdown()) {
 				return;
 			}
