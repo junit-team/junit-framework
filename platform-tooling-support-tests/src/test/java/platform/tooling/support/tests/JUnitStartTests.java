@@ -31,7 +31,7 @@ import platform.tooling.support.ThirdPartyJars;
 /**
  * @since 6.1
  */
-class JUnitstartTests {
+class JUnitStartTests {
 
 	@TempDir
 	static Path workspace;
