@@ -11,6 +11,7 @@
 package platform.tooling.support.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static platform.tooling.support.tests.Projects.copyToWorkspace;
 
 import java.nio.file.Files;
@@ -82,6 +83,7 @@ class JUnitStartTests {
 				.startAndWait();
 
 		assertEquals(0, result.exitCode());
+		assertTrue(result.stdOut().contains("addition()"), result.stdOut());
 	}
 
 	@Test
@@ -96,6 +98,7 @@ class JUnitStartTests {
 				.startAndWait();
 
 		assertEquals(0, result.exitCode());
+		assertTrue(result.stdOut().contains("substraction()"), result.stdOut());
 	}
 
 	@Test
@@ -110,6 +113,7 @@ class JUnitStartTests {
 				.startAndWait();
 
 		assertEquals(0, result.exitCode());
+		assertTrue(result.stdOut().contains("multiplication()"), result.stdOut());
 	}
 
 }
