@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Future.State.SUCCESS;
 import static java.util.function.Predicate.isEqual;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.TestDescriptor.Type.CONTAINER;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.NullMarked;
@@ -47,6 +49,7 @@ import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.support.hierarchical.ExclusiveResource.LockMode;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService.TestTask;
 import org.junit.platform.engine.support.hierarchical.Node.ExecutionMode;
 import org.junit.platform.fakes.TestDescriptorStub;
@@ -196,7 +199,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	void runsTasksWithoutConflictingLocksConcurrently() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(3));
 
-		var resourceLock = new SingleLock(exclusiveResource(), new ReentrantLock());
+		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
 
 		var latch = new CountDownLatch(3);
 		Executable behavior = () -> {
@@ -316,8 +319,60 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.hasSize(3);
 	}
 
-	private static ExclusiveResource exclusiveResource() {
-		return new ExclusiveResource("key", ExclusiveResource.LockMode.READ_WRITE);
+	@Test
+	void stealsBlockingChildren() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+
+		var child1Started = new CountDownLatch(1);
+		var leaf2aStarted = new CountDownLatch(1);
+		var leaf2bStarted = new CountDownLatch(1);
+		var readWriteLock = new ReentrantReadWriteLock();
+		var readOnlyResourceLock = new SingleLock(exclusiveResource(LockMode.READ), readWriteLock.readLock()) {
+			@Override
+			public void release() {
+				super.release();
+				try {
+					leaf2aStarted.await();
+				}
+				catch (InterruptedException e) {
+					fail(e);
+				}
+			}
+		};
+		var readWriteResourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), readWriteLock.writeLock());
+
+		var leaf2a = new TestTaskStub(ExecutionMode.CONCURRENT, leaf2aStarted::countDown) //
+				.withResourceLock(readWriteResourceLock) //
+				.withName("leaf2a").withLevel(3);
+		var leaf2b = new TestTaskStub(ExecutionMode.SAME_THREAD, leaf2bStarted::countDown) //
+				.withName("leaf2b").withLevel(3);
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			child1Started.countDown();
+			leaf2bStarted.await();
+		}) //
+				.withResourceLock(readOnlyResourceLock) //
+				.withName("child1").withLevel(2);
+		var child2 = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
+			child1Started.await();
+			requiredService().invokeAll(List.of(leaf2a, leaf2b));
+		}) //
+				.withName("child2").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
+			() -> requiredService().invokeAll(List.of(child1, child2))) //
+					.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(List.of(root, child1, child2, leaf2a, leaf2b)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(List.of(leaf2a, leaf2b)).map(TestTaskStub::executionThread) //
+				.containsOnly(child2.executionThread);
+	}
+
+	private static ExclusiveResource exclusiveResource(LockMode lockMode) {
+		return new ExclusiveResource("key", lockMode);
 	}
 
 	private ConcurrentHierarchicalTestExecutorService requiredService() {

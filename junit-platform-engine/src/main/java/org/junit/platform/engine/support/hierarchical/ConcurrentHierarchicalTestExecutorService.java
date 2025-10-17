@@ -21,11 +21,16 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -212,6 +217,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			while (!threadPool.isShutdown()) {
 				var entry = workQueue.poll();
 				if (entry == null) {
+					LOGGER.trace(() -> "no queue entry available");
 					break;
 				}
 				LOGGER.trace(() -> "processing: " + entry.task);
@@ -250,8 +256,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
 			var allForkedChildren = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var remainingForkedChildren = stealWork(allForkedChildren);
-			waitFor(remainingForkedChildren);
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(allForkedChildren);
+			tryToStealWorkWithBlocking(queueEntriesByResult);
+			waitFor(queueEntriesByResult);
 			executeAll(isolatedTasks);
 		}
 
@@ -282,36 +289,48 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queueEntries;
 		}
 
-		private List<WorkQueue.Entry> stealWork(Queue<WorkQueue.Entry> forkedChildren) {
-			List<WorkQueue.Entry> concurrentlyExecutingChildren = new ArrayList<>(forkedChildren.size());
+		private Map<WorkStealResult, List<WorkQueue.Entry>> tryToStealWorkWithoutBlocking(
+				Queue<WorkQueue.Entry> children) {
+			Map<WorkStealResult, List<WorkQueue.Entry>> result = new HashMap<>(WorkStealResult.values().length);
 			WorkQueue.Entry entry;
-			while ((entry = forkedChildren.poll()) != null) {
-				var executed = tryToStealWork(entry);
-				if (!executed) {
-					concurrentlyExecutingChildren.add(entry);
-				}
+			while ((entry = children.poll()) != null) {
+				var state = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
+				result.computeIfAbsent(state, __ -> new ArrayList<>()).add(entry);
 			}
-			return concurrentlyExecutingChildren;
+			return result;
 		}
 
-		private boolean tryToStealWork(WorkQueue.Entry entry) {
+		private void tryToStealWorkWithBlocking(Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
+			var entriesRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
+			if (entriesRequiringResourceLocks == null) {
+				return;
+			}
+			for (var entry : entriesRequiringResourceLocks) {
+				var state = tryToStealWork(entry, BlockingMode.BLOCKING);
+				queueEntriesByResult.computeIfAbsent(state, __ -> new ArrayList<>()).add(entry);
+			}
+		}
+
+		private WorkStealResult tryToStealWork(WorkQueue.Entry entry, BlockingMode blockingMode) {
 			if (entry.future.isDone()) {
-				return false;
+				return WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER;
 			}
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
 				LOGGER.trace(() -> "stole work: " + entry);
-				var executed = tryExecute(entry);
-				if (!executed) {
-					workQueue.reAdd(entry);
+				var executed = executeStolenWork(entry, blockingMode);
+				if (executed) {
+					return WorkStealResult.EXECUTED_BY_THIS_WORKER;
 				}
-				return executed;
+				workQueue.reAdd(entry);
+				return WorkStealResult.RESOURCE_LOCK_UNAVAILABLE;
 			}
-			return false;
+			return WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER;
 		}
 
-		private void waitFor(List<WorkQueue.Entry> children) {
-			if (children.isEmpty()) {
+		private void waitFor(Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
+			var children = queueEntriesByResult.get(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER);
+			if (children == null) {
 				return;
 			}
 			var future = toCombinedFuture(children);
@@ -348,6 +367,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			for (var testTask : children) {
 				executeTask(testTask);
 			}
+		}
+
+		private boolean executeStolenWork(WorkQueue.Entry entry, BlockingMode blockingMode) {
+			return switch (blockingMode) {
+				case NON_BLOCKING -> tryExecute(entry);
+				case BLOCKING -> {
+					execute(entry);
+					yield true;
+				}
+			};
 		}
 
 		private boolean tryExecute(WorkQueue.Entry entry) {
@@ -433,6 +462,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return CompletableFuture.allOf(futures);
 		}
 
+		private enum WorkStealResult {
+			EXECUTED_BY_DIFFERENT_WORKER, RESOURCE_LOCK_UNAVAILABLE, EXECUTED_BY_THIS_WORKER
+		}
+
 		private interface BlockingAction<T> {
 			T run() throws InterruptedException;
 		}
@@ -454,7 +487,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (workerThread == null || entry.future.isDone()) {
 				return callable.call();
 			}
-			workerThread.tryToStealWork(entry);
+			workerThread.tryToStealWork(entry, BlockingMode.BLOCKING);
 			if (entry.future.isDone()) {
 				return callable.call();
 			}
@@ -471,8 +504,13 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	}
 
+	private enum BlockingMode {
+		NON_BLOCKING, BLOCKING
+	}
+
 	private static class WorkQueue {
 
+		private final EntryOrdering ordering = new EntryOrdering();
 		private final Queue<Entry> queue = new PriorityBlockingQueue<>();
 
 		Entry add(TestTask task) {
@@ -487,7 +525,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		void reAdd(Entry entry) {
 			LOGGER.trace(() -> "re-enqueuing: " + entry.task);
-			doAdd(entry.incrementAttempts());
+			ordering.incrementAttempts(entry);
+			doAdd(entry);
 		}
 
 		private Entry doAdd(Entry entry) {
@@ -511,12 +550,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queue.isEmpty();
 		}
 
-		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, int attempts)
+		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level)
 				implements Comparable<Entry> {
 
 			static Entry create(TestTask task) {
 				int level = task.getTestDescriptor().getUniqueId().getSegments().size();
-				return new Entry(task, new CompletableFuture<>(), level, 0);
+				return new Entry(task, new CompletableFuture<>(), level);
 			}
 
 			@SuppressWarnings("FutureReturnValueIgnored")
@@ -531,18 +570,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				});
 			}
 
-			Entry incrementAttempts() {
-				return new Entry(task(), future, level, attempts + 1);
-			}
-
 			@Override
 			public int compareTo(Entry that) {
 				var result = Integer.compare(that.level, this.level);
 				if (result == 0) {
 					result = Boolean.compare(this.isContainer(), that.isContainer());
-					if (result == 0) {
-						result = Integer.compare(that.attempts, this.attempts);
-					}
 				}
 				return result;
 			}
@@ -551,6 +583,28 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				return task.getTestDescriptor().isContainer();
 			}
 
+		}
+
+		static class EntryOrdering implements Comparator<Entry> {
+
+			private final ConcurrentMap<Entry, Integer> attempts = new ConcurrentHashMap<>();
+
+			@Override
+			public int compare(Entry a, Entry b) {
+				var result = a.compareTo(b);
+				if (result == 0) {
+					result = Integer.compare(attempts(b), attempts(a));
+				}
+				return result;
+			}
+
+			void incrementAttempts(Entry entry) {
+				attempts.compute(entry, (__, n) -> n == null ? 1 : n + 1);
+			}
+
+			private int attempts(Entry entry) {
+				return attempts.getOrDefault(entry, 0);
+			}
 		}
 
 	}
