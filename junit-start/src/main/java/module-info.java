@@ -9,11 +9,11 @@
  */
 
 /**
- * Defines the API of the JUnit On-Ramp module for writing and running tests.
+ * Defines the API of the JUnit Start module for writing and running tests.
  * <p>
  * Usage example:
  * <pre>{@code
- * import module org.junit.onramp;
+ * import module org.junit.start;
  *
  *  void main() {
  *    JUnit.run();
@@ -25,7 +25,7 @@
  *  }
  * }</pre>
  */
-module org.junit.onramp {
+module org.junit.start {
 	requires static transitive org.apiguardian.api;
 	requires static transitive org.jspecify;
 
@@ -33,5 +33,5 @@ module org.junit.onramp {
 	requires org.junit.platform.launcher;
 	requires org.junit.platform.console;
 
-	exports org.junit.onramp;
+	exports org.junit.start;
 }

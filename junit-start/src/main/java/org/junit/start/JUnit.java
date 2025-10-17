@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.onramp;
+package org.junit.start;
 
 import static java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;

@@ -10,7 +10,7 @@
 
 package p;
 
-import module org.junit.onramp;
+import module org.junit.start;
 
 class JUnitRunModule {
 	void main() {

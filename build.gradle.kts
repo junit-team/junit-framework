@@ -43,7 +43,7 @@ val vintageProjects by extra(listOf(
 	dependencyProject(projects.junitVintageEngine)
 ))
 
-val mavenizedProjects by extra(listOf(dependencyProject(projects.junitOnramp)) + platformProjects + jupiterProjects + vintageProjects)
+val mavenizedProjects by extra(listOf(dependencyProject(projects.junitStart)) + platformProjects + jupiterProjects + vintageProjects)
 val modularProjects by extra(mavenizedProjects - setOf(dependencyProject(projects.junitPlatformConsoleStandalone)))
 
 dependencies {

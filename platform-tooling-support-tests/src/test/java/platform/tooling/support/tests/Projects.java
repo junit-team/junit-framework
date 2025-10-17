@@ -21,7 +21,7 @@ public class Projects {
 	public static final String GRADLE_KOTLIN_EXTENSIONS = "gradle-kotlin-extensions";
 	public static final String GRADLE_MISSING_ENGINE = "gradle-missing-engine";
 	public static final String JAR_DESCRIBE_MODULE = "jar-describe-module";
-	public static final String JUNIT_ONRAMP = "junit-onramp";
+	public static final String JUNIT_start = "junit-start";
 	public static final String JUPITER_STARTER = "jupiter-starter";
 	public static final String KOTLIN_COROUTINES = "kotlin-coroutines";
 	public static final String MAVEN_SUREFIRE_COMPATIBILITY = "maven-surefire-compatibility";

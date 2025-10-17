@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-import module org.junit.onramp;
+import module org.junit.start;
 
 void main() {
 	JUnit.run();

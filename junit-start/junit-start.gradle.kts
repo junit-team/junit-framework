@@ -2,7 +2,7 @@ plugins {
 	id("junitbuild.java-library-conventions")
 }
 
-description = "JUnit On-Ramp Module"
+description = "JUnit Start Module"
 
 dependencies {
 	api(platform(projects.junitBom))

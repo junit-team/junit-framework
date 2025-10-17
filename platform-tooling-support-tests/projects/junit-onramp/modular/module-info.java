@@ -9,5 +9,5 @@
  */
 
 open module m {
-	requires org.junit.onramp;
+	requires org.junit.start;
 }

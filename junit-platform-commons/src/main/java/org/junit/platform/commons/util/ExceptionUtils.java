@@ -41,7 +41,7 @@ import org.junit.platform.commons.annotation.Contract;
 @API(status = INTERNAL, since = "1.0")
 public final class ExceptionUtils {
 
-	private static final String JUNIT_ON_RAMP_PACKAGE_PREFIX = "org.junit.onramp.";
+	private static final String JUNIT_START_PACKAGE_PREFIX = "org.junit.start.";
 
 	private static final String JUNIT_PLATFORM_LAUNCHER_PACKAGE_PREFIX = "org.junit.platform.launcher.";
 
@@ -141,7 +141,7 @@ public final class ExceptionUtils {
 				prunedStackTrace.addAll(stackTrace.subList(i, stackTrace.size()));
 				break;
 			}
-			else if (className.startsWith(JUNIT_ON_RAMP_PACKAGE_PREFIX)) {
+			else if (className.startsWith(JUNIT_START_PACKAGE_PREFIX)) {
 				prunedStackTrace.clear();
 			}
 			else if (className.startsWith(JUNIT_PLATFORM_LAUNCHER_PACKAGE_PREFIX)) {

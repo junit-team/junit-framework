@@ -31,14 +31,14 @@ import platform.tooling.support.ThirdPartyJars;
 /**
  * @since 6.1
  */
-class JUnitOnRampTests {
+class JUnitstartTests {
 
 	@TempDir
 	static Path workspace;
 
 	@BeforeAll
 	static void prepareLocalLibraryDirectoryWithJUnitModules() throws Exception {
-		copyToWorkspace(Projects.JUNIT_ONRAMP, workspace);
+		copyToWorkspace(Projects.JUNIT_start, workspace);
 		var lib = workspace.resolve("lib");
 		try {
 			Files.createDirectories(lib);
@@ -49,7 +49,7 @@ class JUnitOnRampTests {
 			}
 			for (var module : Helper.loadModuleDirectoryNames()) {
 				if (module.startsWith("junit-platform") || module.startsWith("junit-jupiter")
-						|| module.equals("junit-onramp")) {
+						|| module.equals("junit-start")) {
 					if (module.equals("junit-jupiter-migrationsupport"))
 						continue;
 					if (module.startsWith("junit-platform-suite"))
@@ -76,7 +76,7 @@ class JUnitOnRampTests {
 		var result = ProcessStarters.java() //
 				.workingDir(workspace) //
 				.addArguments("--module-path", "lib") // relative to workspace
-				.addArguments("--add-modules", "org.junit.onramp") // configure root module
+				.addArguments("--add-modules", "org.junit.start") // configure root module
 				.addArguments("compact/JUnitRun.java") // leverage Java's source mode
 				.redirectOutput(outputFiles) //
 				.startAndWait();
@@ -90,7 +90,7 @@ class JUnitOnRampTests {
 		var result = ProcessStarters.java() //
 				.workingDir(workspace) //
 				.addArguments("--module-path", "lib") // relative to workspace
-				.addArguments("--add-modules", "org.junit.onramp") // configure root module
+				.addArguments("--add-modules", "org.junit.start") // configure root module
 				.addArguments("compact/JUnitRunClass.java") // leverage Java's source mode
 				.redirectOutput(outputFiles) //
 				.startAndWait();

@@ -1,5 +1,5 @@
-org.junit.onramp@${version} jar:file:.+/junit-onramp-\d.+\.jar..module-info\.class
-exports org.junit.onramp
+org.junit.start@${version} jar:file:.+/junit-start-\d.+\.jar..module-info\.class
+exports org.junit.start
 requires java.base mandated
 requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
