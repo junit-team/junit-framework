@@ -11,7 +11,6 @@
 package org.junit.platform.commons.util;
 
 import static java.util.stream.Collectors.joining;
-import static org.junit.platform.commons.util.ClasspathFilters.CLASS_FILE_SUFFIX;
 import static org.junit.platform.commons.util.StringUtils.isNotBlank;
 
 import java.io.IOException;
@@ -32,6 +31,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;
 import org.junit.platform.commons.io.Resource;
@@ -182,10 +182,10 @@ class DefaultClasspathScanner implements ClasspathScanner {
 		}
 	}
 
-	private void processClassFileSafely(Path baseDir, String basePackageName, ClassFilter classFilter, Path classFile,
+	private void processClassFileSafely(Path baseDir, String basePackageName, ClassFilter classFilter, Path file,
 			Consumer<Class<?>> classConsumer) {
 		try {
-			String fullyQualifiedClassName = determineFullyQualifiedClassName(baseDir, basePackageName, classFile);
+			String fullyQualifiedClassName = determineFullyQualifiedClassName(baseDir, basePackageName, file);
 			if (classFilter.match(fullyQualifiedClassName)) {
 				try {
 					// @formatter:off
@@ -196,12 +196,12 @@ class DefaultClasspathScanner implements ClasspathScanner {
 					// @formatter:on
 				}
 				catch (InternalError internalError) {
-					handleInternalError(classFile, fullyQualifiedClassName, internalError);
+					handleInternalError(file, fullyQualifiedClassName, internalError);
 				}
 			}
 		}
 		catch (Throwable throwable) {
-			handleThrowable(classFile, throwable);
+			handleThrowable(file, throwable);
 		}
 	}
 
@@ -221,12 +221,12 @@ class DefaultClasspathScanner implements ClasspathScanner {
 		}
 	}
 
-	private String determineFullyQualifiedClassName(Path baseDir, String basePackageName, Path classFile) {
+	private String determineFullyQualifiedClassName(Path baseDir, String basePackageName, Path file) {
 		// @formatter:off
 		return Stream.of(
 					basePackageName,
-					determineSubpackageName(baseDir, classFile),
-					determineSimpleClassName(classFile)
+					determineSubpackageName(baseDir, file),
+					determineSimpleClassName(file)
 				)
 				.filter(value -> !value.isEmpty()) // Handle default package appropriately.
 				.collect(joining(PACKAGE_SEPARATOR_STRING));
@@ -253,21 +253,29 @@ class DefaultClasspathScanner implements ClasspathScanner {
 		// @formatter:on
 	}
 
-	private String determineSimpleClassName(Path classFile) {
-		String fileName = classFile.getFileName().toString();
-		return fileName.substring(0, fileName.length() - CLASS_FILE_SUFFIX.length());
+	private String determineSimpleClassName(Path file) {
+		String fileName = file.getFileName().toString();
+		return determineSimpleClassName(fileName);
+	}
+
+	static String determineSimpleClassName(String fileName) {
+		int lastDot = fileName.lastIndexOf('.');
+		if (lastDot < 0) {
+			throw new JUnitException("Expected file name with file extension, but got: " + fileName);
+		}
+		return fileName.substring(0, lastDot);
 	}
 
 	private String determineSimpleResourceName(Path resourceFile) {
 		return resourceFile.getFileName().toString();
 	}
 
-	private String determineSubpackageName(Path baseDir, Path classFile) {
-		Path relativePath = baseDir.relativize(classFile.getParent());
+	private String determineSubpackageName(Path baseDir, Path file) {
+		Path relativePath = baseDir.relativize(file.getParent());
 		String pathSeparator = baseDir.getFileSystem().getSeparator();
 		String subpackageName = relativePath.toString().replace(pathSeparator, PACKAGE_SEPARATOR_STRING);
 		if (subpackageName.endsWith(pathSeparator)) {
-			// Workaround for JDK bug: https://bugs.openjdk.java.net/browse/JDK-8153248
+			// TODO: Remove workaround for JDK bug: https://bugs.openjdk.org/browse/JDK-8153248
 			subpackageName = subpackageName.substring(0, subpackageName.length() - pathSeparator.length());
 		}
 		return subpackageName;

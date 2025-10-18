@@ -7,9 +7,9 @@ requires org.junit.platform.engine
 requires org.junit.platform.launcher
 requires org.junit.platform.reporting
 provides java.util.spi.ToolProvider with org.junit.platform.console.ConsoleLauncherToolProvider
+qualified exports org.junit.platform.console.output to org.junit.start
 contains org.junit.platform.console
 contains org.junit.platform.console.command
 contains org.junit.platform.console.options
-contains org.junit.platform.console.output
 contains org.junit.platform.console.shadow.picocli
 main-class org.junit.platform.console.ConsoleLauncher
