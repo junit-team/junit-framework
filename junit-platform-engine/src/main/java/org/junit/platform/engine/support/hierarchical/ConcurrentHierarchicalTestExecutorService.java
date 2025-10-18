@@ -510,6 +510,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (entry.future.isDone()) {
 				return callable.call();
 			}
+			// TODO steal other dynamic children until future is done and check again before blocking
 			LOGGER.trace(() -> "blocking for child task");
 			return workerThread.runBlocking(entry.future::isDone, () -> {
 				try {
