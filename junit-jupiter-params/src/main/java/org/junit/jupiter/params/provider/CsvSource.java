@@ -134,7 +134,7 @@ public @interface CsvSource {
 	 * via this attribute or the {@link #value} attribute.
 	 *
 	 * <p>Text block syntax is supported by various languages on the JVM
-	 * including Java SE 15 or higher. If text blocks are not supported, you
+	 * including Java SE. If text blocks are not supported, you
 	 * should declare your CSV content via the {@link #value} attribute.
 	 *
 	 * <p>Each record in the text block corresponds to a record in a CSV file and will
@@ -154,7 +154,7 @@ public @interface CsvSource {
 	 * input or on the following line, vertically aligned with the rest of the
 	 * input (as can be seen in the example below).
 	 *
-	 * <p>Java's <a href="https://docs.oracle.com/en/java/javase/15/text-blocks/index.html">text block</a>
+	 * <p>Java's <a href="https://docs.oracle.com/en/java/javase/17/text-blocks/index.html">text block</a>
 	 * feature automatically removes <em>incidental whitespace</em> when the code
 	 * is compiled. However, other JVM languages such as Groovy and Kotlin do not.
 	 * Thus, if you are using a programming language other than Java and your text
