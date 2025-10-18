@@ -221,7 +221,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		void processQueueEntries(WorkerLease workerLease, BooleanSupplier doneCondition) {
 			this.workerLease = workerLease;
-			this.doneCondition = doneCondition;
 			while (!threadPool.isShutdown()) {
 				if (doneCondition.getAsBoolean()) {
 					LOGGER.trace(() -> "yielding resource lock");
@@ -306,7 +305,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private Map<WorkStealResult, List<WorkQueue.Entry>> tryToStealWorkWithoutBlocking(
 				List<WorkQueue.Entry> forkedChildren) {
 
-			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new HashMap<>(WorkStealResult.values().length);
+			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new HashMap<>(
+				WorkStealResult.values().length);
 			if (!forkedChildren.isEmpty()) {
 				forkedChildren.sort(reverseOrder());
 				tryToStealWork(forkedChildren, BlockingMode.NON_BLOCKING, queueEntriesByResult);
