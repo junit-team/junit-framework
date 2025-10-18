@@ -50,6 +50,7 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.UniqueId;
 
 /**
  * @since 6.1
@@ -589,7 +590,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		static class EntryOrdering implements Comparator<Entry> {
 
-			private final ConcurrentMap<Entry, Integer> attempts = new ConcurrentHashMap<>();
+			private final ConcurrentMap<UniqueId, Integer> attempts = new ConcurrentHashMap<>();
 
 			@Override
 			public int compare(Entry a, Entry b) {
@@ -601,11 +602,26 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 
 			void incrementAttempts(Entry entry) {
-				attempts.compute(entry, (__, n) -> n == null ? 1 : n + 1);
+				attempts.compute(key(entry), (key, n) -> {
+					if (n == null) {
+						registerForKeyRemoval(entry, key);
+						return 1;
+					}
+					return n + 1;
+				});
 			}
 
 			private int attempts(Entry entry) {
-				return attempts.getOrDefault(entry, 0);
+				return attempts.getOrDefault(key(entry), 0);
+			}
+
+			@SuppressWarnings("FutureReturnValueIgnored")
+			private void registerForKeyRemoval(Entry entry, UniqueId key) {
+				entry.future.whenComplete((__, ___) -> attempts.remove(key));
+			}
+
+			private static UniqueId key(Entry entry) {
+				return entry.task.getTestDescriptor().getUniqueId();
 			}
 		}
 
