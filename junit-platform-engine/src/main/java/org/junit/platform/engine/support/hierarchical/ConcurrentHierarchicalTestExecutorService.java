@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -25,7 +26,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -257,18 +257,18 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var allForkedChildren = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			var forkedChildren = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var queueEntriesByResult = tryToStealWorkWithoutBlocking(allForkedChildren);
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(forkedChildren);
 			tryToStealWorkWithBlocking(queueEntriesByResult);
 			waitFor(queueEntriesByResult);
 			executeAll(isolatedTasks);
 		}
 
-		private Queue<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
+		private List<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
 				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
-			Queue<WorkQueue.Entry> queueEntries = new PriorityQueue<>(children.size(), reverseOrder());
+			List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
 			for (TestTask child : children) {
 				if (requiresGlobalReadWriteLock(child)) {
 					isolatedTaskCollector.accept(child);
@@ -284,7 +284,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (!queueEntries.isEmpty()) {
 				if (sameThreadTasks.isEmpty()) {
 					// hold back one task for this thread
-					sameThreadTasks.add(queueEntries.poll().task);
+					var lastEntry = queueEntries.stream().max(naturalOrder()).orElseThrow();
+					queueEntries.remove(lastEntry);
+					sameThreadTasks.add(lastEntry.task);
 				}
 				forkAll(queueEntries);
 			}
@@ -293,23 +295,28 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		private Map<WorkStealResult, List<WorkQueue.Entry>> tryToStealWorkWithoutBlocking(
-				Queue<WorkQueue.Entry> children) {
-			Map<WorkStealResult, List<WorkQueue.Entry>> result = new HashMap<>(WorkStealResult.values().length);
-			WorkQueue.Entry entry;
-			while ((entry = children.poll()) != null) {
-				var state = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
-				result.computeIfAbsent(state, __ -> new ArrayList<>()).add(entry);
+				List<WorkQueue.Entry> forkedChildren) {
+
+			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new HashMap<>(WorkStealResult.values().length);
+			if (!forkedChildren.isEmpty()) {
+				forkedChildren.sort(reverseOrder());
+				tryToStealWork(forkedChildren, BlockingMode.NON_BLOCKING, queueEntriesByResult);
 			}
-			return result;
+			return queueEntriesByResult;
 		}
 
 		private void tryToStealWorkWithBlocking(Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
-			var entriesRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
-			if (entriesRequiringResourceLocks == null) {
+			var childrenRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
+			if (childrenRequiringResourceLocks == null) {
 				return;
 			}
-			for (var entry : entriesRequiringResourceLocks) {
-				var state = tryToStealWork(entry, BlockingMode.BLOCKING);
+			tryToStealWork(childrenRequiringResourceLocks, BlockingMode.BLOCKING, queueEntriesByResult);
+		}
+
+		private void tryToStealWork(List<WorkQueue.Entry> children, BlockingMode blocking,
+				Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
+			for (var entry : children) {
+				var state = tryToStealWork(entry, blocking);
 				queueEntriesByResult.computeIfAbsent(state, __ -> new ArrayList<>()).add(entry);
 			}
 		}
