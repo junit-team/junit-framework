@@ -40,8 +40,9 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -134,7 +135,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	private void maybeStartWorker() {
-		if (threadPool.isShutdown() || workQueue.isEmpty()) {
+		maybeStartWorker(() -> false);
+	}
+
+	private void maybeStartWorker(BooleanSupplier doneCondition) {
+		if (threadPool.isShutdown() || workQueue.isEmpty() || doneCondition.getAsBoolean()) {
 			return;
 		}
 		var workerLease = workerLeaseManager.tryAcquire();
@@ -144,15 +149,14 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		try {
 			threadPool.execute(() -> {
 				LOGGER.trace(() -> "starting worker");
-				try (workerLease) {
-					WorkerThread.getOrThrow().processQueueEntries(workerLease);
+				try {
+					WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition);
 				}
 				finally {
+					workerLease.release(false);
 					LOGGER.trace(() -> "stopping worker");
 				}
-				// An attempt to start a worker might have failed due to no worker lease being
-				// available while this worker was stopping due to lack of work
-				maybeStartWorker();
+				maybeStartWorker(doneCondition);
 			});
 		}
 		catch (RejectedExecutionException e) {
@@ -215,9 +219,14 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return ConcurrentHierarchicalTestExecutorService.this;
 		}
 
-		void processQueueEntries(WorkerLease workerLease) {
+		void processQueueEntries(WorkerLease workerLease, BooleanSupplier doneCondition) {
 			this.workerLease = workerLease;
+			this.doneCondition = doneCondition;
 			while (!threadPool.isShutdown()) {
+				if (doneCondition.getAsBoolean()) {
+					LOGGER.trace(() -> "yielding resource lock");
+					break;
+				}
 				var entry = workQueue.poll();
 				if (entry == null) {
 					LOGGER.trace(() -> "no queue entry available");
@@ -228,9 +237,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 		}
 
-		<T> T runBlocking(BlockingAction<T> blockingAction) throws InterruptedException {
+		<T> T runBlocking(BooleanSupplier doneCondition, BlockingAction<T> blockingAction) throws InterruptedException {
 			var workerLease = requireNonNull(this.workerLease);
-			workerLease.release(true);
+			workerLease.release(doneCondition);
 			try {
 				return blockingAction.run();
 			}
@@ -350,7 +359,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					future.join();
 				}
 				else {
-					runBlocking(() -> {
+					runBlocking(future::isDone, () -> {
 						LOGGER.trace(() -> "blocking for forked children : %s".formatted(children));
 						return future.join();
 					});
@@ -420,7 +429,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			var executed = tryExecuteTask(testTask);
 			if (!executed) {
 				var resourceLock = testTask.getResourceLock();
-				try (var ignored = runBlocking(() -> {
+				try (var ignored = runBlocking(() -> false, () -> {
 					LOGGER.trace(() -> "blocking for resource lock: " + resourceLock);
 					return resourceLock.acquire();
 				})) {
@@ -502,7 +511,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				return callable.call();
 			}
 			LOGGER.trace(() -> "blocking for child task");
-			return workerThread.runBlocking(() -> {
+			return workerThread.runBlocking(entry.future::isDone, () -> {
 				try {
 					return callable.call();
 				}
@@ -638,9 +647,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		private final int parallelism;
 		private final Semaphore semaphore;
-		private final Runnable compensation;
+		private final Consumer<BooleanSupplier> compensation;
 
-		WorkerLeaseManager(int parallelism, Runnable compensation) {
+		WorkerLeaseManager(int parallelism, Consumer<BooleanSupplier> compensation) {
 			this.parallelism = parallelism;
 			this.semaphore = new Semaphore(parallelism);
 			this.compensation = compensation;
@@ -657,11 +666,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return null;
 		}
 
-		private ReacquisitionToken release(boolean compensate) {
+		private ReacquisitionToken release(boolean compensate, BooleanSupplier doneCondition) {
 			semaphore.release();
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			if (compensate) {
-				compensation.run();
+				compensation.accept(doneCondition);
 			}
 			return new ReacquisitionToken();
 		}
@@ -685,10 +694,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	static class WorkerLease implements AutoCloseable {
 
-		private final Function<Boolean, WorkerLeaseManager.ReacquisitionToken> releaseAction;
+		private final BiFunction<Boolean, BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction;
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
-		WorkerLease(Function<Boolean, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
+		WorkerLease(BiFunction<Boolean, BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
 			this.releaseAction = releaseAction;
 		}
 
@@ -697,9 +706,17 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			release(true);
 		}
 
+		public void release(BooleanSupplier doneCondition) {
+			release(true, doneCondition);
+		}
+
 		void release(boolean compensate) {
+			release(compensate, () -> false);
+		}
+
+		void release(boolean compensate, BooleanSupplier doneCondition) {
 			if (reacquisitionToken == null) {
-				reacquisitionToken = releaseAction.apply(compensate);
+				reacquisitionToken = releaseAction.apply(compensate, doneCondition);
 			}
 		}
 

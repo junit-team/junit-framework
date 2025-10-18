@@ -22,7 +22,7 @@ class WorkerLeaseManagerTests {
 	@Test
 	void releasingIsIdempotent() {
 		var released = new AtomicInteger();
-		var manager = new WorkerLeaseManager(1, released::incrementAndGet);
+		var manager = new WorkerLeaseManager(1, __ -> released.incrementAndGet());
 
 		var lease = manager.tryAcquire();
 		assertThat(lease).isNotNull();
@@ -37,7 +37,7 @@ class WorkerLeaseManagerTests {
 	@Test
 	void leaseCanBeReacquired() throws Exception {
 		var released = new AtomicInteger();
-		var manager = new WorkerLeaseManager(1, released::incrementAndGet);
+		var manager = new WorkerLeaseManager(1, __ -> released.incrementAndGet());
 
 		var lease = manager.tryAcquire();
 		assertThat(lease).isNotNull();
