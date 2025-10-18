@@ -7,13 +7,18 @@
  *
  * https://www.eclipse.org/legal/epl-v20.html
  */
-package org.junit.jupiter.api
+package org.junit.jupiter.api.kotlin
 
 import org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals
 import org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertTimeout
+import org.junit.jupiter.api.assertTimeoutPreemptively
+import org.junit.jupiter.api.fail
 import org.junit.platform.commons.util.ExceptionUtils
 import org.opentest4j.AssertionFailedError
 import java.time.Duration.ofMillis
@@ -21,7 +26,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Unit tests for JUnit Jupiter [Assertions].
+ * Unit tests for Kotlin-specific `assertTimeout*` assertions.
  *
  * @since 5.5
  */

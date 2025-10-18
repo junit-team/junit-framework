@@ -10,44 +10,48 @@
 
 package org.junit.jupiter.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
-import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.jspecify.annotations.Nullable;
 import org.opentest4j.AssertionFailedError;
+import org.opentest4j.MultipleFailuresError;
 import org.opentest4j.ValueWrapper;
 
-class AssertionTestUtils {
+public class AssertionTestUtils {
 
 	private AssertionTestUtils() {
 		/* no-op */
 	}
 
-	static void expectAssertionFailedError() {
+	public static void expectAssertionFailedError() {
 		throw new AssertionError("Should have thrown an " + AssertionFailedError.class.getName());
 	}
 
-	static void assertEmptyMessage(Throwable ex) throws AssertionError {
-		if (!StringUtils.isEmpty(ex.getMessage())) {
+	public static void assertEmptyMessage(Throwable ex) throws AssertionError {
+		if (!(ex.getMessage() == null || ex.getMessage().isEmpty())) {
 			throw new AssertionError("Exception message should be empty, but was [" + ex.getMessage() + "].");
 		}
 	}
 
-	static void assertMessageEquals(Throwable ex, String msg) throws AssertionError {
+	public static void assertMessageEquals(Throwable ex, String msg) throws AssertionError {
 		if (!msg.equals(ex.getMessage())) {
 			throw new AssertionError("Exception message should be [" + msg + "], but was [" + ex.getMessage() + "].");
 		}
 	}
 
-	static void assertMessageMatches(Throwable ex, String regex) throws AssertionError {
+	public static void assertMessageMatches(Throwable ex, String regex) throws AssertionError {
 		if (ex.getMessage() == null || !ex.getMessage().matches(regex)) {
 			throw new AssertionError("Exception message should match regular expression [" + regex + "], but was ["
 					+ ex.getMessage() + "].");
 		}
 	}
 
-	static void assertMessageStartsWith(@Nullable Throwable ex, String msg) throws AssertionError {
+	public static void assertMessageStartsWith(@Nullable Throwable ex, String msg) throws AssertionError {
 		if (ex == null) {
 			throw new AssertionError("Cause should not have been null");
 		}
@@ -57,14 +61,14 @@ class AssertionTestUtils {
 		}
 	}
 
-	static void assertMessageEndsWith(Throwable ex, String msg) throws AssertionError {
+	public static void assertMessageEndsWith(Throwable ex, String msg) throws AssertionError {
 		if (ex.getMessage() == null || !ex.getMessage().endsWith(msg)) {
 			throw new AssertionError(
 				"Exception message should end with [" + msg + "], but was [" + ex.getMessage() + "].");
 		}
 	}
 
-	static void assertMessageContains(@Nullable Throwable ex, String msg) throws AssertionError {
+	public static void assertMessageContains(@Nullable Throwable ex, String msg) throws AssertionError {
 		if (ex == null) {
 			throw new AssertionError("Cause should not have been null");
 		}
@@ -74,7 +78,7 @@ class AssertionTestUtils {
 		}
 	}
 
-	static void assertExpectedAndActualValues(AssertionFailedError ex, @Nullable Object expected,
+	public static void assertExpectedAndActualValues(AssertionFailedError ex, @Nullable Object expected,
 			@Nullable Object actual) throws AssertionError {
 		if (!wrapsEqualValue(ex.getExpected(), expected)) {
 			throw new AssertionError("Expected value in AssertionFailedError should equal ["
@@ -86,7 +90,7 @@ class AssertionTestUtils {
 		}
 	}
 
-	static boolean wrapsEqualValue(ValueWrapper wrapper, @Nullable Object value) {
+	public static boolean wrapsEqualValue(ValueWrapper wrapper, @Nullable Object value) {
 		if (value == null || value instanceof Serializable) {
 			return Objects.equals(value, wrapper.getValue());
 		}
@@ -95,14 +99,32 @@ class AssertionTestUtils {
 				&& Objects.equals(wrapper.getType(), value.getClass());
 	}
 
-	static void recurseIndefinitely() {
+	public static void recurseIndefinitely() {
 		// simulate infinite recursion
 		throw new StackOverflowError();
 	}
 
-	static void runOutOfMemory() {
+	public static void runOutOfMemory() {
 		// simulate running out of memory
 		throw new OutOfMemoryError("boom");
 	}
 
+	@SafeVarargs
+	public static void assertExpectedExceptionTypes(MultipleFailuresError multipleFailuresError,
+			Class<? extends Throwable>... exceptionTypes) {
+
+		assertNotNull(multipleFailuresError, "MultipleFailuresError");
+		List<Throwable> failures = multipleFailuresError.getFailures();
+		assertEquals(exceptionTypes.length, failures.size(), "number of failures");
+
+		// Verify that exceptions are also present as suppressed exceptions.
+		// https://github.com/junit-team/junit-framework/issues/1602
+		Throwable[] suppressed = multipleFailuresError.getSuppressed();
+		assertEquals(exceptionTypes.length, suppressed.length, "number of suppressed exceptions");
+
+		for (int i = 0; i < exceptionTypes.length; i++) {
+			assertEquals(exceptionTypes[i], failures.get(i).getClass(), "exception type [" + i + "]");
+			assertEquals(exceptionTypes[i], suppressed[i].getClass(), "suppressed exception type [" + i + "]");
+		}
+	}
 }

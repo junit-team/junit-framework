@@ -14,6 +14,7 @@ package org.junit.jupiter.api
 import org.apiguardian.api.API
 import org.apiguardian.api.API.Status.MAINTAINED
 import org.apiguardian.api.API.Status.STABLE
+import org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure
 import org.junit.jupiter.api.function.Executable
 import org.junit.platform.commons.util.UnrecoverableExceptions.rethrowIfUnrecoverable
 import java.time.Duration
@@ -347,7 +348,6 @@ inline fun <reified T : Throwable> assertThrows(
  * @see Assertions.assertDoesNotThrow
  * @param R the result type of the [executable]
  */
-@Suppress("LESS_VISIBLE_TYPE_ACCESS_IN_INLINE_WARNING")
 @OptIn(ExperimentalContracts::class)
 @API(status = STABLE, since = "5.11")
 inline fun <R> assertDoesNotThrow(executable: () -> R): R {
@@ -359,7 +359,11 @@ inline fun <R> assertDoesNotThrow(executable: () -> R): R {
         return executable()
     } catch (t: Throwable) {
         rethrowIfUnrecoverable(t)
-        throw AssertDoesNotThrow.createAssertionFailedError(null, t)
+        val suffix = t.message?.let { if (it.isNotBlank()) ": ${t.message}" else null } ?: ""
+        throw assertionFailure()
+            .reason("Unexpected exception thrown: ${t.javaClass.getName()}$suffix")
+            .cause(t)
+            .build()
     }
 }
 
@@ -396,7 +400,6 @@ inline fun <R> assertDoesNotThrow(
  * @see Assertions.assertDoesNotThrow
  * @param R the result type of the [executable]
  */
-@Suppress("LESS_VISIBLE_TYPE_ACCESS_IN_INLINE_WARNING")
 @OptIn(ExperimentalContracts::class)
 @API(status = STABLE, since = "5.11")
 inline fun <R> assertDoesNotThrow(
@@ -412,7 +415,12 @@ inline fun <R> assertDoesNotThrow(
         return executable()
     } catch (t: Throwable) {
         rethrowIfUnrecoverable(t)
-        throw AssertDoesNotThrow.createAssertionFailedError(message(), t)
+        val suffix = t.message?.let { if (it.isNotBlank()) ": ${t.message}" else null } ?: ""
+        throw assertionFailure()
+            .message(message())
+            .reason("Unexpected exception thrown: ${t.javaClass.getName()}$suffix")
+            .cause(t)
+            .build()
     }
 }
 

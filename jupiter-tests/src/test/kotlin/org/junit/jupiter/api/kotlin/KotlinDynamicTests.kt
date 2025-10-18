@@ -7,10 +7,13 @@
  *
  * https://www.eclipse.org/legal/epl-v20.html
  */
-package org.junit.jupiter.api
+package org.junit.jupiter.api.kotlin
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.TestFactory
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.MathContext
@@ -18,7 +21,7 @@ import java.math.BigInteger as BigInt
 import java.math.RoundingMode as Rounding
 
 /**
- * Unit tests for JUnit Jupiter [TestFactory] use in kotlin classes.
+ * Unit tests for JUnit Jupiter [org.junit.jupiter.api.TestFactory] use in kotlin classes.
  *
  * @since 5.12
  */

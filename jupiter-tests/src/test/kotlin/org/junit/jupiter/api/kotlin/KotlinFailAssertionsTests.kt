@@ -7,12 +7,15 @@
  *
  * https://www.eclipse.org/legal/epl-v20.html
  */
-package org.junit.jupiter.api
+package org.junit.jupiter.api.kotlin
 
-import org.junit.jupiter.api.AssertEquals.assertEquals
 import org.junit.jupiter.api.AssertionTestUtils.assertEmptyMessage
 import org.junit.jupiter.api.AssertionTestUtils.assertMessageContains
 import org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 import org.opentest4j.AssertionFailedError
 import java.util.stream.Stream
 
