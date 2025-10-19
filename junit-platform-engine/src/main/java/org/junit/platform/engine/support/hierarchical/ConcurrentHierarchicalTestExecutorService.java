@@ -23,7 +23,7 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -305,8 +305,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private Map<WorkStealResult, List<WorkQueue.Entry>> tryToStealWorkWithoutBlocking(
 				List<WorkQueue.Entry> forkedChildren) {
 
-			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new HashMap<>(
-				WorkStealResult.values().length);
+			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new EnumMap<>(WorkStealResult.class);
 			if (!forkedChildren.isEmpty()) {
 				forkedChildren.sort(reverseOrder());
 				tryToStealWork(forkedChildren, BlockingMode.NON_BLOCKING, queueEntriesByResult);
