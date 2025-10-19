@@ -277,7 +277,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
 			List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
-			for (TestTask child : children) {
+			for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
+				TestTask child = children.get(i);
 				if (requiresGlobalReadWriteLock(child)) {
 					isolatedTaskCollector.accept(child);
 				}
@@ -285,7 +286,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					sameThreadTasks.add(child);
 				}
 				else {
-					queueEntries.add(WorkQueue.Entry.create(child));
+					queueEntries.add(WorkQueue.Entry.createIndexed(i, child));
 				}
 			}
 
@@ -570,12 +571,17 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queue.isEmpty();
 		}
 
-		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level)
+		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, int index)
 				implements Comparable<Entry> {
 
 			static Entry create(TestTask task) {
 				int level = task.getTestDescriptor().getUniqueId().getSegments().size();
-				return new Entry(task, new CompletableFuture<>(), level);
+				return new Entry(task, new CompletableFuture<>(), level, 0);
+			}
+
+			static Entry createIndexed(int index, TestTask task) {
+				int level = task.getTestDescriptor().getUniqueId().getSegments().size();
+				return new Entry(task, new CompletableFuture<>(), level, index);
 			}
 
 			@SuppressWarnings("FutureReturnValueIgnored")
@@ -593,10 +599,14 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			@Override
 			public int compareTo(Entry that) {
 				var result = Integer.compare(that.level, this.level);
-				if (result == 0) {
-					result = Boolean.compare(this.isContainer(), that.isContainer());
+				if (result != 0) {
+					return result;
 				}
-				return result;
+				result = Boolean.compare(this.isContainer(), that.isContainer());
+				if (result != 0) {
+					return result;
+				}
+				return Integer.compare(that.index, this.index);
 			}
 
 			private boolean isContainer() {
