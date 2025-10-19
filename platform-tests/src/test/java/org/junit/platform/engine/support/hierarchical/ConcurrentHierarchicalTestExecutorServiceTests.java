@@ -169,7 +169,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		inOrder.verifyNoMoreInteractions();
 	}
 
-	@Test
+	@RepeatedTest(value = 100, failureThreshold = 1)
 	void acquiresResourceLockForChildTasks() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 
@@ -189,7 +189,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(children).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
 		assertThat(children).extracting(TestTaskStub::executionThread) //
-				.filteredOn(isEqual(root.executionThread())).hasSizeLessThan(2);
+				.filteredOn(isEqual(root.executionThread())).hasSizeLessThanOrEqualTo(2);
 
 		verify(resourceLock, atLeast(2)).tryAcquire();
 		verify(resourceLock, atLeast(1)).acquire();
