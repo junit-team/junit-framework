@@ -412,7 +412,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
 		Executable behavior = cyclicBarrier::await;
 
-		// With half of the leaves to executed normally
+		// With half of the leaves to be executed normally
 		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
 				.withName("leaf1a").withLevel(2);
 		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
@@ -437,18 +437,16 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
-		// If the last node must be stolen.
+		// If the last node was stolen.
 		assertThat(leaf1a.executionThread).isNotEqualTo(leaf2c.executionThread);
-		// Then must follow that the last half of the nodes were stolen
+		// Then it must follow that the last half of the nodes were stolen
 		assertThat(Stream.of(leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c)).extracting(
-			TestTaskStub::executionThread).containsExactly(leaf1a.executionThread, //
-				leaf1a.executionThread, //
-				leaf1a.executionThread, //
-				leaf2c.executionThread, //
-				leaf2c.executionThread, //
-				leaf2c.executionThread //
+			TestTaskStub::executionThread).containsExactly( //
+				leaf1a.executionThread, leaf1a.executionThread, leaf1a.executionThread, //
+				leaf2c.executionThread, leaf2c.executionThread, leaf2c.executionThread //
 		);
-		assertAll(() -> assertThat(leaf1a.startTime).isBeforeOrEqualTo(leaf1b.startTime),
+		assertAll( //
+			() -> assertThat(leaf1a.startTime).isBeforeOrEqualTo(leaf1b.startTime),
 			() -> assertThat(leaf1b.startTime).isBeforeOrEqualTo(leaf1c.startTime),
 			() -> assertThat(leaf2a.startTime).isAfterOrEqualTo(leaf2b.startTime),
 			() -> assertThat(leaf2b.startTime).isAfterOrEqualTo(leaf2c.startTime));
