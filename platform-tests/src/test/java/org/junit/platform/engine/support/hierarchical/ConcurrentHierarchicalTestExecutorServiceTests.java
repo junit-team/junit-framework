@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Future.State.SUCCESS;
 import static java.util.function.Predicate.isEqual;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
@@ -32,6 +33,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
@@ -369,6 +371,86 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 		assertThat(List.of(leaf2a, leaf2b)).map(TestTaskStub::executionThread) //
 				.containsOnly(child2.executionThread);
+	}
+
+	@Test
+	void executesChildrenInOrder() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(1, 1));
+
+		Executable behavior = () -> {
+
+		};
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1a").withLevel(2);
+		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1b").withLevel(2);
+		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1c").withLevel(2);
+		var leaf1d = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1d").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
+			() -> requiredService().invokeAll(List.of(leaf1a, leaf1b, leaf1c, leaf1d))) //
+					.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf1d)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+
+		assertAll(() -> assertThat(leaf1a.startTime).isBeforeOrEqualTo(leaf1b.startTime),
+			() -> assertThat(leaf1b.startTime).isBeforeOrEqualTo(leaf1c.startTime),
+			() -> assertThat(leaf1c.startTime).isBeforeOrEqualTo(leaf1d.startTime));
+	}
+
+	@Test
+	void workIsStolenInReverseOrder() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+
+		// Execute tasks pairwise
+		CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
+		Executable behavior = cyclicBarrier::await;
+
+		// With half of the leaves to executed normally
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1a").withLevel(2);
+		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1b").withLevel(2);
+		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf1c").withLevel(2);
+
+		// And half of the leaves to be stolen
+		var leaf2a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf2a").withLevel(2);
+		var leaf2b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf2b").withLevel(2);
+		var leaf2c = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("leaf2c").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
+			() -> requiredService().invokeAll(List.of(leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c))) //
+					.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+
+		// If the last node must be stolen.
+		assertThat(leaf1a.executionThread).isNotEqualTo(leaf2c.executionThread);
+		// Then must follow that the last half of the nodes were stolen
+		assertThat(Stream.of(leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c)).extracting(
+			TestTaskStub::executionThread).containsExactly(leaf1a.executionThread, //
+				leaf1a.executionThread, //
+				leaf1a.executionThread, //
+				leaf2c.executionThread, //
+				leaf2c.executionThread, //
+				leaf2c.executionThread //
+		);
+		assertAll(() -> assertThat(leaf1a.startTime).isBeforeOrEqualTo(leaf1b.startTime),
+			() -> assertThat(leaf1b.startTime).isBeforeOrEqualTo(leaf1c.startTime),
+			() -> assertThat(leaf2a.startTime).isAfterOrEqualTo(leaf2b.startTime),
+			() -> assertThat(leaf2b.startTime).isAfterOrEqualTo(leaf2c.startTime));
 	}
 
 	private static ExclusiveResource exclusiveResource(LockMode lockMode) {
