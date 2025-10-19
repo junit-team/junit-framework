@@ -232,13 +232,14 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 
 		var leavesStarted = new CountDownLatch(2);
-		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
-				.withName("leaf").withLevel(3);
-		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().submit(leaf).get()) //
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::await) //
 				.withName("child1").withLevel(2);
 		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
 				.withName("child2").withLevel(2);
-		var child3 = new TestTaskStub(ExecutionMode.SAME_THREAD, leavesStarted::await) //
+		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
+				.withName("leaf").withLevel(3);
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().submit(leaf).get()) //
 				.withName("child3").withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
@@ -248,11 +249,11 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		service.submit(root).get();
 
 		root.assertExecutedSuccessfully();
-		assertThat(List.of(child1, child2, child3)).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(List.of(child1, child2, leaf, child3)).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 		leaf.assertExecutedSuccessfully();
 
 		assertThat(leaf.startTime).isBeforeOrEqualTo(child2.startTime);
-		assertThat(leaf.executionThread).isSameAs(child1.executionThread);
+		assertThat(leaf.executionThread).isSameAs(child3.executionThread);
 	}
 
 	@Test
