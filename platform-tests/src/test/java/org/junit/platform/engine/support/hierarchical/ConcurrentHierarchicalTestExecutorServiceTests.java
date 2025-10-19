@@ -227,6 +227,80 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
+	void processingQueueEntriesSkipsOverUnavailableResources() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+
+		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
+
+		var lockFreeChildrenStarted = new CountDownLatch(2);
+		var child1Started = new CountDownLatch(1);
+
+		Executable child1Behaviour = () -> {
+			child1Started.countDown();
+			lockFreeChildrenStarted.await();
+		};
+		Executable child4Behaviour = () -> {
+			lockFreeChildrenStarted.countDown();
+			child1Started.await();
+		};
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, child1Behaviour) //
+				.withResourceLock(resourceLock) //
+				.withName("child1");
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, lockFreeChildrenStarted::countDown).withName("child2"); //
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT).withResourceLock(resourceLock) //
+				.withName("child3");
+		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT, child4Behaviour).withName("child4");
+		var children = List.of(child1, child2, child3, child4);
+		var root = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().invokeAll(children)) //
+				.withName("root");
+
+		service.submit(root).get();
+
+		root.assertExecutedSuccessfully();
+		assertThat(children).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(child4.executionThread).isEqualTo(child2.executionThread);
+		assertThat(child3.startTime).isAfterOrEqualTo(child2.startTime);
+	}
+
+	@Test
+	void invokeAllQueueEntriesSkipsOverUnavailableResources() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+
+		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
+
+		var lockFreeChildrenStarted = new CountDownLatch(2);
+		var child4Started = new CountDownLatch(1);
+
+		Executable child1Behaviour = () -> {
+			lockFreeChildrenStarted.countDown();
+			child4Started.await();
+		};
+		Executable child4Behaviour = () -> {
+			child4Started.countDown();
+			lockFreeChildrenStarted.await();
+		};
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, child1Behaviour) //
+				.withName("child1");
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT).withResourceLock(resourceLock) //
+				.withName("child2"); //
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, lockFreeChildrenStarted::countDown).withName("child3");
+		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT, child4Behaviour).withResourceLock(resourceLock) //
+				.withName("child4");
+		var children = List.of(child1, child2, child3, child4);
+		var root = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().invokeAll(children)) //
+				.withName("root");
+
+		service.submit(root).get();
+
+		root.assertExecutedSuccessfully();
+		assertThat(children).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(child1.executionThread).isEqualTo(child3.executionThread);
+		assertThat(child2.startTime).isAfterOrEqualTo(child3.startTime);
+	}
+
+	@Test
 	void prioritizesChildrenOfStartedContainers() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 

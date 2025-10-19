@@ -226,13 +226,26 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					LOGGER.trace(() -> "yielding resource lock");
 					break;
 				}
-				var entry = workQueue.poll();
-				if (entry == null) {
-					LOGGER.trace(() -> "no queue entry available");
+				var queueEntries = workQueue.peekAll();
+				if (queueEntries.isEmpty()) {
+					LOGGER.trace(() -> "no queue entries available");
 					break;
 				}
-				LOGGER.trace(() -> "processing: " + entry.task);
-				execute(entry);
+				var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
+				maybeTryToStealWorkWithBlocking(queueEntriesByResult);
+			}
+		}
+
+		private void maybeTryToStealWorkWithBlocking(Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
+			if (queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_THIS_WORKER) || //
+					queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER)) {
+				// Queue changed. Try to see if there is work that does not need locking
+				return;
+			}
+			// All resources locked, start blocking
+			var entriesRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
+			if (entriesRequiringResourceLocks != null) {
+				tryToStealWork(entriesRequiringResourceLocks.get(0), BlockingMode.BLOCKING);
 			}
 		}
 
@@ -556,9 +569,13 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return entry;
 		}
 
-		@Nullable
-		Entry poll() {
-			return queue.poll();
+		private List<WorkQueue.Entry> peekAll() {
+			List<Entry> entries = new ArrayList<>(queue);
+			// Iteration order isn't the same as queue order.
+			// TODO: This makes the queue kinda pointless
+			// TODO: This also makes retries pointless
+			entries.sort(naturalOrder());
+			return entries;
 		}
 
 		boolean remove(Entry entry) {
