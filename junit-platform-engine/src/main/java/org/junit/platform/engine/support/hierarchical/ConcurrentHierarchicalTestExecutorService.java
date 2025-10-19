@@ -276,9 +276,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private List<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
 				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
+			int index = 0;
 			List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
-			for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
-				TestTask child = children.get(i);
+			for (TestTask child : children) {
 				if (requiresGlobalReadWriteLock(child)) {
 					isolatedTaskCollector.accept(child);
 				}
@@ -286,7 +286,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					sameThreadTasks.add(child);
 				}
 				else {
-					queueEntries.add(WorkQueue.Entry.createIndexed(i, child));
+					queueEntries.add(WorkQueue.Entry.createWithIndex(child, index++));
 				}
 			}
 
@@ -579,7 +579,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				return new Entry(task, new CompletableFuture<>(), level, 0);
 			}
 
-			static Entry createIndexed(int index, TestTask task) {
+			static Entry createWithIndex(TestTask task, int index) {
 				int level = task.getTestDescriptor().getUniqueId().getSegments().size();
 				return new Entry(task, new CompletableFuture<>(), level, index);
 			}
