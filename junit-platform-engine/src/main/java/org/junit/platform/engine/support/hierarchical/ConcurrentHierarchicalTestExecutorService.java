@@ -265,11 +265,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var forkedChildren = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			var reverseQueueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var queueEntriesByResult = tryToStealWorkWithoutBlocking(forkedChildren);
-			tryToStealWorkWithBlocking(queueEntriesByResult);
-			waitFor(queueEntriesByResult);
+			var reverseQueueEntriesByResult = tryToStealWorkWithoutBlocking(reverseQueueEntries);
+			tryToStealWorkWithBlocking(reverseQueueEntriesByResult);
+			waitFor(reverseQueueEntriesByResult);
 			executeAll(isolatedTasks);
 		}
 
@@ -299,32 +299,31 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				}
 				forkAll(queueEntries);
 			}
-
+			queueEntries.sort(reverseOrder());
 			return queueEntries;
 		}
 
 		private Map<WorkStealResult, List<WorkQueue.Entry>> tryToStealWorkWithoutBlocking(
-				List<WorkQueue.Entry> forkedChildren) {
+				List<WorkQueue.Entry> queueEntries) {
 
 			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new EnumMap<>(WorkStealResult.class);
-			if (!forkedChildren.isEmpty()) {
-				forkedChildren.sort(reverseOrder());
-				tryToStealWork(forkedChildren, BlockingMode.NON_BLOCKING, queueEntriesByResult);
+			if (!queueEntries.isEmpty()) {
+				tryToStealWork(queueEntries, BlockingMode.NON_BLOCKING, queueEntriesByResult);
 			}
 			return queueEntriesByResult;
 		}
 
 		private void tryToStealWorkWithBlocking(Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
-			var childrenRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
-			if (childrenRequiringResourceLocks == null) {
+			var entriesRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
+			if (entriesRequiringResourceLocks == null) {
 				return;
 			}
-			tryToStealWork(childrenRequiringResourceLocks, BlockingMode.BLOCKING, queueEntriesByResult);
+			tryToStealWork(entriesRequiringResourceLocks, BlockingMode.BLOCKING, queueEntriesByResult);
 		}
 
-		private void tryToStealWork(List<WorkQueue.Entry> children, BlockingMode blocking,
+		private void tryToStealWork(List<WorkQueue.Entry> entries, BlockingMode blocking,
 				Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
-			for (var entry : children) {
+			for (var entry : entries) {
 				var state = tryToStealWork(entry, blocking);
 				queueEntriesByResult.computeIfAbsent(state, __ -> new ArrayList<>()).add(entry);
 			}
