@@ -22,15 +22,12 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -51,7 +48,6 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
-import org.junit.platform.engine.UniqueId;
 
 /**
  * @since 6.1
@@ -542,7 +538,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	private static class WorkQueue {
 
-		private final EntryOrdering ordering = new EntryOrdering();
 		private final Queue<Entry> queue = new PriorityBlockingQueue<>();
 
 		Entry add(TestTask task) {
@@ -557,7 +552,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		void reAdd(Entry entry) {
 			LOGGER.trace(() -> "re-enqueuing: " + entry.task);
-			ordering.incrementAttempts(entry);
 			doAdd(entry);
 		}
 
@@ -572,8 +566,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private List<WorkQueue.Entry> peekAll() {
 			List<Entry> entries = new ArrayList<>(queue);
 			// Iteration order isn't the same as queue order.
-			// TODO: This makes the queue kinda pointless
-			// TODO: This also makes retries pointless
 			entries.sort(naturalOrder());
 			return entries;
 		}
@@ -628,44 +620,6 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 
 		}
-
-		static class EntryOrdering implements Comparator<Entry> {
-
-			private final ConcurrentMap<UniqueId, Integer> attempts = new ConcurrentHashMap<>();
-
-			@Override
-			public int compare(Entry a, Entry b) {
-				var result = a.compareTo(b);
-				if (result == 0) {
-					result = Integer.compare(attempts(b), attempts(a));
-				}
-				return result;
-			}
-
-			void incrementAttempts(Entry entry) {
-				attempts.compute(key(entry), (key, n) -> {
-					if (n == null) {
-						registerForKeyRemoval(entry, key);
-						return 1;
-					}
-					return n + 1;
-				});
-			}
-
-			private int attempts(Entry entry) {
-				return attempts.getOrDefault(key(entry), 0);
-			}
-
-			@SuppressWarnings("FutureReturnValueIgnored")
-			private void registerForKeyRemoval(Entry entry, UniqueId key) {
-				entry.future.whenComplete((__, ___) -> attempts.remove(key));
-			}
-
-			private static UniqueId key(Entry entry) {
-				return entry.task.getTestDescriptor().getUniqueId();
-			}
-		}
-
 	}
 
 	static class WorkerLeaseManager {
