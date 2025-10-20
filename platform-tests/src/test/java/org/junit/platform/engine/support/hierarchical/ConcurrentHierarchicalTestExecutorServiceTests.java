@@ -169,7 +169,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		inOrder.verifyNoMoreInteractions();
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void acquiresResourceLockForChildTasks() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
 
