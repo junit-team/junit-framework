@@ -234,7 +234,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		private void processQueueEntries(List<WorkQueue.Entry> queueEntries) {
 			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
 			var queueModified = queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_THIS_WORKER) //
-					|| queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER); 
+					|| queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER);
 			if (queueModified) {
 				return;
 			}
