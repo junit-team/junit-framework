@@ -240,7 +240,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 			var entriesRequiringResourceLocks = queueEntriesByResult.get(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
 			if (entriesRequiringResourceLocks != null) {
-				// One entry at a time to avoid over comitting
+				// One entry at a time to avoid blocking too much
 				tryToStealWork(entriesRequiringResourceLocks.get(0), BlockingMode.BLOCKING);
 			}
 		}
