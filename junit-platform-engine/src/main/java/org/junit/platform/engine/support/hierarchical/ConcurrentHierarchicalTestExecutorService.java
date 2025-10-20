@@ -227,20 +227,20 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 					LOGGER.trace(() -> "no queue entries available");
 					break;
 				}
-				var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
-				maybeTryToStealWorkWithBlocking(queueEntriesByResult);
+				processQueueEntries(queueEntries);
 			}
 		}
 
-		private void maybeTryToStealWorkWithBlocking(Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
-			if (queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_THIS_WORKER) || //
-					queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER)) {
-				// Queue changed. Try to see if there is work that does not need locking
+		private void processQueueEntries(List<WorkQueue.Entry> queueEntries) {
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
+			var queueModified = queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_THIS_WORKER) //
+					|| queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER); 
+			if (queueModified) {
 				return;
 			}
-			// All resources locked, start blocking
-			var entriesRequiringResourceLocks = queueEntriesByResult.remove(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
+			var entriesRequiringResourceLocks = queueEntriesByResult.get(WorkStealResult.RESOURCE_LOCK_UNAVAILABLE);
 			if (entriesRequiringResourceLocks != null) {
+				// One entry at a time to avoid over comitting
 				tryToStealWork(entriesRequiringResourceLocks.get(0), BlockingMode.BLOCKING);
 			}
 		}
