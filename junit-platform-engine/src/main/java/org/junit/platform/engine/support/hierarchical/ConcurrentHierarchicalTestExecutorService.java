@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -47,6 +48,7 @@ import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.ConfigurationParameters;
 
 /**
@@ -72,10 +74,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 	ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration, ClassLoader classLoader) {
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
-		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
-			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory);
 		parallelism = configuration.getParallelism();
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
+		var rejectedExecutionHandler = new LeaseAwareRejectedExecutionHandler(workerLeaseManager);
+		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
+			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory,
+			rejectedExecutionHandler);
 		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
 	}
 
@@ -142,26 +146,25 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		if (workerLease == null) {
 			return;
 		}
-		try {
-			threadPool.execute(() -> {
-				LOGGER.trace(() -> "starting worker");
-				try {
-					WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition);
-				}
-				finally {
-					workerLease.release(false);
-					LOGGER.trace(() -> "stopping worker");
-				}
-				maybeStartWorker(doneCondition);
-			});
-		}
-		catch (RejectedExecutionException e) {
-			workerLease.release(false);
-			if (threadPool.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()) {
-				return;
+		threadPool.execute(new RunLeaseAwareWorker(workerLease,
+			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition),
+			() -> this.maybeStartWorker(doneCondition)));
+	}
+
+	private record RunLeaseAwareWorker(WorkerLease workerLease, Runnable worker, Runnable onWorkerFinished)
+			implements Runnable {
+
+		@Override
+		public void run() {
+			LOGGER.trace(() -> "starting worker");
+			try {
+				worker.run();
 			}
-			LOGGER.error(e, () -> "failed to submit worker to thread pool");
-			throw e;
+			finally {
+				workerLease.release(false);
+				LOGGER.trace(() -> "stopping worker");
+			}
+			onWorkerFinished.run();
 		}
 	}
 
@@ -669,6 +672,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				LOGGER.trace(() -> "reacquired worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			}
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this).append("parallelism", parallelism).append("semaphore",
+				semaphore).toString();
+		}
 	}
 
 	static class WorkerLease implements AutoCloseable {
@@ -703,6 +712,21 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			Preconditions.notNull(reacquisitionToken, "Cannot reacquire an unreleased WorkerLease");
 			reacquisitionToken.reacquire();
 			reacquisitionToken = null;
+		}
+	}
+
+	private record LeaseAwareRejectedExecutionHandler(WorkerLeaseManager workerLeaseManager)
+			implements RejectedExecutionHandler {
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			if (!(r instanceof RunLeaseAwareWorker worker)) {
+				return;
+			}
+			worker.workerLease.release(false);
+			if (executor.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()) {
+				return;
+			}
+			throw new RejectedExecutionException("Task with " + workerLeaseManager + " rejected from " + executor);
 		}
 	}
 }
