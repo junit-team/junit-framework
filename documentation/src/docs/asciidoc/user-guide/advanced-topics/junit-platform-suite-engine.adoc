@@ -31,6 +31,18 @@ on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 * `junit-platform-commons` in _test_ scope
 * `opentest4j` in _test_ scope
 
+[[junit-platform-suite-engine-setup-duplicate-test-execution]]
+===== Duplicate test execution
+
+Tests in a suite are executed in addition to the tests executed by every other test
+engine. This can result in the same tests being executed twice.
+
+This can be prevented by configuring your build tool to only include the
+`junit-platform-suite` engine. Or by using a naming pattern. For example name all suites
+`*Suite` and all tests `*Test` and configure your build tool to only include the former.
+
+Alternatively, consider <<running-tests-tags, using tags>> to select specific groups of tests.
+
 [[junit-platform-suite-engine-example]]
 ==== @Suite Example
 
@@ -47,13 +59,6 @@ include::{testDir}/example/SuiteDemo.java[tags=user_guide]
 NOTE: There are numerous configuration options for discovering and filtering tests in a
 test suite. Please consult the Javadoc of the `{suite-api-package}` package for a full
 list of supported annotations and further details.
-
-.Duplicate test execution
-NOTE: Tests in a suite are executed in addition to the tests executed by every other test
-engine, so it is possible to for the same test to be executed twice. A common solution is
-to use a naming pattern. Name all suites `*Suite` and all tests `*Test` and configure your
-build tool to only include the former. Alternatively, consider
-<<running-tests-tags, using tags>> to select specific groups of tests.
 
 ==== @BeforeSuite and @AfterSuite
 
