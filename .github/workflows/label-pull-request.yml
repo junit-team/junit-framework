@@ -42,7 +42,7 @@ jobs:
             
             let labels = Array.from(new Set(repository.pullRequest.closingIssuesReferences.nodes
                 .flatMap((node) => node.labels.nodes.map((label) => label.name))))
-                .filter((label) => !label.startsWith("status:") && labels !== "up-for-grabs");
+                .filter((label) => !label.startsWith("status:") && label !== "up-for-grabs");
             
             if (labels.length > 0) {
                 console.log(`Adding labels to PR: ${labels}`);
