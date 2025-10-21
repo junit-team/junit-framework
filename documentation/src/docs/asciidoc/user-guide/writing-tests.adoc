@@ -1749,9 +1749,8 @@ test class.
 include::{testDir}/example/ParameterizedClassDemo.java[tags=constructor_injection]
 ----
 
-If your programming language you are using supports _records_ you may use them
-to implement parameterized classes that avoid the boilerplate code of declaring
-a test class constructor.
+You may use _records_ to implement parameterized classes that avoid the boilerplate code
+of declaring a test class constructor.
 
 [source,java,indent=0]
 ----
