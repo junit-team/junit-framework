@@ -7,9 +7,10 @@
  *
  * https://www.eclipse.org/legal/epl-v20.html
  */
-package org.junit.jupiter.api
+package org.junit.jupiter.api.kotlin
 
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AssertionTestUtils
 import org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals
 import org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith
 import org.junit.jupiter.api.AssertionTestUtils.expectAssertionFailedError
@@ -17,7 +18,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
+import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.assertAll
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertInstanceOf
+import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 import org.opentest4j.AssertionFailedError
 import org.opentest4j.MultipleFailuresError
 import java.util.stream.Stream
@@ -70,7 +80,7 @@ class KotlinAssertionsTests {
         }
 
     @TestFactory
-    fun assertDoesNotThrow(): Stream<out DynamicNode> =
+    fun `assertDoesNotThrow behaves as expected`(): Stream<out DynamicNode> =
         Stream.of(
             dynamicContainer(
                 "succeeds when no exception thrown",
@@ -223,7 +233,7 @@ class KotlinAssertionsTests {
     }
 
     @Test
-    fun assertInstanceOf() {
+    fun `assertInstanceOf succeeds`() {
         assertInstanceOf<RandomAccess>(listOf("whatever"))
         assertInstanceOf<RandomAccess>(listOf("whatever"), "No random access")
         assertInstanceOf<RandomAccess>(listOf("whatever")) { "No random access" }
@@ -336,7 +346,7 @@ class KotlinAssertionsTests {
         fun assertExpectedExceptionTypes(
             multipleFailuresError: MultipleFailuresError,
             vararg exceptionTypes: KClass<out Throwable>
-        ) = AssertAllAssertionsTests.assertExpectedExceptionTypes(
+        ) = AssertionTestUtils.assertExpectedExceptionTypes(
             multipleFailuresError,
             *exceptionTypes.map { it.java }.toTypedArray()
         )
