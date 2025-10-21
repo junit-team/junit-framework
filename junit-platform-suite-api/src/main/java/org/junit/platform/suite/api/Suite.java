@@ -46,8 +46,7 @@ import org.junit.platform.commons.annotation.Testable;
  *
  * <p>Note: Tests in a suite are executed in addition to the tests executed by every
  * other test engine. This can result in the same tests being executed twice. This can be
- * prevented by configuring your build tool to only include the
- * {@value org.junit.platform.suite.engine.SuiteEngineDescriptor#ENGINE_ID} engine. Or by
+ * prevented by configuring your build tool to only include the Suite Engine. Or by
  * using a naming pattern. For example name all suites {@code *Suite} and all tests
  * {@code *Test} and configure your build tool to only include the former. Alternatively,
  * consider using tags to select specific groups of tests.
