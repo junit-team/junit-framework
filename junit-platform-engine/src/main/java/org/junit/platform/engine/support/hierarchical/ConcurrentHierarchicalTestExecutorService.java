@@ -39,6 +39,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -537,7 +538,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 	}
 
 	private static class WorkQueue implements Iterable<WorkQueue.Entry> {
-		private final AtomicInteger index = new AtomicInteger();
+		private final AtomicLong index = new AtomicLong();
 		private final Set<Entry> queue = new ConcurrentSkipListSet<>();
 
 		Entry add(TestTask task) {
@@ -581,7 +582,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return queue.iterator();
 		}
 
-		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, int index)
+		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, long index)
 				implements Comparable<Entry> {
 
 			@SuppressWarnings("FutureReturnValueIgnored")
@@ -606,7 +607,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				if (result != 0) {
 					return result;
 				}
-				return Integer.compare(that.index, this.index);
+				return Long.compare(that.index, this.index);
 			}
 
 			private boolean isContainer() {
