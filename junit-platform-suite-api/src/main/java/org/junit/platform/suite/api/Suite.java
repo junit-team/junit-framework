@@ -26,7 +26,7 @@ import org.junit.platform.commons.annotation.Testable;
  * {@code @Suite} marks a class as a test suite on the JUnit Platform.
  *
  * <p>Selector and filter annotations are used to control the contents of the
- * suite. Additionally configuration can be passed to the suite via the
+ * suite. Additionally, configuration can be passed to the suite via the
  * configuration annotations.
  *
  * <p>When the {@link IncludeClassNamePatterns @IncludeClassNamePatterns}
@@ -43,6 +43,12 @@ import org.junit.platform.commons.annotation.Testable;
  * {@link DisableParentConfigurationParameters @DisableParentConfigurationParameters}
  * annotation disables the latter as a source of parameters so that only explicit
  * configuration parameters are taken into account.
+ *
+ * <p>Note: Tests in a suite are executed in addition to the tests executed by every
+ * other test engine, so it is possible to for the same test to be executed twice. A
+ * common solution is to use a naming pattern. Name all suites {@code *Suite} and all
+ * tests {@code *Test} and configure your build tool to only include the former.
+ * Alternatively, consider using tags to select specific groups of tests.
  *
  * @since 1.8
  * @see Select
