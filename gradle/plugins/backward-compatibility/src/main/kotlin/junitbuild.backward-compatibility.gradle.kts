@@ -75,7 +75,6 @@ val roseau by tasks.registering(RoseauDiff::class) {
 		enabled = false
 	}
 	onlyIf { extension.enabled.get() }
-	onlyIf("https://github.com/alien-tools/roseau/issues/90") { !OperatingSystem.current().isWindows }
 
 	toolClasspath.from(roseauClasspath)
 	libraryClasspath.from(configurations.compileClasspath)
