@@ -36,6 +36,7 @@ class HelperTests {
 			"junit-jupiter-engine", //
 			"junit-jupiter-migrationsupport", //
 			"junit-jupiter-params", //
+			"junit-start", //
 			"junit-platform-commons", //
 			"junit-platform-console", //
 			"junit-platform-engine", //

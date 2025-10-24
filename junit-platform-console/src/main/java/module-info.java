@@ -24,5 +24,7 @@ module org.junit.platform.console {
 	requires org.junit.platform.launcher;
 	requires org.junit.platform.reporting;
 
+	exports org.junit.platform.console.output to org.junit.start;
+
 	provides java.util.spi.ToolProvider with org.junit.platform.console.ConsoleLauncherToolProvider;
 }

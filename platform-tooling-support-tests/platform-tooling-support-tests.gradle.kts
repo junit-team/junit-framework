@@ -20,6 +20,7 @@ javaLibrary {
 spotless {
 	java {
 		target(files(project.java.sourceSets.map { it.allJava }), "projects/**/*.java")
+		targetExclude("projects/junit-start/**/*.java") // due to compact source files and module imports
 	}
 	kotlin {
 		target("projects/**/*.kt")
