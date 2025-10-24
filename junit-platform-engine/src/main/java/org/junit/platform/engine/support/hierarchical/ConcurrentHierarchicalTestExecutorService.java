@@ -574,8 +574,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 				implements Comparable<Entry> {
 
 			static Entry create(TestTask task) {
-				int level = task.getTestDescriptor().getUniqueId().getSegments().size();
-				return new Entry(task, new CompletableFuture<>(), level, 0);
+				return createWithIndex(task, 0);
 			}
 
 			static Entry createWithIndex(TestTask task, int index) {
