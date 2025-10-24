@@ -14,7 +14,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Future.State.SUCCESS;
 import static java.util.function.Predicate.isEqual;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
@@ -374,20 +373,17 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.containsOnly(child2.executionThread);
 	}
 
-	@Test
+	@RepeatedTest(value = 100, failureThreshold = 1)
 	void executesChildrenInOrder() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(1, 1));
 
-		Executable behavior = () -> {
-
-		};
-		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("leaf1a").withLevel(2);
-		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("leaf1b").withLevel(2);
-		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("leaf1c").withLevel(2);
-		var leaf1d = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+		var leaf1d = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("leaf1d").withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
@@ -399,12 +395,12 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf1d)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
-		assertAll(() -> assertThat(leaf1a.startTime).isBeforeOrEqualTo(leaf1b.startTime),
-			() -> assertThat(leaf1b.startTime).isBeforeOrEqualTo(leaf1c.startTime),
-			() -> assertThat(leaf1c.startTime).isBeforeOrEqualTo(leaf1d.startTime));
+		assertThat(Stream.of(leaf1a, leaf1b, leaf1c, leaf1d)) //
+				.extracting(TestTaskStub::startTime) //
+				.isSorted();
 	}
 
-	@Test
+	@RepeatedTest(value = 100, failureThreshold = 1)
 	void workIsStolenInReverseOrder() throws Exception {
 		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
 
@@ -440,16 +436,19 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		// If the last node was stolen.
 		assertThat(leaf1a.executionThread).isNotEqualTo(leaf2c.executionThread);
 		// Then it must follow that the last half of the nodes were stolen
-		assertThat(Stream.of(leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c)).extracting(
-			TestTaskStub::executionThread).containsExactly( //
-				leaf1a.executionThread, leaf1a.executionThread, leaf1a.executionThread, //
-				leaf2c.executionThread, leaf2c.executionThread, leaf2c.executionThread //
-		);
-		assertAll( //
-			() -> assertThat(leaf1a.startTime).isBeforeOrEqualTo(leaf1b.startTime),
-			() -> assertThat(leaf1b.startTime).isBeforeOrEqualTo(leaf1c.startTime),
-			() -> assertThat(leaf2a.startTime).isAfterOrEqualTo(leaf2b.startTime),
-			() -> assertThat(leaf2b.startTime).isAfterOrEqualTo(leaf2c.startTime));
+		assertThat(Stream.of(leaf1a, leaf1b, leaf1c)) //
+				.extracting(TestTaskStub::executionThread) //
+				.containsOnly(leaf1a.executionThread);
+		assertThat(Stream.of(leaf2a, leaf2b, leaf2c)) //
+				.extracting(TestTaskStub::executionThread) //
+				.containsOnly(leaf2c.executionThread);
+
+		assertThat(Stream.of(leaf1a, leaf1b, leaf1c)) //
+				.extracting(TestTaskStub::startTime) //
+				.isSorted();
+		assertThat(Stream.of(leaf2c, leaf2b, leaf2a)) //
+				.extracting(TestTaskStub::startTime) //
+				.isSorted();
 	}
 
 	private static ExclusiveResource exclusiveResource(LockMode lockMode) {
@@ -565,6 +564,11 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		@Nullable
 		Thread executionThread() {
 			return executionThread;
+		}
+
+		@Nullable
+		Instant startTime() {
+			return startTime;
 		}
 
 		@Override
