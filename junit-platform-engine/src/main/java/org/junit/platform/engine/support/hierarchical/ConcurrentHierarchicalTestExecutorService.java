@@ -153,14 +153,14 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			() -> this.maybeStartWorker(doneCondition)));
 	}
 
-	private record RunLeaseAwareWorker(WorkerLease workerLease, Runnable worker, Runnable onWorkerFinished)
+	private record RunLeaseAwareWorker(WorkerLease workerLease, Runnable work, Runnable onWorkerFinished)
 			implements Runnable {
 
 		@Override
 		public void run() {
 			LOGGER.trace(() -> "starting worker");
 			try {
-				worker.run();
+				work.run();
 			}
 			finally {
 				workerLease.release(false);
@@ -667,8 +667,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		@Override
 		public String toString() {
-			return new ToStringBuilder(this).append("parallelism", parallelism).append("semaphore",
-				semaphore).toString();
+			return new ToStringBuilder(this) //
+					.append("parallelism", parallelism) //
+					.append("semaphore", semaphore) //
+					.toString();
 		}
 	}
 
