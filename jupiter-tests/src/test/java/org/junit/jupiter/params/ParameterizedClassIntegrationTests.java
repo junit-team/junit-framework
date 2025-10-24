@@ -552,6 +552,20 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 						"Configuration error: duplicate index declared in @Parameter(0) annotation on fields [int %s.i, long %s.l].".formatted(
 							classTemplateClass.getName(), classTemplateClass.getName()))));
 		}
+
+		@Test
+		void failsWithMeaningfulErrorWhenTooFewArgumentsProvidedForFieldInjection() {
+			var results = executeTestsForClass(NotEnoughArgumentsForFieldsTestCase.class);
+
+			results.containerEvents().assertThatEvents()
+					.haveExactly(1, event(finishedWithFailure(
+							instanceOf(org.junit.jupiter.api.extension.ParameterResolutionException.class),
+							message(it -> it.contains("field 's")
+									&& it.contains("index 1")
+									&& it.contains("only 1 argument")
+									&& it.contains("at least 2"))
+					)));
+		}
 	}
 
 	@Nested
@@ -1688,6 +1702,22 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		long l;
 
 		@Test
+		void test() {
+			fail("should not be called");
+		}
+	}
+
+	@ParameterizedClass
+	@ValueSource(ints = 1)
+	static class NotEnoughArgumentsForFieldsTestCase {
+
+		@Parameter(0)
+		int i;
+
+		@Parameter(1)
+		String s;
+
+		@org.junit.jupiter.api.Test
 		void test() {
 			fail("should not be called");
 		}

@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.support.HierarchyTraversalMode;
@@ -130,6 +132,11 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Param
 	@Override
 	public ParameterizedClassInvocationContext createInvocationContext(ParameterizedInvocationNameFormatter formatter,
 			Arguments arguments, int invocationIndex) {
+
+		if (this.injectionType == InjectionType.FIELDS) {
+			assertEnoughArgumentsForFieldInjection(arguments);
+		}
+
 		return new ParameterizedClassInvocationContext(this, formatter, arguments, invocationIndex);
 	}
 
@@ -170,6 +177,65 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Param
 	private static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
 		return findAnnotation(method, annotationType) //
 				.orElseThrow(() -> new JUnitException("Method not annotated with @" + annotationType.getSimpleName()));
+	}
+
+	private void assertEnoughArgumentsForFieldInjection(Arguments arguments) {
+		@SuppressWarnings("NullAway")
+		final Object[] providedArguments = (arguments == null ? new Object[0] : arguments.get());
+		final int providedArgumentCount = providedArguments.length;
+
+		final List<Field> parameterFields = findParameterAnnotatedFields(this.testClass);
+		if (parameterFields.isEmpty()) {
+			return;
+		}
+
+		final int requiredArgumentCount = requiredArgumentCountForParameterFields(parameterFields);
+		if (providedArgumentCount >= requiredArgumentCount) {
+			return;
+		}
+
+		final @Nullable Field firstMissingField = firstMissingParameterFieldByIndex(parameterFields,
+			providedArgumentCount);
+
+		final String missingTargetDescription = (firstMissingField != null)
+				? "field '%s' (index %d, type %s)".formatted(firstMissingField.getName(),
+					firstMissingField.getAnnotation(Parameter.class).value(), firstMissingField.getType().getName())
+				: "parameter at index %d".formatted(providedArgumentCount);
+
+		throw new ParameterResolutionException(
+			"Not enough arguments for @ParameterizedClass field injection in %s: %s cannot be injected because only %d argument(s) were provided; at least %d are required.".formatted(
+				this.testClass.getName(), missingTargetDescription, providedArgumentCount, requiredArgumentCount));
+	}
+
+	private static int requiredArgumentCountForParameterFields(List<Field> parameterFields) {
+		int maxIndex = -1;
+		for (Field field : parameterFields) {
+			Parameter param = field.getAnnotation(Parameter.class);
+			if (param != null) {
+				int index = param.value();
+				if (index >= 0 && index > maxIndex) {
+					maxIndex = index;
+				}
+			}
+		}
+		return maxIndex + 1;
+	}
+
+	private static @Nullable Field firstMissingParameterFieldByIndex(List<Field> parameterFields,
+			int providedArgumentCount) {
+		Field candidate = null;
+		int minIndex = Integer.MAX_VALUE;
+		for (Field field : parameterFields) {
+			Parameter param = field.getAnnotation(Parameter.class);
+			if (param != null) {
+				int index = param.value();
+				if (index >= 0 && index >= providedArgumentCount && index < minIndex) {
+					candidate = field;
+					minIndex = index;
+				}
+			}
+		}
+		return candidate;
 	}
 
 	enum InjectionType {
