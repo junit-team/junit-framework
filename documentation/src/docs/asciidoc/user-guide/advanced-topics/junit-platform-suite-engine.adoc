@@ -1,8 +1,8 @@
 [[junit-platform-suite-engine]]
 === JUnit Platform Suite Engine
 
-The JUnit Platform supports the declarative definition and execution of suites of tests
-from _any_ test engine using the JUnit Platform.
+The Suite Engine supports the declarative selection and execution of tests from
+_any_ test engine using the JUnit Platform.
 
 [[junit-platform-suite-engine-setup]]
 ==== Setup
@@ -30,6 +30,18 @@ on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 * `junit-platform-engine` in _test_ scope
 * `junit-platform-commons` in _test_ scope
 * `opentest4j` in _test_ scope
+
+[[junit-platform-suite-engine-setup-duplicate-test-execution]]
+===== Duplicate test execution
+
+Tests in a suite are executed in addition to the tests executed by every other test
+engine. This can result in the same tests being executed twice.
+
+This can be prevented by configuring your build tool to only include the
+`junit-platform-suite` engine. Or by using a naming pattern. For example name all suites
+`*Suite` and all tests `*Test` and configure your build tool to only include the former.
+
+Alternatively, consider <<running-tests-tags, using tags>> to select specific groups of tests.
 
 [[junit-platform-suite-engine-example]]
 ==== @Suite Example

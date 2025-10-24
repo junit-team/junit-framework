@@ -18,7 +18,7 @@ This following Gradle command generates the HTML version of the User Guide as
 `build/docs/asciidoc/user-guide/index.html`.
 
 ```
-gradlew asciidoctor
+./gradlew asciidoctor
 ```
 
 On Linux operating systems, the `graphviz` package providing `/usr/bin/dot` must be
@@ -30,5 +30,5 @@ This following Gradle command generates the PDF version of the User Guide to
 `build/docs/asciidocPdf/user-guide/index.pdf`.
 
 ```
-gradlew asciidoctorPdf
+./gradlew asciidoctorPdf
 ```
