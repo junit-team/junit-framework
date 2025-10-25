@@ -46,6 +46,26 @@ class CompositeLock implements ResourceLock {
 	}
 
 	@Override
+	public boolean tryAcquire() {
+		List<Lock> acquiredLocks = new ArrayList<>(this.locks.size());
+		for (Lock lock : this.locks) {
+			if (lock.tryLock()) {
+				acquiredLocks.add(lock);
+			}
+			else {
+				break;
+			}
+		}
+		if (acquiredLocks.size() == this.locks.size()) {
+			return true;
+		}
+		else {
+			release(acquiredLocks);
+			return false;
+		}
+	}
+
+	@Override
 	public ResourceLock acquire() throws InterruptedException {
 		ForkJoinPool.managedBlock(new CompositeLockManagedBlocker());
 		return this;

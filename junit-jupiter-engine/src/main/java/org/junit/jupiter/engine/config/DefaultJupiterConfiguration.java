@@ -34,13 +34,17 @@ import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.Extension
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.engine.config.InstantiatingConfigurationParameterConverter.Strictness;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.support.config.PrefixedConfigurationParameters;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
+import org.junit.platform.engine.support.hierarchical.ForkJoinPoolHierarchicalTestExecutorService;
+import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService;
 
 /**
  * Default implementation of the {@link JupiterConfiguration} API.
@@ -80,6 +84,10 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	private static final ConfigurationParameterConverter<ExtensionContextScope> extensionContextScopeConverter = //
 		new EnumConfigurationParameterConverter<>(ExtensionContextScope.class, "extension context scope");
+
+	private static final ConfigurationParameterConverter<HierarchicalTestExecutorService> parallelExecutorServiceConverter = //
+		new InstantiatingConfigurationParameterConverter<>(HierarchicalTestExecutorService.class,
+			"parallel executor service", Strictness.FAIL, parameters -> new Object[] { parallelConfig(parameters) });
 
 	private final ConfigurationParameters configurationParameters;
 	private final OutputDirectoryCreator outputDirectoryCreator;
@@ -134,6 +142,13 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	@Override
 	public boolean isParallelExecutionEnabled() {
 		return configurationParameters.getBoolean(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME).orElse(false);
+	}
+
+	@Override
+	public HierarchicalTestExecutorService createParallelExecutorService() {
+		return parallelExecutorServiceConverter.get(configurationParameters, PARALLEL_EXECUTION_EXECUTOR_PROPERTY_NAME) //
+				.orElseGet(
+					() -> new ForkJoinPoolHierarchicalTestExecutorService(parallelConfig(configurationParameters)));
 	}
 
 	@Override
@@ -214,4 +229,9 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	public OutputDirectoryCreator getOutputDirectoryCreator() {
 		return outputDirectoryCreator;
 	}
+
+	private static PrefixedConfigurationParameters parallelConfig(ConfigurationParameters configurationParameters) {
+		return new PrefixedConfigurationParameters(configurationParameters, PARALLEL_CONFIG_PREFIX);
+	}
+
 }
