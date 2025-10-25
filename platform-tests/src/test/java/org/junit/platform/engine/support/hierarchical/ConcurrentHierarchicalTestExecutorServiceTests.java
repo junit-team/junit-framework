@@ -525,6 +525,36 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 				.isSorted();
 	}
 
+	@RepeatedTest(value = 100, failureThreshold = 1)
+	void stealsDynamicChildren() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+
+		var child1Started = new CountDownLatch(1);
+		var child2Finished = new CountDownLatch(1);
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			child1Started.countDown();
+			child2Finished.await();
+		}) //
+				.withName("child1").withLevel(2);
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, child2Finished::countDown) //
+				.withName("child2").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
+			var future1 = requiredService().submit(child1);
+			child1Started.await();
+			var future2 = requiredService().submit(child2);
+			future1.get();
+			future2.get();
+		}) //
+				.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(Stream.of(root, child1, child2)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(child2.executionThread).isEqualTo(root.executionThread).isNotEqualTo(child1.executionThread);
+	}
+
 	private static ExclusiveResource exclusiveResource(LockMode lockMode) {
 		return new ExclusiveResource("key", lockMode);
 	}
