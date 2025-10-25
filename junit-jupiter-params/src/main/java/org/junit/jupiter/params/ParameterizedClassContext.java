@@ -130,6 +130,7 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Param
 	@Override
 	public ParameterizedClassInvocationContext createInvocationContext(ParameterizedInvocationNameFormatter formatter,
 			Arguments arguments, int invocationIndex) {
+
 		return new ParameterizedClassInvocationContext(this, formatter, arguments, invocationIndex);
 	}
 

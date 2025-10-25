@@ -464,6 +464,43 @@ class ResolverFacade {
 		return new ParameterResolutionException(fullMessage, cause);
 	}
 
+	private static void assertFieldAvailableOrThrow(FieldContext fieldContext, EvaluatedArgumentSet arguments) {
+		int parameterIndex = fieldContext.getParameterIndex();
+		int provided = arguments.getTotalLength();
+		int required = parameterIndex + 1;
+
+		if (provided < required) {
+			Field field = fieldContext.getField();
+			throw new org.junit.jupiter.api.extension.ParameterResolutionException(
+				("Not enough arguments for @ParameterizedClass field injection: "
+						+ "field '%s' (index %d, type %s) cannot be injected because "
+						+ "only %d argument(s) were provided; at least %d are required.").formatted(field.getName(),
+							parameterIndex, field.getType().getName(), provided, required));
+		}
+	}
+
+	void assertEnoughFieldArguments(EvaluatedArgumentSet arguments) {
+		int provided = arguments.getTotalLength();
+		int required = determineConsumedArgumentLength(Integer.MAX_VALUE);
+
+		if (provided < required) {
+			int missingIndex = provided;
+			var maybeDecl = getIndexedParameterDeclarations().get(missingIndex);
+			if (maybeDecl.isPresent() && maybeDecl.get() instanceof FieldParameterDeclaration fpd) {
+				Field field = fpd.getField();
+				throw new org.junit.jupiter.api.extension.ParameterResolutionException(
+					("Not enough arguments for @ParameterizedClass field injection: "
+							+ "field '%s' (index %d, type %s) cannot be injected because "
+							+ "only %d argument(s) were provided; at least %d are required.").formatted(field.getName(),
+								missingIndex, field.getType().getName(), provided, required));
+			}
+			throw new org.junit.jupiter.api.extension.ParameterResolutionException(
+				"Not enough arguments for @ParameterizedClass field injection: "
+						+ "index %d cannot be injected because only %d argument(s) were provided; at least %d are required.".formatted(
+							missingIndex, provided, required));
+		}
+	}
+
 	private interface Resolver {
 
 		@Nullable
@@ -495,6 +532,8 @@ class ResolverFacade {
 		@Override
 		public @Nullable Object resolve(FieldContext fieldContext, ExtensionContext extensionContext,
 				EvaluatedArgumentSet arguments, int invocationIndex) {
+			ResolverFacade.assertFieldAvailableOrThrow(fieldContext, arguments);
+
 			Object argument = arguments.getConsumedPayload(fieldContext.getParameterIndex());
 			try {
 				return this.argumentConverter.convert(argument, fieldContext);
