@@ -560,7 +560,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 			results.containerEvents().assertThatEvents()
 					.haveExactly(1, event(finishedWithFailure(
 							instanceOf(org.junit.jupiter.api.extension.ParameterResolutionException.class),
-							message(it -> it.contains("field 's")
+							message(it -> it.contains("field 's'")
 									&& it.contains("index 1")
 									&& it.contains("only 1 argument")
 									&& it.contains("at least 2"))
