@@ -20,8 +20,10 @@ import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedExc
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
@@ -105,7 +107,9 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return completedFuture(null);
 		}
 
-		return new WorkStealingFuture(enqueue(testTask));
+		var entry = enqueue(testTask);
+		workerThread.addDynamicChild(entry);
+		return new WorkStealingFuture(entry);
 	}
 
 	@Override
@@ -196,6 +200,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		@Nullable
 		WorkerLease workerLease;
+
+		private Deque<WorkQueue.Entry> dynamicChildren = new ArrayDeque<>();
 
 		WorkerThread(Runnable runnable, String name) {
 			super(runnable, name);
@@ -490,6 +496,16 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return CompletableFuture.allOf(futures);
 		}
 
+		private void addDynamicChild(WorkQueue.Entry entry) {
+			dynamicChildren.add(entry);
+		}
+
+		private void tryToStealWorkFromDynamicChildren() {
+			for (var entry : dynamicChildren) {
+				tryToStealWork(entry, BlockingMode.NON_BLOCKING);
+			}
+		}
+
 		private enum WorkStealResult {
 			EXECUTED_BY_DIFFERENT_WORKER, RESOURCE_LOCK_UNAVAILABLE, EXECUTED_BY_THIS_WORKER
 		}
@@ -519,7 +535,10 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (entry.future.isDone()) {
 				return callable.call();
 			}
-			// TODO steal other dynamic children until future is done and check again before blocking
+			workerThread.tryToStealWorkFromDynamicChildren();
+			if (entry.future.isDone()) {
+				return callable.call();
+			}
 			LOGGER.trace(() -> "blocking for child task");
 			return workerThread.runBlocking(entry.future::isDone, () -> {
 				try {
