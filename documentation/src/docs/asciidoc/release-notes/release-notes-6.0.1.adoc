@@ -16,6 +16,8 @@ repository on GitHub.
 [[release-notes-6.0.1-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
+* The `jdk.jfr` package is now an optional import when using the `junit-platform-launcher`
+  as an OSGi bundle.
 * Remove remnants of Java 8 compatibility from User Guide.
 
 [[release-notes-6.0.1-junit-platform-deprecations-and-breaking-changes]]
