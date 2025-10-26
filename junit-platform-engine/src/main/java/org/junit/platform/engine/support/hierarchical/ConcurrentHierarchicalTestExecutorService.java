@@ -351,7 +351,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			}
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
-				LOGGER.trace(() -> "stole work: " + entry);
+				LOGGER.trace(() -> "stole work: " + entry.task);
 				var executed = executeStolenWork(entry, blockingMode);
 				if (executed) {
 					return WorkStealResult.EXECUTED_BY_THIS_WORKER;
