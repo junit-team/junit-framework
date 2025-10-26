@@ -47,7 +47,6 @@ tasks.withType<Jar>().named {
 				# the kotlin and apiguardian packages, but enough modules do to make it a default.
 				-fixupmessages.kotlin.import: "Unused Import-Package instructions: \\[kotlin.*\\]";is:=ignore
 				-fixupmessages.apiguardian.import: "Unused Import-Package instructions: \\[org.apiguardian.*\\]";is:=ignore
-				-fixupmessages.jspecify.import: "Unused Import-Package instructions: \\[org.jspecify.*\\]";is:=ignore
 				-fixupmessages.warningsAsErrors: ".*";restrict:=warning;is:=error
 
 				# Don't scan for Class.forName package imports.
