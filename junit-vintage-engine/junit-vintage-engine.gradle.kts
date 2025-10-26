@@ -47,16 +47,17 @@ tasks {
 			val version = project.version
 			val importAPIGuardian: String by extra
 			val importJSpecify: String by extra
+			val importCommonsLogging: String by extra
 			bnd("""
 				# Import JUnit4 packages with a version
 				Import-Package: \
 					${importAPIGuardian},\
 					${importJSpecify},\
+					${importCommonsLogging},\
 					junit.runner;version="[${junit4Min},5)",\
 					org.junit;version="[${junit4Min},5)",\
 					org.junit.experimental.categories;version="[${junit4Min},5)",\
 					org.junit.internal.builders;version="[${junit4Min},5)",\
-					org.junit.platform.commons.logging;status=INTERNAL,\
 					org.junit.runner.*;version="[${junit4Min},5)",\
 					org.junit.runners.model;version="[${junit4Min},5)",\
 					*
