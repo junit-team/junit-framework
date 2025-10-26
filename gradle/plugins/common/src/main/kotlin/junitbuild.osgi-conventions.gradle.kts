@@ -16,7 +16,7 @@ tasks.withType<Jar>().named {
 
 	val importAPIGuardian by extra { "org.apiguardian.*;resolution:=\"optional\"" }
 	val importJSpecify by extra { "org.jspecify.*;resolution:=\"optional\"" }
-	val importJdkJfr by extra { "jdk.jfr;resolution:=\"optional\"" }
+	val importCommonsLogging by extra { "org.junit.platform.commons.logging;status=INTERNAL" }
 
 	extensions.create<BundleTaskExtension>(BundleTaskExtension.NAME, this).apply {
 		properties.set(projectDescription.map {
@@ -39,8 +39,7 @@ tasks.withType<Jar>().named {
 				Import-Package: \
 					${importAPIGuardian},\
 					${importJSpecify},\
-					${importJdkJfr},\
-					org.junit.platform.commons.logging;status=INTERNAL,\
+					${importCommonsLogging},\
 					kotlin.*;resolution:="optional",\
 					*
 
@@ -49,7 +48,6 @@ tasks.withType<Jar>().named {
 				-fixupmessages.kotlin.import: "Unused Import-Package instructions: \\[kotlin.*\\]";is:=ignore
 				-fixupmessages.apiguardian.import: "Unused Import-Package instructions: \\[org.apiguardian.*\\]";is:=ignore
 				-fixupmessages.jspecify.import: "Unused Import-Package instructions: \\[org.jspecify.*\\]";is:=ignore
-				-fixupmessages.jdkjfr.import: "Unused Import-Package instructions: \\[jdk.jfr\\]";is:=ignore
 
 				# Don't scan for Class.forName package imports.
 				# See https://bnd.bndtools.org/instructions/noclassforname.html
@@ -92,7 +90,7 @@ val osgiProperties by tasks.registering(WriteProperties::class) {
 	property("-runsystempackages", "jdk.internal.misc,sun.misc")
 	// API Guardian and JDK JFR should be optional -> instruct resolver to ignore them
 	// during resolution. Resolve should still pass.
-	property("-runblacklist", "org.apiguardian.api")
+	property("-runblacklist", "org.apiguardian.api,jdk.jfr")
 }
 
 val osgiVerification = configurations.dependencyScope("osgiVerification")
