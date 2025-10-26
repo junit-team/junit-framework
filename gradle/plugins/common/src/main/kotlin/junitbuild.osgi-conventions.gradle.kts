@@ -48,6 +48,7 @@ tasks.withType<Jar>().named {
 				-fixupmessages.kotlin.import: "Unused Import-Package instructions: \\[kotlin.*\\]";is:=ignore
 				-fixupmessages.apiguardian.import: "Unused Import-Package instructions: \\[org.apiguardian.*\\]";is:=ignore
 				-fixupmessages.jspecify.import: "Unused Import-Package instructions: \\[org.jspecify.*\\]";is:=ignore
+				-fixupmessages.warningsAsErrors: ".*";restrict:=warning;is:=error
 
 				# Don't scan for Class.forName package imports.
 				# See https://bnd.bndtools.org/instructions/noclassforname.html
