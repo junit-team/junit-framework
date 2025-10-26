@@ -555,6 +555,114 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		assertThat(child2.executionThread).isEqualTo(root.executionThread).isNotEqualTo(child1.executionThread);
 	}
 
+	@RepeatedTest(value = 100, failureThreshold = 1)
+	void stealsNestedDynamicChildren() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+
+		var barrier = new CyclicBarrier(2);
+
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf1a").withLevel(3);
+		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf1b").withLevel(3);
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			barrier.await();
+			var futureA = requiredService().submit(leaf1a);
+			barrier.await();
+			var futureB = requiredService().submit(leaf1b);
+			futureA.get();
+			futureB.get();
+			barrier.await();
+		}) //
+				.withName("child1").withLevel(2);
+
+		var leaf2a = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf2a").withLevel(3);
+		var leaf2b = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf2b").withLevel(3);
+
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			barrier.await();
+			var futureA = requiredService().submit(leaf2a);
+			barrier.await();
+			var futureB = requiredService().submit(leaf2b);
+			futureB.get();
+			futureA.get();
+			barrier.await();
+		}) //
+				.withName("child2").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
+			var future1 = requiredService().submit(child1);
+			var future2 = requiredService().submit(child2);
+			future1.get();
+			future2.get();
+		}) //
+				.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(Stream.of(root, child1, child2, leaf1a, leaf1b, leaf2a, leaf2b)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(child2.executionThread).isNotEqualTo(child1.executionThread);
+		assertThat(child1.executionThread).isEqualTo(leaf1a.executionThread).isEqualTo(leaf1b.executionThread);
+		assertThat(child2.executionThread).isEqualTo(leaf2a.executionThread).isEqualTo(leaf2b.executionThread);
+	}
+
+	@RepeatedTest(value = 100, failureThreshold = 1)
+	void stealsSiblingDynamicChildrenOnly() throws Exception {
+		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 3));
+
+		var child1Started = new CountDownLatch(1);
+		var child2Started = new CountDownLatch(1);
+		var leaf1ASubmitted = new CountDownLatch(1);
+		var leaf1AStarted = new CountDownLatch(1);
+
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			leaf1AStarted.countDown();
+			child2Started.await();
+		}) //
+				.withName("leaf1a").withLevel(3);
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			child1Started.countDown();
+			leaf1ASubmitted.await();
+		}) //
+				.withName("child1").withLevel(2);
+
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, child2Started::countDown) //
+				.withName("child2").withLevel(2);
+
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			var futureA = requiredService().submit(leaf1a);
+			leaf1ASubmitted.countDown();
+			leaf1AStarted.await();
+			futureA.get();
+		}) //
+				.withName("child3").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
+			var future1 = requiredService().submit(child1);
+			child1Started.await();
+			var future2 = requiredService().submit(child2);
+			var future3 = requiredService().submit(child3);
+			future1.get();
+			future2.get();
+			future3.get();
+		}) //
+				.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(Stream.of(root, child1, child2, child3, leaf1a)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+
+		assertThat(child3.executionThread).isNotEqualTo(child1.executionThread).isNotEqualTo(child2.executionThread);
+		assertThat(child1.executionThread).isNotEqualTo(child2.executionThread);
+		assertThat(child1.executionThread).isEqualTo(leaf1a.executionThread);
+	}
+
 	private static ExclusiveResource exclusiveResource(LockMode lockMode) {
 		return new ExclusiveResource("key", lockMode);
 	}

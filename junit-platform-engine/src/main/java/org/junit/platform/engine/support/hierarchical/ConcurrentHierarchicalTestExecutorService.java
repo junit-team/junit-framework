@@ -108,7 +108,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		}
 
 		var entry = enqueue(testTask);
-		workerThread.addDynamicChild(entry);
+		workerThread.trackSubmittedChild(entry);
 		return new WorkStealingFuture(entry);
 	}
 
@@ -201,7 +201,7 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 		@Nullable
 		WorkerLease workerLease;
 
-		private Deque<WorkQueue.Entry> dynamicChildren = new ArrayDeque<>();
+		private final Deque<State> stateStack = new ArrayDeque<>();
 
 		WorkerThread(Runnable runnable, String name) {
 			super(runnable, name);
@@ -480,10 +480,12 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 
 		private void doExecute(TestTask testTask) {
 			LOGGER.trace(() -> "executing: " + testTask);
+			stateStack.push(new State());
 			try {
 				testTask.execute();
 			}
 			finally {
+				stateStack.pop();
 				LOGGER.trace(() -> "finished executing: " + testTask);
 			}
 		}
@@ -496,18 +498,52 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return CompletableFuture.allOf(futures);
 		}
 
-		private void addDynamicChild(WorkQueue.Entry entry) {
-			dynamicChildren.add(entry);
+		private void trackSubmittedChild(WorkQueue.Entry entry) {
+			stateStack.element().trackSubmittedChild(entry);
 		}
 
-		private void tryToStealWorkFromDynamicChildren() {
-			for (var entry : dynamicChildren) {
-				tryToStealWork(entry, BlockingMode.NON_BLOCKING);
+		private void tryToStealWorkFromSubmittedChildren() {
+			var currentState = stateStack.element();
+			var currentSubmittedChildren = currentState.submittedChildren;
+			if (currentSubmittedChildren == null || currentSubmittedChildren.isEmpty()) {
+				return;
+			}
+			var iterator = currentSubmittedChildren.listIterator(currentSubmittedChildren.size());
+			while (iterator.hasPrevious()) {
+				WorkQueue.Entry entry = iterator.previous();
+				var result = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
+				if (result.isExecuted()) {
+					iterator.remove();
+				}
+			}
+			currentState.clearIfEmpty();
+		}
+
+		private static class State {
+
+			@Nullable
+			private List<WorkQueue.Entry> submittedChildren;
+
+			private void trackSubmittedChild(WorkQueue.Entry entry) {
+				if (submittedChildren == null) {
+					submittedChildren = new ArrayList<>();
+				}
+				submittedChildren.add(entry);
+			}
+
+			private void clearIfEmpty() {
+				if (submittedChildren != null && submittedChildren.isEmpty()) {
+					submittedChildren = null;
+				}
 			}
 		}
 
 		private enum WorkStealResult {
-			EXECUTED_BY_DIFFERENT_WORKER, RESOURCE_LOCK_UNAVAILABLE, EXECUTED_BY_THIS_WORKER
+			EXECUTED_BY_DIFFERENT_WORKER, RESOURCE_LOCK_UNAVAILABLE, EXECUTED_BY_THIS_WORKER;
+
+			private boolean isExecuted() {
+				return this != RESOURCE_LOCK_UNAVAILABLE;
+			}
 		}
 
 		private interface BlockingAction<T> {
@@ -535,11 +571,11 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			if (entry.future.isDone()) {
 				return callable.call();
 			}
-			workerThread.tryToStealWorkFromDynamicChildren();
+			workerThread.tryToStealWorkFromSubmittedChildren();
 			if (entry.future.isDone()) {
 				return callable.call();
 			}
-			LOGGER.trace(() -> "blocking for child task");
+			LOGGER.trace(() -> "blocking for child task: " + entry.task);
 			return workerThread.runBlocking(entry.future::isDone, () -> {
 				try {
 					return callable.call();
