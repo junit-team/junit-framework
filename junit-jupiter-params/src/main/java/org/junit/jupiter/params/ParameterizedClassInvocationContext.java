@@ -65,8 +65,6 @@ class ParameterizedClassInvocationContext extends ParameterizedInvocationContext
 	}
 
 	private Extension createExtensionForFieldInjection() {
-		this.declarationContext.getResolverFacade().assertEnoughFieldArguments(this.arguments);
-
 		ResolverFacade resolverFacade = this.declarationContext.getResolverFacade();
 		TestInstance.Lifecycle lifecycle = this.declarationContext.getTestInstanceLifecycle();
 		return switch (lifecycle) {

@@ -557,14 +557,11 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		void failsWithMeaningfulErrorWhenTooFewArgumentsProvidedForFieldInjection() {
 			var results = executeTestsForClass(NotEnoughArgumentsForFieldsTestCase.class);
 
-			results.containerEvents().assertThatEvents()
-					.haveExactly(1, event(finishedWithFailure(
-							instanceOf(org.junit.jupiter.api.extension.ParameterResolutionException.class),
-							message(it -> it.contains("field 's'")
-									&& it.contains("index 1")
-									&& it.contains("only 1 argument")
-									&& it.contains("at least 2"))
-					)));
+			results.containerEvents().assertThatEvents() //
+					.haveExactly(1, finishedWithFailure(message(
+						"""
+								Configuration error: @ParameterizedClass has 2 required parameters (due to field injection) but there was 1 argument provided.
+								Note: the provided arguments were [1]""")));
 		}
 	}
 

@@ -98,7 +98,9 @@ class ResolverFacade {
 		Stream.concat(uniqueIndexedParameters.values().stream(), aggregatorParameters.stream()) //
 				.forEach(declaration -> makeAccessible(declaration.getField()));
 
-		return new ResolverFacade(clazz, uniqueIndexedParameters, aggregatorParameters, 0);
+		var requiredParameterCount = new RequiredParameterCount(uniqueIndexedParameters.size(), "field injection");
+
+		return new ResolverFacade(clazz, uniqueIndexedParameters, aggregatorParameters, 0, requiredParameterCount);
 	}
 
 	static ResolverFacade create(Constructor<?> constructor, ParameterizedClass annotation) {
@@ -155,25 +157,33 @@ class ResolverFacade {
 			}
 		}
 		return new ResolverFacade(executable, indexedParameters, new LinkedHashSet<>(aggregatorParameters.values()),
-			indexOffset);
+			indexOffset, null);
 	}
 
 	private final int parameterIndexOffset;
 	private final Map<ParameterDeclaration, Resolver> resolvers;
 	private final DefaultParameterDeclarations indexedParameterDeclarations;
 	private final Set<? extends ResolvableParameterDeclaration> aggregatorParameters;
+	private final @Nullable RequiredParameterCount requiredParameterCount;
 
 	private ResolverFacade(AnnotatedElement sourceElement,
 			NavigableMap<Integer, ? extends ResolvableParameterDeclaration> indexedParameters,
-			Set<? extends ResolvableParameterDeclaration> aggregatorParameters, int parameterIndexOffset) {
+			Set<? extends ResolvableParameterDeclaration> aggregatorParameters, int parameterIndexOffset,
+			@Nullable RequiredParameterCount requiredParameterCount) {
 		this.aggregatorParameters = aggregatorParameters;
 		this.parameterIndexOffset = parameterIndexOffset;
 		this.resolvers = new ConcurrentHashMap<>(indexedParameters.size() + aggregatorParameters.size());
 		this.indexedParameterDeclarations = new DefaultParameterDeclarations(sourceElement, indexedParameters);
+		this.requiredParameterCount = requiredParameterCount;
 	}
 
 	ParameterDeclarations getIndexedParameterDeclarations() {
 		return this.indexedParameterDeclarations;
+	}
+
+	@Nullable
+	RequiredParameterCount getRequiredParameterCount() {
+		return this.requiredParameterCount;
 	}
 
 	boolean isSupportedParameter(ParameterContext parameterContext, EvaluatedArgumentSet arguments) {
@@ -464,43 +474,6 @@ class ResolverFacade {
 		return new ParameterResolutionException(fullMessage, cause);
 	}
 
-	private static void assertFieldAvailableOrThrow(FieldContext fieldContext, EvaluatedArgumentSet arguments) {
-		int parameterIndex = fieldContext.getParameterIndex();
-		int provided = arguments.getTotalLength();
-		int required = parameterIndex + 1;
-
-		if (provided < required) {
-			Field field = fieldContext.getField();
-			throw new org.junit.jupiter.api.extension.ParameterResolutionException(
-				("Not enough arguments for @ParameterizedClass field injection: "
-						+ "field '%s' (index %d, type %s) cannot be injected because "
-						+ "only %d argument(s) were provided; at least %d are required.").formatted(field.getName(),
-							parameterIndex, field.getType().getName(), provided, required));
-		}
-	}
-
-	void assertEnoughFieldArguments(EvaluatedArgumentSet arguments) {
-		int provided = arguments.getTotalLength();
-		int required = determineConsumedArgumentLength(Integer.MAX_VALUE);
-
-		if (provided < required) {
-			int missingIndex = provided;
-			var maybeDecl = getIndexedParameterDeclarations().get(missingIndex);
-			if (maybeDecl.isPresent() && maybeDecl.get() instanceof FieldParameterDeclaration fpd) {
-				Field field = fpd.getField();
-				throw new org.junit.jupiter.api.extension.ParameterResolutionException(
-					("Not enough arguments for @ParameterizedClass field injection: "
-							+ "field '%s' (index %d, type %s) cannot be injected because "
-							+ "only %d argument(s) were provided; at least %d are required.").formatted(field.getName(),
-								missingIndex, field.getType().getName(), provided, required));
-			}
-			throw new org.junit.jupiter.api.extension.ParameterResolutionException(
-				"Not enough arguments for @ParameterizedClass field injection: "
-						+ "index %d cannot be injected because only %d argument(s) were provided; at least %d are required.".formatted(
-							missingIndex, provided, required));
-		}
-	}
-
 	private interface Resolver {
 
 		@Nullable
@@ -532,7 +505,6 @@ class ResolverFacade {
 		@Override
 		public @Nullable Object resolve(FieldContext fieldContext, ExtensionContext extensionContext,
 				EvaluatedArgumentSet arguments, int invocationIndex) {
-			ResolverFacade.assertFieldAvailableOrThrow(fieldContext, arguments);
 
 			Object argument = arguments.getConsumedPayload(fieldContext.getParameterIndex());
 			try {
@@ -790,5 +762,8 @@ class ResolverFacade {
 				() -> this.originalResolverFacade.resolve(originalDeclaration, extensionContext, arguments,
 					invocationIndex, Optional.of(parameterContext)));
 		}
+	}
+
+	record RequiredParameterCount(int value, String reason) {
 	}
 }
