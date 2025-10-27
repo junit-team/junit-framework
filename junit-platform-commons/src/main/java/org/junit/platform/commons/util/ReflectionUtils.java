@@ -1872,7 +1872,11 @@ public final class ReflectionUtils {
 		return hasCompatibleSignature(upper, lower.getName(), lower.getParameterTypes());
 	}
 
-	private static boolean isPackagePrivate(Member member) {
+	/**
+	 * @since 6.0.1
+	 */
+	@API(status = INTERNAL, since = "6.0.1")
+	public static boolean isPackagePrivate(Member member) {
 		int modifiers = member.getModifiers();
 		return !(Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers));
 	}

@@ -275,9 +275,17 @@ public final class MethodSelector implements DiscoverySelector {
 			return false;
 		}
 		MethodSelector that = (MethodSelector) o;
-		return Objects.equals(this.className, that.className)//
+		var equal = Objects.equals(this.className, that.className)//
 				&& Objects.equals(this.methodName, that.methodName)//
 				&& Objects.equals(this.parameterTypeNames, that.parameterTypeNames);
+		if (equal) {
+			var thisJavaMethod = this.javaMethod;
+			var thatJavaMethod = that.javaMethod;
+			if (thisJavaMethod != null && thatJavaMethod != null) {
+				return thisJavaMethod.equals(thatJavaMethod);
+			}
+		}
+		return equal;
 	}
 
 	/**

@@ -45,6 +45,8 @@ repository on GitHub.
   to avoid conflicts with other control characters.
 * Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
   assertion.
+* Fix support for test methods with the same signature as a package-private methods
+  declared in super classes in different packages.
 
 [[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

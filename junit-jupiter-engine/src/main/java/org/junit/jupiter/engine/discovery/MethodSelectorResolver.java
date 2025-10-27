@@ -13,6 +13,7 @@ package org.junit.jupiter.engine.discovery;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.platform.commons.util.ReflectionUtils.isPackagePrivate;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.engine.support.discovery.SelectorResolver.Resolution.matches;
 import static org.junit.platform.engine.support.discovery.SelectorResolver.Resolution.unresolved;
@@ -223,15 +224,22 @@ class MethodSelectorResolver implements SelectorResolver {
 
 		private TestDescriptor createTestDescriptor(TestDescriptor parent, Class<?> testClass, Method method,
 				JupiterConfiguration configuration) {
-			UniqueId uniqueId = createUniqueId(method, parent);
+			UniqueId uniqueId = createUniqueId(method, parent, testClass);
 			return testDescriptorFactory.create(uniqueId, testClass, method,
 				((TestClassAware) parent)::getEnclosingTestClasses, configuration);
 		}
 
-		private UniqueId createUniqueId(Method method, TestDescriptor parent) {
-			String methodId = "%s(%s)".formatted(method.getName(),
-				ClassUtils.nullSafeToString(method.getParameterTypes()));
-			return parent.getUniqueId().append(segmentType, methodId);
+		private UniqueId createUniqueId(Method method, TestDescriptor parent, Class<?> testClass) {
+			return parent.getUniqueId().append(segmentType, computeMethodId(method, testClass));
+		}
+
+		private static String computeMethodId(Method method, Class<?> testClass) {
+			var parameterTypes = ClassUtils.nullSafeToString(method.getParameterTypes());
+			if (isPackagePrivate(method)
+					&& !method.getDeclaringClass().getPackageName().equals(testClass.getPackageName())) {
+				return "%s#%s(%s)".formatted(method.getDeclaringClass().getName(), method.getName(), parameterTypes);
+			}
+			return "%s(%s)".formatted(method.getName(), parameterTypes);
 		}
 
 		interface TestDescriptorFactory {
