@@ -28,6 +28,9 @@ repository on GitHub.
 
 * Support for creating a `ModuleSelector` from a `java.lang.Module` and using
   its classloader for test discovery.
+* Allow implementations of `HierarchicalTestEngine` to specify which nodes require the
+  global read lock by overriding the `Node.isGlobalReadLockRequired()` method to return
+  `false`.
 
 
 [[release-notes-6.1.0-M1-junit-jupiter]]
