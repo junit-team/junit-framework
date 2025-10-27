@@ -19,8 +19,7 @@ import org.apiguardian.api.API;
  *
  * @since 6.0.1
  */
-@API(status = STABLE, since = "6.0.1")
-public final class ExitCode {
+final class ExitCode {
 	/**
 	 * Exit code indicating a successful tool run.
 	 */
