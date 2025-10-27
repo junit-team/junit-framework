@@ -54,6 +54,8 @@ repository on GitHub.
 
 * The `@CsvSource` and `@CsvFileSource` annotations now allow specifying
   a custom comment character using the new `commentCharacter` attribute.
+* Improve error message when using `@ParameterizedClass` with field injection and not
+  providing enough arguments.
 
 
 [[release-notes-6.0.1-junit-vintage]]
