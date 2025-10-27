@@ -28,6 +28,9 @@ repository on GitHub.
 
 * Support for creating a `ModuleSelector` from a `java.lang.Module` and using
   its classloader for test discovery.
+* `OpenTestReportGeneratingListener` now supports redirecting XML events to a socket via
+  the new `junit.platform.reporting.open.xml.socket` configuration parameter. When set to a
+  port number, events are sent to `localhost:<port>` instead of being written to a file.
 
 
 [[release-notes-6.1.0-M1-junit-jupiter]]
