@@ -57,7 +57,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -806,7 +805,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	private static @NotNull String withPlatformSpecificLineSeparator(String textBlock) {
+	private static String withPlatformSpecificLineSeparator(String textBlock) {
 		return textBlock.replace("\n", System.lineSeparator());
 	}
 
