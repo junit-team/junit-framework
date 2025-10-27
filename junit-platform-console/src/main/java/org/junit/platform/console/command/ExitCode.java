@@ -16,6 +16,8 @@ import org.apiguardian.api.API;
 
 /**
  * Well-known exit codes of the {@code junit} tool.
+ *
+ * @since 6.0.1
  */
 @API(status = STABLE, since = "6.0.1")
 public final class ExitCode {
