@@ -13,7 +13,6 @@ package org.junit.jupiter.engine;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
-import static org.junit.jupiter.engine.config.JupiterConfiguration.PARALLEL_CONFIG_PREFIX;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_CUSTOM_CLASS_PROPERTY_NAME;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME;
@@ -39,8 +38,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
-import org.junit.platform.engine.support.hierarchical.ForkJoinPoolHierarchicalTestExecutorService;
-import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService;
 import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
 
 /**
@@ -214,21 +211,6 @@ public final class Constants {
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = JupiterConfiguration.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 
 	/**
-	 * Property name used to configure the fully qualified class name
-	 * {@link HierarchicalTestExecutorService} implementation to use if parallel
-	 * test execution is
-	 * {@linkplain #PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME enabled}: {@value}
-	 *
-	 * <p>The implementation class must provide a parameter of type
-	 *
-	 * <p>By default, {@link ForkJoinPoolHierarchicalTestExecutorService} is used.
-	 *
-	 * @since 6.1
-	 */
-	@API(status = EXPERIMENTAL, since = "6.1")
-	public static final String PARALLEL_EXECUTION_EXECUTOR_PROPERTY_NAME = JupiterConfiguration.PARALLEL_EXECUTION_EXECUTOR_PROPERTY_NAME;
-
-	/**
 	 * Property name used to enable auto-closing of {@link AutoCloseable} instances
 	 *
 	 * <p>By default, auto-closing is enabled.
@@ -254,6 +236,8 @@ public final class Constants {
 	 */
 	@API(status = STABLE, since = "5.10")
 	public static final String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
+
+	static final String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
 
 	/**
 	 * Property name used to select the

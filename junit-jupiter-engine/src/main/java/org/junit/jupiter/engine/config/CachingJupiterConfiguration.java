@@ -32,7 +32,6 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
-import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService;
 
 /**
  * Caching implementation of the {@link JupiterConfiguration} API.
@@ -68,11 +67,6 @@ public class CachingJupiterConfiguration implements JupiterConfiguration {
 	public boolean isParallelExecutionEnabled() {
 		return (boolean) cache.computeIfAbsent(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME,
 			__ -> delegate.isParallelExecutionEnabled());
-	}
-
-	@Override
-	public HierarchicalTestExecutorService createParallelExecutorService() {
-		return delegate.createParallelExecutorService();
 	}
 
 	@Override

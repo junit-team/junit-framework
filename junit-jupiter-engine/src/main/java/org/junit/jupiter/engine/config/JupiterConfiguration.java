@@ -31,7 +31,6 @@ import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
-import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService;
 
 /**
  * @since 5.4
@@ -43,8 +42,6 @@ public interface JupiterConfiguration {
 	String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 	String DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME = "junit.jupiter.conditions.deactivate";
 	String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
-	String PARALLEL_EXECUTION_EXECUTOR_PROPERTY_NAME = "junit.jupiter.execution.parallel.executor";
-	String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
 	String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 	String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 	String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
@@ -63,8 +60,6 @@ public interface JupiterConfiguration {
 	<T> Optional<T> getRawConfigurationParameter(String key, Function<? super String, ? extends T> transformer);
 
 	boolean isParallelExecutionEnabled();
-
-	HierarchicalTestExecutorService createParallelExecutorService();
 
 	boolean isClosingStoredAutoCloseablesEnabled();
 
