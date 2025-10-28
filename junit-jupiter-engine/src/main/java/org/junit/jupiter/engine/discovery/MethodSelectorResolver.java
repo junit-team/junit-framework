@@ -13,7 +13,6 @@ package org.junit.jupiter.engine.discovery;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.platform.commons.util.ReflectionUtils.isPackagePrivate;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.engine.support.discovery.SelectorResolver.Resolution.matches;
 import static org.junit.platform.engine.support.discovery.SelectorResolver.Resolution.unresolved;
@@ -40,7 +39,6 @@ import org.junit.jupiter.engine.discovery.predicates.IsTestFactoryMethod;
 import org.junit.jupiter.engine.discovery.predicates.IsTestMethod;
 import org.junit.jupiter.engine.discovery.predicates.IsTestTemplateMethod;
 import org.junit.jupiter.engine.discovery.predicates.TestClassPredicates;
-import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.DiscoverySelector;
@@ -60,7 +58,7 @@ import org.junit.platform.engine.support.discovery.SelectorResolver;
  */
 class MethodSelectorResolver implements SelectorResolver {
 
-	private static final MethodFinder methodFinder = new MethodFinder();
+	private static final MethodSegmentResolver methodSegmentResolver = new MethodSegmentResolver();
 	private final Predicate<Class<?>> testClassPredicate;
 
 	private final JupiterConfiguration configuration;
@@ -210,7 +208,7 @@ class MethodSelectorResolver implements SelectorResolver {
 					String methodSpecPart = lastSegment.getValue();
 					Class<?> testClass = ((TestClassAware) parent).getTestClass();
 					// @formatter:off
-					return methodFinder.findMethod(methodSpecPart, testClass)
+					return methodSegmentResolver.findMethod(methodSpecPart, testClass)
 							.filter(methodPredicate)
 							.map(method -> createTestDescriptor(parent, testClass, method, configuration));
 					// @formatter:on
@@ -230,16 +228,8 @@ class MethodSelectorResolver implements SelectorResolver {
 		}
 
 		private UniqueId createUniqueId(Method method, TestDescriptor parent, Class<?> testClass) {
-			return parent.getUniqueId().append(segmentType, computeMethodId(method, testClass));
-		}
-
-		private static String computeMethodId(Method method, Class<?> testClass) {
-			var parameterTypes = ClassUtils.nullSafeToString(method.getParameterTypes());
-			if (isPackagePrivate(method)
-					&& !method.getDeclaringClass().getPackageName().equals(testClass.getPackageName())) {
-				return "%s#%s(%s)".formatted(method.getDeclaringClass().getName(), method.getName(), parameterTypes);
-			}
-			return "%s(%s)".formatted(method.getName(), parameterTypes);
+			return parent.getUniqueId().append(segmentType,
+				methodSegmentResolver.formatMethodSpecPart(method, testClass));
 		}
 
 		interface TestDescriptorFactory {
