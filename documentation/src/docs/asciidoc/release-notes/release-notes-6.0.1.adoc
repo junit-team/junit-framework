@@ -45,6 +45,8 @@ repository on GitHub.
   to avoid conflicts with other control characters.
 * Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
   assertion.
+* Stop reporting discovery issues for synthetic methods, particularly in conjunction with
+  Kotlin suspend functions.
 
 [[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
