@@ -38,6 +38,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
+import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
 import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
 
 /**
@@ -238,6 +240,22 @@ public final class Constants {
 	public static final String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
 
 	static final String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
+
+	/**
+	 * Property name used to determine the desired
+	 * {@link ConcurrentExecutorServiceType ConcurrentExecutorServiceType}.
+	 *
+	 * <p>Value must be
+	 * {@link ConcurrentExecutorServiceType#FORK_JOIN_POOL FORK_JOIN_POOL} or
+	 * {@link ConcurrentExecutorServiceType#WORKER_THREAD_POOL WORKER_THREAD_POOL},
+	 * ignoring case.
+	 *
+	 * @since 6.1
+	 * @see ConcurrentHierarchicalTestExecutorServiceFactory
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+			+ ConcurrentHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME;
 
 	/**
 	 * Property name used to select the

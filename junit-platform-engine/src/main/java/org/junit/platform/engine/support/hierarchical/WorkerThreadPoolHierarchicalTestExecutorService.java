@@ -53,7 +53,6 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
-import org.junit.platform.engine.ConfigurationParameters;
 
 /**
  * @since 6.1
@@ -67,10 +66,6 @@ public class WorkerThreadPoolHierarchicalTestExecutorService implements Hierarch
 	private final ExecutorService threadPool;
 	private final int parallelism;
 	private final WorkerLeaseManager workerLeaseManager;
-
-	public WorkerThreadPoolHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
-		this(DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters));
-	}
 
 	public WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());

@@ -29,10 +29,10 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.config.PrefixedConfigurationParameters;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
+import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
-import org.junit.platform.engine.support.hierarchical.WorkerThreadPoolHierarchicalTestExecutorService;
 
 /**
  * The JUnit Jupiter {@link org.junit.platform.engine.TestEngine TestEngine}.
@@ -79,7 +79,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 	protected HierarchicalTestExecutorService createExecutorService(ExecutionRequest request) {
 		JupiterConfiguration configuration = getJupiterConfiguration(request);
 		if (configuration.isParallelExecutionEnabled()) {
-			return new WorkerThreadPoolHierarchicalTestExecutorService(new PrefixedConfigurationParameters(
+			return ConcurrentHierarchicalTestExecutorServiceFactory.create(new PrefixedConfigurationParameters(
 				request.getConfigurationParameters(), Constants.PARALLEL_CONFIG_PREFIX));
 		}
 		return super.createExecutorService(request);
