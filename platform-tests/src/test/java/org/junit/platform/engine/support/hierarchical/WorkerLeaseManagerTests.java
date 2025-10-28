@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorService.WorkerLeaseManager;
+import org.junit.platform.engine.support.hierarchical.WorkerThreadPoolHierarchicalTestExecutorService.WorkerLeaseManager;
 
 class WorkerLeaseManagerTests {
 

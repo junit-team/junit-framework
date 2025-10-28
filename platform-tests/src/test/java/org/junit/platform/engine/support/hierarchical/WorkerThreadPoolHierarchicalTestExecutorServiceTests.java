@@ -61,11 +61,11 @@ import org.opentest4j.AssertionFailedError;
  */
 @SuppressWarnings("resource")
 @Timeout(5)
-class ConcurrentHierarchicalTestExecutorServiceTests {
+class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 
 	@AutoClose
 	@Nullable
-	ConcurrentHierarchicalTestExecutorService service;
+	WorkerThreadPoolHierarchicalTestExecutorService service;
 
 	@ParameterizedTest
 	@EnumSource(ExecutionMode.class)
@@ -75,7 +75,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		var customClassLoader = new URLClassLoader(new URL[0], this.getClass().getClassLoader());
 		try (customClassLoader) {
-			service = new ConcurrentHierarchicalTestExecutorService(configuration(1), customClassLoader);
+			service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1), customClassLoader);
 			service.submit(task).get();
 		}
 
@@ -90,7 +90,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@Test
 	void invokeAllMustBeExecutedFromWithinThreadPool() {
 		var tasks = List.of(new TestTaskStub(ExecutionMode.CONCURRENT));
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1));
 
 		assertPreconditionViolationFor(() -> requiredService().invokeAll(tasks)) //
 				.withMessage("invokeAll() must be called from a worker thread that belongs to this executor");
@@ -100,7 +100,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 	@EnumSource(ExecutionMode.class)
 	void executesSingleChildInSameThreadRegardlessOfItsExecutionMode(ExecutionMode childExecutionMode)
 			throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1));
 
 		var child = new TestTaskStub(childExecutionMode);
 		var root = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().invokeAll(List.of(child)));
@@ -116,7 +116,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void executesTwoChildrenConcurrently() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
 		var latch = new CountDownLatch(2);
 		Executable behavior = () -> {
@@ -136,7 +136,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void executesTwoChildrenInSameThread() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1));
 
 		var children = List.of(new TestTaskStub(ExecutionMode.SAME_THREAD),
 			new TestTaskStub(ExecutionMode.SAME_THREAD));
@@ -158,7 +158,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 		var task = new TestTaskStub(ExecutionMode.CONCURRENT).withResourceLock(resourceLock);
 
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(1));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1));
 		service.submit(task).get();
 
 		task.assertExecutedSuccessfully();
@@ -171,7 +171,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void acquiresResourceLockForChildTasks() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
 		var resourceLock = mock(ResourceLock.class);
 		when(resourceLock.tryAcquire()).thenReturn(true, false);
@@ -198,7 +198,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void runsTasksWithoutConflictingLocksConcurrently() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(3));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(3));
 
 		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
 
@@ -228,7 +228,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void processingQueueEntriesSkipsOverUnavailableResources() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
 		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
 
@@ -265,7 +265,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void invokeAllQueueEntriesSkipsOverUnavailableResources() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
 		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
 
@@ -302,7 +302,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void prioritizesChildrenOfStartedContainers() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
 		var leavesStarted = new CountDownLatch(2);
 
@@ -331,7 +331,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void prioritizesTestsOverContainers() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
 		var leavesStarted = new CountDownLatch(2);
 		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
@@ -358,7 +358,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@RepeatedTest(value = 100, failureThreshold = 1)
 	void limitsWorkerThreadsToMaxPoolSize() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(3, 3));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(3, 3));
 
 		CountDownLatch latch = new CountDownLatch(3);
 		Executable behavior = () -> {
@@ -397,7 +397,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@Test
 	void stealsBlockingChildren() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
 		var child1Started = new CountDownLatch(1);
 		var leaf2aStarted = new CountDownLatch(1);
@@ -449,7 +449,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@RepeatedTest(value = 100, failureThreshold = 1)
 	void executesChildrenInOrder() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(1, 1));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1, 1));
 
 		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("leaf1a").withLevel(2);
@@ -476,7 +476,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@RepeatedTest(value = 100, failureThreshold = 1)
 	void workIsStolenInReverseOrder() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
 		// Execute tasks pairwise
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
@@ -527,7 +527,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@RepeatedTest(value = 100, failureThreshold = 1)
 	void stealsDynamicChildren() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
 		var child1Started = new CountDownLatch(1);
 		var child2Finished = new CountDownLatch(1);
@@ -557,7 +557,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@RepeatedTest(value = 100, failureThreshold = 1)
 	void stealsNestedDynamicChildren() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
 		var barrier = new CyclicBarrier(2);
 
@@ -612,7 +612,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 
 	@RepeatedTest(value = 100, failureThreshold = 1)
 	void stealsSiblingDynamicChildrenOnly() throws Exception {
-		service = new ConcurrentHierarchicalTestExecutorService(configuration(2, 3));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 3));
 
 		var child1Started = new CountDownLatch(1);
 		var child2Started = new CountDownLatch(1);
@@ -667,7 +667,7 @@ class ConcurrentHierarchicalTestExecutorServiceTests {
 		return new ExclusiveResource("key", lockMode);
 	}
 
-	private ConcurrentHierarchicalTestExecutorService requiredService() {
+	private WorkerThreadPoolHierarchicalTestExecutorService requiredService() {
 		return requireNonNull(service);
 	}
 

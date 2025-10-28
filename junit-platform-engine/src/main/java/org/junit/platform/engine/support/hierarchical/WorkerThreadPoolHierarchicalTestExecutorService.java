@@ -59,24 +59,25 @@ import org.junit.platform.engine.ConfigurationParameters;
  * @since 6.1
  */
 @API(status = EXPERIMENTAL, since = "6.1")
-public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
+public class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentHierarchicalTestExecutorService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
 
 	private final WorkQueue workQueue = new WorkQueue();
 	private final ExecutorService threadPool;
 	private final int parallelism;
 	private final WorkerLeaseManager workerLeaseManager;
 
-	public ConcurrentHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
+	public WorkerThreadPoolHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
 		this(DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters));
 	}
 
-	public ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
+	public WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
-	ConcurrentHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration, ClassLoader classLoader) {
+	WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration,
+			ClassLoader classLoader) {
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
 		parallelism = configuration.getParallelism();
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
@@ -222,8 +223,8 @@ public class ConcurrentHierarchicalTestExecutorService implements HierarchicalTe
 			return workerThread;
 		}
 
-		ConcurrentHierarchicalTestExecutorService executor() {
-			return ConcurrentHierarchicalTestExecutorService.this;
+		WorkerThreadPoolHierarchicalTestExecutorService executor() {
+			return WorkerThreadPoolHierarchicalTestExecutorService.this;
 		}
 
 		void processQueueEntries(WorkerLease workerLease, BooleanSupplier doneCondition) {
