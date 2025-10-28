@@ -45,6 +45,8 @@ repository on GitHub.
   to avoid conflicts with other control characters.
 * Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
   assertion.
+* Stop reporting discovery issues for synthetic methods, particularly in conjunction with
+  Kotlin suspend functions.
 * Fix support for test methods with the same signature as a package-private methods
   declared in super classes in different packages.
 

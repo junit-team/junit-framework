@@ -67,7 +67,7 @@ public class KotlinReflectionUtils {
 	 */
 	@API(status = INTERNAL, since = "6.0")
 	public static boolean isKotlinSuspendingFunction(Method method) {
-		if (kotlinCoroutineContinuation != null && isKotlinType(method.getDeclaringClass())) {
+		if (!method.isSynthetic() && kotlinCoroutineContinuation != null && isKotlinType(method.getDeclaringClass())) {
 			int parameterCount = method.getParameterCount();
 			return parameterCount > 0 //
 					&& method.getParameterTypes()[parameterCount - 1] == kotlinCoroutineContinuation;
