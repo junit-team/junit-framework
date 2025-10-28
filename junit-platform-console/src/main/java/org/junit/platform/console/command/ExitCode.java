@@ -10,10 +10,6 @@
 
 package org.junit.platform.console.command;
 
-import static org.apiguardian.api.API.Status.STABLE;
-
-import org.apiguardian.api.API;
-
 /**
  * Well-known exit codes of the {@code junit} tool.
  *
