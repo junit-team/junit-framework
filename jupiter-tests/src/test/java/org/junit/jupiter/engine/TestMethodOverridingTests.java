@@ -11,9 +11,11 @@
 package org.junit.jupiter.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.engine.subpackage.SuperClassWithPackagePrivateLifecycleMethodInDifferentPackageTestCase;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 
 /**
@@ -31,11 +34,9 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
 class TestMethodOverridingTests extends AbstractJupiterTestEngineTests {
 
 	@Test
-	void bothPackagePrivateTestMethodsAreDiscovered() {
+	void bothPackagePrivateTestMethodsAreDiscovered() throws Exception {
 		var results = discoverTestsForClass(DuplicateTestMethodDueToPackagePrivateVisibilityTestCase.class);
 		var classDescriptor = getOnlyElement(results.getEngineDescriptor().getChildren());
-
-		assertThat(classDescriptor.getChildren()).hasSize(2);
 
 		var parentUniqueId = classDescriptor.getUniqueId();
 		var inheritedMethodUniqueId = parentUniqueId.append("method",
@@ -44,21 +45,28 @@ class TestMethodOverridingTests extends AbstractJupiterTestEngineTests {
 		var declaredMethodUniqueId = parentUniqueId.append("method",
 			"test(org.junit.jupiter.api.TestInfo, org.junit.jupiter.api.TestReporter)");
 
+		var inheritedMethod = SuperClassWithPackagePrivateLifecycleMethodInDifferentPackageTestCase.class.getDeclaredMethod(
+			"test", TestInfo.class, TestReporter.class);
+		var declaredMethod = DuplicateTestMethodDueToPackagePrivateVisibilityTestCase.class.getDeclaredMethod("test",
+			TestInfo.class, TestReporter.class);
+
 		assertThat(classDescriptor.getChildren()) //
-				.extracting(TestDescriptor::getUniqueId) //
-				.containsExactly(inheritedMethodUniqueId, declaredMethodUniqueId);
+				.hasSize(2) //
+				.extracting(TestDescriptor::getUniqueId, TestMethodOverridingTests::getSourceMethod) //
+				.containsExactly(tuple(inheritedMethodUniqueId, inheritedMethod),
+					tuple(declaredMethodUniqueId, declaredMethod));
 
 		results = discoverTests(selectUniqueId(inheritedMethodUniqueId));
 		classDescriptor = getOnlyElement(results.getEngineDescriptor().getChildren());
 		assertThat(classDescriptor.getChildren()) //
-				.extracting(TestDescriptor::getUniqueId) //
-				.containsExactly(inheritedMethodUniqueId);
+				.extracting(TestDescriptor::getUniqueId, TestMethodOverridingTests::getSourceMethod) //
+				.containsExactly(tuple(inheritedMethodUniqueId, inheritedMethod));
 
 		results = discoverTests(selectUniqueId(declaredMethodUniqueId));
 		classDescriptor = getOnlyElement(results.getEngineDescriptor().getChildren());
 		assertThat(classDescriptor.getChildren()) //
-				.extracting(TestDescriptor::getUniqueId) //
-				.containsExactly(declaredMethodUniqueId);
+				.extracting(TestDescriptor::getUniqueId, TestMethodOverridingTests::getSourceMethod) //
+				.containsExactly(tuple(declaredMethodUniqueId, declaredMethod));
 	}
 
 	@Test
@@ -74,6 +82,10 @@ class TestMethodOverridingTests extends AbstractJupiterTestEngineTests {
 					Map.of("invokedChild",
 						DuplicateTestMethodDueToPackagePrivateVisibilityTestCase.class.getDeclaredMethod("test",
 							TestInfo.class, TestReporter.class).toGenericString()));
+	}
+
+	private static Method getSourceMethod(TestDescriptor it) {
+		return ((MethodSource) it.getSource().orElseThrow()).getJavaMethod();
 	}
 
 	private static Stream<Map<String, String>> allReportEntries(EngineExecutionResults results) {
