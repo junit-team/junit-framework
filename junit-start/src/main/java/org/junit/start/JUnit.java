@@ -58,7 +58,9 @@ public final class JUnit {
 		var listener = new SummaryGeneratingListener();
 		var charset = Charset.defaultCharset();
 		var writer = new PrintWriter(System.out, true, charset);
-		var printer = new TreePrintingListener(writer, ColorPalette.DEFAULT, Theme.valueOf(charset));
+		var palette = System.getenv("NO_COLOR") != null ? ColorPalette.NONE : ColorPalette.DEFAULT;
+		var theme = Theme.valueOf(charset);
+		var printer = new TreePrintingListener(writer, palette, theme);
 		var request = request().selectors(selector).forExecution() //
 				.listeners(listener, printer) //
 				.build();
