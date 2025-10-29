@@ -3439,9 +3439,9 @@ configuration parameter to one of the following options:
 
 `fork_join_pool` (default)::
 Use an executor service that is backed by a `ForkJoinPool` from the JDK. This will cause
-tests to be executed in a `ForkJoinWorkerThread` and, in some cases, cause usages of
-`ForkJoinPool` in test or production code or calls to blocking JDK APIs to increase the
-number of concurrently executing tests. To avoid this limitation, please use
+tests to be executed in a `ForkJoinWorkerThread`. In some cases, usages of
+`ForkJoinPool` in test or production code or calls to blocking JDK APIs may cause the
+number of concurrently executing tests to increase. To avoid this situation, please use
 `worker_thread_pool`.
 
 `worker_thread_pool` (experimental)::
