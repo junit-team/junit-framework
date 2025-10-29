@@ -39,8 +39,8 @@ import picocli.CommandLine.Spec;
 		footer = "For more information, please refer to the JUnit User Guide at%n" //
 				+ "@|underline https://docs.junit.org/${junit.docs.version}/user-guide/|@", //
 		scope = CommandLine.ScopeType.INHERIT, //
-		exitCodeOnInvalidInput = CommandResult.FAILURE, //
-		exitCodeOnExecutionException = CommandResult.FAILURE, //
+		exitCodeOnInvalidInput = ExitCode.INVALID_INPUT, //
+		exitCodeOnExecutionException = ExitCode.ANY_ERROR, //
 		versionProvider = ManifestVersionProvider.class //
 )
 class MainCommand implements Runnable, IExitCodeGenerator {

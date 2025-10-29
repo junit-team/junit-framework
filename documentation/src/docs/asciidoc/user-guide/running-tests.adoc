@@ -748,10 +748,12 @@ include::{consoleLauncherDiscoverOptionsFile}[]
 ===== Executing tests
 
 .Exit Code
-NOTE: The `{ConsoleLauncher}` exits with a status code of `1` if any containers or tests
-failed. If no tests are discovered and the `--fail-if-no-tests` command-line option is
-supplied, the `ConsoleLauncher` exits with a status code of `2`. Otherwise, the exit code
-is `0`.
+NOTE: On successful runs, the `{ConsoleLauncher}` exits with a status code of `0`.
+All non-zero codes indicate an error of some sort. For example, status code `1`
+is returned if any containers or tests failed. If no tests are discovered and the
+`--fail-if-no-tests` command-line option is supplied, the `ConsoleLauncher` exits
+with a status code of `2`. Unexpected or invalid user input yields a status code
+of `3`. An exit code of `-1` indicates an unspecified error condition.
 
 ----
 include::{consoleLauncherExecuteOptionsFile}[]

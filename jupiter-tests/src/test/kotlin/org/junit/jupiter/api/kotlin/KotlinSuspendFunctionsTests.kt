@@ -42,6 +42,13 @@ class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
     }
 
     @Test
+    fun suspendingOpenTestMethodsAreSupported() {
+        val results = executeTestsForClass(OpenTestMethodTestCase::class)
+        assertAllTestsPassed(results, 1)
+        assertThat(getPublishedEvents(results)).containsExactly("test")
+    }
+
+    @Test
     fun suspendingTestTemplateMethodsAreSupported() {
         val results = executeTestsForClass(TestTemplateTestCase::class)
         assertAllTestsPassed(results, 2)
@@ -184,6 +191,14 @@ class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
         @Test
         suspend fun test(reporter: TestReporter) {
             suspendingPublish(reporter, "test[$parameter]")
+        }
+    }
+
+    @Suppress("JUnitMalformedDeclaration")
+    open class OpenTestMethodTestCase {
+        @Test // https://github.com/junit-team/junit-framework/issues/5102
+        open suspend fun `check getRandomPositiveInt`(reporter: TestReporter) {
+            suspendingPublish(reporter, "test")
         }
     }
 

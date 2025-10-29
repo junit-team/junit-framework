@@ -45,6 +45,16 @@ import org.junit.jupiter.api.TestTemplate;
  * <p>Consult the documentation in {@link Extension} for details on
  * constructor requirements.
  *
+ * <h2>{@code ExtensionContext} Scope</h2>
+ *
+ * <p>As of JUnit Jupiter 5.12, this API participates in the
+ * {@link TestInstantiationAwareExtension} contract. Implementations of this API
+ * may therefore choose to override
+ * {@link TestInstantiationAwareExtension#getTestInstantiationExtensionContextScope(ExtensionContext)
+ * getTestInstantiationExtensionContextScope(ExtensionContext)}. See
+ * {@link #interceptTestClassConstructor(Invocation, ReflectiveInvocationContext, ExtensionContext)}
+ * for details.
+ *
  * @since 5.5
  * @see Invocation
  * @see ReflectiveInvocationContext

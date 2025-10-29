@@ -22,23 +22,8 @@ import org.jspecify.annotations.Nullable;
  */
 @API(status = INTERNAL, since = "1.10")
 public class CommandResult<T> {
-
-	/**
-	 * Exit code indicating successful execution.
-	 */
-	public static final int SUCCESS = 0;
-
-	/**
-	 * Exit code indicating any failure(s).
-	 */
-	protected static final int FAILURE = -1;
-
 	public static <T> CommandResult<T> success() {
-		return create(SUCCESS, null);
-	}
-
-	public static <T> CommandResult<T> failure() {
-		return create(FAILURE, null);
+		return create(ExitCode.SUCCESS, null);
 	}
 
 	public static <T> CommandResult<T> create(int exitCode, @Nullable T value) {
