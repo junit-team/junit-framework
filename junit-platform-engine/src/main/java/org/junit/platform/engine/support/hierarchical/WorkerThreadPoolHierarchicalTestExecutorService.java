@@ -53,6 +53,7 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
+import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
 
 /**
@@ -66,7 +67,7 @@ import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTest
  * @see DefaultParallelExecutionConfigurationStrategy
  */
 @API(status = EXPERIMENTAL, since = "6.1")
-public class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
+public final class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	/*
 		This implementation is based on a regular thread pool and a work queue shared among all worker threads. Whenever
@@ -112,7 +113,7 @@ public class WorkerThreadPoolHierarchicalTestExecutorService implements Hierarch
 	 *
 	 * @see ConcurrentHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)
 	 */
-	public WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
+	WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
@@ -245,10 +246,10 @@ public class WorkerThreadPoolHierarchicalTestExecutorService implements Hierarch
 
 	private class WorkerThread extends Thread {
 
+		private final Deque<State> stateStack = new ArrayDeque<>();
+
 		@Nullable
 		WorkerLease workerLease;
-
-		private final Deque<State> stateStack = new ArrayDeque<>();
 
 		WorkerThread(Runnable runnable, String name) {
 			super(runnable, name);
