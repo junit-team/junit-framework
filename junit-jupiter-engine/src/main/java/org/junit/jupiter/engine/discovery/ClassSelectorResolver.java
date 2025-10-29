@@ -323,11 +323,7 @@ class ClassSelectorResolver implements SelectorResolver {
 	}
 
 	private DiscoverySelector selectMethod(List<Class<?>> classes, Method method) {
-		if (classes.size() == 1) {
-			return DiscoverySelectors.selectMethod(classes.get(0), method);
-		}
-		int lastIndex = classes.size() - 1;
-		return DiscoverySelectors.selectNestedMethod(classes.subList(0, lastIndex), classes.get(lastIndex), method);
+		return new DeclaredMethodSelector(classes, method);
 	}
 
 	static class DummyClassTemplateInvocationContext implements ClassTemplateInvocationContext {

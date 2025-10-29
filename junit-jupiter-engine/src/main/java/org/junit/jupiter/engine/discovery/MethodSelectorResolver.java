@@ -83,6 +83,20 @@ class MethodSelectorResolver implements SelectorResolver {
 			Match::exact);
 	}
 
+	@Override
+	public Resolution resolve(DiscoverySelector selector, Context context) {
+		if (selector instanceof DeclaredMethodSelector methodSelector) {
+			var testClasses = methodSelector.testClasses();
+			if (testClasses.size() == 1) {
+				return resolve(context, emptyList(), testClasses.get(0), methodSelector::method, Match::exact);
+			}
+			int lastIndex = testClasses.size() - 1;
+			return resolve(context, testClasses.subList(0, lastIndex), testClasses.get(lastIndex),
+				methodSelector::method, Match::exact);
+		}
+		return unresolved();
+	}
+
 	private Resolution resolve(Context context, List<Class<?>> enclosingClasses, Class<?> testClass,
 			Supplier<Method> methodSupplier,
 			BiFunction<TestDescriptor, Supplier<Set<? extends DiscoverySelector>>, Match> matchFactory) {
