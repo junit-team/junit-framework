@@ -82,33 +82,7 @@ class MethodSelectorTests {
 		assertThat(selector.getClassLoader()).isNotNull().isSameAs(getClass().getClassLoader());
 	}
 
-	@Test
-	void distinguishesDeclaringClass() throws Exception {
-		var parentMethodSelector = new MethodSelector(TestCase.class,
-			ParentTestCase.class.getDeclaredMethod("method", int.class, boolean.class));
-		var childMethodSelector = new MethodSelector(TestCase.class,
-			TestCase.class.getDeclaredMethod("method", int.class, boolean.class));
-
-		assertThat(parentMethodSelector).isNotEqualTo(childMethodSelector);
-		assertThat(childMethodSelector).isNotEqualTo(parentMethodSelector);
-	}
-
-	@Test
-	void ignoresDeclaringClassWhenEqualToClassname() throws Exception {
-		var selectorByMethod = new MethodSelector(TestCase.class,
-			TestCase.class.getDeclaredMethod("method", int.class, boolean.class));
-		var selectorByName = new MethodSelector(TestCase.class, "method", int.class, boolean.class);
-		assertThat(selectorByMethod).isEqualTo(selectorByName);
-	}
-
-	private static class ParentTestCase {
-
-		@SuppressWarnings("unused")
-		private void method(int num, boolean flag) {
-		}
-	}
-
-	private static class TestCase extends ParentTestCase {
+	private static class TestCase {
 
 		@SuppressWarnings("unused")
 		void method(int num, boolean flag) {

@@ -64,7 +64,6 @@ public final class MethodSelector implements DiscoverySelector {
 	private final String className;
 	private final String methodName;
 	private final String parameterTypeNames;
-	private final @Nullable String declaringClassName;
 
 	private volatile @Nullable Class<?> javaClass;
 
@@ -76,11 +75,14 @@ public final class MethodSelector implements DiscoverySelector {
 	 * @since 1.10
 	 */
 	MethodSelector(@Nullable ClassLoader classLoader, String className, String methodName, String parameterTypeNames) {
-		this(classLoader, className, methodName, parameterTypeNames, null);
+		this.classLoader = classLoader;
+		this.className = className;
+		this.methodName = methodName;
+		this.parameterTypeNames = parameterTypeNames;
 	}
 
 	MethodSelector(Class<?> javaClass, String methodName, String parameterTypeNames) {
-		this(javaClass.getClassLoader(), javaClass.getName(), methodName, parameterTypeNames, null);
+		this(javaClass.getClassLoader(), javaClass.getName(), methodName, parameterTypeNames);
 		this.javaClass = javaClass;
 	}
 
@@ -88,7 +90,7 @@ public final class MethodSelector implements DiscoverySelector {
 	 * @since 1.10
 	 */
 	MethodSelector(@Nullable ClassLoader classLoader, String className, String methodName, Class<?>... parameterTypes) {
-		this(classLoader, className, methodName, ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes), null);
+		this(classLoader, className, methodName, ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.parameterTypes = parameterTypes.clone();
 	}
 
@@ -97,7 +99,7 @@ public final class MethodSelector implements DiscoverySelector {
 	 */
 	MethodSelector(Class<?> javaClass, String methodName, Class<?>... parameterTypes) {
 		this(javaClass.getClassLoader(), javaClass.getName(), methodName,
-			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes), null);
+			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.javaClass = javaClass;
 		this.parameterTypes = parameterTypes.clone();
 	}
@@ -108,19 +110,10 @@ public final class MethodSelector implements DiscoverySelector {
 
 	private MethodSelector(Class<?> javaClass, Method method, Class<?>... parameterTypes) {
 		this(javaClass.getClassLoader(), javaClass.getName(), method.getName(),
-			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes), method.getDeclaringClass().getName());
+			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.javaClass = javaClass;
 		this.javaMethod = method;
 		this.parameterTypes = parameterTypes;
-	}
-
-	private MethodSelector(@Nullable ClassLoader classLoader, String className, String methodName,
-			String parameterTypeNames, @Nullable String declaringClassName) {
-		this.classLoader = classLoader;
-		this.className = className;
-		this.methodName = methodName;
-		this.parameterTypeNames = parameterTypeNames;
-		this.declaringClassName = className.equals(declaringClassName) ? null : declaringClassName;
 	}
 
 	/**
@@ -278,8 +271,7 @@ public final class MethodSelector implements DiscoverySelector {
 		MethodSelector that = (MethodSelector) o;
 		return Objects.equals(this.className, that.className)//
 				&& Objects.equals(this.methodName, that.methodName)//
-				&& Objects.equals(this.parameterTypeNames, that.parameterTypeNames)//
-				&& Objects.equals(this.declaringClassName, that.declaringClassName);
+				&& Objects.equals(this.parameterTypeNames, that.parameterTypeNames);
 	}
 
 	/**
@@ -288,7 +280,7 @@ public final class MethodSelector implements DiscoverySelector {
 	@API(status = STABLE, since = "1.3")
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.className, this.methodName, this.parameterTypeNames, this.declaringClassName);
+		return Objects.hash(this.className, this.methodName, this.parameterTypeNames);
 	}
 
 	@Override
