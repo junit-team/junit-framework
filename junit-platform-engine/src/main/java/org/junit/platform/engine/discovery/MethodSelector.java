@@ -120,7 +120,7 @@ public final class MethodSelector implements DiscoverySelector {
 		this.className = className;
 		this.methodName = methodName;
 		this.parameterTypeNames = parameterTypeNames;
-		this.declaringClassName = declaringClassName;
+		this.declaringClassName = className.equals(declaringClassName) ? null : declaringClassName;
 	}
 
 	/**

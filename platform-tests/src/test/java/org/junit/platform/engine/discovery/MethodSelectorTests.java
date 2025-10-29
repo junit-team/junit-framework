@@ -93,6 +93,14 @@ class MethodSelectorTests {
 		assertThat(childMethodSelector).isNotEqualTo(parentMethodSelector);
 	}
 
+	@Test
+	void ignoresDeclaringClassWhenEqualToClassname() throws Exception {
+		var selectorByMethod = new MethodSelector(TestCase.class,
+			TestCase.class.getDeclaredMethod("method", int.class, boolean.class));
+		var selectorByName = new MethodSelector(TestCase.class, "method", int.class, boolean.class);
+		assertThat(selectorByMethod).isEqualTo(selectorByName);
+	}
+
 	private static class ParentTestCase {
 
 		@SuppressWarnings("unused")
