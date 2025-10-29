@@ -40,7 +40,6 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
@@ -356,7 +355,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		assertThat(child2.startTime).isBeforeOrEqualTo(child1.startTime);
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void limitsWorkerThreadsToMaxPoolSize() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(3, 3));
 
@@ -447,7 +446,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 				.containsOnly(child2.executionThread);
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void executesChildrenInOrder() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1, 1));
 
@@ -474,7 +473,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 				.isSorted();
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void workIsStolenInReverseOrder() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
@@ -525,7 +524,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 				.isSorted();
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void stealsDynamicChildren() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
@@ -555,7 +554,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		assertThat(child2.executionThread).isEqualTo(root.executionThread).isNotEqualTo(child1.executionThread);
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void stealsNestedDynamicChildren() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
@@ -610,7 +609,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		assertThat(child2.executionThread).isEqualTo(leaf2a.executionThread).isEqualTo(leaf2b.executionThread);
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void stealsSiblingDynamicChildrenOnly() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 3));
 
