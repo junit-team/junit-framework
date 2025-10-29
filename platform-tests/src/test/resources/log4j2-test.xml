@@ -21,7 +21,7 @@
 		<Logger name="org.junit.platform.launcher.core.InternalTestPlan" level="ERROR"/>
 		<Logger name="org.junit.platform.launcher.core.LauncherConfigurationParameters" level="ERROR"/>
 		<Logger name="org.junit.platform.launcher.listeners.discovery.LoggingLauncherDiscoveryListener" level="OFF"/>
-		<Logger name="org.junit.platform.engine.support.hierarchical.WorkerThreadPoolHierarchicalTestExecutorService" level="TRACE"/>
+		<Logger name="org.junit.platform.engine.support.hierarchical.WorkerThreadPoolHierarchicalTestExecutorService" level="ERROR"/>
 		<Logger name="org.junit.vintage.engine" level="ERROR"/>
 		<Logger name="org.junit.jupiter.engine" level="ERROR"/>
 		<Root level="ERROR">
