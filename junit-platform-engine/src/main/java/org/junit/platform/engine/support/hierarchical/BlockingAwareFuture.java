@@ -20,6 +20,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.jspecify.annotations.Nullable;
 
+/**
+ * @since 6.1
+ */
 abstract class BlockingAwareFuture<T extends @Nullable Object> extends DelegatingFuture<T> {
 
 	BlockingAwareFuture(Future<T> delegate) {

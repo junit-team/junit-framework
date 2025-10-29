@@ -53,12 +53,36 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
+import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
 
 /**
+ * An {@linkplain HierarchicalTestExecutorService executor service} based on a
+ * regular thread pool that executes {@linkplain TestTask test tasks} with the
+ * configured parallelism.
+ *
  * @since 6.1
+ * @see ConcurrentHierarchicalTestExecutorServiceFactory
+ * @see ConcurrentExecutorServiceType#WORKER_THREAD_POOL
+ * @see DefaultParallelExecutionConfigurationStrategy
  */
 @API(status = EXPERIMENTAL, since = "6.1")
 public class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
+
+	/*
+		This implementation is based on a regular thread pool and a work queue shared among all worker threads. Whenever
+		a task is submitted to the work queue to be executed concurrently, an attempt is made to acquire a worker lease.
+		The number of total worker leases is initialized with the desired parallelism. This ensures	that at most
+		`parallelism` tests are running concurrently, regardless whether the user code performs any	blocking operations.
+		If a worker lease was acquired, a worker thread is started. Each worker thread polls the shared work queue for
+		tasks to run. Since the tasks represent hierarchically structured tests, container tasks will call
+		`submit(TestTask)` or `invokeAll(List<TestTask>)` for their children, recursively. Child tasks with execution
+		mode `CONCURRENT` are submitted to the shared queue be prior to executing those with execution mode
+		`SAME_THREAD` directly. Each worker thread attempts to "steal" queue entries for its children and execute them
+		itself prior to waiting for its children to finish. In case it does need to block, it temporarily gives	up its
+		worker lease and starts another worker thread to compensate for the reduced `parallelism`. If the max pool size
+		does not permit starting another thread, that is ignored in case there are still other active worker threads.
+		The same happens in case a resource lock needs to be acquired.
+	 */
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
 
@@ -67,6 +91,27 @@ public class WorkerThreadPoolHierarchicalTestExecutorService implements Hierarch
 	private final int parallelism;
 	private final WorkerLeaseManager workerLeaseManager;
 
+	/**
+	 * Create a new {@code WorkerThreadPoolHierarchicalTestExecutorService}
+	 * based on the supplied {@link ParallelExecutionConfiguration}.
+	 *
+	 * <p>The following attributes of the supplied configuration are applied to
+	 * the thread pool used by this executor service:
+	 *
+	 * <ul>
+	 *     <li>{@link ParallelExecutionConfiguration#getParallelism()}</li>
+	 *     <li>{@link ParallelExecutionConfiguration#getCorePoolSize()}</li>
+	 *     <li>{@link ParallelExecutionConfiguration#getMaxPoolSize()}</li>
+	 *     <li>{@link ParallelExecutionConfiguration#getKeepAliveSeconds()}</li>
+	 * </ul>
+	 *
+	 * <p>The remaining attributes, such as
+	 * {@link ParallelExecutionConfiguration#getMinimumRunnable()} and
+	 * {@link ParallelExecutionConfiguration#getSaturatePredicate()}, are
+	 * ignored.
+	 *
+	 * @see ConcurrentHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)
+	 */
 	public WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
 	}
@@ -108,6 +153,12 @@ public class WorkerThreadPoolHierarchicalTestExecutorService implements Hierarch
 		return new WorkStealingFuture(entry);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @implNote This method must be called from within a worker thread that
+	 * belongs to this executor.
+	 */
 	@Override
 	public void invokeAll(List<? extends TestTask> testTasks) {
 		LOGGER.trace(() -> "invokeAll: " + testTasks);

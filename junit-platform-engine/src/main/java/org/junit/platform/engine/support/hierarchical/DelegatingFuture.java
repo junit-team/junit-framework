@@ -17,6 +17,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.jspecify.annotations.Nullable;
 
+/**
+ * @since 6.1
+ */
 class DelegatingFuture<T extends @Nullable Object> implements Future<T> {
 
 	protected final Future<T> delegate;
