@@ -11,6 +11,7 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
@@ -33,6 +34,7 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
 
 /**
  * A {@link ForkJoinPool}-based
@@ -58,7 +60,12 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 * the supplied {@link ConfigurationParameters}.
 	 *
 	 * @see DefaultParallelExecutionConfigurationStrategy
+	 * @deprecated Please use
+	 * {@link ConcurrentHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)}
+	 * instead.
 	 */
+	@API(status = DEPRECATED, since = "6.1")
+	@Deprecated(since = "6.1")
 	public ForkJoinPoolHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
 		this(DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters));
 	}
@@ -68,8 +75,12 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 * the supplied {@link ParallelExecutionConfiguration}.
 	 *
 	 * @since 1.7
+	 * @deprecated Please use
+	 * {@link ConcurrentHierarchicalTestExecutorServiceFactory#create(ConcurrentExecutorServiceType, ParallelExecutionConfiguration)}
+	 * instead.
 	 */
-	@API(status = STABLE, since = "1.10")
+	@API(status = DEPRECATED, since = "6.1")
+	@Deprecated(since = "6.1")
 	public ForkJoinPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, TaskEventListener.NOOP);
 	}

@@ -11,12 +11,14 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.util.Locale;
 
 import org.apiguardian.api.API;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.support.config.PrefixedConfigurationParameters;
+import org.junit.platform.engine.support.hierarchical.ForkJoinPoolHierarchicalTestExecutorService.TaskEventListener;
 
 /**
  * Factory for {@link HierarchicalTestExecutorService} instances that support
@@ -27,7 +29,7 @@ import org.junit.platform.engine.support.config.PrefixedConfigurationParameters;
  * @see ForkJoinPoolHierarchicalTestExecutorService
  * @see WorkerThreadPoolHierarchicalTestExecutorService
  */
-@API(status = EXPERIMENTAL, since = "6.1")
+@API(status = MAINTAINED, since = "6.1")
 public class ConcurrentHierarchicalTestExecutorServiceFactory {
 
 	/**
@@ -62,16 +64,19 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 	 * @see PrefixedConfigurationParameters
 	 */
 	public static HierarchicalTestExecutorService create(ConfigurationParameters configurationParameters) {
-		var executorServiceType = configurationParameters.get(EXECUTOR_SERVICE_PROPERTY_NAME,
-			it -> ConcurrentExecutorServiceType.valueOf(it.toUpperCase(Locale.ROOT))) //
+		var type = configurationParameters.get(EXECUTOR_SERVICE_PROPERTY_NAME, ConcurrentExecutorServiceType::parse) //
 				.orElse(ConcurrentExecutorServiceType.FORK_JOIN_POOL);
 		var configuration = DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters);
-		return create(executorServiceType, configuration);
+		return create(type, configuration);
 	}
 
 	/**
 	 * Create a new {@link HierarchicalTestExecutorService} based on the
 	 * supplied {@link ConfigurationParameters}.
+	 *
+	 * <p>The {@value #EXECUTOR_SERVICE_PROPERTY_NAME} key is ignored in favor
+	 * of the supplied {@link ConcurrentExecutorServiceType} parameter when
+	 * invoking this method.
 	 *
 	 * @see ConcurrentExecutorServiceType
 	 * @see ParallelExecutionConfigurationStrategy
@@ -79,7 +84,8 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 	public static HierarchicalTestExecutorService create(ConcurrentExecutorServiceType type,
 			ParallelExecutionConfiguration configuration) {
 		return switch (type) {
-			case FORK_JOIN_POOL -> new ForkJoinPoolHierarchicalTestExecutorService(configuration);
+			case FORK_JOIN_POOL -> new ForkJoinPoolHierarchicalTestExecutorService(configuration,
+				TaskEventListener.NOOP);
 			case WORKER_THREAD_POOL -> new WorkerThreadPoolHierarchicalTestExecutorService(configuration);
 		};
 	}
@@ -90,7 +96,10 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 	/**
 	 * Type of {@link HierarchicalTestExecutorService} that supports concurrent
 	 * execution.
+	 *
+	 * @since 6.1
 	 */
+	@API(status = MAINTAINED, since = "6.1")
 	public enum ConcurrentExecutorServiceType {
 
 		/**
@@ -103,8 +112,12 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 		 * Indicates that {@link WorkerThreadPoolHierarchicalTestExecutorService}
 		 * should be used.
 		 */
-		WORKER_THREAD_POOL
+		@API(status = EXPERIMENTAL, since = "6.1")
+		WORKER_THREAD_POOL;
 
+		private static ConcurrentExecutorServiceType parse(String value) {
+			return valueOf(value.toUpperCase(Locale.ROOT));
+		}
 	}
 
 }
