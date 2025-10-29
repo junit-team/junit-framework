@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -203,7 +203,7 @@ class DefaultJupiterConfigurationTests {
 			mock()).getDefaultTestInstanceLifecycle();
 	}
 
-	private static ConfigurationParameters configurationParameters(Map<@NotNull String, ?> parameters) {
+	private static ConfigurationParameters configurationParameters(Map<@NonNull String, ?> parameters) {
 		return ConfigurationParametersFactoryForTests.create(parameters);
 	}
 
