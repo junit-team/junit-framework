@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -203,6 +204,7 @@ class TypedArgumentConverterTests {
 	private @interface StringLength {
 	}
 
+	@NullMarked
 	private static class StringLengthArgumentConverter extends TypedArgumentConverter<String, Integer> {
 
 		StringLengthArgumentConverter() {

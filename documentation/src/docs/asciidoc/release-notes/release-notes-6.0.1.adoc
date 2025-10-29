@@ -60,6 +60,8 @@ repository on GitHub.
   a custom comment character using the new `commentCharacter` attribute.
 * Improve error message when using `@ParameterizedClass` with field injection and not
   providing enough arguments.
+* Allow calling `TypedArgumentConverter` constructor for `@Nullable T` target types
+  without having to cast class literals to `Class<@Nullable T>`.
 
 
 [[release-notes-6.0.1-junit-vintage]]

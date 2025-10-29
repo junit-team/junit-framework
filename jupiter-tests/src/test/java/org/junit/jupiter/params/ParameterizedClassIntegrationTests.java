@@ -57,6 +57,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -972,7 +973,8 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	private static class CustomIntegerToStringConverter extends TypedArgumentConverter<Integer, String> {
+	@NullMarked
+	private static class CustomIntegerToStringConverter extends TypedArgumentConverter<Integer, @Nullable String> {
 
 		CustomIntegerToStringConverter() {
 			super(Integer.class, String.class);
