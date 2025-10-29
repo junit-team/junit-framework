@@ -80,7 +80,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 		JupiterConfiguration configuration = getJupiterConfiguration(request);
 		if (configuration.isParallelExecutionEnabled()) {
 			return ConcurrentHierarchicalTestExecutorServiceFactory.create(new PrefixedConfigurationParameters(
-				request.getConfigurationParameters(), Constants.PARALLEL_CONFIG_PREFIX));
+				request.getConfigurationParameters(), JupiterConfiguration.PARALLEL_CONFIG_PREFIX));
 		}
 		return super.createExecutorService(request);
 	}

@@ -593,9 +593,9 @@ class HierarchicalTestExecutorTests {
 		});
 
 		var parameters = ConfigurationParametersFactoryForTests.create(Map.of(//
-			ConcurrentHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType.name(), //
+			ConcurrentHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType, //
 			DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME, "fixed", //
-			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, "2"));
+			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, 2));
 
 		try (var executorService = ConcurrentHierarchicalTestExecutorServiceFactory.create(parameters)) {
 			createExecutor(executorService).execute().get();
