@@ -141,7 +141,7 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 
 	private Optional<ExecutionMode> determineExecutionModeFromAncestors() {
 		return ancestors() //
-				.takeWhile(it -> it instanceof JupiterTestDescriptor) //
+				.takeWhile(JupiterTestDescriptor.class::isInstance) //
 				.flatMap(ancestor -> determineExecutionModeFromAncestor((JupiterTestDescriptor) ancestor).stream()) //
 				.findFirst();
 	}

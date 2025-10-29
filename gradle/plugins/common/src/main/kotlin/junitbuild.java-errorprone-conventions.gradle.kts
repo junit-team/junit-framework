@@ -52,6 +52,8 @@ tasks.withType<JavaCompile>().configureEach {
 				"TimeZoneUsage",
 			)
 			error(
+				"CanonicalAnnotationSyntax",
+				"IsInstanceLambdaUsage",
 				"PackageLocation",
 				"RedundantStringConversion",
 				"RedundantStringEscape",

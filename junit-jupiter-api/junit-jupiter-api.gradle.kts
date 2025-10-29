@@ -1,6 +1,5 @@
 plugins {
 	id("junitbuild.kotlin-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.code-generator")
 	`java-test-fixtures`
 }

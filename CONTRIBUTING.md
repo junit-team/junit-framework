@@ -180,6 +180,16 @@ To deprecate an item:
 Please refer to [the readme](README.md#building-from-source) for the most common
 build commands.
 
+### Build Cache
+
+Local builds can reuse outputs from previous CI builds via Gradle's [Build Cache](https://docs.gradle.org/current/userguide/build_cache.html).
+The default build cache server is located in the US.
+If you're in Europe, you can configure the build to use a build cache node located in the EU by adding the following to the `gradle.properties` file in your [Gradle user home](https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home):
+
+```properties
+junit.develocity.buildCache.server=https://eu-build-cache-ge.junit.org
+```
+
 ### Build Parameters
 
 The build can be influenced by a number of parameters. For example, measuring

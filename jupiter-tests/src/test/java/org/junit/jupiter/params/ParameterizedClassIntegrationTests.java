@@ -552,6 +552,17 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 						"Configuration error: duplicate index declared in @Parameter(0) annotation on fields [int %s.i, long %s.l].".formatted(
 							classTemplateClass.getName(), classTemplateClass.getName()))));
 		}
+
+		@Test
+		void failsWithMeaningfulErrorWhenTooFewArgumentsProvidedForFieldInjection() {
+			var results = executeTestsForClass(NotEnoughArgumentsForFieldsTestCase.class);
+
+			results.containerEvents().assertThatEvents() //
+					.haveExactly(1, finishedWithFailure(message(withPlatformSpecificLineSeparator(
+						"""
+								Configuration error: @ParameterizedClass has 2 required parameters (due to field injection) but there was 1 argument provided.
+								Note: the provided arguments were [1]"""))));
+		}
 	}
 
 	@Nested
@@ -726,12 +737,12 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			var results = executeTestsForClass(LifecycleMethodWithInvalidParametersTestCase.class);
 
-			var expectedMessage = """
-					2 configuration errors:
-					- parameter 'value' with index 0 is incompatible with the parameter declared on the parameterized class: \
-					expected type 'int' but found 'long'
-					- parameter 'anotherValue' with index 1 must not be annotated with @ConvertWith"""//
-					.replace("\n", System.lineSeparator()); // use platform-specific line separators
+			var expectedMessage = withPlatformSpecificLineSeparator(
+				"""
+						2 configuration errors:
+						- parameter 'value' with index 0 is incompatible with the parameter declared on the parameterized class: \
+						expected type 'int' but found 'long'
+						- parameter 'anotherValue' with index 1 must not be annotated with @ConvertWith""");
 
 			var failedResult = getFirstTestExecutionResult(results.containerEvents().failed());
 			assertThat(failedResult.getThrowable().orElseThrow()) //
@@ -792,6 +803,10 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 						"@BeforeParameterizedClassInvocation method 'static void %s.before()' must not be declared in test class '%s' because it is not annotated with @ParameterizedClass.",
 						testClassName, testClassName);
 		}
+	}
+
+	private static String withPlatformSpecificLineSeparator(String textBlock) {
+		return textBlock.replace("\n", System.lineSeparator());
 	}
 
 	// -------------------------------------------------------------------
@@ -1688,6 +1703,22 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		long l;
 
 		@Test
+		void test() {
+			fail("should not be called");
+		}
+	}
+
+	@ParameterizedClass
+	@ValueSource(ints = 1)
+	static class NotEnoughArgumentsForFieldsTestCase {
+
+		@Parameter(0)
+		int i;
+
+		@Parameter(1)
+		String s;
+
+		@org.junit.jupiter.api.Test
 		void test() {
 			fail("should not be called");
 		}

@@ -8,6 +8,7 @@ plugins {
 	id("junitbuild.checkstyle-conventions")
 	id("junitbuild.eclipse-conventions")
 	id("junitbuild.jacoco-java-conventions")
+	id("junitbuild.java-errorprone-conventions")
 }
 
 val mavenizedProjects: List<Project> by rootProject.extra

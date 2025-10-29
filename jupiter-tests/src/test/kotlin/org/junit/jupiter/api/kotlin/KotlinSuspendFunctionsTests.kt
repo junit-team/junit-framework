@@ -7,12 +7,21 @@
  *
  * https://www.eclipse.org/legal/epl-v20.html
  */
-package org.junit.jupiter.api
+package org.junit.jupiter.api.kotlin
 
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.junit.jupiter.api.TestReporter
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests
 import org.junit.jupiter.params.AfterParameterizedClassInvocation
 import org.junit.jupiter.params.BeforeParameterizedClassInvocation
@@ -28,6 +37,13 @@ class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
     @Test
     fun suspendingTestMethodsAreSupported() {
         val results = executeTestsForClass(TestMethodTestCase::class)
+        assertAllTestsPassed(results, 1)
+        assertThat(getPublishedEvents(results)).containsExactly("test")
+    }
+
+    @Test
+    fun suspendingOpenTestMethodsAreSupported() {
+        val results = executeTestsForClass(OpenTestMethodTestCase::class)
         assertAllTestsPassed(results, 1)
         assertThat(getPublishedEvents(results)).containsExactly("test")
     }
@@ -175,6 +191,14 @@ class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
         @Test
         suspend fun test(reporter: TestReporter) {
             suspendingPublish(reporter, "test[$parameter]")
+        }
+    }
+
+    @Suppress("JUnitMalformedDeclaration")
+    open class OpenTestMethodTestCase {
+        @Test // https://github.com/junit-team/junit-framework/issues/5102
+        open suspend fun `check getRandomPositiveInt`(reporter: TestReporter) {
+            suspendingPublish(reporter, "test")
         }
     }
 

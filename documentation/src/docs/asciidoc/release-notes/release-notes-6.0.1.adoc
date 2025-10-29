@@ -16,7 +16,9 @@ repository on GitHub.
 [[release-notes-6.0.1-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* The `jdk.jfr` package is now an optional import when using the `junit-platform-launcher`
+  as an OSGi bundle.
+* Remove remnants of Java 8 compatibility from User Guide.
 
 [[release-notes-6.0.1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -35,7 +37,16 @@ repository on GitHub.
 [[release-notes-6.0.1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* A regression introduced in version 6.0.0 caused an exception when using `@CsvSource` or
+  `@CsvFileSource` if the `delimiter` or `delimiterString` attribute was set to `+++#+++`.
+  This occurred because `+++#+++` was used as the default comment character without an
+  option to change it. To resolve this, a new `commentCharacter` attribute has been added
+  to both annotations. Its default value remains `+++#+++`, but it can now be customized
+  to avoid conflicts with other control characters.
+* Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
+  assertion.
+* Stop reporting discovery issues for synthetic methods, particularly in conjunction with
+  Kotlin suspend functions.
 
 [[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -45,7 +56,10 @@ repository on GitHub.
 [[release-notes-6.0.1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* The `@CsvSource` and `@CsvFileSource` annotations now allow specifying
+  a custom comment character using the new `commentCharacter` attribute.
+* Improve error message when using `@ParameterizedClass` with field injection and not
+  providing enough arguments.
 
 
 [[release-notes-6.0.1-junit-vintage]]

@@ -1,6 +1,5 @@
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	`java-test-fixtures`
 }
 

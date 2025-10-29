@@ -1,7 +1,6 @@
 import junitbuild.extensions.javaModuleName
 
 plugins {
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
 	`java-test-fixtures`
 }

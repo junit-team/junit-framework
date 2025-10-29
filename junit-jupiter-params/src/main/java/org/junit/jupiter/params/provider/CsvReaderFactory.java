@@ -18,7 +18,9 @@ import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
@@ -65,7 +67,11 @@ class CsvReaderFactory {
 
 	static CsvReader<? extends CsvRecord> createReaderFor(CsvSource csvSource, String data) {
 		String delimiter = selectDelimiter(csvSource.delimiter(), csvSource.delimiterString());
+		var commentStrategy = csvSource.textBlock().isEmpty() ? NONE : SKIP;
 		// @formatter:off
+		validateControlCharactersDiffer(
+				delimiter, csvSource.quoteCharacter(), csvSource.commentCharacter(), commentStrategy);
+
 		var builder = CsvReader.builder()
 				.skipEmptyLines(SKIP_EMPTY_LINES)
 				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES)
@@ -73,7 +79,8 @@ class CsvReaderFactory {
 				.allowMissingFields(ALLOW_MISSING_FIELDS)
 				.fieldSeparator(delimiter)
 				.quoteCharacter(csvSource.quoteCharacter())
-				.commentStrategy(csvSource.textBlock().isEmpty() ? NONE : SKIP);
+				.commentStrategy(commentStrategy)
+				.commentCharacter(csvSource.commentCharacter());
 
 		var callbackHandler = createCallbackHandler(
 				csvSource.emptyValue(),
@@ -90,7 +97,11 @@ class CsvReaderFactory {
 			Charset charset) {
 
 		String delimiter = selectDelimiter(csvFileSource.delimiter(), csvFileSource.delimiterString());
+		var commentStrategy = SKIP;
 		// @formatter:off
+		validateControlCharactersDiffer(
+				delimiter, csvFileSource.quoteCharacter(), csvFileSource.commentCharacter(), commentStrategy);
+
 		var builder = CsvReader.builder()
 				.skipEmptyLines(SKIP_EMPTY_LINES)
 				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES)
@@ -98,7 +109,8 @@ class CsvReaderFactory {
 				.allowMissingFields(ALLOW_MISSING_FIELDS)
 				.fieldSeparator(delimiter)
 				.quoteCharacter(csvFileSource.quoteCharacter())
-				.commentStrategy(SKIP);
+				.commentStrategy(commentStrategy)
+				.commentCharacter(csvFileSource.commentCharacter());
 
 		var callbackHandler = createCallbackHandler(
 				csvFileSource.emptyValue(),
@@ -119,6 +131,26 @@ class CsvReaderFactory {
 			return delimiterString;
 		}
 		return DEFAULT_DELIMITER;
+	}
+
+	private static void validateControlCharactersDiffer(String delimiter, char quoteCharacter, char commentCharacter,
+			CommentStrategy commentStrategy) {
+
+		if (commentStrategy == NONE) {
+			Preconditions.condition(stringValuesUnique(delimiter, quoteCharacter),
+				() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
+						"must differ").formatted(delimiter, quoteCharacter));
+		}
+		else {
+			Preconditions.condition(stringValuesUnique(delimiter, quoteCharacter, commentCharacter),
+				() -> ("delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
+						"must all differ").formatted(delimiter, quoteCharacter, commentCharacter));
+		}
+	}
+
+	private static boolean stringValuesUnique(Object... values) {
+		long uniqueCount = Stream.of(values).map(String::valueOf).distinct().count();
+		return uniqueCount == values.length;
 	}
 
 	private static CsvCallbackHandler<? extends CsvRecord> createCallbackHandler(String emptyValue,

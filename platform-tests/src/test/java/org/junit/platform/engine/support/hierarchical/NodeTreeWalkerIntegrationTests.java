@@ -11,6 +11,8 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ;
@@ -20,10 +22,13 @@ import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.L
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -32,6 +37,8 @@ import org.junit.jupiter.api.parallel.Resources;
 import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
+import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 
 /**
  * @since 1.3
@@ -171,6 +178,55 @@ class NodeTreeWalkerIntegrationTests {
 		assertThat(advisor.getForcedExecutionMode(testMethodDescriptor)).contains(SAME_THREAD);
 	}
 
+	@Test
+	void putsGlobalReadLockOnFirstNodeThatRequiresIt() {
+		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("dummy"), "Dummy");
+
+		var containerWithoutBehavior = new NodeStub(engineDescriptor.getUniqueId().append("container", "1"),
+			"Container 1") //
+					.withGlobalReadLockRequired(false);
+		var test1 = new NodeStub(containerWithoutBehavior.getUniqueId().append("test", "1"), "Test 1") //
+				.withExclusiveResource(new ExclusiveResource("key1", READ_WRITE));
+		containerWithoutBehavior.addChild(test1);
+
+		var containerWithBehavior = new NodeStub(engineDescriptor.getUniqueId().append("container", "2"), "Container 2") //
+				.withGlobalReadLockRequired(true);
+		var test2 = new NodeStub(containerWithBehavior.getUniqueId().append("test", "2"), "Test 2") //
+				.withExclusiveResource(new ExclusiveResource("key2", READ_WRITE));
+		containerWithBehavior.addChild(test2);
+
+		engineDescriptor.addChild(containerWithoutBehavior);
+		engineDescriptor.addChild(containerWithBehavior);
+
+		var advisor = nodeTreeWalker.walk(engineDescriptor);
+
+		assertThat(advisor.getResourceLock(containerWithoutBehavior)) //
+				.extracting(allLocks(), LIST) //
+				.isEmpty();
+		assertThat(advisor.getResourceLock(test1)) //
+				.extracting(allLocks(), LIST) //
+				.containsExactly(getLock(GLOBAL_READ), getReadWriteLock("key1"));
+
+		assertThat(advisor.getResourceLock(containerWithBehavior)) //
+				.extracting(allLocks(), LIST) //
+				.containsExactly(getLock(GLOBAL_READ));
+		assertThat(advisor.getResourceLock(test2)) //
+				.extracting(allLocks(), LIST) //
+				.containsExactly(getReadWriteLock("key2"));
+	}
+
+	@Test
+	void doesNotAllowExclusiveResourcesWithoutRequiringGlobalReadLock() {
+		var engineDescriptor = new EngineDescriptor(UniqueId.forEngine("dummy"), "Dummy");
+		var invalidNode = new NodeStub(engineDescriptor.getUniqueId().append("container", "1"), "Container") //
+				.withGlobalReadLockRequired(false) //
+				.withExclusiveResource(new ExclusiveResource("key", READ_WRITE));
+		engineDescriptor.addChild(invalidNode);
+
+		assertPreconditionViolationFor(() -> nodeTreeWalker.walk(engineDescriptor)) //
+				.withMessage("Node requiring exclusive resources must also require global read lock: " + invalidNode);
+	}
+
 	private static Function<org.junit.platform.engine.support.hierarchical.ResourceLock, List<Lock>> allLocks() {
 		return ResourceLockSupport::getLocks;
 	}
@@ -262,4 +318,41 @@ class NodeTreeWalkerIntegrationTests {
 		void test() {
 		}
 	}
+
+	@NullMarked
+	static class NodeStub extends AbstractTestDescriptor implements Node<EngineExecutionContext> {
+
+		private final Set<ExclusiveResource> exclusiveResources = new LinkedHashSet<>();
+		private boolean globalReadLockRequired = true;
+
+		NodeStub(UniqueId uniqueId, String displayName) {
+			super(uniqueId, displayName);
+		}
+
+		NodeStub withExclusiveResource(ExclusiveResource exclusiveResource) {
+			exclusiveResources.add(exclusiveResource);
+			return this;
+		}
+
+		NodeStub withGlobalReadLockRequired(boolean globalReadLockRequired) {
+			this.globalReadLockRequired = globalReadLockRequired;
+			return this;
+		}
+
+		@Override
+		public boolean isGlobalReadLockRequired() {
+			return globalReadLockRequired;
+		}
+
+		@Override
+		public Type getType() {
+			throw new UnsupportedOperationException("should not be called");
+		}
+
+		@Override
+		public Set<ExclusiveResource> getExclusiveResources() {
+			return exclusiveResources;
+		}
+	}
+
 }

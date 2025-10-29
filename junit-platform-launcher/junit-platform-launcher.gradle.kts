@@ -1,6 +1,5 @@
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	`java-test-fixtures`
 }
 
@@ -23,8 +22,17 @@ javadocConventions {
 tasks {
 	jar {
 		bundle {
+			val importAPIGuardian: String by extra
+			val importJSpecify: String by extra
+			val importCommonsLogging: String by extra
 			val version = project.version
 			bnd("""
+				Import-Package: \
+					${importAPIGuardian},\
+					${importJSpecify},\
+					${importCommonsLogging},\
+					jdk.jfr;resolution:="optional",\
+					*
 				Provide-Capability:\
 					org.junit.platform.launcher;\
 						org.junit.platform.launcher='junit-platform-launcher';\

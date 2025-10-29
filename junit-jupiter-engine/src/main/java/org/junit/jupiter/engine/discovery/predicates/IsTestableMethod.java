@@ -45,7 +45,7 @@ abstract class IsTestableMethod implements Predicate<Method> {
 
 	@Override
 	public boolean test(Method candidate) {
-		if (isAnnotated(candidate, this.annotationType)) {
+		if (!candidate.isSynthetic() && isAnnotated(candidate, this.annotationType)) {
 			return condition.check(candidate) && isNotAbstract(candidate);
 		}
 		return false;

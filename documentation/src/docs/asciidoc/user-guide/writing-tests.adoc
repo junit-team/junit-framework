@@ -1749,9 +1749,8 @@ test class.
 include::{testDir}/example/ParameterizedClassDemo.java[tags=constructor_injection]
 ----
 
-If your programming language level you are using supports _records_ -- for example, Java
-16 or higher -- you may use them to implement parameterized classes that avoid the
-boilerplate code of declaring a test class constructor.
+You may use _records_ to implement parameterized classes that avoid the boilerplate code
+of declaring a test class constructor.
 
 [source,java,indent=0]
 ----
@@ -2237,11 +2236,12 @@ by default. This behavior can be changed by setting the
 | `@CsvSource(value = { " apple , banana" }, ignoreLeadingAndTrailingWhitespace = false)` | `" apple "`, `" banana"`
 |===
 
-If the programming language you are using supports _text blocks_ -- for example, Java SE
-15 or higher -- you can alternatively use the `textBlock` attribute of `@CsvSource`. Each
-record within a text block represents a CSV record and results in one invocation of the
-parameterized class or test. The first record may optionally be used to supply CSV headers
-by setting the `useHeadersInDisplayName` attribute to `true` as in the example below.
+If the programming language you are using supports Java _text blocks_  or equivalent
+multi-line string literals, you can alternatively use the `textBlock` attribute of
+`@CsvSource`. Each record within a text block represents a CSV record and results in one
+invocation of the parameterized class or test. The first record may optionally be used to
+supply CSV headers by setting the `useHeadersInDisplayName` attribute to `true` as in the
+example below.
 
 Using a text block, the previous example can be implemented as follows.
 
@@ -2270,12 +2270,16 @@ The generated display names for the previous example include the CSV header name
 ----
 
 In contrast to CSV records supplied via the `value` attribute, a text block can contain
-comments. Any line beginning with a `+++#+++` symbol will be treated as a comment and
-ignored. Note, however, that the `+++#+++` symbol must be the first character on the line
-without any leading whitespace. It is therefore recommended that the closing text block
-delimiter (`"""`) be placed either at the end of the last line of input or on the
-following line, left aligned with the rest of the input (as can be seen in the example
-below which demonstrates formatting similar to a table).
+comments. Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be treated as a comment and ignored. Note that there is one exception
+to this rule: if the comment character appears within a quoted field, it loses
+its special meaning.
+
+The comment character must be the first character on the line without any leading
+whitespace. It is therefore recommended that the closing text block delimiter (`"""`)
+be placed either at the end of the last line of input or on the following line,
+left aligned with the rest of the input (as can be seen in the example below which
+demonstrates formatting similar to a table).
 
 [source,java,indent=0]
 ----
@@ -2300,7 +2304,7 @@ void testWithCsvSource(String fruit, int rank) {
 
 [NOTE]
 ====
-Java's https://docs.oracle.com/en/java/javase/15/text-blocks/index.html[text block]
+Java's https://docs.oracle.com/en/java/javase/17/text-blocks/index.html[text block]
 feature automatically removes _incidental whitespace_ when the code is compiled.
 However other JVM languages such as Groovy and Kotlin do not. Thus, if you are using a
 programming language other than Java and your text block contains comments or new lines
@@ -2325,8 +2329,8 @@ The default delimiter is a comma (`,`), but you can use another character by set
 cannot be set simultaneously.
 
 .Comments in CSV files
-NOTE: Any line beginning with a `+++#+++` symbol will be interpreted as a comment and will
-be ignored.
+NOTE: Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be interpreted as a comment and will be ignored.
 
 [source,java,indent=0]
 ----

@@ -1,3 +1,4 @@
+import com.diffplug.spotless.LineEnding
 import junitbuild.extensions.requiredVersionFromLibs
 
 plugins {
@@ -67,6 +68,10 @@ spotless {
 			endWithNewline()
 		}
 	}
+
+	// Explicitly configure line endings to avoid Spotless to search for .gitattributes file
+	// see https://github.com/gradle/gradle/issues/25469#issuecomment-3444231151
+	lineEndings = LineEnding.UNIX
 }
 
 tasks {
