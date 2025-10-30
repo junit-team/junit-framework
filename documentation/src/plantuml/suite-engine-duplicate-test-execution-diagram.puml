@@ -15,11 +15,11 @@ together {
     object "Example Test A (@Suite)"
 }
 
-"IDEs" --> "JUnit Platform": ...
-"Build Tools" --> "JUnit Platform" : ...
+"IDEs" --> "JUnit Platform"
+"Build Tools" --> "JUnit Platform"
 "Console Launcher" --> "JUnit Platform" : requests discovery and execution
 
-"JUnit Platform" --> "Suite Test Engine" : ...
+"JUnit Platform" --> "Suite Test Engine"
 "Suite Test Engine" --> "@Suite annotated class" : discovers and executes
 "@Suite annotated class" --> "JUnit Platform (@Suite)" : requests discovery and execution
 "JUnit Platform (@Suite)" --> "Jupiter Test Engine (@Suite)" : forwards request
