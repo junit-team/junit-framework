@@ -17,5 +17,5 @@ dependencies {
 }
 
 backwardCompatibilityChecks {
-	enabled = false // already checked by individual projects
+	enabled = false // TODO enable after initial release
 }
