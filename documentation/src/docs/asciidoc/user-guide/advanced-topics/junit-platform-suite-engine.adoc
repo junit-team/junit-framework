@@ -2,7 +2,9 @@
 === JUnit Platform Suite Engine
 
 The Suite Engine supports the declarative selection and execution of tests from
-_any_ test engine using the JUnit Platform.
+_any_ test engine on the JUnit Platform using the <<launcher-api>>.
+
+image::suite-engine-multiple-suites-diagram.svg[]
 
 [[junit-platform-suite-engine-setup]]
 ==== Setup
@@ -31,18 +33,6 @@ on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 * `junit-platform-commons` in _test_ scope
 * `opentest4j` in _test_ scope
 
-[[junit-platform-suite-engine-setup-duplicate-test-execution]]
-===== Duplicate test execution
-
-Tests in a suite are executed in addition to the tests executed by every other test
-engine. This can result in the same tests being executed twice.
-
-This can be prevented by configuring your build tool to only include the
-`junit-platform-suite` engine. Or by using a naming pattern. For example, name all suites
-`*Suite` and all tests `*Test` and configure your build tool to only include the former.
-
-Alternatively, consider <<running-tests-tags, using tags>> to select specific groups of tests.
-
 [[junit-platform-suite-engine-example]]
 ==== @Suite Example
 
@@ -70,3 +60,19 @@ all tests of the test suite.
 ----
 include::{testDir}/example/BeforeAndAfterSuiteDemo.java[tags=user_guide]
 ----
+
+[[junit-platform-suite-engine-duplicate-test-execution]]
+==== Duplicate test execution
+
+Depending on the declared test selection, different suites may contain the same tests,
+potentially with different configurations. Moreover, tests in a suite are executed
+in addition to the tests executed by every other test engine. This can result in the same
+tests being executed twice.
+
+image::suite-engine-duplicate-test-execution-diagram.svg[]
+
+This can be prevented by configuring your build tool to only include the
+`junit-platform-suite` engine. Or by using a naming pattern. For example, name all suites
+`*Suite` and all tests `*Test` and configure your build tool to only include the former.
+
+Alternatively, consider <<running-tests-tags, using tags>> to select specific groups of tests.

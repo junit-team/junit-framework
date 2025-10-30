@@ -3,16 +3,13 @@ object "IDEs"
 object "Build Tools"
 object "Console Launcher"
 object "JUnit Platform"
-
 object "Jupiter Test Engine"
-object "Test Classes"
-
+object "Suite Test Engine"
 object "Cucumber Test Engine"
-object "Feature Files"
-
 object "Spock Test Engine"
+object "Test Classes"
+object "Feature Files"
 object "Specifications"
-
 
 "IDEs" --> "JUnit Platform": ...
 "Build Tools" --> "JUnit Platform" : ...
