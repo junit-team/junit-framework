@@ -22,23 +22,23 @@ import org.junit.platform.engine.support.hierarchical.ForkJoinPoolHierarchicalTe
 
 /**
  * Factory for {@link HierarchicalTestExecutorService} instances that support
- * concurrent execution.
+ * parallel execution.
  *
  * @since 6.1
- * @see ConcurrentExecutorServiceType
+ * @see ParallelExecutorServiceType
  * @see ForkJoinPoolHierarchicalTestExecutorService
  * @see WorkerThreadPoolHierarchicalTestExecutorService
  */
 @API(status = MAINTAINED, since = "6.1")
-public class ConcurrentHierarchicalTestExecutorServiceFactory {
+public final class ParallelHierarchicalTestExecutorServiceFactory {
 
 	/**
 	 * Property name used to determine the desired
-	 * {@link ConcurrentExecutorServiceType ConcurrentExecutorServiceType}.
+	 * {@link ParallelExecutorServiceType ParallelExecutorServiceType}.
 	 *
 	 * <p>Value must be
-	 * {@link ConcurrentExecutorServiceType#FORK_JOIN_POOL FORK_JOIN_POOL} or
-	 * {@link ConcurrentExecutorServiceType#WORKER_THREAD_POOL WORKER_THREAD_POOL},
+	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL FORK_JOIN_POOL} or
+	 * {@link ParallelExecutorServiceType#WORKER_THREAD_POOL WORKER_THREAD_POOL},
 	 * ignoring case.
 	 */
 	public static final String EXECUTOR_SERVICE_PROPERTY_NAME = "executor-service";
@@ -59,13 +59,13 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 	 * key.
 	 *
 	 * @see #EXECUTOR_SERVICE_PROPERTY_NAME
-	 * @see ConcurrentExecutorServiceType
+	 * @see ParallelExecutorServiceType
 	 * @see ParallelExecutionConfigurationStrategy
 	 * @see PrefixedConfigurationParameters
 	 */
 	public static HierarchicalTestExecutorService create(ConfigurationParameters configurationParameters) {
-		var type = configurationParameters.get(EXECUTOR_SERVICE_PROPERTY_NAME, ConcurrentExecutorServiceType::parse) //
-				.orElse(ConcurrentExecutorServiceType.FORK_JOIN_POOL);
+		var type = configurationParameters.get(EXECUTOR_SERVICE_PROPERTY_NAME, ParallelExecutorServiceType::parse) //
+				.orElse(ParallelExecutorServiceType.FORK_JOIN_POOL);
 		var configuration = DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters);
 		return create(type, configuration);
 	}
@@ -75,32 +75,32 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 	 * supplied {@link ConfigurationParameters}.
 	 *
 	 * <p>The {@value #EXECUTOR_SERVICE_PROPERTY_NAME} key is ignored in favor
-	 * of the supplied {@link ConcurrentExecutorServiceType} parameter when
+	 * of the supplied {@link ParallelExecutorServiceType} parameter when
 	 * invoking this method.
 	 *
-	 * @see ConcurrentExecutorServiceType
+	 * @see ParallelExecutorServiceType
 	 * @see ParallelExecutionConfigurationStrategy
 	 */
-	public static HierarchicalTestExecutorService create(ConcurrentExecutorServiceType type,
+	public static HierarchicalTestExecutorService create(ParallelExecutorServiceType executorServiceType,
 			ParallelExecutionConfiguration configuration) {
-		return switch (type) {
+		return switch (executorServiceType) {
 			case FORK_JOIN_POOL -> new ForkJoinPoolHierarchicalTestExecutorService(configuration,
 				TaskEventListener.NOOP);
 			case WORKER_THREAD_POOL -> new WorkerThreadPoolHierarchicalTestExecutorService(configuration);
 		};
 	}
 
-	private ConcurrentHierarchicalTestExecutorServiceFactory() {
+	private ParallelHierarchicalTestExecutorServiceFactory() {
 	}
 
 	/**
-	 * Type of {@link HierarchicalTestExecutorService} that supports concurrent
+	 * Type of {@link HierarchicalTestExecutorService} that supports parallel
 	 * execution.
 	 *
 	 * @since 6.1
 	 */
 	@API(status = MAINTAINED, since = "6.1")
-	public enum ConcurrentExecutorServiceType {
+	public enum ParallelExecutorServiceType {
 
 		/**
 		 * Indicates that {@link ForkJoinPoolHierarchicalTestExecutorService}
@@ -115,7 +115,7 @@ public class ConcurrentHierarchicalTestExecutorServiceFactory {
 		@API(status = EXPERIMENTAL, since = "6.1")
 		WORKER_THREAD_POOL;
 
-		private static ConcurrentExecutorServiceType parse(String value) {
+		private static ParallelExecutorServiceType parse(String value) {
 			return valueOf(value.toUpperCase(Locale.ROOT));
 		}
 	}

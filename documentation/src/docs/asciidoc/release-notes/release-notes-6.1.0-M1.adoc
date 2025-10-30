@@ -22,7 +22,7 @@ repository on GitHub.
 ==== Deprecations and Breaking Changes
 
 * Deprecate constructors for `ForkJoinPoolHierarchicalTestExecutorService` in favor of the
-  new `ConcurrentHierarchicalTestExecutorServiceFactory` that also supports
+  new `ParallelHierarchicalTestExecutorServiceFactory` that also supports
   `WorkerThreadPoolHierarchicalTestExecutorService`.
 
 [[release-notes-6.1.0-M1-junit-platform-new-features-and-improvements]]
@@ -32,7 +32,7 @@ repository on GitHub.
   its classloader for test discovery.
 * New `WorkerThreadPoolHierarchicalTestExecutorService` implementation of parallel test
   execution that is backed by a regular thread pool rather than a `ForkJoinPool`. Engine
-  authors should switch to use `ConcurrentHierarchicalTestExecutorServiceFactory` rather
+  authors should switch to use `ParallelHierarchicalTestExecutorServiceFactory` rather
   than instantiating a concrete `HierarchicalTestExecutorService` implementation for
   parallel execution directly.
 * `OpenTestReportGeneratingListener` now supports redirecting XML events to a socket via

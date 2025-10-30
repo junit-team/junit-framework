@@ -54,7 +54,7 @@ import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.ConfigurationParameters;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * An {@linkplain HierarchicalTestExecutorService executor service} based on a
@@ -62,8 +62,8 @@ import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTest
  * configured parallelism.
  *
  * @since 6.1
- * @see ConcurrentHierarchicalTestExecutorServiceFactory
- * @see ConcurrentExecutorServiceType#WORKER_THREAD_POOL
+ * @see ParallelHierarchicalTestExecutorServiceFactory
+ * @see ParallelExecutorServiceType#WORKER_THREAD_POOL
  * @see DefaultParallelExecutionConfigurationStrategy
  */
 @API(status = EXPERIMENTAL, since = "6.1")
@@ -111,12 +111,13 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	 * {@link ParallelExecutionConfiguration#getSaturatePredicate()}, are
 	 * ignored.
 	 *
-	 * @see ConcurrentHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)
+	 * @see ParallelHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)
 	 */
 	WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
+	// package-private for testing
 	WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration,
 			ClassLoader classLoader) {
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);

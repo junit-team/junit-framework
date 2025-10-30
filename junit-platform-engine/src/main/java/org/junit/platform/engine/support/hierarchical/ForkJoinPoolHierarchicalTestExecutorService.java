@@ -12,7 +12,7 @@ package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apiguardian.api.API.Status.DEPRECATED;
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
@@ -34,7 +34,7 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.ConfigurationParameters;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * A {@link ForkJoinPool}-based
@@ -42,10 +42,12 @@ import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTest
  * {@linkplain TestTask test tasks} with the configured parallelism.
  *
  * @since 1.3
- * @see ForkJoinPool
+ * @see ParallelHierarchicalTestExecutorServiceFactory
+ * @see ParallelExecutorServiceType#FORK_JOIN_POOL
  * @see DefaultParallelExecutionConfigurationStrategy
+ * @see ForkJoinPool
  */
-@API(status = STABLE, since = "1.10")
+@API(status = MAINTAINED, since = "1.10")
 public class ForkJoinPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	// package-private for testing
@@ -61,7 +63,11 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 *
 	 * @see DefaultParallelExecutionConfigurationStrategy
 	 * @deprecated Please use
-	 * {@link ConcurrentHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)}
+	 * {@link ParallelHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)}
+	 * with configuration parameter
+	 * {@value ParallelHierarchicalTestExecutorServiceFactory#EXECUTOR_SERVICE_PROPERTY_NAME}
+	 * set to
+	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL FORK_JOIN_POOL}
 	 * instead.
 	 */
 	@API(status = DEPRECATED, since = "6.1")
@@ -76,7 +82,9 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 *
 	 * @since 1.7
 	 * @deprecated Please use
-	 * {@link ConcurrentHierarchicalTestExecutorServiceFactory#create(ConcurrentExecutorServiceType, ParallelExecutionConfiguration)}
+	 * {@link ParallelHierarchicalTestExecutorServiceFactory#create(ParallelExecutorServiceType, ParallelExecutionConfiguration)}
+	 * with
+	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL ParallelExecutorServiceType.FORK_JOIN_POOL}
 	 * instead.
 	 */
 	@API(status = DEPRECATED, since = "6.1")

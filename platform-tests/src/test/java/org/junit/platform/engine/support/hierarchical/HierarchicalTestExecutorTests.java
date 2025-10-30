@@ -49,9 +49,9 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
 import org.junit.platform.engine.support.hierarchical.ExclusiveResource.LockMode;
 import org.junit.platform.engine.support.hierarchical.Node.DynamicTestExecutor;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.launcher.core.ConfigurationParametersFactoryForTests;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -561,9 +561,9 @@ class HierarchicalTestExecutorTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(ConcurrentExecutorServiceType.class)
+	@EnumSource(ParallelExecutorServiceType.class)
 	@MockitoSettings(strictness = LENIENT)
-	void canAbortExecutionOfDynamicChild(ConcurrentExecutorServiceType executorServiceType) throws Exception {
+	void canAbortExecutionOfDynamicChild(ParallelExecutorServiceType executorServiceType) throws Exception {
 
 		var leafUniqueId = UniqueId.root("leaf", "child leaf");
 		var child = spy(new MyLeaf(leafUniqueId));
@@ -593,11 +593,11 @@ class HierarchicalTestExecutorTests {
 		});
 
 		var parameters = ConfigurationParametersFactoryForTests.create(Map.of(//
-			ConcurrentHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType, //
+			ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType, //
 			DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME, "fixed", //
 			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, 2));
 
-		try (var executorService = ConcurrentHierarchicalTestExecutorServiceFactory.create(parameters)) {
+		try (var executorService = ParallelHierarchicalTestExecutorServiceFactory.create(parameters)) {
 			createExecutor(executorService).execute().get();
 		}
 

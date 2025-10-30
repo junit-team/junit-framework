@@ -83,7 +83,7 @@ import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.MethodSource;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
@@ -94,8 +94,8 @@ import org.junit.platform.testkit.engine.Events;
  */
 @SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
 @ParameterizedClass
-@EnumSource(ConcurrentExecutorServiceType.class)
-record ParallelExecutionIntegrationTests(ConcurrentExecutorServiceType executorServiceType) {
+@EnumSource(ParallelExecutorServiceType.class)
+record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorServiceType) {
 
 	@Test
 	void successfulParallelTest(TestReporter reporter) {

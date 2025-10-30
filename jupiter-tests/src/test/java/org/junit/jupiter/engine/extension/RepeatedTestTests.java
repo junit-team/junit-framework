@@ -51,7 +51,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.testkit.engine.Events;
 
@@ -296,8 +296,8 @@ class RepeatedTestTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@ParameterizedTest
-		@EnumSource(ConcurrentExecutorServiceType.class)
-		void failureThresholdWithConcurrentExecution(ConcurrentExecutorServiceType executorServiceType) {
+		@EnumSource(ParallelExecutorServiceType.class)
+		void failureThresholdWithConcurrentExecution(ParallelExecutorServiceType executorServiceType) {
 			Class<TestCase> testClass = TestCase.class;
 			String methodName = "failureThresholdWithConcurrentExecution";
 			Method method = ReflectionSupport.findMethod(testClass, methodName).orElseThrow();

@@ -69,7 +69,7 @@ import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineDiscoveryResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
@@ -82,8 +82,8 @@ import org.mockito.Mockito;
  * @since 5.4
  */
 @ParameterizedClass
-@EnumSource(ConcurrentExecutorServiceType.class)
-record OrderedMethodTests(ConcurrentExecutorServiceType executorServiceType) {
+@EnumSource(ParallelExecutorServiceType.class)
+record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	private static final Set<String> callSequence = Collections.synchronizedSet(new LinkedHashSet<>());
 	private static final Set<String> threadNames = Collections.synchronizedSet(new LinkedHashSet<>());

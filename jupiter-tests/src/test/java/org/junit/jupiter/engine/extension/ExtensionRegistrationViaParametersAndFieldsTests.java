@@ -79,7 +79,8 @@ import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.commons.support.ModifierSupport;
 import org.junit.platform.commons.util.ExceptionUtils;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 
 /**
@@ -208,8 +209,9 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 	}
 
 	@ParameterizedTest
-	@EnumSource(ConcurrentExecutorServiceType.class)
-	void createsExtensionPerInstance(ConcurrentExecutorServiceType executorServiceType) {
+	@EnumSource(ParallelExecutorServiceType.class)
+	void createsExtensionPerInstance(
+			ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType executorServiceType) {
 		var results = executeTests(request() //
 				.selectors(selectClass(InitializationPerInstanceTestCase.class)) //
 				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //

@@ -34,14 +34,14 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.engine.Constants;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
 // https://github.com/junit-team/junit-framework/issues/3945
 @Timeout(10)
 @ParameterizedClass
-@EnumSource(ConcurrentExecutorServiceType.class)
-record ForkJoinDeadLockTests(ConcurrentExecutorServiceType executorServiceType) {
+@EnumSource(ParallelExecutorServiceType.class)
+record ForkJoinDeadLockTests(ParallelExecutorServiceType executorServiceType) {
 
 	@Test
 	void forkJoinExecutionDoesNotLeadToDeadLock() {

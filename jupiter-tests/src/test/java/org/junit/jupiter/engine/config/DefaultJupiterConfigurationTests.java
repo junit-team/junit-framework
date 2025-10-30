@@ -47,7 +47,7 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
-import org.junit.platform.engine.support.hierarchical.ConcurrentHierarchicalTestExecutorServiceFactory.ConcurrentExecutorServiceType;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.launcher.core.ConfigurationParametersFactoryForTests;
 
 class DefaultJupiterConfigurationTests {
@@ -163,9 +163,9 @@ class DefaultJupiterConfigurationTests {
 	}
 
 	@ParameterizedTest
-	@EnumSource(ConcurrentExecutorServiceType.class)
+	@EnumSource(ParallelExecutorServiceType.class)
 	void doesNotReportAnyIssuesIfParallelExecutionIsEnabledAndConfigurationParameterIsSet(
-			ConcurrentExecutorServiceType executorServiceType) {
+			ParallelExecutorServiceType executorServiceType) {
 		var parameters = Map.of(JupiterConfiguration.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, true, //
 			JupiterConfiguration.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType);
 		List<DiscoveryIssue> issues = new ArrayList<>();
