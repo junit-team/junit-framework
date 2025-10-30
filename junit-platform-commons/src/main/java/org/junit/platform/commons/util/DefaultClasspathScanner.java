@@ -260,12 +260,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	private String determineSubpackageName(Path baseDir, Path file) {
 		Path relativePath = baseDir.relativize(file.getParent());
 		String pathSeparator = baseDir.getFileSystem().getSeparator();
-		String subpackageName = relativePath.toString().replace(pathSeparator, PACKAGE_SEPARATOR_STRING);
-		if (subpackageName.endsWith(pathSeparator)) {
-			// TODO: Remove workaround for JDK bug: https://bugs.openjdk.org/browse/JDK-8153248
-			subpackageName = subpackageName.substring(0, subpackageName.length() - pathSeparator.length());
-		}
-		return subpackageName;
+		return relativePath.toString().replace(pathSeparator, PACKAGE_SEPARATOR_STRING);
 	}
 
 	private void handleInternalError(Path classFile, String fullyQualifiedClassName, InternalError ex) {
