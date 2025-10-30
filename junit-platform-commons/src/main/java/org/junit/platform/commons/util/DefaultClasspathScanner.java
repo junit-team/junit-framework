@@ -11,6 +11,9 @@
 package org.junit.platform.commons.util;
 
 import static java.util.stream.Collectors.joining;
+import static org.junit.platform.commons.util.SearchPathUtils.PACKAGE_SEPARATOR_CHAR;
+import static org.junit.platform.commons.util.SearchPathUtils.PACKAGE_SEPARATOR_STRING;
+import static org.junit.platform.commons.util.SearchPathUtils.determineSimpleClassName;
 import static org.junit.platform.commons.util.StringUtils.isNotBlank;
 
 import java.io.IOException;
@@ -31,7 +34,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;
 import org.junit.platform.commons.io.Resource;
@@ -57,8 +59,6 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	private static final char CLASSPATH_RESOURCE_PATH_SEPARATOR = '/';
 	private static final String CLASSPATH_RESOURCE_PATH_SEPARATOR_STRING = String.valueOf(
 		CLASSPATH_RESOURCE_PATH_SEPARATOR);
-	private static final char PACKAGE_SEPARATOR_CHAR = '.';
-	private static final String PACKAGE_SEPARATOR_STRING = String.valueOf(PACKAGE_SEPARATOR_CHAR);
 
 	/**
 	 * Malformed class name InternalError like reported in #401.
@@ -132,7 +132,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	private List<Class<?>> findClassesForUri(URI baseUri, String basePackageName, ClassFilter classFilter) {
 		List<Class<?>> classes = new ArrayList<>();
 		// @formatter:off
-		walkFilesForUri(baseUri, ClasspathFilters.classFiles(),
+		walkFilesForUri(baseUri, SearchPathUtils::isClassOrSourceFile,
 				(baseDir, file) ->
 						processClassFileSafely(baseDir, basePackageName, classFilter, file, classes::add));
 		// @formatter:on
@@ -156,7 +156,7 @@ class DefaultClasspathScanner implements ClasspathScanner {
 	private List<Resource> findResourcesForUri(URI baseUri, String basePackageName, ResourceFilter resourceFilter) {
 		List<Resource> resources = new ArrayList<>();
 		// @formatter:off
-		walkFilesForUri(baseUri, ClasspathFilters.resourceFiles(),
+		walkFilesForUri(baseUri, SearchPathUtils::isResourceFile,
 				(baseDir, file) ->
 						processResourceFileSafely(baseDir, basePackageName, resourceFilter, file, resources::add));
 		// @formatter:on
@@ -251,19 +251,6 @@ class DefaultClasspathScanner implements ClasspathScanner {
 				.filter(value -> !value.isEmpty()) // Handle default package appropriately.
 				.collect(joining(CLASSPATH_RESOURCE_PATH_SEPARATOR_STRING));
 		// @formatter:on
-	}
-
-	private String determineSimpleClassName(Path file) {
-		String fileName = file.getFileName().toString();
-		return determineSimpleClassName(fileName);
-	}
-
-	static String determineSimpleClassName(String fileName) {
-		int lastDot = fileName.lastIndexOf('.');
-		if (lastDot < 0) {
-			throw new JUnitException("Expected file name with file extension, but got: " + fileName);
-		}
-		return fileName.substring(0, lastDot);
 	}
 
 	private String determineSimpleResourceName(Path resourceFile) {

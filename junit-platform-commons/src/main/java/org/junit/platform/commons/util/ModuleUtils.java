@@ -24,6 +24,7 @@ import java.lang.module.ModuleReference;
 import java.lang.module.ResolvedModule;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -253,11 +254,10 @@ public class ModuleUtils {
 			try (ModuleReader reader = reference.open()) {
 				try (Stream<String> names = reader.list()) {
 					// @formatter:off
-					return names.filter(ClasspathFilters::isClassOrSourceFileName)
-							.map(DefaultClasspathScanner::determineSimpleClassName)
-							.map(name -> name.replace('/', '.'))
-							.filter(name -> !"module-info".equals(name))
-							.filter(name -> !name.endsWith("package-info"))
+					return names.filter(name -> !name.endsWith("/")) // remove directories
+							.map(Path::of)
+							.filter(SearchPathUtils::isClassOrSourceFile)
+							.map(SearchPathUtils::determineFullyQualifiedClassName)
 							.filter(classFilter::match)
 							.<Class<?>> map(this::loadClassUnchecked)
 							.filter(classFilter::match)

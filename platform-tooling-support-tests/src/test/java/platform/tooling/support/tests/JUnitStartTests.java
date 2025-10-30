@@ -103,7 +103,7 @@ class JUnitStartTests {
 
 	@Test
 	@EnabledOnJre(JRE.JAVA_25)
-	void junitRunModule(@FilePrefix("junit-run-Module") OutputFiles outputFiles) throws Exception {
+	void junitRunModule(@FilePrefix("junit-run-module") OutputFiles outputFiles) throws Exception {
 		var result = ProcessStarters.java() //
 				.workingDir(workspace) //
 				.putEnvironment("NO_COLOR", "1") // --disable-ansi-colors
