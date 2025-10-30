@@ -44,12 +44,17 @@ import org.junit.platform.commons.annotation.Testable;
  * annotation disables the latter as a source of parameters so that only explicit
  * configuration parameters are taken into account.
  *
- * <p>Note: Tests in a suite are executed in addition to the tests executed by every
- * other test engine. This can result in the same tests being executed twice. This can be
- * prevented by configuring your build tool to only include the Suite Engine. Or by
- * using a naming pattern. For example name all suites {@code *Suite} and all tests
- * {@code *Test} and configure your build tool to only include the former. Alternatively,
- * consider using tags to select specific groups of tests.
+ * <p>Note: Depending on the declared test selection, different suites may contain the
+ * same tests, potentially with different configurations.
+ *
+ * <p>Moreover, tests in a suite are executed in addition to the tests executed by every
+ * other test engine. This can result in the same tests being executed twice and can be
+ * prevented by configuring your build tool to only include the
+ * {@code junit-platform-suite} engine. Or by using a naming pattern. For example name
+ * all suites {@code *Suite} and all tests {@code *Test} and configure your build tool
+ * to only include the former.
+ *
+ * <p>Alternatively, consider using tags to select specific groups of tests.
  *
  * @since 1.8
  * @see Select
