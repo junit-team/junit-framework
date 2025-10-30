@@ -46,7 +46,7 @@ public final class StringUtils {
 	 * @see <a href="https://github.com/junit-team/junit-framework/issues/1800">#1800</a>
 	 */
 	static Pattern compileIsoControlPattern() {
-		// https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#posix
+		// https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/regex/Pattern.html#posix
 		try {
 			// All of the characters that Unicode refers to as 'control characters'
 			return Pattern.compile("\\p{Cntrl}", UNICODE_CHARACTER_CLASS);

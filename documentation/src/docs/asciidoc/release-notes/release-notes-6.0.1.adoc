@@ -16,7 +16,9 @@ repository on GitHub.
 [[release-notes-6.0.1-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* The `jdk.jfr` package is now an optional import when using the `junit-platform-launcher`
+  as an OSGi bundle.
+* Remove remnants of Java 8 compatibility from User Guide.
 
 [[release-notes-6.0.1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -43,6 +45,10 @@ repository on GitHub.
   to avoid conflicts with other control characters.
 * Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
   assertion.
+* Stop reporting discovery issues for synthetic methods, particularly in conjunction with
+  Kotlin suspend functions.
+* Fix support for test methods with the same signature as a package-private methods
+  declared in super classes in different packages.
 
 [[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -54,6 +60,10 @@ repository on GitHub.
 
 * The `@CsvSource` and `@CsvFileSource` annotations now allow specifying
   a custom comment character using the new `commentCharacter` attribute.
+* Improve error message when using `@ParameterizedClass` with field injection and not
+  providing enough arguments.
+* Allow calling `TypedArgumentConverter` constructor for `@Nullable T` target types
+  without having to cast class literals to `Class<@Nullable T>`.
 
 
 [[release-notes-6.0.1-junit-vintage]]

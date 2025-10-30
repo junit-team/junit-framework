@@ -75,13 +75,18 @@ val roseau by tasks.registering(RoseauDiff::class) {
 		enabled = false
 	}
 	onlyIf { extension.enabled.get() }
-	onlyIf("https://github.com/alien-tools/roseau/issues/90") { !OperatingSystem.current().isWindows }
 
 	toolClasspath.from(roseauClasspath)
 	libraryClasspath.from(configurations.compileClasspath)
 	v1 = downloadPreviousReleaseJar.map { it.outputFiles.single() }
 	v2 = tasks.jar.flatMap { it.archiveFile }.map { it.asFile }
-	csvReport = layout.buildDirectory.file("reports/roseau/breaking-changes.csv")
+	configFile = rootProject.layout.projectDirectory.file("gradle/config/roseau/config.yaml")
+	rootProject.layout.projectDirectory.file("gradle/config/roseau/accepted-breaking-changes.csv").asFile.let {
+		if (it.exists()) {
+			acceptedChangesCsvFile = it
+		}
+	}
+	reportDir = layout.buildDirectory.dir("reports/roseau")
 }
 
 val japicmp by tasks.registering(JapicmpTask::class) {

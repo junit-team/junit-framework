@@ -59,14 +59,14 @@ abstract class BaseCommand<T> implements Callable<T> {
 		return commandLine //
 				.setParameterExceptionHandler((ex, args) -> {
 					defaultParameterExceptionHandler.handleParseException(ex, args);
-					return CommandResult.FAILURE;
+					return ExitCode.ANY_ERROR;
 				}) //
 				.setExecutionExceptionHandler((ex, cmd, __) -> {
 					commandLine.getErr().println(cmd.getColorScheme().richStackTraceString(ex));
 					commandLine.getErr().println();
 					commandLine.getErr().flush();
 					cmd.usage(commandLine.getOut());
-					return CommandResult.FAILURE;
+					return ExitCode.ANY_ERROR;
 				}) //
 				.setCaseInsensitiveEnumValuesAllowed(true) //
 				.setAtFileCommentChar(null);

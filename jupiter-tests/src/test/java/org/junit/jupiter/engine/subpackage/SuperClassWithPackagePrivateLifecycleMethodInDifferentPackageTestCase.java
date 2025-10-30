@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.TestReporter;
 
 /**
  * @since 5.9
@@ -28,7 +30,8 @@ public class SuperClassWithPackagePrivateLifecycleMethodInDifferentPackageTestCa
 	}
 
 	@Test
-	void test() {
+	void test(TestInfo testInfo, TestReporter reporter) {
+		reporter.publishEntry("invokedSuper", testInfo.getTestMethod().orElseThrow().toGenericString());
 		assertThat(this.beforeEachInvoked).isTrue();
 	}
 

@@ -82,44 +82,38 @@ public final class MethodSelector implements DiscoverySelector {
 	}
 
 	MethodSelector(Class<?> javaClass, String methodName, String parameterTypeNames) {
-		this.classLoader = javaClass.getClassLoader();
+		this(javaClass.getClassLoader(), javaClass.getName(), methodName, parameterTypeNames);
 		this.javaClass = javaClass;
-		this.className = javaClass.getName();
-		this.methodName = methodName;
-		this.parameterTypeNames = parameterTypeNames;
 	}
 
 	/**
 	 * @since 1.10
 	 */
 	MethodSelector(@Nullable ClassLoader classLoader, String className, String methodName, Class<?>... parameterTypes) {
-		this.classLoader = classLoader;
-		this.className = className;
-		this.methodName = methodName;
+		this(classLoader, className, methodName, ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.parameterTypes = parameterTypes.clone();
-		this.parameterTypeNames = ClassUtils.nullSafeToString(Class::getTypeName, this.parameterTypes);
 	}
 
 	/**
 	 * @since 1.10
 	 */
 	MethodSelector(Class<?> javaClass, String methodName, Class<?>... parameterTypes) {
-		this.classLoader = javaClass.getClassLoader();
+		this(javaClass.getClassLoader(), javaClass.getName(), methodName,
+			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.javaClass = javaClass;
-		this.className = javaClass.getName();
-		this.methodName = methodName;
 		this.parameterTypes = parameterTypes.clone();
-		this.parameterTypeNames = ClassUtils.nullSafeToString(Class::getTypeName, this.parameterTypes);
 	}
 
 	MethodSelector(Class<?> javaClass, Method method) {
-		this.classLoader = javaClass.getClassLoader();
+		this(javaClass, method, method.getParameterTypes());
+	}
+
+	private MethodSelector(Class<?> javaClass, Method method, Class<?>... parameterTypes) {
+		this(javaClass.getClassLoader(), javaClass.getName(), method.getName(),
+			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.javaClass = javaClass;
-		this.className = javaClass.getName();
 		this.javaMethod = method;
-		this.methodName = method.getName();
-		this.parameterTypes = method.getParameterTypes();
-		this.parameterTypeNames = ClassUtils.nullSafeToString(Class::getTypeName, this.parameterTypes);
+		this.parameterTypes = parameterTypes;
 	}
 
 	/**
