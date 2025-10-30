@@ -4,7 +4,7 @@
 The Suite Engine supports the declarative selection and execution of tests from
 _any_ test engine on the JUnit Platform using the <<launcher-api>>.
 
-image::suite-engine-multiple-suites-diagram.svg[]
+image::junit-platform-suite-engine-diagram.svg[]
 
 [[junit-platform-suite-engine-setup]]
 ==== Setup
@@ -70,7 +70,7 @@ potentially with different configurations.
 Moreover, tests in a suite are executed in addition to the tests executed by every other
 test engine. This can result in the same tests being executed twice.
 
-image::suite-engine-duplicate-test-execution-diagram.svg[]
+image::junit-platform-suite-engine-duplicate-test-execution-diagram.svg[]
 
 This can be prevented by configuring your build tool to only include the
 `junit-platform-suite` engine. Or by using a naming pattern. For example, name all suites
