@@ -268,7 +268,10 @@ tasks {
 		outputs.cacheIf { true }
 	}
 
+	// TODO: Loop?
 	val componentDiagram = plantUml.flatMap { it.outputDirectory.file("component-diagram.svg") }
+	val junitPlatformLauncherApiDiagram = plantUml.flatMap { it.outputDirectory.file("junit-platform-launcher-api-diagram.svg") }
+	val suiteEngineMultipleSuitesDiagram = plantUml.flatMap { it.outputDirectory.file("suite-engine-multiple-suites-diagram.svg") }
 
 	withType<AbstractAsciidoctorTask>().configureEach {
 		inputs.files(
@@ -278,7 +281,9 @@ tasks {
 			generateConsoleLauncherEnginesOptions,
 			generateApiTables,
 			generateStandaloneConsoleLauncherShadowedArtifactsFile,
-			componentDiagram
+			componentDiagram,
+			junitPlatformLauncherApiDiagram,
+			suiteEngineMultipleSuitesDiagram
 		)
 
 		resources {
@@ -287,6 +292,12 @@ tasks {
 				include("**/images/**/*.svg")
 			}
 			from(componentDiagram) {
+				into("user-guide/images")
+			}
+			from(junitPlatformLauncherApiDiagram) {
+				into("user-guide/images")
+			}
+			from(suiteEngineMultipleSuitesDiagram) {
 				into("user-guide/images")
 			}
 		}
