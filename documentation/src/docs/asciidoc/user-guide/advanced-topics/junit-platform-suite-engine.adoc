@@ -66,7 +66,6 @@ include::{testDir}/example/BeforeAndAfterSuiteDemo.java[tags=user_guide]
 
 Depending on the declared test selection, different suites may contain the same tests,
 potentially with different configurations.
-
 Moreover, tests in a suite are executed in addition to the tests executed by every other
 test engine. This can result in the same tests being executed twice.
 
