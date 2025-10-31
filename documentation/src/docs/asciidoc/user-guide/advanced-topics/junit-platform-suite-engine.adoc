@@ -69,7 +69,7 @@ potentially with different configurations.
 Moreover, tests in a suite are executed in addition to the tests executed by every other
 test engine. This can result in the same tests being executed twice.
 
-image::junit-platform-suite-engine-duplicate-test-execution-diagram.svg[]
+image::junit-platform-suite-engine-duplicate-test-execution-diagram.svg[role=text-center]
 
 This can be prevented by configuring your build tool to only include the
 `junit-platform-suite` engine. Or by using a naming pattern. For example, name all suites
