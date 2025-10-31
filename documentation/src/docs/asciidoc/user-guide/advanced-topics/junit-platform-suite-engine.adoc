@@ -4,7 +4,7 @@
 The Suite Engine supports the declarative selection and execution of tests from
 _any_ test engine on the JUnit Platform using the <<launcher-api>>.
 
-image::junit-platform-suite-engine-diagram.svg[]
+image::junit-platform-suite-engine-diagram.svg[role=text-center]
 
 [[junit-platform-suite-engine-setup]]
 ==== Setup
