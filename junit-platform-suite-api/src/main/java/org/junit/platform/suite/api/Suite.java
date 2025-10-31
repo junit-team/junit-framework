@@ -46,8 +46,7 @@ import org.junit.platform.commons.annotation.Testable;
  *
  * <p>Note: Depending on the declared test selection, different suites may contain the
  * same tests, potentially with different configurations.
- *
- * <p>Moreover, tests in a suite are executed in addition to the tests executed by every
+ * Moreover, tests in a suite are executed in addition to the tests executed by every
  * other test engine. This can result in the same tests being executed twice and can be
  * prevented by configuring your build tool to only include the
  * {@code junit-platform-suite} engine. Or by using a naming pattern. For example, name
