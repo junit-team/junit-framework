@@ -18,7 +18,11 @@ repository on GitHub.
 
 * The `jdk.jfr` package is now an optional import when using the `junit-platform-launcher`
   as an OSGi bundle.
-* Remove remnants of Java 8 compatibility from User Guide.
+
+[[release-notes-6.0.1-junit-platform-new-features-and-improvements]]
+==== New Features and Improvements
+
+* Legacy documentation regarding Java 8 compatibility has been removed from the User Guide.
 
 
 [[release-notes-6.0.1-junit-jupiter]]
@@ -37,22 +41,23 @@ repository on GitHub.
   assertion.
 * Stop reporting discovery issues for synthetic methods, particularly in conjunction with
   Kotlin suspend functions.
-* Fix support for test methods with the same signature as a package-private methods
-  declared in super classes in different packages.
+* Fix support for test methods with the same signature as package-private methods declared
+  in super classes in different packages.
 
 [[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* Mark `org.junit.jupiter.migrationsupport` module descriptor as deprecated for removal.
+* The `org.junit.jupiter.migrationsupport` module descriptor has been marked as deprecated
+  for removal.
 
 [[release-notes-6.0.1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* The `@CsvSource` and `@CsvFileSource` annotations now allow specifying
-  a custom comment character using the new `commentCharacter` attribute.
-* Improve error message when using `@ParameterizedClass` with field injection and not
+* The `@CsvSource` and `@CsvFileSource` annotations now allow specifying a custom comment
+  character using the new `commentCharacter` attribute.
+* Improve error message when `@ParameterizedClass` is used with field injection without
   providing enough arguments.
-* Allow calling `TypedArgumentConverter` constructor for `@Nullable T` target types
+* Allow calling the `TypedArgumentConverter` constructor for `@Nullable T` target types
   without having to cast class literals to `Class<@Nullable T>`.
 
 
