@@ -1749,9 +1749,8 @@ test class.
 include::{testDir}/example/ParameterizedClassDemo.java[tags=constructor_injection]
 ----
 
-If your programming language level you are using supports _records_ -- for example, Java
-16 or higher -- you may use them to implement parameterized classes that avoid the
-boilerplate code of declaring a test class constructor.
+You may use _records_ to implement parameterized classes that avoid the boilerplate code
+of declaring a test class constructor.
 
 [source,java,indent=0]
 ----
@@ -2237,11 +2236,12 @@ by default. This behavior can be changed by setting the
 | `@CsvSource(value = { " apple , banana" }, ignoreLeadingAndTrailingWhitespace = false)` | `" apple "`, `" banana"`
 |===
 
-If the programming language you are using supports _text blocks_ -- for example, Java SE
-15 or higher -- you can alternatively use the `textBlock` attribute of `@CsvSource`. Each
-record within a text block represents a CSV record and results in one invocation of the
-parameterized class or test. The first record may optionally be used to supply CSV headers
-by setting the `useHeadersInDisplayName` attribute to `true` as in the example below.
+If the programming language you are using supports Java _text blocks_  or equivalent
+multi-line string literals, you can alternatively use the `textBlock` attribute of
+`@CsvSource`. Each record within a text block represents a CSV record and results in one
+invocation of the parameterized class or test. The first record may optionally be used to
+supply CSV headers by setting the `useHeadersInDisplayName` attribute to `true` as in the
+example below.
 
 Using a text block, the previous example can be implemented as follows.
 
@@ -2304,7 +2304,7 @@ void testWithCsvSource(String fruit, int rank) {
 
 [NOTE]
 ====
-Java's https://docs.oracle.com/en/java/javase/15/text-blocks/index.html[text block]
+Java's https://docs.oracle.com/en/java/javase/17/text-blocks/index.html[text block]
 feature automatically removes _incidental whitespace_ when the code is compiled.
 However other JVM languages such as Groovy and Kotlin do not. Thus, if you are using a
 programming language other than Java and your text block contains comments or new lines

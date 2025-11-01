@@ -8,7 +8,7 @@ plugins {
 dependencies {
 	implementation("junitbuild.base:dsl-extensions")
 	implementation(libs.plugins.download.markerCoordinates)
-	implementation(libs.plugins.japicmp.markerCoordinates)
+	implementation(libs.jackson.dataformat.yaml)
 }
 
 tasks.compileJava {

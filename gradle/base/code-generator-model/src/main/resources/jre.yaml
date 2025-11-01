@@ -31,4 +31,4 @@
 - version: 25
   since: '5.11.4'
 - version: 26
-  since: '6.0'
+  since: '5.13.2'

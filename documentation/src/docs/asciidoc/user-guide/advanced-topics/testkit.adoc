@@ -4,9 +4,8 @@
 === JUnit Platform Test Kit
 
 The `junit-platform-testkit` artifact provides support for executing a test plan on the
-JUnit Platform and then verifying the expected results. As of JUnit Platform
-{version}, this support is limited to the execution of a single `TestEngine` (see
-<<testkit-engine>>).
+JUnit Platform and then verifying the expected results. This support is currently limited
+to the execution of a single `TestEngine` (see <<testkit-engine>>).
 
 [[testkit-engine]]
 ==== Engine Test Kit

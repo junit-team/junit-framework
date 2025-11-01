@@ -1,13 +1,13 @@
 [versions]
 ant = "1.10.15"
 apiguardian = "1.1.2"
-asciidoctorj-pdf = "2.3.20"
+asciidoctorj-pdf = "2.3.23"
 asciidoctor-plugins = "4.0.5" # Check if workaround in documentation.gradle.kts can be removed when upgrading
 assertj = "3.27.6"
 bnd = "7.1.0"
-checkstyle = "12.0.1"
+checkstyle = "12.1.1"
 eclipse = "4.37.0"
-jackson = "2.20.0"
+jackson = "2.20.1"
 jacoco = "0.8.14"
 jmh = "1.37"
 jruby = "9.4.14.0"
@@ -16,10 +16,10 @@ junit4Min = "4.12"
 ktlint = "1.7.1"
 log4j = "2.25.2"
 opentest4j = "1.3.0"
-openTestReporting = "0.2.4"
+openTestReporting = "0.2.5"
 snapshotTests = "1.11.0"
 surefire = "3.5.4"
-xmlunit = "2.10.4"
+xmlunit = "2.11.0"
 
 [libraries]
 ant = { module = "org.apache.ant:ant", version.ref = "ant" }
@@ -32,14 +32,16 @@ bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
 classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.184" }
 commons-io = { module = "commons-io:commons-io", version = "2.20.0" }
-error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.25.0" }
-error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
+error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.26.0" }
+error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.43.0" }
 fastcsv = { module = "de.siegmar:fastcsv", version = "4.1.0" }
-groovy = { module = "org.apache.groovy:groovy", version = "5.0.1" }
+groovy = { module = "org.apache.groovy:groovy", version = "5.0.2" }
 groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.4" }
+jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.6" }
 jfrunit = { module = "org.moditect.jfrunit:jfrunit-core", version = "1.0.0.Alpha2" }
 jimfs = { module = "com.google.jimfs:jimfs", version = "1.3.1" }
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
@@ -58,21 +60,21 @@ mockito-bom = { module = "org.mockito:mockito-bom", version = "5.20.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
-nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.10" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.11" }
 opentest4j = { module = "org.opentest4j:opentest4j", version.ref = "opentest4j" }
 openTestReporting-cli = { module = "org.opentest4j.reporting:open-test-reporting-cli", version.ref = "openTestReporting" }
 openTestReporting-events = { module = "org.opentest4j.reporting:open-test-reporting-events", version.ref = "openTestReporting" }
 openTestReporting-tooling-core = { module = "org.opentest4j.reporting:open-test-reporting-tooling-core", version.ref = "openTestReporting" }
 openTestReporting-tooling-spi = { module = "org.opentest4j.reporting:open-test-reporting-tooling-spi", version.ref = "openTestReporting" }
 picocli = { module = "info.picocli:picocli", version = "4.7.7" }
-# Enable `roseau` tasks on Windows when upgrading (in junitbuild.backward-compatibility.gradle.kts)
-roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.3.0" }
+roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.4.0" }
 slf4j-julBinding = { module = "org.slf4j:slf4j-jdk14", version = "2.0.17" }
 snapshotTests-junit5 = { module = "de.skuzzle.test:snapshot-tests-junit5", version.ref = "snapshotTests" }
 snapshotTests-xml = { module = "de.skuzzle.test:snapshot-tests-xml", version.ref = "snapshotTests" }
 spock1 = { module = "org.spockframework:spock-core", version = "1.3-groovy-2.5" }
 xmlunit-assertj = { module = "org.xmlunit:xmlunit-assertj3", version.ref = "xmlunit" }
 xmlunit-placeholders = { module = "org.xmlunit:xmlunit-placeholders", version.ref = "xmlunit" }
+xmlunit-jakarta-jaxb-impl = { module = "org.xmlunit:xmlunit-jakarta-jaxb-impl", version.ref = "xmlunit" }
 testingAnnotations = { module = "com.gradle:develocity-testing-annotations", version = "2.0.1" }
 woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.1.1" }
 
@@ -88,7 +90,7 @@ ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint
 [bundles]
 ant = ["ant", "ant-junit", "ant-junitlauncher"]
 log4j = ["log4j-core", "log4j-jul"]
-xmlunit = ["xmlunit-assertj", "xmlunit-placeholders"]
+xmlunit = ["xmlunit-assertj", "xmlunit-placeholders", "xmlunit-jakarta-jaxb-impl", "jaxb-api", "jaxb-runtime"]
 
 [plugins]
 asciidoctorConvert = { id = "org.asciidoctor.jvm.convert", version.ref = "asciidoctor-plugins" }
@@ -101,11 +103,10 @@ download = { id = "de.undercouch.download", version = "5.6.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "4.3.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
 gitPublish = { id = "org.ajoberstar.git-publish", version = "5.1.3" }
-japicmp = { id = "me.champeau.gradle.japicmp", version = "0.4.6" }
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
-jreleaser = { id = "org.jreleaser", version = "1.20.0" }
+jreleaser = { id = "org.jreleaser", version = "1.21.0" }
 # check if workaround in gradle.properties can be removed when updating
-kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.2.21" }
 nullaway = { id = "net.ltgt.nullaway", version = "2.3.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.0.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
