@@ -26,5 +26,5 @@ together {
 "Jupiter Test Engine (@Suite)"  --> "Example Test A (@Suite)" : discovers and executes
 
 "JUnit Platform" --> "Jupiter Test Engine": forwards request
-"Jupiter Test Engine" --> "Example Test A" #line:red;line.bold;text:red : also discover and executes!
+"Jupiter Test Engine" --> "Example Test A" #line:red;line.bold;text:red : also discovers and executes!
 @enduml
