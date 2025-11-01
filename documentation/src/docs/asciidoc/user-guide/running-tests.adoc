@@ -849,6 +849,7 @@ generically as strings via their identifiers.
 
 The following discovery selectors are provided out of the box:
 
+[.scrollable]
 |===
 | Java Type                     | API                                            | Annotation                  | Console Launcher                                 | Identifier
 
