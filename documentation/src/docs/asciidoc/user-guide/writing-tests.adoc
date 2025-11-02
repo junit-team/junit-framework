@@ -3479,7 +3479,7 @@ strategies.
 The following table lists relevant properties for configuring parallel execution. See
 <<running-tests-config-params>> for details on how to set such properties.
 
-[.scrollable, cols="d,d,a,d"]
+[cols="d,d,a,d"]
 |===
 |Property |Description |Supported Values |Default Value
 
