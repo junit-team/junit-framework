@@ -364,6 +364,9 @@ tasks {
 
 	asciidoctorPdf {
 		setExecutionMode(JAVA_EXEC) // Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		jvm {
+			maxHeapSize = "512M"
+		}
 		sources {
 			include("user-guide/index.adoc")
 		}
