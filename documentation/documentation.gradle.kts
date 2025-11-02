@@ -363,7 +363,9 @@ tasks {
 	}
 
 	asciidoctorPdf {
-		setExecutionMode(JAVA_EXEC) // Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		// Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		// Avoid propagating apparent memory leaks in Asciidoctor/JRuby to Gradle daemon.
+		setExecutionMode(JAVA_EXEC)
 		jvm {
 			maxHeapSize = "512M"
 		}
