@@ -587,6 +587,41 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
+	void executesDynamicChildrenInSubmitOrder() throws Exception {
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1, 1));
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("child1").withLevel(2);
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("child2").withLevel(2);
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("child3").withLevel(2);
+		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("child3").withLevel(2);
+
+		List<TestTaskStub> children = List.of(child1, child2, child3, child4);
+		Collections.shuffle(children);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
+			var executor = requiredService();
+			var features = children.stream().map(executor::submit).toList();
+			for (var future : features) {
+				future.get();
+			}
+		}) //
+				.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(Stream.of(root, child1, child2)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+
+		assertThat(children) //
+				.extracting(TestTaskStub::startTime) //
+				.isSorted();
+	}
+
+	@Test
 	void stealsNestedDynamicChildren() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 

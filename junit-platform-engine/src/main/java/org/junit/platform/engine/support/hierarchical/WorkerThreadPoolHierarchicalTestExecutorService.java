@@ -142,7 +142,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		var workerThread = WorkerThread.get();
 		if (workerThread == null) {
-			return enqueue(testTask).future();
+			return enqueue(testTask, 0).future();
 		}
 
 		if (testTask.getExecutionMode() == SAME_THREAD) {
@@ -150,7 +150,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return completedFuture(null);
 		}
 
-		var entry = enqueue(testTask);
+		var entry = enqueue(testTask, workerThread.nextChildIndex());
 		workerThread.trackSubmittedChild(entry);
 		return new WorkStealingFuture(entry);
 	}
@@ -172,8 +172,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		workerThread.invokeAll(testTasks);
 	}
 
-	private WorkQueue.Entry enqueue(TestTask testTask) {
-		var entry = workQueue.add(testTask);
+	private WorkQueue.Entry enqueue(TestTask testTask, int index) {
+		var entry = workQueue.add(testTask, index);
 		maybeStartWorker();
 		return entry;
 	}
@@ -548,6 +548,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return CompletableFuture.allOf(futures);
 		}
 
+		private int nextChildIndex() {
+			return stateStack.element().nextChildIndex();
+		}
+
 		private void trackSubmittedChild(WorkQueue.Entry entry) {
 			stateStack.element().trackSubmittedChild(entry);
 		}
@@ -571,6 +575,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		private static class State {
 
+			private int nextChildIndex = 0;
+
 			@Nullable
 			private List<WorkQueue.Entry> submittedChildren;
 
@@ -585,6 +591,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				if (submittedChildren != null && submittedChildren.isEmpty()) {
 					submittedChildren = null;
 				}
+			}
+
+			private int nextChildIndex() {
+				return nextChildIndex++;
 			}
 		}
 
@@ -645,8 +655,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	private static class WorkQueue implements Iterable<WorkQueue.Entry> {
 		private final Set<Entry> queue = new ConcurrentSkipListSet<>();
 
-		Entry add(TestTask task) {
-			Entry entry = createEntry(task, 0);
+		Entry add(TestTask task, int index) {
+			Entry entry = createEntry(task, index);
 			LOGGER.trace(() -> "forking: " + entry.task);
 			return doAdd(entry);
 		}
