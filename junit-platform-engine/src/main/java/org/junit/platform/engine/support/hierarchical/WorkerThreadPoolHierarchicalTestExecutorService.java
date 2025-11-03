@@ -41,7 +41,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -54,6 +53,7 @@ import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
@@ -642,7 +642,6 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	}
 
 	private static class WorkQueue implements Iterable<WorkQueue.Entry> {
-		private final AtomicLong index = new AtomicLong();
 		private final Set<Entry> queue = new ConcurrentSkipListSet<>();
 
 		Entry add(TestTask task) {
@@ -652,8 +651,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		}
 
 		Entry createEntry(TestTask task) {
-			int level = task.getTestDescriptor().getUniqueId().getSegments().size();
-			return new Entry(task, new CompletableFuture<>(), level, index.getAndIncrement());
+			var uniqueId = task.getTestDescriptor().getUniqueId();
+			return new Entry(uniqueId, task, new CompletableFuture<>());
 		}
 
 		void addAll(Collection<Entry> entries) {
@@ -686,7 +685,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return queue.iterator();
 		}
 
-		private record Entry(TestTask task, CompletableFuture<@Nullable Void> future, int level, long index)
+		private record Entry(UniqueId id, TestTask task, CompletableFuture<@Nullable Void> future)
 				implements Comparable<Entry> {
 
 			@SuppressWarnings("FutureReturnValueIgnored")
@@ -703,7 +702,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 			@Override
 			public int compareTo(Entry that) {
-				var result = Integer.compare(that.level, this.level);
+				var result = Integer.compare(that.getLevel(), getLevel());
 				if (result != 0) {
 					return result;
 				}
@@ -711,7 +710,35 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				if (result != 0) {
 					return result;
 				}
-				return Long.compare(that.index, this.index);
+				return compareBy(that.id(), this.id());
+			}
+
+			private int compareBy(UniqueId a, UniqueId b) {
+				var aIterator = a.getSegments().iterator();
+				var bIterator = b.getSegments().iterator();
+
+				// ids have the same length
+				while (aIterator.hasNext()) {
+					var aCurrent = aIterator.next();
+					var bCurrent = bIterator.next();
+					int result = compareBy(aCurrent, bCurrent);
+					if (result != 0) {
+						return result;
+					}
+				}
+				return 0;
+			}
+
+			private int compareBy(UniqueId.Segment a, UniqueId.Segment b) {
+				int result = a.getType().compareTo(b.getType());
+				if (result != 0) {
+					return result;
+				}
+				return a.getValue().compareTo(b.getValue());
+			}
+
+			private int getLevel() {
+				return this.id.getSegments().size();
 			}
 
 			private boolean isContainer() {
