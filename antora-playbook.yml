@@ -1,6 +1,7 @@
 antora:
   extensions:
   - '@antora/collector-extension'
+  - '@antora/lunr-extension'
 site:
   title: JUnit User Guide
   url: https://docs.junit.org
