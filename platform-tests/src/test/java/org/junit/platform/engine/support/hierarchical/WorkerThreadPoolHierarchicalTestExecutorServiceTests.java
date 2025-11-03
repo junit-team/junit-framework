@@ -490,8 +490,8 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 
 		List<TestTaskStub> children = Arrays.asList(leaf1d, leaf1a, leaf1b, leaf1c);
 		Collections.shuffle(children);
-		
-		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, //
 			() -> requiredService().invokeAll(children)) //
 					.withName("root").withLevel(1);
 
