@@ -1,0 +1,21 @@
+antora:
+  extensions:
+  - '@antora/collector-extension'
+site:
+  title: JUnit User Guide
+  url: https://docs.junit.org
+  robots: allow
+content:
+  sources:
+  - url: ../main
+    branches: antora-migration
+    start_path: documentation
+runtime:
+  fetch: true
+  log:
+    failure_level: warn
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  supplemental_files: ./supplemental-ui

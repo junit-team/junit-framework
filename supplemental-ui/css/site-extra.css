@@ -1,0 +1,8 @@
+.navbar {
+    background: #25a162;
+}
+.navbar-end .navbar-item.has-dropdown:hover .navbar-link,
+.navbar-end .navbar-link:hover,
+.navbar-end>a.navbar-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
