@@ -345,6 +345,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
 			List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
+			int index = 0;
 			for (TestTask child : children) {
 				if (requiresGlobalReadWriteLock(child)) {
 					isolatedTaskCollector.accept(child);
@@ -353,7 +354,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 					sameThreadTasks.add(child);
 				}
 				else {
-					queueEntries.add(workQueue.createEntry(child));
+					queueEntries.add(workQueue.createEntry(child, index++));
 				}
 			}
 
@@ -645,14 +646,14 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		private final Set<Entry> queue = new ConcurrentSkipListSet<>();
 
 		Entry add(TestTask task) {
-			Entry entry = createEntry(task);
+			Entry entry = createEntry(task, 0);
 			LOGGER.trace(() -> "forking: " + entry.task);
 			return doAdd(entry);
 		}
 
-		Entry createEntry(TestTask task) {
+		Entry createEntry(TestTask task, int index) {
 			var uniqueId = task.getTestDescriptor().getUniqueId();
-			return new Entry(uniqueId, task, new CompletableFuture<>());
+			return new Entry(uniqueId, task, new CompletableFuture<>(), index);
 		}
 
 		void addAll(Collection<Entry> entries) {
@@ -685,7 +686,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return queue.iterator();
 		}
 
-		private record Entry(UniqueId id, TestTask task, CompletableFuture<@Nullable Void> future)
+		private record Entry(UniqueId id, TestTask task, CompletableFuture<@Nullable Void> future, int index)
 				implements Comparable<Entry> {
 
 			@SuppressWarnings("FutureReturnValueIgnored")
@@ -707,6 +708,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 					return result;
 				}
 				result = Boolean.compare(this.isContainer(), that.isContainer());
+				if (result != 0) {
+					return result;
+				}
+				result = Integer.compare(that.index(), this.index());
 				if (result != 0) {
 					return result;
 				}

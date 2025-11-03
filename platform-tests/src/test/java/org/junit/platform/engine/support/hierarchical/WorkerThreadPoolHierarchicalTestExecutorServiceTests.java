@@ -29,6 +29,8 @@ import static org.mockito.Mockito.when;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -469,6 +471,36 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
 		assertThat(Stream.of(leaf1a, leaf1b, leaf1c, leaf1d)) //
+				.extracting(TestTaskStub::startTime) //
+				.isSorted();
+	}
+
+	@Test
+	void executesChildrenInInvokeAllOrder() throws Exception {
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1, 1));
+
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf1a").withLevel(2);
+		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf1b").withLevel(2);
+		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf1c").withLevel(2);
+		var leaf1d = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withName("leaf1d").withLevel(2);
+
+		List<TestTaskStub> children = Arrays.asList(leaf1d, leaf1a, leaf1b, leaf1c);
+		Collections.shuffle(children);
+		
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
+			() -> requiredService().invokeAll(children)) //
+					.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf1d)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+
+		assertThat(children) //
 				.extracting(TestTaskStub::startTime) //
 				.isSorted();
 	}
