@@ -28,6 +28,7 @@ if (project in mavenizedProjects) {
 	apply(plugin = "junitbuild.publishing-conventions")
 	apply(plugin = "junitbuild.osgi-conventions")
 	apply(plugin = "junitbuild.backward-compatibility")
+	apply(plugin = "junitbuild.module-artifact-mapping")
 
 	java {
 		withSourcesJar()

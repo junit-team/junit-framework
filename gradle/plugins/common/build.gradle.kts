@@ -9,6 +9,7 @@ dependencies {
 	implementation("junitbuild.base:dsl-extensions")
 	implementation(projects.buildParameters)
 	implementation(projects.backwardCompatibility)
+	implementation(projects.moduleArtifactMapping)
 	implementation(libs.plugins.kotlin.markerCoordinates)
 	implementation(libs.plugins.bnd.markerCoordinates)
 	implementation(libs.plugins.commonCustomUserData.markerCoordinates)

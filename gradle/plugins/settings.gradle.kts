@@ -23,6 +23,7 @@ include("backward-compatibility")
 include("build-parameters")
 include("common")
 include("code-generator")
+include("module-artifact-mapping")
 include("publishing")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
