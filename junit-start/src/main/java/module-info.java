@@ -8,23 +8,23 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-/**
- * Defines the API of the JUnit Start module for writing and running tests.
- * <p>
- * Usage example:
- * <pre>{@code
- * import module org.junit.start;
- *
- *  void main() {
- *    JUnit.run();
- *  }
- *
- *  @Test
- *  void addition() {
- *    Assertions.assertEquals(2, 1 + 1, "Addition error detected!");
- *  }
- * }</pre>
- */
+
+/// Defines the API of the JUnit Start module for writing and running tests.
+///
+/// Usage example:
+/// ```java
+/// import module org.junit.start;
+///
+///  void main() {
+///    JUnit.run();
+///  }
+///
+///  @Test
+///  void addition() {
+///    Assertions.assertEquals(2, 1 + 1, "Addition error detected!");
+///   }
+/// }
+/// ```
 module org.junit.start {
 	requires static transitive org.apiguardian.api;
 	requires static transitive org.jspecify;
