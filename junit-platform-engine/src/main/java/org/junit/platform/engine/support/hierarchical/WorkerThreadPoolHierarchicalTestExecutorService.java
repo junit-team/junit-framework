@@ -694,13 +694,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		private static final class Entry {
 
-			private static final Comparator<Entry> SAME_LENGTH_UNIQUE_ID_COMPARATOR //
-				= (e1, e2) -> compareBy(e1.uniqueId(), e2.uniqueId());
-
 			private static final Comparator<Entry> QUEUE_COMPARATOR = comparing(Entry::level).reversed() //
 					.thenComparing(Entry::isContainer) // tests before containers
 					.thenComparing(Entry::index) //
-					.thenComparing(SAME_LENGTH_UNIQUE_ID_COMPARATOR);
+					.thenComparing(Entry::uniqueId, new SameLengthUniqueIdComparator());
 
 			private static final Comparator<Entry> CHILD_COMPARATOR = comparing(Entry::isContainer).reversed() // containers before tests
 					.thenComparing(Entry::index);
@@ -722,30 +719,6 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				});
 				this.task = task;
 				this.index = index;
-			}
-
-			private static int compareBy(UniqueId a, UniqueId b) {
-				var aIterator = a.getSegments().iterator();
-				var bIterator = b.getSegments().iterator();
-
-				// ids have the same length
-				while (aIterator.hasNext()) {
-					var aCurrent = aIterator.next();
-					var bCurrent = bIterator.next();
-					int result = compareBy(aCurrent, bCurrent);
-					if (result != 0) {
-						return result;
-					}
-				}
-				return 0;
-			}
-
-			private static int compareBy(UniqueId.Segment a, UniqueId.Segment b) {
-				int result = a.getType().compareTo(b.getType());
-				if (result != 0) {
-					return result;
-				}
-				return a.getValue().compareTo(b.getValue());
 			}
 
 			private int index() {
@@ -791,6 +764,34 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 						.append("task", task) //
 						.append("index", index) //
 						.toString();
+			}
+
+			private static class SameLengthUniqueIdComparator implements Comparator<UniqueId> {
+
+				@Override
+				public int compare(UniqueId a, UniqueId b) {
+					var aIterator = a.getSegments().iterator();
+					var bIterator = b.getSegments().iterator();
+
+					// ids have the same length
+					while (aIterator.hasNext()) {
+						var aCurrent = aIterator.next();
+						var bCurrent = bIterator.next();
+						int result = compareBy(aCurrent, bCurrent);
+						if (result != 0) {
+							return result;
+						}
+					}
+					return 0;
+				}
+
+				private static int compareBy(UniqueId.Segment a, UniqueId.Segment b) {
+					int result = a.getType().compareTo(b.getType());
+					if (result != 0) {
+						return result;
+					}
+					return a.getValue().compareTo(b.getValue());
+				}
 			}
 
 		}
