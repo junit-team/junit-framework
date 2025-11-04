@@ -33,7 +33,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * <p>A {@code @ParameterizedClass} must specify at least one
  * {@link org.junit.jupiter.params.provider.ArgumentsProvider ArgumentsProvider}
  * via {@link org.junit.jupiter.params.provider.ArgumentsSource @ArgumentsSource}
- * or a corresponding composed annotation (e.g., {@code @ValueSource},
+ * or a corresponding composed annotation (such as {@code @ValueSource},
  * {@code @CsvSource}, etc.). The provider is responsible for providing a
  * {@link java.util.stream.Stream Stream} of
  * {@link org.junit.jupiter.params.provider.Arguments Arguments} that will be
@@ -52,7 +52,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * <p>A {@code @ParameterizedClass} constructor may declare additional
  * parameters at the end of its parameter list to be resolved by other
  * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers}
- * (e.g., {@code TestInfo}, {@code TestReporter}, etc.). Specifically, such a
+ * (such as {@code TestInfo}, {@code TestReporter}, etc.). Specifically, such a
  * constructor must declare formal parameters according to the following rules.
  *
  * <ol>
@@ -64,7 +64,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  *
  * <p>In this context, an <em>indexed parameter</em> is an argument for a given
  * index in the {@code Arguments} provided by an {@code ArgumentsProvider} that
- * is passed as an argument to the parameterized class at the same index in
+ * is supplied as an argument to the parameterized class at the same index in
  * the constructor's formal parameter list. An <em>aggregator</em> is any
  * parameter of type
  * {@link org.junit.jupiter.params.aggregator.ArgumentsAccessor ArgumentsAccessor}
@@ -112,8 +112,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * <p>If you wish to execute custom code before or after each invocation of the
  * parameterized class, you may declare methods annotated with
  * {@link BeforeParameterizedClassInvocation @BeforeParameterizedClassInvocation}
- * or
- * {@link AfterParameterizedClassInvocation @AfterParameterizedClassInvocation}.
+ * or {@link AfterParameterizedClassInvocation @AfterParameterizedClassInvocation}.
  * This can, for example, be useful to initialize the arguments before they are
  * used.
  *
@@ -125,7 +124,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is inherited by subclasses.
  *
  * @since 5.13
  * @see Parameter

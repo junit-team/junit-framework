@@ -7,7 +7,7 @@ assertj = "3.27.6"
 bnd = "7.1.0"
 checkstyle = "12.1.1"
 eclipse = "4.37.0"
-jackson = "2.20.0"
+jackson = "2.20.1"
 jacoco = "0.8.14"
 jmh = "1.37"
 jruby = "9.4.14.0"
@@ -60,7 +60,7 @@ mockito-bom = { module = "org.mockito:mockito-bom", version = "5.20.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
-nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.10" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.11" }
 opentest4j = { module = "org.opentest4j:opentest4j", version.ref = "opentest4j" }
 openTestReporting-cli = { module = "org.opentest4j.reporting:open-test-reporting-cli", version.ref = "openTestReporting" }
 openTestReporting-events = { module = "org.opentest4j.reporting:open-test-reporting-events", version.ref = "openTestReporting" }
@@ -103,9 +103,8 @@ download = { id = "de.undercouch.download", version = "5.6.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "4.3.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
 gitPublish = { id = "org.ajoberstar.git-publish", version = "5.1.3" }
-japicmp = { id = "me.champeau.gradle.japicmp", version = "0.4.6" }
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
-jreleaser = { id = "org.jreleaser", version = "1.20.0" }
+jreleaser = { id = "org.jreleaser", version = "1.21.0" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.2.21" }
 nullaway = { id = "net.ltgt.nullaway", version = "2.3.0" }

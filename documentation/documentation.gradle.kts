@@ -268,7 +268,7 @@ tasks {
 		outputs.cacheIf { true }
 	}
 
-	val componentDiagram = plantUml.flatMap { it.outputDirectory.file("component-diagram.svg") }
+	val plantUmlOutputDirectory = plantUml.flatMap { it.outputDirectory }
 
 	withType<AbstractAsciidoctorTask>().configureEach {
 		inputs.files(
@@ -278,7 +278,7 @@ tasks {
 			generateConsoleLauncherEnginesOptions,
 			generateApiTables,
 			generateStandaloneConsoleLauncherShadowedArtifactsFile,
-			componentDiagram
+			plantUmlOutputDirectory
 		)
 
 		resources {
@@ -286,7 +286,7 @@ tasks {
 				include("**/images/**/*.png")
 				include("**/images/**/*.svg")
 			}
-			from(componentDiagram) {
+			from(plantUmlOutputDirectory) {
 				into("user-guide/images")
 			}
 		}
@@ -363,7 +363,12 @@ tasks {
 	}
 
 	asciidoctorPdf {
-		setExecutionMode(JAVA_EXEC) // Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		// Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		// Avoid propagating apparent memory leaks in Asciidoctor/JRuby to Gradle daemon.
+		setExecutionMode(JAVA_EXEC)
+		jvm {
+			maxHeapSize = "512M"
+		}
 		sources {
 			include("user-guide/index.adoc")
 		}

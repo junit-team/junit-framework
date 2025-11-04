@@ -1,0 +1,30 @@
+@startuml
+object "IDEs"
+object "Build Tools"
+object "Console Launcher"
+object "JUnit Platform"
+together {
+    object "Suite Test Engine"
+    object "Jupiter Test Engine"
+}
+object "@Suite annotated class"
+object "JUnit Platform (@Suite)"
+object "Jupiter Test Engine (@Suite)"
+together {
+    object "Example Test A"
+    object "Example Test A (@Suite)"
+}
+
+"IDEs" --> "JUnit Platform"
+"Build Tools" --> "JUnit Platform"
+"Console Launcher" --> "JUnit Platform" : requests discovery and execution
+
+"JUnit Platform" --> "Suite Test Engine"
+"Suite Test Engine" --> "@Suite annotated class" : discovers and executes
+"@Suite annotated class" --> "JUnit Platform (@Suite)" : requests discovery and execution
+"JUnit Platform (@Suite)" --> "Jupiter Test Engine (@Suite)" : forwards request
+"Jupiter Test Engine (@Suite)"  --> "Example Test A (@Suite)" : discovers and executes
+
+"JUnit Platform" --> "Jupiter Test Engine": forwards request
+"Jupiter Test Engine" --> "Example Test A" #line:red;line.bold;text:red : also discovers and executes!
+@enduml

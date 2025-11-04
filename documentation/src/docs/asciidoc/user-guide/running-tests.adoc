@@ -1011,13 +1011,13 @@ expressions can be useful.
 | `+++catalog \| shipping+++`
 | all tests for *catalog* plus all tests for *shipping*
 
-| `+++catalog & shipping+++`
+| `+++catalog &amp; shipping+++`
 | all tests for the intersection between *catalog* and *shipping*
 
-| `+++product & !end-to-end+++`
+| `+++product &amp; !end-to-end+++`
 | all tests for *product*, but not the _end-to-end_ tests
 
-| `+++(micro \| integration) & (product \| shipping)+++`
+| `+++(micro \| integration) &amp; (product \| shipping)+++`
 | all _micro_ or _integration_ tests for *product* or *shipping*
 |===
 

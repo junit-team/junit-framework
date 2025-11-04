@@ -44,6 +44,7 @@ import platform.tooling.support.ThirdPartyJars;
 class ModularUserGuideTests {
 
 	private static final String DOCUMENTATION_MODULE_DESCRIPTOR = """
+			@SuppressWarnings("removal")
 			open module documentation {
 			  exports example.testkit; // just here to ensure documentation example sources are compiled
 
