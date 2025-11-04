@@ -334,11 +334,11 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var reverseQueueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var reverseQueueEntriesByResult = tryToStealWorkWithoutBlocking(reverseQueueEntries);
-			tryToStealWorkWithBlocking(reverseQueueEntriesByResult);
-			waitFor(reverseQueueEntriesByResult);
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
+			tryToStealWorkWithBlocking(queueEntriesByResult);
+			waitFor(queueEntriesByResult);
 			executeAll(isolatedTasks);
 		}
 
@@ -359,15 +359,14 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			}
 
 			if (!queueEntries.isEmpty()) {
+				queueEntries.sort(WorkQueue.Entry.CHILD_COMPARATOR);
 				if (sameThreadTasks.isEmpty()) {
 					// hold back one task for this thread
-					var lastEntry = queueEntries.stream().max(WorkQueue.Entry.COMPARATOR).orElseThrow();
-					queueEntries.remove(lastEntry);
-					sameThreadTasks.add(lastEntry.task);
+					var firstEntry = queueEntries.remove(0);
+					sameThreadTasks.add(firstEntry.task);
 				}
 				forkAll(queueEntries);
 			}
-			queueEntries.sort(WorkQueue.Entry.COMPARATOR.reversed());
 			return queueEntries;
 		}
 
@@ -562,9 +561,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (currentSubmittedChildren == null || currentSubmittedChildren.isEmpty()) {
 				return;
 			}
-			var iterator = currentSubmittedChildren.listIterator(currentSubmittedChildren.size());
-			while (iterator.hasPrevious()) {
-				WorkQueue.Entry entry = iterator.previous();
+			currentSubmittedChildren.sort(WorkQueue.Entry.CHILD_COMPARATOR);
+			var iterator = currentSubmittedChildren.iterator();
+			while (iterator.hasNext()) {
+				WorkQueue.Entry entry = iterator.next();
 				var result = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
 				if (result.isExecuted()) {
 					iterator.remove();
@@ -654,7 +654,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 	private static class WorkQueue implements Iterable<WorkQueue.Entry> {
 
-		private final Set<Entry> queue = new ConcurrentSkipListSet<>(Entry.COMPARATOR);
+		private final Set<Entry> queue = new ConcurrentSkipListSet<>(Entry.QUEUE_COMPARATOR);
 
 		Entry add(TestTask task, int index) {
 			Entry entry = new Entry(task, index);
@@ -697,10 +697,13 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			private static final Comparator<Entry> SAME_LENGTH_UNIQUE_ID_COMPARATOR //
 				= (e1, e2) -> compareBy(e1.uniqueId(), e2.uniqueId());
 
-			private static final Comparator<Entry> COMPARATOR = comparing(Entry::level).reversed() //
+			private static final Comparator<Entry> QUEUE_COMPARATOR = comparing(Entry::level).reversed() //
 					.thenComparing(Entry::isContainer) // tests before containers
-					.thenComparing(comparing(Entry::index).reversed()) //
-					.thenComparing(SAME_LENGTH_UNIQUE_ID_COMPARATOR.reversed());
+					.thenComparing(Entry::index) //
+					.thenComparing(SAME_LENGTH_UNIQUE_ID_COMPARATOR);
+
+			private static final Comparator<Entry> CHILD_COMPARATOR = comparing(Entry::isContainer).reversed() // containers before tests
+					.thenComparing(Entry::index);
 
 			private final TestTask task;
 			private final CompletableFuture<@Nullable Void> future;

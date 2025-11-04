@@ -272,23 +272,26 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		var resourceLock = new SingleLock(exclusiveResource(LockMode.READ_WRITE), new ReentrantLock());
 
 		var lockFreeChildrenStarted = new CountDownLatch(2);
-		var child4Started = new CountDownLatch(1);
+		var child2Started = new CountDownLatch(1);
 
 		Executable child1Behaviour = () -> {
 			lockFreeChildrenStarted.countDown();
-			child4Started.await();
+			child2Started.await();
 		};
-		Executable child4Behaviour = () -> {
-			child4Started.countDown();
+		Executable child2Behaviour = () -> {
+			child2Started.countDown();
 			lockFreeChildrenStarted.await();
 		};
 
 		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, child1Behaviour) //
 				.withName("child1");
-		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT).withResourceLock(resourceLock) //
-				.withName("child2"); //
-		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, lockFreeChildrenStarted::countDown).withName("child3");
-		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT, child4Behaviour).withResourceLock(resourceLock) //
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, child2Behaviour) //
+				.withResourceLock(resourceLock) //
+				.withName("child2");
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withResourceLock(resourceLock) //
+				.withName("child3"); //
+		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT, lockFreeChildrenStarted::countDown) //
 				.withName("child4");
 		var children = List.of(child1, child2, child3, child4);
 		var root = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().invokeAll(children)) //
@@ -298,8 +301,8 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 
 		root.assertExecutedSuccessfully();
 		assertThat(children).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
-		assertThat(child1.executionThread).isEqualTo(child3.executionThread);
-		assertThat(child2.startTime).isAfterOrEqualTo(child3.startTime);
+		assertThat(child1.executionThread).isEqualTo(child4.executionThread);
+		assertThat(child3.startTime).isAfterOrEqualTo(child4.startTime);
 	}
 
 	@Test
@@ -315,7 +318,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
 				.withName("leaf").withLevel(3);
 		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().submit(leaf).get()) //
-				.withName("child3").withLevel(2);
+				.withType(CONTAINER).withName("child3").withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
 			() -> requiredService().invokeAll(List.of(child1, child2, child3))) //
@@ -462,33 +465,6 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		var leaf1d = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("leaf1d").withLevel(2);
 
-		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
-			() -> requiredService().invokeAll(List.of(leaf1a, leaf1b, leaf1c, leaf1d))) //
-					.withName("root").withLevel(1);
-
-		service.submit(root).get();
-
-		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf1d)) //
-				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
-
-		assertThat(Stream.of(leaf1a, leaf1b, leaf1c, leaf1d)) //
-				.extracting(TestTaskStub::startTime) //
-				.isSorted();
-	}
-
-	@Test
-	void executesChildrenInInvokeAllOrder() throws Exception {
-		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(1, 1));
-
-		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT) //
-				.withName("leaf1a").withLevel(2);
-		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT) //
-				.withName("leaf1b").withLevel(2);
-		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT) //
-				.withName("leaf1c").withLevel(2);
-		var leaf1d = new TestTaskStub(ExecutionMode.CONCURRENT) //
-				.withName("leaf1d").withLevel(2);
-
 		List<TestTaskStub> children = Arrays.asList(leaf1d, leaf1a, leaf1b, leaf1c);
 		Collections.shuffle(children);
 
@@ -507,52 +483,52 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 	}
 
 	@Test
-	void workIsStolenInReverseOrder() throws Exception {
+	void testsAreStolenRatherThanContainers() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
 		// Execute tasks pairwise
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
 		Executable behavior = cyclicBarrier::await;
 
-		// With half of the leaves to be executed normally
-		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
-				.withName("leaf1a").withLevel(2);
-		var leaf1b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
-				.withName("leaf1b").withLevel(2);
-		var leaf1c = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
-				.withName("leaf1c").withLevel(2);
+		// With half of the leaves being containers
+		var container1 = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("container1").withType(CONTAINER).withLevel(2);
+		var container2 = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("container2").withType(CONTAINER).withLevel(2);
+		var container3 = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("container3").withType(CONTAINER).withLevel(2);
 
-		// And half of the leaves to be stolen
-		var leaf2a = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
-				.withName("leaf2a").withLevel(2);
-		var leaf2b = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
-				.withName("leaf2b").withLevel(2);
-		var leaf2c = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
-				.withName("leaf2c").withLevel(2);
+		// And half of the leaves being tests, to be stolen
+		var test1 = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("test1").withType(TEST).withLevel(2);
+		var test2 = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("test2").withType(TEST).withLevel(2);
+		var test3 = new TestTaskStub(ExecutionMode.CONCURRENT, behavior) //
+				.withName("test3").withType(TEST).withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
-			() -> requiredService().invokeAll(List.of(leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c))) //
+			() -> requiredService().invokeAll(List.of(container1, container2, container3, test1, test2, test3))) //
 					.withName("root").withLevel(1);
 
 		service.submit(root).get();
 
-		assertThat(List.of(root, leaf1a, leaf1b, leaf1c, leaf2a, leaf2b, leaf2c)) //
+		assertThat(List.of(root, container1, container2, container3, test1, test2, test3)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
-		// If the last node was stolen.
-		assertThat(leaf1a.executionThread).isNotEqualTo(leaf2c.executionThread);
-		// Then it must follow that the last half of the nodes were stolen
-		assertThat(Stream.of(leaf1a, leaf1b, leaf1c)) //
+		// If the last test node was stolen
+		assertThat(container1.executionThread).isNotEqualTo(test3.executionThread);
+		// Then it must follow that the test nodes were stolen
+		assertThat(Stream.of(container1, container2, container3)) //
 				.extracting(TestTaskStub::executionThread) //
-				.containsOnly(leaf1a.executionThread);
-		assertThat(Stream.of(leaf2a, leaf2b, leaf2c)) //
+				.containsOnly(container1.executionThread);
+		assertThat(Stream.of(test1, test2, test3)) //
 				.extracting(TestTaskStub::executionThread) //
-				.containsOnly(leaf2c.executionThread);
+				.containsOnly(test3.executionThread);
 
-		assertThat(Stream.of(leaf1a, leaf1b, leaf1c)) //
+		assertThat(Stream.of(container1, container2, container3)) //
 				.extracting(TestTaskStub::startTime) //
 				.isSorted();
-		assertThat(Stream.of(leaf2c, leaf2b, leaf2a)) //
+		assertThat(Stream.of(test1, test2, test3)) //
 				.extracting(TestTaskStub::startTime) //
 				.isSorted();
 	}
@@ -585,6 +561,45 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		assertThat(Stream.of(root, child1, child2)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 		assertThat(child2.executionThread).isEqualTo(root.executionThread).isNotEqualTo(child1.executionThread);
+	}
+
+	@Test
+	void stealsDynamicChildrenInOrder() throws Exception {
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
+
+		var child1Started = new CountDownLatch(1);
+		var childrenSubmitted = new CountDownLatch(1);
+		var childrenFinished = new CountDownLatch(2);
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			child1Started.countDown();
+			childrenSubmitted.await();
+		}) //
+				.withName("child1").withLevel(2);
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, childrenFinished::countDown) //
+				.withName("child2").withLevel(2);
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, childrenFinished::countDown) //
+				.withName("child3").withLevel(2);
+
+		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
+			var future1 = requiredService().submit(child1);
+			child1Started.await();
+			var future2 = requiredService().submit(child2);
+			var future3 = requiredService().submit(child3);
+			childrenSubmitted.countDown();
+			childrenFinished.await();
+			future1.get();
+			future2.get();
+			future3.get();
+		}) //
+				.withName("root").withLevel(1);
+
+		service.submit(root).get();
+
+		assertThat(Stream.of(root, child1, child2, child3)) //
+				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
+		assertThat(List.of(child1, child2, child3)) //
+				.extracting(TestTaskStub::startTime) //
+				.isSorted();
 	}
 
 	@Test
@@ -686,27 +701,27 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		var leaf1ASubmitted = new CountDownLatch(1);
 		var leaf1AStarted = new CountDownLatch(1);
 
-		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
-			leaf1AStarted.countDown();
-			child2Started.await();
-		}) //
-				.withName("leaf1a").withLevel(3);
-
 		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
 			child1Started.countDown();
 			leaf1ASubmitted.await();
 		}) //
 				.withName("child1").withLevel(2);
 
-		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, child2Started::countDown) //
-				.withName("child2").withLevel(2);
+		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			leaf1AStarted.countDown();
+			child2Started.await();
+		}) //
+				.withName("leaf1a").withLevel(3);
 
-		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
 			var futureA = requiredService().submit(leaf1a);
 			leaf1ASubmitted.countDown();
 			leaf1AStarted.await();
 			futureA.get();
 		}) //
+				.withName("child2").withType(CONTAINER).withLevel(2);
+
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, child2Started::countDown) //
 				.withName("child3").withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
@@ -715,18 +730,18 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 			var future2 = requiredService().submit(child2);
 			var future3 = requiredService().submit(child3);
 			future1.get();
-			future2.get();
 			future3.get();
+			future2.get();
 		}) //
 				.withName("root").withLevel(1);
 
 		service.submit(root).get();
 
-		assertThat(Stream.of(root, child1, child2, child3, leaf1a)) //
+		assertThat(Stream.of(root, child1, child3, child2, leaf1a)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
-		assertThat(child3.executionThread).isNotEqualTo(child1.executionThread).isNotEqualTo(child2.executionThread);
-		assertThat(child1.executionThread).isNotEqualTo(child2.executionThread);
+		assertThat(child2.executionThread).isNotEqualTo(child1.executionThread).isNotEqualTo(child3.executionThread);
+		assertThat(child1.executionThread).isNotEqualTo(child3.executionThread);
 		assertThat(child1.executionThread).isEqualTo(leaf1a.executionThread);
 	}
 
