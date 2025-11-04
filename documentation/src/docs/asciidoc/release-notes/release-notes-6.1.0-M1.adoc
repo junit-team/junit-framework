@@ -52,6 +52,17 @@ repository on GitHub.
 [[release-notes-6.1.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
+* Introduce new module `org.junit.start` for writing and running tests. It simplifies
+  usages of JUnit in compact source files together with a single module import statement:
+[source,java,indent=0]
+----
+import module org.junit.start;
+
+void main() { JUnit.run(); }
+
+@Test
+void test() { Assertions.assertEquals(2, 1 + 1); }
+----
 * Introduce new `dynamicTest(Consumer<? super Configuration>)` factory method for dynamic
   tests. It allows configuring the `ExecutionMode` of the dynamic test in addition to its
   display name, test source URI, and executable.

@@ -836,6 +836,40 @@ DYNAMIC = 35
 REPORTED = 37
 ----
 
+[[running-tests-source-launcher]]
+=== Source Launcher
+
+Java 25 introduced Module Import Declarations with {JEP511} and Compact Source Files
+and Instance Methods with {JEP512}. The `org.junit.start` module is JUnit's "On-Ramp"
+enabler, allowing to write minimal source code programs. For example, like in a
+`HelloTests.java` file reading:
+
+```java
+import module org.junit.start;
+
+void main() {
+  JUnit.run();
+}
+
+@Test
+void stringLength() {
+  Assertions.assertEquals(11, "Hello JUnit".length());
+}
+```
+With all required modular JAR files available in a local `lib/` directory, the
+following Java 25+ command will discover and execute tests using the JUnit Platform.
+It will also print the result tree to the console.
+
+```shell
+java --module-path lib --add-modules org.junit.start HelloTests.java
+╷
+└─ JUnit Jupiter ✔
+   └─ HelloTests ✔
+      └─ stringLength() ✔
+```
+
+Find JUnit's class API documentation here: {JUnit}
+
 [[running-tests-discovery-selectors]]
 === Discovery Selectors
 

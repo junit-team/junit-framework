@@ -230,6 +230,8 @@ endif::[]
 // Jupiter Migration Support
 :EnableJUnit4MigrationSupport:               {javadoc-root}/org.junit.jupiter.migrationsupport/org/junit/jupiter/migrationsupport/EnableJUnit4MigrationSupport.html[@EnableJUnit4MigrationSupport]
 :EnableRuleMigrationSupport:                 {javadoc-root}/org.junit.jupiter.migrationsupport/org/junit/jupiter/migrationsupport/rules/EnableRuleMigrationSupport.html[@EnableRuleMigrationSupport]
+// JUnit Start
+:JUnit:                                      {javadoc-root}/org.junit.start/org/junit/start/JUnit.html[JUnit]
 // Vintage
 :junit-vintage-engine:                       {javadoc-root}/org.junit.vintage.engine/org/junit/vintage/engine/package-summary.html[junit-vintage-engine]
 // Examples Repository
@@ -247,6 +249,8 @@ endif::[]
 :Checkstyle:                                 https://checkstyle.sourceforge.io[Checkstyle]
 :DiscussionsQA:                              https://github.com/junit-team/junit-framework/discussions/categories/q-a[Q&A category on GitHub Discussions]
 :Hamcrest:                                   https://hamcrest.org/JavaHamcrest/[Hamcrest]
+:JEP511:                                     https://openjdk.org/jeps/511[JEP 511]
+:JEP512:                                     https://openjdk.org/jeps/512[JEP 512]
 :Jimfs:                                      https://google.github.io/jimfs/[Jimfs]
 :Log4j:                                      https://logging.apache.org/log4j/2.x/[Log4j]
 :Log4j_JDK_Logging_Adapter:                  https://logging.apache.org/log4j/2.x/log4j-jul/index.html[Log4j JDK Logging Adapter]
