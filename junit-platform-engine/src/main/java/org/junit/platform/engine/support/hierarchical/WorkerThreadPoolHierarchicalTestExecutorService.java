@@ -346,7 +346,6 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
 			List<WorkQueue.Entry> queueEntries = new ArrayList<>(children.size());
-			int index = 0;
 			for (TestTask child : children) {
 				if (requiresGlobalReadWriteLock(child)) {
 					isolatedTaskCollector.accept(child);
@@ -355,7 +354,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 					sameThreadTasks.add(child);
 				}
 				else {
-					queueEntries.add(new WorkQueue.Entry(child, index++));
+					queueEntries.add(new WorkQueue.Entry(child, nextChildIndex()));
 				}
 			}
 
