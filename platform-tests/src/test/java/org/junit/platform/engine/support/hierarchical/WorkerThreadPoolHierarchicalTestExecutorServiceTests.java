@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -599,7 +600,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT) //
 				.withName("child3").withLevel(2);
 
-		List<TestTaskStub> children = List.of(child1, child2, child3, child4);
+		List<TestTaskStub> children = new ArrayList<>(List.of(child1, child2, child3, child4));
 		Collections.shuffle(children);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
