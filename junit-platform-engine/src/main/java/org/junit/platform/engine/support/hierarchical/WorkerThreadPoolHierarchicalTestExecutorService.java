@@ -10,8 +10,7 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.reverseOrder;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -23,6 +22,7 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -361,13 +361,13 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (!queueEntries.isEmpty()) {
 				if (sameThreadTasks.isEmpty()) {
 					// hold back one task for this thread
-					var lastEntry = queueEntries.stream().max(naturalOrder()).orElseThrow();
+					var lastEntry = queueEntries.stream().max(WorkQueue.Entry.COMPARATOR).orElseThrow();
 					queueEntries.remove(lastEntry);
 					sameThreadTasks.add(lastEntry.task);
 				}
 				forkAll(queueEntries);
 			}
-			queueEntries.sort(reverseOrder());
+			queueEntries.sort(WorkQueue.Entry.COMPARATOR.reversed());
 			return queueEntries;
 		}
 
@@ -653,7 +653,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	}
 
 	private static class WorkQueue implements Iterable<WorkQueue.Entry> {
-		private final Set<Entry> queue = new ConcurrentSkipListSet<>();
+
+		private final Set<Entry> queue = new ConcurrentSkipListSet<>(Entry.COMPARATOR);
 
 		Entry add(TestTask task, int index) {
 			Entry entry = new Entry(task, index);
@@ -691,7 +692,15 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return queue.iterator();
 		}
 
-		private static final class Entry implements Comparable<Entry> {
+		private static final class Entry {
+
+			private static final Comparator<Entry> SAME_LENGTH_UNIQUE_ID_COMPARATOR //
+				= (e1, e2) -> compareBy(e1.uniqueId(), e2.uniqueId());
+
+			private static final Comparator<Entry> COMPARATOR = comparing(Entry::level).reversed() //
+					.thenComparing(Entry::isContainer) // tests before containers
+					.thenComparing(comparing(Entry::index).reversed()) //
+					.thenComparing(SAME_LENGTH_UNIQUE_ID_COMPARATOR.reversed());
 
 			private final TestTask task;
 			private final CompletableFuture<@Nullable Void> future;
@@ -712,24 +721,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				this.index = index;
 			}
 
-			@Override
-			public int compareTo(Entry that) {
-				var result = Integer.compare(that.getLevel(), getLevel());
-				if (result != 0) {
-					return result;
-				}
-				result = Boolean.compare(this.isContainer(), that.isContainer());
-				if (result != 0) {
-					return result;
-				}
-				result = Integer.compare(that.index, index);
-				if (result != 0) {
-					return result;
-				}
-				return compareBy(that.uniqueId(), this.uniqueId());
-			}
-
-			private int compareBy(UniqueId a, UniqueId b) {
+			private static int compareBy(UniqueId a, UniqueId b) {
 				var aIterator = a.getSegments().iterator();
 				var bIterator = b.getSegments().iterator();
 
@@ -745,7 +737,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				return 0;
 			}
 
-			private int compareBy(UniqueId.Segment a, UniqueId.Segment b) {
+			private static int compareBy(UniqueId.Segment a, UniqueId.Segment b) {
 				int result = a.getType().compareTo(b.getType());
 				if (result != 0) {
 					return result;
@@ -753,7 +745,11 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				return a.getValue().compareTo(b.getValue());
 			}
 
-			private int getLevel() {
+			private int index() {
+				return this.index;
+			}
+
+			private int level() {
 				return uniqueId().getSegments().size();
 			}
 
