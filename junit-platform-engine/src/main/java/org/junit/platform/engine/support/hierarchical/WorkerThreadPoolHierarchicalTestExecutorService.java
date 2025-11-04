@@ -28,6 +28,7 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -354,7 +355,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 					sameThreadTasks.add(child);
 				}
 				else {
-					queueEntries.add(workQueue.createEntry(child, index++));
+					queueEntries.add(new WorkQueue.Entry(child, index++));
 				}
 			}
 
@@ -656,14 +657,9 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		private final Set<Entry> queue = new ConcurrentSkipListSet<>();
 
 		Entry add(TestTask task, int index) {
-			Entry entry = createEntry(task, index);
+			Entry entry = new Entry(task, index);
 			LOGGER.trace(() -> "forking: " + entry.task);
 			return doAdd(entry);
-		}
-
-		Entry createEntry(TestTask task, int index) {
-			var uniqueId = task.getTestDescriptor().getUniqueId();
-			return new Entry(uniqueId, task, new CompletableFuture<>(), index);
 		}
 
 		void addAll(Collection<Entry> entries) {
@@ -696,19 +692,25 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return queue.iterator();
 		}
 
-		private record Entry(UniqueId id, TestTask task, CompletableFuture<@Nullable Void> future, int index)
-				implements Comparable<Entry> {
+		private static final class Entry implements Comparable<Entry> {
+
+			private final TestTask task;
+			private final CompletableFuture<@Nullable Void> future;
+			private final int index;
 
 			@SuppressWarnings("FutureReturnValueIgnored")
-			Entry {
-				future.whenComplete((__, t) -> {
+			Entry(TestTask task, int index) {
+				this.future = new CompletableFuture<>();
+				this.future.whenComplete((__, t) -> {
 					if (t == null) {
-						LOGGER.trace(() -> "completed normally: " + this.task());
+						LOGGER.trace(() -> "completed normally: " + task);
 					}
 					else {
-						LOGGER.trace(t, () -> "completed exceptionally: " + this.task());
+						LOGGER.trace(t, () -> "completed exceptionally: " + task);
 					}
 				});
+				this.task = task;
+				this.index = index;
 			}
 
 			@Override
@@ -721,11 +723,11 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				if (result != 0) {
 					return result;
 				}
-				result = Integer.compare(that.index(), this.index());
+				result = Integer.compare(that.index, index);
 				if (result != 0) {
 					return result;
 				}
-				return compareBy(that.id(), this.id());
+				return compareBy(that.uniqueId(), this.uniqueId());
 			}
 
 			private int compareBy(UniqueId a, UniqueId b) {
@@ -753,11 +755,44 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			}
 
 			private int getLevel() {
-				return this.id.getSegments().size();
+				return uniqueId().getSegments().size();
 			}
 
 			private boolean isContainer() {
 				return task.getTestDescriptor().isContainer();
+			}
+
+			private UniqueId uniqueId() {
+				return task.getTestDescriptor().getUniqueId();
+			}
+
+			CompletableFuture<@Nullable Void> future() {
+				return future;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (obj == this) {
+					return true;
+				}
+				if (obj == null || obj.getClass() != this.getClass()) {
+					return false;
+				}
+				var that = (Entry) obj;
+				return Objects.equals(this.uniqueId(), that.uniqueId()) && this.index == that.index;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(uniqueId(), index);
+			}
+
+			@Override
+			public String toString() {
+				return new ToStringBuilder(this) //
+						.append("task", task) //
+						.append("index", index) //
+						.toString();
 			}
 
 		}
