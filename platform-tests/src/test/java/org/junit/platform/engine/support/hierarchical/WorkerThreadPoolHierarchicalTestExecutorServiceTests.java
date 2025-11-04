@@ -736,7 +736,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 
 		service.submit(root).get();
 
-		assertThat(Stream.of(root, child1, child3, child2, leaf2a)) //
+		assertThat(Stream.of(root, child1, child2, leaf2a, child3)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
 		assertThat(child2.executionThread).isNotEqualTo(child1.executionThread).isNotEqualTo(child3.executionThread);
