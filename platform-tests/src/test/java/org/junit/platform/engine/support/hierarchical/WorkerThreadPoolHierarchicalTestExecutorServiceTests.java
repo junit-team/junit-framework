@@ -696,31 +696,31 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 3));
 
 		var child1Started = new CountDownLatch(1);
-		var child2Started = new CountDownLatch(1);
-		var leaf1ASubmitted = new CountDownLatch(1);
-		var leaf1AStarted = new CountDownLatch(1);
+		var child3Started = new CountDownLatch(1);
+		var leaf2ASubmitted = new CountDownLatch(1);
+		var leaf2AStarted = new CountDownLatch(1);
 
 		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
 			child1Started.countDown();
-			leaf1ASubmitted.await();
+			leaf2ASubmitted.await();
 		}) //
 				.withName("child1").withLevel(2);
 
-		var leaf1a = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
-			leaf1AStarted.countDown();
-			child2Started.await();
+		var leaf2a = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
+			leaf2AStarted.countDown();
+			child3Started.await();
 		}) //
 				.withName("leaf1a").withLevel(3);
 
 		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> {
-			var futureA = requiredService().submit(leaf1a);
-			leaf1ASubmitted.countDown();
-			leaf1AStarted.await();
+			var futureA = requiredService().submit(leaf2a);
+			leaf2ASubmitted.countDown();
+			leaf2AStarted.await();
 			futureA.get();
 		}) //
 				.withName("child2").withType(CONTAINER).withLevel(2);
 
-		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, child2Started::countDown) //
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, child3Started::countDown) //
 				.withName("child3").withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD, () -> {
@@ -736,12 +736,12 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 
 		service.submit(root).get();
 
-		assertThat(Stream.of(root, child1, child3, child2, leaf1a)) //
+		assertThat(Stream.of(root, child1, child3, child2, leaf2a)) //
 				.allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
 		assertThat(child2.executionThread).isNotEqualTo(child1.executionThread).isNotEqualTo(child3.executionThread);
 		assertThat(child1.executionThread).isNotEqualTo(child3.executionThread);
-		assertThat(child1.executionThread).isEqualTo(leaf1a.executionThread);
+		assertThat(child1.executionThread).isEqualTo(leaf2a.executionThread);
 	}
 
 	private static ExclusiveResource exclusiveResource(LockMode lockMode) {
