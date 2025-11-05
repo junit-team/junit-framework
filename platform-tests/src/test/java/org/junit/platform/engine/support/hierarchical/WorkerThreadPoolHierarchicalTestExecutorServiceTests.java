@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
@@ -304,7 +305,7 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		assertThat(child3.startTime).isAfterOrEqualTo(child4.startTime);
 	}
 
-	@Test
+	@RepeatedTest(value = 100, failureThreshold = 1)
 	void prioritizesChildrenOfStartedContainers() throws Exception {
 		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
 
