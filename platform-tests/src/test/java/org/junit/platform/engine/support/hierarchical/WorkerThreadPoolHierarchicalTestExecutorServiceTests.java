@@ -42,7 +42,6 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
@@ -305,19 +304,28 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		assertThat(child3.startTime).isAfterOrEqualTo(child4.startTime);
 	}
 
-	@RepeatedTest(value = 100, failureThreshold = 1)
+	@Test
 	void prioritizesChildrenOfStartedContainers() throws Exception {
-		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2));
+		service = new WorkerThreadPoolHierarchicalTestExecutorService(configuration(2, 2));
 
-		var leavesStarted = new CountDownLatch(2);
+		var leafSubmitted = new CountDownLatch(1);
+		var child2AndLeafStarted = new CountDownLatch(2);
 
-		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::await) //
-				.withName("child1").withLevel(2);
-		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
-				.withName("child2").withLevel(2);
-		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, leavesStarted::countDown) //
+		var leaf = new TestTaskStub(ExecutionMode.CONCURRENT, child2AndLeafStarted::countDown) //
 				.withName("leaf").withLevel(3);
-		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().submit(leaf).get()) //
+
+		Executable child3Behavior = () -> {
+			var future = requiredService().submit(leaf);
+			leafSubmitted.countDown();
+			child2AndLeafStarted.await();
+			future.get();
+		};
+
+		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, leafSubmitted::await) //
+				.withName("child1").withLevel(2);
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, child2AndLeafStarted::countDown) //
+				.withName("child2").withLevel(2);
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT, child3Behavior) //
 				.withType(CONTAINER).withName("child3").withLevel(2);
 
 		var root = new TestTaskStub(ExecutionMode.SAME_THREAD,
@@ -327,11 +335,10 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		service.submit(root).get();
 
 		root.assertExecutedSuccessfully();
-		assertThat(List.of(child1, child2, leaf, child3)).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
-		leaf.assertExecutedSuccessfully();
+		assertThat(List.of(root, child1, child2, leaf, child3)).allSatisfy(TestTaskStub::assertExecutedSuccessfully);
 
 		assertThat(leaf.startTime).isBeforeOrEqualTo(child2.startTime);
-		assertThat(leaf.executionThread).isSameAs(child3.executionThread);
+		assertThat(leaf.executionThread).isSameAs(child2.executionThread).isNotSameAs(child3.executionThread);
 	}
 
 	@Test
