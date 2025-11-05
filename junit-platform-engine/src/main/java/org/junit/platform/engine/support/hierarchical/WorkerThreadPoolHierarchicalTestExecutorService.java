@@ -14,6 +14,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.function.Predicate.isEqual;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
@@ -45,6 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -292,7 +294,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		}
 
 		private void processQueueEntries() {
-			var queueEntriesByResult = tryToStealWorkWithoutBlocking(workQueue);
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(workQueue,
+				isEqual(WorkStealResult.EXECUTED_BY_THIS_WORKER));
 			var queueModified = queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_THIS_WORKER) //
 					|| queueEntriesByResult.containsKey(WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER);
 			if (queueModified) {
@@ -336,7 +339,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
 			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
 			executeAll(sameThreadTasks);
-			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries, __ -> false);
 			tryToStealWorkWithBlocking(queueEntriesByResult);
 			waitFor(queueEntriesByResult);
 			executeAll(isolatedTasks);
@@ -371,10 +374,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		}
 
 		private Map<WorkStealResult, List<WorkQueue.Entry>> tryToStealWorkWithoutBlocking(
-				Iterable<WorkQueue.Entry> queueEntries) {
+				Iterable<WorkQueue.Entry> queueEntries, Predicate<? super WorkStealResult> stopCondition) {
 
 			Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult = new EnumMap<>(WorkStealResult.class);
-			tryToStealWork(queueEntries, BlockingMode.NON_BLOCKING, queueEntriesByResult);
+			tryToStealWork(queueEntries, BlockingMode.NON_BLOCKING, queueEntriesByResult, stopCondition);
 			return queueEntriesByResult;
 		}
 
@@ -383,14 +386,18 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (entriesRequiringResourceLocks == null) {
 				return;
 			}
-			tryToStealWork(entriesRequiringResourceLocks, BlockingMode.BLOCKING, queueEntriesByResult);
+			tryToStealWork(entriesRequiringResourceLocks, BlockingMode.BLOCKING, queueEntriesByResult, __ -> false);
 		}
 
 		private void tryToStealWork(Iterable<WorkQueue.Entry> entries, BlockingMode blocking,
-				Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult) {
+				Map<WorkStealResult, List<WorkQueue.Entry>> queueEntriesByResult,
+				Predicate<? super WorkStealResult> stopCondition) {
 			for (var entry : entries) {
-				var state = tryToStealWork(entry, blocking);
-				queueEntriesByResult.computeIfAbsent(state, __ -> new ArrayList<>()).add(entry);
+				var result = tryToStealWork(entry, blocking);
+				queueEntriesByResult.computeIfAbsent(result, __ -> new ArrayList<>()).add(entry);
+				if (stopCondition.test(result)) {
+					break;
+				}
 			}
 		}
 
