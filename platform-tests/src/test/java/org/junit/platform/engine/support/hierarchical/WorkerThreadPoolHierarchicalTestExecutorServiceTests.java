@@ -729,8 +729,8 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 			var future2 = requiredService().submit(child2);
 			var future3 = requiredService().submit(child3);
 			future1.get();
-			future3.get();
 			future2.get();
+			future3.get();
 		}) //
 				.withName("root").withLevel(1);
 
