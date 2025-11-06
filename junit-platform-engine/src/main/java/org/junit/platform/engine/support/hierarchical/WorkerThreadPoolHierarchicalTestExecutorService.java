@@ -293,26 +293,17 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		private void processQueueEntries() {
 			var entriesRequiringResourceLocks = new ArrayList<WorkQueue.Entry>();
-			var queueModified = false;
 
 			for (var entry : workQueue) {
 				var result = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
-				// After executing a test a significant amount of time has passed.
-				// Process the queue from the beginning
 				if (result == WorkStealResult.EXECUTED_BY_THIS_WORKER) {
+					// After executing a test a significant amount of time has passed.
+					// Process the queue from the beginning
 					return;
-				}
-				if (result == WorkStealResult.EXECUTED_BY_DIFFERENT_WORKER) {
-					queueModified = true;
 				}
 				if (result == WorkStealResult.RESOURCE_LOCK_UNAVAILABLE) {
 					entriesRequiringResourceLocks.add(entry);
 				}
-			}
-			// The queue changed while we looked at it.
-			// Check from the start before processing any blocked items.
-			if (queueModified) {
-				return;
 			}
 			if (!entriesRequiringResourceLocks.isEmpty()) {
 				// One entry at a time to avoid blocking too much
