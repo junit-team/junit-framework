@@ -29,6 +29,10 @@
     color: #b62b23
 }
 
+.doc .dlist dt {
+    font-style: normal;
+}
+
 .version-banner {
     color: #856404;
     background-color: #fff3cd;
