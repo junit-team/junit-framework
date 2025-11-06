@@ -28,7 +28,6 @@ asciidoc:
     hide-uri-scheme: '@'
     attribute-missing: warn
 runtime:
-  fetch: true
   log:
     failure_level: warn
 urls:
