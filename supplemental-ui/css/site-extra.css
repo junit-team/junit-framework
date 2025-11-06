@@ -31,3 +31,12 @@
 .doc a:hover {
     color: #b62b23
 }
+
+.version-banner {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    font-size: .88889rem;
+    padding: 1rem 1rem .75rem;
+    margin: 1.5rem 0;
+}
