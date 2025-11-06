@@ -71,20 +71,30 @@ import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestEx
 public final class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	/*
-		This implementation is based on a regular thread pool and a work queue shared among all worker threads. Whenever
-		a task is submitted to the work queue to be executed concurrently, an attempt is made to acquire a worker lease.
-		The number of total worker leases is initialized with the desired parallelism. This ensures	that at most
-		`parallelism` tests are running concurrently, regardless whether the user code performs any	blocking operations.
-		If a worker lease was acquired, a worker thread is started. Each worker thread polls the shared work queue for
-		tasks to run. Since the tasks represent hierarchically structured tests, container tasks will call
-		`submit(TestTask)` or `invokeAll(List<TestTask>)` for their children, recursively. Child tasks with execution
-		mode `CONCURRENT` are submitted to the shared queue be prior to executing those with execution mode
-		`SAME_THREAD` directly. Each worker thread attempts to "steal" queue entries for its children and execute them
-		itself prior to waiting for its children to finish. In case it does need to block, it temporarily gives	up its
-		worker lease and starts another worker thread to compensate for the reduced `parallelism`. If the max pool size
-		does not permit starting another thread, that is ignored in case there are still other active worker threads.
+		This implementation is based on a regular thread pool and a work queue shared among all worker threads.
+
+		Each worker thread scans the shared work queue for tasks to run. Since the tasks represent hierarchically
+		structured tests, container tasks will call `submit(TestTask)` or `invokeAll(List<TestTask>)` for their
+		children, recursively.
+
+		To maintain the desired parallelism -- regardless whether the user code performs any blocking operations --
+		a fixed number of worker leases is configured. Whenever a task is submitted to the work queue to be executed
+		concurrently, an attempt is made to acquire a worker lease. If a worker lease was acquired, a worker thread is
+		started. Each worker thread attempts to "steal" queue entries for its children and execute them itself prior to
+		waiting for its children to finish.
+
+		To optimize CPU utilization, whenever a worker thread does need to block, it temporarily gives up its worker
+		lease and attempts to start another worker thread to compensate for the reduced `parallelism`. If the max pool
+	    size does not permit starting another thread, the attempt is ignored in case there are still other active worker
+	    threads.
+
 		The same happens in case a resource lock needs to be acquired.
-	 */
+
+		To minimize the number of idle workers, worker threads will prefer to steal top level tasks, while working
+		through their own task hierarchy in a depth first fashion. Furthermore, child tasks with execution mode
+		`CONCURRENT` are submitted to the shared queue prior to executing those with execution mode `SAME_THREAD`
+		directly.
+	*/
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
 
