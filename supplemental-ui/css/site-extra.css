@@ -20,3 +20,14 @@
 .breadcrumbs li:first-child {
     display: none;
 }
+
+.toc .toc-menu a.is-active {
+    border-left-color: #25a162;
+}
+
+.doc a {
+    color: #dc524a
+}
+.doc a:hover {
+    color: #b62b23
+}
