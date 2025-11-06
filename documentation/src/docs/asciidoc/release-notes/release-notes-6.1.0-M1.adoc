@@ -30,11 +30,11 @@ repository on GitHub.
 
 * Support for creating a `ModuleSelector` from a `java.lang.Module` and using
   its classloader for test discovery.
-* New `WorkerThreadPoolHierarchicalTestExecutorService` implementation of parallel test
-  execution that is backed by a regular thread pool rather than a `ForkJoinPool`. Engine
-  authors should switch to use `ParallelHierarchicalTestExecutorServiceFactory` rather
-  than instantiating a concrete `HierarchicalTestExecutorService` implementation for
-  parallel execution directly.
+* New `WorkerThreadPoolHierarchicalTestExecutorService` implementation used for parallel
+  test execution that is backed by a regular thread pool rather than a `ForkJoinPool`.
+  Engine authors should switch to use `ParallelHierarchicalTestExecutorServiceFactory`
+  rather than instantiating a concrete `HierarchicalTestExecutorService` implementation
+  for parallel execution directly.
 * `OpenTestReportGeneratingListener` now supports redirecting XML events to a socket via
   the new `junit.platform.reporting.open.xml.socket` configuration parameter. When set to a
   port number, events are sent to `127.0.0.1:<port>` instead of being written to a file.
