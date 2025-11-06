@@ -17,6 +17,16 @@ content:
 asciidoc:
   attributes:
     page-pagination: ''
+    idprefix: '@'
+    idseparator: '-@'
+    table-caption: false
+    table-frame: 'none@'
+    table-grid: 'rows@'
+    table-stripes: 'odd@'
+    example-caption: false
+    listing-caption: false
+    hide-uri-scheme: '@'
+    attribute-missing: warn
 runtime:
   fetch: true
   log:
