@@ -69,7 +69,6 @@ tasks.withType<JavaCompile>().configureEach {
 			}
 			onlyNullMarked = true
 			isJSpecifyMode = true
-			customContractAnnotations.add("org.junit.platform.commons.annotation.Contract")
 			checkContracts = true
 			suppressionNameAliases.add("DataFlowIssue")
 		}
