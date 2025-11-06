@@ -13,9 +13,6 @@
 .nav-menu > .title {
     display: none;
 }
-.nav-menu > .nav-list {
-    margin-left: 0;
-}
 
 .breadcrumbs li:first-child {
     display: none;
