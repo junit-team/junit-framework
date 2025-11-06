@@ -14,9 +14,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 // end::user_guide[]
+// @formatter:off
 @Suppress("JUnitMalformedDeclaration")
 // tag::user_guide[]
 class KotlinCoroutinesDemo {
+    // end::user_guide[]
+    // @formatter:on
+    // tag::user_guide[]
     @BeforeEach
     fun regularSetUp() {
     }

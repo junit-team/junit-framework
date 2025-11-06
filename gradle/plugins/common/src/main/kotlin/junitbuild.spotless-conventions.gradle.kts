@@ -58,6 +58,7 @@ spotless {
 			licenseHeaderFile(license.headerFile)
 			trimTrailingWhitespace()
 			endWithNewline()
+			toggleOffOn("formatter:off", "formatter:on")
 		}
 	}
 
