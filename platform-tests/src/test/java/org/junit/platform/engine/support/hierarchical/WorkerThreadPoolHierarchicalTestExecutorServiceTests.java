@@ -248,10 +248,13 @@ class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 		var child1 = new TestTaskStub(ExecutionMode.CONCURRENT, child1Behaviour) //
 				.withResourceLock(resourceLock) //
 				.withName("child1");
-		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, lockFreeChildrenStarted::countDown).withName("child2"); //
-		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT).withResourceLock(resourceLock) //
+		var child2 = new TestTaskStub(ExecutionMode.CONCURRENT, lockFreeChildrenStarted::countDown) //
+				.withName("child2"); //
+		var child3 = new TestTaskStub(ExecutionMode.CONCURRENT) //
+				.withResourceLock(resourceLock) //
 				.withName("child3");
-		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT, child4Behaviour).withName("child4");
+		var child4 = new TestTaskStub(ExecutionMode.CONCURRENT, child4Behaviour) //
+				.withName("child4");
 		var children = List.of(child1, child2, child3, child4);
 		var root = new TestTaskStub(ExecutionMode.CONCURRENT, () -> requiredService().invokeAll(children)) //
 				.withName("root");
