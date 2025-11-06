@@ -110,7 +110,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 						+ PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME + "' configuration parameter to '"
 						+ WORKER_THREAD_POOL + "' and report any issues to the JUnit team. "
 						+ "Alternatively, set the configuration parameter to '" + FORK_JOIN_POOL
-						+ "' to hide this message.");
+						+ "' to hide this message and keep using the original implementation.");
 			issueReporter.reportIssue(info);
 		}
 	}

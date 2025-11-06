@@ -188,8 +188,8 @@ class DefaultJupiterConfigurationTests {
 				Parallel test execution is enabled but the default ForkJoinPool-based executor service will be used. \
 				Please give the new implementation based on a regular thread pool a try by setting the \
 				'junit.jupiter.execution.parallel.config.executor-service' configuration parameter to \
-				'WORKER_THREAD_POOL' and report any issues to the JUnit team. \
-				Alternatively, set the configuration parameter to 'FORK_JOIN_POOL' to hide this message."""));
+				'WORKER_THREAD_POOL' and report any issues to the JUnit team. Alternatively, set the configuration \
+				parameter to 'FORK_JOIN_POOL' to hide this message and keep using the original implementation."""));
 	}
 
 	private void assertDefaultConfigParam(@Nullable String configValue, Lifecycle expected) {
