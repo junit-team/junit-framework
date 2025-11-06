@@ -315,9 +315,12 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 					entriesRequiringResourceLocks.add(entry);
 				}
 			}
-			if (!entriesRequiringResourceLocks.isEmpty()) {
-				// One entry at a time to avoid blocking too much
-				tryToStealWork(entriesRequiringResourceLocks.get(0), BlockingMode.BLOCKING);
+
+			for (var entry : entriesRequiringResourceLocks) {
+				var result = tryToStealWork(entry, BlockingMode.BLOCKING);
+				if (result == WorkStealResult.EXECUTED_BY_THIS_WORKER) {
+					return;
+				}
 			}
 		}
 
