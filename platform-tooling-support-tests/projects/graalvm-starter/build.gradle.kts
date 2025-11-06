@@ -33,14 +33,19 @@ tasks.test {
 
 val initializeAtBuildTime = mapOf(
 	// These need to be added to native-build-tools
-	"6.1" to listOf<String>(),
+	"5.14.1" to listOf(
+		"org.junit.jupiter.engine.discovery.MethodSegmentResolver"
+	),
 )
 
 graalvmNative {
 	binaries {
 		named("test") {
 			buildArgs.add("-H:+ReportExceptionStackTraces")
-			buildArgs.add("--initialize-at-build-time=${initializeAtBuildTime.values.flatten().joinToString(",")}")
+			val classNames = initializeAtBuildTime.values.flatten()
+			if (classNames.isNotEmpty()) {
+				buildArgs.add("--initialize-at-build-time=${classNames.joinToString(",")}")
+			}
 		}
 	}
 }
