@@ -6,3 +6,13 @@
 .navbar-end>a.navbar-item:hover {
     background: rgba(0, 0, 0, 0.1);
 }
+
+.nav-menu {
+    padding-left: 1rem;
+}
+.nav-menu > .title {
+    display: none;
+}
+.nav-menu > .nav-list {
+    margin-left: 0;
+}
