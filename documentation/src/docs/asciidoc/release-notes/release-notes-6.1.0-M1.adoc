@@ -53,7 +53,7 @@ repository on GitHub.
 ==== New Features and Improvements
 
 * Introduce new module `org.junit.start` for writing and running tests. It simplifies
-  using JUnit in compact source files together with a single module import statement.
+  using JUnit in compact source files together with a single module import statement:
 * Introduce new `dynamicTest(Consumer<? super Configuration>)` factory method for dynamic
   tests. It allows configuring the `ExecutionMode` of the dynamic test in addition to its
   display name, test source URI, and executable.
