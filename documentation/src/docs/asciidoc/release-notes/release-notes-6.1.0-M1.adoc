@@ -53,7 +53,7 @@ repository on GitHub.
 ==== New Features and Improvements
 
 * Introduce new module `org.junit.start` for writing and running tests. It simplifies
-  usages of JUnit in compact source files together with a single module import statement:
+  using JUnit in compact source files together with a single module import statement:
 [source,java,indent=0]
 ----
 import module org.junit.start;
