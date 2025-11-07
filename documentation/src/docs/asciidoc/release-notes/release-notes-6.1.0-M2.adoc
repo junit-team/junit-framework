@@ -6,9 +6,7 @@
 *Scope:* ❓
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
-link:{junit-framework-repo}+/milestone/112?closed=1+[6.1.0-M2] milestone page in the JUnit
-repository on GitHub.
-
+link:{junit-framework-repo}+/milestone/112?closed=1+[6.1.0-M2] milestone page in the JUnit repository on GitHub.
 
 [[release-notes-6.1.0-M2-junit-platform]]
 === JUnit Platform
@@ -28,7 +26,6 @@ repository on GitHub.
 
 * ❓
 
-
 [[release-notes-6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
 
@@ -47,6 +44,8 @@ repository on GitHub.
 
 * `JAVA_27` has been added to the `JRE` enum for use with `JRE`-based execution conditions.
 
+* https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and `DefaultTimeZoneExtension` are now part of the JUnit Jupiter.
+Find an example at the <<../user-guide/index.adoc#writing-tests-built-in-extensions-DefaultLocaleAndTimeZone, User Guide>>.
 
 [[release-notes-6.1.0-M2-junit-vintage]]
 === JUnit Vintage

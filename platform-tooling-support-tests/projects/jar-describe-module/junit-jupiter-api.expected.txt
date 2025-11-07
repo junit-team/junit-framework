@@ -6,6 +6,7 @@ exports org.junit.jupiter.api.extension.support
 exports org.junit.jupiter.api.function
 exports org.junit.jupiter.api.io
 exports org.junit.jupiter.api.parallel
+exports org.junit.jupiter.api.util
 requires java.base mandated
 requires kotlin.stdlib static
 requires org.apiguardian.api static transitive
