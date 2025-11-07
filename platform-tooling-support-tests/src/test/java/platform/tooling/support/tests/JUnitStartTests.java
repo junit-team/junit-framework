@@ -39,7 +39,7 @@ class JUnitStartTests {
 
 	@BeforeAll
 	static void prepareLocalLibraryDirectoryWithJUnitModules() throws Exception {
-		copyToWorkspace(Projects.JUNIT_start, workspace);
+		copyToWorkspace(Projects.JUNIT_START, workspace);
 		var lib = workspace.resolve("lib");
 		try {
 			Files.createDirectories(lib);
