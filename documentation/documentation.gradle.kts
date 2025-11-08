@@ -28,7 +28,13 @@ modularProjects.forEach { evaluationDependsOn(it.path) }
 
 javaLibrary {
 	mainJavaVersion = JavaVersion.VERSION_17
-	testJavaVersion = JavaVersion.VERSION_17
+	testJavaVersion = JavaVersion.VERSION_25
+}
+
+spotless {
+	java {
+		targetExclude("src/test/java/JUnitStartTests.java") // due to compact source files and module imports
+	}
 }
 
 val apiReport = configurations.dependencyScope("apiReport")
@@ -68,6 +74,7 @@ dependencies {
 	testImplementation(projects.junitPlatformConsole)
 	testImplementation(projects.junitPlatformSuite)
 	testImplementation(projects.junitPlatformTestkit)
+	testImplementation(projects.junitStart)
 	testImplementation(projects.junitVintageEngine)
 	testImplementation(kotlin("stdlib"))
 	testRuntimeOnly(libs.kotlinx.coroutines)
