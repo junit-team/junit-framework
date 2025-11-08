@@ -33,6 +33,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -58,7 +60,7 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 		var configuration = new DefaultParallelExecutionConfiguration(2, 1, 1, 1, 0, __ -> true);
 
 		JUnitException exception = assertThrows(JUnitException.class, () -> {
-			try (var pool = new ForkJoinPoolHierarchicalTestExecutorService(configuration)) {
+			try (var pool = new ForkJoinPoolHierarchicalTestExecutorService(configuration, TaskEventListener.NOOP)) {
 				assertNotNull(pool, "we won't get here");
 			}
 		});
@@ -168,7 +170,7 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 		);
 	}
 
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings("NullAway")
 	@ParameterizedTest
 	@MethodSource("compatibleLockCombinations")
 	void canWorkStealTaskWithCompatibleLocks(Set<ExclusiveResource> initialResources,
@@ -293,8 +295,8 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 	}
 
 	private void withForkJoinPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration,
-			TaskEventListener taskEventListener, ThrowingConsumer<ForkJoinPoolHierarchicalTestExecutorService> action)
-			throws Throwable {
+			TaskEventListener taskEventListener,
+			ThrowingConsumer<@NonNull ForkJoinPoolHierarchicalTestExecutorService> action) throws Throwable {
 		try (var service = new ForkJoinPoolHierarchicalTestExecutorService(configuration, taskEventListener)) {
 
 			action.accept(service);
@@ -304,14 +306,14 @@ class ForkJoinPoolHierarchicalTestExecutorServiceTests {
 		}
 	}
 
+	@NullMarked
 	static final class DummyTestTask implements TestTask {
 
 		private final String identifier;
 		private final ResourceLock resourceLock;
 		private final Executable action;
 
-		@Nullable
-		private volatile String threadName;
+		private volatile @Nullable String threadName;
 
 		private final CountDownLatch started = new CountDownLatch(1);
 		private final CompletableFuture<?> completion = new CompletableFuture<>();

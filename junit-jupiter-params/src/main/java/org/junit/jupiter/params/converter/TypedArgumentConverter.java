@@ -13,6 +13,7 @@ package org.junit.jupiter.params.converter;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.support.FieldContext;
@@ -43,7 +44,8 @@ public abstract class TypedArgumentConverter<S, T extends @Nullable Object> impl
 	 * @param targetType the type of the target object to create from the source;
 	 * never {@code null}
 	 */
-	protected TypedArgumentConverter(Class<S> sourceType, Class<T> targetType) {
+	protected TypedArgumentConverter(Class<S> sourceType,
+			@SuppressWarnings("NullableProblems") Class<@NonNull T> targetType) {
 		this.sourceType = Preconditions.notNull(sourceType, "sourceType must not be null");
 		this.targetType = Preconditions.notNull(targetType, "targetType must not be null");
 	}

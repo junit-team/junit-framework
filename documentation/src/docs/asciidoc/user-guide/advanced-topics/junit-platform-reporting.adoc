@@ -42,9 +42,15 @@ The listener is auto-registered and can be configured via the following
   Enable/disable writing the report; defaults to `false`.
 `junit.platform.reporting.open.xml.git.enabled=true|false`::
   Enable/disable including information about the Git repository (see https://github.com/ota4j-team/open-test-reporting#git[Git extension schema] of open-test-reporting); defaults to `false`.
+`junit.platform.reporting.open.xml.socket=<port>`::
+  Optional port number to redirect events to a socket instead of a file. When specified, the
+  listener will connect to `127.0.0.1:<port>` and send the XML events to the socket. The socket
+  connection is automatically closed when the test execution completes.
 
 If enabled, the listener creates an XML report file named `open-test-report.xml` in the
-configured <<junit-platform-reporting-output-directory, output directory>>.
+configured <<junit-platform-reporting-output-directory, output directory>>, unless the
+`junit.platform.reporting.open.xml.socket` configuration parameter is set, in which case the
+events are sent to the specified socket instead.
 
 If <<running-tests-capturing-output, output capturing>> is enabled, the captured output
 written to `System.out` and `System.err` will be included in the report as well.

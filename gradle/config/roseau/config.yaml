@@ -1,0 +1,5 @@
+common:
+  excludes:
+    annotations:
+      - name: org.apiguardian.api.API
+        args: { status: org.apiguardian.api.API$Status.INTERNAL }

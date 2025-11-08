@@ -10,7 +10,9 @@
 
 package org.junit.platform.console.command;
 
-import static org.junit.platform.console.command.CommandResult.SUCCESS;
+import static org.junit.platform.console.command.ExitCode.NO_TESTS_FOUND;
+import static org.junit.platform.console.command.ExitCode.SUCCESS;
+import static org.junit.platform.console.command.ExitCode.TEST_FAILED;
 
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -34,17 +36,6 @@ import picocli.CommandLine.Option;
 		description = "Execute tests" //
 )
 class ExecuteTestsCommand extends BaseCommand<TestExecutionSummary> implements CommandLine.IExitCodeGenerator {
-
-	/**
-	 * Exit code indicating test failure(s)
-	 */
-	private static final int TEST_FAILED = 1;
-
-	/**
-	 * Exit code indicating no tests found
-	 */
-	private static final int NO_TESTS_FOUND = 2;
-
 	private final ConsoleTestExecutor.Factory consoleTestExecutorFactory;
 
 	@Mixin

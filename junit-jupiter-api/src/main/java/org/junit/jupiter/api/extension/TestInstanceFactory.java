@@ -43,6 +43,17 @@ import org.junit.jupiter.api.TestInstance;
  * <p>Consult the documentation in {@link Extension} for details on
  * constructor requirements.
  *
+ * <h2>{@code ExtensionContext} Scope</h2>
+ *
+ * <p>As of JUnit Jupiter 5.12, this API participates in the
+ * {@link TestInstantiationAwareExtension} contract. Implementations of this API
+ * may therefore choose to override
+ * {@link TestInstantiationAwareExtension#getTestInstantiationExtensionContextScope(ExtensionContext)
+ * getTestInstantiationExtensionContextScope(ExtensionContext)} to require a
+ * test-method scoped {@code ExtensionContext}. See
+ * {@link #createTestInstance(TestInstanceFactoryContext, ExtensionContext)} for
+ * further details.
+ *
  * @since 5.3
  * @see #createTestInstance(TestInstanceFactoryContext, ExtensionContext)
  * @see TestInstanceFactoryContext

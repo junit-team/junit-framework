@@ -53,7 +53,7 @@ import org.junit.platform.commons.annotation.Testable;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is inherited by subclasses.
  *
  * @since 5.13
  * @see TestTemplate

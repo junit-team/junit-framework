@@ -12,15 +12,6 @@ dependencies {
 	errorprone(dependencyFromLibs("error-prone-contrib"))
 	errorprone(dependencyFromLibs("error-prone-core"))
 	errorprone(dependencyFromLibs("nullaway"))
-	constraints {
-		errorprone("com.google.guava:guava") {
-			version {
-				require("33.4.8-jre")
-			}
-			because("Older versions use deprecated methods in sun.misc.Unsafe")
-			// https://github.com/junit-team/junit-framework/pull/5039#discussion_r2414490581
-		}
-	}
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -69,7 +60,6 @@ tasks.withType<JavaCompile>().configureEach {
 			}
 			onlyNullMarked = true
 			isJSpecifyMode = true
-			customContractAnnotations.add("org.junit.platform.commons.annotation.Contract")
 			checkContracts = true
 			suppressionNameAliases.add("DataFlowIssue")
 		}

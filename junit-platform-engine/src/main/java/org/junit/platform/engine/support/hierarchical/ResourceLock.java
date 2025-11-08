@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.List;
@@ -25,6 +26,17 @@ import org.apiguardian.api.API;
  */
 @API(status = STABLE, since = "1.10")
 public interface ResourceLock extends AutoCloseable {
+
+	/**
+	 * Try to acquire this resource lock, without blocking.
+	 *
+	 * @return {@code true} if the lock was acquired and {@code false} otherwise
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	default boolean tryAcquire() {
+		return false;
+	}
 
 	/**
 	 * Acquire this resource lock, potentially blocking.

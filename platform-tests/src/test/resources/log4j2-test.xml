@@ -5,7 +5,7 @@
 			   xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+			<PatternLayout pattern="%d{HH:mm:ss.SSSSSS} [%-18t] %-5level %logger{1.} - %msg%n"/>
 		</Console>
 	</Appenders>
 	<Loggers>
@@ -21,6 +21,7 @@
 		<Logger name="org.junit.platform.launcher.core.InternalTestPlan" level="ERROR"/>
 		<Logger name="org.junit.platform.launcher.core.LauncherConfigurationParameters" level="ERROR"/>
 		<Logger name="org.junit.platform.launcher.listeners.discovery.LoggingLauncherDiscoveryListener" level="OFF"/>
+		<Logger name="org.junit.platform.engine.support.hierarchical.WorkerThreadPoolHierarchicalTestExecutorService" level="ERROR"/>
 		<Logger name="org.junit.vintage.engine" level="ERROR"/>
 		<Logger name="org.junit.jupiter.engine" level="ERROR"/>
 		<Root level="ERROR">

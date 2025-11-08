@@ -5,7 +5,7 @@
 
 *Scope:*
 
-* Java 17 and Kotlin 2.2 baseline
+* Java 17 and Kotlin 2.1 baseline
 * Single version number for Platform, Jupiter, and Vintage
 * Use of JSpecify annotations to express nullability
 * Integration of JFR functionality in `junit-platform-launcher`

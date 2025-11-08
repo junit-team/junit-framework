@@ -14,6 +14,8 @@ tests. Moreover, third party test libraries – like Spock or Cucumber – can p
 JUnit Platform's launching infrastructure by providing a custom
 <<test-engines,TestEngine>>.
 
+image::launcher-api-diagram.svg[role=text-center]
+
 The launcher API is in the `{junit-platform-launcher}` module.
 
 An example consumer of the launcher API is the `{ConsoleLauncher}` in the

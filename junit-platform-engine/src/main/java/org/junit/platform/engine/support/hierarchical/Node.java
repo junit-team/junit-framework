@@ -11,6 +11,7 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.Collections.emptySet;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -180,6 +181,23 @@ public interface Node<C extends EngineExecutionContext> {
 	@API(status = STABLE, since = "1.10", consumers = "org.junit.platform.engine.support.hierarchical")
 	default Set<ExclusiveResource> getExclusiveResources() {
 		return emptySet();
+	}
+
+	/**
+	 * {@return whether this node requires the global read-write lock}
+	 *
+	 * <p>Engines should return {@code true} for all nodes that have behavior,
+	 * including tests but also containers with before/after lifecycle hooks.
+	 *
+	 * <p>The default implementation returns {@code true}. The value returned by
+	 * engine-level nodes is ignored. Otherwise, if a container node returns
+	 * {@code true}, the value returned by its descendants is ignored.
+	 *
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	default boolean isGlobalReadLockRequired() {
+		return true;
 	}
 
 	/**

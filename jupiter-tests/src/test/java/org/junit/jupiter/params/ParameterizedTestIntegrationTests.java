@@ -63,6 +63,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -2629,6 +2630,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			assertEquals("", locale.getCountry());
 		}
 
+		@NullMarked
 		static class Iso639Converter extends TypedArgumentConverter<String, Locale> {
 
 			Iso639Converter() {

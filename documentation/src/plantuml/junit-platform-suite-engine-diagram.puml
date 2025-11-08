@@ -1,0 +1,32 @@
+@startuml
+object "IDEs"
+object "Build Tools"
+object "Console Launcher"
+
+object "JUnit Platform"
+object "Suite Test Engine"
+
+object "@Suite annotated class A"
+object "@Suite annotated class B"
+object "JUnit Platform (A)"
+object "JUnit Platform (B)"
+object "Jupiter Test Engine (A)"
+object "Jupiter Test Engine (B)"
+object "Tests in package A"
+object "Tests in package B"
+
+"IDEs" --> "JUnit Platform"
+"Build Tools" --> "JUnit Platform"
+"Console Launcher" --> "JUnit Platform" : requests discovery and execution
+"JUnit Platform" --> "Suite Test Engine": forwards request
+
+"Suite Test Engine" --> "@Suite annotated class A"
+"@Suite annotated class A" --> "JUnit Platform (A)" 
+"JUnit Platform (A)" --> "Jupiter Test Engine (A)"
+"Jupiter Test Engine (A)"  --> "Tests in package A"
+
+"Suite Test Engine" --> "@Suite annotated class B" : discovers and executes
+"@Suite annotated class B" --> "JUnit Platform (B)" : requests discovery and execution
+"JUnit Platform (B)" --> "Jupiter Test Engine (B)" : forwards request
+"Jupiter Test Engine (B)" --> "Tests in package B" : discovers and executes
+@enduml

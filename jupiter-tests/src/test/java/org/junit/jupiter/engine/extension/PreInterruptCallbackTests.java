@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
 import org.assertj.core.api.Condition;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,10 +62,10 @@ class PreInterruptCallbackTests extends AbstractJupiterTestEngineTests {
 	private static final String TC = "test";
 	private static final String TIMEOUT_ERROR_MSG = TC + "() timed out after 1 microsecond";
 	private static final AtomicBoolean interruptedTest = new AtomicBoolean();
-	private static final CompletableFuture<Void> testThreadExecutionDone = new CompletableFuture<>();
-	private static final AtomicReference<Thread> interruptedTestThread = new AtomicReference<>();
+	private static final CompletableFuture<?> testThreadExecutionDone = new CompletableFuture<>();
+	private static final AtomicReference<@Nullable Thread> interruptedTestThread = new AtomicReference<>();
 	private static final AtomicBoolean interruptCallbackShallThrowException = new AtomicBoolean();
-	private static final AtomicReference<PreInterruptContext> calledPreInterruptContext = new AtomicReference<>();
+	private static final AtomicReference<@Nullable PreInterruptContext> calledPreInterruptContext = new AtomicReference<>();
 
 	@BeforeEach
 	void setUp() {

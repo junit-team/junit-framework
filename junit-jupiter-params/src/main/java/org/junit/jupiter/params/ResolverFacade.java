@@ -98,7 +98,9 @@ class ResolverFacade {
 		Stream.concat(uniqueIndexedParameters.values().stream(), aggregatorParameters.stream()) //
 				.forEach(declaration -> makeAccessible(declaration.getField()));
 
-		return new ResolverFacade(clazz, uniqueIndexedParameters, aggregatorParameters, 0);
+		var requiredParameterCount = new RequiredParameterCount(uniqueIndexedParameters.size(), "field injection");
+
+		return new ResolverFacade(clazz, uniqueIndexedParameters, aggregatorParameters, 0, requiredParameterCount);
 	}
 
 	static ResolverFacade create(Constructor<?> constructor, ParameterizedClass annotation) {
@@ -155,25 +157,33 @@ class ResolverFacade {
 			}
 		}
 		return new ResolverFacade(executable, indexedParameters, new LinkedHashSet<>(aggregatorParameters.values()),
-			indexOffset);
+			indexOffset, null);
 	}
 
 	private final int parameterIndexOffset;
 	private final Map<ParameterDeclaration, Resolver> resolvers;
 	private final DefaultParameterDeclarations indexedParameterDeclarations;
 	private final Set<? extends ResolvableParameterDeclaration> aggregatorParameters;
+	private final @Nullable RequiredParameterCount requiredParameterCount;
 
 	private ResolverFacade(AnnotatedElement sourceElement,
 			NavigableMap<Integer, ? extends ResolvableParameterDeclaration> indexedParameters,
-			Set<? extends ResolvableParameterDeclaration> aggregatorParameters, int parameterIndexOffset) {
+			Set<? extends ResolvableParameterDeclaration> aggregatorParameters, int parameterIndexOffset,
+			@Nullable RequiredParameterCount requiredParameterCount) {
 		this.aggregatorParameters = aggregatorParameters;
 		this.parameterIndexOffset = parameterIndexOffset;
 		this.resolvers = new ConcurrentHashMap<>(indexedParameters.size() + aggregatorParameters.size());
 		this.indexedParameterDeclarations = new DefaultParameterDeclarations(sourceElement, indexedParameters);
+		this.requiredParameterCount = requiredParameterCount;
 	}
 
 	ParameterDeclarations getIndexedParameterDeclarations() {
 		return this.indexedParameterDeclarations;
+	}
+
+	@Nullable
+	RequiredParameterCount getRequiredParameterCount() {
+		return this.requiredParameterCount;
 	}
 
 	boolean isSupportedParameter(ParameterContext parameterContext, EvaluatedArgumentSet arguments) {
@@ -495,6 +505,7 @@ class ResolverFacade {
 		@Override
 		public @Nullable Object resolve(FieldContext fieldContext, ExtensionContext extensionContext,
 				EvaluatedArgumentSet arguments, int invocationIndex) {
+
 			Object argument = arguments.getConsumedPayload(fieldContext.getParameterIndex());
 			try {
 				return this.argumentConverter.convert(argument, fieldContext);
@@ -751,5 +762,8 @@ class ResolverFacade {
 				() -> this.originalResolverFacade.resolve(originalDeclaration, extensionContext, arguments,
 					invocationIndex, Optional.of(parameterContext)));
 		}
+	}
+
+	record RequiredParameterCount(int value, String reason) {
 	}
 }

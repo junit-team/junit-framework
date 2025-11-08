@@ -224,9 +224,9 @@ endif::[]
 :TestReporterParameterResolver:              {current-branch}/junit-jupiter-engine/src/main/java/org/junit/jupiter/engine/extension/TestReporterParameterResolver.java[TestReporterParameterResolver]
 :TypeBasedParameterResolver:                 {current-branch}/junit-jupiter-api/src/main/java/org/junit/jupiter/api/extension/support/TypeBasedParameterResolver.java[TypeBasedParameterResolver]
 // Jupiter Examples
-:CustomAnnotationParameterResolver:          {current-branch}/junit-jupiter-engine/src/test/java/org/junit/jupiter/engine/execution/injection/sample/CustomAnnotationParameterResolver.java[CustomAnnotationParameterResolver]
-:CustomTypeParameterResolver:                {current-branch}/junit-jupiter-engine/src/test/java/org/junit/jupiter/engine/execution/injection/sample/CustomTypeParameterResolver.java[CustomTypeParameterResolver]
-:MapOfListsTypeBasedParameterResolver:       {current-branch}/junit-jupiter-engine/src/test/java/org/junit/jupiter/engine/execution/injection/sample/MapOfListsTypeBasedParameterResolver.java[MapOfListsTypeBasedParameterResolver]
+:CustomAnnotationParameterResolver:          {current-branch}/jupiter-tests/src/test/java/org/junit/jupiter/engine/execution/injection/sample/CustomAnnotationParameterResolver.java[CustomAnnotationParameterResolver]
+:CustomTypeParameterResolver:                {current-branch}/jupiter-tests/src/test/java/org/junit/jupiter/engine/execution/injection/sample/CustomTypeParameterResolver.java[CustomTypeParameterResolver]
+:MapOfListsTypeBasedParameterResolver:       {current-branch}/jupiter-tests/src/test/java/org/junit/jupiter/engine/execution/injection/sample/MapOfListsTypeBasedParameterResolver.java[MapOfListsTypeBasedParameterResolver]
 // Jupiter Migration Support
 :EnableJUnit4MigrationSupport:               {javadoc-root}/org.junit.jupiter.migrationsupport/org/junit/jupiter/migrationsupport/EnableJUnit4MigrationSupport.html[@EnableJUnit4MigrationSupport]
 :EnableRuleMigrationSupport:                 {javadoc-root}/org.junit.jupiter.migrationsupport/org/junit/jupiter/migrationsupport/rules/EnableRuleMigrationSupport.html[@EnableRuleMigrationSupport]

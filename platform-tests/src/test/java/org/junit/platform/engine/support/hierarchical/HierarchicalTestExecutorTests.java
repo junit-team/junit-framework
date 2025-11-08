@@ -34,10 +34,14 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
@@ -47,6 +51,7 @@ import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.hierarchical.ExclusiveResource.LockMode;
 import org.junit.platform.engine.support.hierarchical.Node.DynamicTestExecutor;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.launcher.core.ConfigurationParametersFactoryForTests;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -73,14 +78,14 @@ class HierarchicalTestExecutorTests {
 	CancellationToken cancellationToken = CancellationToken.create();
 
 	MyEngineExecutionContext rootContext = new MyEngineExecutionContext();
-	HierarchicalTestExecutor<MyEngineExecutionContext> executor;
+	HierarchicalTestExecutor<@NonNull MyEngineExecutionContext> executor;
 
 	@BeforeEach
 	void init() {
 		executor = createExecutor(new SameThreadHierarchicalTestExecutorService());
 	}
 
-	private HierarchicalTestExecutor<MyEngineExecutionContext> createExecutor(
+	private HierarchicalTestExecutor<@NonNull MyEngineExecutionContext> createExecutor(
 			HierarchicalTestExecutorService executorService) {
 		ExecutionRequest request = mock();
 		when(request.getRootTestDescriptor()).thenReturn(root);
@@ -555,9 +560,10 @@ class HierarchicalTestExecutorTests {
 		inOrder.verify(anotherListener).executionFinished(dynamicTestDescriptor, successful());
 	}
 
-	@Test
+	@ParameterizedTest
+	@EnumSource(ParallelExecutorServiceType.class)
 	@MockitoSettings(strictness = LENIENT)
-	void canAbortExecutionOfDynamicChild() throws Exception {
+	void canAbortExecutionOfDynamicChild(ParallelExecutorServiceType executorServiceType) throws Exception {
 
 		var leafUniqueId = UniqueId.root("leaf", "child leaf");
 		var child = spy(new MyLeaf(leafUniqueId));
@@ -587,10 +593,11 @@ class HierarchicalTestExecutorTests {
 		});
 
 		var parameters = ConfigurationParametersFactoryForTests.create(Map.of(//
+			ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType, //
 			DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME, "fixed", //
-			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, "2"));
+			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, 2));
 
-		try (var executorService = new ForkJoinPoolHierarchicalTestExecutorService(parameters)) {
+		try (var executorService = ParallelHierarchicalTestExecutorServiceFactory.create(parameters)) {
 			createExecutor(executorService).execute().get();
 		}
 
@@ -602,7 +609,7 @@ class HierarchicalTestExecutorTests {
 		return useDynamicTestExecutor(executor -> executor.execute(dynamicChild));
 	}
 
-	private Answer<Object> useDynamicTestExecutor(ThrowingConsumer<DynamicTestExecutor> action) {
+	private Answer<Object> useDynamicTestExecutor(ThrowingConsumer<@NonNull DynamicTestExecutor> action) {
 		return invocation -> {
 			DynamicTestExecutor dynamicTestExecutor = invocation.getArgument(1);
 			action.accept(dynamicTestExecutor);
@@ -658,7 +665,7 @@ class HierarchicalTestExecutorTests {
 		inOrder.verify(listener).executionFinished(eq(child), childExecutionResult.capture());
 
 		assertThat(childExecutionResult.getValue().getStatus()).isEqualTo(FAILED);
-		assertThat(childExecutionResult.getValue().getThrowable().get()).isSameAs(
+		assertThat(childExecutionResult.getValue().getThrowable().orElseThrow()).isSameAs(
 			exceptionInExecute).hasSuppressedException(exceptionInAfter);
 	}
 
@@ -707,7 +714,7 @@ class HierarchicalTestExecutorTests {
 		inOrder.verify(listener).executionFinished(eq(child), childExecutionResult.capture());
 
 		assertThat(childExecutionResult.getValue().getStatus()).isEqualTo(FAILED);
-		assertThat(childExecutionResult.getValue().getThrowable().get()).isSameAs(
+		assertThat(childExecutionResult.getValue().getThrowable().orElseThrow()).isSameAs(
 			exceptionInAfter).hasSuppressedException(exceptionInExecute);
 	}
 
@@ -776,6 +783,7 @@ class HierarchicalTestExecutorTests {
 	private static class MyEngineExecutionContext implements EngineExecutionContext {
 	}
 
+	@NullMarked
 	private static class MyContainer extends AbstractTestDescriptor implements Node<MyEngineExecutionContext> {
 
 		MyContainer(UniqueId uniqueId) {
@@ -788,6 +796,7 @@ class HierarchicalTestExecutorTests {
 		}
 	}
 
+	@NullMarked
 	private static class MyLeaf extends AbstractTestDescriptor implements Node<MyEngineExecutionContext> {
 
 		MyLeaf(UniqueId uniqueId) {
@@ -806,6 +815,7 @@ class HierarchicalTestExecutorTests {
 		}
 	}
 
+	@NullMarked
 	private static class MyContainerAndTestTestCase extends AbstractTestDescriptor
 			implements Node<MyEngineExecutionContext> {
 

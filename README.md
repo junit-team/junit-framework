@@ -1,4 +1,10 @@
-# <img src="https://junit.org/assets/img/junit6-temporary-logo.png" align="right" width="100">JUnit
+<h1>
+  <picture width="200">
+    <source media="(prefers-color-scheme: dark)" srcset="https://junit.org/assets/img/junit-logo-inverted-darker.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://junit.org/assets/img/junit-logo.svg">
+    <img alt="JUnit" src="https://junit.org/assets/img/junit-logo.svg" width="200">
+  </picture>
+</h1>
 
 This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
@@ -12,7 +18,7 @@ This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
 ## Latest Releases
 
-- General Availability (GA): [JUnit 6.0.0](https://github.com/junit-team/junit-framework/releases/tag/r6.0.0) (September 30, 2025)
+- General Availability (GA): [JUnit 6.0.1](https://github.com/junit-team/junit-framework/releases/tag/r6.0.1) (October 31, 2025)
 - Preview (Milestone/Release Candidate): N/A
 
 ## Documentation

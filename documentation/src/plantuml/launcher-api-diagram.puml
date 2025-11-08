@@ -1,0 +1,24 @@
+@startuml
+object "IDEs"
+object "Build Tools"
+object "Console Launcher"
+object "JUnit Platform"
+object "Jupiter Test Engine"
+object "Cucumber Test Engine"
+object "Spock Test Engine"
+object "Test Classes"
+object "Feature Files"
+object "Specifications"
+
+"IDEs" --> "JUnit Platform"
+"Build Tools" --> "JUnit Platform"
+"Console Launcher" --> "JUnit Platform" : requests discovery and execution
+"JUnit Platform" --> "Jupiter Test Engine"
+"Jupiter Test Engine" --> "Test Classes"
+
+"JUnit Platform" --> "Cucumber Test Engine"
+"Cucumber Test Engine" --> "Feature Files"
+
+"JUnit Platform" --> "Spock Test Engine": forwards request
+"Spock Test Engine" --> "Specifications" : discovers and executes
+@enduml

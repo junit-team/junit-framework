@@ -35,9 +35,6 @@ tasks {
 	compileJava {
 		options.compilerArgs.add("-Xlint:-module") // due to qualified exports
 	}
-	japicmp {
-		classExcludes.addAll($$"*.AssertionsKt$assert*", $$"*.AssertionsKt$evaluate*")
-	}
 	jar {
 		bundle {
 			val version = project.version

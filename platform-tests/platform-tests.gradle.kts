@@ -5,7 +5,7 @@ import org.gradle.plugins.ide.eclipse.model.Classpath
 import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
 plugins {
-	id("junitbuild.java-library-conventions")
+	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.junit4-compatibility")
 	id("junitbuild.testing-conventions")
 	id("junitbuild.jmh-conventions")
@@ -54,6 +54,7 @@ dependencies {
 	testImplementation(libs.openTestReporting.tooling.core)
 	testImplementation(libs.picocli)
 	testImplementation(libs.bundles.xmlunit)
+	testImplementation(kotlin("stdlib"))
 	testImplementation(testFixtures(projects.junitJupiterApi))
 	testImplementation(testFixtures(projects.junitPlatformReporting))
 	testImplementation(projects.platformTests) {
