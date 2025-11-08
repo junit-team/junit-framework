@@ -108,6 +108,6 @@ jreleaser = { id = "org.jreleaser", version = "1.21.0" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.2.21" }
 nullaway = { id = "net.ltgt.nullaway", version = "2.3.0" }
-plantuml = { id = "io.freefair.plantuml", version = "9.0.0" }
+plantuml = { id = "io.freefair.plantuml", version = "9.1.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
 spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
