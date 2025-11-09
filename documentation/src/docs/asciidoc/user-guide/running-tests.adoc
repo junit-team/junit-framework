@@ -839,10 +839,9 @@ REPORTED = 37
 [[running-tests-source-launcher]]
 === Source Launcher
 
-Java 25 introduced Module Import Declarations with {JEP511} and Compact Source Files
-and Instance Methods with {JEP512}. The `org.junit.start` module is JUnit's "On-Ramp"
-enabler, allowing to write minimal source code programs. For example, like in a
-`HelloTests.java` file reading:
+Starting with Java 25 it is possible to write minimal source code test programs
+using the `org.junit.start` module. For example, like in a `HelloTests.java`
+file reading:
 
 ```java
 import module org.junit.start;
