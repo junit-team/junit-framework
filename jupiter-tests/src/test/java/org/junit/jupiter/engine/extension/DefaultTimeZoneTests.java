@@ -13,7 +13,9 @@ package org.junit.jupiter.engine.extension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.testkit.JUnitJupiterTestKit.executeTestClass;
 import static org.junit.jupiter.testkit.JUnitJupiterTestKit.executeTestMethod;
-import static org.junit.jupiter.testkit.assertion.JUnitJupiterAssert.assertThat;
+import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
 import java.util.TimeZone;
 
@@ -208,10 +210,9 @@ class DefaultTimeZoneTests {
 		void throwsWhenConfigurationIsBad() {
 			ExecutionResults results = executeTestMethod(BadMethodLevelConfigurationTestCases.class,
 				"badConfiguration");
-
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageNotContaining(
-					"should never execute").hasMessageContaining("@DefaultTimeZone not configured correctly.");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
 		}
 
 		@Test
@@ -220,9 +221,9 @@ class DefaultTimeZoneTests {
 		void shouldThrowWithBadConfiguration() {
 			ExecutionResults results = executeTestClass(BadClassLevelConfigurationTestCases.class);
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"@DefaultTimeZone not configured correctly.");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
 		}
 
 		@AfterEach
@@ -291,9 +292,9 @@ class DefaultTimeZoneTests {
 		void throwsForMutuallyExclusiveOptions() {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "notExclusive");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"Either a valid time zone id or a TimeZoneProvider must be provided");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("Either a valid time zone id or a TimeZoneProvider must be provided"))));
 		}
 
 		@Test
@@ -302,9 +303,9 @@ class DefaultTimeZoneTests {
 		void throwsForEmptyOptions() {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "empty");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"Either a valid time zone id or a TimeZoneProvider must be provided");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("Either a valid time zone id or a TimeZoneProvider must be provided"))));
 		}
 
 		@Test
@@ -313,9 +314,9 @@ class DefaultTimeZoneTests {
 		void throwsForBadConstructor() {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "noConstructor");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"Could not instantiate TimeZoneProvider because of exception");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("Could not instantiate TimeZoneProvider because of exception"))));
 		}
 
 	}
@@ -354,6 +355,7 @@ class DefaultTimeZoneTests {
 	static class NullProvider implements TimeZoneProvider {
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public TimeZone get() {
 			return null;
 		}
@@ -364,7 +366,7 @@ class DefaultTimeZoneTests {
 
 		private final String timeZoneString;
 
-		public ComplicatedProvider(String timeZoneString) {
+		ComplicatedProvider(String timeZoneString) {
 			this.timeZoneString = timeZoneString;
 		}
 

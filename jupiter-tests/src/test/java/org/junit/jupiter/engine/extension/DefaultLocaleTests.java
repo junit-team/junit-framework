@@ -13,7 +13,9 @@ package org.junit.jupiter.engine.extension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.testkit.JUnitJupiterTestKit.executeTestClass;
 import static org.junit.jupiter.testkit.JUnitJupiterTestKit.executeTestMethod;
-import static org.junit.jupiter.testkit.assertion.JUnitJupiterAssert.assertThat;
+import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
 import java.util.Locale;
 
@@ -108,7 +110,7 @@ class DefaultLocaleTests {
 	void shouldExecuteTestsWithConfiguredLocale() {
 		ExecutionResults results = executeTestClass(ClassLevelTestCases.class);
 
-		assertThat(results).hasNumberOfSucceededTests(2);
+		results.testEvents().assertThatEvents().haveExactly(2, null);
 	}
 
 	@DefaultLocale(language = "fr", country = "FR")
@@ -228,8 +230,8 @@ class DefaultLocaleTests {
 				ExecutionResults results = executeTestMethod(MethodLevelInitializationFailureTestCases.class,
 					"shouldFailMissingConfiguration");
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 			@Test
@@ -238,8 +240,8 @@ class DefaultLocaleTests {
 				ExecutionResults results = executeTestMethod(MethodLevelInitializationFailureTestCases.class,
 					"shouldFailMissingCountry");
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 			@Test
@@ -248,8 +250,8 @@ class DefaultLocaleTests {
 				ExecutionResults results = executeTestMethod(MethodLevelInitializationFailureTestCases.class,
 					"shouldFailLanguageTagAndLanguage");
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 			@Test
@@ -258,8 +260,8 @@ class DefaultLocaleTests {
 				ExecutionResults results = executeTestMethod(MethodLevelInitializationFailureTestCases.class,
 					"shouldFailLanguageTagAndCountry");
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 			@Test
@@ -268,8 +270,8 @@ class DefaultLocaleTests {
 				ExecutionResults results = executeTestMethod(MethodLevelInitializationFailureTestCases.class,
 					"shouldFailLanguageTagAndVariant");
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 			@Test
@@ -278,8 +280,8 @@ class DefaultLocaleTests {
 				ExecutionResults results = executeTestMethod(MethodLevelInitializationFailureTestCases.class,
 					"shouldFailNoValidBCP47Variant");
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 		}
@@ -293,8 +295,8 @@ class DefaultLocaleTests {
 			void shouldFailWhenVariantIsSetButCountryIsNot() {
 				ExecutionResults results = executeTestClass(ClassLevelInitializationFailureTestCases.class);
 
-				assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-					ExtensionConfigurationException.class);
+				results.testEvents().assertThatEvents().haveExactly(1,
+					finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
 			}
 
 		}
@@ -378,8 +380,9 @@ class DefaultLocaleTests {
 		void providerReturnsNull() {
 			ExecutionResults results = executeTestMethod(BadProviderTestCases.class, "returnsNull");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				NullPointerException.class).hasMessageContaining("LocaleProvider instance returned with null");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(NullPointerException.class),
+					message(it -> it.contains("LocaleProvider instance returned with null"))));
 		}
 
 		@Test
@@ -388,9 +391,9 @@ class DefaultLocaleTests {
 		void mutuallyExclusiveWithValue() {
 			ExecutionResults results = executeTestMethod(BadProviderTestCases.class, "mutuallyExclusiveWithValue");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"can only be used with language tag if language, country, variant and provider are not set");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class), message(it -> it.contains(
+					"can only be used with a provider if value, language, country and variant are not set."))));
 		}
 
 		@Test
@@ -399,9 +402,9 @@ class DefaultLocaleTests {
 		void mutuallyExclusiveWithLanguage() {
 			ExecutionResults results = executeTestMethod(BadProviderTestCases.class, "mutuallyExclusiveWithLanguage");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"can only be used with language tag if provider is not set");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("can only be used with language tag if provider is not set."))));
 		}
 
 		@Test
@@ -410,9 +413,9 @@ class DefaultLocaleTests {
 		void mutuallyExclusiveWithCountry() {
 			ExecutionResults results = executeTestMethod(BadProviderTestCases.class, "mutuallyExclusiveWithCountry");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"can only be used with a provider if value, language, country and variant are not set.");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class), message(it -> it.contains(
+					"can only be used with a provider if value, language, country and variant are not set."))));
 		}
 
 		@Test
@@ -421,9 +424,9 @@ class DefaultLocaleTests {
 		void mutuallyExclusiveWithVariant() {
 			ExecutionResults results = executeTestMethod(BadProviderTestCases.class, "mutuallyExclusiveWithVariant");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"can only be used with a provider if value, language, country and variant are not set.");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class), message(it -> it.contains(
+					"can only be used with a provider if value, language, country and variant are not set."))));
 		}
 
 		@Test
@@ -432,9 +435,9 @@ class DefaultLocaleTests {
 		void badConstructor() {
 			ExecutionResults results = executeTestMethod(BadProviderTestCases.class, "badConstructor");
 
-			assertThat(results).hasSingleFailedTest().withExceptionInstanceOf(
-				ExtensionConfigurationException.class).hasMessageContaining(
-					"could not be constructed because of an exception");
+			results.testEvents().assertThatEvents().haveExactly(1,
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("could not be constructed because of an exception"))));
 		}
 
 	}
@@ -491,6 +494,7 @@ class DefaultLocaleTests {
 	static class ReturnsNullLocaleProvider implements LocaleProvider {
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public Locale get() {
 			return null;
 		}

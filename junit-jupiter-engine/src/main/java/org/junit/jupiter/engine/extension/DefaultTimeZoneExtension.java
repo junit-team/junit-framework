@@ -65,11 +65,12 @@ class DefaultTimeZoneExtension implements BeforeEachCallback, AfterEachCallback 
 	private static TimeZone createTimeZone(String timeZoneId) {
 		TimeZone configuredTimeZone = TimeZone.getTimeZone(timeZoneId);
 		// TimeZone::getTimeZone returns with GMT as fallback if the given ID cannot be understood
-		if (configuredTimeZone.equals(TimeZone.getTimeZone("GMT")) && !timeZoneId.equals("GMT")) {
-			throw new ExtensionConfigurationException(String.format(
-				"@DefaultTimeZone not configured correctly. " + "Could not find the specified time zone + '%s'. "
-						+ "Please use correct identifiers, e.g. \"GMT\" for Greenwich Mean Time.",
-				timeZoneId));
+		if (configuredTimeZone.equals(TimeZone.getTimeZone("GMT")) && !"GMT".equals(timeZoneId)) {
+			throw new ExtensionConfigurationException("""
+					@DefaultTimeZone not configured correctly.
+					Could not find the specified time zone + '%s'.
+					Please use correct identifiers, e.g. "GMT" for Greenwich Mean Time.
+					""".formatted(timeZoneId));
 		}
 		return configuredTimeZone;
 	}
