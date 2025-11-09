@@ -16,6 +16,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apiguardian.api.API;
+
 /**
  * {@code @DefaultLocale} is a JUnit Jupiter extension to change the value
  * returned by {@link java.util.Locale#getDefault()} for a test execution.
@@ -67,6 +69,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @WritesDefaultLocale
+@API(status = API.Status.STABLE, since = "6.1")
 public @interface DefaultLocale {
 
 	/**

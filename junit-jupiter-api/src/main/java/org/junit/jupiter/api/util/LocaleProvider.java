@@ -13,6 +13,9 @@ package org.junit.jupiter.api.util;
 import java.util.Locale;
 import java.util.function.Supplier;
 
+import org.apiguardian.api.API;
+
+@API(status = API.Status.STABLE, since = "6.1")
 public interface LocaleProvider extends Supplier<Locale> {
 
 	interface NullLocaleProvider extends LocaleProvider {

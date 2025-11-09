@@ -16,6 +16,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apiguardian.api.API;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
@@ -37,5 +38,6 @@ import org.junit.jupiter.api.parallel.Resources;
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })
 @Inherited
 @ResourceLock(value = Resources.TIME_ZONE, mode = ResourceAccessMode.READ_WRITE)
+@API(status = API.Status.STABLE, since = "6.1")
 public @interface WritesDefaultTimeZone {
 }

@@ -12,9 +12,12 @@ package org.junit.jupiter.engine.support;
 
 import java.util.Locale;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility class to create {@code Locale}.
  */
+@API(status = API.Status.INTERNAL, since = "6.1")
 public class JupiterLocaleUtils {
 
 	private JupiterLocaleUtils() {

@@ -13,6 +13,9 @@ package org.junit.jupiter.api.util;
 import java.util.TimeZone;
 import java.util.function.Supplier;
 
+import org.apiguardian.api.API;
+
+@API(status = API.Status.STABLE, since = "6.1")
 public interface TimeZoneProvider extends Supplier<TimeZone> {
 
 	interface NullTimeZoneProvider extends TimeZoneProvider {
