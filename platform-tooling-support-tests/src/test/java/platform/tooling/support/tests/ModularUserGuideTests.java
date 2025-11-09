@@ -48,7 +48,6 @@ class ModularUserGuideTests {
 			open module documentation {
 			  exports example.testkit; // just here to ensure documentation example sources are compiled
 
-			  requires org.junit.start;
 			  requires org.junit.jupiter.api;
 			  requires org.junit.jupiter.migrationsupport;
 			  requires org.junit.jupiter.params;
@@ -103,8 +102,6 @@ class ModularUserGuideTests {
 					.filter(s -> s.endsWith(".java")) //
 					// TypeError: systemProperty.get is not a function ?!?!
 					.filter(s -> !s.endsWith("ConditionalTestExecutionDemo.java")) //
-					// InvalidModuleDescriptorException: Unnamed package not allowed in module
-					.filter(s -> !s.endsWith("JUnitStartTests.java")) //
 					// Don't include command-line tools that "require io.github.classgraph"
 					.filter(s -> !s.contains("tools")).forEach(args::add);
 		}
