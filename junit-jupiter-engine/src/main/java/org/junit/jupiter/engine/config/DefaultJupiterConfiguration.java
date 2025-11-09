@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
 import static org.junit.jupiter.engine.config.FilteringConfigurationParameterConverter.exclude;
+import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.FORK_JOIN_POOL;
+import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.WORKER_THREAD_POOL;
 
 import java.util.List;
 import java.util.Optional;
@@ -100,6 +102,17 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 							Please remove it from your configuration.""".formatted(key));
 					issueReporter.reportIssue(warning);
 				}));
+		if (isParallelExecutionEnabled()
+				&& configurationParameters.get(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME).isEmpty()) {
+			var info = DiscoveryIssue.create(Severity.INFO,
+				"Parallel test execution is enabled but the default ForkJoinPool-based executor service will be used. "
+						+ "Please give the new implementation based on a regular thread pool a try by setting the '"
+						+ PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME + "' configuration parameter to '"
+						+ WORKER_THREAD_POOL + "' and report any issues to the JUnit team. "
+						+ "Alternatively, set the configuration parameter to '" + FORK_JOIN_POOL
+						+ "' to hide this message and keep using the original implementation.");
+			issueReporter.reportIssue(info);
+		}
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import static platform.tooling.support.tests.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +28,7 @@ import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
 
+@Order(Integer.MIN_VALUE + 1)
 class VintageGradleIntegrationTests {
 
 	@TempDir

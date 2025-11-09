@@ -17,6 +17,7 @@ import static platform.tooling.support.tests.Projects.copyToWorkspace;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
@@ -30,6 +31,7 @@ import platform.tooling.support.ProcessStarters;
 /**
  * @since 6.0
  */
+@Order(Integer.MIN_VALUE + 1)
 class KotlinCoroutinesTests {
 
 	@Test

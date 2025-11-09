@@ -21,13 +21,20 @@ repository on GitHub.
 [[release-notes-6.1.0-M1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* ❓
+* Deprecate constructors for `ForkJoinPoolHierarchicalTestExecutorService` in favor of the
+  new `ParallelHierarchicalTestExecutorServiceFactory` that also supports
+  `WorkerThreadPoolHierarchicalTestExecutorService`.
 
 [[release-notes-6.1.0-M1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Support for creating a `ModuleSelector` from a `java.lang.Module` and using
   its classloader for test discovery.
+* New `WorkerThreadPoolHierarchicalTestExecutorService` implementation used for parallel
+  test execution that is backed by a regular thread pool rather than a `ForkJoinPool`.
+  Engine authors should switch to use `ParallelHierarchicalTestExecutorServiceFactory`
+  rather than instantiating a concrete `HierarchicalTestExecutorService` implementation
+  for parallel execution directly.
 * `OpenTestReportGeneratingListener` now supports redirecting XML events to a socket via
   the new `junit.platform.reporting.open.xml.socket` configuration parameter. When set to a
   port number, events are sent to `127.0.0.1:<port>` instead of being written to a file.
@@ -63,6 +70,13 @@ repository on GitHub.
 * Enrich `assertInstanceOf` failure using the test subject `Throwable` as cause. It
   results in the stack trace of the test subject `Throwable` to get reported along with
   the failure.
+* Make implementation of `HierarchicalTestExecutorService` used for parallel test
+  execution configurable via the new
+  `junit.jupiter.execution.parallel.config.executor-service` configuration parameter to
+  in order to add support for `WorkerThreadPoolHierarchicalTestExecutorService`. Please
+  refer to the
+  <<../user-guide/index.adoc#writing-tests-parallel-execution-config-executor-service, User Guide>>
+  for details.
 
 [[release-notes-6.1.0-M1-junit-vintage]]
 === JUnit Vintage

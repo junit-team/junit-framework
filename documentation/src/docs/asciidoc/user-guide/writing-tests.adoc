@@ -3433,6 +3433,33 @@ used instead.
 [[writing-tests-parallel-execution-config]]
 ==== Configuration
 
+[[writing-tests-parallel-execution-config-executor-service]]
+===== Executor Service
+
+If parallel execution is enabled, a thread pool is used behind the scenes to execute tests
+concurrently. You can configure which implementation of `HierarchicalTestExecutorService`
+is used be setting the `junit.jupiter.execution.parallel.config.executor-service`
+configuration parameter to one of the following options:
+
+`fork_join_pool` (default)::
+Use an executor service that is backed by a `ForkJoinPool` from the JDK. This will cause
+tests to be executed in a `ForkJoinWorkerThread`. In some cases, usages of
+`ForkJoinPool` in test or production code or calls to blocking JDK APIs may cause the
+number of concurrently executing tests to increase. To avoid this situation, please use
+`worker_thread_pool`.
+
+`worker_thread_pool` (experimental)::
+Use an executor service that is backed by a regular thread pool and does not create
+additional threads if test or production code uses `ForkJoinPool` or calls a blocking
+API in the JDK.
+
+WARNING: Using `worker_thread_pool` is currently an _experimental_ feature. You're invited
+to give it a try and provide feedback to the JUnit team so they can improve and eventually
+<<api-evolution, promote>> this feature.
+
+[[writing-tests-parallel-execution-config-strategies]]
+===== Strategies
+
 Properties such as the desired parallelism and the maximum pool size can be configured
 using a `{ParallelExecutionConfigurationStrategy}`. The JUnit Platform provides two
 implementations out of the box: `dynamic` and `fixed`. Alternatively, you may implement a
@@ -3464,13 +3491,12 @@ strategy with a factor of `1`. Consequently, the desired parallelism will be equ
 number of available processors/cores.
 
 .Parallelism alone does not imply maximum number of concurrent threads
-NOTE: By default JUnit Jupiter does not guarantee that the number of concurrently
-executing tests will not exceed the configured parallelism. For example, when using one
-of the synchronization mechanisms described in the next section, the `ForkJoinPool` that
-is used behind the scenes may spawn additional threads to ensure execution continues with
-sufficient parallelism.
-If you require such guarantees, it is possible to limit the maximum number of concurrent
-threads by controlling the maximum pool size of the `dynamic`, `fixed` and `custom`
+NOTE: By default, JUnit Jupiter does not guarantee that the number of threads used to
+execute test will not exceed the configured parallelism. For example, when using one
+of the synchronization mechanisms described in the next section, the executor service
+implementation may spawn additional threads to ensure execution continues with sufficient
+parallelism. If you require such guarantees, it is possible to limit the maximum number of
+threads by configuring the maximum pool size of the `dynamic`, `fixed` and `custom`
 strategies.
 
 [[writing-tests-parallel-execution-config-properties]]
@@ -3479,86 +3505,66 @@ strategies.
 The following table lists relevant properties for configuring parallel execution. See
 <<running-tests-config-params>> for details on how to set such properties.
 
-[cols="d,d,a,d"]
-|===
-|Property |Description |Supported Values |Default Value
+====== General
 
-| ```junit.jupiter.execution.parallel.enabled```
-| Enable parallel test execution
-|
-  * `true`
-  * `false`
-| ```false```
+`junit.jupiter.execution.parallel.enabled=true|false`::
+  Enable/disable parallel test execution (defaults to `false`).
 
-| ```junit.jupiter.execution.parallel.mode.default```
-| Default execution mode of nodes in the test tree
-|
-  * `concurrent`
-  * `same_thread`
-| ```same_thread```
+`junit.jupiter.execution.parallel.mode.default=concurrent|same_thread`::
+  Default execution mode of nodes in the test tree (defaults to `same_thread`).
 
-| ```junit.jupiter.execution.parallel.mode.classes.default```
-| Default execution mode of top-level classes
-|
-  * `concurrent`
-  * `same_thread`
-| ```same_thread```
+`junit.jupiter.execution.parallel.mode.classes.default=concurrent|same_thread`::
+  Default execution mode of top-level classes (defaults to `same_thread`).
 
-| ```junit.jupiter.execution.parallel.config.strategy```
-| Execution strategy for desired parallelism and maximum pool size
-|
-  * `dynamic`
-  * `fixed`
-  * `custom`
-| ```dynamic```
+`junit.jupiter.execution.parallel.config.executor-service=fork_join_pool|worker_thread_pool`::
+  Type of `HierarchicalTestExecutorService` to use for parallel execution (defaults to
+  `fork_join_pool`).
 
-| ```junit.jupiter.execution.parallel.config.dynamic.factor```
-| Factor to be multiplied by the number of available processors/cores to determine the
-  desired parallelism for the ```dynamic``` configuration strategy
-| a positive decimal number
-| ```1.0```
+`junit.jupiter.execution.parallel.config.strategy=dynamic|fixed|custom`::
+  Execution strategy for desired parallelism, maximum pool size, etc. (defaults to `dynamic`).
 
-| ```junit.jupiter.execution.parallel.config.dynamic.max-pool-size-factor```
-| Factor to be multiplied by the number of available processors/cores and the value of
+====== Dynamic strategy
+
+`junit.jupiter.execution.parallel.config.dynamic.factor=decimal`::
+  Factor to be multiplied by the number of available processors/cores to determine the
+  desired parallelism for the ```dynamic``` configuration strategy.
+  Must be a positive decimal number (defaults to `1.0`).
+
+`junit.jupiter.execution.parallel.config.dynamic.max-pool-size-factor=decimal`::
+  Factor to be multiplied by the number of available processors/cores and the value of
   `junit.jupiter.execution.parallel.config.dynamic.factor` to determine the desired
-  parallelism for the ```dynamic``` configuration strategy
-| a positive decimal number, must be greater than or equal to `1.0`
-| 256 + the value of `junit.jupiter.execution.parallel.config.dynamic.factor` multiplied
-  by the number of available processors/cores
+  parallelism for the ```dynamic``` configuration strategy.
+  Must be a positive decimal number greater than or equal to `1.0` (defaults to 256 plus
+  the value of `junit.jupiter.execution.parallel.config.dynamic.factor` multiplied by the
+  number of available processors/cores)
 
-| ```junit.jupiter.execution.parallel.config.dynamic.saturate```
-| Disable saturation of the underlying fork-join pool for the ```dynamic``` configuration
-strategy
-|
-* `true`
-* `false`
-| ```true```
+`junit.jupiter.execution.parallel.config.dynamic.saturate=true|false`::
+  Enable/disable saturation of the underlying `ForkJoinPool` for the ```dynamic```
+  configuration strategy (defaults to `true`). Only used if
+  `junit.jupiter.execution.parallel.config.executor-service` is set to `fork_join_pool`.
 
-| ```junit.jupiter.execution.parallel.config.fixed.parallelism```
-| Desired parallelism for the ```fixed``` configuration strategy
-| a positive integer
-| no default value
+====== Fixed strategy
 
-| ```junit.jupiter.execution.parallel.config.fixed.max-pool-size```
-| Desired maximum pool size of the underlying fork-join pool for the ```fixed```
-  configuration strategy
-| a positive integer, must be greater than or equal to `junit.jupiter.execution.parallel.config.fixed.parallelism`
-| 256 + the value of `junit.jupiter.execution.parallel.config.fixed.parallelism`
+`junit.jupiter.execution.parallel.config.fixed.parallelism=integer`::
+  Desired parallelism for the ```fixed``` configuration strategy (no default value). Must
+  be a positive integer.
 
-| ```junit.jupiter.execution.parallel.config.fixed.saturate```
-| Disable saturation of the underlying fork-join pool for the ```fixed``` configuration
-  strategy
-|
-  * `true`
-  * `false`
-| ```true```
+`junit.jupiter.execution.parallel.config.fixed.max-pool-size=integer`::
+  Desired maximum pool size of the underlying fork-join pool for the ```fixed```
+  configuration strategy. Must be a positive integer greater than or equal to
+  `junit.jupiter.execution.parallel.config.fixed.parallelism` (defaults to 256 plus the
+  value of `junit.jupiter.execution.parallel.config.fixed.parallelism`).
 
-| ```junit.jupiter.execution.parallel.config.custom.class```
-| Fully qualified class name of the _ParallelExecutionConfigurationStrategy_ to be
-  used for the ```custom``` configuration strategy
-| for example, _org.example.CustomStrategy_
-| no default value
-|===
+`junit.jupiter.execution.parallel.config.fixed.saturate=true|false`::
+  Enable/disable saturation of the underlying `ForkJoinPool` for the ```fixed```
+  configuration strategy (defaults to `true`). Only used if
+  `junit.jupiter.execution.parallel.config.executor-service` is set to `fork_join_pool`.
+
+====== Custom strategy
+
+`junit.jupiter.execution.parallel.config.custom.class=classname`::
+  Fully qualified class name of the `ParallelExecutionConfigurationStrategy` to be used
+  for the ```custom``` configuration strategy (no default value).
 
 [[writing-tests-parallel-execution-synchronization]]
 ==== Synchronization

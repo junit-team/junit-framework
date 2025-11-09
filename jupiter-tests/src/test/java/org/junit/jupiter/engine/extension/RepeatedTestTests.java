@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.engine.Constants.DEFAULT_PARALLEL_EXECUTION_MODE;
+import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
@@ -46,8 +47,11 @@ import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.testkit.engine.Events;
 
@@ -135,7 +139,7 @@ class RepeatedTestTests extends AbstractJupiterTestEngineTests {
 		@BeforeEach
 		@AfterEach
 		void beforeAndAfterEach(TestInfo testInfo, RepetitionInfo repetitionInfo) {
-			switch (testInfo.getTestMethod().get().getName()) {
+			switch (testInfo.getTestMethod().orElseThrow().getName()) {
 				case "repeatedOnce" -> {
 					assertThat(repetitionInfo.getCurrentRepetition()).isEqualTo(1);
 					assertThat(repetitionInfo.getTotalRepetitions()).isEqualTo(1);
@@ -291,14 +295,16 @@ class RepeatedTestTests extends AbstractJupiterTestEngineTests {
 			// @formatter:on
 		}
 
-		@Test
-		void failureThresholdWithConcurrentExecution() {
+		@ParameterizedTest
+		@EnumSource(ParallelExecutorServiceType.class)
+		void failureThresholdWithConcurrentExecution(ParallelExecutorServiceType executorServiceType) {
 			Class<TestCase> testClass = TestCase.class;
 			String methodName = "failureThresholdWithConcurrentExecution";
-			Method method = ReflectionSupport.findMethod(testClass, methodName).get();
+			Method method = ReflectionSupport.findMethod(testClass, methodName).orElseThrow();
 			LauncherDiscoveryRequest request = request()//
 					.selectors(selectMethod(testClass, method))//
 					.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true")//
+					.configurationParameter(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType.name()) //
 					.configurationParameter(DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent")//
 					.configurationParameter(PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME, "fixed")//
 					.configurationParameter(PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, "4")//
@@ -323,7 +329,7 @@ class RepeatedTestTests extends AbstractJupiterTestEngineTests {
 
 		private Events executeTest(String methodName) {
 			Class<TestCase> testClass = TestCase.class;
-			Method method = ReflectionSupport.findMethod(testClass, methodName).get();
+			Method method = ReflectionSupport.findMethod(testClass, methodName).orElseThrow();
 			return executeTests(selectMethod(testClass, method)).allEvents();
 		}
 

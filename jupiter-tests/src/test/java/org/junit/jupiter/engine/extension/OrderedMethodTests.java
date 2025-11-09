@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.MethodOrderer.Random.RANDOM_SEED_PROPERTY_NA
 import static org.junit.jupiter.api.Order.DEFAULT;
 import static org.junit.jupiter.engine.Constants.DEFAULT_PARALLEL_EXECUTION_MODE;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME;
@@ -34,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +59,9 @@ import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.engine.JupiterTestEngine;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.commons.util.ClassUtils;
@@ -65,6 +69,7 @@ import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineDiscoveryResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
@@ -76,7 +81,9 @@ import org.mockito.Mockito;
  *
  * @since 5.4
  */
-class OrderedMethodTests {
+@ParameterizedClass
+@EnumSource(ParallelExecutorServiceType.class)
+record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	private static final Set<String> callSequence = Collections.synchronizedSet(new LinkedHashSet<>());
 	private static final Set<String> threadNames = Collections.synchronizedSet(new LinkedHashSet<>());
@@ -361,12 +368,13 @@ class OrderedMethodTests {
 				.testEvents();
 	}
 
-	private static EngineTestKit.Builder testKit(Class<?> testClass,
-			@Nullable Class<? extends MethodOrderer> defaultOrderer, Severity criticalSeverity) {
+	private EngineTestKit.Builder testKit(Class<?> testClass, @Nullable Class<? extends MethodOrderer> defaultOrderer,
+			Severity criticalSeverity) {
 
 		var testKit = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //
 				.configurationParameter(DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent") //
+				.configurationParameter(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType.name()) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, criticalSeverity.name());
 		if (defaultOrderer != null) {
 			testKit.configurationParameter(DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME, defaultOrderer.getName());
@@ -767,7 +775,8 @@ class OrderedMethodTests {
 
 		@SuppressWarnings("unchecked")
 		static <T> T createMethodDescriptorImpersonator(MethodDescriptor method) {
-			MethodDescriptor stub = new MethodDescriptor() {
+			@NullMarked
+			class Stub implements MethodDescriptor {
 				@Override
 				public Method getMethod() {
 					throw new UnsupportedOperationException();
@@ -803,8 +812,8 @@ class OrderedMethodTests {
 				public int hashCode() {
 					return method.hashCode();
 				}
-			};
-			return (T) stub;
+			}
+			return (T) new Stub();
 		}
 	}
 

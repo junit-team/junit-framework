@@ -1,4 +1,10 @@
-# <img src="https://junit.org/assets/img/junit6-temporary-logo.png" align="right" width="100">JUnit
+<h1>
+  <picture width="200">
+    <source media="(prefers-color-scheme: dark)" srcset="https://junit.org/assets/img/junit-logo-inverted-darker.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://junit.org/assets/img/junit-logo.svg">
+    <img alt="JUnit" src="https://junit.org/assets/img/junit-logo.svg" width="200">
+  </picture>
+</h1>
 
 This repository is the home of JUnit Platform, Jupiter, and Vintage.
 

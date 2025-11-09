@@ -43,6 +43,20 @@ class SingleLockTests {
 		assertFalse(lock.isLocked());
 	}
 
+	@Test
+	@SuppressWarnings("resource")
+	void tryAcquireAndRelease() {
+		var lock = new ReentrantLock();
+
+		var singleLock = new SingleLock(anyResource(), lock);
+
+		singleLock.tryAcquire();
+		assertTrue(lock.isLocked());
+
+		singleLock.release();
+		assertFalse(lock.isLocked());
+	}
+
 	private static ExclusiveResource anyResource() {
 		return new ExclusiveResource("key", LockMode.READ);
 	}

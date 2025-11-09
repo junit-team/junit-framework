@@ -363,7 +363,12 @@ tasks {
 	}
 
 	asciidoctorPdf {
-		setExecutionMode(JAVA_EXEC) // Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		// Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
+		// Avoid propagating apparent memory leaks in Asciidoctor/JRuby to Gradle daemon.
+		setExecutionMode(JAVA_EXEC)
+		jvm {
+			maxHeapSize = "512M"
+		}
 		sources {
 			include("user-guide/index.adoc")
 		}
@@ -474,7 +479,7 @@ tasks {
 		}
 		from(inputDir) {
 			filesMatching("**/*.html") {
-				val favicon = "<link rel=\"icon\" type=\"image/png\" href=\"https://junit.org/assets/img/junit6-temporary-logo.png\">"
+				val favicon = "<link rel=\"icon\" type=\"image/png\" href=\"https://junit.org/assets/img/junit-diamond.png\">"
 				filter { line ->
 					var result = if (line.startsWith("<head>")) line.replace("<head>", "<head>$favicon") else line
 					externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
