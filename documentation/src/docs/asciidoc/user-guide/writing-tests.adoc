@@ -3827,8 +3827,8 @@ include::{testDir}/example/AutoCloseDemo.java[tags=user_guide_example]
 <2> `WebClient` implements `java.lang.AutoCloseable` which defines a `close()` method that
     will be invoked after each `@Test` method.
 
-[[writing-tests-built-in-extensions-DefaultLocalAndTimezone]]
-==== The @DefaultLocal and @DefaultTimezone Extensions
+[[writing-tests-built-in-extensions-DefaultLocaleAndTimeZone]]
+==== The @DefaultLocale and @DefaultTimeZone Extensions
 
 ----
 include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tags=default_locale_language]
@@ -3840,14 +3840,14 @@ After the annotated element has been executed, the initial default value is rest
 
 ===== `@DefaultLocale`
 
-The default `Locale` can be specified using an https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html#forLanguageTag-java.lang.String-[IETF BCP 47 language tag string]
+The default `Locale` can be specified using an {jdk-javadoc-base-url}/java.base/java/util/Locale.html#forLanguageTag-java.lang.String-[IETF BCP 47 language tag string]
 
 [source,java,indent=0]
 ----
 include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tags=default_locale_language]
 ----
 
-Alternatively the default `Locale` can be created using the following attributes of which a https://docs.oracle.com/javase/8/docs/api/java/util/Locale.Builder.html[Locale Builder] can create an instance with:
+Alternatively the default `Locale` can be created using the following attributes of which a {jdk-javadoc-base-url}/java.base/java/util/Locale.Builder.html[Locale Builder] can create an instance with:
 
 * `language` or
 * `language` and `country` or
