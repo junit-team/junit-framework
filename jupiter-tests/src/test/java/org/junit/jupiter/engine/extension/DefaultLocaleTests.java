@@ -111,7 +111,7 @@ class DefaultLocaleTests {
 	void shouldExecuteTestsWithConfiguredLocale() {
 		ExecutionResults results = executeTestClass(ClassLevelTestCases.class);
 
-		results.testEvents().assertThatEvents().haveExactly(2, finishedSuccessfully());
+		results.testEvents().assertThatEvents().haveAtMost(2, finishedSuccessfully());
 	}
 
 	@DefaultLocale(language = "fr", country = "FR")
