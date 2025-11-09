@@ -12,7 +12,7 @@ package org.junit.jupiter.testkit;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.testkit.assertion.JUnitJupiterAssert.assertThat;
+import static org.junit.platform.testkit.engine.EventConditions.started;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,7 +28,7 @@ class JUnitJupiterKitTests {
 	void executeTestClass() {
 		ExecutionResults results = JUnitJupiterTestKit.executeTestClass(DummyClass.class);
 
-		assertThat(results).hasNumberOfStartedTests(1);
+		results.testEvents().assertThatEvents().haveExactly(1, started());
 	}
 
 	@Test
@@ -37,7 +37,7 @@ class JUnitJupiterKitTests {
 		ExecutionResults results = JUnitJupiterTestKit.executeTestClasses(
 			asList(DummyClass.class, SecondDummyClass.class));
 
-		assertThat(results).hasNumberOfStartedTests(2);
+		results.testEvents().assertThatEvents().haveExactly(2, started());
 	}
 
 	@Test
@@ -45,7 +45,7 @@ class JUnitJupiterKitTests {
 	void executeTestMethod() {
 		ExecutionResults results = JUnitJupiterTestKit.executeTestMethod(DummyClass.class, "nothing");
 
-		assertThat(results).hasNumberOfStartedTests(1);
+		results.testEvents().assertThatEvents().haveExactly(1, started());
 	}
 
 	@Nested
@@ -58,7 +58,7 @@ class JUnitJupiterKitTests {
 			ExecutionResults results = JUnitJupiterTestKit.executeTestMethodWithParameterTypes(DummyPropertyClass.class,
 				"single", String.class);
 
-			assertThat(results).hasNumberOfStartedTests(1);
+			results.testEvents().assertThatEvents().haveExactly(1, started());
 		}
 
 		@Test
@@ -69,7 +69,7 @@ class JUnitJupiterKitTests {
 			ExecutionResults results = JUnitJupiterTestKit.executeTestMethodWithParameterTypes(DummyPropertyClass.class,
 				"single", classes);
 
-			assertThat(results).hasNumberOfStartedTests(1);
+			results.testEvents().assertThatEvents().haveExactly(1, started());
 		}
 
 		@Test

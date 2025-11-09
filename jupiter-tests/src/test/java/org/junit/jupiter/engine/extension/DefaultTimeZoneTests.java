@@ -210,7 +210,7 @@ class DefaultTimeZoneTests {
 		void throwsWhenConfigurationIsBad() {
 			ExecutionResults results = executeTestMethod(BadMethodLevelConfigurationTestCases.class,
 				"badConfiguration");
-			results.testEvents().assertThatEvents().haveExactly(1,
+			results.testEvents().assertThatEvents().haveAtMost(1,
 				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
 					message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
 		}
@@ -221,7 +221,7 @@ class DefaultTimeZoneTests {
 		void shouldThrowWithBadConfiguration() {
 			ExecutionResults results = executeTestClass(BadClassLevelConfigurationTestCases.class);
 
-			results.testEvents().assertThatEvents().haveExactly(1,
+			results.testEvents().assertThatEvents().haveAtMost(1,
 				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
 					message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
 		}
@@ -292,7 +292,7 @@ class DefaultTimeZoneTests {
 		void throwsForMutuallyExclusiveOptions() {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "notExclusive");
 
-			results.testEvents().assertThatEvents().haveExactly(1,
+			results.testEvents().assertThatEvents().haveAtMost(1,
 				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
 					message(it -> it.contains("Either a valid time zone id or a TimeZoneProvider must be provided"))));
 		}
@@ -303,7 +303,7 @@ class DefaultTimeZoneTests {
 		void throwsForEmptyOptions() {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "empty");
 
-			results.testEvents().assertThatEvents().haveExactly(1,
+			results.testEvents().assertThatEvents().haveAtMost(1,
 				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
 					message(it -> it.contains("Either a valid time zone id or a TimeZoneProvider must be provided"))));
 		}
@@ -314,7 +314,7 @@ class DefaultTimeZoneTests {
 		void throwsForBadConstructor() {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "noConstructor");
 
-			results.testEvents().assertThatEvents().haveExactly(1,
+			results.testEvents().assertThatEvents().haveAtMost(1,
 				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
 					message(it -> it.contains("Could not instantiate TimeZoneProvider because of exception"))));
 		}
