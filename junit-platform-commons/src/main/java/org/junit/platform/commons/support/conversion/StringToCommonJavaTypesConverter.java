@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 import org.junit.platform.commons.util.Preconditions;
 
-class StringToCommonJavaTypesConverter implements StringToObjectConverter {
+class StringToCommonJavaTypesConverter extends StringToTargetTypeConverter<Object> {
 
 	private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Map.of( //
 		// java.io and java.nio
@@ -42,12 +42,12 @@ class StringToCommonJavaTypesConverter implements StringToObjectConverter {
 	);
 
 	@Override
-	public boolean canConvertTo(Class<?> targetType) {
+	boolean canConvert(Class<?> targetType) {
 		return CONVERTERS.containsKey(targetType);
 	}
 
 	@Override
-	public Object convert(String source, Class<?> targetType) throws Exception {
+	Object convert(String source, Class<?> targetType) {
 		Function<String, ?> converter = Preconditions.notNull(CONVERTERS.get(targetType),
 			() -> "No registered converter for %s".formatted(targetType.getName()));
 		return converter.apply(source);
