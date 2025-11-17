@@ -106,3 +106,4 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.1.21" }
 plantuml = { id = "io.freefair.plantuml", version = "8.13.1" }
 shadow = { id = "com.gradleup.shadow", version = "8.3.6" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.3" }
+spring-antora = { id = "io.spring.antora.generate-antora-yml", version = "0.0.1" }
