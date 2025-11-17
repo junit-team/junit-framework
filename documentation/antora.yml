@@ -1,0 +1,24 @@
+name: junit
+version: null
+title: JUnit
+nav:
+  - modules/ROOT/nav.adoc
+ext:
+  collector:
+    run:
+      command: gradlew --quiet :documentation:generateAntoraResources
+      local: true
+    scan:
+    - dir: ./build/generated-antora-resources
+      clean: true
+    - dir: ./build/docs/fixedJavadoc
+      clean: true
+      into: modules/ROOT/attachments/api
+    - dir: ./src/test
+      into: modules/ROOT/examples
+    - dir: ./build/generated/asciidoc
+      clean: true
+      into: modules/ROOT/partials
+    - dir: ./build/plantuml
+      clean: true
+      into: modules/ROOT/images
