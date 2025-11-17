@@ -15,6 +15,7 @@ plugins {
 	alias(libs.plugins.asciidoctorPdf)
 	alias(libs.plugins.gitPublish)
 	alias(libs.plugins.plantuml)
+	alias(libs.plugins.spring.antora)
 	id("junitbuild.build-parameters")
 	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
@@ -271,8 +272,8 @@ tasks {
 
 	val plantUmlOutputDirectory = plantUml.flatMap { it.outputDirectory }
 
-	withType<AbstractAsciidoctorTask>().configureEach {
-		inputs.files(
+	val generateAsciidocInputs by registering {
+		dependsOn(
 			generateConsoleLauncherOptions,
 			generateConsoleLauncherDiscoverOptions,
 			generateConsoleLauncherExecuteOptions,
@@ -281,6 +282,10 @@ tasks {
 			generateStandaloneConsoleLauncherShadowedArtifactsFile,
 			plantUmlOutputDirectory
 		)
+	}
+
+	withType<AbstractAsciidoctorTask>().configureEach {
+		dependsOn(generateAsciidocInputs)
 
 		resources {
 			from(sourceDir) {
@@ -545,5 +550,24 @@ tasks {
 		from(attestationClasspath)
 		into(layout.buildDirectory.dir("attestation"))
 		rename("(.*)-SNAPSHOT.jar", "$1-SNAPSHOT+${buildRevision.substring(0, 7)}.jar")
+	}
+
+	generateAntoraYml {
+		asciidocAttributes.putAll(provider {
+			mapOf(
+				"version" to project.version,
+				"junit4-version" to libs.versions.junit4.get(),
+				"apiguardian-version" to libs.versions.apiguardian.get(),
+				"ota4j-version" to libs.versions.opentest4j.get(),
+				"surefire-version" to libs.versions.surefire.get(),
+				"release-branch" to releaseBranch,
+				"docs-version" to docsVersion,
+				"jdk-javadoc-base-url" to jdkJavadocBaseUrl
+			)
+		})
+	}
+
+	register("generateAntoraResources") {
+		dependsOn(generateAntoraYml, generateAsciidocInputs, fixJavadoc)
 	}
 }
