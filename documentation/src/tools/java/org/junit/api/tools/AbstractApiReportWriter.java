@@ -60,12 +60,12 @@ abstract class AbstractApiReportWriter implements ApiReportWriter {
 			return;
 		}
 		declarationsByModule.forEach((moduleName, moduleDeclarations) -> {
-			out.println(h4("Module " + moduleName));
+			out.println(h3("Module " + moduleName));
 			out.println();
 			moduleDeclarations.stream() //
 					.collect(groupingBy(Declaration::packageName, TreeMap::new, toList())) //
 					.forEach((packageName, packageDeclarations) -> {
-						out.println(h5("Package " + packageName));
+						out.println(h4("Package " + packageName));
 						out.println();
 						printDeclarationTableHeader(out);
 						packageDeclarations.forEach(it -> printDeclarationTableRow(it, out));
@@ -92,9 +92,9 @@ abstract class AbstractApiReportWriter implements ApiReportWriter {
 
 	protected abstract String h2(String header);
 
-	protected abstract String h4(String header);
+	protected abstract String h3(String header);
 
-	protected abstract String h5(String header);
+	protected abstract String h4(String header);
 
 	protected abstract String code(String element);
 
