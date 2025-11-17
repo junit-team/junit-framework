@@ -10,9 +10,11 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.jupiter.api.AssertionUtils.getCanonicalName;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
@@ -45,6 +47,8 @@ public class AssertionFailureBuilder {
 	private @Nullable String reason;
 
 	private boolean includeValuesInMessage = true;
+
+	private @Nullable Class<?> trimStackTraceTo;
 
 	/**
 	 * Create a new {@code AssertionFailureBuilder}.
@@ -131,6 +135,21 @@ public class AssertionFailureBuilder {
 	}
 
 	/**
+	 * Set class to trim from the stacktrace.
+	 *
+	 * <p>To improve the readability of assertion failures, stack-frames up to
+	 * and including any frames from {@code to} are trimmed from the stacktrace.
+	 *
+	 * @param to class to prune from the stacktrace.
+	 * @return this builder for method chaining
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> to) {
+		this.trimStackTraceTo = to;
+		return this;
+	}
+
+	/**
 	 * Build the {@link AssertionFailedError AssertionFailedError} and throw it.
 	 *
 	 * @throws AssertionFailedError always
@@ -154,9 +173,37 @@ public class AssertionFailureBuilder {
 		if (reason != null) {
 			message = buildPrefix(message) + reason;
 		}
-		return mismatch //
+
+		var assertionFailedError = mismatch //
 				? new AssertionFailedError(message, expected, actual, cause) //
 				: new AssertionFailedError(message, cause);
+
+		maybeTrimStackTrace(assertionFailedError);
+		return assertionFailedError;
+	}
+
+	private void maybeTrimStackTrace(Throwable throwable) {
+		if (trimStackTraceTo == null) {
+			return;
+		}
+
+		var pruneTargetClassName = trimStackTraceTo.getName();
+		var stackTrace = throwable.getStackTrace();
+
+		int lastIndexOf = -1;
+		for (int i = 0; i < stackTrace.length; i++) {
+			var element = stackTrace[i];
+			var className = element.getClassName();
+			if (className.equals(pruneTargetClassName)) {
+				lastIndexOf = i;
+			}
+		}
+
+		if (lastIndexOf != -1) {
+			int from = Math.min(lastIndexOf + 1, stackTrace.length);
+			var pruned = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
+			throwable.setStackTrace(pruned);
+		}
 	}
 
 	private static @Nullable String nullSafeGet(@Nullable Object messageOrSupplier) {

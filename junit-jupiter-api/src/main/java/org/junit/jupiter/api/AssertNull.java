@@ -53,6 +53,7 @@ class AssertNull {
 				.message(messageOrSupplier) //
 				.expected(null) //
 				.actual(actual) //
+				.trimStacktrace(Assertions.class) //
 				.buildAndThrow();
 	}
 

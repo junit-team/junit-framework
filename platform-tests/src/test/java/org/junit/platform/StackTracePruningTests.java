@@ -75,7 +75,7 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
-				\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
+				\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 				>>>>
 				\\Qorg.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:\\E.+
 				>>>>
@@ -83,7 +83,7 @@ class StackTracePruningTests {
 	}
 
 	@Test
-	void shouldAlwaysKeepJupiterAssertionStackTraceElement() {
+	void shouldAlwaysKeepJupiterTestStackTraceElement() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(FailingTestTestCase.class, "failingAssertion")) //
@@ -92,13 +92,12 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
-				>>>>
-				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
+				\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 				>>>>
 				""");
 	}
 
-	@Test
+	@Test //TODO:
 	void shouldAlwaysKeepJupiterAssumptionStackTraceElement() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
@@ -115,18 +114,16 @@ class StackTracePruningTests {
 	}
 
 	@Test
-	void shouldKeepExactlyEverythingAfterTestCall() {
+	void shouldKeepExactlyEverythingBeforeAssertionsCall() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(FailingTestTestCase.class, "failingAssertion")) //
 				.execute();
 
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
-
 		assertStackTraceMatch(stackTrace,
 			"""
-					\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
-					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
+					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.failingAssertion(StackTracePruningTests.java:\\E.+
 					""");
 	}
@@ -145,8 +142,7 @@ class StackTracePruningTests {
 
 		assertStackTraceMatch(stackTrace,
 			"""
-					\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
-					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
+					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.fail(StackTracePruningTests.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.setUp(StackTracePruningTests.java:\\E.+
 					""");
 	}
@@ -198,12 +194,16 @@ class StackTracePruningTests {
 
 		@Test
 		void failingAssertion() {
-			Assertions.fail();
+			fail();
 		}
 
 		@Test
 		void multipleFailingAssertions() {
-			Assertions.assertAll(Assertions::fail, Assertions::fail);
+			failMultiple();
+		}
+
+		private void failMultiple() {
+			Assertions.assertAll(FailingTestTestCase::fail, FailingTestTestCase::fail);
 		}
 
 		@Test
@@ -213,6 +213,9 @@ class StackTracePruningTests {
 			});
 		}
 
+		private static void fail() {
+			Assertions.fail();
+		}
 	}
 
 	@SuppressWarnings("JUnitMalformedDeclaration")
@@ -220,7 +223,7 @@ class StackTracePruningTests {
 
 		@BeforeEach
 		void setUp() {
-			Assertions.fail();
+			fail();
 		}
 
 		@Test
@@ -243,6 +246,10 @@ class StackTracePruningTests {
 
 			}
 
+		}
+
+		private static void fail() {
+			Assertions.fail();
 		}
 
 	}
