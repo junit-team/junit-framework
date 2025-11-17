@@ -19,6 +19,7 @@ import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -102,6 +103,25 @@ class ExceptionUtilsTests {
 
 		assertThat(exception.getStackTrace()) //
 				.noneMatch(element -> element.toString().contains("org.example.Class.method(file:123)"));
+	}
+
+	@Test
+	void pruneStackTraceOfJUnitStart() {
+		var testClassName = ExceptionUtilsTests.class.getCanonicalName();
+
+		var exception = new JUnitException("expected");
+		var stackTrace = exception.getStackTrace();
+
+		var extendedStacktrace = Arrays.copyOfRange(stackTrace, 0, stackTrace.length + 2);
+		extendedStacktrace[stackTrace.length] = new StackTraceElement("org.junit.start.JUnit", "run", "JUnit.class", 3);
+		extendedStacktrace[stackTrace.length + 1] = new StackTraceElement(testClassName, "main",
+			"ExceptionUtilsTest.class", 5);
+		exception.setStackTrace(extendedStacktrace);
+
+		pruneStackTrace(exception, List.of(testClassName));
+
+		assertThat(exception.getStackTrace()) //
+				.noneMatch(element -> element.toString().contains(testClassName + ".main(file:5)"));
 	}
 
 	@Test
