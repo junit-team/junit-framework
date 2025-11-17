@@ -35,13 +35,13 @@ class HtmlApiReportWriter extends AbstractApiReportWriter {
 	}
 
 	@Override
-	protected String h4(String header) {
-		return "<h4>" + header + "</h4>";
+	protected String h3(String header) {
+		return "<h3>" + header + "</h3>";
 	}
 
 	@Override
-	protected String h5(String header) {
-		return "<h5>" + header + "</h5>";
+	protected String h4(String header) {
+		return "<h4>" + header + "</h4>";
 	}
 
 	@Override
