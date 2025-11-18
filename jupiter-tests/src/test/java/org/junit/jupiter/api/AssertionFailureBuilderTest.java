@@ -90,8 +90,8 @@ class AssertionFailureBuilderTest {
 			return assertionFailure().build();
 		}
 
-		static AssertionFailedError failWithTrimmedStacktrace(Class<?> testCaseClass) {
-			return assertionFailure().trimStacktrace(testCaseClass).build();
+		static AssertionFailedError failWithTrimmedStacktrace(Class<?> to) {
+			return assertionFailure().trimStacktrace(to).build();
 		}
 
 	}
