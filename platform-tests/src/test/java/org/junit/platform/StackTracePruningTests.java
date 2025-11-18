@@ -197,6 +197,10 @@ class StackTracePruningTests {
 			fail();
 		}
 
+		private static void fail() {
+			Assertions.fail();
+		}
+
 		@Test
 		void multipleFailingAssertions() {
 			failMultiple();
@@ -212,10 +216,6 @@ class StackTracePruningTests {
 				throw new RuntimeException();
 			});
 		}
-
-		private static void fail() {
-			Assertions.fail();
-		}
 	}
 
 	@SuppressWarnings("JUnitMalformedDeclaration")
@@ -224,6 +224,10 @@ class StackTracePruningTests {
 		@BeforeEach
 		void setUp() {
 			fail();
+		}
+
+		private static void fail() {
+			Assertions.fail();
 		}
 
 		@Test
@@ -243,15 +247,7 @@ class StackTracePruningTests {
 				@Test
 				void test() {
 				}
-
 			}
-
 		}
-
-		private static void fail() {
-			Assertions.fail();
-		}
-
 	}
-
 }
