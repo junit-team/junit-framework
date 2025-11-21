@@ -207,13 +207,13 @@ public class AssertionFailureBuilder {
 		}
 
 		if (lastIndexOf != -1) {
-			int from = clamp(lastIndexOf + 1 - trimStackTraceRetain, stackTrace.length);
+			int from = clamp0(lastIndexOf + 1 - trimStackTraceRetain, stackTrace.length);
 			var trimmed = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
 			throwable.setStackTrace(trimmed);
 		}
 	}
 
-	private static int clamp(int value, int max) {
+	private static int clamp0(int value, int max) {
 		return Math.max(0, Math.min(value, max));
 	}
 
