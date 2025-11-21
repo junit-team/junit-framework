@@ -76,7 +76,6 @@ class StackTracePruningTests {
 
 		assertStackTraceMatch(stackTrace, """
 				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
-				\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 				>>>>
 				\\Qorg.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:\\E.+
 				>>>>
@@ -94,7 +93,6 @@ class StackTracePruningTests {
 
 		assertStackTraceMatch(stackTrace, """
 				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
-				\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 				>>>>
 				""");
 	}
@@ -126,7 +124,6 @@ class StackTracePruningTests {
 		assertStackTraceMatch(stackTrace,
 			"""
 					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
-					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.failingAssertion(StackTracePruningTests.java:\\E.+
 					""");
 	}
@@ -146,7 +143,6 @@ class StackTracePruningTests {
 		assertStackTraceMatch(stackTrace,
 			"""
 					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
-					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.fail(StackTracePruningTests.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.setUp(StackTracePruningTests.java:\\E.+
 					""");
 	}
@@ -198,10 +194,6 @@ class StackTracePruningTests {
 
 		@Test
 		void failingAssertion() {
-			fail();
-		}
-
-		private static void fail() {
 			Assertions.fail();
 		}
 
@@ -211,7 +203,7 @@ class StackTracePruningTests {
 		}
 
 		private void failMultiple() {
-			Assertions.assertAll(FailingTestTestCase::fail, FailingTestTestCase::fail);
+			Assertions.assertAll(Assertions::fail, Assertions::fail);
 		}
 
 		@Test
@@ -227,10 +219,6 @@ class StackTracePruningTests {
 
 		@BeforeEach
 		void setUp() {
-			fail();
-		}
-
-		private static void fail() {
 			Assertions.fail();
 		}
 
