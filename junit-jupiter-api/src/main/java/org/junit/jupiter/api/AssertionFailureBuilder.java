@@ -49,7 +49,7 @@ public class AssertionFailureBuilder {
 
 	private boolean includeValuesInMessage = true;
 
-	private @Nullable Class<?> trimStackTraceBefore;
+	private @Nullable Class<?> trimStackTraceTarget;
 
 	private int trimStackTraceRetain;
 
@@ -151,7 +151,7 @@ public class AssertionFailureBuilder {
 	@API(status = EXPERIMENTAL, since = "6.1")
 	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> target, int retain) {
 		Preconditions.condition(retain >= 0, "retain must have a non-negative value");
-		this.trimStackTraceBefore = target;
+		this.trimStackTraceTarget = target;
 		this.trimStackTraceRetain = retain;
 		return this;
 	}
@@ -190,11 +190,11 @@ public class AssertionFailureBuilder {
 	}
 
 	private void maybeTrimStackTrace(Throwable throwable) {
-		if (trimStackTraceBefore == null) {
+		if (trimStackTraceTarget == null) {
 			return;
 		}
 
-		var pruneTargetClassName = trimStackTraceBefore.getName();
+		var pruneTargetClassName = trimStackTraceTarget.getName();
 		var stackTrace = throwable.getStackTrace();
 
 		int lastIndexOf = -1;
