@@ -75,7 +75,7 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
-				\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
+				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 				>>>>
 				\\Qorg.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:\\E.+
 				>>>>
