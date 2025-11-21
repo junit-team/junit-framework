@@ -208,6 +208,7 @@ class StackTracePruningTests {
 				throw new RuntimeException();
 			});
 		}
+
 	}
 
 	@SuppressWarnings("JUnitMalformedDeclaration")
