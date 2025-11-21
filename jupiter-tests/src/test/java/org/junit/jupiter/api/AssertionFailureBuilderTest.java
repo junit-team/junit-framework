@@ -14,6 +14,7 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.List;
