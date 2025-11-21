@@ -13,6 +13,7 @@ package org.junit.jupiter.api;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
+import org.junit.platform.commons.PreconditionViolationException;
 import org.opentest4j.AssertionFailedError;
 
 class AssertionFailureBuilderTest {
@@ -89,6 +91,13 @@ class AssertionFailureBuilderTest {
 		}
 	}
 
+	@Test
+	void mustRetainNonNegativeNumberOfFrames() {
+		var exception = assertThrows(PreconditionViolationException.class, //
+			() -> assertionFailure().trimStacktrace(Assertions.class, -1));
+		assertThat(exception).hasMessage("retain must have a non-negative value");
+	}
+
 	private static void assertStackTraceMatch(AssertionFailedError assertionFailedError, String expectedLines) {
 		List<String> stackStraceAsLines = Arrays.stream(assertionFailedError.getStackTrace()) //
 				.map(StackTraceElement::toString) //
@@ -101,8 +110,8 @@ class AssertionFailureBuilderTest {
 			return assertionFailure().build();
 		}
 
-		static AssertionFailedError failWithTrimmedStacktrace(Class<?> to, int depth) {
-			return AssertionFailureBuilder.assertionFailure().trimStacktrace(to, depth).build();
+		static AssertionFailedError failWithTrimmedStacktrace(Class<?> to, int retain) {
+			return AssertionFailureBuilder.assertionFailure().trimStacktrace(to, retain).build();
 		}
 
 	}

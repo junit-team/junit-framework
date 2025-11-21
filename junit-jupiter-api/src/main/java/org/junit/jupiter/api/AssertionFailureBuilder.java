@@ -141,7 +141,7 @@ public class AssertionFailureBuilder {
 	 * Set target and depth for trimming stacktrace.
 	 *
 	 * <p>Removes all but {@code retain - 1} frames before the last frame from
-	 * {@code target}. If {@code retain} is zero, all frames from
+	 * {@code target}. If {@code retain} is zero, all frames including
 	 * {@code target} are trimmed.
 	 *
 	 * @param target class to trim from the stacktrace
