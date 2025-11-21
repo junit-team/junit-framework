@@ -208,8 +208,8 @@ public class AssertionFailureBuilder {
 
 		if (lastIndexOf != -1) {
 			int from = clamp(lastIndexOf + 1 - trimStackTraceRetain, stackTrace.length);
-			var pruned = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
-			throwable.setStackTrace(pruned);
+			var trimmed = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
+			throwable.setStackTrace(trimmed);
 		}
 	}
 
