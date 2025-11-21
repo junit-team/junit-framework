@@ -13,7 +13,6 @@ package org.junit.jupiter.api;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
 import java.util.Arrays;
