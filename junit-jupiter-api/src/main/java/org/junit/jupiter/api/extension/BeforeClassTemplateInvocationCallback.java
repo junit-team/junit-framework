@@ -64,7 +64,7 @@ import org.junit.jupiter.api.ClassTemplate;
 public interface BeforeClassTemplateInvocationCallback extends Extension {
 
 	/**
-	 * Callback that is invoked <em>before</em> each invocation of a container
+	 * Callback that is invoked <em>before</em> each invocation of a class
 	 * template.
 	 *
 	 * @param context the current extension context; never {@code null}

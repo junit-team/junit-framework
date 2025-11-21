@@ -22,8 +22,7 @@ import org.junit.jupiter.api.ClassTemplate;
  * {@code ClassTemplateInvocationContext} represents the <em>context</em> of
  * a single invocation of a {@link ClassTemplate @ClassTemplate}.
  *
- * <p>Each context is provided by a
- * {@link ClassTemplateInvocationContextProvider}.
+ * <p>Each context is provided by a {@link ClassTemplateInvocationContextProvider}.
  *
  * @since 5.13
  * @see ClassTemplate
@@ -36,7 +35,7 @@ public interface ClassTemplateInvocationContext {
 	 * Get the display name for this invocation.
 	 *
 	 * <p>The supplied {@code invocationIndex} is incremented by the framework
-	 * with each container invocation. Thus, in the case of multiple active
+	 * with each class template invocation. Thus, in the case of multiple active
 	 * {@linkplain ClassTemplateInvocationContextProvider providers}, only the
 	 * first active provider receives indices starting with {@code 1}.
 	 *
@@ -51,16 +50,16 @@ public interface ClassTemplateInvocationContext {
 	}
 
 	/**
-	 * Get the additional {@linkplain Extension extensions} for this invocation.
+	 * Get additional {@linkplain Extension extensions} for this invocation.
 	 *
 	 * <p>The extensions provided by this method will only be used for this
 	 * invocation of the class template. Thus, it does not make sense to return
-	 * an extension that acts solely on the container level (e.g.
-	 * {@link BeforeAllCallback}).
+	 * an extension that needs to perform some action at the container level,
+	 * such as an implementation of {@link BeforeAllCallback}.
 	 *
 	 * <p>The default implementation returns an empty list.
 	 *
-	 * @return the additional extensions for this invocation; never {@code null}
+	 * @return additional extensions for this invocation; never {@code null}
 	 * or containing {@code null} elements, but potentially empty
 	 */
 	default List<Extension> getAdditionalExtensions() {
@@ -74,7 +73,7 @@ public interface ClassTemplateInvocationContext {
 	 * {@link ExtensionContext.Store Store} to benefit from its cleanup support
 	 * or for retrieval by other extensions.
 	 *
-	 * @param context The invocation-level extension context.
+	 * @param context the invocation-level extension context
 	 */
 	default void prepareInvocation(ExtensionContext context) {
 	}

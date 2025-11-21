@@ -21,17 +21,18 @@ import org.jspecify.annotations.Nullable;
  * {@code ArgumentsAccessor} defines the public API for accessing arguments provided
  * by an {@link org.junit.jupiter.params.provider.ArgumentsProvider ArgumentsProvider}
  * for a single invocation of a
- * {@link org.junit.jupiter.params.ParameterizedTest @ParameterizedTest} method.
+ * {@link org.junit.jupiter.params.ParameterizedClass @ParameterizedClass} or
+ * {@link org.junit.jupiter.params.ParameterizedTest @ParameterizedTest}.
  *
  * <p>Specifically, an {@code ArgumentsAccessor} <em>aggregates</em> a set of
- * arguments for a given invocation of a parameterized test and provides convenience
- * methods for accessing those arguments in a type-safe manner with support for
- * automatic type conversion.
+ * arguments for a given invocation of a parameterized class or parameterized
+ * test and provides convenience methods for accessing those arguments in a
+ * type-safe manner with support for automatic type conversion.
  *
  * <p>An instance of {@code ArgumentsAccessor} will be automatically supplied
- * for any parameter of type {@code ArgumentsAccessor} in a parameterized test.
- * In addition, {@link ArgumentsAggregator} implementations are given access to
- * an {@code ArgumentsAccessor}.
+ * for any parameter of type {@code ArgumentsAccessor} in a parameterized class
+ * or parameterized test. In addition, {@link ArgumentsAggregator} implementations
+ * are given access to an {@code ArgumentsAccessor}.
  *
  * <p>This interface is not intended to be implemented by clients.
  *
@@ -201,7 +202,8 @@ public interface ArgumentsAccessor {
 	List<@Nullable Object> toList();
 
 	/**
-	 * Get the index of the current test invocation.
+	 * Get the index of the current invocation.
 	 */
 	int getInvocationIndex();
+
 }
