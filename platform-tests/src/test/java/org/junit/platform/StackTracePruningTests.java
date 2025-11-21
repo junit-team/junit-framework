@@ -116,7 +116,7 @@ class StackTracePruningTests {
 	}
 
 	@Test
-	void shouldKeepExactlyEverythingBeforeAssertionsCall() {
+	void shouldKeepExactlyEverythingBetweenTestCallAndFirstAssertionCall() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(FailingTestTestCase.class, "failingAssertion")) //
