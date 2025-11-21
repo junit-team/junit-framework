@@ -199,10 +199,6 @@ class StackTracePruningTests {
 
 		@Test
 		void multipleFailingAssertions() {
-			failMultiple();
-		}
-
-		private void failMultiple() {
 			Assertions.assertAll(Assertions::fail, Assertions::fail);
 		}
 
