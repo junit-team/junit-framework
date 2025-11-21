@@ -153,7 +153,7 @@ class AssertIterableEquals {
 		return assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("expected iterable was <null>" + formatIndexes(indexes)) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.build();
 	}
 
@@ -166,7 +166,7 @@ class AssertIterableEquals {
 		return assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("actual iterable was <null>" + formatIndexes(indexes)) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.build();
 	}
 

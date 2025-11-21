@@ -66,7 +66,7 @@ class AssertTrue {
 				.message(messageOrSupplier) //
 				.expected(true) //
 				.actual(false) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.buildAndThrow();
 	}
 

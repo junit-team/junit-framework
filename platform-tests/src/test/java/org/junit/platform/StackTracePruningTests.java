@@ -75,6 +75,7 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
+				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 				\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 				>>>>
 				\\Qorg.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:\\E.+
@@ -83,7 +84,7 @@ class StackTracePruningTests {
 	}
 
 	@Test
-	void shouldAlwaysKeepJupiterTestStackTraceElement() {
+	void shouldAlwaysKeepJupiterAssertionStackTraceElement() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(FailingTestTestCase.class, "failingAssertion")) //
@@ -92,12 +93,13 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
+				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 				\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 				>>>>
 				""");
 	}
 
-	@Test //TODO:
+	@Test
 	void shouldAlwaysKeepJupiterAssumptionStackTraceElement() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
@@ -123,6 +125,7 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 		assertStackTraceMatch(stackTrace,
 			"""
+					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.fail(StackTracePruningTests.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.failingAssertion(StackTracePruningTests.java:\\E.+
 					""");
@@ -142,6 +145,7 @@ class StackTracePruningTests {
 
 		assertStackTraceMatch(stackTrace,
 			"""
+					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.fail(StackTracePruningTests.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.setUp(StackTracePruningTests.java:\\E.+
 					""");

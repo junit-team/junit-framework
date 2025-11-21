@@ -56,7 +56,7 @@ class AssertInstanceOf {
 					.expected(expectedType) //
 					.actual(actualValue == null ? null : actualValue.getClass()) //
 					.cause(actualValue instanceof Throwable t ? t : null) //
-					.trimStacktrace(Assertions.class) //
+					.trimStacktrace(Assertions.class, 1) //
 					.buildAndThrow();
 		}
 		return expectedType.cast(actualValue);

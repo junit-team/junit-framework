@@ -65,14 +65,14 @@ class AssertThrows {
 						.actual(actualException.getClass()) //
 						.reason("Unexpected exception type thrown") //
 						.cause(actualException) //
-						.trimStacktrace(Assertions.class) //
+						.trimStacktrace(Assertions.class, 1) //
 						.build();
 			}
 		}
 		throw assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("Expected %s to be thrown, but nothing was thrown.".formatted(getCanonicalName(expectedType))) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.build();
 	}
 

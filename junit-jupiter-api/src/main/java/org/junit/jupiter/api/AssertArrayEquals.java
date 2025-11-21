@@ -483,7 +483,7 @@ class AssertArrayEquals {
 		return assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("expected array was <null>" + formatIndexes(indexes)) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.build();
 	}
 
@@ -496,7 +496,7 @@ class AssertArrayEquals {
 		return assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("actual array was <null>" + formatIndexes(indexes)) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.build();
 	}
 
@@ -509,7 +509,7 @@ class AssertArrayEquals {
 					.reason("array lengths differ" + formatIndexes(indexes)) //
 					.expected(expected) //
 					.actual(actual) //
-					.trimStacktrace(Assertions.class) //
+					.trimStacktrace(Assertions.class, 1) //
 					.buildAndThrow();
 		}
 	}
@@ -522,7 +522,7 @@ class AssertArrayEquals {
 				.reason("array contents differ" + formatIndexes(indexes)) //
 				.expected(expected) //
 				.actual(actual) //
-				.trimStacktrace(Assertions.class) //
+				.trimStacktrace(Assertions.class, 1) //
 				.buildAndThrow();
 	}
 

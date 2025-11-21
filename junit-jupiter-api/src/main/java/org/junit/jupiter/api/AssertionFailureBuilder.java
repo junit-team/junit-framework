@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.StringUtils;
 import org.opentest4j.AssertionFailedError;
 
@@ -48,7 +49,9 @@ public class AssertionFailureBuilder {
 
 	private boolean includeValuesInMessage = true;
 
-	private @Nullable Class<?> trimStackTraceTo;
+	private @Nullable Class<?> trimStackTraceBefore;
+
+	private int trimStackTraceRetain;
 
 	/**
 	 * Create a new {@code AssertionFailureBuilder}.
@@ -135,17 +138,21 @@ public class AssertionFailureBuilder {
 	}
 
 	/**
-	 * Set class to trim from the stacktrace.
+	 * Set target and depth for trimming stacktrace.
 	 *
-	 * <p>To improve the readability of assertion failures, stack-frames up to
-	 * and including any frames from {@code to} are trimmed from the stacktrace.
+	 * <p>Removes all but {@code retain - 1} frames before the last frame from
+	 * {@code target}. If {@code retain} is zero, all frames before the last frame from
+	 * {@code target} are trimmed.
 	 *
-	 * @param to class to prune from the stacktrace.
+	 * @param target class to trim from the stacktrace
+	 * @param retain depth of trimming, must be non-negative
 	 * @return this builder for method chaining
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> to) {
-		this.trimStackTraceTo = to;
+	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> target, int retain) {
+		Preconditions.condition(retain >= 0, "retain must have a non-negative value");
+		this.trimStackTraceBefore = target;
+		this.trimStackTraceRetain = retain;
 		return this;
 	}
 
@@ -183,11 +190,11 @@ public class AssertionFailureBuilder {
 	}
 
 	private void maybeTrimStackTrace(Throwable throwable) {
-		if (trimStackTraceTo == null) {
+		if (trimStackTraceBefore == null) {
 			return;
 		}
 
-		var pruneTargetClassName = trimStackTraceTo.getName();
+		var pruneTargetClassName = trimStackTraceBefore.getName();
 		var stackTrace = throwable.getStackTrace();
 
 		int lastIndexOf = -1;
@@ -200,10 +207,14 @@ public class AssertionFailureBuilder {
 		}
 
 		if (lastIndexOf != -1) {
-			int from = Math.min(lastIndexOf + 1, stackTrace.length);
+			int from = clamp(lastIndexOf + 1 - trimStackTraceRetain, stackTrace.length);
 			var pruned = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
 			throwable.setStackTrace(pruned);
 		}
+	}
+
+	private static int clamp(int value, int max) {
+		return Math.max(0, Math.min(value, max));
 	}
 
 	private static @Nullable String nullSafeGet(@Nullable Object messageOrSupplier) {

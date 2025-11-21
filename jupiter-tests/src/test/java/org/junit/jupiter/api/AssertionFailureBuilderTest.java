@@ -38,7 +38,7 @@ class AssertionFailureBuilderTest {
 
 	@Test
 	void trimsUpToAssertionsFacade() {
-		var error = AssertionsFacade.failWithTrimmedStacktrace(AssertionsFacade.class);
+		var error = AssertionsFacade.failWithTrimmedStacktrace(AssertionsFacade.class, 0);
 		assertStackTraceMatch(error,
 			"""
 					\\Qorg.junit.jupiter.api.AssertionFailureBuilderTest.trimsUpToAssertionsFacade(AssertionFailureBuilderTest.java:\\E.+
@@ -47,8 +47,19 @@ class AssertionFailureBuilderTest {
 	}
 
 	@Test
+	void trimsUpToAssertionsFacadeKeepingOne() {
+		var error = AssertionsFacade.failWithTrimmedStacktrace(AssertionsFacade.class, 1);
+		assertStackTraceMatch(error,
+			"""
+					\\Qorg.junit.jupiter.api.AssertionFailureBuilderTest$AssertionsFacade.failWithTrimmedStacktrace(AssertionFailureBuilderTest.java:\\E.+
+					\\Qorg.junit.jupiter.api.AssertionFailureBuilderTest.trimsUpToAssertionsFacadeKeepingOne(AssertionFailureBuilderTest.java:\\E.+
+					>>>>
+					""");
+	}
+
+	@Test
 	void trimsUpToAssertionFailureBuilder() {
-		var error = AssertionsFacade.failWithTrimmedStacktrace(AssertionFailureBuilder.class);
+		var error = AssertionsFacade.failWithTrimmedStacktrace(AssertionFailureBuilder.class, 0);
 		assertStackTraceMatch(error,
 			"""
 					\\Qorg.junit.jupiter.api.AssertionFailureBuilderTest$AssertionsFacade.failWithTrimmedStacktrace(AssertionFailureBuilderTest.java:\\E.+
@@ -59,7 +70,7 @@ class AssertionFailureBuilderTest {
 
 	@Test
 	void ignoresClassNotInStackTrace() {
-		var error = AssertionsFacade.failWithTrimmedStacktrace(String.class);
+		var error = AssertionsFacade.failWithTrimmedStacktrace(String.class, 0);
 		assertStackTraceMatch(error,
 			"""
 					\\Qorg.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:\\E.+
@@ -73,7 +84,7 @@ class AssertionFailureBuilderTest {
 	void canTrimToEmptyStacktrace() throws ExecutionException, InterruptedException {
 		try (ExecutorService service = newSingleThreadExecutor()) {
 			// Ensure that the stacktrace starts at Thread.
-			var error = service.submit(() -> AssertionsFacade.failWithTrimmedStacktrace(Thread.class)).get();
+			var error = service.submit(() -> AssertionsFacade.failWithTrimmedStacktrace(Thread.class, 0)).get();
 			assertThat(error.getStackTrace()).isEmpty();
 		}
 	}
@@ -90,8 +101,8 @@ class AssertionFailureBuilderTest {
 			return assertionFailure().build();
 		}
 
-		static AssertionFailedError failWithTrimmedStacktrace(Class<?> to) {
-			return assertionFailure().trimStacktrace(to).build();
+		static AssertionFailedError failWithTrimmedStacktrace(Class<?> to, int depth) {
+			return AssertionFailureBuilder.assertionFailure().trimStacktrace(to, depth).build();
 		}
 
 	}

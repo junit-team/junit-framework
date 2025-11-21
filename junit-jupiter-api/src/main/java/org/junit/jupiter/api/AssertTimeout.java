@@ -82,7 +82,7 @@ class AssertTimeout {
 					.message(messageOrSupplier) //
 					.reason("execution exceeded timeout of " + timeoutInMillis + " ms by "
 							+ (timeElapsed - timeoutInMillis) + " ms") //
-					.trimStacktrace(Assertions.class) //
+					.trimStacktrace(Assertions.class, 1) //
 					.buildAndThrow();
 		}
 		return result;
