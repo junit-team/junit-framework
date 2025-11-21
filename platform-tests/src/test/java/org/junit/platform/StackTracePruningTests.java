@@ -251,7 +251,11 @@ class StackTracePruningTests {
 				@Test
 				void test() {
 				}
+
 			}
+
 		}
+
 	}
+
 }
