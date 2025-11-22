@@ -55,12 +55,15 @@ public class ProcessStarters {
 	}
 
 	public static ProcessStarter maven(Path javaHome) {
-		return new ProcessStarter() //
+		var starter = new ProcessStarter() //
 				.executable(Path.of(System.getProperty("mavenDistribution")).resolve("bin").resolve(
 					windowsOrOtherExecutable("mvn.cmd", "mvn")).toAbsolutePath()) //
 				.putEnvironment("JAVA_HOME", javaHome) //
-				.putEnvironment("MAVEN_OPTS", "--enable-final-field-mutation=ALL-UNNAMED") //
 				.addArguments("-Djunit.version=" + Helper.version());
+		if (Runtime.version().feature() >= 26) {
+			starter.putEnvironment("MAVEN_OPTS", "--enable-final-field-mutation=ALL-UNNAMED");
+		}
+		return starter;
 	}
 
 	private static String windowsOrOtherExecutable(String cmdOrExe, String other) {
