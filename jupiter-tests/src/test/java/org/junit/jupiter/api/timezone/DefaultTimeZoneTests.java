@@ -206,10 +206,10 @@ class DefaultTimeZoneTests {
 		@DisplayName("on method level, throws exception")
 		void throwsWhenConfigurationIsBad() {
 			ExecutionResults results = executeTestMethod(BadMethodLevelConfigurationTestCases.class,
-					"badConfiguration");
+				"badConfiguration");
 			results.testEvents().assertThatEvents().haveAtMost(1,
-					finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
-							message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
 		}
 
 		@Test
@@ -219,8 +219,8 @@ class DefaultTimeZoneTests {
 			ExecutionResults results = executeTestClass(BadClassLevelConfigurationTestCases.class);
 
 			results.testEvents().assertThatEvents().haveAtMost(1,
-					finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
-							message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("@DefaultTimeZone not configured correctly."))));
 		}
 
 		@AfterEach
@@ -290,8 +290,8 @@ class DefaultTimeZoneTests {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "notExclusive");
 
 			results.testEvents().assertThatEvents().haveAtMost(1,
-					finishedWithFailure(instanceOf(ExtensionConfigurationException.class), message(it -> it.contains(
-							"Either a valid time zone id or a TimeZoneProvider must be provided"))));
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("Either a valid time zone id or a TimeZoneProvider must be provided"))));
 		}
 
 		@Test
@@ -301,8 +301,8 @@ class DefaultTimeZoneTests {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "empty");
 
 			results.testEvents().assertThatEvents().haveAtMost(1,
-					finishedWithFailure(instanceOf(ExtensionConfigurationException.class), message(it -> it.contains(
-							"Either a valid time zone id or a TimeZoneProvider must be provided"))));
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("Either a valid time zone id or a TimeZoneProvider must be provided"))));
 		}
 
 		@Test
@@ -312,8 +312,8 @@ class DefaultTimeZoneTests {
 			ExecutionResults results = executeTestMethod(BadTimeZoneProviderTestCases.class, "noConstructor");
 
 			results.testEvents().assertThatEvents().haveAtMost(1,
-					finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
-							message(it -> it.contains("Could not instantiate TimeZoneProvider because of exception"))));
+				finishedWithFailure(instanceOf(ExtensionConfigurationException.class),
+					message(it -> it.contains("Could not instantiate TimeZoneProvider because of exception"))));
 		}
 
 	}

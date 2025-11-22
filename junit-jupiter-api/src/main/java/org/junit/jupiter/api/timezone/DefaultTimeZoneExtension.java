@@ -69,7 +69,8 @@ class DefaultTimeZoneExtension implements BeforeAllCallback, BeforeEachCallback,
 		boolean noProvider = annotation.timeZoneProvider() == NullTimeZoneProvider.class;
 		if (noValue == noProvider) {
 			throw new ExtensionConfigurationException(
-					"Either a valid time zone id or a TimeZoneProvider must be provided to " + DefaultTimeZone.class.getSimpleName());
+				"Either a valid time zone id or a TimeZoneProvider must be provided to "
+						+ DefaultTimeZone.class.getSimpleName());
 		}
 	}
 
@@ -93,7 +94,7 @@ class DefaultTimeZoneExtension implements BeforeAllCallback, BeforeEachCallback,
 		}
 		catch (Exception exception) {
 			throw new ExtensionConfigurationException("Could not instantiate TimeZoneProvider because of exception",
-					exception);
+				exception);
 		}
 	}
 

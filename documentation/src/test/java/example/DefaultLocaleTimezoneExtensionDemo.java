@@ -50,7 +50,7 @@ public class DefaultLocaleTimezoneExtensionDemo {
 	@DefaultLocale(language = "ja", country = "JP", variant = "japanese")
 	void test_with_language_and_country_and_vairant() {
 		assertThat(Locale.getDefault()).isEqualTo(
-				new Locale.Builder().setLanguage("ja").setRegion("JP").setVariant("japanese").build());
+			new Locale.Builder().setLanguage("ja").setRegion("JP").setVariant("japanese").build());
 	}
 	// end::default_locale_language_alternatives[]
 
