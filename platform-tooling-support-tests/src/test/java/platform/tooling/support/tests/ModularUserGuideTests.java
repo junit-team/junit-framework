@@ -49,6 +49,8 @@ class ModularUserGuideTests {
 			  exports example.testkit; // just here to ensure documentation example sources are compiled
 
 			  requires org.junit.jupiter.api;
+			  requires org.junit.jupiter.api.locale;
+			  requires org.junit.jupiter.api.timezone;
 			  requires org.junit.jupiter.migrationsupport;
 			  requires org.junit.jupiter.params;
 

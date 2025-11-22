@@ -31,6 +31,10 @@ module org.junit.jupiter.api {
 	exports org.junit.jupiter.api.io;
 	exports org.junit.jupiter.api.parallel;
 	exports org.junit.jupiter.api.timeout to org.junit.jupiter.engine;
+	exports org.junit.jupiter.api.locale to org.junit.platform.engine;
+	exports org.junit.jupiter.api.timezone to org.junit.platform.engine;
 
 	opens org.junit.jupiter.api.condition to org.junit.platform.commons;
+	opens org.junit.jupiter.api.locale to org.junit.platform.commons;
+	opens org.junit.jupiter.api.timezone to org.junit.platform.commons;
 }
