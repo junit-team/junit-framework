@@ -59,6 +59,7 @@ public class ProcessStarters {
 				.executable(Path.of(System.getProperty("mavenDistribution")).resolve("bin").resolve(
 					windowsOrOtherExecutable("mvn.cmd", "mvn")).toAbsolutePath()) //
 				.putEnvironment("JAVA_HOME", javaHome) //
+				.putEnvironment("MAVEN_OPTS", "--enable-final-field-mutation=ALL-UNNAMED") //
 				.addArguments("-Djunit.version=" + Helper.version());
 	}
 
