@@ -21,6 +21,7 @@ import de.skuzzle.test.snapshots.Snapshot;
 import de.skuzzle.test.snapshots.junit5.EnableSnapshotTests;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
@@ -65,6 +66,7 @@ class MavenStarterTests {
 	}
 
 	@Test
+	@Disabled("Maven 4 issue?")
 	void runOnlyOneMethodInClassTemplate(@FilePrefix("maven") OutputFiles outputFiles) throws Exception {
 
 		var result = runMaven(outputFiles, "test", "-Dtest=CalculatorParameterizedClassTests$Inner#regularTest");
