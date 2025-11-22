@@ -133,7 +133,7 @@ public final class ExceptionUtils {
 			StackTraceElement element = stackTrace.get(i);
 			String className = element.getClassName();
 
-			if (classNames.contains(className)) {
+			if (classNames.contains(className) && !includesJunitStart(stackTrace, i + 1)) {
 				// We found the test
 				// everything before that is not informative.
 				prunedStackTrace.clear();
@@ -154,6 +154,13 @@ public final class ExceptionUtils {
 
 		Collections.reverse(prunedStackTrace);
 		throwable.setStackTrace(prunedStackTrace.toArray(new StackTraceElement[0]));
+	}
+
+	private static boolean includesJunitStart(List<StackTraceElement> stackTrace, int fromIndex) {
+		return stackTrace.stream() //
+				.skip(fromIndex) //
+				.map(StackTraceElement::getClassName) //
+				.anyMatch(className -> className.startsWith(JUNIT_START_PACKAGE_PREFIX));
 	}
 
 	/**
