@@ -10,13 +10,16 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.jupiter.api.AssertionUtils.getCanonicalName;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.StringUtils;
 import org.opentest4j.AssertionFailedError;
 
@@ -45,6 +48,10 @@ public class AssertionFailureBuilder {
 	private @Nullable String reason;
 
 	private boolean includeValuesInMessage = true;
+
+	private @Nullable Class<?> trimStackTraceTarget;
+
+	private int trimStackTraceRetain;
 
 	/**
 	 * Create a new {@code AssertionFailureBuilder}.
@@ -131,6 +138,25 @@ public class AssertionFailureBuilder {
 	}
 
 	/**
+	 * Set target and depth for trimming stacktrace.
+	 *
+	 * <p>Removes all but {@code retain - 1} frames before the last frame from
+	 * {@code target}. If {@code retain} is zero, all frames including
+	 * {@code target} are trimmed.
+	 *
+	 * @param target class to trim from the stacktrace
+	 * @param retain depth of trimming, must be non-negative
+	 * @return this builder for method chaining
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> target, int retain) {
+		Preconditions.condition(retain >= 0, "retain must have a non-negative value");
+		this.trimStackTraceTarget = target;
+		this.trimStackTraceRetain = retain;
+		return this;
+	}
+
+	/**
 	 * Build the {@link AssertionFailedError AssertionFailedError} and throw it.
 	 *
 	 * @throws AssertionFailedError always
@@ -154,9 +180,41 @@ public class AssertionFailureBuilder {
 		if (reason != null) {
 			message = buildPrefix(message) + reason;
 		}
-		return mismatch //
+
+		var assertionFailedError = mismatch //
 				? new AssertionFailedError(message, expected, actual, cause) //
 				: new AssertionFailedError(message, cause);
+
+		maybeTrimStackTrace(assertionFailedError);
+		return assertionFailedError;
+	}
+
+	private void maybeTrimStackTrace(Throwable throwable) {
+		if (trimStackTraceTarget == null) {
+			return;
+		}
+
+		var pruneTargetClassName = trimStackTraceTarget.getName();
+		var stackTrace = throwable.getStackTrace();
+
+		int lastIndexOf = -1;
+		for (int i = 0; i < stackTrace.length; i++) {
+			var element = stackTrace[i];
+			var className = element.getClassName();
+			if (className.equals(pruneTargetClassName)) {
+				lastIndexOf = i;
+			}
+		}
+
+		if (lastIndexOf != -1) {
+			int from = clamp0(lastIndexOf + 1 - trimStackTraceRetain, stackTrace.length);
+			var trimmed = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
+			throwable.setStackTrace(trimmed);
+		}
+	}
+
+	private static int clamp0(int value, int max) {
+		return Math.max(0, Math.min(value, max));
 	}
 
 	private static @Nullable String nullSafeGet(@Nullable Object messageOrSupplier) {
