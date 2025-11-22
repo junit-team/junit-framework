@@ -47,24 +47,26 @@ class ModularUserGuideTests {
 			@SuppressWarnings("removal")
 			open module documentation {
 			  exports example.testkit; // just here to ensure documentation example sources are compiled
-
+			
 			  requires org.junit.jupiter.api;
+			  requires org.junit.jupiter.api.locale;
+			  requires org.junit.jupiter.api.timezone;
 			  requires org.junit.jupiter.migrationsupport;
 			  requires org.junit.jupiter.params;
-
+			
 			  requires org.junit.platform.engine;
 			  requires org.junit.platform.reporting;
 			  requires org.junit.platform.suite;
 			  requires org.junit.platform.testkit;
-
+			
 			  // Byte Buddy is used by AssertJ's soft assertions which are used by the Engine Test Kit
 			  requires net.bytebuddy;
-
+			
 			  requires java.desktop;
 			  requires java.logging;
 			  requires java.scripting;
 			  requires jdk.httpserver;
-
+			
 			  provides org.junit.platform.launcher.LauncherSessionListener
 			    with example.session.GlobalSetupTeardownListener;
 			}
@@ -90,8 +92,8 @@ class ModularUserGuideTests {
 		args.add(lib.toString());
 
 		args.add("--patch-module");
-		args.add("documentation=" + Path.of("../documentation/src/main/java") + File.pathSeparator
-				+ Path.of("../documentation/src/test/java"));
+		args.add("documentation=" + Path.of("../documentation/src/main/java") + File.pathSeparator + Path.of(
+				"../documentation/src/test/java"));
 
 		args.add("--module-source-path");
 		args.add(temp.resolve("src").toString());
@@ -122,8 +124,8 @@ class ModularUserGuideTests {
 				.addArguments("-XX:StartFlightRecording:filename=" + temp.resolve("user-guide.jfr")) //
 				.addArguments("--show-version", "--show-module-resolution") //
 				.addArguments("--module-path", String.join(File.pathSeparator, //
-					temp.resolve("destination").toString(), //
-					temp.resolve("lib").toString() //
+						temp.resolve("destination").toString(), //
+						temp.resolve("lib").toString() //
 				)) //
 				.addArguments("--add-modules", "documentation") //
 				.addArguments("--patch-module", "documentation=" + projectDir.resolve("src/test/resources")) //
@@ -155,11 +157,11 @@ class ModularUserGuideTests {
 		assertTrue(err.toString().isBlank(), () -> err + "\n\n" + String.join("\n", args));
 		var listing = treeWalk(temp);
 		assertLinesMatch(List.of( //
-			"destination", //
-			">> CLASSES AND JARS >>", //
-			"src", //
-			"src/documentation", //
-			"src/documentation/module-info.java" //
+				"destination", //
+				">> CLASSES AND JARS >>", //
+				"src", //
+				"src/documentation", //
+				"src/documentation/module-info.java" //
 		), listing);
 
 		junit(temp, outputFiles);
