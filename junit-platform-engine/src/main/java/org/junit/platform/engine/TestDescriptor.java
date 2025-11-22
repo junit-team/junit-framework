@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
- * Mutable descriptor for a test or container that has been discovered by a
- * {@link TestEngine}.
+ * Mutable descriptor for a test or container that has
+ * been discovered by a {@link TestEngine}.
  *
  * @since 1.0
  * @see TestEngine
@@ -106,6 +106,9 @@ public interface TestDescriptor {
 	/**
 	 * Get the immutable set of <em>children</em> of this descriptor.
 	 *
+	 * <p>The implementation must be consistent with {@link #isContainer()} such that
+	 * {@code !x.container()} implies {@code x.getChildren().isEmpty()}.
+	 *
 	 * @return the set of children of this descriptor; neither {@code null}
 	 * nor mutable, but potentially empty
 	 * @see #getDescendants()
@@ -140,6 +143,9 @@ public interface TestDescriptor {
 	 *
 	 * <p>A <em>descendant</em> is a child of this descriptor or a child of one of
 	 * its children, recursively.
+	 *
+	 * <p>The implementation must be consistent with {@link #isContainer()} such that
+	 * {@code !x.container()} implies {@code x.getDescendants().isEmpty()}.
 	 *
 	 * @see #getChildren()
 	 */
@@ -230,7 +236,11 @@ public interface TestDescriptor {
 	Type getType();
 
 	/**
-	 * Determine if this descriptor describes a container.
+	 * Determine if this descriptor describes a <em>container</em>.
+	 *
+	 * <p>A test descriptor is a <em>container</em> when it may contain other
+	 * containers or tests as its children. A <em>container</em> can also be a
+	 * <em>test</em>.
 	 *
 	 * <p>The default implementation delegates to {@link Type#isContainer()}.
 	 */
@@ -239,7 +249,11 @@ public interface TestDescriptor {
 	}
 
 	/**
-	 * Determine if this descriptor describes a test.
+	 * Determine if this descriptor describes a <em>test</em>.
+	 *
+	 * <p>A test descriptor is a <em>test</em> when it verifies expected
+	 * behavior when executed. A <em>test</em> can also be a
+	 * <em>container</em>.
 	 *
 	 * <p>The default implementation delegates to {@link Type#isTest()}.
 	 */
@@ -250,6 +264,9 @@ public interface TestDescriptor {
 	/**
 	 * Determine if this descriptor may register dynamic tests during execution.
 	 *
+	 * <p>The implementation must be consistent with {@link #isContainer()} such that
+	 * {@code !x.container()} implies {@code !x.mayRegisterTests()}.
+	 *
 	 * <p>The default implementation assumes tests are usually known during
 	 * discovery and thus returns {@code false}.
 	 */
@@ -259,7 +276,7 @@ public interface TestDescriptor {
 
 	/**
 	 * Determine if the supplied descriptor (or any of its descendants)
-	 * {@linkplain TestDescriptor#isTest() is a test} or
+	 * {@linkplain TestDescriptor#isTest() is a <em>test</em>} or
 	 * {@linkplain TestDescriptor#mayRegisterTests() may potentially register
 	 * tests dynamically}.
 	 *
@@ -355,12 +372,14 @@ public interface TestDescriptor {
 	enum Type {
 
 		/**
-		 * Denotes that the {@link TestDescriptor} is for a <em>container</em>.
+		 * Denotes that the {@link TestDescriptor} is strictly for a
+		 * <em>container</em>. I.e. it is not also a <em>test</em>.
 		 */
 		CONTAINER,
 
 		/**
-		 * Denotes that the {@link TestDescriptor} is for a <em>test</em>.
+		 * Denotes that the {@link TestDescriptor} is strictly for a
+		 * <em>test</em>. I.e. it is not also a <em>container</em>.
 		 */
 		TEST,
 
