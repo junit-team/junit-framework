@@ -50,20 +50,12 @@ public class ProcessStarters {
 				.addArguments("-PjunitVersion=" + Helper.version());
 	}
 
-	public static ProcessStarter maven() {
-		return maven(currentJdkHome());
-	}
-
 	public static ProcessStarter maven(Path javaHome) {
-		var starter = new ProcessStarter() //
+		return new ProcessStarter() //
 				.executable(Path.of(System.getProperty("mavenDistribution")).resolve("bin").resolve(
 					windowsOrOtherExecutable("mvn.cmd", "mvn")).toAbsolutePath()) //
 				.putEnvironment("JAVA_HOME", javaHome) //
 				.addArguments("-Djunit.version=" + Helper.version());
-		if (Runtime.version().feature() >= 26) {
-			starter.putEnvironment("MAVEN_OPTS", "--enable-final-field-mutation=ALL-UNNAMED");
-		}
-		return starter;
 	}
 
 	private static String windowsOrOtherExecutable(String cmdOrExe, String other) {
