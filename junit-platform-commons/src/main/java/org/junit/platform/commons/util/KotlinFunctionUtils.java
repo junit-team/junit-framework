@@ -37,7 +37,7 @@ import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
-class KotlinSuspendingFunctionUtils {
+class KotlinFunctionUtils {
 
 	static Class<?> getReturnType(Method method) {
 		var returnType = getJavaClass(getJvmErasure(getKotlinFunction(method).getReturnType()));
@@ -67,17 +67,35 @@ class KotlinSuspendingFunctionUtils {
 		return Arrays.stream(method.getParameterTypes()).limit(parameterCount - 1).toArray(Class<?>[]::new);
 	}
 
-	static @Nullable Object invoke(Method method, @Nullable Object target, @Nullable Object[] args) {
+	static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target, @Nullable Object[] args) {
 		try {
-			return invoke(getKotlinFunction(method), target, args);
+			return invokeKotlinFunction(getKotlinFunction(method), target, args);
 		}
 		catch (InterruptedException e) {
 			throw throwAsUncheckedException(e);
 		}
 	}
 
-	private static <T> @Nullable T invoke(KFunction<T> function, @Nullable Object target, @Nullable Object[] args)
-			throws InterruptedException {
+	private static <T extends @Nullable Object> T invokeKotlinFunction(KFunction<T> function, @Nullable Object target,
+			@Nullable Object[] args) throws InterruptedException {
+		if (!isAccessible(function)) {
+			setAccessible(function, true);
+		}
+		return function.callBy(toArgumentMap(target, args, function));
+	}
+
+	static @Nullable Object invokeKotlinSuspendingFunction(Method method, @Nullable Object target,
+			@Nullable Object[] args) {
+		try {
+			return invokeKotlinSuspendingFunction(getKotlinFunction(method), target, args);
+		}
+		catch (InterruptedException e) {
+			throw throwAsUncheckedException(e);
+		}
+	}
+
+	private static <T extends @Nullable Object> T invokeKotlinSuspendingFunction(KFunction<T> function,
+			@Nullable Object target, @Nullable Object[] args) throws InterruptedException {
 		if (!isAccessible(function)) {
 			setAccessible(function, true);
 		}
@@ -113,6 +131,6 @@ class KotlinSuspendingFunctionUtils {
 			() -> "Failed to get Kotlin function for method: " + method);
 	}
 
-	private KotlinSuspendingFunctionUtils() {
+	private KotlinFunctionUtils() {
 	}
 }

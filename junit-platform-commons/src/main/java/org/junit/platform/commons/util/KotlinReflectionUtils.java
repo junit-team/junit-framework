@@ -37,6 +37,7 @@ public class KotlinReflectionUtils {
 	private static final String DEFAULT_IMPLS_CLASS_NAME = "DefaultImpls";
 
 	private static final @Nullable Class<? extends Annotation> kotlinMetadata;
+	private static final @Nullable Class<? extends Annotation> jvmInline;
 	private static final @Nullable Class<?> kotlinCoroutineContinuation;
 	private static final boolean kotlinReflectPresent;
 	private static final boolean kotlinxCoroutinesPresent;
@@ -44,6 +45,7 @@ public class KotlinReflectionUtils {
 	static {
 		var metadata = tryToLoadKotlinMetadataClass();
 		kotlinMetadata = metadata.toOptional().orElse(null);
+		jvmInline = tryToLoadJvmInlineClass().toOptional().orElse(null);
 		kotlinCoroutineContinuation = metadata //
 				.andThen(__ -> tryToLoadClass("kotlin.coroutines.Continuation")) //
 				.toOptional() //
@@ -59,6 +61,12 @@ public class KotlinReflectionUtils {
 	@SuppressWarnings("unchecked")
 	private static Try<Class<? extends Annotation>> tryToLoadKotlinMetadataClass() {
 		return tryToLoadClass("kotlin.Metadata") //
+				.andThenTry(it -> (Class<? extends Annotation>) it);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Try<Class<? extends Annotation>> tryToLoadJvmInlineClass() {
+		return tryToLoadClass("kotlin.jvm.JvmInline") //
 				.andThenTry(it -> (Class<? extends Annotation>) it);
 	}
 
@@ -117,36 +125,48 @@ public class KotlinReflectionUtils {
 		return result;
 	}
 
-	private static boolean isKotlinType(Class<?> clazz) {
+	public static boolean isKotlinType(Class<?> clazz) {
 		return kotlinMetadata != null //
 				&& clazz.getDeclaredAnnotation(kotlinMetadata) != null;
 	}
 
 	public static Class<?> getKotlinSuspendingFunctionReturnType(Method method) {
 		requireKotlinReflect(method);
-		return KotlinSuspendingFunctionUtils.getReturnType(method);
+		return KotlinFunctionUtils.getReturnType(method);
 	}
 
 	public static Type getKotlinSuspendingFunctionGenericReturnType(Method method) {
 		requireKotlinReflect(method);
-		return KotlinSuspendingFunctionUtils.getGenericReturnType(method);
+		return KotlinFunctionUtils.getGenericReturnType(method);
 	}
 
 	public static Parameter[] getKotlinSuspendingFunctionParameters(Method method) {
 		requireKotlinReflect(method);
-		return KotlinSuspendingFunctionUtils.getParameters(method);
+		return KotlinFunctionUtils.getParameters(method);
 	}
 
 	public static Class<?>[] getKotlinSuspendingFunctionParameterTypes(Method method) {
 		requireKotlinReflect(method);
-		return KotlinSuspendingFunctionUtils.getParameterTypes(method);
+		return KotlinFunctionUtils.getParameterTypes(method);
 	}
 
 	public static @Nullable Object invokeKotlinSuspendingFunction(Method method, @Nullable Object target,
 			@Nullable Object[] args) {
 		requireKotlinReflect(method);
 		requireKotlinxCoroutines(method);
-		return KotlinSuspendingFunctionUtils.invoke(method, target, args);
+		return KotlinFunctionUtils.invokeKotlinSuspendingFunction(method, target, args);
+	}
+
+	public static boolean isInstanceOfInlineType(@Nullable Object value) {
+		return jvmInline != null //
+				&& value != null //
+				&& value.getClass().getDeclaredAnnotation(jvmInline) != null;
+	}
+
+	public static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target,
+			@Nullable Object... args) {
+		requireKotlinReflect(method);
+		return KotlinFunctionUtils.invokeKotlinFunction(method, target, args);
 	}
 
 	private static void requireKotlinReflect(Method method) {
@@ -159,7 +179,7 @@ public class KotlinReflectionUtils {
 
 	private static void requireDependency(Method method, boolean condition, String dependencyNotation) {
 		Preconditions.condition(condition,
-			() -> ("Kotlin suspending function [%s] requires %s to be on the classpath or module path. "
+			() -> ("Kotlin function [%s] requires %s to be on the classpath or module path. "
 					+ "Please add a corresponding dependency.").formatted(method.toGenericString(),
 						dependencyNotation));
 	}
