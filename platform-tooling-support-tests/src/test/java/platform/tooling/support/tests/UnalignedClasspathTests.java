@@ -51,8 +51,8 @@ class UnalignedClasspathTests {
 				.workingDir(copyToWorkspace(Projects.JUPITER_STARTER, workspace)) //
 				.addArguments(localMavenRepo.toCliArgument(), "-Dmaven.repo=" + MavenRepo.dir()) //
 				.addArguments("-Dsnapshot.repo.url=" + mavenRepoProxy.getBaseUri()) //
-				.addArguments("-Djunit.platform.commons.version=1.11.4").addArguments("--update-snapshots",
-					"--batch-mode", "verify") //
+				.addArguments("-Djunit.platform.commons.version=1.11.4") //
+				.addArguments("--update-snapshots", "--batch-mode", "verify") //
 				.putEnvironment(MavenEnvVars.forJre(jre)) //
 				.redirectOutput(outputFiles);
 		var result = starter.startAndWait();
