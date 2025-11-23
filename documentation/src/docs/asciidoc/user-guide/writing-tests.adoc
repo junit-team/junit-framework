@@ -1445,18 +1445,18 @@ display name can be configured for each repetition via the `name` attribute of t
 combination of static text and dynamic placeholders. The following placeholders are
 currently supported.
 
-- `{displayName}`: display name of the `@RepeatedTest` method
-- `{currentRepetition}`: the current repetition count
-- `{totalRepetitions}`: the total number of repetitions
+- `+{displayName}+`: display name of the `@RepeatedTest` method
+- `+{currentRepetition}+`: the current repetition count
+- `+{totalRepetitions}+`: the total number of repetitions
 
 The default display name for a given repetition is generated based on the following
-pattern: `"repetition {currentRepetition} of {totalRepetitions}"`. Thus, the display
+pattern: `"repetition +{currentRepetition}+ of +{totalRepetitions}+"`.Thus, the display
 names for individual repetitions of the previous `repeatedTest()` example would be:
-`repetition 1 of 10`, `repetition 2 of 10`, etc. If you would like the display name of
+`repetition 1 of 10`, `repetition 2 of 10`, etc.If you would like the display name of
 the `@RepeatedTest` method included in the name of each repetition, you can define your
-own custom pattern or use the predefined `RepeatedTest.LONG_DISPLAY_NAME` pattern. The
-latter is equal to `"{displayName} :: repetition {currentRepetition} of
-{totalRepetitions}"` which results in display names for individual repetitions like
+own custom pattern or use the predefined `RepeatedTest.LONG_DISPLAY_NAME` pattern.The
+latter is equal to `"+{displayName}+ :: repetition +{currentRepetition}+ of
++{totalRepetitions}+"` which results in display names for individual repetitions like
 `repeatedTest() :: repetition 1 of 10`, `repeatedTest() :: repetition 2 of 10`, etc.
 
 In order to retrieve information about the current repetition, the total number of
@@ -1476,15 +1476,15 @@ The `repeatedTest()` method is identical to the example from the previous sectio
 current repeated test.
 
 `repeatedTestWithFailureThreshold()` demonstrates how to set a failure threshold and
-simulates an unexpected failure for every second repetition. The resulting behavior can be
+simulates an unexpected failure for every second repetition.The resulting behavior can be
 viewed in the `ConsoleLauncher` output at the end of this section.
 
 The next two methods demonstrate how to include a custom `@DisplayName` for the
 `@RepeatedTest` method in the display name of each repetition. `customDisplayName()`
 combines a custom display name with a custom pattern and then uses `TestInfo` to verify
-the format of the generated display name. `Repeat!` is the `{displayName}` which comes
+the format of the generated display name. `Repeat!` is the `+{displayName}+` which comes
 from the `@DisplayName` declaration, and `1/1` comes from
-`{currentRepetition}/{totalRepetitions}`. In contrast,
+`+{currentRepetition}+/+{totalRepetitions}+`.In contrast,
 `customDisplayNameWithLongPattern()` uses the aforementioned predefined
 `RepeatedTest.LONG_DISPLAY_NAME` pattern.
 
