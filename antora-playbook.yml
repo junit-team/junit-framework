@@ -23,6 +23,7 @@ asciidoc:
     table-frame: 'none@'
     table-grid: 'rows@'
     table-stripes: 'odd@'
+    figure-caption: false
     example-caption: false
     listing-caption: false
     hide-uri-scheme: '@'
