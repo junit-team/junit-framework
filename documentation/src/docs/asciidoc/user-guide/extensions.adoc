@@ -1032,7 +1032,7 @@ code. User-supplied test and lifecycle methods are shown in orange, with callbac
 implemented by extensions shown in blue. The grey box denotes the execution of a single
 test method and will be repeated for every test method in the test class.
 
-[#extensions-execution-order-diagram]
+[[extensions-execution-order-diagram]]
 .User code and extension code
 image::extensions_lifecycle.png[]
 
