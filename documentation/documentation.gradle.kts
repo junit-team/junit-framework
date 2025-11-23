@@ -9,7 +9,6 @@ import junitbuild.javadoc.ModuleSpecificJavadocFileOption
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 
 plugins {
-	alias(libs.plugins.gitPublish)
 	alias(libs.plugins.plantuml)
 	id("junitbuild.antora-conventions")
 	id("junitbuild.build-parameters")
@@ -95,30 +94,6 @@ val uploadPdfs = !snapshot
 val userGuidePdfFileName = "junit-user-guide-${version}.pdf"
 val ota4jDocVersion = libs.versions.opentest4j.map { if (it.isSnapshot()) "snapshot" else it }.get()
 val apiGuardianDocVersion = libs.versions.apiguardian.map { if (it.isSnapshot()) "snapshot" else it }.get()
-
-gitPublish {
-	repoUri = "https://github.com/junit-team/docs.junit.org.git"
-
-	branch = "main"
-	sign = false
-	fetchDepth = 1
-
-	username = providers.environmentVariable("GIT_USERNAME")
-	password = providers.environmentVariable("GIT_PASSWORD")
-
-	contents {
-		from(docsDir)
-		into(".")
-	}
-
-	preserve {
-		include("**/*")
-		exclude("$docsVersion/**")
-		if (replaceCurrentDocs) {
-			exclude("current/**")
-		}
-	}
-}
 
 val generatedAsciiDocPath = layout.buildDirectory.dir("generated/asciidoc")
 val consoleLauncherOptionsFile = generatedAsciiDocPath.map { it.file("console-launcher-options.txt") }
@@ -393,43 +368,6 @@ tasks {
 			}
 		}
 		into(layout.buildDirectory.dir("docs/fixedJavadoc"))
-	}
-
-	val prepareDocsForUploadToGhPages by registering(Copy::class) {
-		outputs.dir(docsDir)
-
-		from(fixJavadoc.map { it.destinationDir }) {
-			into("api")
-		}
-		into(docsDir.map { it.dir(docsVersion.toString()) })
-		includeEmptyDirs = false
-	}
-
-	val createCurrentDocsFolder by registering(Copy::class) {
-		dependsOn(prepareDocsForUploadToGhPages)
-		onlyIf { replaceCurrentDocs }
-
-		from(docsDir.map { it.dir(docsVersion.toString()) })
-		into(docsDir.map { it.dir("current") })
-	}
-
-	val configureGitAuthor by registering {
-		dependsOn(gitPublishReset)
-		doFirst {
-			File(gitPublish.repoDir.get().asFile, ".git/config").appendText("""
-				[user]
-					name = JUnit Team
-					email = team@junit.org
-			""".trimIndent())
-		}
-	}
-
-	gitPublishCopy {
-		dependsOn(prepareDocsForUploadToGhPages, createCurrentDocsFolder)
-	}
-
-	gitPublishCommit {
-		dependsOn(configureGitAuthor)
 	}
 
 	val prepareGitHubAttestation by registering(Sync::class) {

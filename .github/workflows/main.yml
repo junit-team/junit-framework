@@ -117,21 +117,5 @@ jobs:
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: |
-          prepareDocsForUploadToGhPages \
+          antora \
           -Dscan.tag.Documentation
-    - name: Configure Git
-      shell: bash
-      run: |
-        git config --global user.name "JUnit Team"
-        git config --global user.email "team@junit.org"
-    - name: Upload Documentation
-      if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/main'
-      uses: ./.github/actions/run-gradle
-      with:
-        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: |
-          gitPublishPush \
-          -Dscan.tag.Documentation
-      env:
-        GIT_USERNAME: git
-        GIT_PASSWORD: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_DOCS_REPO }}
