@@ -1,0 +1,26 @@
+antora:
+  extensions:
+  - '@antora/collector-extension'
+  - '@antora/lunr-extension'
+  - require: '@springio/antora-extensions/root-component-extension'
+    root_component_name: junit
+  - require: '@springio/antora-extensions/root-attachments-extension'
+site:
+  title: JUnit User Guide
+  url: https://docs.junit.org
+content:
+  sources:
+  - url: @GIT_REPO_ROOT@
+    branches: @GIT_BRANCH_NAME@
+    start_path: documentation
+    worktrees: true
+asciidoc:
+  attributes:
+    attribute-missing: warn
+runtime:
+  log:
+    failure_level: warn
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
