@@ -79,6 +79,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.engine.descriptor.ClassTemplateInvocationTestDescriptor;
 import org.junit.jupiter.engine.descriptor.ClassTemplateTestDescriptor;
 import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
@@ -1004,6 +1005,14 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		assertThat(engineDescriptor.getDescendants()).isEmpty();
 	}
 
+	@Test
+	void classTemplateWithResourceLockExecutesSuccessfully() {
+		var results = executeTestsForClass(ClassTemplateWithResourceLockTestCase.class);
+
+		results.testEvents().assertStatistics(stats -> stats.started(2).succeeded(2));
+		results.containerEvents().assertStatistics(stats -> stats.started(4).succeeded(4));
+	}
+
 	// -------------------------------------------------------------------
 
 	private static Stream<String> allReportEntryValues(EngineExecutionResults results) {
@@ -1564,6 +1573,17 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			@Test
 			void test() {
 			}
+		}
+	}
+
+	@SuppressWarnings("JUnitMalformedDeclaration")
+	@ClassTemplate
+	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
+	@ResourceLock("test-resource")
+	static class ClassTemplateWithResourceLockTestCase {
+		@Test
+		void test() {
+			// This test verifies that @ResourceLock works with @ClassTemplate (issue #5155)
 		}
 	}
 
