@@ -89,6 +89,7 @@ log4j = ["log4j-core", "log4j-jul"]
 xmlunit = ["xmlunit-assertj", "xmlunit-placeholders"]
 
 [plugins]
+antora = { id = "org.antora", version = "1.0.0" }
 asciidoctorConvert = { id = "org.asciidoctor.jvm.convert", version.ref = "asciidoctor-plugins" }
 asciidoctorPdf = { id = "org.asciidoctor.jvm.pdf", version.ref = "asciidoctor-plugins" }
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
