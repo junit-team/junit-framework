@@ -1,10 +1,10 @@
 # JUnit 5 User Guide
 
-This subproject contains the AsciiDoc sources for the JUnit 5 User Guide.
+This subproject contains the Antora/AsciiDoc sources for the JUnit 5 User Guide.
 
 ## Structure
 
-- `src/docs/asciidoc`: AsciiDoc files
+- `modules/ROOT/pages`: AsciiDoc files
 - `src/test/java`: Java test source code that can be included in the AsciiDoc files
 - `src/test/kotlin`: Kotlin test source code that can be included in the AsciiDoc files
 - `src/test/resources`: Classpath resources that can be included in the AsciiDoc files or
@@ -12,23 +12,14 @@ This subproject contains the AsciiDoc sources for the JUnit 5 User Guide.
 
 ## Usage
 
-### Generate AsciiDoc
+### Generate Antora site
 
 This following Gradle command generates the HTML version of the User Guide as
-`build/docs/asciidoc/user-guide/index.html`.
+`build/antora/build/site`.
 
 ```
-gradlew asciidoctor
+gradlew antora
 ```
 
 On Linux operating systems, the `graphviz` package providing `/usr/bin/dot` must be
-installed in order to generate the User Guide.
-
-### Generate AsciiDocPdf
-
-This following Gradle command generates the PDF version of the User Guide to
-`build/docs/asciidocPdf/user-guide/index.pdf`.
-
-```
-gradlew asciidoctorPdf
-```
+installed in order to generate the PlantUML images used in the User Guide.
