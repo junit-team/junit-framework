@@ -1,7 +1,10 @@
 <header class="header">
   <nav class="navbar">
     <div class="navbar-brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}">{{site.title}}</a>
+      <a class="navbar-item title" href="{{{or site.url siteRootPath}}}">
+          <img class="logo" src="{{uiRootPath}}/img/junit-diamond-white.png" alt="✔️"/>
+          {{site.title}}<span class="version">{{page.componentVersion.displayVersion}}</span>
+      </a>
       {{#if env.SITE_SEARCH_PROVIDER}}
       <div class="navbar-item search hide-for-print">
         <div id="search-field" class="field">
