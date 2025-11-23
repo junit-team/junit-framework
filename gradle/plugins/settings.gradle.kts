@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "plugins"
 
+include("antora")
 include("build-parameters")
 include("common")
 include("code-generator")
