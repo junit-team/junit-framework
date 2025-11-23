@@ -12,12 +12,11 @@ import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.ysb33r.grolifant.api.core.jvm.ExecutionMode.JAVA_EXEC
 
 plugins {
-	alias(libs.plugins.antora)
 	alias(libs.plugins.asciidoctorConvert)
 	alias(libs.plugins.asciidoctorPdf)
 	alias(libs.plugins.gitPublish)
 	alias(libs.plugins.plantuml)
-	alias(libs.plugins.spring.antora)
+	id("junitbuild.antora-conventions")
 	id("junitbuild.build-parameters")
 	id("junitbuild.java-multi-release-test-sources")
 	id("junitbuild.kotlin-library-conventions")
@@ -151,15 +150,6 @@ val externalModulesWithoutModularJavadoc = mapOf(
 )
 require(externalModulesWithoutModularJavadoc.values.all { it.endsWith("/") }) {
 	"all base URLs must end with a trailing slash: $externalModulesWithoutModularJavadoc"
-}
-
-repositories {
-	// Redefined here because the Node.js plugin adds a repo
-	mavenCentral()
-}
-
-antora {
-	setOptions(mapOf("clean" to true, "stacktrace" to true, "fetch" to true))
 }
 
 tasks {
@@ -598,36 +588,8 @@ tasks {
 		})
 	}
 
-	register("generateAntoraResources") {
-		dependsOn(generateAntoraYml, generateAsciidocInputs, fixJavadoc)
-	}
-
-	val generateAntoraPlaybook by registering(Copy::class) {
-
-		val gitRepoRoot = providers.exec {
-			commandLine("git", "worktree", "list", "--porcelain", "-z")
-		}.standardOutput.asText.map { it.substringBefore('\u0000').substringAfter(' ') }
-
-		val gitBranchName = providers.exec {
-			commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
-		}.standardOutput.asText.map { it.trim() }
-
-		from(layout.projectDirectory.file("antora-playbook.yml").asFile)
-		filter { line ->
-			var result = line
-			if (line.contains("@GIT_REPO_ROOT@")) {
-				result = result.replace("@GIT_REPO_ROOT@", gitRepoRoot.get())
-			}
-			if (line.contains("@GIT_BRANCH_NAME@")) {
-				result = result.replace("@GIT_BRANCH_NAME@", gitBranchName.get())
-			}
-			return@filter result
-		}
-		into(layout.buildDirectory.dir("antora"))
-	}
-
-	project.antora {
-		playbook = generateAntoraPlaybook.map { it.rootSpec.destinationDir.resolve("antora-playbook.yml") }
+	generateAntoraResources {
+		dependsOn(generateAsciidocInputs, fixJavadoc)
 	}
 }
 
