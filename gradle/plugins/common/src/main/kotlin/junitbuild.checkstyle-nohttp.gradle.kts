@@ -37,5 +37,6 @@ tasks.register<Checkstyle>("checkstyleNohttp") {
 		exclude("**/*.jks")
 		exclude("**/build/**")
 		exclude("**/.kotlin")
+		exclude("**/node_modules/**")
 	}
 }
