@@ -1,8 +1,6 @@
 [versions]
 ant = "1.10.15"
 apiguardian = "1.1.2"
-asciidoctorj-pdf = "2.3.19"
-asciidoctor-plugins = "4.0.4" # Check if workaround in documentation.gradle.kts can be removed when upgrading
 assertj = "3.27.3"
 bnd = "7.1.0"
 checkstyle = "10.26.1"
@@ -75,7 +73,6 @@ testingAnnotations = { module = "com.gradle:develocity-testing-annotations", ver
 woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.1.0" }
 
 # Only declared here so Dependabot knows when to update the referenced versions
-asciidoctorj-pdf = { module = "org.asciidoctor:asciidoctorj-pdf", version.ref = "asciidoctorj-pdf" }
 eclipse-platform = { module = "org.eclipse.platform:org.eclipse.platform", version.ref = "eclipse" }
 jacoco = { module = "org.jacoco:jacoco", version.ref = "jacoco" }
 junit4-latest = { module = "junit:junit", version.ref = "junit4" }
@@ -90,8 +87,6 @@ xmlunit = ["xmlunit-assertj", "xmlunit-placeholders"]
 
 [plugins]
 antora = { id = "org.antora", version = "1.0.0" }
-asciidoctorConvert = { id = "org.asciidoctor.jvm.convert", version.ref = "asciidoctor-plugins" }
-asciidoctorPdf = { id = "org.asciidoctor.jvm.pdf", version.ref = "asciidoctor-plugins" }
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.4" }
 commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.2.1" }
