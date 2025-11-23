@@ -104,6 +104,7 @@ jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 jreleaser = { id = "org.jreleaser", version = "1.20.0" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
+node = { id = "com.github.node-gradle.node", version = "5.0.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "2.3.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.0.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
