@@ -106,22 +106,27 @@ class ExceptionUtilsTests {
 	}
 
 	@Test
-	void pruneStackTraceOfJUnitStart() {
-		var testClassName = ExceptionUtilsTests.class.getCanonicalName();
+	void pruneStackTraceRetainsStackFramesFromJUnitStart() {
+		// Non-test class frames from org.junit are filtered.
+		var testClassName = "com.example.project.HelloTest";
+		var testFileName = "HelloTest.java";
 
 		var exception = new JUnitException("expected");
 		var stackTrace = exception.getStackTrace();
-
 		var extendedStacktrace = Arrays.copyOfRange(stackTrace, 0, stackTrace.length + 2);
-		extendedStacktrace[stackTrace.length] = new StackTraceElement("org.junit.start.JUnit", "run", "JUnit.class", 3);
-		extendedStacktrace[stackTrace.length + 1] = new StackTraceElement(testClassName, "main",
-			"ExceptionUtilsTest.class", 5);
+		extendedStacktrace[0] = new StackTraceElement(testClassName, "stringLength", testFileName, 10);
+		extendedStacktrace[stackTrace.length] = new StackTraceElement("org.junit.start.JUnit", "run", "JUnit.java", 3);
+		extendedStacktrace[stackTrace.length + 1] = new StackTraceElement(testClassName, "main", testFileName, 5);
 		exception.setStackTrace(extendedStacktrace);
 
 		pruneStackTrace(exception, List.of(testClassName));
 
 		assertThat(exception.getStackTrace()) //
-				.noneMatch(element -> element.toString().contains(testClassName + ".main(file:5)"));
+				.extracting(StackTraceElement::toString) //
+				.containsExactly( //
+					"com.example.project.HelloTest.stringLength(HelloTest.java:10)", //
+					"org.junit.start.JUnit.run(JUnit.java:3)", //
+					"com.example.project.HelloTest.main(HelloTest.java:5)");
 	}
 
 	@Test
