@@ -21,18 +21,18 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
  * {@code ParameterDeclarations} encapsulates the combined <em>declarations</em>
- * of all <em>indexed</em> {@code @ParameterizedClass} or
- * {@code @ParameterizedTest} parameters.
+ * of all <em>indexed</em> parameters for a {@code @ParameterizedClass} or
+ * {@code @ParameterizedTest}.
  *
  * <p>For a {@code @ParameterizedTest}, the parameter declarations are derived
  * from the method signature. For a {@code @ParameterizedClass}, they may be
  * derived from the constructor or
- * {@link java.lang.reflect.Parameter @Parameter}-annotated fields.
+ * {@link org.junit.jupiter.params.Parameter @Parameter}-annotated fields.
  *
- * <p>Aggregators, that is parameters of type
- * {@link ArgumentsAccessor ArgumentsAccessor} or parameters annotated with
- * {@link org.junit.jupiter.params.aggregator.AggregateWith @AggregateWith}, are
- * <em>not</em> indexed and thus not included in the list of parameter
+ * <p>Aggregators &mdash; parameters of type {@link ArgumentsAccessor ArgumentsAccessor}
+ * or parameters annotated with
+ * {@link org.junit.jupiter.params.aggregator.AggregateWith @AggregateWith} &mdash;
+ * are <em>not</em> indexed and thus not included in the list of parameter
  * declarations.
  *
  * @since 5.13
@@ -44,20 +44,20 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public interface ParameterDeclarations {
 
 	/**
-	 * {@return all <em>indexed</em> parameter declarations; never {@code null},
-	 * sorted by index}
+	 * {@return all <em>indexed</em> parameter declarations, sorted by index;
+	 * never {@code null}, but potentially empty}
 	 */
 	List<ParameterDeclaration> getAll();
 
 	/**
 	 * {@return the first <em>indexed</em> parameter declaration, if available;
-	 * never {@code null}}
+	 * never {@code null}, but potentially empty}
 	 */
 	Optional<ParameterDeclaration> getFirst();
 
 	/**
 	 * {@return the <em>indexed</em> parameter declaration for the supplied
-	 * index, if available; never {@code null}}
+	 * index, if available; never {@code null}, but potentially empty}
 	 */
 	Optional<ParameterDeclaration> get(int parameterIndex);
 

@@ -23,7 +23,7 @@ import org.apiguardian.api.API;
  * for the invocation of a
  * {@link org.junit.jupiter.api.TestTemplate @TestTemplate} method.
  *
- * <p>This extension point makes it possible to execute a test template in
+ * <p>This extension API makes it possible to execute a test template in
  * different contexts &mdash; for example, with different parameters, by
  * preparing the test class instance differently, or multiple times without
  * modifying the context.
@@ -48,8 +48,8 @@ import org.apiguardian.api.API;
  *
  * <h2>Constructor Requirements</h2>
  *
- * <p>Consult the documentation in {@link Extension} for details on
- * constructor requirements.
+ * <p>Consult the documentation in {@link Extension} for details on constructor
+ * requirements.
  *
  * @since 5.0
  * @see org.junit.jupiter.api.TestTemplate
@@ -86,8 +86,8 @@ public interface TestTemplateInvocationContextProvider extends Extension {
 	 * to be invoked; never {@code null}
 	 * @return a {@code Stream} of {@code TestTemplateInvocationContext}
 	 * instances for the invocation of the test template method; never {@code null}
-	 * @throws TemplateInvocationValidationException if a validation fails when
-	 * while providing or closing the {@link java.util.stream.Stream}.
+	 * @throws TemplateInvocationValidationException if validation fails while
+	 * providing or closing the {@link Stream}
 	 * @see #supportsTestTemplate
 	 * @see ExtensionContext
 	 */

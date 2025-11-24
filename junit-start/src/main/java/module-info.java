@@ -8,21 +8,19 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-
 /// Defines the API of the JUnit Start module for writing and running tests.
 ///
-/// Usage example:
+/// Usage example in a `HelloTests.java` compact source-file program:
 /// ```java
 /// import module org.junit.start;
 ///
-///  void main() {
-///    JUnit.run();
-///  }
+/// void main() {
+///   JUnit.run();
+/// }
 ///
-///  @Test
-///  void addition() {
-///    Assertions.assertEquals(2, 1 + 1, "Addition error detected!");
-///   }
+/// @Test
+/// void addition() {
+///   Assertions.assertEquals(2, 1 + 1, "Addition error detected!");
 /// }
 /// ```
 module org.junit.start {

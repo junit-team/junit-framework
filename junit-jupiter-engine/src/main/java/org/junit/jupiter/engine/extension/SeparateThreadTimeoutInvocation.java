@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.engine.extension;
 
-import static org.junit.jupiter.api.util.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
+import static org.junit.jupiter.api.timeout.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
 
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;

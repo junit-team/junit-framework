@@ -12,5 +12,5 @@ requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
 requires org.junit.platform.commons transitive
 requires org.opentest4j transitive
-qualified exports org.junit.jupiter.api.util to org.junit.jupiter.engine
+qualified exports org.junit.jupiter.api.timeout to org.junit.jupiter.engine
 qualified opens org.junit.jupiter.api.condition to org.junit.platform.commons
