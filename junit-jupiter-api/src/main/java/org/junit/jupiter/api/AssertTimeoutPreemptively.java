@@ -11,7 +11,7 @@
 package org.junit.jupiter.api;
 
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
-import static org.junit.jupiter.api.util.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
+import static org.junit.jupiter.api.timeout.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
 
 import java.time.Duration;
 import java.util.function.Supplier;

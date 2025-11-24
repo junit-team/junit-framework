@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.util;
+package org.junit.jupiter.api.timeout;
 
 import static java.util.Objects.requireNonNullElse;
 import static org.apiguardian.api.API.Status.INTERNAL;

@@ -1,0 +1,67 @@
+[[release-notes-6.0.2]]
+== 6.0.2
+
+*Date of Release:* ❓
+
+*Scope:* ❓
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/113?closed=1+[6.0.2] milestone page in the JUnit
+repository on GitHub.
+
+
+[[release-notes-6.0.2-junit-platform]]
+=== JUnit Platform
+
+[[release-notes-6.0.2-junit-platform-bug-fixes]]
+==== Bug Fixes
+
+* Make `ConsoleLauncher` compatible with JDK 26 by avoiding final field mutations.
+
+[[release-notes-6.0.2-junit-platform-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[release-notes-6.0.2-junit-platform-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
+
+
+[[release-notes-6.0.2-junit-jupiter]]
+=== JUnit Jupiter
+
+[[release-notes-6.0.2-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[release-notes-6.0.2-junit-jupiter-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[release-notes-6.0.2-junit-jupiter-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
+
+
+[[release-notes-6.0.2-junit-vintage]]
+=== JUnit Vintage
+
+[[release-notes-6.0.2-junit-vintage-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[release-notes-6.0.2-junit-vintage-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[release-notes-6.0.2-junit-vintage-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
