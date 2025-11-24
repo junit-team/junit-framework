@@ -50,10 +50,6 @@ public class ProcessStarters {
 				.addArguments("-PjunitVersion=" + Helper.version());
 	}
 
-	public static ProcessStarter maven() {
-		return maven(currentJdkHome());
-	}
-
 	public static ProcessStarter maven(Path javaHome) {
 		return new ProcessStarter() //
 				.executable(Path.of(System.getProperty("mavenDistribution")).resolve("bin").resolve(

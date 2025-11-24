@@ -22,37 +22,34 @@ import org.junit.jupiter.api.ClassTemplate;
  * {@link Extension Extensions} that wish to provide one or multiple contexts
  * for the invocation of a {@link ClassTemplate @ClassTemplate}.
  *
- * <p>This extension point makes it possible to execute a class template in
+ * <p>This extension API makes it possible to execute a class template in
  * different contexts &mdash; for example, with different parameters, by
  * preparing the test class instance differently, or multiple times without
  * modifying the context.
  *
- * <p>This interface defines two main methods:
- * {@link #supportsClassTemplate} and
+ * <p>This interface defines two main methods: {@link #supportsClassTemplate} and
  * {@link #provideClassTemplateInvocationContexts}. The former is called by the
- * framework to determine whether this extension wants to act on a container
+ * framework to determine whether this extension wants to act on a class
  * template that is about to be executed. If so, the latter is called and must
  * return a {@link Stream} of {@link ClassTemplateInvocationContext} instances.
  * Otherwise, this provider is ignored for the execution of the current class
  * template.
  *
- * <p>A provider that has returned {@code true} from its
- * {@link #supportsClassTemplate} method is called <em>active</em>. When
- * multiple providers are active for a class template, the
- * {@code Streams} returned by their
+ * <p>A provider that has returned {@code true} from its {@link #supportsClassTemplate}
+ * method is called <em>active</em>. When multiple providers are active for a class
+ * template, the {@code Streams} returned by their
  * {@link #provideClassTemplateInvocationContexts} methods will be chained, and
  * the class template method will be invoked using the contexts of all active
  * providers.
  *
  * <p>An active provider may return zero invocation contexts from its
  * {@link #provideClassTemplateInvocationContexts} method if it overrides
- * {@link #mayReturnZeroClassTemplateInvocationContexts} to return
- * {@code true}.
+ * {@link #mayReturnZeroClassTemplateInvocationContexts} to return {@code true}.
  *
  * <h2>Constructor Requirements</h2>
  *
- * <p>Consult the documentation in {@link Extension} for details on
- * constructor requirements.
+ * <p>Consult the documentation in {@link Extension} for details on constructor
+ * requirements.
  *
  * @since 5.13
  * @see ClassTemplate
@@ -90,8 +87,8 @@ public interface ClassTemplateInvocationContextProvider extends Extension {
 	 * invoked; never {@code null}
 	 * @return a {@code Stream} of {@code ClassTemplateInvocationContext}
 	 * instances for the invocation of the class template; never {@code null}
-	 * @throws TemplateInvocationValidationException if a validation fails when
-	 * while providing or closing the {@link java.util.stream.Stream}.
+	 * @throws TemplateInvocationValidationException if validation fails while
+	 * providing or closing the {@link Stream}
 	 * @see #supportsClassTemplate
 	 * @see ExtensionContext
 	 */

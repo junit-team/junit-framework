@@ -77,7 +77,7 @@ public interface ParameterInfo {
 	ParameterDeclarations getDeclarations();
 
 	/**
-	 * {@return the accessor to the arguments of the current invocation}
+	 * {@return an accessor for the arguments of the current invocation}
 	 */
 	ArgumentsAccessor getArguments();
 
