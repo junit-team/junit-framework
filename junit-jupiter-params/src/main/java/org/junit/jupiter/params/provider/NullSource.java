@@ -32,7 +32,7 @@ import org.apiguardian.api.API;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.4
  * @see org.junit.jupiter.params.provider.ArgumentsSource

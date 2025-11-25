@@ -124,7 +124,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited by subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.13
  * @see Parameter

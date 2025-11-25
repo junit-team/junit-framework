@@ -23,7 +23,7 @@ import org.apiguardian.api.API;
 
 /**
  * {@code @EnumSources} is a simple container for one or more
- * {@link EnumSource} annotations.
+ * {@link EnumSource @EnumSource} annotations.
  *
  * <p>Note, however, that use of the {@code @EnumSources} container is completely
  * optional since {@code @EnumSource} is a {@linkplain java.lang.annotation.Repeatable
@@ -31,7 +31,7 @@ import org.apiguardian.api.API;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.11
  * @see EnumSource

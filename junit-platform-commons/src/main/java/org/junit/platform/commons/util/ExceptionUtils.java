@@ -101,16 +101,19 @@ public final class ExceptionUtils {
 	/**
 	 * Prune the stack trace of the supplied {@link Throwable}.
 	 *
-	 * <p>Prune all {@linkplain StackTraceElement stack trace elements} up one
-	 * of the supplied {@code classNames} are pruned. All subsequent elements
-	 * in the stack trace will be retained.
+	 * <p>Prune all {@linkplain StackTraceElement stack trace elements} up to one
+	 * of the supplied {@code classNames}. All subsequent elements in the stack
+	 * trace will be retained.
 	 *
 	 * <p>If the {@code classNames} do not match any of the stacktrace elements
 	 * then the {@code org.junit}, {@code jdk.internal.reflect}, and
 	 * {@code sun.reflect} packages are pruned.
 	 *
-	 * <p>Additionally, all elements prior to and including the first JUnit Platform
-	 * Launcher call will be removed.
+	 * <p>Additionally:
+	 * <ul>
+	 *     <li>all elements prior to and including the first JUnit Platform Launcher call will be removed.
+	 *     <li>all elements prior to and including {@code org.junit.start} are kept.
+	 * </ul>
 	 *
 	 * @param throwable the {@code Throwable} whose stack trace should be pruned;
 	 * never {@code null}
@@ -126,6 +129,7 @@ public final class ExceptionUtils {
 
 		List<StackTraceElement> stackTrace = Arrays.asList(throwable.getStackTrace());
 		List<StackTraceElement> prunedStackTrace = new ArrayList<>();
+		List<StackTraceElement> junitStartStackTrace = new ArrayList<>(0);
 
 		Collections.reverse(stackTrace);
 
@@ -133,7 +137,7 @@ public final class ExceptionUtils {
 			StackTraceElement element = stackTrace.get(i);
 			String className = element.getClassName();
 
-			if (classNames.contains(className)) {
+			if (classNames.contains(className) && !includesJunitStart(stackTrace, i + 1)) {
 				// We found the test
 				// everything before that is not informative.
 				prunedStackTrace.clear();
@@ -142,7 +146,9 @@ public final class ExceptionUtils {
 				break;
 			}
 			else if (className.startsWith(JUNIT_START_PACKAGE_PREFIX)) {
+				junitStartStackTrace.addAll(prunedStackTrace);
 				prunedStackTrace.clear();
+				junitStartStackTrace.add(element);
 			}
 			else if (className.startsWith(JUNIT_PLATFORM_LAUNCHER_PACKAGE_PREFIX)) {
 				prunedStackTrace.clear();
@@ -152,8 +158,20 @@ public final class ExceptionUtils {
 			}
 		}
 
+		if (!junitStartStackTrace.isEmpty()) {
+			junitStartStackTrace.addAll(prunedStackTrace);
+			prunedStackTrace = junitStartStackTrace;
+		}
+
 		Collections.reverse(prunedStackTrace);
 		throwable.setStackTrace(prunedStackTrace.toArray(new StackTraceElement[0]));
+	}
+
+	private static boolean includesJunitStart(List<StackTraceElement> stackTrace, int fromIndex) {
+		return stackTrace.stream() //
+				.skip(fromIndex) //
+				.map(StackTraceElement::getClassName) //
+				.anyMatch(className -> className.startsWith(JUNIT_START_PACKAGE_PREFIX));
 	}
 
 	/**

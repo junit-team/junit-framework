@@ -23,7 +23,7 @@ import org.apiguardian.api.API;
 
 /**
  * {@code @ValueSources} is a simple container for one or more
- * {@link ValueSource} annotations.
+ * {@link ValueSource @ValueSource} annotations.
  *
  * <p>Note, however, that use of the {@code @ValueSources} container is completely
  * optional since {@code @ValueSource} is a {@linkplain java.lang.annotation.Repeatable
@@ -31,7 +31,7 @@ import org.apiguardian.api.API;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.11
  * @see ValueSource
