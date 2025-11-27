@@ -123,13 +123,13 @@ class FallbackStringToObjectConverterTests {
 	@Test
 	@DisplayName("Cannot convert String to Diary because Diary has neither a static factory method nor a factory constructor")
 	void cannotConvertStringToDiary() {
-		assertThat(converter.canConvertTo(Diary.class)).isFalse();
+		assertThat(converter.canConvert(Diary.class)).isFalse();
 	}
 
 	@Test
 	@DisplayName("Cannot convert String to Magazine because Magazine has multiple static factory methods")
 	void cannotConvertStringToMagazine() {
-		assertThat(converter.canConvertTo(Magazine.class)).isFalse();
+		assertThat(converter.canConvert(Magazine.class)).isFalse();
 	}
 
 	// -------------------------------------------------------------------------
@@ -160,7 +160,7 @@ class FallbackStringToObjectConverterTests {
 	}
 
 	private static void assertConverts(String input, Class<?> targetType, Object expectedOutput) throws Exception {
-		assertCanConvertTo(targetType);
+		assertCanConvert(targetType);
 
 		var result = converter.convert(input, targetType);
 
@@ -171,7 +171,7 @@ class FallbackStringToObjectConverterTests {
 
 	private static void assertConvertsRecord1(String input, Record1 expected) throws Exception {
 		Class<?> targetType = Record1.class;
-		assertCanConvertTo(targetType);
+		assertCanConvert(targetType);
 
 		Record1 result = (Record1) converter.convert(input, targetType);
 
@@ -181,15 +181,15 @@ class FallbackStringToObjectConverterTests {
 
 	private static void assertConvertsRecord2(String input, Record2 expected) throws Exception {
 		Class<?> targetType = Record2.class;
-		assertCanConvertTo(targetType);
+		assertCanConvert(targetType);
 
 		var result = converter.convert(input, targetType);
 
 		assertThat(result).isEqualTo(expected);
 	}
 
-	private static void assertCanConvertTo(Class<?> targetType) {
-		assertThat(converter.canConvertTo(targetType)).as("canConvertTo(%s)", targetType.getSimpleName()).isTrue();
+	private static void assertCanConvert(Class<?> targetType) {
+		assertThat(converter.canConvert(targetType)).as("canConvertTo(%s)", targetType.getSimpleName()).isTrue();
 	}
 
 	static class Book {
