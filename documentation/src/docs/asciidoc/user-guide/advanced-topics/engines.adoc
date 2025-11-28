@@ -95,6 +95,8 @@ to the following requirements:
 * The `TestDescriptor` returned from `TestEngine.discover()` _must_ be the root of a tree
   of `TestDescriptor` instances. This implies that there _must not_ be any cycles between
   a node and its descendants.
+* The hierarchy of test descriptors returned from `TestEngine.discover()` _must_ be
+  mutable, but the test descriptors _must_ otherwise be immutable after discovery.
 * A `TestEngine` _must_ be able to discover `UniqueIdSelectors` for any unique ID that it
   previously generated and returned from `TestEngine.discover()`. This enables selecting a
   subset of tests to execute or rerun.
