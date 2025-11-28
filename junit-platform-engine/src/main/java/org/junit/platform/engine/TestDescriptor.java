@@ -239,9 +239,12 @@ public interface TestDescriptor {
 	 * Determine if this descriptor describes a <em>container</em>.
 	 *
 	 * <p>A test descriptor is a <em>container</em> when it may contain other
-	 * containers or tests as its children. A <em>container</em> can also be a
-	 * <em>test</em>.
+	 * containers or tests as its children. In addition to being a
+	 * <em>container</em> this test descriptor may also be a <em>test</em>.
 	 *
+	 * <p>The implementation must be consistent with {@link #getType()} such that
+	 * {@code x.isContainer()} equals {@code x.getType().isContainer()}.
+	 * 
 	 * <p>The default implementation delegates to {@link Type#isContainer()}.
 	 */
 	default boolean isContainer() {
@@ -252,9 +255,12 @@ public interface TestDescriptor {
 	 * Determine if this descriptor describes a <em>test</em>.
 	 *
 	 * <p>A test descriptor is a <em>test</em> when it verifies expected
-	 * behavior when executed. A <em>test</em> can also be a
-	 * <em>container</em>.
-	 *
+	 * behavior when executed. In addition to being a <em>test</em> this
+	 * test descriptor may also be a <em>container</em>.
+	 * 
+	 * <p>The implementation must be consistent with {@link #getType()} such that
+	 * {@code x.isTest()} equals {@code x.getType().isTest()}.
+	 * 
 	 * <p>The default implementation delegates to {@link Type#isTest()}.
 	 */
 	default boolean isTest() {
