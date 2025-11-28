@@ -27,9 +27,9 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
- * Mutable descriptor for a test or container that has
- * been discovered by a {@link TestEngine}.
- *
+ * A descriptor with a mutable hierarchy for a test or container that has been
+ * discovered by a {@link TestEngine}.
+ * 
  * @since 1.0
  * @see TestEngine
  */
@@ -41,7 +41,10 @@ public interface TestDescriptor {
 	 *
 	 * <p>Uniqueness must be guaranteed across an entire test plan,
 	 * regardless of how many engines are used behind the scenes.
-	 *
+	 * 
+	 * <p>Implementations must treat this property as immutable after test
+	 * discovery has completed.
+	 * 
 	 * @return the {@code UniqueId} for this descriptor; never {@code null}
 	 */
 	UniqueId getUniqueId();
@@ -76,7 +79,10 @@ public interface TestDescriptor {
 
 	/**
 	 * Get the set of {@linkplain TestTag tags} associated with this descriptor.
-	 *
+	 * 
+	 * <p>Implementations must treat this property as immutable after test
+	 * discovery has completed.
+	 * 
 	 * @return the set of tags associated with this descriptor; never {@code null}
 	 * but potentially empty
 	 * @see TestTag
@@ -86,6 +92,9 @@ public interface TestDescriptor {
 	/**
 	 * Get the {@linkplain TestSource source} of the test or container described
 	 * by this descriptor, if available.
+	 *
+	 * <p>Implementations must treat this property as immutable after test
+	 * discovery has completed.
 	 *
 	 * @see TestSource
 	 */
@@ -229,6 +238,9 @@ public interface TestDescriptor {
 	/**
 	 * Determine the {@link Type} of this descriptor.
 	 *
+	 * <p>Implementations must treat this property as immutable after test
+	 * discovery has completed.
+	 * 
 	 * @return the descriptor type; never {@code null}.
 	 * @see #isContainer()
 	 * @see #isTest()
@@ -273,6 +285,9 @@ public interface TestDescriptor {
 	 * <p>The implementation must be consistent with {@link #isContainer()} such that
 	 * {@code !x.container()} implies {@code !x.mayRegisterTests()}.
 	 *
+	 * <p>Implementations must treat this property as immutable after test
+	 * discovery has completed.
+	 * 
 	 * <p>The default implementation assumes tests are usually known during
 	 * discovery and thus returns {@code false}.
 	 */
