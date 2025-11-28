@@ -42,7 +42,7 @@ public interface TestDescriptor {
 	 * <p>Uniqueness must be guaranteed across an entire test plan,
 	 * regardless of how many engines are used behind the scenes.
 	 *
-	 * <p>Implementations must treat this property as immutable after test
+	 * <p>The implementation must treat this property as immutable after test
 	 * discovery has completed.
 	 *
 	 * @return the {@code UniqueId} for this descriptor; never {@code null}
@@ -80,7 +80,7 @@ public interface TestDescriptor {
 	/**
 	 * Get the set of {@linkplain TestTag tags} associated with this descriptor.
 	 *
-	 * <p>Implementations must treat this property as immutable after test
+	 * <p>The implementation must treat this property as immutable after test
 	 * discovery has completed.
 	 *
 	 * @return the set of tags associated with this descriptor; never {@code null}
@@ -93,7 +93,7 @@ public interface TestDescriptor {
 	 * Get the {@linkplain TestSource source} of the test or container described
 	 * by this descriptor, if available.
 	 *
-	 * <p>Implementations must treat this property as immutable after test
+	 * <p>The implementation must treat this property as immutable after test
 	 * discovery has completed.
 	 *
 	 * @see TestSource
@@ -238,7 +238,7 @@ public interface TestDescriptor {
 	/**
 	 * Determine the {@link Type} of this descriptor.
 	 *
-	 * <p>Implementations must treat this property as immutable after test
+	 * <p>The implementation must treat this property as immutable after test
 	 * discovery has completed.
 	 *
 	 * @return the descriptor type; never {@code null}.
@@ -254,8 +254,8 @@ public interface TestDescriptor {
 	 * containers or tests as its children. In addition to being a
 	 * <em>container</em> this test descriptor may also be a <em>test</em>.
 	 *
-	 * <p>The implementation must be consistent with {@link #getType()} such that
-	 * {@code x.isContainer()} equals {@code x.getType().isContainer()}.
+	 * <p>The implementation must be consistent with {@link #getType()} such
+	 * that {@code x.isContainer()} equals {@code x.getType().isContainer()}.
 	 *
 	 * <p>The default implementation delegates to {@link Type#isContainer()}.
 	 */
@@ -270,8 +270,8 @@ public interface TestDescriptor {
 	 * behavior when executed. In addition to being a <em>test</em> this
 	 * test descriptor may also be a <em>container</em>.
 	 *
-	 * <p>The implementation must be consistent with {@link #getType()} such that
-	 * {@code x.isTest()} equals {@code x.getType().isTest()}.
+	 * <p>The implementation must be consistent with {@link #getType()} such
+	 * that {@code x.isTest()} equals {@code x.getType().isTest()}.
 	 *
 	 * <p>The default implementation delegates to {@link Type#isTest()}.
 	 */
@@ -282,11 +282,9 @@ public interface TestDescriptor {
 	/**
 	 * Determine if this descriptor may register dynamic tests during execution.
 	 *
-	 * <p>The implementation must be consistent with {@link #isContainer()} such that
-	 * {@code !x.container()} implies {@code !x.mayRegisterTests()}.
-	 *
-	 * <p>Implementations must treat this property as immutable after test
-	 * discovery has completed.
+	 * <p>The implementation must treat this property as immutable after test
+	 * discovery has completed and must be consistent with {@link #isContainer()}
+	 * such that {@code !x.container()} implies {@code !x.mayRegisterTests()}.
 	 *
 	 * <p>The default implementation assumes tests are usually known during
 	 * discovery and thus returns {@code false}.
