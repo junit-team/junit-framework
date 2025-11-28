@@ -29,7 +29,7 @@ import org.junit.platform.commons.util.Preconditions;
 /**
  * A descriptor with a mutable hierarchy for a test or container that has been
  * discovered by a {@link TestEngine}.
- * 
+ *
  * @since 1.0
  * @see TestEngine
  */
@@ -41,10 +41,10 @@ public interface TestDescriptor {
 	 *
 	 * <p>Uniqueness must be guaranteed across an entire test plan,
 	 * regardless of how many engines are used behind the scenes.
-	 * 
+	 *
 	 * <p>Implementations must treat this property as immutable after test
 	 * discovery has completed.
-	 * 
+	 *
 	 * @return the {@code UniqueId} for this descriptor; never {@code null}
 	 */
 	UniqueId getUniqueId();
@@ -79,10 +79,10 @@ public interface TestDescriptor {
 
 	/**
 	 * Get the set of {@linkplain TestTag tags} associated with this descriptor.
-	 * 
+	 *
 	 * <p>Implementations must treat this property as immutable after test
 	 * discovery has completed.
-	 * 
+	 *
 	 * @return the set of tags associated with this descriptor; never {@code null}
 	 * but potentially empty
 	 * @see TestTag
@@ -240,7 +240,7 @@ public interface TestDescriptor {
 	 *
 	 * <p>Implementations must treat this property as immutable after test
 	 * discovery has completed.
-	 * 
+	 *
 	 * @return the descriptor type; never {@code null}.
 	 * @see #isContainer()
 	 * @see #isTest()
@@ -256,7 +256,7 @@ public interface TestDescriptor {
 	 *
 	 * <p>The implementation must be consistent with {@link #getType()} such that
 	 * {@code x.isContainer()} equals {@code x.getType().isContainer()}.
-	 * 
+	 *
 	 * <p>The default implementation delegates to {@link Type#isContainer()}.
 	 */
 	default boolean isContainer() {
@@ -269,10 +269,10 @@ public interface TestDescriptor {
 	 * <p>A test descriptor is a <em>test</em> when it verifies expected
 	 * behavior when executed. In addition to being a <em>test</em> this
 	 * test descriptor may also be a <em>container</em>.
-	 * 
+	 *
 	 * <p>The implementation must be consistent with {@link #getType()} such that
 	 * {@code x.isTest()} equals {@code x.getType().isTest()}.
-	 * 
+	 *
 	 * <p>The default implementation delegates to {@link Type#isTest()}.
 	 */
 	default boolean isTest() {
@@ -287,7 +287,7 @@ public interface TestDescriptor {
 	 *
 	 * <p>Implementations must treat this property as immutable after test
 	 * discovery has completed.
-	 * 
+	 *
 	 * <p>The default implementation assumes tests are usually known during
 	 * discovery and thus returns {@code false}.
 	 */
