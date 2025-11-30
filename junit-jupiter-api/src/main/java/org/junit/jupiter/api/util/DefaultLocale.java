@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.locale;
+package org.junit.jupiter.api.util;
 
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -20,7 +20,6 @@ import java.lang.annotation.Target;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.timezone.DefaultTimeZone;
 
 /**
  * {@code @DefaultLocale} is a JUnit Jupiter extension to change the value

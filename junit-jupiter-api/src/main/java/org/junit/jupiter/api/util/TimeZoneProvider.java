@@ -8,17 +8,17 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.locale;
+package org.junit.jupiter.api.util;
 
-import java.util.Locale;
+import java.util.TimeZone;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 
 @API(status = API.Status.STABLE, since = "6.1")
-public interface LocaleProvider extends Supplier<Locale> {
+public interface TimeZoneProvider extends Supplier<TimeZone> {
 
-	interface NullLocaleProvider extends LocaleProvider {
+	interface NullTimeZoneProvider extends TimeZoneProvider {
 	}
 
 }

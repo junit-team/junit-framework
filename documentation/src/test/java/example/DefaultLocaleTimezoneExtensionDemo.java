@@ -18,10 +18,10 @@ import java.util.TimeZone;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.locale.DefaultLocale;
-import org.junit.jupiter.api.locale.LocaleProvider;
-import org.junit.jupiter.api.timezone.DefaultTimeZone;
-import org.junit.jupiter.api.timezone.TimeZoneProvider;
+import org.junit.jupiter.api.util.DefaultLocale;
+import org.junit.jupiter.api.util.DefaultTimeZone;
+import org.junit.jupiter.api.util.LocaleProvider;
+import org.junit.jupiter.api.util.TimeZoneProvider;
 
 public class DefaultLocaleTimezoneExtensionDemo {
 

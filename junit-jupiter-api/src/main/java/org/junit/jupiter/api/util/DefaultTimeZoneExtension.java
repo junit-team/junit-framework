@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.timezone;
+package org.junit.jupiter.api.util;
 
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.timezone.TimeZoneProvider.NullTimeZoneProvider;
+import org.junit.jupiter.api.util.TimeZoneProvider.NullTimeZoneProvider;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
 

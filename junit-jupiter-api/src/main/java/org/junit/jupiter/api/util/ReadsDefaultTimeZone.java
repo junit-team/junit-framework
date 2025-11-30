@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api.locale;
+package org.junit.jupiter.api.util;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -22,11 +22,11 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
 
 /**
- * Marks tests that write the default locale but don't use the locale extension themselves.
+ * Marks tests that read the default time zone but don't use the time zone extension themselves.
  *
  * <p>During
- * <a href="https://docs.junit.org/docs/current/user-guide/#writing-tests-parallel-execution" target="_top">parallel test execution</a>,
- * all tests annotated with {@link DefaultLocale}, {@link ReadsDefaultLocale}, and {@link WritesDefaultLocale}
+ * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution" target="_top">parallel test execution</a>,
+ * all tests annotated with {@link DefaultTimeZone}, {@link ReadsDefaultTimeZone}, and {@link WritesDefaultTimeZone}
  * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
  *
  * <p>For more details and examples, see
@@ -37,7 +37,7 @@ import org.junit.jupiter.api.parallel.Resources;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })
 @Inherited
-@ResourceLock(value = Resources.LOCALE, mode = ResourceAccessMode.READ_WRITE)
+@ResourceLock(value = Resources.TIME_ZONE, mode = ResourceAccessMode.READ)
 @API(status = API.Status.STABLE, since = "6.1")
-public @interface WritesDefaultLocale {
+public @interface ReadsDefaultTimeZone {
 }
