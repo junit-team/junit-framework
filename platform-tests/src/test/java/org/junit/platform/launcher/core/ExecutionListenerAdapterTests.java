@@ -10,17 +10,20 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.reporting.FileEntry;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.engine.support.descriptor.DemoMethodTestDescriptor;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -30,28 +33,82 @@ import org.junit.platform.launcher.core.LauncherDiscoveryResult.EngineResultInfo
 /**
  * @since 1.0
  */
-// TODO Test other adapter methods.
 class ExecutionListenerAdapterTests {
 
-	@Test
-	void testReportingEntryPublished() {
-		var testDescriptor = getSampleMethodTestDescriptor();
+	private TestDescriptor testDescriptor;
+	private InternalTestPlan testPlan;
+	private TestExecutionListener testExecutionListener;
+	private ExecutionListenerAdapter executionListenerAdapter;
+
+	@BeforeEach
+	void setUp() {
+		testDescriptor = getSampleMethodTestDescriptor();
 
 		var discoveryResult = new LauncherDiscoveryResult(
 			Map.of(mock(), EngineResultInfo.completed(testDescriptor, DiscoveryIssueNotifier.NO_ISSUES)), mock(),
 			dummyOutputDirectoryCreator());
-		var testPlan = InternalTestPlan.from(discoveryResult);
+		testPlan = InternalTestPlan.from(discoveryResult);
+
+		testExecutionListener = spy(TestExecutionListener.class);
+		executionListenerAdapter = new ExecutionListenerAdapter(testPlan, testExecutionListener);
+	}
+
+	@Test
+	void testReportingEntryPublished() {
 		var testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
-
-		//not yet spyable with mockito? -> https://github.com/mockito/mockito/issues/146
-		var testExecutionListener = new MockTestExecutionListener();
-		var executionListenerAdapter = new ExecutionListenerAdapter(testPlan, testExecutionListener);
-
 		var entry = ReportEntry.from("one", "two");
+
 		executionListenerAdapter.reportingEntryPublished(testDescriptor, entry);
 
-		assertThat(testExecutionListener.entry).isEqualTo(entry);
-		assertThat(testExecutionListener.testIdentifier).isEqualTo(testIdentifier);
+		verify(testExecutionListener).reportingEntryPublished(testIdentifier, entry);
+	}
+
+	@Test
+	void testDynamicTestRegistered() {
+		var testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
+
+		executionListenerAdapter.dynamicTestRegistered(testDescriptor);
+
+		verify(testExecutionListener).dynamicTestRegistered(testIdentifier);
+	}
+
+	@Test
+	void testExecutionStarted() {
+		var testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
+
+		executionListenerAdapter.executionStarted(testDescriptor);
+
+		verify(testExecutionListener).executionStarted(testIdentifier);
+	}
+
+	@Test
+	void testExecutionSkipped() {
+		var testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
+		var reason = "Test skipped due to condition";
+
+		executionListenerAdapter.executionSkipped(testDescriptor, reason);
+
+		verify(testExecutionListener).executionSkipped(testIdentifier, reason);
+	}
+
+	@Test
+	void testExecutionFinished() {
+		var testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
+		var result = mock(TestExecutionResult.class);
+
+		executionListenerAdapter.executionFinished(testDescriptor, result);
+
+		verify(testExecutionListener).executionFinished(testIdentifier, result);
+	}
+
+	@Test
+	void testFileEntryPublished() {
+		var testIdentifier = testPlan.getTestIdentifier(testDescriptor.getUniqueId());
+		var fileEntry = mock(FileEntry.class);
+
+		executionListenerAdapter.fileEntryPublished(testDescriptor, fileEntry);
+
+		verify(testExecutionListener).fileEntryPublished(testIdentifier, fileEntry);
 	}
 
 	private TestDescriptor getSampleMethodTestDescriptor() {
@@ -62,22 +119,6 @@ class ExecutionListenerAdapterTests {
 
 	//for reflection purposes only
 	void nothing() {
-	}
-
-	static class MockTestExecutionListener implements TestExecutionListener {
-
-		@Nullable
-		public TestIdentifier testIdentifier;
-
-		@Nullable
-		public ReportEntry entry;
-
-		@Override
-		public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
-			this.testIdentifier = testIdentifier;
-			this.entry = entry;
-		}
-
 	}
 
 }
