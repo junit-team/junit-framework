@@ -11,6 +11,7 @@
 package org.junit.platform.testkit.engine;
 
 import static org.apiguardian.api.API.Status.MAINTAINED;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -184,7 +185,7 @@ public final class Executions {
 	 * @see org.assertj.core.api.ListAssert
 	 */
 	public ListAssert<Execution> assertThatExecutions() {
-		return org.assertj.core.api.Assertions.assertThat(list());
+		return assertThat(list());
 	}
 
 	// --- Diagnostics ---------------------------------------------------------

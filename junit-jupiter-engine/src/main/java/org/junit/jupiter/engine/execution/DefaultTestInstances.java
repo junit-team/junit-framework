@@ -10,10 +10,10 @@
 
 package org.junit.jupiter.engine.execution;
 
+import static java.util.Collections.unmodifiableList;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
@@ -32,7 +32,7 @@ public class DefaultTestInstances implements TestInstances {
 	public static DefaultTestInstances of(TestInstances testInstances, Object instance) {
 		List<Object> allInstances = new ArrayList<>(testInstances.getAllInstances());
 		allInstances.add(instance);
-		return new DefaultTestInstances(Collections.unmodifiableList(allInstances));
+		return new DefaultTestInstances(unmodifiableList(allInstances));
 	}
 
 	private final List<Object> instances;

@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine.descriptor;
 
 import static java.util.Collections.emptySet;
+import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
@@ -108,7 +109,7 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 			Throwable throwable, ExceptionHandlerInvoker<E> handlerInvoker) {
 
 		List<E> extensions = registry.getExtensions(handlerType);
-		Collections.reverse(extensions);
+		reverse(extensions);
 		invokeExecutionExceptionHandlers(extensions, throwable, handlerInvoker);
 	}
 

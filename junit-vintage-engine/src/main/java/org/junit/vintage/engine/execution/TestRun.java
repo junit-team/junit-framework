@@ -11,6 +11,7 @@
 package org.junit.vintage.engine.execution;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.reverse;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
@@ -21,7 +22,6 @@ import static org.junit.platform.engine.TestExecutionResult.successful;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,13 +83,13 @@ class TestRun {
 				.filter(entry -> entry.getValue().equals(EventType.SYNTHETIC)) //
 				.map(Entry::getKey) //
 				.collect(toCollection(ArrayList::new));
-		Collections.reverse(result);
+		reverse(result);
 		return result;
 	}
 
 	Collection<TestDescriptor> getInProgressTestDescriptors() {
 		List<TestDescriptor> result = new ArrayList<>(inProgressDescriptors.keySet());
-		Collections.reverse(result);
+		reverse(result);
 		return result;
 	}
 

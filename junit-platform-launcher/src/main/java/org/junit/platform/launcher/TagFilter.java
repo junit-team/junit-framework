@@ -11,12 +11,12 @@
 package org.junit.platform.launcher;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -168,7 +168,7 @@ public final class TagFilter {
 	}
 
 	private static String formatToString(List<String> tagExpressions) {
-		return tagExpressions.stream().map(String::strip).sorted().collect(Collectors.joining(","));
+		return tagExpressions.stream().map(String::strip).sorted().collect(joining(","));
 	}
 
 	private static List<TagExpression> parseAll(List<String> tagExpressions) {

@@ -12,6 +12,7 @@ package org.junit.platform.testkit.engine;
 
 import static java.util.function.Predicate.isEqual;
 import static org.apiguardian.api.API.Status.MAINTAINED;
+import static org.assertj.core.api.Assertions.allOf;
 import static org.junit.platform.commons.util.FunctionUtils.where;
 
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.FunctionUtils;
@@ -65,7 +65,7 @@ public final class TestExecutionResultConditions {
 				.map(TestExecutionResultConditions::throwable)//
 				.toList();
 
-		return Assertions.allOf(list);
+		return allOf(list);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public final class TestExecutionResultConditions {
 				.map(TestExecutionResultConditions::cause)//
 				.toList();
 
-		return Assertions.allOf(list);
+		return allOf(list);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public final class TestExecutionResultConditions {
 				.map(TestExecutionResultConditions::rootCause)//
 				.toList();
 
-		return Assertions.allOf(list);
+		return allOf(list);
 	}
 
 	/**
@@ -121,7 +121,7 @@ public final class TestExecutionResultConditions {
 				.map(condition -> suppressed(index, condition))//
 				.toList();
 
-		return Assertions.allOf(list);
+		return allOf(list);
 	}
 
 	/**

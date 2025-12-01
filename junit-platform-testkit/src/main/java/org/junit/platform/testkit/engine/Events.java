@@ -10,9 +10,9 @@
 
 package org.junit.platform.testkit.engine;
 
-import static java.util.Collections.sort;
 import static java.util.function.Predicate.isEqual;
 import static org.apiguardian.api.API.Status.MAINTAINED;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.util.FunctionUtils.where;
 import static org.junit.platform.testkit.engine.Event.byPayload;
 import static org.junit.platform.testkit.engine.Event.byType;
@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,7 +32,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.ListAssert;
 import org.assertj.core.api.SoftAssertions;
@@ -355,7 +355,7 @@ public final class Events {
 	 * @see org.assertj.core.api.ListAssert
 	 */
 	public ListAssert<Event> assertThatEvents() {
-		return org.assertj.core.api.Assertions.assertThat(list());
+		return assertThat(list());
 	}
 
 	// --- Diagnostics ---------------------------------------------------------
@@ -416,7 +416,7 @@ public final class Events {
 
 	@SafeVarargs
 	private static void assertEventsMatchExactly(List<Event> events, Condition<? super Event>... conditions) {
-		Assertions.assertThat(events).hasSize(conditions.length);
+		assertThat(events).hasSize(conditions.length);
 
 		SoftAssertions softly = new SoftAssertions();
 		for (int i = 0; i < conditions.length; i++) {
@@ -437,7 +437,7 @@ public final class Events {
 	@SafeVarargs
 	@SuppressWarnings("varargs")
 	private static void assertEventsMatchLooselyInOrder(List<Event> events, Condition<? super Event>... conditions) {
-		Assertions.assertThat(conditions).hasSizeLessThanOrEqualTo(events.size());
+		assertThat(conditions).hasSizeLessThanOrEqualTo(events.size());
 		SoftAssertions softly = new SoftAssertions();
 
 		// @formatter:off
@@ -457,7 +457,7 @@ public final class Events {
 
 	private static boolean isNotInIncreasingOrder(List<Integer> indices) {
 		List<Integer> copy = new ArrayList<>(indices);
-		sort(copy);
+		Collections.sort(copy);
 
 		return !indices.equals(copy);
 	}

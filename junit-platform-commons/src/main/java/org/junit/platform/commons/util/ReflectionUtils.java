@@ -10,7 +10,9 @@
 
 package org.junit.platform.commons.util;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedMap;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
 import static org.apiguardian.api.API.Status.INTERNAL;
@@ -213,7 +215,7 @@ public final class ReflectionUtils {
 			classNamesToTypes.put(type.getCanonicalName(), type);
 		});
 
-		classNameToTypeMap = Collections.unmodifiableMap(classNamesToTypes);
+		classNameToTypeMap = unmodifiableMap(classNamesToTypes);
 
 		primitiveToWrapperMap = createPrimitivesToWrapperMap();
 	}
@@ -231,7 +233,7 @@ public final class ReflectionUtils {
 		primitivesToWrappers.put(float.class, Float.class);
 		primitivesToWrappers.put(double.class, Double.class);
 
-		return Collections.unmodifiableMap(primitivesToWrappers);
+		return unmodifiableMap(primitivesToWrappers);
 	}
 
 	public static boolean isPublic(Class<?> clazz) {
@@ -1830,7 +1832,7 @@ public final class ReflectionUtils {
 	private static List<Field> getSuperclassFields(Class<?> clazz, HierarchyTraversalMode traversalMode) {
 		Class<?> superclass = clazz.getSuperclass();
 		if (!isSearchable(superclass)) {
-			return Collections.emptyList();
+			return emptyList();
 		}
 		return findAllFieldsInHierarchy(superclass, traversalMode);
 	}
@@ -1838,7 +1840,7 @@ public final class ReflectionUtils {
 	private static List<Method> getSuperclassMethods(Class<?> clazz, HierarchyTraversalMode traversalMode) {
 		Class<?> superclass = clazz.getSuperclass();
 		if (!isSearchable(superclass)) {
-			return Collections.emptyList();
+			return emptyList();
 		}
 		return findAllMethodsInHierarchy(superclass, traversalMode);
 	}

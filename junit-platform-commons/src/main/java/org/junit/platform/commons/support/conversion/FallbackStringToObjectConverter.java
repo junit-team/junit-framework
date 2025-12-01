@@ -16,7 +16,6 @@ import static org.junit.platform.commons.support.ModifierSupport.isNotStatic;
 import static org.junit.platform.commons.support.ReflectionSupport.findMethods;
 import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
 import static org.junit.platform.commons.util.ReflectionUtils.findConstructors;
-import static org.junit.platform.commons.util.ReflectionUtils.newInstance;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -28,6 +27,7 @@ import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.ReflectionUtils;
 
 /**
  * {@code FallbackStringToObjectConverter} is a {@link StringToObjectConverter}
@@ -115,7 +115,7 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 		}
 		Constructor<?> constructor = findFactoryConstructor(targetType, parameterType);
 		if (constructor != null) {
-			return source -> newInstance(constructor, source);
+			return source -> ReflectionUtils.newInstance(constructor, source);
 		}
 		return null;
 	}

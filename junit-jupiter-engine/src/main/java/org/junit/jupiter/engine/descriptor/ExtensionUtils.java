@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -226,7 +227,7 @@ final class ExtensionUtils {
 	 * @since 5.4
 	 */
 	private static final Comparator<Field> orderComparator = //
-		Comparator.comparingInt(ExtensionUtils::getOrder);
+		comparingInt(ExtensionUtils::getOrder);
 
 	/**
 	 * @since 5.4

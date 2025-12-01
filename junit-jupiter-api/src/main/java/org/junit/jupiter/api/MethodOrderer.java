@@ -10,12 +10,13 @@
 
 package org.junit.jupiter.api;
 
+import static java.util.Collections.shuffle;
+import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -214,8 +215,7 @@ public interface MethodOrderer {
 			context.getMethodDescriptors().sort(comparator);
 		}
 
-		private static final Comparator<MethodDescriptor> comparator = Comparator.comparing(
-			MethodDescriptor::getDisplayName);
+		private static final Comparator<MethodDescriptor> comparator = comparing(MethodDescriptor::getDisplayName);
 	}
 
 	/**
@@ -308,7 +308,7 @@ public interface MethodOrderer {
 		 */
 		@Override
 		public void orderMethods(MethodOrdererContext context) {
-			Collections.shuffle(context.getMethodDescriptors(),
+			shuffle(context.getMethodDescriptors(),
 				new java.util.Random(RandomOrdererUtils.getSeed(context::getConfigurationParameter, logger)));
 		}
 

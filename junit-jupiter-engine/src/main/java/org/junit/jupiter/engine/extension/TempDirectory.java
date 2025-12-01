@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.extension;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
+import static java.util.Collections.emptySortedMap;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
 import static org.junit.jupiter.api.io.CleanupMode.DEFAULT;
@@ -39,7 +40,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -371,7 +371,7 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 			Path rootDir = this.dir;
 			if (rootDir == null || Files.notExists(rootDir)) {
-				return Collections.emptySortedMap();
+				return emptySortedMap();
 			}
 
 			SortedMap<Path, IOException> failures = new TreeMap<>();

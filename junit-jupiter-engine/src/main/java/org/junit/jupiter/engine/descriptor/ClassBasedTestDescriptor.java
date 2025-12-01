@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import static java.util.Collections.reverse;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static org.apiguardian.api.API.Status.INTERNAL;
@@ -30,7 +31,6 @@ import static org.junit.jupiter.engine.support.JupiterThrowableCollectorFactory.
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -516,7 +516,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 		// synthesized AfterEachMethodAdapters are executed within TestMethodTestDescriptor,
 		// we have to reverse the afterEachMethods list to put them in top-down order before
 		// we register them as synthesized extensions.
-		Collections.reverse(afterEachMethods);
+		reverse(afterEachMethods);
 
 		registerMethodsAsExtensions(afterEachMethods, registrar, this::synthesizeAfterEachMethodAdapter);
 	}

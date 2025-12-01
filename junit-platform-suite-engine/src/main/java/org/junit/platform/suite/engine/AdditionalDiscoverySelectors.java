@@ -10,9 +10,10 @@
 
 package org.junit.platform.suite.engine;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.platform.commons.util.Preconditions;
@@ -71,7 +72,7 @@ class AdditionalDiscoverySelectors {
 		Preconditions.notNull(moduleNames, "Module names must not be null");
 		Preconditions.containsNoNullElements(moduleNames, "Individual module names must not be null");
 
-		return DiscoverySelectors.selectModules(uniqueStreamOf(moduleNames).collect(Collectors.toSet()));
+		return DiscoverySelectors.selectModules(uniqueStreamOf(moduleNames).collect(toSet()));
 	}
 
 	static FileSelector selectFile(String path, int line, int column) {

@@ -10,20 +10,20 @@
 
 package org.junit.platform.console.output;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apiguardian.api.API;
 
@@ -96,11 +96,11 @@ public class ColorPalette {
 	}
 
 	private static Map<Style, String> toOverrideMap(Properties properties) {
-		Map<String, String> upperCaseProperties = properties.entrySet().stream().collect(Collectors.toMap(
-			entry -> ((String) entry.getKey()).toUpperCase(Locale.ROOT), entry -> (String) entry.getValue()));
+		Map<String, String> upperCaseProperties = properties.entrySet().stream().collect(
+			toMap(entry -> ((String) entry.getKey()).toUpperCase(Locale.ROOT), entry -> (String) entry.getValue()));
 
 		return Arrays.stream(Style.values()).filter(style -> upperCaseProperties.containsKey(style.name())).collect(
-			Collectors.toMap(Function.identity(), style -> upperCaseProperties.get(style.name())));
+			toMap(identity(), style -> upperCaseProperties.get(style.name())));
 	}
 
 	private static Properties getProperties(Reader reader) {
@@ -115,7 +115,7 @@ public class ColorPalette {
 	}
 
 	private static Properties getProperties(Path path) {
-		try (FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+		try (FileReader fileReader = new FileReader(path.toFile(), UTF_8)) {
 			return getProperties(fileReader);
 		}
 		catch (IOException e) {

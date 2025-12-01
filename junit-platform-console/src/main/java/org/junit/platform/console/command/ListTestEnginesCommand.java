@@ -10,8 +10,9 @@
 
 package org.junit.platform.console.command;
 
+import static java.util.Comparator.comparing;
+
 import java.io.PrintWriter;
-import java.util.Comparator;
 import java.util.StringJoiner;
 import java.util.stream.StreamSupport;
 
@@ -36,7 +37,7 @@ class ListTestEnginesCommand extends BaseCommand<Void> {
 		ServiceLoaderTestEngineRegistry registry = new ServiceLoaderTestEngineRegistry();
 		Iterable<TestEngine> engines = registry.loadTestEngines();
 		StreamSupport.stream(engines.spliterator(), false) //
-				.sorted(Comparator.comparing(TestEngine::getId)) //
+				.sorted(comparing(TestEngine::getId)) //
 				.forEach(engine -> displayEngine(out, engine));
 		out.flush();
 	}
