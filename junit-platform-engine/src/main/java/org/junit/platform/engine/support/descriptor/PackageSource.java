@@ -21,7 +21,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.TestSource;
 
 /**
- * Package based {@link org.junit.platform.engine.TestSource}.
+ * Package based {@link TestSource}.
  *
  * <p>This class stores the package name because {@link Package} does not
  * implement {@link java.io.Serializable}.

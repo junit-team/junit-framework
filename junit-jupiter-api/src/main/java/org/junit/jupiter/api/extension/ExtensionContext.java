@@ -506,7 +506,7 @@ public interface ExtensionContext {
 	 * @return the {@code ExecutionMode} of the test; never {@code null}
 	 *
 	 * @since 5.8.1
-	 * @see org.junit.jupiter.api.parallel.ExecutionMode {@code @ExecutionMode}
+	 * @see ExecutionMode {@code @ExecutionMode}
 	 */
 	@API(status = STABLE, since = "5.8.1")
 	ExecutionMode getExecutionMode();

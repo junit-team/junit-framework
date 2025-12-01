@@ -8,13 +8,17 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.engine.JupiterTestEngine;
+import org.junit.platform.engine.TestEngine;
+
 /**
- * Provides the JUnit Jupiter {@link org.junit.platform.engine.TestEngine}
+ * Provides the JUnit Jupiter {@link TestEngine}
  * implementation.
  *
  * @since 5.0
- * @uses org.junit.jupiter.api.extension.Extension
- * @provides org.junit.platform.engine.TestEngine The {@code JupiterTestEngine}
+ * @uses Extension
+ * @provides TestEngine The {@code JupiterTestEngine}
  * runs Jupiter based tests on the platform.
  */
 module org.junit.jupiter.engine {
@@ -29,10 +33,10 @@ module org.junit.jupiter.engine {
 
 	// exports org.junit.jupiter.engine; // Constants...
 
-	uses org.junit.jupiter.api.extension.Extension;
+	uses Extension;
 
-	provides org.junit.platform.engine.TestEngine
-			with org.junit.jupiter.engine.JupiterTestEngine;
+	provides TestEngine
+			with JupiterTestEngine;
 
 	opens org.junit.jupiter.engine.extension to org.junit.platform.commons;
 }

@@ -41,8 +41,8 @@ import org.junit.platform.commons.util.PackageUtils;
  * {@code @Testable} for further details.
  *
  * @since 1.0
- * @see org.junit.platform.engine.EngineDiscoveryRequest
- * @see org.junit.platform.engine.ExecutionRequest
+ * @see EngineDiscoveryRequest
+ * @see ExecutionRequest
  * @see org.junit.platform.commons.annotation.Testable
  */
 @API(status = STABLE, since = "1.0")

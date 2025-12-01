@@ -10,6 +10,7 @@
 
 package org.junit.vintage.engine.samples.junit3;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -18,7 +19,7 @@ import junit.framework.TestSuite;
  */
 public class JUnit3SuiteWithSingleTestCaseWithSingleTestWhichFails extends TestCase {
 
-	public static junit.framework.Test suite() {
+	public static Test suite() {
 		var suite = new TestSuite();
 		suite.addTestSuite(PlainJUnit3TestCaseWithSingleTestWhichFails.class);
 		return suite;

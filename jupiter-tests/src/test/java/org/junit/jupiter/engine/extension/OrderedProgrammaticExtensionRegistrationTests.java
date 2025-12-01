@@ -46,7 +46,7 @@ class OrderedProgrammaticExtensionRegistrationTests extends AbstractJupiterTestE
 
 	/**
 	 * This method basically verifies the implementation of
-	 * {@link java.lang.String#hashCode()} (which needn't really be tested)
+	 * {@link String#hashCode()} (which needn't really be tested)
 	 * in order to make reasonable assumptions about how fields are sorted
 	 * in {@link org.junit.platform.commons.util.ReflectionUtils#defaultFieldSorter(Field, Field)}.
 	 *

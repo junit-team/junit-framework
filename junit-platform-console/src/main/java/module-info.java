@@ -8,11 +8,15 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import java.util.spi.ToolProvider;
+
+import org.junit.platform.console.ConsoleLauncherToolProvider;
+
 /**
  * Support for launching the JUnit Platform from the console.
  *
  * @since 1.0
- * @provides java.util.spi.ToolProvider
+ * @provides ToolProvider
  */
 module org.junit.platform.console {
 
@@ -26,5 +30,5 @@ module org.junit.platform.console {
 
 	exports org.junit.platform.console.output to org.junit.start;
 
-	provides java.util.spi.ToolProvider with org.junit.platform.console.ConsoleLauncherToolProvider;
+	provides ToolProvider with ConsoleLauncherToolProvider;
 }

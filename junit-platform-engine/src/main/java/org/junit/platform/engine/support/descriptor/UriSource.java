@@ -50,8 +50,8 @@ public interface UriSource extends TestSource {
 	 * @param uri the URI to use as the source; never {@code null}
 	 * @return an appropriate {@code UriSource} for the supplied {@code URI}
 	 * @since 1.3
-	 * @see org.junit.platform.engine.support.descriptor.FileSource
-	 * @see org.junit.platform.engine.support.descriptor.DirectorySource
+	 * @see FileSource
+	 * @see DirectorySource
 	 */
 	static UriSource from(URI uri) {
 		Preconditions.notNull(uri, "URI must not be null");

@@ -31,9 +31,8 @@ class AnnotationBasedArgumentsProviderTests {
 
 	private final AnnotationBasedArgumentsProvider<CsvSource> annotationBasedArgumentsProvider = new AnnotationBasedArgumentsProvider<>() {
 		@Override
-		protected Stream<? extends Arguments> provideArguments(
-				org.junit.jupiter.params.support.ParameterDeclarations parameters, ExtensionContext context,
-				CsvSource annotation) {
+		protected Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters,
+				ExtensionContext context, CsvSource annotation) {
 			return Stream.of(Arguments.of(annotation));
 		}
 	};
@@ -50,7 +49,7 @@ class AnnotationBasedArgumentsProviderTests {
 	@DisplayName("should invoke the provideArguments template method with the accepted annotation")
 	void shouldInvokeTemplateMethodWithTheAnnotationProvidedToAccept() {
 		var spiedProvider = spy(annotationBasedArgumentsProvider);
-		var parameters = mock(org.junit.jupiter.params.support.ParameterDeclarations.class);
+		var parameters = mock(ParameterDeclarations.class);
 		var extensionContext = mock(ExtensionContext.class);
 		var annotation = csvSource("0", "1", "2");
 

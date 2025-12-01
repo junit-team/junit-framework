@@ -27,6 +27,8 @@ import java.util.concurrent.CountDownLatch;
 import example.domain.Person;
 import example.util.Calculator;
 
+import extensions.DisabledOnOpenJ9;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -87,7 +89,7 @@ class AssertionsDemo {
 	}
 
 	// end::user_guide[]
-	@extensions.DisabledOnOpenJ9
+	@DisabledOnOpenJ9
 	// tag::user_guide[]
 	@Test
 	void exceptionTesting() {

@@ -8,12 +8,15 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import org.junit.platform.engine.TestEngine;
+import org.junit.vintage.engine.VintageTestEngine;
+
 /**
- * Provides a {@link org.junit.platform.engine.TestEngine} for running JUnit 3
+ * Provides a {@link TestEngine} for running JUnit 3
  * and 4 based tests on the platform.
  *
  * @since 4.12
- * @provides org.junit.platform.engine.TestEngine The {@code VintageTestEngine}
+ * @provides TestEngine The {@code VintageTestEngine}
  * runs JUnit 3 and 4 based tests on the platform.
  */
 @SuppressWarnings("deprecation")
@@ -25,6 +28,6 @@ module org.junit.vintage.engine {
 	requires junit; // 4
 	requires org.junit.platform.engine;
 
-	provides org.junit.platform.engine.TestEngine
-			with org.junit.vintage.engine.VintageTestEngine;
+	provides TestEngine
+			with VintageTestEngine;
 }

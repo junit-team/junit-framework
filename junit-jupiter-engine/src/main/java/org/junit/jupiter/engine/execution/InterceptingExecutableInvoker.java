@@ -30,7 +30,7 @@ import org.junit.jupiter.engine.extension.ExtensionRegistry;
 
 /**
  * {@code InterceptingExecutableInvoker} encapsulates the invocation of a
- * {@link java.lang.reflect.Executable} (i.e., method or constructor),
+ * {@link Executable} (i.e., method or constructor),
  * including support for dynamic resolution of method parameters via
  * {@link ParameterResolver ParameterResolvers}.
  *

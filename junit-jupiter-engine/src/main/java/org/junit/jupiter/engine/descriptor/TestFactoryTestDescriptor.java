@@ -47,7 +47,7 @@ import org.junit.platform.engine.support.descriptor.ClasspathResourceSource;
 import org.junit.platform.engine.support.descriptor.UriSource;
 
 /**
- * {@link org.junit.platform.engine.TestDescriptor TestDescriptor} for
+ * {@link TestDescriptor TestDescriptor} for
  * {@link org.junit.jupiter.api.TestFactory @TestFactory} methods.
  *
  * @since 5.0

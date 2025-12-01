@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
  * <h2>Rationale for throwing {@code Throwable} instead of {@code Exception}</h2>
  *
  * <p>Although Java applications typically throw exceptions that are instances
- * of {@link java.lang.Exception}, {@link java.lang.RuntimeException},
- * {@link java.lang.Error}, or {@link java.lang.AssertionError} (in testing
+ * of {@link Exception}, {@link RuntimeException},
+ * {@link Error}, or {@link AssertionError} (in testing
  * scenarios), there may be use cases where a {@code ThrowingConsumer} needs to
  * explicitly throw a {@code Throwable}. In order to support such specialized
  * use cases, {@link #accept} is declared to throw {@code Throwable}.

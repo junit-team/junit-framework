@@ -49,7 +49,7 @@ public final class DirectorySelector implements DiscoverySelector {
 	}
 
 	/**
-	 * Get the selected directory as a {@link java.io.File}.
+	 * Get the selected directory as a {@link File}.
 	 *
 	 * @see #getPath()
 	 * @see #getRawPath()
@@ -59,7 +59,7 @@ public final class DirectorySelector implements DiscoverySelector {
 	}
 
 	/**
-	 * Get the selected directory as a {@link java.nio.file.Path} using the
+	 * Get the selected directory as a {@link Path} using the
 	 * {@linkplain FileSystems#getDefault default} {@link FileSystem}.
 	 *
 	 * @see #getDirectory()

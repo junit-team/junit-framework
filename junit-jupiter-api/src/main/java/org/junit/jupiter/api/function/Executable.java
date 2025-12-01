@@ -19,14 +19,14 @@ import org.apiguardian.api.API;
  * implement any generic block of code that potentially throws a
  * {@link Throwable}.
  *
- * <p>The {@code Executable} interface is similar to {@link java.lang.Runnable},
+ * <p>The {@code Executable} interface is similar to {@link Runnable},
  * except that an {@code Executable} can throw any kind of exception.
  *
  * <h2>Rationale for throwing {@code Throwable} instead of {@code Exception}</h2>
  *
  * <p>Although Java applications typically throw exceptions that are instances
- * of {@link java.lang.Exception}, {@link java.lang.RuntimeException},
- * {@link java.lang.Error}, or {@link java.lang.AssertionError} (in testing
+ * of {@link Exception}, {@link RuntimeException},
+ * {@link Error}, or {@link AssertionError} (in testing
  * scenarios), there may be use cases where an {@code Executable} needs to
  * explicitly throw a {@code Throwable}. In order to support such specialized
  * use cases, {@link #execute()} is declared to throw {@code Throwable}.

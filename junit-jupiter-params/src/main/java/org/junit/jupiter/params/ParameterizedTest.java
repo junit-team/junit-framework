@@ -36,7 +36,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  *
  * <p>{@code @ParameterizedTest} methods must specify at least one
  * {@link org.junit.jupiter.params.provider.ArgumentsProvider ArgumentsProvider}
- * via {@link org.junit.jupiter.params.provider.ArgumentsSource @ArgumentsSource}
+ * via {@link ArgumentsSource @ArgumentsSource}
  * or a corresponding composed annotation (e.g., {@code @ValueSource},
  * {@code @CsvSource}, etc.). The provider is responsible for providing a
  * {@link java.util.stream.Stream Stream} of
@@ -118,7 +118,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * @see ParameterizedClass
  * @see org.junit.jupiter.params.provider.Arguments
  * @see org.junit.jupiter.params.provider.ArgumentsProvider
- * @see org.junit.jupiter.params.provider.ArgumentsSource
+ * @see ArgumentsSource
  * @see org.junit.jupiter.params.provider.CsvFileSource
  * @see org.junit.jupiter.params.provider.CsvSource
  * @see org.junit.jupiter.params.provider.EnumSource
@@ -340,7 +340,7 @@ public @interface ParameterizedTest {
 	 * invocations.
 	 *
 	 * @since 5.8
-	 * @see java.lang.AutoCloseable
+	 * @see AutoCloseable
 	 */
 	@API(status = STABLE, since = "5.10")
 	boolean autoCloseArguments() default true;

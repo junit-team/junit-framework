@@ -46,7 +46,7 @@ import org.junit.platform.engine.support.descriptor.MethodSource;
  * and {@link TestMethodTestDescriptor}.
  *
  * @since 5.0
- * @see org.junit.jupiter.engine.descriptor.LifecycleMethodUtilsTests
+ * @see LifecycleMethodUtilsTests
  */
 class JupiterTestDescriptorTests {
 

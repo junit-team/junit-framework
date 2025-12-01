@@ -34,7 +34,7 @@ import org.junit.rules.ExpectedException;
  *
  * @since 5.0
  * @see org.junit.jupiter.api.Assertions#assertThrows
- * @see org.junit.rules.ExpectedException
+ * @see ExpectedException
  * @see org.junit.rules.TestRule
  * @see org.junit.Rule
  * @deprecated Please use

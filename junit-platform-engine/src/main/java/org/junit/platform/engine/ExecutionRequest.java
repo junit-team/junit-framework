@@ -20,6 +20,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
@@ -148,7 +149,7 @@ public class ExecutionRequest {
 
 	/**
 	 * {@return the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
+	 * {@link OutputDirectoryProvider} for
 	 * this request for writing reports and other output files}
 	 *
 	 * @throws PreconditionViolationException if the output directory provider
@@ -159,8 +160,8 @@ public class ExecutionRequest {
 	@Deprecated(since = "1.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "1.14")
 	@SuppressWarnings("removal")
-	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
-		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
+	public OutputDirectoryProvider getOutputDirectoryProvider() {
+		return OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
 	}
 
 	/**

@@ -46,8 +46,8 @@ import org.junit.platform.commons.util.Preconditions;
  * @since 5.0
  * @see ArgumentSet
  * @see org.junit.jupiter.params.ParameterizedTest
- * @see org.junit.jupiter.params.provider.ArgumentsSource
- * @see org.junit.jupiter.params.provider.ArgumentsProvider
+ * @see ArgumentsSource
+ * @see ArgumentsProvider
  * @see org.junit.jupiter.params.converter.ArgumentConverter
  */
 @FunctionalInterface

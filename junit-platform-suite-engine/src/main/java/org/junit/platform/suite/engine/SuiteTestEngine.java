@@ -27,7 +27,7 @@ import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
- * The JUnit Platform Suite {@link org.junit.platform.engine.TestEngine TestEngine}.
+ * The JUnit Platform Suite {@link TestEngine TestEngine}.
  *
  * @since 1.8
  */

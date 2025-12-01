@@ -26,7 +26,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.TestSource;
 
 /**
- * <em>Classpath resource</em> based {@link org.junit.platform.engine.TestSource}
+ * <em>Classpath resource</em> based {@link TestSource}
  * with an optional {@linkplain FilePosition position}.
  *
  * @since 1.0

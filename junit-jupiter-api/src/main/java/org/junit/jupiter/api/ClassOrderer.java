@@ -69,7 +69,7 @@ public interface ClassOrderer {
 	 * <h4>Supported Values</h4>
 	 *
 	 * <p>Supported values include fully qualified class names for types that
-	 * implement {@link org.junit.jupiter.api.ClassOrderer}.
+	 * implement {@link ClassOrderer}.
 	 *
 	 * <p>If not specified, test classes are not ordered unless test classes are
 	 * annotated with {@link TestClassOrder @TestClassOrder}.

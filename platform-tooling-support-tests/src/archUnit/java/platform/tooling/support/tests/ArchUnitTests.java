@@ -62,9 +62,12 @@ import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.TestReporter;
+import org.junit.jupiter.api.extension.MediaType;
+import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.support.scanning.ClasspathScanner;
 import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 @AnalyzeClasses(packages = { "org.junit.platform", "org.junit.jupiter", "org.junit.vintage" })
 class ArchUnitTests {
@@ -160,18 +163,17 @@ class ArchUnitTests {
 				.ignoreDependency(nameContaining(".shadow."), nameContaining(".shadow.")) //
 
 				// https://github.com/junit-team/junit-framework/issues/4886
-				.ignoreDependency(TestReporter.class, org.junit.jupiter.api.extension.MediaType.class) //
+				.ignoreDependency(TestReporter.class, MediaType.class) //
 
 				// https://github.com/junit-team/junit-framework/issues/4885
-				.ignoreDependency(ClasspathScanner.class, org.junit.platform.commons.support.Resource.class) //
+				.ignoreDependency(ClasspathScanner.class, Resource.class) //
 
 				// https://github.com/junit-team/junit-framework/issues/4919
 				.ignoreDependency(org.junit.jupiter.params.support.ParameterInfo.class,
 					org.junit.jupiter.params.ParameterInfo.class)
 
 				// https://github.com/junit-team/junit-framework/issues/4923
-				.ignoreDependency(org.junit.platform.engine.reporting.OutputDirectoryProvider.class,
-					OutputDirectoryCreator.class) //
+				.ignoreDependency(OutputDirectoryProvider.class, OutputDirectoryCreator.class) //
 				.ignoreDependency(Class.forName("org.junit.platform.engine.reporting.OutputDirectoryProviderAdapter"),
 					OutputDirectoryCreator.class) //
 				.ignoreDependency(Class.forName("org.junit.platform.engine.reporting.OutputDirectoryProviderAdapter"),

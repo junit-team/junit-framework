@@ -34,7 +34,7 @@ import org.junit.rules.ExternalResource;
  * of the rule-based model of JUnit 4.
  *
  * @since 5.0
- * @see org.junit.rules.ExternalResource
+ * @see ExternalResource
  * @see org.junit.rules.TestRule
  * @see org.junit.Rule
  * @deprecated Please use {@link org.junit.jupiter.api.AutoClose @AutoClose} instead.

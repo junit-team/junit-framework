@@ -78,7 +78,7 @@ public interface TempDirFactory extends Closeable {
 	 * <p>The created temporary directory is always created in the default
 	 * file system with the system's default temporary directory as its parent.
 	 *
-	 * @see Files#createTempDirectory(java.lang.String, java.nio.file.attribute.FileAttribute[])
+	 * @see Files#createTempDirectory(String, java.nio.file.attribute.FileAttribute[])
 	 */
 	class Standard implements TempDirFactory {
 

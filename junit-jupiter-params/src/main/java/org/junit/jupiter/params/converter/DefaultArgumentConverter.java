@@ -45,8 +45,8 @@ import org.junit.platform.commons.util.ReflectionUtils;
  * be modified.
  *
  * @since 5.0
- * @see org.junit.jupiter.params.converter.ArgumentConverter
- * @see org.junit.platform.commons.support.conversion.ConversionSupport
+ * @see ArgumentConverter
+ * @see ConversionSupport
  */
 @API(status = INTERNAL, since = "5.0")
 public class DefaultArgumentConverter implements ArgumentConverter {

@@ -45,7 +45,7 @@ import org.junit.platform.launcher.jfr.JfrUtils;
  * {@link java.util.ServiceLoader ServiceLoader} mechanism. For that purpose, a
  * text file named {@code META-INF/services/org.junit.platform.engine.TestEngine}
  * has to be added to the engine's JAR file in which the fully qualified name
- * of the implementation class of the {@link org.junit.platform.engine.TestEngine}
+ * of the implementation class of the {@link TestEngine}
  * interface is declared.
  *
  * <p>By default, test execution listeners are discovered at runtime via the

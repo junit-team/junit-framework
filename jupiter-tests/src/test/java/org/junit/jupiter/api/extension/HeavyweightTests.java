@@ -28,7 +28,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 /**
- * Unit tests for {@link org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource}
+ * Unit tests for {@link ExtensionContext.Store.CloseableResource}
  * stored values.
  *
  * @since 1.1

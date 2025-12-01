@@ -36,7 +36,7 @@ public interface Named<T extends @Nullable Object> {
 	 * depending on the use case
 	 * @param <T> the type of the payload
 	 * @return an instance of {@code Named}; never {@code null}
-	 * @see #named(String, java.lang.Object)
+	 * @see #named(String, Object)
 	 */
 	static <T extends @Nullable Object> Named<T> of(String name, T payload) {
 		Preconditions.notBlank(name, "name must not be null or blank");

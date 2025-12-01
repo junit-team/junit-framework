@@ -8,6 +8,21 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import org.junit.platform.engine.discovery.ClassSelector;
+import org.junit.platform.engine.discovery.ClasspathResourceSelector;
+import org.junit.platform.engine.discovery.ClasspathRootSelector;
+import org.junit.platform.engine.discovery.DirectorySelector;
+import org.junit.platform.engine.discovery.DiscoverySelectorIdentifierParser;
+import org.junit.platform.engine.discovery.FileSelector;
+import org.junit.platform.engine.discovery.IterationSelector;
+import org.junit.platform.engine.discovery.MethodSelector;
+import org.junit.platform.engine.discovery.ModuleSelector;
+import org.junit.platform.engine.discovery.NestedClassSelector;
+import org.junit.platform.engine.discovery.NestedMethodSelector;
+import org.junit.platform.engine.discovery.PackageSelector;
+import org.junit.platform.engine.discovery.UniqueIdSelector;
+import org.junit.platform.engine.discovery.UriSelector;
+
 /**
  * Public API for test engines.
  *
@@ -34,21 +49,21 @@ module org.junit.platform.engine {
 	exports org.junit.platform.engine.support.hierarchical;
 	exports org.junit.platform.engine.support.store;
 
-	uses org.junit.platform.engine.discovery.DiscoverySelectorIdentifierParser;
+	uses DiscoverySelectorIdentifierParser;
 
-	provides org.junit.platform.engine.discovery.DiscoverySelectorIdentifierParser with
-			org.junit.platform.engine.discovery.ClassSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.ClasspathResourceSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.ClasspathRootSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.DirectorySelector.IdentifierParser,
-			org.junit.platform.engine.discovery.FileSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.IterationSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.MethodSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.ModuleSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.NestedClassSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.NestedMethodSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.PackageSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.UniqueIdSelector.IdentifierParser,
-			org.junit.platform.engine.discovery.UriSelector.IdentifierParser;
+	provides DiscoverySelectorIdentifierParser with
+			ClassSelector.IdentifierParser,
+			ClasspathResourceSelector.IdentifierParser,
+			ClasspathRootSelector.IdentifierParser,
+			DirectorySelector.IdentifierParser,
+			FileSelector.IdentifierParser,
+			IterationSelector.IdentifierParser,
+			MethodSelector.IdentifierParser,
+			ModuleSelector.IdentifierParser,
+			NestedClassSelector.IdentifierParser,
+			NestedMethodSelector.IdentifierParser,
+			PackageSelector.IdentifierParser,
+			UniqueIdSelector.IdentifierParser,
+			UriSelector.IdentifierParser;
 
 }

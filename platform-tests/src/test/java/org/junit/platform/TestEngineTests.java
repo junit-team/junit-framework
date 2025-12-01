@@ -22,7 +22,7 @@ import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
 
 /**
- * Test cases for default implementations of {@link org.junit.platform.engine.TestEngine}.
+ * Test cases for default implementations of {@link TestEngine}.
  *
  * <p>Note: the package {@code org.junit.platform} this class resides in is
  * chosen on purpose. If it was in {@code org.junit.platform.engine} the default

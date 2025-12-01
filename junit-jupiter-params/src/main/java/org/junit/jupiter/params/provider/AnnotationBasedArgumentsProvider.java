@@ -33,10 +33,10 @@ import org.junit.platform.commons.util.Preconditions;
  * @since 5.10
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
- * @see org.junit.jupiter.params.provider.ArgumentsSource
- * @see org.junit.jupiter.params.provider.Arguments
- * @see org.junit.jupiter.params.provider.ArgumentsProvider
- * @see org.junit.jupiter.params.support.AnnotationConsumer
+ * @see ArgumentsSource
+ * @see Arguments
+ * @see ArgumentsProvider
+ * @see AnnotationConsumer
  */
 @API(status = MAINTAINED, since = "5.13.3")
 public abstract class AnnotationBasedArgumentsProvider<A extends Annotation>

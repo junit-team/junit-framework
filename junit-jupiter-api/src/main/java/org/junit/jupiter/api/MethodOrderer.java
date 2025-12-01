@@ -66,7 +66,7 @@ public interface MethodOrderer {
 	 * <h4>Supported Values</h4>
 	 *
 	 * <p>Supported values include fully qualified class names for types that
-	 * implement {@link org.junit.jupiter.api.MethodOrderer}.
+	 * implement {@link MethodOrderer}.
 	 *
 	 * <p>If not specified, test methods will be ordered using an algorithm that
 	 * is deterministic but intentionally non-obvious.

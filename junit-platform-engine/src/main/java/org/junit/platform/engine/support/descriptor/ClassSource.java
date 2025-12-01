@@ -26,7 +26,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.TestSource;
 
 /**
- * Class based {@link org.junit.platform.engine.TestSource TestSource} with
+ * Class based {@link TestSource TestSource} with
  * an optional {@linkplain FilePosition file position}.
  *
  * <p>If a Java {@link Class} reference is provided, the {@code ClassSource}

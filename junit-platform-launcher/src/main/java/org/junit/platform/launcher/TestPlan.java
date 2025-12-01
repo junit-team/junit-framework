@@ -33,6 +33,7 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 /**
  * {@code TestPlan} describes the tree of tests and containers as discovered
@@ -263,7 +264,7 @@ public class TestPlan {
 
 	/**
 	 * Get the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
+	 * {@link OutputDirectoryProvider} for
 	 * this test plan.
 	 *
 	 * @return the output directory provider; never {@code null}
@@ -273,8 +274,8 @@ public class TestPlan {
 	@SuppressWarnings("removal")
 	@API(status = DEPRECATED, since = "1.14")
 	@Deprecated(since = "1.14", forRemoval = true)
-	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
-		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
+	public OutputDirectoryProvider getOutputDirectoryProvider() {
+		return OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
 	}
 
 	/**

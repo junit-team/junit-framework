@@ -132,7 +132,7 @@ public final class CollectionUtils {
 	 * <li>{@link Object} array</li>
 	 * <li>primitive array</li>
 	 * <li>any type that provides an
-	 * {@link java.util.Iterator Iterator}-returning {@code iterator()} method
+	 * {@link Iterator Iterator}-returning {@code iterator()} method
 	 * (such as, for example, a {@code kotlin.sequences.Sequence})</li>
 	 * </ul>
 	 *

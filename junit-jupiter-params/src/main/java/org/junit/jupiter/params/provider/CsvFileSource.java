@@ -74,7 +74,7 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  *
  * @since 5.0
  * @see CsvSource
- * @see org.junit.jupiter.params.provider.ArgumentsSource
+ * @see ArgumentsSource
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
  */

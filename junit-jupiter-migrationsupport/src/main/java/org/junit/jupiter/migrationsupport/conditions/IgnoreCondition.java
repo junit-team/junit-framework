@@ -28,7 +28,7 @@ import org.junit.platform.commons.util.StringUtils;
  * annotation.
  *
  * @since 5.4
- * @see org.junit.Ignore @Ignore
+ * @see Ignore @Ignore
  * @see org.junit.jupiter.api.Disabled @Disabled
  * @see #evaluateExecutionCondition(ExtensionContext)
  * @see org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport

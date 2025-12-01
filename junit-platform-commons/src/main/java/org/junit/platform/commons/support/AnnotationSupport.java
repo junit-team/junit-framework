@@ -273,7 +273,7 @@ public final class AnnotationSupport {
 	 * {@link AnnotatedElement}.
 	 *
 	 * <p>This method extends the functionality of
-	 * {@link java.lang.reflect.AnnotatedElement#getAnnotationsByType(Class)}
+	 * {@link AnnotatedElement#getAnnotationsByType(Class)}
 	 * with additional support for meta-annotations.
 	 *
 	 * <p>In addition, if the element is a class and the repeatable annotation

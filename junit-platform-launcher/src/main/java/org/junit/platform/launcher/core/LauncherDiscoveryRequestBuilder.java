@@ -32,6 +32,7 @@ import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.Filter;
 import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
@@ -88,7 +89,7 @@ import org.junit.platform.launcher.listeners.discovery.LauncherDiscoveryListener
  * @since 1.0
  * @see org.junit.platform.engine.discovery.DiscoverySelectors
  * @see org.junit.platform.engine.discovery.ClassNameFilter
- * @see org.junit.platform.launcher.EngineFilter
+ * @see EngineFilter
  * @see org.junit.platform.launcher.TagFilter
  * @see LauncherExecutionRequestBuilder
  */
@@ -310,7 +311,7 @@ public final class LauncherDiscoveryRequestBuilder {
 
 	/**
 	 * Set the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} to use for the request.
+	 * {@link OutputDirectoryProvider} to use for the request.
 	 *
 	 * <p>If not specified, a default provider will be used that can be
 	 * configured via the {@value LauncherConstants#OUTPUT_DIR_PROPERTY_NAME}
@@ -320,7 +321,7 @@ public final class LauncherDiscoveryRequestBuilder {
 	 *                                never {@code null}
 	 * @return this builder for method chaining
 	 * @since 1.12
-	 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
+	 * @see OutputDirectoryProvider
 	 * @see LauncherConstants#OUTPUT_DIR_PROPERTY_NAME
 	 * @deprecated Please use
 	 * {@link #outputDirectoryCreator(OutputDirectoryCreator)} instead
@@ -328,8 +329,7 @@ public final class LauncherDiscoveryRequestBuilder {
 	@SuppressWarnings("removal")
 	@API(status = DEPRECATED, since = "1.14")
 	@Deprecated(since = "1.14", forRemoval = true)
-	public LauncherDiscoveryRequestBuilder outputDirectoryProvider(
-			org.junit.platform.engine.reporting.OutputDirectoryProvider outputDirectoryProvider) {
+	public LauncherDiscoveryRequestBuilder outputDirectoryProvider(OutputDirectoryProvider outputDirectoryProvider) {
 		return outputDirectoryCreator(outputDirectoryProvider);
 	}
 

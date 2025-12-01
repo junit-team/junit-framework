@@ -26,7 +26,7 @@ import org.junit.platform.engine.support.descriptor.MethodSource;
  * Prunes the stack trace in case of a failed event.
  *
  * @since 1.10
- * @see org.junit.platform.commons.util.ExceptionUtils#pruneStackTrace(Throwable, List)
+ * @see ExceptionUtils#pruneStackTrace(Throwable, List)
  */
 class StackTracePruningEngineExecutionListener extends DelegatingEngineExecutionListener {
 

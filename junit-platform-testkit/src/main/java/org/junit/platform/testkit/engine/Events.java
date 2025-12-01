@@ -351,11 +351,11 @@ public final class Events {
 	 * Shortcut for {@code org.assertj.core.api.Assertions.assertThat(events.list())}.
 	 *
 	 * @return an instance of {@link ListAssert} for events; never {@code null}
-	 * @see org.assertj.core.api.Assertions#assertThat(List)
-	 * @see org.assertj.core.api.ListAssert
+	 * @see Assertions#assertThat(List)
+	 * @see ListAssert
 	 */
 	public ListAssert<Event> assertThatEvents() {
-		return org.assertj.core.api.Assertions.assertThat(list());
+		return Assertions.assertThat(list());
 	}
 
 	// --- Diagnostics ---------------------------------------------------------

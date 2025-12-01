@@ -30,7 +30,7 @@ import org.junit.platform.commons.JUnitException;
  * {@link org.junit.jupiter.params.Parameter @Parameter}-annotated field of a
  * {@link org.junit.jupiter.params.ParameterizedClass @ParameterizedClass} with
  * the help of a
- * {@link org.junit.jupiter.params.converter.ConvertWith @ConvertWith}
+ * {@link ConvertWith @ConvertWith}
  * annotation.
  *
  * <p>Implementations must provide a no-args constructor or a single unambiguous
@@ -49,7 +49,7 @@ import org.junit.platform.commons.JUnitException;
  *
  * @since 5.0
  * @see org.junit.jupiter.params.ParameterizedTest
- * @see org.junit.jupiter.params.converter.ConvertWith
+ * @see ConvertWith
  * @see org.junit.jupiter.params.support.AnnotationConsumer
  * @see SimpleArgumentConverter
  * @see TypedArgumentConverter

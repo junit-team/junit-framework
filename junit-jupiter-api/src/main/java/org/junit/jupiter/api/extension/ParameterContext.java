@@ -32,8 +32,8 @@ import org.apiguardian.api.API;
  *
  * @since 5.0
  * @see ParameterResolver
- * @see java.lang.reflect.Parameter
- * @see java.lang.reflect.Executable
+ * @see Parameter
+ * @see Executable
  * @see java.lang.reflect.Method
  * @see java.lang.reflect.Constructor
  */

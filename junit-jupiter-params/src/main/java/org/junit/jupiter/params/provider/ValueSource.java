@@ -40,7 +40,7 @@ import org.apiguardian.api.API;
  * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.0
- * @see org.junit.jupiter.params.provider.ArgumentsSource
+ * @see ArgumentsSource
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
  */

@@ -17,14 +17,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 // end::user_guide[]
 // Use fully qualified names to avoid having them show up in the imports.
-@org.junit.jupiter.api.parallel.Execution(org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD)
+@Execution(ExecutionMode.SAME_THREAD)
 // tag::user_guide[]
 class RepeatedTestsDemo {
 
@@ -54,7 +57,7 @@ class RepeatedTestsDemo {
 
 	// end::user_guide[]
 	// Use fully qualified name to avoid having it show up in the imports.
-	@org.junit.jupiter.api.Disabled("intentional failures would break the build")
+	@Disabled("intentional failures would break the build")
 	// tag::user_guide[]
 	@RepeatedTest(value = 8, failureThreshold = 2)
 	void repeatedTestWithFailureThreshold(RepetitionInfo repetitionInfo) {

@@ -113,13 +113,13 @@ public @interface TestInstance {
 		 * <h4>Supported Values</h4>
 		 *
 		 * <p>Supported values include names of enum constants defined in
-		 * {@link org.junit.jupiter.api.TestInstance.Lifecycle}, ignoring case.
+		 * {@link TestInstance.Lifecycle}, ignoring case.
 		 *
 		 * <p>If not specified, the default is "per_method" which corresponds to
 		 * {@code @TestInstance(Lifecycle.PER_METHOD)}.
 		 *
 		 * @since 5.0
-		 * @see org.junit.jupiter.api.TestInstance
+		 * @see TestInstance
 		 */
 		@API(status = STABLE, since = "5.9")
 		public static final String DEFAULT_LIFECYCLE_PROPERTY_NAME = "junit.jupiter.testinstance.lifecycle.default";

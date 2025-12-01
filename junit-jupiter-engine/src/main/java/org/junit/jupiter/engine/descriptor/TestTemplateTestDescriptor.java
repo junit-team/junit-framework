@@ -32,7 +32,7 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 
 /**
- * {@link TestDescriptor} for {@link org.junit.jupiter.api.TestTemplate @TestTemplate}
+ * {@link TestDescriptor} for {@link TestTemplate @TestTemplate}
  * methods.
  *
  * @since 5.0

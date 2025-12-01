@@ -54,7 +54,7 @@ public final class FileSelector implements DiscoverySelector {
 	}
 
 	/**
-	 * Get the selected file as a {@link java.io.File}.
+	 * Get the selected file as a {@link File}.
 	 *
 	 * @see #getPath()
 	 * @see #getRawPath()
@@ -64,7 +64,7 @@ public final class FileSelector implements DiscoverySelector {
 	}
 
 	/**
-	 * Get the selected file as a {@link java.nio.file.Path} using the
+	 * Get the selected file as a {@link Path} using the
 	 * {@linkplain FileSystems#getDefault default} {@link FileSystem}.
 	 *
 	 * @see #getFile()

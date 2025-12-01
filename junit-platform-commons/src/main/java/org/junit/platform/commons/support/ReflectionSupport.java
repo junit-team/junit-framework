@@ -609,7 +609,7 @@ public final class ReflectionSupport {
 	 * {@code ClassLoader}, which allows parameter types to be resolved in different
 	 * {@code ClassLoader} arrangements.
 	 *
-	 * <p>The algorithm does not search for methods in {@link java.lang.Object}.
+	 * <p>The algorithm does not search for methods in {@link Object}.
 	 *
 	 * @param clazz the class or interface in which to find the method; never {@code null}
 	 * @param methodName the name of the method to find; never {@code null} or empty
@@ -629,7 +629,7 @@ public final class ReflectionSupport {
 	 * interface and traversing up the type hierarchy until such a method is
 	 * found or the type hierarchy is exhausted.
 	 *
-	 * <p>The algorithm does not search for methods in {@link java.lang.Object}.
+	 * <p>The algorithm does not search for methods in {@link Object}.
 	 *
 	 * @param clazz the class or interface in which to find the method; never {@code null}
 	 * @param methodName the name of the method to find; never {@code null} or empty

@@ -38,8 +38,8 @@ import org.junit.platform.commons.JUnitException;
  * @since 5.0
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
- * @see org.junit.jupiter.params.provider.ArgumentsSource
- * @see org.junit.jupiter.params.provider.Arguments
+ * @see ArgumentsSource
+ * @see Arguments
  * @see org.junit.jupiter.params.support.AnnotationConsumer
  */
 @API(status = STABLE, since = "5.7")

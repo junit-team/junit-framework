@@ -82,7 +82,7 @@ class EnumArgumentsProviderTests {
 
 	@Test
 	void providesEnumConstantsBasedOnTestMethod() {
-		org.junit.jupiter.params.support.ParameterDeclaration firstParameterDeclaration = mock();
+		ParameterDeclaration firstParameterDeclaration = mock();
 		when(firstParameterDeclaration.getParameterType()).thenAnswer(__ -> EnumWithFourConstants.class);
 		when(parameters.getFirst()).thenReturn(Optional.of(firstParameterDeclaration));
 

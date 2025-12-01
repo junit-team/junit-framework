@@ -1720,7 +1720,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		@Parameter(1)
 		String s;
 
-		@org.junit.jupiter.api.Test
+		@Test
 		void test() {
 			fail("should not be called");
 		}

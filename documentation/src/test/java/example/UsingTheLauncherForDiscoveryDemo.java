@@ -16,6 +16,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
 
+import org.junit.jupiter.api.Test;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.TestPlan;
@@ -27,7 +28,7 @@ import org.junit.platform.launcher.core.LauncherFactory;
  */
 class UsingTheLauncherForDiscoveryDemo {
 
-	@org.junit.jupiter.api.Test
+	@Test
 	@SuppressWarnings("unused")
 	void discovery() {
 		// @formatter:off

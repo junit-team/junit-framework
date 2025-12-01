@@ -50,7 +50,7 @@ public interface ExtensionRegistrar {
 	 * {@code source} and the {@code extension} should be the same object.
 	 * However, if an extension is registered <em>programmatically</em> via
 	 * {@link RegisterExtension @RegisterExtension}, the {@code source} object
-	 * should be the {@link java.lang.reflect.Field} that is annotated with
+	 * should be the {@link Field} that is annotated with
 	 * {@code @RegisterExtension}. Similarly, if an extension is registered
 	 * <em>programmatically</em> as a lambda expression or method reference, the
 	 * {@code source} object should be the underlying

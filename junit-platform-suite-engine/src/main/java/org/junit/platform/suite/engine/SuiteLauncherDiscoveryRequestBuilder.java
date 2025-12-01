@@ -71,10 +71,10 @@ import org.junit.platform.suite.api.SelectUris;
  * suite execution.
  *
  * @since 1.8 (originally in junit-platform-suite-commons)
- * @see org.junit.platform.engine.discovery.DiscoverySelectors
- * @see org.junit.platform.engine.discovery.ClassNameFilter
- * @see org.junit.platform.launcher.EngineFilter
- * @see org.junit.platform.launcher.TagFilter
+ * @see DiscoverySelectors
+ * @see ClassNameFilter
+ * @see EngineFilter
+ * @see TagFilter
  */
 final class SuiteLauncherDiscoveryRequestBuilder {
 

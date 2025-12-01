@@ -40,7 +40,7 @@ public class LoggingListener implements TestExecutionListener {
 
 	/**
 	 * Create a {@code LoggingListener} which delegates to a
-	 * {@link java.util.logging.Logger} using a log level of
+	 * {@link Logger} using a log level of
 	 * {@link Level#FINE FINE}.
 	 *
 	 * @see #forJavaUtilLogging(Level)
@@ -52,7 +52,7 @@ public class LoggingListener implements TestExecutionListener {
 
 	/**
 	 * Create a {@code LoggingListener} which delegates to a
-	 * {@link java.util.logging.Logger} using the supplied
+	 * {@link Logger} using the supplied
 	 * {@linkplain Level log level}.
 	 *
 	 * @param logLevel the log level to use; never {@code null}

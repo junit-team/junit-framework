@@ -8,12 +8,15 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import org.junit.platform.engine.TestEngine;
+import org.junit.platform.suite.engine.SuiteTestEngine;
+
 /**
- * Provides a {@link org.junit.platform.engine.TestEngine} for running
+ * Provides a {@link TestEngine} for running
  * declarative test suites.
  *
  * @since 1.8
- * @provides org.junit.platform.engine.TestEngine
+ * @provides TestEngine
  */
 module org.junit.platform.suite.engine {
 
@@ -25,6 +28,6 @@ module org.junit.platform.suite.engine {
 	requires org.junit.platform.engine;
 	requires org.junit.platform.launcher;
 
-	provides org.junit.platform.engine.TestEngine
-			with org.junit.platform.suite.engine.SuiteTestEngine;
+	provides TestEngine
+			with SuiteTestEngine;
 }

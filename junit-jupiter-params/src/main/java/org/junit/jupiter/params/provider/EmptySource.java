@@ -32,7 +32,7 @@ import org.apiguardian.api.API;
  * parameter types.
  *
  * <ul>
- * <li>{@link java.lang.String}</li>
+ * <li>{@link String}</li>
  * <li>{@link java.util.Collection} and concrete subtypes with a public no-arg constructor</li>
  * <li>{@link java.util.List}</li>
  * <li>{@link java.util.Set}</li>
@@ -50,7 +50,7 @@ import org.apiguardian.api.API;
  * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.4
- * @see org.junit.jupiter.params.provider.ArgumentsSource
+ * @see ArgumentsSource
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
  * @see NullSource

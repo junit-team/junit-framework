@@ -44,7 +44,7 @@ record DefaultResource(String name, URI uri) implements Resource {
 		if (obj == this) {
 			return true;
 		}
-		if (obj instanceof org.junit.platform.commons.io.Resource that) {
+		if (obj instanceof Resource that) {
 			return this.name.equals(that.getName()) //
 					&& this.uri.equals(that.getUri());
 		}

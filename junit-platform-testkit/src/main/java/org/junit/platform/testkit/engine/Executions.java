@@ -181,7 +181,7 @@ public final class Executions {
 	 *
 	 * @return an instance of {@link ListAssert} for executions; never {@code null}
 	 * @see org.assertj.core.api.Assertions#assertThat(List)
-	 * @see org.assertj.core.api.ListAssert
+	 * @see ListAssert
 	 */
 	public ListAssert<Execution> assertThatExecutions() {
 		return org.assertj.core.api.Assertions.assertThat(list());

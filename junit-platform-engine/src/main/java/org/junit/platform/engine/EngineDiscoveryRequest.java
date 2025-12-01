@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 /**
  * {@code EngineDiscoveryRequest} provides a {@link TestEngine} access to the
@@ -87,7 +88,7 @@ public interface EngineDiscoveryRequest {
 
 	/**
 	 * Get the
-	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
+	 * {@link OutputDirectoryProvider} for
 	 * this request.
 	 *
 	 * @return the output directory provider; never {@code null}
@@ -97,8 +98,8 @@ public interface EngineDiscoveryRequest {
 	@SuppressWarnings("removal")
 	@Deprecated(since = "1.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "1.14")
-	default org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
-		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
+	default OutputDirectoryProvider getOutputDirectoryProvider() {
+		return OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
 	}
 
 	/**

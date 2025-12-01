@@ -8,6 +8,11 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.reporting.open.xml.JUnitContributor;
+import org.junit.platform.reporting.open.xml.OpenTestReportGeneratingListener;
+import org.opentest4j.reporting.tooling.spi.htmlreport.Contributor;
+
 /**
  * Defines the JUnit Platform Reporting API.
  *
@@ -29,9 +34,9 @@ module org.junit.platform.reporting {
 	exports org.junit.platform.reporting.legacy.xml;
 	exports org.junit.platform.reporting.open.xml;
 
-	provides org.junit.platform.launcher.TestExecutionListener
-			with org.junit.platform.reporting.open.xml.OpenTestReportGeneratingListener;
+	provides TestExecutionListener
+			with OpenTestReportGeneratingListener;
 
-	provides org.opentest4j.reporting.tooling.spi.htmlreport.Contributor
-			with org.junit.platform.reporting.open.xml.JUnitContributor;
+	provides Contributor
+			with JUnitContributor;
 }

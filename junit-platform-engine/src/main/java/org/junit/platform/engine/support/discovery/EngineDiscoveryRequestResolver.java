@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.io.ResourceFilter;
+import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.EngineDiscoveryRequest;
@@ -233,11 +234,9 @@ public class EngineDiscoveryRequestResolver<T extends TestDescriptor> {
 		@API(status = DEPRECATED, since = "1.14")
 		@Deprecated(since = "1.14", forRemoval = true)
 		@SuppressWarnings("removal")
-		public Builder<T> addResourceContainerSelectorResolver(
-				Predicate<org.junit.platform.commons.support.Resource> resourceFilter) {
+		public Builder<T> addResourceContainerSelectorResolver(Predicate<Resource> resourceFilter) {
 			Preconditions.notNull(resourceFilter, "resourceFilter must not be null");
-			return addResourceContainerSelectorResolver(
-				ResourceFilter.of(r -> resourceFilter.test(org.junit.platform.commons.support.Resource.of(r))));
+			return addResourceContainerSelectorResolver(ResourceFilter.of(r -> resourceFilter.test(Resource.of(r))));
 		}
 
 		/**

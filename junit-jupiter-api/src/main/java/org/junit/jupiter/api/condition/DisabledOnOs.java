@@ -63,19 +63,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *
  * @since 5.1
  * @see OS
- * @see org.junit.jupiter.api.condition.EnabledIf
- * @see org.junit.jupiter.api.condition.DisabledIf
- * @see org.junit.jupiter.api.condition.EnabledOnOs
- * @see org.junit.jupiter.api.condition.EnabledOnJre
- * @see org.junit.jupiter.api.condition.DisabledOnJre
- * @see org.junit.jupiter.api.condition.EnabledForJreRange
- * @see org.junit.jupiter.api.condition.DisabledForJreRange
- * @see org.junit.jupiter.api.condition.EnabledInNativeImage
- * @see org.junit.jupiter.api.condition.DisabledInNativeImage
- * @see org.junit.jupiter.api.condition.EnabledIfSystemProperty
- * @see org.junit.jupiter.api.condition.DisabledIfSystemProperty
- * @see org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
- * @see org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
+ * @see EnabledIf
+ * @see DisabledIf
+ * @see EnabledOnOs
+ * @see EnabledOnJre
+ * @see DisabledOnJre
+ * @see EnabledForJreRange
+ * @see DisabledForJreRange
+ * @see EnabledInNativeImage
+ * @see DisabledInNativeImage
+ * @see EnabledIfSystemProperty
+ * @see DisabledIfSystemProperty
+ * @see EnabledIfEnvironmentVariable
+ * @see DisabledIfEnvironmentVariable
  * @see org.junit.jupiter.api.Disabled
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })

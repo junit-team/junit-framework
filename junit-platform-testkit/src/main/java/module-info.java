@@ -8,11 +8,13 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+import org.junit.platform.engine.TestEngine;
+
 /**
  * Defines the Test Kit API for the JUnit Platform.
  *
  * @since 1.4
- * @uses org.junit.platform.engine.TestEngine
+ * @uses TestEngine
  */
 module org.junit.platform.testkit {
 
@@ -28,5 +30,5 @@ module org.junit.platform.testkit {
 	// exports org.junit.platform.testkit; empty package
 	exports org.junit.platform.testkit.engine;
 
-	uses org.junit.platform.engine.TestEngine;
+	uses TestEngine;
 }

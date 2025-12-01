@@ -41,6 +41,7 @@ import org.junit.platform.engine.Filter;
 import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestEngine;
+import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -143,7 +144,7 @@ public final class EngineTestKit {
 	 * mechanism, analogous to the manner in which test engines are loaded in
 	 * the JUnit Platform Launcher API.
 	 *
-	 * <p>{@link org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder}
+	 * <p>{@link LauncherDiscoveryRequestBuilder}
 	 * provides a convenient way to build an appropriate discovery request to
 	 * supply to this method. As an alternative, consider using
 	 * {@link #engine(TestEngine)} for a more fluent API.
@@ -169,7 +170,7 @@ public final class EngineTestKit {
 	 * Discover tests for the given {@link LauncherDiscoveryRequest} using the
 	 * supplied {@link TestEngine}.
 	 *
-	 * <p>{@link org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder}
+	 * <p>{@link LauncherDiscoveryRequestBuilder}
 	 * provides a convenient way to build an appropriate discovery request to
 	 * supply to this method. As an alternative, consider using
 	 * {@link #engine(TestEngine)} for a more fluent API.
@@ -202,7 +203,7 @@ public final class EngineTestKit {
 	 * mechanism, analogous to the manner in which test engines are loaded in
 	 * the JUnit Platform Launcher API.
 	 *
-	 * <p>{@link org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder}
+	 * <p>{@link LauncherDiscoveryRequestBuilder}
 	 * provides a convenient way to build an appropriate discovery request to
 	 * supply to this method. As an alternative, consider using
 	 * {@link #engine(TestEngine)} for a more fluent API.
@@ -227,7 +228,7 @@ public final class EngineTestKit {
 	 * Execute tests for the given {@link LauncherDiscoveryRequest} using the
 	 * supplied {@link TestEngine}.
 	 *
-	 * <p>{@link org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder}
+	 * <p>{@link LauncherDiscoveryRequestBuilder}
 	 * provides a convenient way to build an appropriate discovery request to
 	 * supply to this method. As an alternative, consider using
 	 * {@link #engine(TestEngine)} for a more fluent API.
@@ -443,7 +444,7 @@ public final class EngineTestKit {
 
 		/**
 		 * Set the
-		 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider}
+		 * {@link OutputDirectoryProvider}
 		 * to use.
 		 *
 		 * <p>If not specified, a default provider will be used that throws an
@@ -454,15 +455,14 @@ public final class EngineTestKit {
 		 * never {@code null}
 		 * @return this builder for method chaining
 		 * @since 1.12
-		 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
+		 * @see OutputDirectoryProvider
 		 * @deprecated Please use
 		 * {@link #outputDirectoryCreator(OutputDirectoryCreator)} instead
 		 */
 		@SuppressWarnings("removal")
 		@Deprecated(since = "1.14", forRemoval = true)
 		@API(status = DEPRECATED, since = "1.14")
-		public Builder outputDirectoryProvider(
-				org.junit.platform.engine.reporting.OutputDirectoryProvider outputDirectoryProvider) {
+		public Builder outputDirectoryProvider(OutputDirectoryProvider outputDirectoryProvider) {
 			return outputDirectoryCreator(outputDirectoryProvider);
 		}
 

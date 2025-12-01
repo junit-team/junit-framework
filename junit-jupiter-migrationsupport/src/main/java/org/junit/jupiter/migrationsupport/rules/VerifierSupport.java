@@ -33,7 +33,7 @@ import org.junit.rules.Verifier;
  * of the rule-based model of JUnit 4.
  *
  * @since 5.0
- * @see org.junit.rules.Verifier
+ * @see Verifier
  * @see org.junit.rules.TestRule
  * @see org.junit.Rule
  * @deprecated Please implement {@link org.junit.jupiter.api.extension.AfterTestExecutionCallback} instead.

@@ -27,7 +27,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.TestSource;
 
 /**
- * Method based {@link org.junit.platform.engine.TestSource TestSource}.
+ * Method based {@link TestSource TestSource}.
  *
  * <p>This class stores the method name along with the names of its parameter
  * types because {@link Method} does not implement {@link java.io.Serializable}.

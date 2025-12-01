@@ -20,7 +20,7 @@ import org.apiguardian.api.API;
  *
  * <p>For example, this is used by the
  * {@link org.junit.platform.launcher.Launcher} and
- * {@link org.junit.platform.engine.TestEngine} implementations to determine
+ * {@link TestEngine} implementations to determine
  * whether the current test execution should be cancelled.
  *
  * <p>This interface is not intended to be implemented by clients.
