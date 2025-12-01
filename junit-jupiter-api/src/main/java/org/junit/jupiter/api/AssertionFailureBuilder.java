@@ -142,8 +142,8 @@ public class AssertionFailureBuilder {
 	/**
 	 * Set target to trim the stacktrace to.
 	 *
-	 * <p>Unless {@link #retainStackTraceElements(int)} is set all frames
-	 * before the last frame from {@code target} are trimmed.
+	 * <p>Unless {@link #retainStackTraceElements(int)} is set all stacktrace
+	 * elements before the last element from {@code target} are trimmed.
 	 *
 	 * @param target class to trim from the stacktrace
 	 * @return this builder for method chaining
@@ -159,9 +159,10 @@ public class AssertionFailureBuilder {
 	 * {@value #DEFAULT_RETAIN_STACKTRACE_ELEMENTS}.
 	 *
 	 * <p>If {@link #trimStacktrace(Class)} was set, all but
-	 * {@code retainStackTraceElements - 1} frames before the last frame from
-	 * {@code target} are removed. If {@code retainStackTraceElements} is zero,
-	 * all frames including {@code target} are trimmed.
+	 * {@code retainStackTraceElements - 1} stacktrace elements before the last
+	 * element from {@code target} are removed. If
+	 * {@code retainStackTraceElements} is zero, all elements including those
+	 * from {@code target} are trimmed.
 	 *
 	 * @param retainStackTraceElements depth of trimming, must be non-negative
 	 * @return this builder for method chaining
