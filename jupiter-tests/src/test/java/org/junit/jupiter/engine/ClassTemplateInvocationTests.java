@@ -96,6 +96,7 @@ import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.hierarchical.ExclusiveResource;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.opentest4j.AssertionFailedError;
 import org.opentest4j.TestAbortedException;
@@ -1003,6 +1004,16 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		var engineDescriptor = discoverTestsWithoutIssues(request);
 
 		assertThat(engineDescriptor.getDescendants()).isEmpty();
+	}
+
+	@Test
+	void classTemplateWithResourceLockCollectsExclusiveResources() {
+		var results = discoverTestsForClass(ClassTemplateWithResourceLockTestCase.class);
+		var classTemplateDescriptor = (ClassTemplateTestDescriptor) getOnlyElement(
+			results.getEngineDescriptor().getChildren());
+
+		assertThat(classTemplateDescriptor.getExclusiveResources()).extracting(
+			ExclusiveResource::getKey).containsExactly("test-resource");
 	}
 
 	@Test
