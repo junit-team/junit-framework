@@ -279,7 +279,8 @@ class AssertNotEquals {
 		assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("expected: not equal but was: <" + actual + ">") //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 

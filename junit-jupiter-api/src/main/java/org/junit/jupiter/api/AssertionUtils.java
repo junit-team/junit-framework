@@ -35,7 +35,8 @@ class AssertionUtils {
 	@Contract(" -> fail")
 	static void fail() {
 		throw assertionFailure() //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -43,7 +44,8 @@ class AssertionUtils {
 	static void fail(@Nullable String message) {
 		throw assertionFailure() //
 				.message(message) //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -52,7 +54,8 @@ class AssertionUtils {
 		throw assertionFailure() //
 				.message(message) //
 				.cause(cause) //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -60,7 +63,8 @@ class AssertionUtils {
 	static void fail(@Nullable Throwable cause) {
 		throw assertionFailure() //
 				.cause(cause) //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -68,7 +72,8 @@ class AssertionUtils {
 	static void fail(Supplier<@Nullable String> messageSupplier) {
 		throw assertionFailure() //
 				.message(nullSafeGet(messageSupplier)) //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.build();
 	}
 

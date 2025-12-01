@@ -46,7 +46,9 @@ repository on GitHub.
 ==== New Features and Improvements
 
 * Trim internal stack frames from `AssertionFailedError` stack traces.
-* Introduce new `trimStacktrace(Class<?>, int)` method for `AssertionFailureBuilder`. It allows user defined assertions to trim their stacktrace.
+* Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
+  methods for `AssertionFailureBuilder`. It allows user defined assertions to
+  trim their stacktrace.
 
 [[release-notes-6.1.0-M2-junit-vintage]]
 === JUnit Vintage

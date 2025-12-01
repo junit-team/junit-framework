@@ -49,7 +49,8 @@ class AssertNotSame {
 		assertionFailure() //
 				.message(messageOrSupplier) //
 				.reason("expected: not same but was: <" + actual + ">") //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 

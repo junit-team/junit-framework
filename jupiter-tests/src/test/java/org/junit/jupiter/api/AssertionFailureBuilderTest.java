@@ -94,8 +94,8 @@ class AssertionFailureBuilderTest {
 	@Test
 	void mustRetainNonNegativeNumberOfFrames() {
 		var exception = assertThrows(PreconditionViolationException.class, //
-			() -> assertionFailure().trimStacktrace(Assertions.class, -1));
-		assertThat(exception).hasMessage("retain must have a non-negative value");
+			() -> assertionFailure().retainStackTraceElements(-1));
+		assertThat(exception).hasMessage("retainStackTraceElements must have a non-negative value");
 	}
 
 	private static void assertStackTraceMatch(AssertionFailedError assertionFailedError, String expectedLines) {
@@ -111,7 +111,10 @@ class AssertionFailureBuilderTest {
 		}
 
 		static AssertionFailedError failWithTrimmedStacktrace(Class<?> to, int retain) {
-			return AssertionFailureBuilder.assertionFailure().trimStacktrace(to, retain).build();
+			return AssertionFailureBuilder.assertionFailure() //
+					.trimStacktrace(to) //
+					.retainStackTraceElements(retain) //
+					.build();
 		}
 
 	}

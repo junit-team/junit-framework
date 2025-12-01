@@ -193,7 +193,8 @@ class AssertLinesMatch {
 					.expected(join(newLine, expectedLines)) //
 					.actual(join(newLine, actualLines)) //
 					.includeValuesInMessage(false) //
-					.trimStacktrace(Assertions.class, 1) //
+					.trimStacktrace(Assertions.class) //
+					.retainStackTraceElements(1) //
 					.buildAndThrow();
 		}
 	}

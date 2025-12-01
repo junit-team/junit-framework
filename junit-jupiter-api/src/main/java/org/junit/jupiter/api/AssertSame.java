@@ -51,7 +51,8 @@ class AssertSame {
 				.message(messageOrSupplier) //
 				.expected(expected) //
 				.actual(actual) //
-				.trimStacktrace(Assertions.class, 1) //
+				.trimStacktrace(Assertions.class) //
+				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 

@@ -51,7 +51,7 @@ public class AssertionFailureBuilder {
 
 	private @Nullable Class<?> trimStackTraceTarget;
 
-	private int trimStackTraceRetain;
+	private int retainStackTraceElements;
 
 	/**
 	 * Create a new {@code AssertionFailureBuilder}.
@@ -138,21 +138,36 @@ public class AssertionFailureBuilder {
 	}
 
 	/**
-	 * Set target and depth for trimming stacktrace.
+	 * Set target to trim the stacktrace to.
 	 *
-	 * <p>Removes all but {@code retain - 1} frames before the last frame from
-	 * {@code target}. If {@code retain} is zero, all frames including
-	 * {@code target} are trimmed.
+	 * <p>Unless {@link #retainStackTraceElements(int)} is set to a non-zero
+	 * value all frames including those from {@code target} are trimmed.
 	 *
 	 * @param target class to trim from the stacktrace
-	 * @param retain depth of trimming, must be non-negative
 	 * @return this builder for method chaining
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> target, int retain) {
-		Preconditions.condition(retain >= 0, "retain must have a non-negative value");
+	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> target) {
 		this.trimStackTraceTarget = target;
-		this.trimStackTraceRetain = retain;
+		return this;
+	}
+
+	/**
+	 * Set depth to trim the stacktrace to.
+	 *
+	 * <p>If {@link #trimStacktrace(Class)} was set, all but
+	 * {@code retainStackTraceElements - 1} frames before the last frame from
+	 * {@code target} are removed. If {@code retainStackTraceElements} is zero,
+	 * all frames including {@code target} are trimmed.
+	 *
+	 * @param retainStackTraceElements depth of trimming, must be non-negative
+	 * @return this builder for method chaining
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public AssertionFailureBuilder retainStackTraceElements(int retainStackTraceElements) {
+		Preconditions.condition(retainStackTraceElements >= 0,
+			"retainStackTraceElements must have a non-negative value");
+		this.retainStackTraceElements = retainStackTraceElements;
 		return this;
 	}
 
@@ -207,7 +222,7 @@ public class AssertionFailureBuilder {
 		}
 
 		if (lastIndexOf != -1) {
-			int from = clamp0(lastIndexOf + 1 - trimStackTraceRetain, stackTrace.length);
+			int from = clamp0(lastIndexOf + 1 - retainStackTraceElements, stackTrace.length);
 			var trimmed = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
 			throwable.setStackTrace(trimmed);
 		}
