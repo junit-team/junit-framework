@@ -484,7 +484,6 @@ class AssertArrayEquals {
 				.message(messageOrSupplier) //
 				.reason("expected array was <null>" + formatIndexes(indexes)) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -498,7 +497,6 @@ class AssertArrayEquals {
 				.message(messageOrSupplier) //
 				.reason("actual array was <null>" + formatIndexes(indexes)) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -512,7 +510,6 @@ class AssertArrayEquals {
 					.expected(expected) //
 					.actual(actual) //
 					.trimStacktrace(Assertions.class) //
-					.retainStackTraceElements(1) //
 					.buildAndThrow();
 		}
 	}
@@ -526,7 +523,6 @@ class AssertArrayEquals {
 				.expected(expected) //
 				.actual(actual) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 

@@ -54,7 +54,6 @@ class AssertNull {
 				.expected(null) //
 				.actual(actual) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 

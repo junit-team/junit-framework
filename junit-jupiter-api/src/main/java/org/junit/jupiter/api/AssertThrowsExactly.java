@@ -66,7 +66,6 @@ class AssertThrowsExactly {
 						.reason("Unexpected exception type thrown") //
 						.cause(actualException) //
 						.trimStacktrace(Assertions.class) //
-						.retainStackTraceElements(1) //
 						.build();
 			}
 		}
@@ -75,7 +74,6 @@ class AssertThrowsExactly {
 				.message(messageOrSupplier) //
 				.reason("Expected %s to be thrown, but nothing was thrown.".formatted(getCanonicalName(expectedType))) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 

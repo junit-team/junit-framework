@@ -83,7 +83,6 @@ class AssertTimeout {
 					.reason("execution exceeded timeout of " + timeoutInMillis + " ms by "
 							+ (timeElapsed - timeoutInMillis) + " ms") //
 					.trimStacktrace(Assertions.class) //
-					.retainStackTraceElements(1) //
 					.buildAndThrow();
 		}
 		return result;

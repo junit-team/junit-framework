@@ -36,7 +36,6 @@ class AssertionUtils {
 	static void fail() {
 		throw assertionFailure() //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -45,7 +44,6 @@ class AssertionUtils {
 		throw assertionFailure() //
 				.message(message) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -55,7 +53,6 @@ class AssertionUtils {
 				.message(message) //
 				.cause(cause) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -64,7 +61,6 @@ class AssertionUtils {
 		throw assertionFailure() //
 				.cause(cause) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 
@@ -73,7 +69,6 @@ class AssertionUtils {
 		throw assertionFailure() //
 				.message(nullSafeGet(messageSupplier)) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 

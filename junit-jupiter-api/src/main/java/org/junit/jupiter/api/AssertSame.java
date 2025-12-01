@@ -52,7 +52,6 @@ class AssertSame {
 				.expected(expected) //
 				.actual(actual) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 

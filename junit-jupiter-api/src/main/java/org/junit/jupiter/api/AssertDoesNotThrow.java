@@ -88,7 +88,6 @@ class AssertDoesNotThrow {
 				.reason("Unexpected exception thrown: " + t.getClass().getName() + buildSuffix(t.getMessage())) //
 				.cause(t) //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.build();
 	}
 

@@ -35,6 +35,8 @@ import org.opentest4j.AssertionFailedError;
 @API(status = STABLE, since = "5.9")
 public class AssertionFailureBuilder {
 
+	private static final int DEFAULT_RETAIN_STACKTRACE_ELEMENTS = 1;
+
 	private @Nullable Object message;
 
 	private @Nullable Throwable cause;
@@ -51,7 +53,7 @@ public class AssertionFailureBuilder {
 
 	private @Nullable Class<?> trimStackTraceTarget;
 
-	private int retainStackTraceElements;
+	private int retainStackTraceElements = DEFAULT_RETAIN_STACKTRACE_ELEMENTS;
 
 	/**
 	 * Create a new {@code AssertionFailureBuilder}.
@@ -140,8 +142,8 @@ public class AssertionFailureBuilder {
 	/**
 	 * Set target to trim the stacktrace to.
 	 *
-	 * <p>Unless {@link #retainStackTraceElements(int)} is set to a non-zero
-	 * value all frames including those from {@code target} are trimmed.
+	 * <p>Unless {@link #retainStackTraceElements(int)} is set all frames
+	 * before the last frame from {@code target} are trimmed.
 	 *
 	 * @param target class to trim from the stacktrace
 	 * @return this builder for method chaining
@@ -153,7 +155,8 @@ public class AssertionFailureBuilder {
 	}
 
 	/**
-	 * Set depth to trim the stacktrace to.
+	 * Set depth to trim the stacktrace to. Defaults to
+	 * {@value #DEFAULT_RETAIN_STACKTRACE_ELEMENTS}.
 	 *
 	 * <p>If {@link #trimStacktrace(Class)} was set, all but
 	 * {@code retainStackTraceElements - 1} frames before the last frame from

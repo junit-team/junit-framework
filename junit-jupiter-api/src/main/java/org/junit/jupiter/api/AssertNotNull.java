@@ -53,7 +53,6 @@ class AssertNotNull {
 				.message(messageOrSupplier) //
 				.reason("expected: not <null>") //
 				.trimStacktrace(Assertions.class) //
-				.retainStackTraceElements(1) //
 				.buildAndThrow();
 	}
 }
