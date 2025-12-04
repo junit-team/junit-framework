@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -30,10 +31,11 @@ import org.junit.platform.commons.util.Preconditions;
  *
  * @apiNote <p>This interface is specifically designed as a simple holder of
  * arguments for a parameterized test. Therefore, if you end up
- * {@linkplain java.util.stream.Stream#map(java.util.function.Function) transforming} or
+ * {@linkplain java.util.stream.Stream#map(java.util.function.Function) transforming}
+ * or
  * {@linkplain java.util.stream.Stream#filter(java.util.function.Predicate) filtering}
- * the arguments, you should consider using one of the following in intermediate
- * steps:
+ * the arguments, you should consider using one of the following in
+ * intermediate steps:
  *
  * <ul>
  *   <li>The standard Java collections</li>
@@ -62,8 +64,8 @@ public interface Arguments {
 	 * Get the arguments used for an invocation of the
 	 * {@code @ParameterizedTest} method.
 	 *
-	 * @apiNote If you need a type-safe way to access some or all of the arguments,
-	 * please read the {@linkplain Arguments class-level API note}.
+	 * @apiNote If you need a type-safe way to access some or all of the
+	 * arguments, please read the {@linkplain Arguments class-level API note}.
 	 *
 	 * @return the arguments; never {@code null} but may contain {@code null}
 	 */
@@ -108,21 +110,22 @@ public interface Arguments {
 	 * {@code name} and {@code arguments}.
 	 *
 	 * <p>Favor this method over {@link Arguments#of Arguments.of(...)} and
-	 * {@link Arguments#arguments arguments(...)} when you wish to assign a name
-	 * to the entire set of arguments.
+	 * {@link Arguments#arguments arguments(...)} when you wish to assign a
+	 * name to the entire set of arguments.
 	 *
 	 * <p>This method is well suited to be used as a static import &mdash; for
 	 * example, via:
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSet;}.
 	 *
-	 * @param name the name of the argument set; must not be {@code null} or blank
+	 * @param name the name of the argument set; must not be {@code null} or
+	*                blank
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an {@code ArgumentSet}; never {@code null}
 	 * @since 5.11
 	 * @see ArgumentSet
-	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_PLACEHOLDER
-	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
 	static ArgumentSet argumentSet(String name, @Nullable Object... arguments) {
@@ -134,12 +137,12 @@ public interface Arguments {
 	 * the supplied {@link List} of {@code arguments}.
 	 *
 	 * @param arguments the arguments to be used for an invocation of the test
-	 * method; must not be {@code null} but may contain {@code null}.
-	 * @return an instance of {@code Arguments}; never {@code null}.
-	 * @since 6.0
+	 * method; must not be {@code null} but may contain {@code null}
+	 * @return an instance of {@code Arguments}; never {@code null}
+	 * @since 6.1
 	 * @see #argumentsFrom(List)
 	 */
-	@API(status = EXPERIMENTAL, since = "6.0")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	static Arguments from(List<@Nullable Object> arguments) {
 		Preconditions.notNull(arguments, "arguments must not be null");
 		return of(arguments.toArray());
@@ -154,12 +157,12 @@ public interface Arguments {
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentsFrom;}
 	 *
 	 * @param arguments the arguments to be used for an invocation of the test
-	 * method; must not be {@code null} but may contain {@code null}.
-	 * @return an instance of {@code Arguments}; never {@code null}.
-	 * @since 6.0
+	 * method; must not be {@code null} but may contain {@code null}
+	 * @return an instance of {@code Arguments}; never {@code null}
+	 * @since 6.1
 	 * @see #argumentSet(String, Object...)
 	 */
-	@API(status = EXPERIMENTAL, since = "6.0")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	static Arguments argumentsFrom(List<@Nullable Object> arguments) {
 		return from(arguments);
 	}
@@ -173,14 +176,14 @@ public interface Arguments {
 	 * based inputs.
 	 *
 	 * @param name the name of the argument set; must not be {@code null}
-	 * or blank.
+	 * or blank
 	 * @param arguments the arguments to be used for an invocation of the test
-	 * method; must not be {@code null} but may contain {@code null}.
-	 * @return an {@code ArgumentSet}; never {@code null}.
-	 * @since 6.0
+	 * method; must not be {@code null} but may contain {@code null}
+	 * @return an {@code ArgumentSet}; never {@code null}
+	 * @since 6.1
 	 * @see #argumentSet(String, Object...)
 	 */
-	@API(status = EXPERIMENTAL, since = "6.0")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	static ArgumentSet argumentSetFrom(String name, List<@Nullable Object> arguments) {
 		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(arguments, "arguments list must not be null");
@@ -195,10 +198,10 @@ public interface Arguments {
 	 * operations such as filtering, transformation, or assertions.
 	 *
 	 * @return a mutable List of arguments; never {@code null} but may contain
-	 * {@code null}.
-	 * @since 6.0
+	 * {@code null}
+	 * @since 6.1
 	 */
-	@API(status = EXPERIMENTAL, since = "6.0")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	default List<@Nullable Object> toList() {
 		return new ArrayList<>(Arrays.asList(get()));
 	}
@@ -209,8 +212,8 @@ public interface Arguments {
 	 *
 	 * @since 5.11
 	 * @see Arguments#argumentSet(String, Object...)
-	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_PLACEHOLDER
-	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
 	final class ArgumentSet implements Arguments {
@@ -228,7 +231,8 @@ public interface Arguments {
 
 		/**
 		 * Get the name of this {@code ArgumentSet}.
-		 * @return the name of this {@code ArgumentSet}; never {@code null} or blank
+		 * @return the name of this {@code ArgumentSet}; never {@code null} or
+		 *         blank
 		 */
 		public String getName() {
 			return this.name;
