@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
 
@@ -57,7 +58,7 @@ public class PrefixedConfigurationParameters implements ConfigurationParameters 
 	}
 
 	@Override
-	public <T> Optional<T> get(String key, Function<String, T> transformer) {
+	public <T> Optional<T> get(String key, Function<? super String, ? extends @Nullable T> transformer) {
 		return delegate.get(prefixed(key), transformer);
 	}
 

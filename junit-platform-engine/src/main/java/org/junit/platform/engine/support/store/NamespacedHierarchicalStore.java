@@ -12,11 +12,16 @@ package org.junit.platform.engine.support.store;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
+import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.commons.util.ReflectionUtils.getWrapperType;
 import static org.junit.platform.commons.util.ReflectionUtils.isAssignableTo;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -26,10 +31,8 @@ import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
-import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 
 /**
  * {@code NamespacedHierarchicalStore} is a hierarchical, namespaced key-value store.
@@ -45,18 +48,16 @@ import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
  * @param <N> Namespace type
  * @since 1.10
  */
-@API(status = EXPERIMENTAL, since = "1.10")
+@API(status = MAINTAINED, since = "1.13.3")
 public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 	private final AtomicInteger insertOrderSequence = new AtomicInteger();
 
 	private final ConcurrentMap<CompositeKey<N>, StoredValue> storedValues = new ConcurrentHashMap<>(4);
 
-	@Nullable
-	private final NamespacedHierarchicalStore<N> parentStore;
+	private final @Nullable NamespacedHierarchicalStore<N> parentStore;
 
-	@Nullable
-	private final CloseAction<N> closeAction;
+	private final @Nullable CloseAction<N> closeAction;
 
 	private volatile boolean closed = false;
 
@@ -96,9 +97,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * <p>If this store does not have a parent, an empty {@code Optional} is returned.
 	 *
 	 * @return an {@code Optional} containing the parent store, or an empty {@code Optional} if there is no parent
-	 * @since 5.13
+	 * @since 1.13
 	 */
-	@API(status = EXPERIMENTAL, since = "5.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public Optional<NamespacedHierarchicalStore<N>> getParent() {
 		return Optional.ofNullable(this.parentStore);
 	}
@@ -110,7 +111,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * @since 1.11
 	 * @see #close()
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public boolean isClosed() {
 		return this.closed;
 	}
@@ -131,13 +132,26 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		if (!this.closed) {
 			try {
 				if (this.closeAction != null) {
-					ThrowableCollector throwableCollector = new ThrowableCollector(__ -> false);
+					List<Throwable> failures = new ArrayList<>();
 					this.storedValues.entrySet().stream() //
 							.map(e -> e.getValue().evaluateSafely(e.getKey())) //
 							.filter(it -> it != null && it.value != null) //
 							.sorted(EvaluatedValue.REVERSE_INSERT_ORDER) //
-							.forEach(it -> throwableCollector.execute(() -> it.close(this.closeAction)));
-					throwableCollector.assertEmpty();
+							.forEach(it -> {
+								try {
+									it.close(this.closeAction);
+								}
+								catch (Throwable t) {
+									UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+									failures.add(t);
+								}
+							});
+					if (!failures.isEmpty()) {
+						var iterator = failures.iterator();
+						var throwable = iterator.next();
+						iterator.forEachRemaining(throwable::addSuppressed);
+						throw throwAsUncheckedException(throwable);
+					}
 				}
 			}
 			finally {
@@ -189,8 +203,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * @return the stored value; may be {@code null}
 	 * @throws NamespacedHierarchicalStoreException if this store has already been
 	 * closed
+	 * @deprecated Please use {@link #computeIfAbsent(Object, Object, Function)} instead.
 	 */
-	public <K, V> @Nullable Object getOrComputeIfAbsent(N namespace, K key, Function<K, @Nullable V> defaultCreator) {
+	@Deprecated(since = "6.0")
+	@API(status = DEPRECATED, since = "6.0")
+	public <K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(N namespace, K key,
+			Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
 		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
 		StoredValue storedValue = getStoredValue(compositeKey);
@@ -202,6 +220,45 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				})));
 		}
 		return storedValue.evaluate();
+	}
+
+	/**
+	 * Return the value stored for the supplied namespace and key in this store
+	 * or the parent store, if present and not {@code null}, or call the
+	 * supplied function to compute it.
+	 *
+	 * @param namespace the namespace; never {@code null}
+	 * @param key the key; never {@code null}
+	 * @param defaultCreator the function called with the supplied {@code key}
+	 * to create a new value; never {@code null} and must not return
+	 * {@code null}
+	 * @return the stored value; never {@code null}
+	 * @throws NamespacedHierarchicalStoreException if this store has already been
+	 * closed
+	 * @since 6.0
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
+		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
+		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
+		StoredValue storedValue = getStoredValue(compositeKey);
+		var result = StoredValue.evaluateIfNotNull(storedValue);
+		if (result == null) {
+			StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+				if (StoredValue.evaluateIfNotNull(oldStoredValue) == null) {
+					rejectIfClosed();
+					var computedValue = Preconditions.notNull(defaultCreator.apply(key),
+						"defaultCreator must not return null");
+					return newStoredValue(() -> {
+						rejectIfClosed();
+						return computedValue;
+					});
+				}
+				return oldStoredValue;
+			});
+			return requireNonNull(newStoredValue.evaluate());
+		}
+		return result;
 	}
 
 	/**
@@ -217,12 +274,41 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * @return the stored value; may be {@code null}
 	 * @throws NamespacedHierarchicalStoreException if the stored value cannot
 	 * be cast to the required type, or if this store has already been closed
+	 * @deprecated Please use {@link #computeIfAbsent(Object, Object, Function, Class)} instead.
 	 */
-	public <K, V> @Nullable V getOrComputeIfAbsent(N namespace, K key, Function<K, @Nullable V> defaultCreator,
-			Class<V> requiredType) throws NamespacedHierarchicalStoreException {
+	@Deprecated(since = "6.0")
+	@API(status = DEPRECATED, since = "6.0")
+	public <K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(N namespace, K key,
+			Function<? super K, ? extends V> defaultCreator, Class<V> requiredType)
+			throws NamespacedHierarchicalStoreException {
 
 		Object value = getOrComputeIfAbsent(namespace, key, defaultCreator);
 		return castToRequiredType(key, value, requiredType);
+	}
+
+	/**
+	 * Return the value stored for the supplied namespace and key in this store
+	 * or the parent store, if present and not {@code null}, or call the
+	 * supplied function to compute it and, finally, cast it to the supplied
+	 * required type.
+	 *
+	 * @param namespace the namespace; never {@code null}
+	 * @param key the key; never {@code null}
+	 * @param defaultCreator the function called with the supplied {@code key}
+	 * to create a new value; never {@code null} and must not return
+	 * {@code null}
+	 * @param requiredType the required type of the value; never {@code null}
+	 * @return the stored value; never {@code null}
+	 * @throws NamespacedHierarchicalStoreException if the stored value cannot
+	 * be cast to the required type, or if this store has already been closed
+	 * @since 6.0
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	public <K, V> V computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator,
+			Class<V> requiredType) throws NamespacedHierarchicalStoreException {
+
+		Object value = computeIfAbsent(namespace, key, defaultCreator);
+		return castNonNullToRequiredType(key, value, requiredType);
 	}
 
 	/**
@@ -301,12 +387,16 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> @Nullable T castToRequiredType(Object key, @Nullable Object value, Class<T> requiredType) {
 		Preconditions.notNull(requiredType, "requiredType must not be null");
 		if (value == null) {
 			return null;
 		}
+		return castNonNullToRequiredType(key, value, requiredType);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T, V> T castNonNullToRequiredType(Object key, V value, Class<T> requiredType) {
 		if (isAssignableTo(value, requiredType)) {
 			if (requiredType.isPrimitive()) {
 				return (T) requireNonNull(getWrapperType(requiredType)).cast(value);
@@ -398,7 +488,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				computeValue();
 			}
 			if (this.value instanceof Failure failure) {
-				throw ExceptionUtils.throwAsUncheckedException(failure.throwable);
+				throw throwAsUncheckedException(failure.throwable);
 			}
 			return this.value;
 		}
@@ -428,7 +518,14 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	@FunctionalInterface
 	public interface CloseAction<N> {
 
-		@API(status = EXPERIMENTAL, since = "1.13")
+		/**
+		 * Static factory method for creating a {@link CloseAction} which
+		 * {@linkplain #close(Object, Object, Object) closes} any value that
+		 * implements {@link AutoCloseable}.
+		 *
+		 * @since 6.0
+		 */
+		@API(status = EXPERIMENTAL, since = "6.0")
 		static <N> CloseAction<N> closeAutoCloseables() {
 			return (__, ___, value) -> {
 				if (value instanceof AutoCloseable closeable) {

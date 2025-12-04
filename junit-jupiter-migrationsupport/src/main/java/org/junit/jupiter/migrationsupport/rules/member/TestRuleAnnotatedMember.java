@@ -18,7 +18,7 @@ import org.junit.rules.TestRule;
 /**
  * @since 5.0
  */
-@API(status = INTERNAL, since = "5.0")
+@API(status = INTERNAL, since = "5.1")
 public interface TestRuleAnnotatedMember {
 
 	TestRule getTestRule();

@@ -92,6 +92,7 @@ public class ExclusiveResource {
 	}
 
 	@Override
+	@SuppressWarnings("EqualsGetClass")
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;

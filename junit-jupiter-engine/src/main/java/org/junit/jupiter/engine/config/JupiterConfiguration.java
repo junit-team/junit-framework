@@ -30,7 +30,8 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
 
 /**
  * @since 5.4
@@ -42,6 +43,9 @@ public interface JupiterConfiguration {
 	String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 	String DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME = "junit.jupiter.conditions.deactivate";
 	String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
+	String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
+	String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+			+ ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME;
 	String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 	String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 	String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
@@ -57,7 +61,7 @@ public interface JupiterConfiguration {
 
 	Optional<String> getRawConfigurationParameter(String key);
 
-	<T> Optional<T> getRawConfigurationParameter(String key, Function<String, T> transformer);
+	<T> Optional<T> getRawConfigurationParameter(String key, Function<? super String, ? extends T> transformer);
 
 	boolean isParallelExecutionEnabled();
 
@@ -87,5 +91,5 @@ public interface JupiterConfiguration {
 
 	ExtensionContextScope getDefaultTestInstantiationExtensionContextScope();
 
-	OutputDirectoryProvider getOutputDirectoryProvider();
+	OutputDirectoryCreator getOutputDirectoryCreator();
 }

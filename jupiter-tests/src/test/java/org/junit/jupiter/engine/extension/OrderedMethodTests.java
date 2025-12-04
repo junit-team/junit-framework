@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.MethodOrderer.Random.RANDOM_SEED_PROPERTY_NA
 import static org.junit.jupiter.api.Order.DEFAULT;
 import static org.junit.jupiter.engine.Constants.DEFAULT_PARALLEL_EXECUTION_MODE;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME;
@@ -34,12 +35,14 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.MethodDescriptor;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.MethodOrderer.Default;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.MethodOrderer.Random;
@@ -53,8 +56,12 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.engine.JupiterTestEngine;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.commons.util.ClassUtils;
@@ -62,6 +69,7 @@ import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineDiscoveryResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
@@ -73,7 +81,9 @@ import org.mockito.Mockito;
  *
  * @since 5.4
  */
-class OrderedMethodTests {
+@ParameterizedClass
+@EnumSource(ParallelExecutorServiceType.class)
+record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	private static final Set<String> callSequence = Collections.synchronizedSet(new LinkedHashSet<>());
 	private static final Set<String> threadNames = Collections.synchronizedSet(new LinkedHashSet<>());
@@ -324,6 +334,24 @@ class OrderedMethodTests {
 				.containsSubsequence("test2()", "test4()");// removed item is re-added before ordered item
 	}
 
+	@Test
+	void nestedClassedCanUseDefaultOrder(@TrackLogRecords LogRecordListener logRecords) {
+		executeTestsInParallel(NestedClassWithDefaultOrderTestCase.NestedTests.class, null, Severity.WARNING);
+		assertThat(callSequence).containsExactly("test1()", "test2()", "test3()", "test4()");
+		callSequence.clear();
+
+		executeTestsInParallel(NestedClassWithDefaultOrderTestCase.NestedTests.class, OrderAnnotation.class);
+		assertThat(callSequence).containsExactly("test4()", "test2()", "test1()", "test3()");
+		callSequence.clear();
+
+		executeTestsInParallel(NestedClassWithDefaultOrderTestCase.NestedTests.class, Default.class, Severity.WARNING);
+		assertThat(callSequence).containsExactly("test1()", "test2()", "test3()", "test4()");
+		assertThat(logRecords.stream()) //
+				.filteredOn(it -> it.getLevel().intValue() >= Level.WARNING.intValue()) //
+				.map(LogRecord::getMessage) //
+				.isEmpty();
+	}
+
 	private EngineDiscoveryResults discoverTests(Class<?> testClass,
 			@Nullable Class<? extends MethodOrderer> defaultOrderer) {
 		return testKit(testClass, defaultOrderer, Severity.INFO).discover();
@@ -340,11 +368,13 @@ class OrderedMethodTests {
 				.testEvents();
 	}
 
-	private static EngineTestKit.Builder testKit(Class<?> testClass,
-			@Nullable Class<? extends MethodOrderer> defaultOrderer, Severity criticalSeverity) {
+	private EngineTestKit.Builder testKit(Class<?> testClass, @Nullable Class<? extends MethodOrderer> defaultOrderer,
+			Severity criticalSeverity) {
+
 		var testKit = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //
 				.configurationParameter(DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent") //
+				.configurationParameter(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType.name()) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, criticalSeverity.name());
 		if (defaultOrderer != null) {
 			testKit.configurationParameter(DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME, defaultOrderer.getName());
@@ -374,7 +404,9 @@ class OrderedMethodTests {
 		assertThat(discoveryIssues).extracting(DiscoveryIssue::severity).containsOnly(Severity.INFO);
 		assertThat(discoveryIssues).extracting(DiscoveryIssue::message) //
 				.allMatch(it -> it.startsWith("Ineffective @Order annotation on method")
-						&& it.endsWith("It will not be applied because MethodOrderer.OrderAnnotation is not in use."));
+						&& it.contains("It will not be applied because MethodOrderer.OrderAnnotation is not in use.")
+						&& it.endsWith(
+							"Note that the annotation may be either directly present or meta-present on the method."));
 		var testClass = WithoutTestMethodOrderTestCase.class;
 		assertThat(discoveryIssues).extracting(DiscoveryIssue::source).extracting(Optional::orElseThrow) //
 				.containsExactlyInAnyOrder(MethodSource.from(testClass.getDeclaredMethod("test1")),
@@ -692,7 +724,6 @@ class OrderedMethodTests {
 
 	static class OrderAnnotationWithNestedClassTestCase extends OrderAnnotationTestCase {
 		@Nested
-		@TestMethodOrder(OrderAnnotation.class)
 		class NestedTests {
 
 			@BeforeEach
@@ -742,17 +773,18 @@ class OrderedMethodTests {
 			context.getMethodDescriptors().set(1, createMethodDescriptorImpersonator(method2));
 		}
 
-		@SuppressWarnings({ "unchecked", "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("unchecked")
 		static <T> T createMethodDescriptorImpersonator(MethodDescriptor method) {
-			MethodDescriptor stub = new MethodDescriptor() {
+			@NullMarked
+			class Stub implements MethodDescriptor {
 				@Override
 				public Method getMethod() {
-					return null;
+					throw new UnsupportedOperationException();
 				}
 
 				@Override
 				public String getDisplayName() {
-					return null;
+					throw new UnsupportedOperationException();
 				}
 
 				@Override
@@ -780,8 +812,8 @@ class OrderedMethodTests {
 				public int hashCode() {
 					return method.hashCode();
 				}
-			};
-			return (T) stub;
+			}
+			return (T) new Stub();
 		}
 	}
 
@@ -822,6 +854,40 @@ class OrderedMethodTests {
 	}
 
 	static class ClassTemplateTestCase extends WithoutTestMethodOrderTestCase {
+	}
+
+	static class NestedClassWithDefaultOrderTestCase extends OrderAnnotationTestCase {
+
+		@Nested
+		@TestMethodOrder(Default.class)
+		@Execution(ExecutionMode.SAME_THREAD)
+		class NestedTests {
+
+			@BeforeEach
+			void trackInvocations(TestInfo testInfo) {
+				callSequence.add(testInfo.getDisplayName());
+			}
+
+			@Test
+			@Order(3)
+			void test1() {
+			}
+
+			@Test
+			@Order(2)
+			void test2() {
+			}
+
+			@Test
+			@Order(4)
+			void test3() {
+			}
+
+			@Test
+			@Order(1)
+			void test4() {
+			}
+		}
 	}
 
 }

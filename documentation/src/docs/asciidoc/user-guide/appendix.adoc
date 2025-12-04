@@ -4,8 +4,7 @@
 [[reproducible-builds]]
 === Reproducible Builds
 
-Starting with version 5.7, JUnit aims for its non-javadoc JARs to be
-https://reproducible-builds.org/[reproducible].
+JUnit aims for its non-javadoc JARs to be https://reproducible-builds.org/[reproducible].
 
 Under identical build conditions, such as Java version, repeated builds should provide the
 same output byte-for-byte.
@@ -65,10 +64,6 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
     directory. See <<running-tests-console-launcher>> for details.
   `junit-platform-engine`::
     Public API for test engines. See <<launcher-api-engines-custom>> for details.
-  `junit-platform-jfr`::
-    Provides a `LauncherDiscoveryListener` and `TestExecutionListener` for Java Flight
-	Recorder events on the JUnit Platform. See <<running-tests-listeners-flight-recorder>>
-	for details.
   `junit-platform-launcher`::
     Public API for configuring and launching test plans -- typically used by IDEs and
     build tools. See <<launcher-api>> for details.
@@ -82,8 +77,6 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
   `junit-platform-suite-api`::
     Annotations for configuring test suites on the JUnit Platform. Supported by the
     <<junit-platform-suite-engine, JUnit Platform Suite Engine>>.
-  `junit-platform-suite-commons`::
-    Common support utilities for executing test suites on the JUnit Platform.
   `junit-platform-suite-engine`::
     Engine that executes test suites on the JUnit Platform; only required at runtime. See
     <<junit-platform-suite-engine,JUnit Platform Suite Engine>> for details.
@@ -108,8 +101,8 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
   `junit-jupiter-params`::
     Support for <<writing-tests-parameterized-tests>> in JUnit Jupiter.
   `junit-jupiter-migrationsupport`::
-    Support for migrating from JUnit 4 to JUnit Jupiter; only required for support for
-    JUnit 4's `@Ignore` annotation and for running selected JUnit 4 rules.
+    _Deprecated_ support for migrating from JUnit 4 to JUnit Jupiter; only required for
+    support for JUnit 4's `@Ignore` annotation and for running selected JUnit 4 rules.
 
 [[dependency-metadata-junit-vintage]]
 ==== JUnit Vintage

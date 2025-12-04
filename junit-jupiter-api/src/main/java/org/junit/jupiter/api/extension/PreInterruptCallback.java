@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.extension;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
 
@@ -28,7 +28,7 @@ import org.apiguardian.api.API;
  * @since 5.12
  * @see org.junit.jupiter.api.Timeout
  */
-@API(status = EXPERIMENTAL, since = "5.12")
+@API(status = MAINTAINED, since = "5.13.3")
 public interface PreInterruptCallback extends Extension {
 
 	/**
@@ -39,7 +39,7 @@ public interface PreInterruptCallback extends Extension {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String THREAD_DUMP_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.timeout.threaddump.enabled";
 
 	/**
@@ -54,7 +54,7 @@ public interface PreInterruptCallback extends Extension {
 	 * @since 5.12
 	 * @see PreInterruptContext
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	void beforeThreadInterrupt(PreInterruptContext preInterruptContext, ExtensionContext extensionContext)
 			throws Exception;
 }

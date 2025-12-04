@@ -6,7 +6,7 @@ exports org.junit.jupiter.params.provider
 exports org.junit.jupiter.params.support
 requires java.base mandated
 requires org.apiguardian.api static transitive
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.jupiter.api transitive
 requires org.junit.platform.commons transitive
 qualified opens org.junit.jupiter.params to org.junit.platform.commons

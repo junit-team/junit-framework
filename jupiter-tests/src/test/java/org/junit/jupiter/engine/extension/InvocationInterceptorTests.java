@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -71,7 +72,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		@RegisterExtension
 		Extension interceptor = new InvocationInterceptor() {
 			@Override
-			public void interceptTestMethod(Invocation<Void> invocation,
+			public void interceptTestMethod(Invocation<@Nullable Void> invocation,
 					ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
 				// do nothing
 			}
@@ -95,7 +96,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		@RegisterExtension
 		Extension interceptor = new InvocationInterceptor() {
 			@Override
-			public void interceptTestMethod(Invocation<Void> invocation,
+			public void interceptTestMethod(Invocation<@Nullable Void> invocation,
 					ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
 				invocation.skip();
 			}
@@ -122,7 +123,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		@RegisterExtension
 		Extension interceptor = new InvocationInterceptor() {
 			@Override
-			public void interceptTestMethod(Invocation<Void> invocation,
+			public void interceptTestMethod(Invocation<@Nullable Void> invocation,
 					ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 					throws Throwable {
 				invocation.proceed();
@@ -208,7 +209,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 	@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 	static class TestCaseWithThreeInterceptors {
 
-		public TestCaseWithThreeInterceptors(TestReporter reporter) {
+		TestCaseWithThreeInterceptors(TestReporter reporter) {
 			publish(reporter, InvocationType.CONSTRUCTOR);
 		}
 
@@ -287,7 +288,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Override
-		public void interceptBeforeAllMethod(Invocation<Void> invocation,
+		public void interceptBeforeAllMethod(Invocation<@Nullable Void> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
@@ -295,7 +296,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 			assertEquals(testClass.getDeclaredMethod("beforeAll", TestReporter.class),
 				invocationContext.getExecutable());
 			assertThat(invocationContext.getArguments()).hasSize(1).hasOnlyElementsOfType(TestReporter.class);
-			reportAndProceed(invocation, extensionContext, InvocationType.BEFORE_ALL);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.BEFORE_ALL);
 		}
 
 		@Override
@@ -309,7 +310,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Override
-		public void interceptBeforeEachMethod(Invocation<Void> invocation,
+		public void interceptBeforeEachMethod(Invocation<@Nullable Void> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
@@ -317,22 +318,22 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 			assertEquals(testClass.getDeclaredMethod("beforeEach", TestReporter.class),
 				invocationContext.getExecutable());
 			assertThat(invocationContext.getArguments()).hasSize(1).hasOnlyElementsOfType(TestReporter.class);
-			reportAndProceed(invocation, extensionContext, InvocationType.BEFORE_EACH);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.BEFORE_EACH);
 		}
 
 		@Override
-		public void interceptTestMethod(Invocation<Void> invocation,
+		public void interceptTestMethod(Invocation<@Nullable Void> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
 			assertThat(invocationContext.getTarget()).containsInstanceOf(testClass);
 			assertEquals(testClass.getDeclaredMethod("test", TestReporter.class), invocationContext.getExecutable());
 			assertThat(invocationContext.getArguments()).hasSize(1).hasOnlyElementsOfType(TestReporter.class);
-			reportAndProceed(invocation, extensionContext, InvocationType.TEST_METHOD);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.TEST_METHOD);
 		}
 
 		@Override
-		public void interceptTestTemplateMethod(Invocation<Void> invocation,
+		public void interceptTestTemplateMethod(Invocation<@Nullable Void> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
@@ -340,7 +341,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 			assertEquals(testClass.getDeclaredMethod("testTemplate", TestReporter.class),
 				invocationContext.getExecutable());
 			assertThat(invocationContext.getArguments()).hasSize(1).hasOnlyElementsOfType(TestReporter.class);
-			reportAndProceed(invocation, extensionContext, InvocationType.TEST_TEMPLATE_METHOD);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.TEST_TEMPLATE_METHOD);
 		}
 
 		@Override
@@ -356,18 +357,18 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Override
-		public void interceptDynamicTest(Invocation<Void> invocation, DynamicTestInvocationContext invocationContext,
-				ExtensionContext extensionContext) throws Throwable {
+		public void interceptDynamicTest(Invocation<@Nullable Void> invocation,
+				DynamicTestInvocationContext invocationContext, ExtensionContext extensionContext) throws Throwable {
 			assertThat(invocationContext.getExecutable()).isNotNull();
 			assertThat(extensionContext.getUniqueId()).isNotBlank();
 			assertThat(extensionContext.getElement()).isEmpty();
 			assertThat(extensionContext.getParent().flatMap(ExtensionContext::getTestMethod)) //
 					.contains(testClass.getDeclaredMethod("testFactory", TestReporter.class));
-			reportAndProceed(invocation, extensionContext, InvocationType.DYNAMIC_TEST);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.DYNAMIC_TEST);
 		}
 
 		@Override
-		public void interceptAfterEachMethod(Invocation<Void> invocation,
+		public void interceptAfterEachMethod(Invocation<@Nullable Void> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
@@ -375,11 +376,11 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 			assertEquals(testClass.getDeclaredMethod("afterEach", TestReporter.class),
 				invocationContext.getExecutable());
 			assertThat(invocationContext.getArguments()).hasSize(1).hasOnlyElementsOfType(TestReporter.class);
-			reportAndProceed(invocation, extensionContext, InvocationType.AFTER_EACH);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.AFTER_EACH);
 		}
 
 		@Override
-		public void interceptAfterAllMethod(Invocation<Void> invocation,
+		public void interceptAfterAllMethod(Invocation<@Nullable Void> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
@@ -387,11 +388,11 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 			assertEquals(testClass.getDeclaredMethod("afterAll", TestReporter.class),
 				invocationContext.getExecutable());
 			assertThat(invocationContext.getArguments()).hasSize(1).hasOnlyElementsOfType(TestReporter.class);
-			reportAndProceed(invocation, extensionContext, InvocationType.AFTER_ALL);
+			this.<@Nullable Void> reportAndProceed(invocation, extensionContext, InvocationType.AFTER_ALL);
 		}
 
-		private <T> T reportAndProceed(Invocation<T> invocation, ExtensionContext extensionContext, InvocationType type)
-				throws Throwable {
+		private <T extends @Nullable Object> T reportAndProceed(Invocation<T> invocation,
+				ExtensionContext extensionContext, InvocationType type) throws Throwable {
 			extensionContext.publishReportEntry(type.name(), "before:" + name);
 			try {
 				return invocation.proceed();

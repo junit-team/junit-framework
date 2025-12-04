@@ -12,22 +12,20 @@ package org.junit.jupiter.api;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
+import static org.junit.jupiter.api.AssertionTestUtils.assertExpectedExceptionTypes;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.function.Executable;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.opentest4j.AssertionFailedError;
 import org.opentest4j.MultipleFailuresError;
 
@@ -38,40 +36,39 @@ import org.opentest4j.MultipleFailuresError;
  */
 class AssertAllAssertionsTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableArray() {
-		assertPrecondition("executables array must not be null or empty", () -> assertAll((Executable[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("executables array", () -> assertAll((Executable[]) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableCollection() {
-		assertPrecondition("executables collection must not be null", () -> assertAll((Collection<Executable>) null));
+		assertPreconditionViolationNotNullFor("executables collection", () -> assertAll((Collection<Executable>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullExecutableStream() {
-		assertPrecondition("executables stream must not be null", () -> assertAll((Stream<Executable>) null));
+		assertPreconditionViolationNotNullFor("executables stream", () -> assertAll((Stream<Executable>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullInExecutableArray() {
-		assertPrecondition("individual executables must not be null", () -> assertAll((Executable) null));
+		assertPreconditionViolationNotNullFor("individual executables", () -> assertAll((Executable) null));
 	}
 
-	@SuppressWarnings({ "NullAway" })
 	@Test
 	void assertAllWithNullInExecutableCollection() {
-		assertPrecondition("individual executables must not be null", () -> assertAll(asList((Executable) null)));
+		assertPreconditionViolationNotNullFor("individual executables", () -> assertAll(asList((Executable) null)));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void assertAllWithNullInExecutableStream() {
-		assertPrecondition("individual executables must not be null", () -> assertAll(Stream.of((Executable) null)));
+		assertPreconditionViolationNotNullFor("individual executables", () -> assertAll(Stream.of((Executable) null)));
 	}
 
 	@Test
@@ -109,8 +106,8 @@ class AssertAllAssertionsTests {
 		// @formatter:off
 		MultipleFailuresError multipleFailuresError = assertThrows(MultipleFailuresError.class, () ->
 			assertAll(
-				() -> fail(),
-				() -> fail()
+				Assertions::fail,
+				Assertions::fail
 			)
 		);
 		// @formatter:on
@@ -123,8 +120,8 @@ class AssertAllAssertionsTests {
 		// @formatter:off
 		MultipleFailuresError multipleFailuresError = assertThrows(MultipleFailuresError.class, () ->
 			assertAll(asList(
-				() -> fail(),
-				() -> fail()
+				Assertions::fail,
+				Assertions::fail
 			))
 		);
 		// @formatter:on
@@ -137,8 +134,8 @@ class AssertAllAssertionsTests {
 		// @formatter:off
 		MultipleFailuresError multipleFailuresError = assertThrows(MultipleFailuresError.class, () ->
 			assertAll(Stream.of(
-				() -> fail(),
-				() -> fail()
+				Assertions::fail,
+				Assertions::fail
 			))
 		);
 		// @formatter:on
@@ -198,30 +195,6 @@ class AssertAllAssertionsTests {
 			() -> assertAll(Stream.generate(() -> executable).parallel().limit(100)));
 
 		assertThat(multipleFailuresError.getFailures()).hasSize(100).doesNotContainNull();
-	}
-
-	private void assertPrecondition(String msg, Executable executable) {
-		PreconditionViolationException exception = assertThrows(PreconditionViolationException.class, executable);
-		assertMessageEquals(exception, msg);
-	}
-
-	@SafeVarargs
-	static void assertExpectedExceptionTypes(MultipleFailuresError multipleFailuresError,
-			Class<? extends Throwable>... exceptionTypes) {
-
-		assertNotNull(multipleFailuresError, "MultipleFailuresError");
-		List<Throwable> failures = multipleFailuresError.getFailures();
-		assertEquals(exceptionTypes.length, failures.size(), "number of failures");
-
-		// Verify that exceptions are also present as suppressed exceptions.
-		// https://github.com/junit-team/junit5/issues/1602
-		Throwable[] suppressed = multipleFailuresError.getSuppressed();
-		assertEquals(exceptionTypes.length, suppressed.length, "number of suppressed exceptions");
-
-		for (int i = 0; i < exceptionTypes.length; i++) {
-			assertEquals(exceptionTypes[i], failures.get(i).getClass(), "exception type [" + i + "]");
-			assertEquals(exceptionTypes[i], suppressed[i].getClass(), "suppressed exception type [" + i + "]");
-		}
 	}
 
 	@SuppressWarnings("serial")

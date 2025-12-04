@@ -13,7 +13,7 @@ import com.example.vintage.VintageTest;
 import org.junit.Ignore;
 
 /**
- * Reproducer for https://github.com/junit-team/junit5/issues/4076
+ * Reproducer for https://github.com/junit-team/junit-framework/issues/4076
  */
 @Ignore
 public class DefaultPackageTest extends VintageTest {

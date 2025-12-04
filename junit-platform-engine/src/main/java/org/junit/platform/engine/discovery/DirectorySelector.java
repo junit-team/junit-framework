@@ -40,7 +40,7 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
  * @see #getRawPath()
  */
 @API(status = STABLE, since = "1.0")
-public class DirectorySelector implements DiscoverySelector {
+public final class DirectorySelector implements DiscoverySelector {
 
 	private final String path;
 

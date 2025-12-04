@@ -40,19 +40,16 @@ public class MavenRepoProxy implements AutoCloseable {
 		httpServer.createContext("/", exchange -> {
 			try (exchange) {
 				switch (exchange.getRequestMethod()) {
-					case "HEAD":
-					case "GET":
-						if (FORBIDDEN_PATHS.stream().anyMatch(
-							it -> exchange.getRequestURI().getPath().startsWith(it))) {
+					case "HEAD", "GET" -> {
+						if (FORBIDDEN_PATHS.stream().anyMatch(exchange.getRequestURI().getPath()::startsWith)) {
 							exchange.sendResponseHeaders(404, -1);
 							break;
 						}
 						var redirectUrl = proxiedUrl + exchange.getRequestURI().getPath();
 						exchange.getResponseHeaders().add("Location", redirectUrl);
 						exchange.sendResponseHeaders(302, -1);
-						break;
-					default:
-						exchange.sendResponseHeaders(405, -1);
+					}
+					default -> exchange.sendResponseHeaders(405, -1);
 				}
 			}
 			catch (Exception e) {

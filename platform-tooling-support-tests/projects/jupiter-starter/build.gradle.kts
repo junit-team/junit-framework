@@ -7,12 +7,6 @@ val junitVersion: String by project
 repositories {
 	maven { url = uri(file(System.getProperty("maven.repo"))) }
 	mavenCentral()
-	maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
-		mavenContent {
-			snapshotsOnly()
-			includeGroup("org.opentest4j.reporting")
-		}
-	}
 }
 
 dependencies {

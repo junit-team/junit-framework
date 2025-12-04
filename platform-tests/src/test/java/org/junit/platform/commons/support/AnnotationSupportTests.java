@@ -13,8 +13,8 @@ package org.junit.platform.commons.support;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.platform.commons.support.PreconditionAssertions.assertPreconditionViolationException;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,7 +26,6 @@ import java.util.Optional;
 import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -35,12 +34,12 @@ import org.junit.platform.commons.util.ReflectionUtils;
  */
 class AnnotationSupportTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void isAnnotatedPreconditions() {
 		var optional = Optional.of(Probe.class);
-		assertPreconditionViolationException("annotationType", () -> AnnotationSupport.isAnnotated(optional, null));
-		assertPreconditionViolationException("annotationType", () -> AnnotationSupport.isAnnotated(Probe.class, null));
+		assertPreconditionViolationNotNullFor("annotationType", () -> AnnotationSupport.isAnnotated(optional, null));
+		assertPreconditionViolationNotNullFor("annotationType", () -> AnnotationSupport.isAnnotated(Probe.class, null));
 	}
 
 	@Test
@@ -59,12 +58,12 @@ class AnnotationSupportTests {
 			AnnotationSupport.isAnnotated(element, Override.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotationOnElementPreconditions() {
 		var optional = Optional.of(Probe.class);
-		assertPreconditionViolationException("annotationType", () -> AnnotationSupport.findAnnotation(optional, null));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType", () -> AnnotationSupport.findAnnotation(optional, null));
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotation(Probe.class, null));
 	}
 
@@ -84,19 +83,19 @@ class AnnotationSupportTests {
 			AnnotationSupport.findAnnotation(element, Override.class));
 	}
 
-	@SuppressWarnings({ "deprecation", "DataFlowIssue", "NullAway" })
+	@SuppressWarnings({ "deprecation", "DataFlowIssue" })
 	@Test
 	void findAnnotationOnClassWithSearchModePreconditions() {
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotation(Probe.class, null, SearchOption.INCLUDE_ENCLOSING_CLASSES));
-		assertPreconditionViolationException("SearchOption",
+		assertPreconditionViolationNotNullFor("SearchOption",
 			() -> AnnotationSupport.findAnnotation(Probe.class, Override.class, (SearchOption) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotationOnClassWithEnclosingInstanceTypesPreconditions() {
-		assertPreconditionViolationException("enclosingInstanceTypes",
+		assertPreconditionViolationNotNullFor("enclosingInstanceTypes",
 			() -> AnnotationSupport.findAnnotation(Probe.class, Override.class, (List<Class<?>>) null));
 	}
 
@@ -135,14 +134,14 @@ class AnnotationSupportTests {
 				.contains(Probe.class.getDeclaredAnnotation(Tag.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsPreconditions() {
-		assertPreconditionViolationException("Class",
+		assertPreconditionViolationNotNullFor("Class",
 			() -> AnnotationSupport.findPublicAnnotatedFields(null, String.class, FieldMarker.class));
-		assertPreconditionViolationException("fieldType",
+		assertPreconditionViolationNotNullFor("fieldType",
 			() -> AnnotationSupport.findPublicAnnotatedFields(Probe.class, null, FieldMarker.class));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findPublicAnnotatedFields(Probe.class, String.class, null));
 	}
 
@@ -154,14 +153,14 @@ class AnnotationSupportTests {
 			AnnotationSupport.findPublicAnnotatedFields(Probe.class, Throwable.class, Override.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedMethodsPreconditions() {
-		assertPreconditionViolationException("Class",
+		assertPreconditionViolationNotNullFor("Class",
 			() -> AnnotationSupport.findAnnotatedMethods(null, Tag.class, HierarchyTraversalMode.TOP_DOWN));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedMethods(Probe.class, null, HierarchyTraversalMode.TOP_DOWN));
-		assertPreconditionViolationException("HierarchyTraversalMode",
+		assertPreconditionViolationNotNullFor("HierarchyTraversalMode",
 			() -> AnnotationSupport.findAnnotatedMethods(Probe.class, Tag.class, null));
 	}
 
@@ -191,18 +190,18 @@ class AnnotationSupportTests {
 		var bMethod = Probe.class.getDeclaredMethod("bMethod");
 		assertEquals(AnnotationUtils.findRepeatableAnnotations(bMethod, Tag.class),
 			AnnotationSupport.findRepeatableAnnotations(bMethod, Tag.class));
-		Object expected = assertThrows(PreconditionViolationException.class,
+		var expected = assertPreconditionViolationFor(
 			() -> AnnotationUtils.findRepeatableAnnotations(bMethod, Override.class));
-		Object actual = assertThrows(PreconditionViolationException.class,
+		var actual = assertPreconditionViolationFor(
 			() -> AnnotationSupport.findRepeatableAnnotations(bMethod, Override.class));
 		assertSame(expected.getClass(), actual.getClass(), "expected same exception class");
 		assertEquals(expected.toString(), actual.toString(), "expected equal exception toString representation");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findRepeatableAnnotationsPreconditions() {
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findRepeatableAnnotations(Probe.class, null));
 	}
 
@@ -225,19 +224,19 @@ class AnnotationSupportTests {
 				HierarchyTraversalMode.TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsPreconditions() {
-		assertPreconditionViolationException("Class",
+		assertPreconditionViolationNotNullFor("Class",
 			() -> AnnotationSupport.findAnnotatedFields(null, FieldMarker.class));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedFields(Probe.class, null));
 
-		assertPreconditionViolationException("Class", () -> AnnotationSupport.findAnnotatedFields(null, Override.class,
+		assertPreconditionViolationNotNullFor("Class", () -> AnnotationSupport.findAnnotatedFields(null, Override.class,
 			f -> true, HierarchyTraversalMode.TOP_DOWN));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedFields(Probe.class, null, f -> true, HierarchyTraversalMode.TOP_DOWN));
-		assertPreconditionViolationException("HierarchyTraversalMode",
+		assertPreconditionViolationNotNullFor("HierarchyTraversalMode",
 			() -> AnnotationSupport.findAnnotatedFields(Probe.class, Override.class, f -> true, null));
 	}
 
@@ -277,31 +276,31 @@ class AnnotationSupportTests {
 				.containsExactlyInAnyOrder("s1", "s2");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldValuesPreconditions() {
-		assertPreconditionViolationException("instance",
+		assertPreconditionViolationNotNullFor("instance",
 			() -> AnnotationSupport.findAnnotatedFieldValues((Object) null, FieldMarker.class));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedFieldValues(this, null));
 
-		assertPreconditionViolationException("Class",
+		assertPreconditionViolationNotNullFor("Class",
 			() -> AnnotationSupport.findAnnotatedFieldValues(null, FieldMarker.class));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedFieldValues(Probe.class, null));
 
-		assertPreconditionViolationException("instance",
+		assertPreconditionViolationNotNullFor("instance",
 			() -> AnnotationSupport.findAnnotatedFieldValues((Object) null, FieldMarker.class, Number.class));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedFieldValues(this, null, Number.class));
-		assertPreconditionViolationException("fieldType",
+		assertPreconditionViolationNotNullFor("fieldType",
 			() -> AnnotationSupport.findAnnotatedFieldValues(this, FieldMarker.class, null));
 
-		assertPreconditionViolationException("Class",
+		assertPreconditionViolationNotNullFor("Class",
 			() -> AnnotationSupport.findAnnotatedFieldValues(null, FieldMarker.class, Number.class));
-		assertPreconditionViolationException("annotationType",
+		assertPreconditionViolationNotNullFor("annotationType",
 			() -> AnnotationSupport.findAnnotatedFieldValues(Probe.class, null, Number.class));
-		assertPreconditionViolationException("fieldType",
+		assertPreconditionViolationNotNullFor("fieldType",
 			() -> AnnotationSupport.findAnnotatedFieldValues(Probe.class, FieldMarker.class, null));
 	}
 

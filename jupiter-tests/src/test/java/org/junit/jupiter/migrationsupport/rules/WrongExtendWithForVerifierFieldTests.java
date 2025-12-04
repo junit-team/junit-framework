@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.Verifier;
 
+@SuppressWarnings("removal")
 @ExtendWith(ExternalResourceSupport.class)
 public class WrongExtendWithForVerifierFieldTests {
 
@@ -39,8 +40,9 @@ public class WrongExtendWithForVerifierFieldTests {
 
 	@AfterAll
 	static void afterMethodOfRuleWasNotExecuted() {
-		if (afterOfRule1WasExecuted)
+		if (afterOfRule1WasExecuted) {
 			fail();
+		}
 	}
 
 }

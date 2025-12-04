@@ -11,14 +11,13 @@
 package org.junit.platform.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link ToStringBuilder}.
@@ -27,26 +26,26 @@ import org.junit.platform.commons.PreconditionViolationException;
  */
 class ToStringBuilderTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void withNullObject() {
-		assertThrows(PreconditionViolationException.class, () -> new ToStringBuilder((Object) null));
+		assertPreconditionViolationFor(() -> new ToStringBuilder((Object) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void withNullClass() {
-		assertThrows(PreconditionViolationException.class, () -> new ToStringBuilder((Class<?>) null));
+		assertPreconditionViolationFor(() -> new ToStringBuilder((Class<?>) null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void appendWithIllegalName() {
 		var builder = new ToStringBuilder("");
 
-		assertThrows(PreconditionViolationException.class, () -> builder.append(null, ""));
-		assertThrows(PreconditionViolationException.class, () -> builder.append("", ""));
-		assertThrows(PreconditionViolationException.class, () -> builder.append("    ", ""));
+		assertPreconditionViolationFor(() -> builder.append(null, ""));
+		assertPreconditionViolationFor(() -> builder.append("", ""));
+		assertPreconditionViolationFor(() -> builder.append("    ", ""));
 	}
 
 	@Test

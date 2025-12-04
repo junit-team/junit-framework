@@ -10,7 +10,7 @@
 
 package org.junit.platform.launcher;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
@@ -62,7 +62,7 @@ public interface LauncherSession extends AutoCloseable {
 	 * @since 1.13
 	 * @see NamespacedHierarchicalStore
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = MAINTAINED, since = "1.13.3")
 	NamespacedHierarchicalStore<Namespace> getStore();
 
 }

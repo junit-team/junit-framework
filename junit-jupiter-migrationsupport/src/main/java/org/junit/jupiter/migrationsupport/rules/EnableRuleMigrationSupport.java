@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.migrationsupport.rules;
 
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -36,10 +36,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * @see VerifierSupport
  * @see ExpectedExceptionSupport
  * @see org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport
+ * @deprecated Please migrate to Jupiter extensions.
  */
+@SuppressWarnings("removal")
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@API(status = STABLE, since = "5.7")
+@API(status = DEPRECATED, since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
 @ExtendWith(ExternalResourceSupport.class)
 @ExtendWith(VerifierSupport.class)
 @ExtendWith(ExpectedExceptionSupport.class)

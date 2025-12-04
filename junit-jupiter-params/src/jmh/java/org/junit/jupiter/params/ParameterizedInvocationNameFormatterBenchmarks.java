@@ -56,7 +56,7 @@ public class ParameterizedInvocationNameFormatterBenchmarks {
 			512);
 		for (int i = 0; i < argumentsList.size(); i++) {
 			Arguments arguments = argumentsList.get(i);
-			blackhole.consume(formatter.format(i, EvaluatedArgumentSet.allOf(arguments)));
+			blackhole.consume(formatter.format(i, EvaluatedArgumentSet.allOf(arguments), false));
 		}
 	}
 

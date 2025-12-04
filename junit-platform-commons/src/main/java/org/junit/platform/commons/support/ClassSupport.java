@@ -31,6 +31,7 @@ import org.junit.platform.commons.util.ClassUtils;
  * @see AnnotationSupport
  * @see ModifierSupport
  * @see ReflectionSupport
+ * @see ResourceSupport
  */
 @API(status = MAINTAINED, since = "1.1")
 public final class ClassSupport {

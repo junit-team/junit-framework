@@ -10,10 +10,11 @@
 
 package org.junit.platform.engine.reporting;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
@@ -28,26 +29,28 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * @since 1.12
  * @see #from(Path, String)
  */
-@API(status = EXPERIMENTAL, since = "1.12")
+@API(status = MAINTAINED, since = "1.13.3")
 public final class FileEntry {
 
 	/**
 	 * Factory for creating a new {@code FileEntry} from the supplied path and
 	 * media type.
 	 *
+	 * <p>The {@link Path} may represent a file or a directory.
+	 *
 	 * @param path the path to publish; never {@code null}
 	 * @param mediaType the media type of the path to publish; may be
-	 * {@code null}
+	 * {@code null} &mdash; for example, if the path represents a directory
 	 */
 	public static FileEntry from(Path path, @Nullable String mediaType) {
 		return new FileEntry(path, mediaType);
 	}
 
-	private final LocalDateTime timestamp = LocalDateTime.now();
+	private final LocalDateTime timestamp = LocalDateTime.now(ZoneId.systemDefault());
+
 	private final Path path;
 
-	@Nullable
-	private final String mediaType;
+	private final @Nullable String mediaType;
 
 	private FileEntry(Path path, @Nullable String mediaType) {
 		this.path = Preconditions.notNull(path, "path must not be null");
@@ -64,7 +67,7 @@ public final class FileEntry {
 	}
 
 	/**
-	 * Get the path to be published.
+	 * Get the path for the file or directory to be published.
 	 *
 	 * @return the path to publish; never {@code null}
 	 */
@@ -75,7 +78,8 @@ public final class FileEntry {
 	/**
 	 * Get the media type of the path to be published.
 	 *
-	 * @return the media type of the path to publish; never {@code null}
+	 * @return the media type of the path to publish; never {@code null} but
+	 * potentially empty &mdash; for example, if the path represents a directory
 	 */
 	public Optional<String> getMediaType() {
 		return Optional.ofNullable(mediaType);

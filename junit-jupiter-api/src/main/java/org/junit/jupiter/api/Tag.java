@@ -65,7 +65,7 @@ public @interface Tag {
 	/**
 	 * The <em>tag</em>.
 	 *
-	 * <p>Note: the tag will first be {@linkplain String#trim() trimmed}. If the
+	 * <p>Note: the tag will first be {@linkplain String#strip() stripped}. If the
 	 * supplied tag is syntactically invalid after trimming, the error will be
 	 * logged as a warning, and the invalid tag will be effectively ignored. See
 	 * {@linkplain Tag Syntax Rules for Tags}.

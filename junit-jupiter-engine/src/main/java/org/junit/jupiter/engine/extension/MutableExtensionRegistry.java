@@ -294,7 +294,7 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 		@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 		private Optional<Extension> extension = Optional.empty();
 
-		public LateInitEntry(Class<?> testClass, Function<Object, ? extends Extension> initializer) {
+		LateInitEntry(Class<?> testClass, Function<Object, ? extends Extension> initializer) {
 			this.testClass = testClass;
 			this.initializer = initializer;
 		}
@@ -304,7 +304,7 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 			return extension;
 		}
 
-		public Class<?> getTestClass() {
+		private Class<?> getTestClass() {
 			return testClass;
 		}
 

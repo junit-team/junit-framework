@@ -10,7 +10,6 @@
 
 package org.junit.platform.testkit.engine;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.commons.util.FunctionUtils.where;
 
@@ -65,7 +64,7 @@ public class Event {
 	 * @since 1.12
 	 * @see EventType#FILE_ENTRY_PUBLISHED
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Event fileEntryPublished(TestDescriptor testDescriptor, FileEntry file) {
 		Preconditions.notNull(file, "FileEntry must not be null");
 		return new Event(EventType.FILE_ENTRY_PUBLISHED, testDescriptor, file);
@@ -172,8 +171,7 @@ public class Event {
 	private final EventType type;
 	private final TestDescriptor testDescriptor;
 
-	@Nullable
-	private final Object payload;
+	private final @Nullable Object payload;
 
 	/**
 	 * Construct an {@code Event} with the supplied arguments.

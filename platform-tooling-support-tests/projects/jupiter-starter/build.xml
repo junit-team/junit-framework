@@ -34,7 +34,7 @@
         <javac destdir="build/test" classpathref="test.classpath" srcdir="src/test/java" includeantruntime="true"/>
     </target>
 
-    <!-- https://junit.org/junit5/docs/snapshot/user-guide/#running-tests-build-ant -->
+    <!-- https://docs.junit.org/snapshot/user-guide/#running-tests-build-ant -->
     <target name="test.junit.launcher" depends="compile">
         <junitlauncher haltOnFailure="true" printSummary="true">
             <classpath refid="test.classpath"/>
@@ -48,7 +48,7 @@
         </junitlauncher>
     </target>
 
-    <!-- https://junit.org/junit5/docs/current/user-guide/#running-tests-console-launcher -->
+    <!-- https://docs.junit.org/current/user-guide/#running-tests-console-launcher -->
     <target name="test.console.launcher" depends="compile">
         <java classpathref="test.classpath" classname="org.junit.platform.console.ConsoleLauncher" fork="true">
             <arg value="execute"/>

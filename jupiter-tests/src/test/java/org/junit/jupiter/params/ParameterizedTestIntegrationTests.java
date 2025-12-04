@@ -11,6 +11,7 @@
 package org.junit.jupiter.params;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +23,6 @@ import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.engine.discovery.JupiterUniqueIdBuilder.appendTestTemplateInvocationSegment;
 import static org.junit.jupiter.engine.discovery.JupiterUniqueIdBuilder.uniqueIdForTestTemplateMethod;
-import static org.junit.jupiter.params.converter.DefaultArgumentConverter.DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectIteration;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
@@ -63,6 +63,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -99,6 +100,7 @@ import org.junit.jupiter.params.aggregator.SimpleArgumentsAggregator;
 import org.junit.jupiter.params.converter.ArgumentConversionException;
 import org.junit.jupiter.params.converter.ArgumentConverter;
 import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.TypedArgumentConverter;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -114,6 +116,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.ClassUtils;
+import org.junit.platform.engine.DiscoveryIssue;
+import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
@@ -230,22 +234,22 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		if (fruit == null) {
 			assertThat(rank).isEqualTo(0);
-			assertThat(displayName).matches("\\[(4|5)\\] FRUIT = null, RANK = 0");
+			assertThat(displayName).matches("\\[(4|5)\\] FRUIT = null, RANK = \"0\"");
 			return;
 		}
 
 		switch (fruit) {
 			case "apple" -> {
 				assertThat(rank).isEqualTo(1);
-				assertThat(displayName).isEqualTo("[1] FRUIT = apple, RANK = 1");
+				assertThat(displayName).isEqualTo("[1] FRUIT = \"apple\", RANK = \"1\"");
 			}
 			case "banana" -> {
 				assertThat(rank).isEqualTo(2);
-				assertThat(displayName).isEqualTo("[2] FRUIT = banana, RANK = 2");
+				assertThat(displayName).isEqualTo("[2] FRUIT = \"banana\", RANK = \"2\"");
 			}
 			case "cherry" -> {
 				assertThat(rank).isCloseTo(Math.PI, within(0.0));
-				assertThat(displayName).isEqualTo("[3] FRUIT = cherry, RANK = 3.14159265358979323846");
+				assertThat(displayName).isEqualTo("[3] FRUIT = \"cherry\", RANK = \"3.14159265358979323846\"");
 			}
 			default -> fail("Unexpected fruit : " + fruit);
 		}
@@ -255,16 +259,40 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	void executesWithSingleArgumentsProviderWithMultipleInvocations() {
 		var results = execute("testWithTwoSingleStringArgumentsProvider", String.class);
 		results.allEvents().assertThatEvents() //
-				.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
-				.haveExactly(1, event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+				.haveExactly(1, event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+				.haveExactly(1, event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 	}
 
 	@Test
 	void executesWithCsvSource() {
 		var results = execute("testWithCsvSource", String.class);
 		results.allEvents().assertThatEvents() //
-				.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
-				.haveExactly(1, event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+				.haveExactly(1, event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+				.haveExactly(1, event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
+	}
+
+	/**
+	 * @since 6.0
+	 */
+	@Test
+	void executesWithCsvSourceAndSpecialCharacters() {
+		// @formatter:off
+		execute("testWithCsvSourceAndSpecialCharacters", String.class)
+				.testEvents()
+				.started()
+				.assertEventsMatchExactly(
+					displayName(quoted("üñåé")),
+					displayName(quoted("\\n")),
+					displayName(quoted("\\r")),
+					displayName(quoted("\uFFFD")),
+					displayName(quoted("😱")),
+					displayName(quoted("Zero\u200BWidth\u200BSpaces"))
+				);
+		// @formatter:on
+	}
+
+	private static String quoted(String text) {
+		return '"' + text + '"';
 	}
 
 	@Test
@@ -292,8 +320,8 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	void executesWithPrimitiveWideningConversion() {
 		var results = execute("testWithPrimitiveWideningConversion", double.class);
 		results.allEvents().assertThatEvents() //
-				.haveExactly(1, event(test(), displayName("[1] num=1"), finishedWithFailure(message("num: 1.0")))) //
-				.haveExactly(1, event(test(), displayName("[2] num=2"), finishedWithFailure(message("num: 2.0"))));
+				.haveExactly(1, event(test(), displayName("[1] num = 1"), finishedWithFailure(message("num: 1.0")))) //
+				.haveExactly(1, event(test(), displayName("[2] num = 2"), finishedWithFailure(message("num: 2.0"))));
 	}
 
 	/**
@@ -303,8 +331,20 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	void executesWithImplicitGenericConverter() {
 		var results = execute("testWithImplicitGenericConverter", Book.class);
 		results.allEvents().assertThatEvents() //
-				.haveExactly(1, event(test(), displayName("[1] book=book 1"), finishedWithFailure(message("book 1")))) //
-				.haveExactly(1, event(test(), displayName("[2] book=book 2"), finishedWithFailure(message("book 2"))));
+				.haveExactly(1, event(test(), displayName("[1] book = book 1"), finishedWithFailure(message("book 1")))) //
+				.haveExactly(1,
+					event(test(), displayName("[2] book = book 2"), finishedWithFailure(message("book 2"))));
+	}
+
+	/**
+	 * @since 6.0
+	 */
+	@Test
+	void executesWithImplicitGenericConverterWithCharSequenceConstructor() {
+		var results = execute("testWithImplicitGenericConverterWithCharSequenceConstructor", Record.class);
+		results.testEvents().assertThatEvents() //
+				.haveExactly(1, event(displayName("\"record 1\""), finishedWithFailure(message("record 1")))) //
+				.haveExactly(1, event(displayName("\"record 2\""), finishedWithFailure(message("record 2"))));
 	}
 
 	@Test
@@ -324,9 +364,9 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	void executesWithExplicitConverter() {
 		var results = execute("testWithExplicitConverter", int.class);
 		results.allEvents().assertThatEvents() //
-				.haveExactly(1, event(test(), displayName("[1] length=O"), finishedWithFailure(message("length: 1")))) //
+				.haveExactly(1, event(test(), displayName("[1] length = O"), finishedWithFailure(message("length: 1")))) //
 				.haveExactly(1,
-					event(test(), displayName("[2] length=XXX"), finishedWithFailure(message("length: 3"))));
+					event(test(), displayName("[2] length = XXX"), finishedWithFailure(message("length: 3"))));
 	}
 
 	@Test
@@ -400,9 +440,9 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		var results = executeTestsForClass(LifecycleTestCase.class);
 		results.allEvents().assertThatEvents() //
 				.haveExactly(1,
-					event(test("test1"), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
+					event(test("test1"), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
 				.haveExactly(1,
-					event(test("test1"), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+					event(test("test1"), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 
 		List<String> testMethods = new ArrayList<>(LifecycleTestCase.testMethods);
 
@@ -410,23 +450,23 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		assertThat(LifecycleTestCase.lifecycleEvents).containsExactly(
 			"beforeAll:ParameterizedTestIntegrationTests$LifecycleTestCase",
 				"providerMethod",
-				"constructor:[1] argument=foo",
-					"beforeEach:[1] argument=foo",
-						testMethods.get(0) + ":[1] argument=foo",
-					"afterEach:[1] argument=foo",
-					"constructor:[2] argument=bar",
-					"beforeEach:[2] argument=bar",
-						testMethods.get(0) + ":[2] argument=bar",
-					"afterEach:[2] argument=bar",
+				"constructor:[1] argument = foo",
+					"beforeEach:[1] argument = foo",
+						testMethods.get(0) + ":[1] argument = foo",
+					"afterEach:[1] argument = foo",
+					"constructor:[2] argument = bar",
+					"beforeEach:[2] argument = bar",
+						testMethods.get(0) + ":[2] argument = bar",
+					"afterEach:[2] argument = bar",
 				"providerMethod",
-					"constructor:[1] argument=foo",
-					"beforeEach:[1] argument=foo",
-						testMethods.get(1) + ":[1] argument=foo",
-					"afterEach:[1] argument=foo",
-					"constructor:[2] argument=bar",
-					"beforeEach:[2] argument=bar",
-						testMethods.get(1) + ":[2] argument=bar",
-					"afterEach:[2] argument=bar",
+					"constructor:[1] argument = foo",
+					"beforeEach:[1] argument = foo",
+						testMethods.get(1) + ":[1] argument = foo",
+					"afterEach:[1] argument = foo",
+					"constructor:[2] argument = bar",
+					"beforeEach:[2] argument = bar",
+						testMethods.get(1) + ":[2] argument = bar",
+					"afterEach:[2] argument = bar",
 			"afterAll:ParameterizedTestIntegrationTests$LifecycleTestCase");
 		// @formatter:on
 	}
@@ -438,8 +478,8 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				.selectors(selectMethod(TestCase.class, "testWithCsvSource", String.class.getName())) //
 				.execute();
 		results.testEvents().assertThatEvents() //
-				.haveExactly(1, event(displayName("[1] argument=f…"), started())) //
-				.haveExactly(1, event(displayName("[2] argument=b…"), started()));
+				.haveExactly(1, event(displayName("[1] argument = f…"), started())) //
+				.haveExactly(1, event(displayName("[2] argument = b…"), started()));
 	}
 
 	@Test
@@ -488,17 +528,20 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Test
-	void executesWithBcp47LocaleConversionFormat() {
-		var results = execute(Map.of(DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME, "bcp_47"),
-			LocaleConversionTestCase.class, "testWithBcp47", Locale.class);
+	void emitsWarningForNoLongerSupportedConfigurationParameter() {
+		var results = discoverTests(request -> request //
+				.configurationParameter("junit.jupiter.params.arguments.conversion.locale.format", "iso_639") //
+				.selectors(selectMethod(LocaleConversionTestCase.class, "testWithBcp47", Locale.class)));
 
-		results.allEvents().assertStatistics(stats -> stats.started(4).succeeded(4));
+		assertThat(results.getDiscoveryIssues()) //
+				.contains(DiscoveryIssue.create(Severity.WARNING, """
+						The 'junit.jupiter.params.arguments.conversion.locale.format' configuration parameter \
+						is no longer supported. Please remove it from your configuration."""));
 	}
 
 	@Test
-	void executesWithIso639LocaleConversionFormat() {
-		var results = execute(Map.of(DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME, "iso_639"),
-			LocaleConversionTestCase.class, "testWithIso639", Locale.class);
+	void executesWithCustomLocalConverterUsingIso639Format() {
+		var results = execute(LocaleConversionTestCase.class, "testWithIso639", Locale.class);
 
 		results.allEvents().assertStatistics(stats -> stats.started(4).succeeded(4));
 	}
@@ -519,14 +562,6 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				.hasNoSuppressedExceptions();
 	}
 
-	private EngineExecutionResults execute(Map<String, String> configurationParameters, Class<?> testClass,
-			String methodName, Class<?>... methodParameterTypes) {
-		return EngineTestKit.engine(new JupiterTestEngine()) //
-				.selectors(selectMethod(testClass, methodName, ClassUtils.nullSafeToString(methodParameterTypes))) //
-				.configurationParameters(configurationParameters) //
-				.execute();
-	}
-
 	private EngineExecutionResults execute(String methodName, Class<?>... methodParameterTypes) {
 		return execute(TestCase.class, methodName, methodParameterTypes);
 	}
@@ -545,21 +580,21 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithNullSourceForString() {
 			var results = execute("testWithNullSourceForString", String.class);
 			results.testEvents().failed().assertEventsMatchExactly(
-				event(test(), displayName("[1] argument=null"), finishedWithFailure(message("null"))));
+				event(test(), displayName("[1] argument = null"), finishedWithFailure(message("null"))));
 		}
 
 		@Test
 		void executesWithNullSourceForStringAndTestInfo() {
 			var results = execute("testWithNullSourceForStringAndTestInfo", String.class, TestInfo.class);
 			results.testEvents().failed().assertEventsMatchExactly(
-				event(test(), displayName("[1] argument=null"), finishedWithFailure(message("null"))));
+				event(test(), displayName("[1] argument = null"), finishedWithFailure(message("null"))));
 		}
 
 		@Test
 		void executesWithNullSourceForNumber() {
 			var results = execute("testWithNullSourceForNumber", Number.class);
 			results.testEvents().failed().assertEventsMatchExactly(
-				event(test(), displayName("[1] argument=null"), finishedWithFailure(message("null"))));
+				event(test(), displayName("[1] argument = null"), finishedWithFailure(message("null"))));
 		}
 
 		@Test
@@ -576,7 +611,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@Test
 		void failsWithNullSourceForPrimitive() {
 			var results = execute("testWithNullSourceForPrimitive", int.class);
-			results.testEvents().failed().assertEventsMatchExactly(event(test(), displayName("[1] argument=null"),
+			results.testEvents().failed().assertEventsMatchExactly(event(test(), displayName("[1] argument = null"),
 				finishedWithFailure(instanceOf(ParameterResolutionException.class), message(
 					"Error converting parameter at index 0: Cannot convert null to primitive value of type int"))));
 		}
@@ -597,13 +632,15 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@Test
 		void executesWithEmptySourceForString() {
 			var results = execute("testWithEmptySourceForString", String.class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=")));
+			results.testEvents().succeeded().assertEventsMatchExactly(
+				event(test(), displayName("[1] argument = \"\"")));
 		}
 
 		@Test
 		void executesWithEmptySourceForStringAndTestInfo() {
 			var results = execute("testWithEmptySourceForStringAndTestInfo", String.class, TestInfo.class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=")));
+			results.testEvents().succeeded().assertEventsMatchExactly(
+				event(test(), displayName("[1] argument = \"\"")));
 		}
 
 		/**
@@ -612,13 +649,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@Test
 		void executesWithEmptySourceForCollection() {
 			var results = execute("testWithEmptySourceForCollection", Collection.class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
 		void executesWithEmptySourceForList() {
 			var results = execute("testWithEmptySourceForList", List.class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		/**
@@ -631,13 +668,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				""")
 		void executesWithEmptySourceForListSubtype(String methodName, Class<?> parameterType) {
 			var results = execute(methodName, parameterType);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
 		void executesWithEmptySourceForSet() {
 			var results = execute("testWithEmptySourceForSet", Set.class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		/**
@@ -653,13 +690,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				""")
 		void executesWithEmptySourceForSetSubtype(String methodName, Class<?> parameterType) {
 			var results = execute(methodName, parameterType);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
 		void executesWithEmptySourceForMap() {
 			var results = execute("testWithEmptySourceForMap", Map.class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument={}")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = {}")));
 		}
 
 		/**
@@ -675,31 +712,31 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				""")
 		void executesWithEmptySourceForMapSubtype(String methodName, Class<?> parameterType) {
 			var results = execute(methodName, parameterType);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument={}")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = {}")));
 		}
 
 		@Test
 		void executesWithEmptySourceForOneDimensionalPrimitiveArray() {
 			var results = execute("testWithEmptySourceForOneDimensionalPrimitiveArray", int[].class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
 		void executesWithEmptySourceForOneDimensionalStringArray() {
 			var results = execute("testWithEmptySourceForOneDimensionalStringArray", String[].class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
 		void executesWithEmptySourceForTwoDimensionalPrimitiveArray() {
 			var results = execute("testWithEmptySourceForTwoDimensionalPrimitiveArray", int[][].class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
 		void executesWithEmptySourceForTwoDimensionalStringArray() {
 			var results = execute("testWithEmptySourceForTwoDimensionalStringArray", String[][].class);
-			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument=[]")));
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		@Test
@@ -784,15 +821,15 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		private void assertNullAndEmptyString(EngineExecutionResults results) {
 			results.testEvents().succeeded().assertEventsMatchExactly(//
-				event(test(), displayName("[1] argument=null")), //
-				event(test(), displayName("[2] argument="))//
+				event(test(), displayName("[1] argument = null")), //
+				event(test(), displayName("[2] argument = \"\""))//
 			);
 		}
 
 		private void assertNullAndEmpty(EngineExecutionResults results) {
 			results.testEvents().succeeded().assertEventsMatchExactly(//
-				event(test(), displayName("[1] argument=null")), //
-				event(test(), displayName("[2] argument=[]"))//
+				event(test(), displayName("[1] argument = null")), //
+				event(test(), displayName("[2] argument = []"))//
 			);
 		}
 
@@ -952,7 +989,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		/**
 		 * @since 5.9.1
-		 * @see https://github.com/junit-team/junit5/issues/3001
+		 * @see https://github.com/junit-team/junit-framework/issues/3001
 		 */
 		@Test
 		void duplicateMethodNames() {
@@ -1120,45 +1157,50 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithArgumentsSourceProvidingUnusedArguments() {
 			var results = execute("testWithTwoUnusedStringArgumentsProvider", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		@Test
 		void executesWithCsvSourceContainingUnusedArguments() {
 			var results = execute("testWithCsvSourceContainingUnusedArguments", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		@Test
 		void executesWithCsvFileSourceContainingUnusedArguments() {
 			var results = execute("testWithCsvFileSourceContainingUnusedArguments", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		@Test
 		void executesWithMethodSourceProvidingUnusedArguments() {
 			var results = execute("testWithMethodSourceProvidingUnusedArguments", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		@Test
 		void executesWithFieldSourceProvidingUnusedArguments() {
 			var results = execute("testWithFieldSourceProvidingUnusedArguments", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		private EngineExecutionResults execute(String methodName, Class<?>... methodParameterTypes) {
@@ -1170,6 +1212,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	@Nested
 	class UnusedArgumentsWithStrictArgumentsCountIntegrationTests {
+
 		@Test
 		void failsWithArgumentsSourceProvidingUnusedArguments() {
 			var results = execute(ArgumentCountValidationMode.STRICT, UnusedArgumentsTestCase.class,
@@ -1205,7 +1248,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 					.haveExactly(1, event(finishedWithFailure(message(
 						"Configuration error: @ParameterizedTest consumes 1 parameter but there were 2 arguments provided.%nNote: the provided arguments were [foo, unused1]".formatted())))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		@Test
@@ -1214,7 +1257,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				"testWithNoneArgumentCountValidation", String.class);
 			results.allEvents().assertThatEvents() //
 					.haveExactly(1,
-						event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo"))));
 		}
 
 		@Test
@@ -1222,8 +1265,8 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			var results = execute(ArgumentCountValidationMode.STRICT, RepeatableSourcesTestCase.class,
 				"testWithRepeatableCsvSource", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=a"), finishedWithFailure(message("a")))) //
-					.haveExactly(1, event(test(), displayName("[2] argument=b"), finishedWithFailure(message("b"))));
+					.haveExactly(1, event(test(), displayName("[1] argument = a"), finishedWithFailure(message("a")))) //
+					.haveExactly(1, event(test(), displayName("[2] argument = b"), finishedWithFailure(message("b"))));
 		}
 
 		@Test
@@ -1255,9 +1298,9 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithRepeatableCsvFileSource(String methodName) {
 			var results = execute(methodName, String.class, String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1,
-						event(test(), displayName("[1] column1=foo, column2=1"), finishedWithFailure(message("foo 1")))) //
-					.haveExactly(1, event(test(), displayName("[5] column1=FRUIT = apple, column2=RANK = 1"),
+					.haveExactly(1, event(test(), displayName("[1] column1 = foo, column2 = 1"),
+						finishedWithFailure(message("foo 1")))) //
+					.haveExactly(1, event(test(), displayName("[5] FRUIT = apple, RANK = 1"),
 						finishedWithFailure(message("apple 1"))));
 		}
 
@@ -1266,8 +1309,8 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithRepeatableCsvSource(String methodName) {
 			var results = execute(methodName, String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=a"), finishedWithFailure(message("a")))) //
-					.haveExactly(1, event(test(), displayName("[2] argument=b"), finishedWithFailure(message("b"))));
+					.haveExactly(1, event(test(), displayName("[1] argument = a"), finishedWithFailure(message("a")))) //
+					.haveExactly(1, event(test(), displayName("[2] argument = b"), finishedWithFailure(message("b"))));
 		}
 
 		@ParameterizedTest
@@ -1276,9 +1319,9 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			var results = execute(methodName, String.class);
 			results.allEvents().assertThatEvents() //
 					.haveExactly(1,
-						event(test(), displayName("[1] argument=some"), finishedWithFailure(message("some")))) //
+						event(test(), displayName("[1] argument = some"), finishedWithFailure(message("some")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=other"), finishedWithFailure(message("other"))));
+						event(test(), displayName("[2] argument = other"), finishedWithFailure(message("other"))));
 		}
 
 		@ParameterizedTest
@@ -1286,9 +1329,10 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithRepeatableEnumSource(String methodName) {
 			var results = execute(methodName, Action.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=FOO"), finishedWithFailure(message("FOO")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=BAR"), finishedWithFailure(message("BAR"))));
+						event(test(), displayName("[1] argument = FOO"), finishedWithFailure(message("FOO")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = BAR"), finishedWithFailure(message("BAR"))));
 		}
 
 		@ParameterizedTest
@@ -1296,9 +1340,10 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithRepeatableValueSource(String methodName) {
 			var results = execute(methodName, String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar"))));
 		}
 
 		@ParameterizedTest
@@ -1307,9 +1352,9 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			var results = execute(methodName, String.class);
 			results.allEvents().assertThatEvents() //
 					.haveExactly(1,
-						event(test(), displayName("[1] argument=some"), finishedWithFailure(message("some")))) //
+						event(test(), displayName("[1] argument = some"), finishedWithFailure(message("some")))) //
 					.haveExactly(1,
-						event(test(), displayName("[2] argument=other"), finishedWithFailure(message("other"))));
+						event(test(), displayName("[2] argument = other"), finishedWithFailure(message("other"))));
 		}
 
 		@ParameterizedTest
@@ -1318,11 +1363,14 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithRepeatableArgumentsSource(String methodName) {
 			var results = execute(methodName, String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=foo"), finishedWithFailure(message("foo")))) //
-					.haveExactly(1, event(test(), displayName("[2] argument=bar"), finishedWithFailure(message("bar")))) //
-					.haveExactly(1, event(test(), displayName("[3] argument=foo"), finishedWithFailure(message("foo")))) //
 					.haveExactly(1,
-						event(test(), displayName("[4] argument=bar"), finishedWithFailure(message("bar"))));
+						event(test(), displayName("[1] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[2] argument = bar"), finishedWithFailure(message("bar")))) //
+					.haveExactly(1,
+						event(test(), displayName("[3] argument = foo"), finishedWithFailure(message("foo")))) //
+					.haveExactly(1,
+						event(test(), displayName("[4] argument = bar"), finishedWithFailure(message("bar"))));
 
 		}
 
@@ -1338,10 +1386,10 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void executesWithDifferentRepeatableAnnotations() {
 			var results = execute("testWithDifferentRepeatableAnnotations", String.class);
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(test(), displayName("[1] argument=a"), finishedWithFailure(message("a")))) //
-					.haveExactly(1, event(test(), displayName("[2] argument=b"), finishedWithFailure(message("b")))) //
-					.haveExactly(1, event(test(), displayName("[3] argument=c"), finishedWithFailure(message("c")))) //
-					.haveExactly(1, event(test(), displayName("[4] argument=d"), finishedWithFailure(message("d"))));
+					.haveExactly(1, event(test(), displayName("[1] argument = a"), finishedWithFailure(message("a")))) //
+					.haveExactly(1, event(test(), displayName("[2] argument = b"), finishedWithFailure(message("b")))) //
+					.haveExactly(1, event(test(), displayName("[3] argument = c"), finishedWithFailure(message("c")))) //
+					.haveExactly(1, event(test(), displayName("[4] argument = d"), finishedWithFailure(message("d"))));
 		}
 
 		private EngineExecutionResults execute(String methodName, Class<?>... methodParameterTypes) {
@@ -1385,8 +1433,8 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		results.allEvents().assertThatEvents() //
 				.haveExactly(2, event(test(), finishedWithFailure())) //
-				.haveExactly(1, event(test(), displayName("[2] argument=3"), finishedWithFailure())) //
-				.haveExactly(1, event(test(), displayName("[3] argument=5"), finishedWithFailure()));
+				.haveExactly(1, event(test(), displayName("[2] argument = 3"), finishedWithFailure())) //
+				.haveExactly(1, event(test(), displayName("[3] argument = 5"), finishedWithFailure()));
 	}
 
 	@Nested
@@ -1418,37 +1466,48 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	static class TestCase {
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ArgumentsSource(TwoSingleStringArgumentsProvider.class)
 		void testWithTwoSingleStringArgumentsProvider(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource({ "foo", "bar" })
 		void testWithCsvSource(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest(name = "{0} and {1}")
+		@ParameterizedTest(name = "{0}")
+		@CsvSource({ "'üñåé'", "'\n'", "'\r'", "'\u0007'", "😱", "'Zero\u200BWidth\u200BSpaces'" })
+		void testWithCsvSourceAndSpecialCharacters(String argument) {
+		}
+
+		@ParameterizedTest(quoteTextArguments = false, name = "{0} and {1}")
 		@CsvSource({ "foo, 23", "bar, 42" })
 		void testWithCustomName(String argument, int i) {
 			fail(argument + ", " + i);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(shorts = { 1, 2 })
 		void testWithPrimitiveWideningConversion(double num) {
 			fail("num: " + num);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = { "book 1", "book 2" })
 		void testWithImplicitGenericConverter(Book book) {
 			fail(book.title);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(name = "{0}")
+		@ValueSource(strings = { "record 1", "record 2" })
+		void testWithImplicitGenericConverterWithCharSequenceConstructor(Record record) {
+			fail(record.title.toString());
+		}
+
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = { "O", "XXX" })
 		void testWithExplicitConverter(@ConvertWith(StringLengthConverter.class) int length) {
 			fail("length: " + length);
@@ -1460,55 +1519,55 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(ints = 42)
 		void testWithErroneousConverter(@ConvertWith(ErroneousConverter.class) Object ignored) {
 			fail("this should never be called");
 		}
 
-		@ParameterizedTest(name = "{0,number,#.####}")
+		@ParameterizedTest(quoteTextArguments = false, name = "{0,number,#.####}")
 		@ValueSource(doubles = Math.PI)
 		void testWithMessageFormat(double argument) {
 			fail(String.valueOf(argument));
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource({ "ab, cd", "ef, gh" })
 		void testWithAggregator(@AggregateWith(StringAggregator.class) String concatenation) {
 			fail("concatenation: " + concatenation);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource(value = { " ab , cd", "ef ,gh" }, ignoreLeadingAndTrailingWhitespace = false)
 		void testWithIgnoreLeadingAndTrailingWhitespaceSetToFalseForCsvSource(String argument1, String argument2) {
 			fail("arguments: '" + argument1 + "', '" + argument2 + "'");
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource(value = { " ab , cd", "ef ,gh" }, ignoreLeadingAndTrailingWhitespace = true)
 		void testWithIgnoreLeadingAndTrailingWhitespaceSetToTrueForCsvSource(String argument1, String argument2) {
 			fail("arguments: '" + argument1 + "', '" + argument2 + "'");
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvFileSource(resources = "provider/leading-trailing-spaces.csv", ignoreLeadingAndTrailingWhitespace = false)
 		void testWithIgnoreLeadingAndTrailingWhitespaceSetToFalseForCsvFileSource(String argument1, String argument2) {
 			fail("arguments: '" + argument1 + "', '" + argument2 + "'");
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvFileSource(resources = "provider/leading-trailing-spaces.csv", ignoreLeadingAndTrailingWhitespace = true)
 		void testWithIgnoreLeadingAndTrailingWhitespaceSetToTrueForCsvFileSource(String argument1, String argument2) {
 			fail("arguments: '" + argument1 + "', '" + argument2 + "'");
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ArgumentsSource(AutoCloseableArgumentProvider.class)
 		void testWithAutoCloseableArgument(AutoCloseableArgument autoCloseable) {
 			assertEquals(0, AutoCloseableArgument.closeCounter);
 		}
 
-		@ParameterizedTest(autoCloseArguments = false)
+		@ParameterizedTest(quoteTextArguments = false, autoCloseArguments = false)
 		@ArgumentsSource(AutoCloseableArgumentProvider.class)
 		void testWithAutoCloseableArgumentButDisabledCleanup(AutoCloseableArgument autoCloseable) {
 			assertEquals(0, AutoCloseableArgument.closeCounter);
@@ -1761,7 +1820,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		@Target(ElementType.METHOD)
 		@Retention(RUNTIME)
-		@ParameterizedTest(name = "{arguments}")
+		@ParameterizedTest(quoteTextArguments = false, name = "{arguments}")
 		@MethodSource
 		@interface MethodSourceTest {
 		}
@@ -1936,7 +1995,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	/**
 	 * @since 5.9.1
-	 * @see https://github.com/junit-team/junit5/issues/3001
+	 * @see https://github.com/junit-team/junit-framework/issues/3001
 	 */
 	static class DuplicateMethodNamesMethodSourceTestCase {
 
@@ -1986,7 +2045,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		@Target(ElementType.METHOD)
 		@Retention(RUNTIME)
-		@ParameterizedTest(name = "{arguments}")
+		@ParameterizedTest(quoteTextArguments = false, name = "{arguments}")
 		@FieldSource
 		@interface FieldSourceTest {
 		}
@@ -2150,25 +2209,25 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	static class UnusedArgumentsTestCase {
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ArgumentsSource(TwoUnusedStringArgumentsProvider.class)
 		void testWithTwoUnusedStringArgumentsProvider(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource({ "foo, unused1", "bar, unused2" })
 		void testWithCsvSourceContainingUnusedArguments(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvFileSource(resources = "two-column.csv")
 		void testWithCsvFileSourceContainingUnusedArguments(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@MethodSource("unusedArgumentsProviderMethod")
 		void testWithMethodSourceProvidingUnusedArguments(String argument) {
 			fail(argument);
@@ -2178,7 +2237,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			return Stream.of(arguments("foo", "unused1"), arguments("bar", "unused2"));
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@FieldSource("unusedArgumentsProviderField")
 		void testWithFieldSourceProvidingUnusedArguments(String argument) {
 			fail(argument);
@@ -2193,13 +2252,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			fail(argument);
 		}
 
-		@ParameterizedTest(argumentCountValidation = ArgumentCountValidationMode.NONE)
+		@ParameterizedTest(quoteTextArguments = false, argumentCountValidation = ArgumentCountValidationMode.NONE)
 		@CsvSource({ "foo, unused1" })
 		void testWithNoneArgumentCountValidation(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource({ "foo, unused1", "bar" })
 		void testWithCsvSourceContainingDifferentNumbersOfArguments(String argument) {
 			fail(argument);
@@ -2229,7 +2288,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		private static final List<String> lifecycleEvents = new ArrayList<>();
 		private static final Set<String> testMethods = new LinkedHashSet<>();
 
-		public LifecycleTestCase(TestInfo testInfo) {
+		LifecycleTestCase(TestInfo testInfo) {
 			lifecycleEvents.add("constructor:" + testInfo.getDisplayName());
 		}
 
@@ -2253,13 +2312,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			lifecycleEvents.add("afterEach:" + testInfo.getDisplayName());
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@MethodSource("providerMethod")
 		void test1(String argument, TestInfo testInfo) {
 			performTest(argument, testInfo);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@MethodSource("providerMethod")
 		void test2(String argument, TestInfo testInfo) {
 			performTest(argument, testInfo);
@@ -2281,7 +2340,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	static class RepeatableSourcesTestCase {
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvFileSource(resources = "two-column.csv")
 		@CsvFileSource(resources = "two-column-with-headers.csv", delimiter = '|', useHeadersInDisplayName = true, nullValues = "NIL")
 		void testWithRepeatableCsvFileSource(String column1, String column2) {
@@ -2294,13 +2353,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoCsvFileSources {
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoCsvFileSources
 		void testWithRepeatableCsvFileSourceAsMetaAnnotation(String column1, String column2) {
 			fail("%s %s".formatted(column1, column2));
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@CsvSource({ "a" })
 		@CsvSource({ "b" })
 		void testWithRepeatableCsvSource(String argument) {
@@ -2313,13 +2372,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoCsvSources {
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoCsvSources
 		void testWithRepeatableCsvSourceAsMetaAnnotation(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@EnumSource(SmartAction.class)
 		@EnumSource(QuickAction.class)
 		void testWithRepeatableEnumSource(Action argument) {
@@ -2332,7 +2391,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoEnumSources {
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoEnumSources
 		void testWithRepeatableEnumSourceAsMetaAnnotation(Action argument) {
 			fail(argument.toString());
@@ -2349,7 +2408,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			BAR
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@MethodSource("someArgumentsMethodSource")
 		@MethodSource("otherArgumentsMethodSource")
 		void testWithRepeatableMethodSource(String argument) {
@@ -2363,7 +2422,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@SuppressWarnings("JUnitMalformedDeclaration")
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoMethodSources
 		void testWithRepeatableMethodSourceAsMetaAnnotation(String argument) {
 			fail(argument);
@@ -2377,7 +2436,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			return Stream.of(Arguments.of("other"));
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@FieldSource("someArgumentsContainer")
 		@FieldSource("otherArgumentsContainer")
 		void testWithRepeatableFieldSource(String argument) {
@@ -2390,7 +2449,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoFieldSources {
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoFieldSources
 		void testWithRepeatableFieldSourceAsMetaAnnotation(String argument) {
 			fail(argument);
@@ -2399,7 +2458,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		static List<String> someArgumentsContainer = List.of("some");
 		static List<String> otherArgumentsContainer = List.of("other");
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "foo")
 		@ValueSource(strings = "bar")
 		void testWithRepeatableValueSource(String argument) {
@@ -2412,13 +2471,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoValueSources {
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoValueSources
 		void testWithRepeatableValueSourceAsMetaAnnotation(String argument) {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "foo")
 		@ValueSource(strings = "foo")
 		@ValueSource(strings = "foo")
@@ -2428,7 +2487,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "a")
 		@ValueSource(strings = "b")
 		@CsvSource({ "c" })
@@ -2437,7 +2496,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			fail(argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ArgumentsSource(TwoSingleStringArgumentsProvider.class)
 		@ArgumentsSource(TwoUnusedStringArgumentsProvider.class)
 		void testWithRepeatableArgumentsSource(String argument) {
@@ -2450,7 +2509,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoArgumentsSources {
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@TwoArgumentsSources
 		void testWithRepeatableArgumentsSourceAsMetaAnnotation(String argument) {
 			fail(argument);
@@ -2476,20 +2535,20 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			}
 		};
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ArgumentsSource(ArgumentsProviderWithConstructorParameter.class)
 		void argumentsProviderWithConstructorParameter(String argument) {
 			assertEquals("resolved value", argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "value")
 		void argumentConverterWithConstructorParameter(
 				@ConvertWith(ArgumentConverterWithConstructorParameter.class) String argument) {
 			assertEquals("resolved value", argument);
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "value")
 		void argumentsAggregatorWithConstructorParameter(
 				@AggregateWith(ArgumentsAggregatorWithConstructorParameter.class) String argument) {
@@ -2518,7 +2577,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 			private final String value;
 
-			public ArgumentsAggregatorWithConstructorParameter(String value) {
+			ArgumentsAggregatorWithConstructorParameter(String value) {
 				this.value = value;
 			}
 
@@ -2532,19 +2591,19 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	static class ZeroInvocationsTestCase {
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@MethodSource("zeroArgumentsProvider")
 		void testThatRequiresInvocations(String argument) {
 			fail("This test should not be executed, because no arguments are provided.");
 		}
 
-		@ParameterizedTest(allowZeroInvocations = true)
+		@ParameterizedTest(quoteTextArguments = false, allowZeroInvocations = true)
 		@MethodSource("zeroArgumentsProvider")
 		void testThatDoesNotRequireInvocations(String argument) {
 			fail("This test should not be executed, because no arguments are provided.");
 		}
 
-		@ParameterizedTest(allowZeroInvocations = true)
+		@ParameterizedTest(quoteTextArguments = false, allowZeroInvocations = true)
 		@SuppressWarnings("JUnitMalformedDeclaration")
 		void testThatHasNoArgumentsSource(String argument) {
 			fail("This test should not be executed, because no arguments source is declared.");
@@ -2557,18 +2616,32 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	static class LocaleConversionTestCase {
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "en-US")
 		void testWithBcp47(Locale locale) {
 			assertEquals("en", locale.getLanguage());
 			assertEquals("US", locale.getCountry());
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ValueSource(strings = "en-US")
-		void testWithIso639(Locale locale) {
+		void testWithIso639(@ConvertWith(Iso639Converter.class) Locale locale) {
 			assertEquals("en-us", locale.getLanguage());
 			assertEquals("", locale.getCountry());
+		}
+
+		@NullMarked
+		static class Iso639Converter extends TypedArgumentConverter<String, Locale> {
+
+			Iso639Converter() {
+				super(String.class, Locale.class);
+			}
+
+			@SuppressWarnings("deprecation")
+			@Override
+			protected Locale convert(@Nullable String source) throws ArgumentConversionException {
+				return new Locale(requireNonNull(source));
+			}
 		}
 
 	}
@@ -2648,6 +2721,9 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	record Record(CharSequence title) {
+	}
+
 	static class FailureInBeforeEachTestCase {
 
 		@BeforeEach
@@ -2655,7 +2731,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			fail("beforeEach");
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@ArgumentsSource(AutoCloseableArgumentProvider.class)
 		void test(AutoCloseableArgument autoCloseable) {
 			assertNotNull(autoCloseable);
@@ -2667,15 +2743,16 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		static {
 			//noinspection ConstantValue
-			if (true)
+			if (true) {
 				throw new RuntimeException("boom");
+			}
 		}
 
 		private static Stream<String> getArguments() {
 			return Stream.of("foo", "bar");
 		}
 
-		@ParameterizedTest
+		@ParameterizedTest(quoteTextArguments = false)
 		@MethodSource("getArguments")
 		void test(String value) {
 			fail("should not be called: " + value);

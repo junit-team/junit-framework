@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.api;
 
-import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.time.Duration;
@@ -26,6 +25,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.function.ThrowingSupplier;
+import org.junit.platform.commons.annotation.Contract;
 import org.opentest4j.MultipleFailuresError;
 
 /**
@@ -116,7 +116,8 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
-	@SuppressWarnings("NullAway")
+	@Contract(" -> fail")
+	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail() {
 		AssertionUtils.fail();
 		return null; // appeasing the compiler: this line will never be executed.
@@ -136,7 +137,8 @@ public class Assertions {
 	 * Stream.of().map(entry -> fail("should not be called"));
 	 * }</pre>
 	 */
-	@SuppressWarnings("NullAway")
+	@Contract("_ -> fail")
+	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(@Nullable String message) {
 		AssertionUtils.fail(message);
 		return null; // appeasing the compiler: this line will never be executed.
@@ -149,7 +151,8 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
-	@SuppressWarnings("NullAway")
+	@Contract("_, _ -> fail")
+	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(@Nullable String message, @Nullable Throwable cause) {
 		AssertionUtils.fail(message, cause);
 		return null; // appeasing the compiler: this line will never be executed.
@@ -161,7 +164,8 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
-	@SuppressWarnings("NullAway")
+	@Contract("_ -> fail")
+	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(@Nullable Throwable cause) {
 		AssertionUtils.fail(cause);
 		return null; // appeasing the compiler: this line will never be executed.
@@ -174,7 +178,8 @@ public class Assertions {
 	 * <p>See Javadoc for {@link #fail(String)} for an explanation of this method's
 	 * generic return type {@code V}.
 	 */
-	@SuppressWarnings("NullAway")
+	@Contract("_ -> fail")
+	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
 	public static <V> V fail(Supplier<@Nullable String> messageSupplier) {
 		AssertionUtils.fail(messageSupplier);
 		return null; // appeasing the compiler: this line will never be executed.
@@ -185,6 +190,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that the supplied {@code condition} is {@code true}.
 	 */
+	@Contract("false -> fail")
 	public static void assertTrue(boolean condition) {
 		AssertTrue.assertTrue(condition);
 	}
@@ -193,6 +199,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code true}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("false, _ -> fail")
 	public static void assertTrue(boolean condition, Supplier<@Nullable String> messageSupplier) {
 		AssertTrue.assertTrue(condition, messageSupplier);
 	}
@@ -216,6 +223,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code true}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("false, _ -> fail")
 	public static void assertTrue(boolean condition, @Nullable String message) {
 		AssertTrue.assertTrue(condition, message);
 	}
@@ -233,6 +241,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that the supplied {@code condition} is {@code false}.
 	 */
+	@Contract("true -> fail")
 	public static void assertFalse(boolean condition) {
 		AssertFalse.assertFalse(condition);
 	}
@@ -241,6 +250,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code false}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("true, _ -> fail")
 	public static void assertFalse(boolean condition, @Nullable String message) {
 		AssertFalse.assertFalse(condition, message);
 	}
@@ -249,6 +259,7 @@ public class Assertions {
 	 * <em>Assert</em> that the supplied {@code condition} is {@code false}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("true, _ -> fail")
 	public static void assertFalse(boolean condition, Supplier<@Nullable String> messageSupplier) {
 		AssertFalse.assertFalse(condition, messageSupplier);
 	}
@@ -281,6 +292,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that {@code actual} is {@code null}.
 	 */
+	@Contract("!null -> fail")
 	public static void assertNull(@Nullable Object actual) {
 		AssertNull.assertNull(actual);
 	}
@@ -289,6 +301,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is {@code null}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("!null, _ -> fail")
 	public static void assertNull(@Nullable Object actual, @Nullable String message) {
 		AssertNull.assertNull(actual, message);
 	}
@@ -297,6 +310,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is {@code null}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("!null, _ -> fail")
 	public static void assertNull(@Nullable Object actual, Supplier<@Nullable String> messageSupplier) {
 		AssertNull.assertNull(actual, messageSupplier);
 	}
@@ -306,6 +320,7 @@ public class Assertions {
 	/**
 	 * <em>Assert</em> that {@code actual} is not {@code null}.
 	 */
+	@Contract("null -> fail")
 	public static void assertNotNull(@Nullable Object actual) {
 		AssertNotNull.assertNotNull(actual);
 	}
@@ -314,6 +329,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is not {@code null}.
 	 * <p>Fails with the supplied failure {@code message}.
 	 */
+	@Contract("null, _ -> fail")
 	public static void assertNotNull(@Nullable Object actual, @Nullable String message) {
 		AssertNotNull.assertNotNull(actual, message);
 	}
@@ -322,6 +338,7 @@ public class Assertions {
 	 * <em>Assert</em> that {@code actual} is not {@code null}.
 	 * <p>If necessary, the failure message will be retrieved lazily from the supplied {@code messageSupplier}.
 	 */
+	@Contract("null, _ -> fail")
 	public static void assertNotNull(@Nullable Object actual, Supplier<@Nullable String> messageSupplier) {
 		AssertNotNull.assertNotNull(actual, messageSupplier);
 	}
@@ -1741,7 +1758,7 @@ public class Assertions {
 	// --- assertNotEquals -----------------------------------------------------
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1751,7 +1768,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1761,7 +1778,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1771,7 +1788,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1781,7 +1798,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1793,7 +1810,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1805,7 +1822,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1817,7 +1834,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1829,7 +1846,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -1842,7 +1859,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -1856,7 +1873,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -1870,7 +1887,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -1884,7 +1901,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1894,7 +1911,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1904,7 +1921,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1914,7 +1931,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -1924,7 +1941,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1936,7 +1953,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1948,7 +1965,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1960,7 +1977,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -1972,7 +1989,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -1985,7 +2002,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -1999,7 +2016,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2013,7 +2030,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2027,7 +2044,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2037,7 +2054,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2047,7 +2064,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2057,7 +2074,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2067,7 +2084,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2079,7 +2096,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2091,7 +2108,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2103,7 +2120,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2116,7 +2133,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2129,7 +2146,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2143,7 +2160,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2157,7 +2174,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2171,7 +2188,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2181,7 +2198,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2191,7 +2208,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2201,7 +2218,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2211,7 +2228,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2223,7 +2240,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2235,7 +2252,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2247,7 +2264,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2259,7 +2276,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2272,7 +2289,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2286,7 +2303,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2300,7 +2317,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2314,7 +2331,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2327,7 +2344,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2340,7 +2357,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2353,7 +2370,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2366,7 +2383,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2381,7 +2398,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2396,7 +2413,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2411,7 +2428,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2426,7 +2443,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2439,7 +2456,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2453,7 +2470,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2467,7 +2484,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Float#equals(Object)} and {@link Float#compare(float, float)}.
@@ -2481,7 +2498,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal
 	 * within the given {@code delta}.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
@@ -2495,7 +2512,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal
 	 * within the given {@code delta}.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
@@ -2511,7 +2528,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal
 	 * within the given {@code delta}.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
@@ -2526,7 +2543,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2539,7 +2556,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2552,7 +2569,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2565,7 +2582,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2578,7 +2595,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2593,7 +2610,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2608,7 +2625,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2623,7 +2640,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2638,7 +2655,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2651,7 +2668,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2665,7 +2682,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2679,7 +2696,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
 	 * {@link Double#equals(Object)} and {@link Double#compare(double, double)}.
@@ -2693,7 +2710,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal
 	 * within the given {@code delta}.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
@@ -2707,7 +2724,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal
 	 * within the given {@code delta}.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
@@ -2723,7 +2740,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal
 	 * within the given {@code delta}.
 	 *
 	 * <p>Inequality imposed by this method is consistent with
@@ -2738,7 +2755,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2748,7 +2765,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2758,7 +2775,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2768,7 +2785,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * @since 5.4
 	 */
@@ -2778,7 +2795,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2790,7 +2807,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2802,7 +2819,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2814,7 +2831,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -2827,7 +2844,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2840,7 +2857,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2854,7 +2871,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2868,7 +2885,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -2882,7 +2899,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails if both are {@code null}.
 	 *
@@ -2893,7 +2910,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails if both are {@code null}.
 	 *
@@ -2906,7 +2923,7 @@ public class Assertions {
 	}
 
 	/**
-	 * <em>Assert</em> that {@code expected} and {@code actual} are not equal.
+	 * <em>Assert</em> that {@code unexpected} and {@code actual} are not equal.
 	 *
 	 * <p>Fails if both are {@code null}.
 	 *
@@ -3098,7 +3115,7 @@ public class Assertions {
 	 * and all exceptions will be aggregated and reported in a {@link MultipleFailuresError}.
 	 * In addition, all aggregated exceptions will be added as {@linkplain
 	 * Throwable#addSuppressed(Throwable) suppressed exceptions} to the
-	 * {@code MultipleFailuresError}. However, if an {@code executable} throws an
+	 * {@code MultipleFailuresError}. However, if one of the {@code executables} throws an
 	 * <em>unrecoverable</em> exception &mdash; for example, an {@link OutOfMemoryError}
 	 * &mdash; execution will halt immediately, and the unrecoverable exception will be
 	 * rethrown <em>as is</em> but <em>masked</em> as an unchecked exception.
@@ -3654,36 +3671,6 @@ public class Assertions {
 		return AssertTimeoutPreemptively.assertTimeoutPreemptively(timeout, supplier, messageSupplier);
 	}
 
-	/**
-	 * <em>Assert</em> that execution of the supplied {@code supplier}
-	 * completes before the given {@code timeout} is exceeded.
-	 *
-	 * <p>See the {@linkplain Assertions Preemptive Timeouts} section of the
-	 * class-level Javadoc for further details.
-	 *
-	 * <p>If the assertion passes then the {@code supplier}'s result is returned.
-	 *
-	 * <p>In the case the assertion does not pass, the supplied
-	 * {@link TimeoutFailureFactory} is invoked to create an exception which is
-	 * then thrown.
-	 *
-	 * <p>If necessary, the failure message will be retrieved lazily from the
-	 * supplied {@code messageSupplier}.
-	 *
-	 * @see #assertTimeoutPreemptively(Duration, Executable)
-	 * @see #assertTimeoutPreemptively(Duration, Executable, String)
-	 * @see #assertTimeoutPreemptively(Duration, Executable, Supplier)
-	 * @see #assertTimeoutPreemptively(Duration, ThrowingSupplier)
-	 * @see #assertTimeoutPreemptively(Duration, ThrowingSupplier, String)
-	 * @see #assertTimeout(Duration, Executable, Supplier)
-	 */
-	@API(status = INTERNAL, since = "5.9.1")
-	public static <T extends @Nullable Object, E extends Throwable> T assertTimeoutPreemptively(Duration timeout,
-			ThrowingSupplier<T> supplier, Supplier<@Nullable String> messageSupplier,
-			TimeoutFailureFactory<E> failureFactory) throws E {
-		return AssertTimeoutPreemptively.assertTimeoutPreemptively(timeout, supplier, messageSupplier, failureFactory);
-	}
-
 	// --- assertInstanceOf ----------------------------------------------------
 
 	/**
@@ -3696,6 +3683,7 @@ public class Assertions {
 	 * @since 5.8
 	 */
 	@API(status = STABLE, since = "5.10")
+	@Contract("_, null -> fail")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue) {
 		return AssertInstanceOf.assertInstanceOf(expectedType, actualValue);
 	}
@@ -3712,6 +3700,7 @@ public class Assertions {
 	 * @since 5.8
 	 */
 	@API(status = STABLE, since = "5.10")
+	@Contract("_, null, _ -> fail")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			@Nullable String message) {
 		return AssertInstanceOf.assertInstanceOf(expectedType, actualValue, message);
@@ -3729,28 +3718,11 @@ public class Assertions {
 	 *
 	 * @since 5.8
 	 */
+	@Contract("_, null, _ -> fail")
 	@API(status = STABLE, since = "5.10")
 	public static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			Supplier<@Nullable String> messageSupplier) {
 		return AssertInstanceOf.assertInstanceOf(expectedType, actualValue, messageSupplier);
 	}
 
-	/**
-	 * Factory for timeout failures.
-	 *
-	 * @param <T> The type of error or exception created
-	 * @since 5.9.1
-	 * @see Assertions#assertTimeoutPreemptively(Duration, ThrowingSupplier, Supplier, TimeoutFailureFactory)
-	 */
-	@API(status = INTERNAL, since = "5.9.1")
-	public interface TimeoutFailureFactory<T extends Throwable> {
-
-		/**
-		 * Create a failure for the given timeout, message, and cause.
-		 *
-		 * @return timeout failure; never {@code null}
-		 */
-		T createTimeoutFailure(Duration timeout, @Nullable Supplier<@Nullable String> messageSupplier,
-				@Nullable Throwable cause, @Nullable Thread testThread);
-	}
 }

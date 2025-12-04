@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.parallel;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
 
@@ -20,7 +20,7 @@ import org.apiguardian.api.API;
  * @since 5.12
  * @see ResourceLock#target()
  */
-@API(status = EXPERIMENTAL, since = "5.12")
+@API(status = MAINTAINED, since = "5.13.3")
 public enum ResourceLockTarget {
 
 	/**

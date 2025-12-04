@@ -1,0 +1,13 @@
+before_install:
+  - sdk update
+  - sdk install java 25-open
+  - sdk use java 25-open
+install:
+  - |
+    ./gradlew \
+      --show-version \
+      -Pjitpack.version=$VERSION \
+      -Ppublishing.group=$GROUP.$ARTIFACT \
+      -Ppublishing.signArtifacts=false \
+      javaToolchains \
+      publishToMavenLocal

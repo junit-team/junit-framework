@@ -147,7 +147,7 @@ public class EngineFilter implements Filter<TestEngine> {
 
 		// @formatter:off
 		return engineIds.stream()
-				.map(id -> Preconditions.notBlank(id, "engine ID must not be null or blank").trim())
+				.map(id -> Preconditions.notBlank(id, "engine ID must not be null or blank").strip())
 				.distinct()
 				.toList();
 		// @formatter:on

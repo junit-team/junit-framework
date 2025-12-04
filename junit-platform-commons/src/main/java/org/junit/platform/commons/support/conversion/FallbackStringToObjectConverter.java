@@ -38,16 +38,21 @@ import org.junit.platform.commons.util.Preconditions;
  * <h2>Search Algorithm</h2>
  *
  * <ol>
- * <li>Search for a single, non-private static factory method in the target
- * type that converts from a String to the target type. Use the factory method
+ * <li>Search for a single, non-private static factory method in the target type
+ * that converts from a {@link String} to the target type. Use the factory method
  * if present.</li>
- * <li>Search for a single, non-private constructor in the target type that
- * accepts a String. Use the constructor if present.</li>
+ * <li>Search for a single, non-private constructor in the target type that accepts
+ * a {@link String}. Use the constructor if present.</li>
+ * <li>Search for a single, non-private static factory method in the target type
+ * that converts from a {@link CharSequence} to the target type. Use the factory
+ * method if present.</li>
+ * <li>Search for a single, non-private constructor in the target type that accepts
+ * a {@link CharSequence}. Use the constructor if present.</li>
  * </ol>
  *
- * <p>If multiple suitable factory methods are discovered they will be ignored.
- * If neither a single factory method nor a single constructor is found, this
- * converter acts as a no-op.
+ * <p>If multiple suitable factory methods or constructors are discovered they
+ * will be ignored. If neither a single factory method nor a single constructor
+ * is found, this converter acts as a no-op.
  *
  * @since 1.11
  * @see ConversionSupport
@@ -76,8 +81,7 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 	}
 
 	@Override
-	@Nullable
-	public Object convert(String source, Class<?> targetType) throws Exception {
+	public @Nullable Object convert(String source, Class<?> targetType) throws Exception {
 		Function<String, @Nullable Object> executable = findFactoryExecutable(targetType);
 		Preconditions.condition(executable != NULL_EXECUTABLE,
 			"Illegal state: convert() must not be called if canConvert() returned false");
@@ -87,28 +91,47 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 
 	private static Function<String, @Nullable Object> findFactoryExecutable(Class<?> targetType) {
 		return factoryExecutableCache.computeIfAbsent(targetType, type -> {
-			Method factoryMethod = findFactoryMethod(type);
-			if (factoryMethod != null) {
-				return source -> invokeMethod(factoryMethod, null, source);
+			// First, search for exact String argument matches.
+			Function<String, @Nullable Object> factory = findFactoryExecutable(type, String.class);
+			if (factory != null) {
+				return factory;
 			}
-			Constructor<?> constructor = findFactoryConstructor(type);
-			if (constructor != null) {
-				return source -> newInstance(constructor, source);
+			// Second, fall back to CharSequence argument matches.
+			factory = findFactoryExecutable(type, CharSequence.class);
+			if (factory != null) {
+				return factory;
 			}
+			// Else, nothing found.
 			return NULL_EXECUTABLE;
 		});
 	}
 
-	private static @Nullable Method findFactoryMethod(Class<?> targetType) {
-		List<Method> factoryMethods = findMethods(targetType, new IsFactoryMethod(targetType), BOTTOM_UP);
+	private static @Nullable Function<String, @Nullable Object> findFactoryExecutable(Class<?> targetType,
+			Class<?> parameterType) {
+
+		Method factoryMethod = findFactoryMethod(targetType, parameterType);
+		if (factoryMethod != null) {
+			return source -> invokeMethod(factoryMethod, null, source);
+		}
+		Constructor<?> constructor = findFactoryConstructor(targetType, parameterType);
+		if (constructor != null) {
+			return source -> newInstance(constructor, source);
+		}
+		return null;
+	}
+
+	private static @Nullable Method findFactoryMethod(Class<?> targetType, Class<?> parameterType) {
+		List<Method> factoryMethods = findMethods(targetType, new IsFactoryMethod(targetType, parameterType),
+			BOTTOM_UP);
 		if (factoryMethods.size() == 1) {
 			return factoryMethods.get(0);
 		}
 		return null;
 	}
 
-	private static @Nullable Constructor<?> findFactoryConstructor(Class<?> targetType) {
-		List<Constructor<?>> constructors = findConstructors(targetType, new IsFactoryConstructor(targetType));
+	private static @Nullable Constructor<?> findFactoryConstructor(Class<?> targetType, Class<?> parameterType) {
+		List<Constructor<?>> constructors = findConstructors(targetType,
+			new IsFactoryConstructor(targetType, parameterType));
 		if (constructors.size() == 1) {
 			return constructors.get(0);
 		}
@@ -118,15 +141,9 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 	/**
 	 * {@link Predicate} that determines if the {@link Method} supplied to
 	 * {@link #test(Method)} is a non-private static factory method for the
-	 * supplied {@link #targetType}.
+	 * supplied {@link #targetType} and {@link #parameterType}.
 	 */
-	static class IsFactoryMethod implements Predicate<Method> {
-
-		private final Class<?> targetType;
-
-		IsFactoryMethod(Class<?> targetType) {
-			this.targetType = targetType;
-		}
+	record IsFactoryMethod(Class<?> targetType, Class<?> parameterType) implements Predicate<Method> {
 
 		@Override
 		public boolean test(Method method) {
@@ -137,23 +154,16 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 			if (isNotStatic(method)) {
 				return false;
 			}
-			return isNotPrivateAndAcceptsSingleStringArgument(method);
+			return isFactoryCandidate(method, this.parameterType);
 		}
-
 	}
 
 	/**
 	 * {@link Predicate} that determines if the {@link Constructor} supplied to
 	 * {@link #test(Constructor)} is a non-private factory constructor for the
-	 * supplied {@link #targetType}.
+	 * supplied {@link #targetType} and {@link #parameterType}.
 	 */
-	static class IsFactoryConstructor implements Predicate<Constructor<?>> {
-
-		private final Class<?> targetType;
-
-		IsFactoryConstructor(Class<?> targetType) {
-			this.targetType = targetType;
-		}
+	record IsFactoryConstructor(Class<?> targetType, Class<?> parameterType) implements Predicate<Constructor<?>> {
 
 		@Override
 		public boolean test(Constructor<?> constructor) {
@@ -161,15 +171,18 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 			if (!constructor.getDeclaringClass().equals(this.targetType)) {
 				return false;
 			}
-			return isNotPrivateAndAcceptsSingleStringArgument(constructor);
+			return isFactoryCandidate(constructor, this.parameterType);
 		}
-
 	}
 
-	private static boolean isNotPrivateAndAcceptsSingleStringArgument(Executable executable) {
+	/**
+	 * Determine if the supplied {@link Executable} is not private and accepts a
+	 * single argument of the supplied parameter type.
+	 */
+	private static boolean isFactoryCandidate(Executable executable, Class<?> parameterType) {
 		return isNotPrivate(executable) //
 				&& (executable.getParameterCount() == 1) //
-				&& (executable.getParameterTypes()[0] == String.class);
+				&& (executable.getParameterTypes()[0] == parameterType);
 	}
 
 }

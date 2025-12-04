@@ -28,7 +28,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.console.options.StdStreamTestCase;
+import org.junit.platform.console.command.StdStreamTestCase;
+import org.junit.platform.console.subpackage.FailingTestCase;
 
 /**
  * @since 1.0
@@ -121,6 +122,18 @@ class ConsoleLauncherIntegrationTests {
 		assertTrue(Files.exists(outputFile), "File does not exist.");
 		assertEquals(StdStreamTestCase.getStdoutOutputFileSize() + StdStreamTestCase.getStderrOutputFileSize(),
 			Files.size(outputFile), "Invalid file size.");
+	}
+
+	@Test
+	void stopsAfterFirstFailingTest() {
+		var result = new ConsoleLauncherWrapper().execute(1, "execute", "-e", "junit-jupiter", "--select-class",
+			FailingTestCase.class.getName(), "--fail-fast", "--disable-ansi-colors");
+
+		assertThat(result.getTestsStartedCount()).isEqualTo(1);
+		assertThat(result.getTestsFailedCount()).isEqualTo(1);
+		assertThat(result.getTestsSkippedCount()).isEqualTo(1);
+
+		assertThat(result.out).endsWith("%nTest execution was cancelled due to --fail-fast mode.%n%n".formatted());
 	}
 
 }

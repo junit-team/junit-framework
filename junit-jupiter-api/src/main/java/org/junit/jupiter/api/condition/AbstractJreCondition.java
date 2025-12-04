@@ -33,21 +33,20 @@ abstract class AbstractJreCondition<A extends Annotation> extends BooleanExecuti
 	static final String DISABLED_ON_CURRENT_JRE = //
 		"Disabled on JRE version: " + System.getProperty("java.version");
 
-	private final String annotationName;
-
 	AbstractJreCondition(Class<A> annotationType, Function<A, String> customDisabledReason) {
 		super(annotationType, ENABLED_ON_CURRENT_JRE, DISABLED_ON_CURRENT_JRE, customDisabledReason);
-		this.annotationName = annotationType.getSimpleName();
 	}
 
 	protected final IntStream validatedVersions(JRE[] jres, int[] versions) {
+		String annotationName = super.annotationType.getSimpleName();
+
 		Preconditions.condition(jres.length > 0 || versions.length > 0,
-			() -> "You must declare at least one JRE or version in @" + this.annotationName);
+			() -> "You must declare at least one JRE or version in @" + annotationName);
 
 		Preconditions.condition(Arrays.stream(jres).noneMatch(isEqual(JRE.UNDEFINED)),
-			() -> "JRE.UNDEFINED is not supported in @" + this.annotationName);
+			() -> "JRE.UNDEFINED is not supported in @" + annotationName);
 		Arrays.stream(versions).min().ifPresent(version -> Preconditions.condition(version >= JRE.MINIMUM_VERSION,
-			() -> "Version [%d] in @%s must be greater than or equal to %d".formatted(version, this.annotationName,
+			() -> "Version [%d] in @%s must be greater than or equal to %d".formatted(version, annotationName,
 				JRE.MINIMUM_VERSION)));
 
 		return IntStream.concat(//

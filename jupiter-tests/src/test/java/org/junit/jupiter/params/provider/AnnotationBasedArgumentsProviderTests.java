@@ -38,7 +38,7 @@ class AnnotationBasedArgumentsProviderTests {
 		}
 	};
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	@DisplayName("should throw exception when null annotation is provided to accept method")
 	void shouldThrowExceptionWhenNullAnnotationIsProvidedToAccept() {

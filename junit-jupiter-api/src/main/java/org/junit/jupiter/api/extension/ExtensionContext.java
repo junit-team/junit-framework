@@ -13,6 +13,7 @@ package org.junit.jupiter.api.extension;
 import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.reflect.AnnotatedElement;
@@ -28,6 +29,7 @@ import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -134,6 +136,22 @@ public interface ExtensionContext {
 	Optional<Class<?>> getTestClass();
 
 	/**
+	 * Get the <em>required</em> {@link Class} associated with the current test
+	 * or container.
+	 *
+	 * <p>Use this method as an alternative to {@link #getTestClass()} for use
+	 * cases in which the test class is required to be present.
+	 *
+	 * @return the test class; never {@code null}
+	 * @throws PreconditionViolationException if the test class is not present
+	 * in this {@code ExtensionContext}
+	 */
+	default Class<?> getRequiredTestClass() {
+		return Preconditions.notNull(getTestClass().orElse(null),
+			"Illegal state: required test class is not present in the current ExtensionContext");
+	}
+
+	/**
 	 * Get the enclosing test classes of the current test or container.
 	 *
 	 * <p>This method is useful to look up annotations on nested test classes
@@ -155,24 +173,8 @@ public interface ExtensionContext {
 	 * @since 5.12.1
 	 * @see org.junit.platform.commons.support.AnnotationSupport#findAnnotation(Class, Class, List)
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12.1")
+	@API(status = MAINTAINED, since = "5.13.3")
 	List<Class<?>> getEnclosingTestClasses();
-
-	/**
-	 * Get the <em>required</em> {@link Class} associated with the current test
-	 * or container.
-	 *
-	 * <p>Use this method as an alternative to {@link #getTestClass()} for use
-	 * cases in which the test class is required to be present.
-	 *
-	 * @return the test class; never {@code null}
-	 * @throws PreconditionViolationException if the test class is not present
-	 * in this {@code ExtensionContext}
-	 */
-	default Class<?> getRequiredTestClass() {
-		return Preconditions.notNull(getTestClass().orElse(null),
-			"Illegal state: required test class is not present in the current ExtensionContext");
-	}
 
 	/**
 	 * Get the {@link Lifecycle} of the {@linkplain #getTestInstance() test
@@ -345,7 +347,7 @@ public interface ExtensionContext {
 	 * @see org.junit.platform.engine.ConfigurationParameters
 	 */
 	@API(status = STABLE, since = "5.10")
-	<T> Optional<T> getConfigurationParameter(String key, Function<String, T> transformer);
+	<T> Optional<T> getConfigurationParameter(String key, Function<? super String, ? extends @Nullable T> transformer);
 
 	/**
 	 * Publish a map of key-value pairs to be consumed by an
@@ -373,7 +375,9 @@ public interface ExtensionContext {
 	 * @see org.junit.platform.engine.EngineExecutionListener#reportingEntryPublished
 	 */
 	default void publishReportEntry(String key, String value) {
-		this.publishReportEntry(Collections.singletonMap(key, value));
+		Preconditions.notBlank(key, "key must not be null or blank");
+		Preconditions.notBlank(value, "value must not be null or blank");
+		publishReportEntry(Map.of(key, value));
 	}
 
 	/**
@@ -393,7 +397,36 @@ public interface ExtensionContext {
 	 */
 	@API(status = STABLE, since = "5.3")
 	default void publishReportEntry(String value) {
-		this.publishReportEntry("value", value);
+		publishReportEntry("value", value);
+	}
+
+	/**
+	 * Publish a file with the supplied name written by the supplied action and
+	 * attach it to the current test or container.
+	 *
+	 * <p>The file will be resolved in the report output directory prior to
+	 * invoking the supplied action.
+	 *
+	 * @param name the name of the file to be published; never {@code null} or
+	 * blank and must not contain any path separators
+	 * @param mediaType the media type of the file; never {@code null}; use
+	 * {@link org.junit.jupiter.api.extension.MediaType#APPLICATION_OCTET_STREAM}
+	 * if unknown
+	 * @param action the action to be executed to write the file; never {@code null}
+	 * @since 5.12
+	 * @see org.junit.platform.engine.EngineExecutionListener#fileEntryPublished
+	 * @deprecated Use
+	 * {@link #publishFile(String, MediaType, ThrowingConsumer)}
+	 * instead.
+	 */
+	@Deprecated(since = "5.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "5.14")
+	@SuppressWarnings("removal")
+	default void publishFile(String name, org.junit.jupiter.api.extension.MediaType mediaType,
+			ThrowingConsumer<Path> action) {
+
+		Preconditions.notNull(mediaType, "mediaType must not be null");
+		publishFile(name, MediaType.parse(mediaType.toString()), action);
 	}
 
 	/**
@@ -408,10 +441,10 @@ public interface ExtensionContext {
 	 * @param mediaType the media type of the file; never {@code null}; use
 	 * {@link MediaType#APPLICATION_OCTET_STREAM} if unknown
 	 * @param action the action to be executed to write the file; never {@code null}
-	 * @since 5.12
+	 * @since 5.14
 	 * @see org.junit.platform.engine.EngineExecutionListener#fileEntryPublished
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.14")
 	void publishFile(String name, MediaType mediaType, ThrowingConsumer<Path> action);
 
 	/**
@@ -419,15 +452,16 @@ public interface ExtensionContext {
 	 * and attach it to the current test or container.
 	 *
 	 * <p>The directory will be resolved and created in the report output directory
-	 * prior to invoking the supplied action.
+	 * prior to invoking the supplied action, if it does not already exist.
 	 *
-	 * @param name the name of the directory to be attached; never {@code null}
+	 * @param name the name of the directory to be published; never {@code null}
 	 * or blank and must not contain any path separators
-	 * @param action the action to be executed to write the file; never {@code null}
+	 * @param action the action to be executed to write to the directory; never
+	 * {@code null}
 	 * @since 5.12
 	 * @see org.junit.platform.engine.EngineExecutionListener#fileEntryPublished
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	void publishDirectory(String name, ThrowingConsumer<Path> action);
 
 	/**
@@ -463,7 +497,7 @@ public interface ExtensionContext {
 	 * @see StoreScope
 	 * @see #getStore(Namespace)
 	 */
-	@API(status = EXPERIMENTAL, since = "5.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	Store getStore(StoreScope scope, Namespace namespace);
 
 	/**
@@ -505,7 +539,7 @@ public interface ExtensionContext {
 		 * @since 5.1
 		 * @deprecated Please extend {@code AutoCloseable} directly.
 		 */
-		@Deprecated
+		@Deprecated(since = "5.13")
 		@API(status = DEPRECATED, since = "5.13")
 		interface CloseableResource {
 
@@ -568,10 +602,9 @@ public interface ExtensionContext {
 		 *
 		 * @param key the key; never {@code null}
 		 * @param requiredType the required type of the value; never {@code null}
-		 * @param defaultValue the default value
+		 * @param defaultValue the default value; never {@code null}
 		 * @param <V> the value type
-		 * @return the value; potentially {@code null} if {@code defaultValue}
-		 * is {@code null}
+		 * @return the value; never {@code null}
 		 * @since 5.5
 		 * @see #get(Object, Class)
 		 */
@@ -591,13 +624,13 @@ public interface ExtensionContext {
 		 * the type of object we wish to retrieve from the store.
 		 *
 		 * <pre style="code">
-		 * X x = store.getOrComputeIfAbsent(X.class, key -&gt; new X(), X.class);
+		 * X x = store.computeIfAbsent(X.class, key -&gt; new X(), X.class);
 		 * // Equivalent to:
-		 * // X x = store.getOrComputeIfAbsent(X.class);
+		 * // X x = store.computeIfAbsent(X.class);
 		 * </pre>
 		 *
-		 * <p>See {@link #getOrComputeIfAbsent(Object, Function, Class)} for
-		 * further details.
+		 * <p>See {@link #computeIfAbsent(Object, Function, Class)} for further
+		 * details.
 		 *
 		 * <p>If {@code type} implements {@link CloseableResource} or
 		 * {@link AutoCloseable} (unless the
@@ -609,15 +642,55 @@ public interface ExtensionContext {
 		 * @param <V> the key and value type
 		 * @return the object; never {@code null}
 		 * @since 5.1
-		 * @see #getOrComputeIfAbsent(Object, Function)
-		 * @see #getOrComputeIfAbsent(Object, Function, Class)
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
+		 * @see CloseableResource
+		 * @see AutoCloseable
+		 * @deprecated Please use {@link #computeIfAbsent(Class)} instead.
+		 */
+		@Deprecated(since = "6.0")
+		@API(status = DEPRECATED, since = "6.0")
+		default <V> V getOrComputeIfAbsent(Class<V> type) {
+			return computeIfAbsent(type);
+		}
+
+		/**
+		 * Return the object of type {@code type} if it is present and not
+		 * {@code null} in this {@code Store} (<em>keyed</em> by {@code type});
+		 * otherwise, invoke the default constructor for {@code type} to
+		 * generate the object, store it, and return it.
+		 *
+		 * <p>This method is a shortcut for the following, where {@code X} is
+		 * the type of object we wish to retrieve from the store.
+		 *
+		 * <pre style="code">
+		 * X x = store.computeIfAbsent(X.class, key -&gt; new X(), X.class);
+		 * // Equivalent to:
+		 * // X x = store.computeIfAbsent(X.class);
+		 * </pre>
+		 *
+		 * <p>See {@link #computeIfAbsent(Object, Function, Class)} for further
+		 * details.
+		 *
+		 * <p>If {@code type} implements {@link CloseableResource} or
+		 * {@link AutoCloseable} (unless the
+		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+		 * configuration parameter is set to {@code false}), then the {@code close()}
+		 * method will be invoked on the stored object when the store is closed.
+		 *
+		 * @param type the type of object to retrieve; never {@code null}
+		 * @param <V> the key and value type
+		 * @return the object; never {@code null}
+		 * @since 6.0
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
 		 * @see CloseableResource
 		 * @see AutoCloseable
 		 */
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
-		@API(status = STABLE, since = "5.1")
-		default <V> V getOrComputeIfAbsent(Class<V> type) {
-			return getOrComputeIfAbsent(type, ReflectionSupport::newInstance, type);
+		@API(status = MAINTAINED, since = "6.0")
+		default <V> V computeIfAbsent(Class<V> type) {
+			return computeIfAbsent(type, ReflectionSupport::newInstance, type);
 		}
 
 		/**
@@ -631,7 +704,7 @@ public interface ExtensionContext {
 		 * the {@code key} as input), stored, and returned.
 		 *
 		 * <p>For greater type safety, consider using
-		 * {@link #getOrComputeIfAbsent(Object, Function, Class)} instead.
+		 * {@link #computeIfAbsent(Object, Function, Class)} instead.
 		 *
 		 * <p>If the created value is an instance of {@link CloseableResource} or
 		 * {@link AutoCloseable} (unless the
@@ -645,12 +718,54 @@ public interface ExtensionContext {
 		 * @param <K> the key type
 		 * @param <V> the value type
 		 * @return the value; potentially {@code null}
-		 * @see #getOrComputeIfAbsent(Class)
-		 * @see #getOrComputeIfAbsent(Object, Function, Class)
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
+		 * @see CloseableResource
+		 * @see AutoCloseable
+		 * @deprecated Please use {@link #computeIfAbsent(Object, Function)} instead.
+		 */
+		@Deprecated(since = "6.0")
+		@API(status = DEPRECATED, since = "6.0")
+		<K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(K key,
+				Function<? super K, ? extends V> defaultCreator);
+
+		/**
+		 * Return the value of the specified required type that is stored under
+		 * the supplied {@code key}.
+		 *
+		 * <p>If no value is stored in the current {@link ExtensionContext}
+		 * for the supplied {@code key}, ancestors of the context will be queried
+		 * for a value with the same {@code key} in the {@code Namespace} used
+		 * to create this store. If no value is found for the supplied {@code key}
+		 * or the value is {@code null}, a new value will be computed by the
+		 * {@code defaultCreator} (given the {@code key} as input), stored, and
+		 * returned.
+		 *
+		 * <p>For greater type safety, consider using
+		 * {@link #computeIfAbsent(Object, Function, Class)} instead.
+		 *
+		 * <p>If the created value is an instance of {@link CloseableResource} or
+		 * {@link AutoCloseable} (unless the
+		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+		 * configuration parameter is set to {@code false}), then the {@code close()}
+		 * method will be invoked on the stored object when the store is closed.
+		 *
+		 * @param key the key; never {@code null}
+		 * @param defaultCreator the function called with the supplied {@code key}
+		 * to create a new value; never {@code null} and must not return
+		 * {@code null}
+		 * @param <K> the key type
+		 * @param <V> the value type
+		 * @return the value; never {@code null}
+		 * @since 6.0
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function, Class)
 		 * @see CloseableResource
 		 * @see AutoCloseable
 		 */
-		<K, V> @Nullable Object getOrComputeIfAbsent(K key, Function<K, @Nullable V> defaultCreator);
+		@API(status = MAINTAINED, since = "6.0")
+		<K, V> Object computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator);
 
 		/**
 		 * Get the value of the specified required type that is stored under the
@@ -663,7 +778,7 @@ public interface ExtensionContext {
 		 * a new value will be computed by the {@code defaultCreator} (given
 		 * the {@code key} as input), stored, and returned.
 		 *
-		 * <p>If {@code requiredType} implements {@link CloseableResource} or
+		 * <p>If the created value implements {@link CloseableResource} or
 		 * {@link AutoCloseable} (unless the
 		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
 		 * configuration parameter is set to {@code false}), then the {@code close()}
@@ -676,12 +791,52 @@ public interface ExtensionContext {
 		 * @param <K> the key type
 		 * @param <V> the value type
 		 * @return the value; potentially {@code null}
-		 * @see #getOrComputeIfAbsent(Class)
-		 * @see #getOrComputeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
+		 * @see #computeIfAbsent(Object, Function, Class)
+		 * @see CloseableResource
+		 * @see AutoCloseable
+		 * @deprecated Please use {@link #computeIfAbsent(Object, Function, Class)} instead.
+		 */
+		@Deprecated(since = "6.0")
+		@API(status = DEPRECATED, since = "6.0")
+		<K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(K key,
+				Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
+
+		/**
+		 * Get the value of the specified required type that is stored under the
+		 * supplied {@code key}.
+		 *
+		 * <p>If no value is stored in the current {@link ExtensionContext}
+		 * for the supplied {@code key}, ancestors of the context will be queried
+		 * for a value with the same {@code key} in the {@code Namespace} used
+		 * to create this store. If no value is found for the supplied {@code key}
+		 * or the value is {@code null}, a new value will be computed by the
+		 * {@code defaultCreator} (given the {@code key} as input), stored, and
+		 * returned.
+		 *
+		 * <p>If the created value is an instance of {@link CloseableResource} or
+		 * {@link AutoCloseable} (unless the
+		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+		 * configuration parameter is set to {@code false}), then the {@code close()}
+		 * method will be invoked on the stored object when the store is closed.
+		 *
+		 * @param key the key; never {@code null}
+		 * @param defaultCreator the function called with the supplied {@code key}
+		 * to create a new value; never {@code null} and must not return
+		 * {@code null}
+		 * @param requiredType the required type of the value; never {@code null}
+		 * @param <K> the key type
+		 * @param <V> the value type
+		 * @return the value; never {@code null}
+		 * @since 6.0
+		 * @see #computeIfAbsent(Class)
+		 * @see #computeIfAbsent(Object, Function)
 		 * @see CloseableResource
 		 * @see AutoCloseable
 		 */
-		<K, V> @Nullable V getOrComputeIfAbsent(K key, Function<K, @Nullable V> defaultCreator, Class<V> requiredType);
+		@API(status = MAINTAINED, since = "6.0")
+		<K, V> V computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
 
 		/**
 		 * Store a {@code value} for later retrieval under the supplied {@code key}.
@@ -749,7 +904,7 @@ public interface ExtensionContext {
 	 * mixing data between extensions or across different invocations within the
 	 * lifecycle of a single extension.
 	 */
-	class Namespace {
+	final class Namespace {
 
 		/**
 		 * The default, global namespace which allows access to stored data from
@@ -824,7 +979,7 @@ public interface ExtensionContext {
 	 * @since 5.13
 	 * @see #getStore(StoreScope, Namespace)
 	 */
-	@API(status = EXPERIMENTAL, since = "5.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	enum StoreScope {
 
 		/**

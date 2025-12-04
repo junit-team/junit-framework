@@ -36,17 +36,15 @@ class AssertTimeout {
 		assertTimeout(timeout, executable, (String) null);
 	}
 
-	@SuppressWarnings("NullAway")
 	static void assertTimeout(Duration timeout, Executable executable, @Nullable String message) {
-		assertTimeout(timeout, () -> {
+		AssertTimeout.<@Nullable Object> assertTimeout(timeout, () -> {
 			executable.execute();
 			return null;
 		}, message);
 	}
 
-	@SuppressWarnings("NullAway")
 	static void assertTimeout(Duration timeout, Executable executable, Supplier<@Nullable String> messageSupplier) {
-		assertTimeout(timeout, () -> {
+		AssertTimeout.<@Nullable Object> assertTimeout(timeout, () -> {
 			executable.execute();
 			return null;
 		}, messageSupplier);

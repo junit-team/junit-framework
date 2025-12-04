@@ -38,11 +38,9 @@ class ClasspathAlignmentChecker {
 		"org.junit.platform.commons", //
 		"org.junit.platform.console", //
 		"org.junit.platform.engine", //
-		"org.junit.platform.jfr", //
 		"org.junit.platform.launcher", //
 		"org.junit.platform.reporting", //
 		"org.junit.platform.suite.api", //
-		"org.junit.platform.suite.commons", //
 		"org.junit.platform.suite.engine", //
 		"org.junit.platform.testkit", //
 		"org.junit.vintage.engine" //
@@ -72,7 +70,7 @@ class ClasspathAlignmentChecker {
 					.append(" is likely caused by the versions of JUnit jars on the classpath/module path ") //
 					.append("not being properly aligned. ") //
 					.append(lineBreak) //
-					.append("Please ensure consistent versions are used (see https://junit.org/junit5/docs/") //
+					.append("Please ensure consistent versions are used (see https://docs.junit.org/") //
 					.append(ClasspathAlignmentChecker.class.getPackage().getImplementationVersion()) //
 					.append("/user-guide/#dependency-metadata).") //
 					.append(lineBreak) //
@@ -85,6 +83,9 @@ class ClasspathAlignmentChecker {
 			return Optional.of(new JUnitException(message.toString(), error));
 		}
 		return Optional.empty();
+	}
+
+	private ClasspathAlignmentChecker() {
 	}
 
 }

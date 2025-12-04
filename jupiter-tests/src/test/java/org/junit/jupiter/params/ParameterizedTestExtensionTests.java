@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.ParameterizedInvocationContextProvider.arguments;
 import static org.junit.jupiter.params.ParameterizedTestExtension.DECLARATION_CONTEXT_KEY;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.mock;
 
 import java.io.FileNotFoundException;
@@ -33,11 +34,11 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExecutableInvoker;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.extension.TemplateInvocationValidationException;
 import org.junit.jupiter.api.extension.TestInstances;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -48,7 +49,6 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
@@ -103,7 +103,7 @@ class ParameterizedTestExtensionTests {
 	@Test
 	void emptyDisplayNameIsIllegal() {
 		var extensionContext = getExtensionContextReturningSingleMethod(new EmptyDisplayNameProviderTestCase());
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext));
 	}
 
@@ -121,7 +121,7 @@ class ParameterizedTestExtensionTests {
 		};
 		var extensionContext = getExtensionContextReturningSingleMethod(new DefaultDisplayNameProviderTestCase(),
 			configurationSupplier);
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext));
 		assertEquals(1, invocations.get());
 	}
@@ -169,9 +169,10 @@ class ParameterizedTestExtensionTests {
 	void throwsExceptionWhenParameterizedTestHasNoArgumentsSource() {
 		var extensionContext = getExtensionContextReturningSingleMethod(new TestCaseWithNoArgumentsSource());
 
-		assertThrows(PreconditionViolationException.class,
-			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext),
-			"Configuration error: You must configure at least one arguments source for this @ParameterizedTest");
+		assertPreconditionViolationFor(
+			() -> this.parameterizedTestExtension.provideTestTemplateInvocationContexts(extensionContext))//
+					.withMessage(
+						"Configuration error: You must configure at least one arguments source for this @ParameterizedTest");
 	}
 
 	@Test
@@ -202,9 +203,9 @@ class ParameterizedTestExtensionTests {
 
 		String className = AmbiguousConstructorArgumentsProvider.class.getName();
 		assertThat(exception) //
-				.hasMessage(String.format("Failed to find constructor for ArgumentsProvider [%s]. "
-						+ "Please ensure that a no-argument or a single constructor exists.",
-					className));
+				.hasMessage("""
+						Failed to find constructor for ArgumentsProvider [%s]. \
+						Please ensure that a no-argument or a single constructor exists.""", className);
 	}
 
 	private ExtensionContext getExtensionContextReturningSingleMethod(Object testCase) {
@@ -293,7 +294,8 @@ class ParameterizedTestExtensionTests {
 			}
 
 			@Override
-			public <T> Optional<T> getConfigurationParameter(String key, Function<String, T> transformer) {
+			public <T> Optional<T> getConfigurationParameter(String key,
+					Function<? super String, ? extends @Nullable T> transformer) {
 				return configurationSupplier.apply(key).map(transformer);
 			}
 
@@ -417,11 +419,10 @@ class ParameterizedTestExtensionTests {
 
 	class NonStaticArgumentsProvider implements ArgumentsProvider {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
 		@Override
 		public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters,
 				ExtensionContext context) {
-			return null;
+			throw new UnsupportedOperationException();
 		}
 	}
 

@@ -10,12 +10,13 @@
 
 package org.junit.platform.commons.util;
 
+import static org.apiguardian.api.API.Status.INTERNAL;
+
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
-import org.apiguardian.api.API.Status;
 
 /**
  * Collection of utilities for working with {@link ServiceLoader}.
@@ -28,7 +29,7 @@ import org.apiguardian.api.API.Status;
  *
  * @since 1.11
  */
-@API(status = Status.INTERNAL, since = "1.11")
+@API(status = INTERNAL, since = "1.11")
 public class ServiceLoaderUtils {
 
 	private ServiceLoaderUtils() {

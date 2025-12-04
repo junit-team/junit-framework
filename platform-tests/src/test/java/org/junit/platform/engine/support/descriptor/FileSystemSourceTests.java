@@ -11,14 +11,13 @@
 package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.File;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link FileSource} and {@link DirectorySource}.
@@ -34,10 +33,10 @@ class FileSystemSourceTests extends AbstractTestSourceTests {
 			FileSource.from(new File("file.and.position"), FilePosition.from(42, 23)));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSourceFileOrDirectoryYieldsException() {
-		assertThrows(PreconditionViolationException.class, () -> FileSource.from(null));
+		assertPreconditionViolationFor(() -> FileSource.from(null));
 	}
 
 	@Test
@@ -74,6 +73,27 @@ class FileSystemSourceTests extends AbstractTestSourceTests {
 		assertThat(source.getUri()).isEqualTo(file.getAbsoluteFile().toURI());
 		assertThat(source.getFile()).isEqualTo(file.getAbsoluteFile());
 		assertThat(source.getPosition()).hasValue(position);
+	}
+
+	@Test
+	void fileReuseWithPosition() {
+		var file = new File("test.txt");
+		var position = FilePosition.from(42, 23);
+		var source = FileSource.from(file);
+		var sourceWithPosition = source.withPosition(position);
+
+		assertThat(source.getUri()).isEqualTo(file.getAbsoluteFile().toURI());
+		assertThat(source.getFile()).isEqualTo(file.getAbsoluteFile());
+		assertThat(source.getPosition()).isEmpty();
+
+		assertThat(source).isNotSameAs(sourceWithPosition);
+		assertThat(source.getFile()).isSameAs(sourceWithPosition.getFile());
+		assertThat(sourceWithPosition.getPosition()).hasValue(position);
+
+		assertThat(sourceWithPosition.withPosition(null).getPosition()).isEmpty();
+
+		assertThat(source.withPosition(null)).isSameAs(source);
+		assertThat(sourceWithPosition.withPosition(position)).isSameAs(sourceWithPosition);
 	}
 
 	@Test

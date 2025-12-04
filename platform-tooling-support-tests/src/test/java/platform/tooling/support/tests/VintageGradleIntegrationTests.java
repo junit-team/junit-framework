@@ -15,6 +15,7 @@ import static platform.tooling.support.tests.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +28,7 @@ import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
 
+@Order(Integer.MIN_VALUE + 1)
 class VintageGradleIntegrationTests {
 
 	@TempDir
@@ -42,7 +44,7 @@ class VintageGradleIntegrationTests {
 				.contains("Unsupported version of junit:junit: 4.11");
 	}
 
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "{0}", quoteTextArguments = false)
 	@ValueSource(strings = { "4.12", "4.13.2" })
 	void supportedVersions(String version, @FilePrefix("gradle") OutputFiles outputFiles) throws Exception {
 		var result = run(outputFiles, version);

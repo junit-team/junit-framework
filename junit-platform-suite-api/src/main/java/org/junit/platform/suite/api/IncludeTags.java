@@ -31,15 +31,15 @@ import org.apiguardian.api.API;
  * <p>Tag expressions are boolean expressions with the following allowed
  * operators: {@code !} (not), {@code &} (and) and {@code |} (or). Parentheses
  * can be used to adjust for operator precedence. Please refer to the
- * <a href="https://junit.org/junit5/docs/current/user-guide/#running-tests-tag-expressions">JUnit User Guide</a>
+ * <a href="https://docs.junit.org/current/user-guide/#running-tests-tag-expressions">JUnit User Guide</a>
  * for usage examples.
  *
  * <h2>Syntax Rules for Tags</h2>
  * <ul>
  * <li>A tag must not be blank.</li>
- * <li>A trimmed tag must not contain whitespace.</li>
- * <li>A trimmed tag must not contain ISO control characters.</li>
- * <li>A trimmed tag must not contain <em>reserved characters</em>.</li>
+ * <li>A stripped tag must not contain whitespace.</li>
+ * <li>A stripped tag must not contain ISO control characters.</li>
+ * <li>A stripped tag must not contain <em>reserved characters</em>.</li>
  * </ul>
  *
  * <p><em>Reserved characters</em> that are not permissible as part of a tag name.
@@ -67,7 +67,7 @@ public @interface IncludeTags {
 	/**
 	 * One or more tags to include.
 	 *
-	 * <p>Note: each tag will be {@linkplain String#trim() trimmed} and
+	 * <p>Note: each tag will be {@linkplain String#strip() stripped} and
 	 * validated according to the <em>Syntax Rules for Tags</em> (see
 	 * {@linkplain IncludeTags class-level Javadoc} for details).
 	 */

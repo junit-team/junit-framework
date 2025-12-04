@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.util.Optional;
 
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.UniqueId.Segment;
 
 /**
@@ -123,14 +122,14 @@ class UniqueIdTests {
 			assertSegment(uniqueId.getSegments().get(2), "t2", "v2");
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void appendingNullIsNotAllowed() {
 			var uniqueId = UniqueId.forEngine(ENGINE_ID);
 
-			assertThrows(PreconditionViolationException.class, () -> uniqueId.append(null));
-			assertThrows(PreconditionViolationException.class, () -> uniqueId.append(null, "foo"));
-			assertThrows(PreconditionViolationException.class, () -> uniqueId.append("foo", null));
+			assertPreconditionViolationFor(() -> uniqueId.append(null));
+			assertPreconditionViolationFor(() -> uniqueId.append(null, "foo"));
+			assertPreconditionViolationFor(() -> uniqueId.append("foo", null));
 		}
 
 	}
@@ -230,12 +229,12 @@ class UniqueIdTests {
 	@Nested
 	class Prefixing {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullIsNotAPrefix() {
 			var id = UniqueId.forEngine(ENGINE_ID);
 
-			assertThrows(PreconditionViolationException.class, () -> id.hasPrefix(null));
+			assertPreconditionViolationFor(() -> id.hasPrefix(null));
 		}
 
 		@Test
@@ -285,7 +284,7 @@ class UniqueIdTests {
 		@Test
 		void removesLastSegment() {
 			var uniqueId = UniqueId.forEngine("foo");
-			assertThrows(PreconditionViolationException.class, uniqueId::removeLastSegment);
+			assertPreconditionViolationFor(uniqueId::removeLastSegment);
 
 			var newUniqueId = uniqueId.append("type", "bar").removeLastSegment();
 			assertEquals(uniqueId, newUniqueId);
@@ -293,7 +292,7 @@ class UniqueIdTests {
 
 	}
 
-	private void assertSegment(Segment segment, String expectedType, String expectedValue) {
+	private static void assertSegment(Segment segment, String expectedType, String expectedValue) {
 		assertEquals(expectedType, segment.getType(), "segment type");
 		assertEquals(expectedValue, segment.getValue(), "segment value");
 	}

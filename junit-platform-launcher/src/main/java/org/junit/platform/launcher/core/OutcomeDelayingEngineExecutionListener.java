@@ -31,14 +31,11 @@ class OutcomeDelayingEngineExecutionListener extends DelegatingEngineExecutionLi
 
 	private volatile boolean engineStarted;
 
-	@Nullable
-	private volatile Outcome outcome;
+	private volatile @Nullable Outcome outcome;
 
-	@Nullable
-	private volatile String skipReason;
+	private volatile @Nullable String skipReason;
 
-	@Nullable
-	private volatile TestExecutionResult executionResult;
+	private volatile @Nullable TestExecutionResult executionResult;
 
 	OutcomeDelayingEngineExecutionListener(EngineExecutionListener delegate, TestDescriptor engineDescriptor) {
 		super(delegate);

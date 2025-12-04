@@ -72,12 +72,7 @@ class IsTestMethodTests {
 		var method = abstractMethod("bogusAbstractTestMethod");
 
 		assertThat(isTestMethod).rejects(method);
-
-		var issue = getOnlyElement(discoveryIssues);
-		assertThat(issue.severity()).isEqualTo(Severity.WARNING);
-		assertThat(issue.message()).isEqualTo("@Test method '%s' must not be abstract. It will not be executed.",
-			method.toGenericString());
-		assertThat(issue.source()).contains(MethodSource.from(method));
+		assertThat(discoveryIssues).isEmpty();
 	}
 
 	@Test
@@ -86,12 +81,8 @@ class IsTestMethodTests {
 
 		assertThat(isTestMethod).rejects(method);
 
-		assertThat(discoveryIssues).hasSize(2);
-		discoveryIssues.sort(comparing(DiscoveryIssue::message));
-		assertThat(discoveryIssues.getFirst().message()) //
-				.isEqualTo("@Test method '%s' must not be abstract. It will not be executed.",
-					method.toGenericString());
-		assertThat(discoveryIssues.getLast().message()) //
+		var issue = getOnlyElement(discoveryIssues);
+		assertThat(issue.message()) //
 				.isEqualTo("@Test method '%s' must not return a value. It will not be executed.",
 					method.toGenericString());
 	}

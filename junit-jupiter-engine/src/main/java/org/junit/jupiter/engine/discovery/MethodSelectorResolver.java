@@ -39,7 +39,6 @@ import org.junit.jupiter.engine.discovery.predicates.IsTestFactoryMethod;
 import org.junit.jupiter.engine.discovery.predicates.IsTestMethod;
 import org.junit.jupiter.engine.discovery.predicates.IsTestTemplateMethod;
 import org.junit.jupiter.engine.discovery.predicates.TestClassPredicates;
-import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.DiscoverySelector;
@@ -59,7 +58,7 @@ import org.junit.platform.engine.support.discovery.SelectorResolver;
  */
 class MethodSelectorResolver implements SelectorResolver {
 
-	private static final MethodFinder methodFinder = new MethodFinder();
+	private static final MethodSegmentResolver methodSegmentResolver = new MethodSegmentResolver();
 	private final Predicate<Class<?>> testClassPredicate;
 
 	private final JupiterConfiguration configuration;
@@ -84,6 +83,20 @@ class MethodSelectorResolver implements SelectorResolver {
 			Match::exact);
 	}
 
+	@Override
+	public Resolution resolve(DiscoverySelector selector, Context context) {
+		if (selector instanceof DeclaredMethodSelector methodSelector) {
+			var testClasses = methodSelector.testClasses();
+			if (testClasses.size() == 1) {
+				return resolve(context, emptyList(), testClasses.get(0), methodSelector::method, Match::exact);
+			}
+			int lastIndex = testClasses.size() - 1;
+			return resolve(context, testClasses.subList(0, lastIndex), testClasses.get(lastIndex),
+				methodSelector::method, Match::exact);
+		}
+		return unresolved();
+	}
+
 	private Resolution resolve(Context context, List<Class<?>> enclosingClasses, Class<?> testClass,
 			Supplier<Method> methodSupplier,
 			BiFunction<TestDescriptor, Supplier<Set<? extends DiscoverySelector>>, Match> matchFactory) {
@@ -100,10 +113,10 @@ class MethodSelectorResolver implements SelectorResolver {
 		// @formatter:on
 		if (matches.size() > 1) {
 			Stream<TestDescriptor> testDescriptors = matches.stream().map(Match::getTestDescriptor);
-			String message = String.format(
-				"Possible configuration error: method [%s] resulted in multiple TestDescriptors %s. "
-						+ "This is typically the result of annotating a method with multiple competing annotations "
-						+ "such as @Test, @RepeatedTest, @ParameterizedTest, @TestFactory, etc.",
+			String message = """
+					Possible configuration error: method [%s] resulted in multiple TestDescriptors %s. \
+					This is typically the result of annotating a method with multiple competing annotations \
+					such as @Test, @RepeatedTest, @ParameterizedTest, @TestFactory, etc.""".formatted(
 				method.toGenericString(), testDescriptors.map(d -> d.getClass().getName()).toList());
 			issueReporter.reportIssue(
 				DiscoveryIssue.builder(Severity.WARNING, message).source(MethodSource.from(method)));
@@ -209,7 +222,7 @@ class MethodSelectorResolver implements SelectorResolver {
 					String methodSpecPart = lastSegment.getValue();
 					Class<?> testClass = ((TestClassAware) parent).getTestClass();
 					// @formatter:off
-					return methodFinder.findMethod(methodSpecPart, testClass)
+					return methodSegmentResolver.findMethod(methodSpecPart, testClass)
 							.filter(methodPredicate)
 							.map(method -> createTestDescriptor(parent, testClass, method, configuration));
 					// @formatter:on
@@ -223,15 +236,14 @@ class MethodSelectorResolver implements SelectorResolver {
 
 		private TestDescriptor createTestDescriptor(TestDescriptor parent, Class<?> testClass, Method method,
 				JupiterConfiguration configuration) {
-			UniqueId uniqueId = createUniqueId(method, parent);
+			UniqueId uniqueId = createUniqueId(method, parent, testClass);
 			return testDescriptorFactory.create(uniqueId, testClass, method,
 				((TestClassAware) parent)::getEnclosingTestClasses, configuration);
 		}
 
-		private UniqueId createUniqueId(Method method, TestDescriptor parent) {
-			String methodId = "%s(%s)".formatted(method.getName(),
-				ClassUtils.nullSafeToString(method.getParameterTypes()));
-			return parent.getUniqueId().append(segmentType, methodId);
+		private UniqueId createUniqueId(Method method, TestDescriptor parent, Class<?> testClass) {
+			return parent.getUniqueId().append(segmentType,
+				methodSegmentResolver.formatMethodSpecPart(method, testClass));
 		}
 
 		interface TestDescriptorFactory {

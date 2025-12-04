@@ -1,0 +1,65 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches:
+      - main
+      - 'releases/**'
+  schedule:
+    - cron: '0 19 * * 3'
+
+concurrency:
+  # Cancels in-progress runs only for pull requests
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: actions
+            build-mode: none
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript
+            build-mode: none
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2 # v4.31.6
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        tools: linked
+    - name: Build
+      if: matrix.build-mode == 'manual'
+      uses: ./.github/actions/run-gradle
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        arguments: |
+          --no-build-cache \
+          -Dscan.tag.CodeQL \
+          classes
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2 # v4.31.6
+      with:
+        category: "/language:${{matrix.language}}"

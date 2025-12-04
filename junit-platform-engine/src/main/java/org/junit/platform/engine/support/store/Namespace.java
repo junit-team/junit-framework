@@ -27,8 +27,8 @@ import org.junit.platform.commons.util.Preconditions;
  * mixing data between extensions or across different invocations within the
  * lifecycle of a single extension.
  */
-@API(status = EXPERIMENTAL, since = "1.13")
-public class Namespace {
+@API(status = EXPERIMENTAL, since = "6.0")
+public final class Namespace {
 
 	/**
 	 * The default, global namespace which allows access to stored data from

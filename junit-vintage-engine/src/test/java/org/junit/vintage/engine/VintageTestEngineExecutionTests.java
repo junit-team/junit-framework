@@ -16,8 +16,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
-import static org.junit.platform.launcher.core.NamespacedHierarchicalStoreProviders.dummyNamespacedHierarchicalStore;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
 import static org.junit.platform.testkit.engine.EventConditions.abortedWithReason;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.displayName;
@@ -34,6 +32,8 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.in
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 import static org.junit.runner.Description.createSuiteDescription;
 import static org.junit.runner.Description.createTestDescription;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
@@ -42,10 +42,12 @@ import junit.runner.Version;
 import org.assertj.core.api.Condition;
 import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.DisabledInEclipse;
+import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
-import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -56,6 +58,7 @@ import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.notification.StoppedByUserException;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.junit.vintage.engine.samples.junit3.IgnoredJUnit3TestCase;
@@ -63,6 +66,7 @@ import org.junit.vintage.engine.samples.junit3.JUnit3ParallelSuiteWithSubsuites;
 import org.junit.vintage.engine.samples.junit3.JUnit3SuiteWithSubsuites;
 import org.junit.vintage.engine.samples.junit3.JUnit4SuiteWithIgnoredJUnit3TestCase;
 import org.junit.vintage.engine.samples.junit3.PlainJUnit3TestCaseWithSingleTestWhichFails;
+import org.junit.vintage.engine.samples.junit4.CancellingTestCase;
 import org.junit.vintage.engine.samples.junit4.CompletelyDynamicTestCase;
 import org.junit.vintage.engine.samples.junit4.EmptyIgnoredTestCase;
 import org.junit.vintage.engine.samples.junit4.EnclosedJUnit4TestCase;
@@ -98,7 +102,6 @@ import org.junit.vintage.engine.samples.junit4.PlainJUnit4TestCaseWithLifecycleM
 import org.junit.vintage.engine.samples.junit4.PlainJUnit4TestCaseWithSingleTestWhichFails;
 import org.junit.vintage.engine.samples.junit4.PlainJUnit4TestCaseWithSingleTestWhichIsIgnored;
 import org.junit.vintage.engine.samples.junit4.PlainJUnit4TestCaseWithTwoTestMethods;
-import org.junit.vintage.engine.samples.spock.SpockTestCaseWithUnrolledAndRegularFeatureMethods;
 import org.opentest4j.MultipleFailuresError;
 
 /**
@@ -587,6 +590,7 @@ class VintageTestEngineExecutionTests {
 
 		private final Class<?> testClass;
 
+		@SuppressWarnings("RedundantModifier")
 		public DynamicSuiteRunner(Class<?> testClass) {
 			this.testClass = testClass;
 		}
@@ -627,6 +631,7 @@ class VintageTestEngineExecutionTests {
 
 		private final Class<?> testClass;
 
+		@SuppressWarnings("RedundantModifier")
 		public DynamicAndStaticChildrenRunner(Class<?> testClass) {
 			this.testClass = testClass;
 		}
@@ -682,6 +687,7 @@ class VintageTestEngineExecutionTests {
 
 		private final Class<?> testClass;
 
+		@SuppressWarnings("RedundantModifier")
 		public MisbehavingChildlessRunner(Class<?> testClass) {
 			this.testClass = testClass;
 		}
@@ -786,8 +792,10 @@ class VintageTestEngineExecutionTests {
 	@Test
 	void executesCompletelyDynamicTestCaseDiscoveredByUniqueId() {
 		Class<?> testClass = CompletelyDynamicTestCase.class;
-		var request = LauncherDiscoveryRequestBuilder.request().selectors(
-			selectUniqueId(VintageUniqueIdBuilder.uniqueIdForClass(testClass))).build();
+		var request = LauncherDiscoveryRequestBuilder.request() //
+				.selectors(selectUniqueId(VintageUniqueIdBuilder.uniqueIdForClass(testClass))) //
+				.enableImplicitConfigurationParameters(false) //
+				.build();
 
 		execute(request).allEvents().assertEventsMatchExactly( //
 			event(engine(), started()), //
@@ -862,13 +870,18 @@ class VintageTestEngineExecutionTests {
 	}
 
 	@Test
+	@DisabledInEclipse
 	void executesUnrolledSpockFeatureMethod() {
-		Class<?> testClass = SpockTestCaseWithUnrolledAndRegularFeatureMethods.class;
-		var request = LauncherDiscoveryRequestBuilder.request().selectors(
-			selectMethod(testClass, "unrolled feature for #input")).build();
+		// Load Groovy class via reflection to avoid compilation errors in Eclipse IDE.
+		String testClassName = "org.junit.vintage.engine.samples.spock.SpockTestCaseWithUnrolledAndRegularFeatureMethods";
+		Class<?> testClass = ReflectionUtils.loadRequiredClass(testClassName, getClass().getClassLoader());
+		var request = LauncherDiscoveryRequestBuilder.request() //
+				.selectors(selectMethod(testClass, "unrolled feature for #input"))//
+				.enableImplicitConfigurationParameters(false) //
+				.build();
 		execute(request).allEvents().assertEventsMatchExactly( //
 			event(engine(), started()), //
-			event(uniqueIdSubstring(testClass.getName()), started()), //
+			event(uniqueIdSubstring(testClassName), started()), //
 			event(dynamicTestRegistered("unrolled feature for 23")), //
 			event(test("unrolled feature for 23"), started()), //
 			event(test("unrolled feature for 23"), finishedWithFailure()), //
@@ -880,9 +893,15 @@ class VintageTestEngineExecutionTests {
 	}
 
 	@Test
+	@DisabledInEclipse
 	void executesRegularSpockFeatureMethod() {
-		Class<?> testClass = SpockTestCaseWithUnrolledAndRegularFeatureMethods.class;
-		var request = LauncherDiscoveryRequestBuilder.request().selectors(selectMethod(testClass, "regular")).build();
+		// Load Groovy class via reflection to avoid compilation errors in Eclipse IDE.
+		String testClassName = "org.junit.vintage.engine.samples.spock.SpockTestCaseWithUnrolledAndRegularFeatureMethods";
+		Class<?> testClass = ReflectionUtils.loadRequiredClass(testClassName, getClass().getClassLoader());
+		var request = LauncherDiscoveryRequestBuilder.request() //
+				.selectors(selectMethod(testClass, "regular")) //
+				.enableImplicitConfigurationParameters(false) //
+				.build();
 		execute(request).allEvents().assertEventsMatchExactly( //
 			event(engine(), started()), //
 			event(container(testClass), started()), //
@@ -913,25 +932,64 @@ class VintageTestEngineExecutionTests {
 			event(engine(), finishedSuccessfully()));
 	}
 
+	@Test
+	void supportsCancellation() {
+		CancellingTestCase.cancellationToken = CancellationToken.create();
+		try {
+			var results = vintageTestEngine() //
+					.selectors(selectClass(CancellingTestCase.class),
+						selectClass(PlainJUnit4TestCaseWithSingleTestWhichFails.class)) //
+					.cancellationToken(CancellingTestCase.cancellationToken) //
+					.execute();
+
+			results.allEvents().assertEventsMatchExactly( //
+				event(engine(), started()), //
+				event(container(CancellingTestCase.class), started()), //
+				event(test(), started()), //
+				event(test(), finishedWithFailure()), //
+				event(test(), skippedWithReason("Execution cancelled")), //
+				event(container(CancellingTestCase.class), abortedWithReason(instanceOf(StoppedByUserException.class))), //
+				event(container(PlainJUnit4TestCaseWithSingleTestWhichFails.class),
+					skippedWithReason("Execution cancelled")), //
+				event(engine(), finishedSuccessfully()));
+		}
+		finally {
+			CancellingTestCase.cancellationToken = null;
+		}
+	}
+
 	private static EngineExecutionResults execute(Class<?> testClass) {
 		return execute(request(testClass));
 	}
 
+	@SuppressWarnings("deprecation")
 	private static EngineExecutionResults execute(LauncherDiscoveryRequest request) {
 		return EngineTestKit.execute(new VintageTestEngine(), request);
 	}
 
+	@SuppressWarnings("deprecation")
+	private static EngineTestKit.Builder vintageTestEngine() {
+		return EngineTestKit.engine(new VintageTestEngine()) //
+				.enableImplicitConfigurationParameters(false);
+	}
+
+	@SuppressWarnings("deprecation")
 	private static void execute(Class<?> testClass, EngineExecutionListener listener) {
-		TestEngine testEngine = new VintageTestEngine();
-		var discoveryRequest = request(testClass);
-		var engineTestDescriptor = testEngine.discover(discoveryRequest, UniqueId.forEngine(testEngine.getId()));
-		testEngine.execute(
-			ExecutionRequest.create(engineTestDescriptor, listener, discoveryRequest.getConfigurationParameters(),
-				dummyOutputDirectoryProvider(), dummyNamespacedHierarchicalStore()));
+		var testEngine = new VintageTestEngine();
+		var engineTestDescriptor = testEngine.discover(request(testClass), UniqueId.forEngine(testEngine.getId()));
+		ExecutionRequest executionRequest = mock();
+		when(executionRequest.getRootTestDescriptor()).thenReturn(engineTestDescriptor);
+		when(executionRequest.getEngineExecutionListener()).thenReturn(listener);
+		when(executionRequest.getConfigurationParameters()).thenReturn(mock());
+		when(executionRequest.getCancellationToken()).thenReturn(CancellationToken.disabled());
+		testEngine.execute(executionRequest);
 	}
 
 	private static LauncherDiscoveryRequest request(Class<?> testClass) {
-		return LauncherDiscoveryRequestBuilder.request().selectors(selectClass(testClass)).build();
+		return LauncherDiscoveryRequestBuilder.request() //
+				.selectors(selectClass(testClass)) //
+				.enableImplicitConfigurationParameters(false) //
+				.build();
 	}
 
 	private static boolean atLeastJUnit4_13() {

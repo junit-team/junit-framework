@@ -22,8 +22,7 @@ import org.junit.platform.engine.support.descriptor.EngineDescriptor;
  */
 public class DemoHierarchicalEngineDescriptor extends EngineDescriptor implements Node<DemoEngineExecutionContext> {
 
-	@Nullable
-	private String skippedReason;
+	private @Nullable String skippedReason;
 
 	private boolean skipped;
 	private Runnable beforeAllBehavior = () -> {

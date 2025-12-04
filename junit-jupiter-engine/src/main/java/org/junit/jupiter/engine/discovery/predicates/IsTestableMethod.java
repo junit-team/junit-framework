@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.discovery.predicates;
 
 import static org.junit.jupiter.engine.support.MethodReflectionUtils.getReturnType;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
+import static org.junit.platform.commons.support.ModifierSupport.isNotAbstract;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -39,14 +40,13 @@ abstract class IsTestableMethod implements Predicate<Method> {
 		this.annotationType = annotationType;
 		this.condition = isNotStatic(annotationType, issueReporter) //
 				.and(isNotPrivate(annotationType, issueReporter)) //
-				.and(isNotAbstract(annotationType, issueReporter)) //
 				.and(returnTypeConditionFactory.apply(annotationType, issueReporter));
 	}
 
 	@Override
 	public boolean test(Method candidate) {
-		if (isAnnotated(candidate, this.annotationType)) {
-			return condition.check(candidate);
+		if (!candidate.isSynthetic() && isAnnotated(candidate, this.annotationType)) {
+			return condition.check(candidate) && isNotAbstract(candidate);
 		}
 		return false;
 	}
@@ -61,12 +61,6 @@ abstract class IsTestableMethod implements Predicate<Method> {
 			DiscoveryIssueReporter issueReporter) {
 		return issueReporter.createReportingCondition(ModifierSupport::isNotPrivate,
 			method -> createIssue(annotationType, method, "must not be private"));
-	}
-
-	private static Condition<Method> isNotAbstract(Class<? extends Annotation> annotationType,
-			DiscoveryIssueReporter issueReporter) {
-		return issueReporter.createReportingCondition(ModifierSupport::isNotAbstract,
-			method -> createIssue(annotationType, method, "must not be abstract"));
 	}
 
 	protected static Condition<Method> hasVoidReturnType(Class<? extends Annotation> annotationType,

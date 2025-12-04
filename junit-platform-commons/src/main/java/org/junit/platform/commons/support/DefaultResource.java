@@ -10,25 +10,19 @@
 
 package org.junit.platform.commons.support;
 
-import static org.apiguardian.api.API.Status.INTERNAL;
-
 import java.net.URI;
+import java.util.Objects;
 
-import org.apiguardian.api.API;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 
 /**
- * <h2>DISCLAIMER</h2>
- *
- * <p>These utilities are intended solely for usage within the JUnit framework
- * itself. <strong>Any usage by external parties is not supported.</strong>
- * Use at your own risk!
+ * Default implementation of {@link Resource}.
  *
  * @since 1.11
  */
-@API(status = INTERNAL, since = "1.12")
-public record DefaultResource(String name, URI uri) implements Resource {
+@SuppressWarnings("removal")
+record DefaultResource(String name, URI uri) implements Resource {
 
 	public DefaultResource {
 		Preconditions.notNull(name, "name must not be null");
@@ -46,10 +40,28 @@ public record DefaultResource(String name, URI uri) implements Resource {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof org.junit.platform.commons.io.Resource that) {
+			return this.name.equals(that.getName()) //
+					&& this.uri.equals(that.getUri());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, uri);
+	}
+
+	@Override
 	public String toString() {
 		return new ToStringBuilder(this) //
 				.append("name", name) //
 				.append("uri", uri) //
 				.toString();
 	}
+
 }

@@ -10,7 +10,12 @@ dependencies {
 		val mavenizedProjects: List<Project> by rootProject.extra
 		mavenizedProjects.sorted()
 				.filter { it.name != "junit-platform-console-standalone" }
-				.forEach { api("${it.group}:${it.name}:${it.version}") }
+				.forEach {
+					val version = buildParameters.jitpack.version
+						.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
+						.getOrElse(it.version.toString())
+					api("${it.group}:${it.name}:${version}")
+				}
 	}
 }
 

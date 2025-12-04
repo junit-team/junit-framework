@@ -15,14 +15,14 @@ import java.util.List;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 
 /**
- * @since 5.13
+ * @since 1.13
  */
 class DelegatingLauncherDiscoveryRequest implements LauncherDiscoveryRequest {
 
@@ -32,31 +32,44 @@ class DelegatingLauncherDiscoveryRequest implements LauncherDiscoveryRequest {
 		this.request = request;
 	}
 
+	@Override
 	public List<EngineFilter> getEngineFilters() {
 		return this.request.getEngineFilters();
 	}
 
+	@Override
 	public List<PostDiscoveryFilter> getPostDiscoveryFilters() {
 		return this.request.getPostDiscoveryFilters();
 	}
 
+	@Override
 	public LauncherDiscoveryListener getDiscoveryListener() {
 		return this.request.getDiscoveryListener();
 	}
 
+	@Override
 	public <T extends DiscoverySelector> List<T> getSelectorsByType(Class<T> selectorType) {
 		return this.request.getSelectorsByType(selectorType);
 	}
 
+	@Override
 	public <T extends DiscoveryFilter<?>> List<T> getFiltersByType(Class<T> filterType) {
 		return this.request.getFiltersByType(filterType);
 	}
 
+	@Override
 	public ConfigurationParameters getConfigurationParameters() {
 		return this.request.getConfigurationParameters();
 	}
 
-	public OutputDirectoryProvider getOutputDirectoryProvider() {
+	@SuppressWarnings("removal")
+	@Override
+	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
 		return this.request.getOutputDirectoryProvider();
+	}
+
+	@Override
+	public OutputDirectoryCreator getOutputDirectoryCreator() {
+		return this.request.getOutputDirectoryCreator();
 	}
 }

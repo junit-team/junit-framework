@@ -42,7 +42,7 @@ class TestInfoParameterResolverTests extends AbstractJupiterTestEngineTests {
 	private static final List<String> allDisplayNames = Arrays.asList("defaultDisplayName(TestInfo)",
 		"custom display name", "getTags(TestInfo)", "customDisplayNameThatIsEmpty()");
 
-	public TestInfoParameterResolverTests(TestInfo testInfo) {
+	TestInfoParameterResolverTests(TestInfo testInfo) {
 		assertThat(testInfo.getTestClass()).contains(TestInfoParameterResolverTests.class);
 		assertThat(testInfo.getTestMethod()).isPresent();
 	}

@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine.support.descriptor;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.File;
@@ -33,7 +34,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * @see org.junit.platform.engine.discovery.FileSelector
  */
 @API(status = STABLE, since = "1.0")
-public class FileSource implements FileSystemSource {
+public final class FileSource implements FileSystemSource {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -53,6 +54,7 @@ public class FileSource implements FileSystemSource {
 	 *
 	 * @param file the source file; must not be {@code null}
 	 * @param filePosition the position in the source file; may be {@code null}
+	 * @see #withPosition(FilePosition)
 	 */
 	public static FileSource from(File file, @Nullable FilePosition filePosition) {
 		return new FileSource(file, filePosition);
@@ -60,8 +62,7 @@ public class FileSource implements FileSystemSource {
 
 	private final File file;
 
-	@Nullable
-	private final FilePosition filePosition;
+	private final @Nullable FilePosition filePosition;
 
 	private FileSource(File file) {
 		this(file, null);
@@ -78,13 +79,18 @@ public class FileSource implements FileSystemSource {
 		this.filePosition = filePosition;
 	}
 
+	private FileSource(FileSource fileSource, @Nullable FilePosition filePosition) {
+		this.file = fileSource.file;
+		this.filePosition = filePosition;
+	}
+
 	/**
 	 * Get the {@link URI} for the source {@linkplain #getFile file}.
 	 *
 	 * @return the source {@code URI}; never {@code null}
 	 */
 	@Override
-	public final URI getUri() {
+	public URI getUri() {
 		return getFile().toURI();
 	}
 
@@ -94,15 +100,39 @@ public class FileSource implements FileSystemSource {
 	 * @return the source file; never {@code null}
 	 */
 	@Override
-	public final File getFile() {
+	public File getFile() {
 		return this.file;
 	}
 
 	/**
 	 * Get the {@link FilePosition}, if available.
 	 */
-	public final Optional<FilePosition> getPosition() {
+	public Optional<FilePosition> getPosition() {
 		return Optional.ofNullable(this.filePosition);
+	}
+
+	/**
+	 * {@return a {@code FileSource} based on this instance but with the
+	 * supplied {@link FilePosition}}
+	 *
+	 * <p>If the supplied {@code FilePosition}
+	 * {@linkplain Objects#equals(Object, Object) equals} the existing one, this
+	 * method returns {@code this}. Otherwise, a new instance is created and
+	 * returned.
+	 *
+	 * <p>Calling this method rather than creating a new {@code FileSource} via
+	 * {@link #from(File, FilePosition)} avoids the overhead of redundant
+	 * canonical path resolution.
+	 *
+	 * @param filePosition the position in the source file; may be {@code null}
+	 * @since 1.14
+	 */
+	@API(status = EXPERIMENTAL, since = "1.14")
+	public FileSource withPosition(@Nullable FilePosition filePosition) {
+		if (Objects.equals(this.filePosition, filePosition)) {
+			return this;
+		}
+		return new FileSource(this, filePosition);
 	}
 
 	@Override

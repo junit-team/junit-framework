@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.params.provider;
 
-import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.util.CollectionUtils.isConvertibleToStream;
@@ -180,10 +179,10 @@ class MethodArgumentsProvider extends AnnotationBasedArgumentsProvider<MethodSou
 	private static Method validateFactoryMethod(Method factoryMethod, @Nullable Object testInstance) {
 		Preconditions.condition(
 			factoryMethod.getDeclaringClass().isInstance(testInstance) || ReflectionUtils.isStatic(factoryMethod),
-			() -> format("Method '%s' must be static: local factory methods must be static "
-					+ "unless the PER_CLASS @TestInstance lifecycle mode is used; "
-					+ "external factory methods must always be static.",
-				factoryMethod.toGenericString()));
+			() -> """
+					Method '%s' must be static: local factory methods must be static \
+					unless the PER_CLASS @TestInstance lifecycle mode is used; \
+					external factory methods must always be static.""".formatted(factoryMethod.toGenericString()));
 		return factoryMethod;
 	}
 

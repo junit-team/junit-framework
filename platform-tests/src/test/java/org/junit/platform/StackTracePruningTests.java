@@ -115,7 +115,7 @@ class StackTracePruningTests {
 	}
 
 	@Test
-	void shouldKeepEverythingAfterTestCall() {
+	void shouldKeepExactlyEverythingAfterTestCall() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(FailingTestTestCase.class, "failingAssertion")) //
@@ -128,7 +128,6 @@ class StackTracePruningTests {
 					\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
 					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.failingAssertion(StackTracePruningTests.java:\\E.+
-					>>>>
 					""");
 	}
 
@@ -136,7 +135,7 @@ class StackTracePruningTests {
 	@ValueSource(strings = { "org.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase",
 			"org.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase$NestedTestCase",
 			"org.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase$NestedTestCase$NestedNestedTestCase" })
-	void shouldKeepEverythingAfterLifecycleMethodCall(Class<?> methodClass) {
+	void shouldKeepExactlyEverythingAfterLifecycleMethodCall(Class<?> methodClass) {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(methodClass, "test")) //
@@ -149,7 +148,6 @@ class StackTracePruningTests {
 					\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
 					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.setUp(StackTracePruningTests.java:\\E.+
-					>>>>
 					""");
 	}
 

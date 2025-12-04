@@ -10,22 +10,26 @@
 
 package org.junit.platform.commons.support;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.function.Try;
+import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -43,6 +47,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
  * @see AnnotationSupport
  * @see ClassSupport
  * @see ModifierSupport
+ * @see ResourceSupport
  */
 @API(status = MAINTAINED, since = "1.0")
 public final class ReflectionSupport {
@@ -67,6 +72,7 @@ public final class ReflectionSupport {
 	 * never {@code null}
 	 * @since 1.4
 	 * @see #tryToLoadClass(String, ClassLoader)
+	 * @see ResourceSupport#tryToGetResources(String)
 	 */
 	@API(status = MAINTAINED, since = "1.4")
 	public static Try<Class<?>> tryToLoadClass(String name) {
@@ -87,8 +93,9 @@ public final class ReflectionSupport {
 	 * never {@code null}
 	 * @since 1.10
 	 * @see #tryToLoadClass(String)
+	 * @see ResourceSupport#tryToGetResources(String, ClassLoader)
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Try<Class<?>> tryToLoadClass(String name, ClassLoader classLoader) {
 		return ReflectionUtils.tryToLoadClass(name, classLoader);
 	}
@@ -105,15 +112,20 @@ public final class ReflectionSupport {
 	 *
 	 * @param classpathResourceName the name of the resource to load; never
 	 * {@code null} or blank
-	 * @return a successful {@code Try} containing the loaded resources or a failed
-	 * {@code Try} containing the exception if no such resources could be loaded;
-	 * never {@code null}
+	 * @return a successful {@code Try} containing the set of loaded resources
+	 * (potentially empty) or a failed {@code Try} containing the exception in
+	 * case a failure occurred while trying to list resources; never
+	 * {@code null}
 	 * @since 1.12
 	 * @see #tryToGetResources(String, ClassLoader)
+	 * @deprecated Please use {@link ResourceSupport#tryToGetResources(String)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static Try<Set<Resource>> tryToGetResources(String classpathResourceName) {
-		return ReflectionUtils.tryToGetResources(classpathResourceName);
+		return ResourceSupport.tryToGetResources(classpathResourceName) //
+				.andThenTry(ReflectionSupport::toSupportResourcesSet);
 	}
 
 	/**
@@ -129,15 +141,20 @@ public final class ReflectionSupport {
 	 * @param classpathResourceName the name of the resource to load; never
 	 * {@code null} or blank
 	 * @param classLoader the {@code ClassLoader} to use; never {@code null}
-	 * @return a successful {@code Try} containing the loaded resources or a failed
-	 * {@code Try} containing the exception if no such resources could be loaded;
-	 * never {@code null}
+	 * @return a successful {@code Try} containing the set of loaded resources
+	 * (potentially empty) or a failed {@code Try} containing the exception in
+	 * case a failure occurred while trying to list resources; never
+	 * {@code null}
 	 * @since 1.12
 	 * @see #tryToGetResources(String)
+	 * @deprecated Please use {@link ResourceSupport#tryToGetResources(String, ClassLoader)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static Try<Set<Resource>> tryToGetResources(String classpathResourceName, ClassLoader classLoader) {
-		return ReflectionUtils.tryToGetResources(classpathResourceName, classLoader);
+		return ResourceSupport.tryToGetResources(classpathResourceName, classLoader) //
+				.andThenTry(ReflectionSupport::toSupportResourcesSet);
 	}
 
 	/**
@@ -156,6 +173,7 @@ public final class ReflectionSupport {
 	 * but potentially empty
 	 * @see #findAllClassesInPackage(String, Predicate, Predicate)
 	 * @see #findAllClassesInModule(String, Predicate, Predicate)
+	 * @see ResourceSupport#findAllResourcesInClasspathRoot(URI, ResourceFilter)
 	 */
 	public static List<Class<?>> findAllClassesInClasspathRoot(URI root, Predicate<Class<?>> classFilter,
 			Predicate<String> classNameFilter) {
@@ -178,10 +196,14 @@ public final class ReflectionSupport {
 	 * @since 1.11
 	 * @see #findAllResourcesInPackage(String, Predicate)
 	 * @see #findAllResourcesInModule(String, Predicate)
+	 * @deprecated Please use {@link ResourceSupport#findAllResourcesInClasspathRoot(URI, ResourceFilter)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static List<Resource> findAllResourcesInClasspathRoot(URI root, Predicate<Resource> resourceFilter) {
-		return ReflectionUtils.findAllResourcesInClasspathRoot(root, resourceFilter);
+		return toSupportResourcesList(
+			ResourceSupport.findAllResourcesInClasspathRoot(root, toResourceFilter(resourceFilter)));
 	}
 
 	/**
@@ -201,6 +223,7 @@ public final class ReflectionSupport {
 	 * @since 1.10
 	 * @see #streamAllClassesInPackage(String, Predicate, Predicate)
 	 * @see #streamAllClassesInModule(String, Predicate, Predicate)
+	 * @see ResourceSupport#streamAllResourcesInClasspathRoot(URI, ResourceFilter)
 	 */
 	@API(status = MAINTAINED, since = "1.10")
 	public static Stream<Class<?>> streamAllClassesInClasspathRoot(URI root, Predicate<Class<?>> classFilter,
@@ -224,10 +247,14 @@ public final class ReflectionSupport {
 	 * @since 1.11
 	 * @see #streamAllResourcesInPackage(String, Predicate)
 	 * @see #streamAllResourcesInModule(String, Predicate)
+	 * @deprecated Please use {@link ResourceSupport#streamAllResourcesInClasspathRoot(URI, ResourceFilter)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static Stream<Resource> streamAllResourcesInClasspathRoot(URI root, Predicate<Resource> resourceFilter) {
-		return ReflectionUtils.streamAllResourcesInClasspathRoot(root, resourceFilter);
+		return toSupportResourcesStream(
+			ResourceSupport.streamAllResourcesInClasspathRoot(root, toResourceFilter(resourceFilter)));
 	}
 
 	/**
@@ -247,6 +274,7 @@ public final class ReflectionSupport {
 	 * but potentially empty
 	 * @see #findAllClassesInClasspathRoot(URI, Predicate, Predicate)
 	 * @see #findAllClassesInModule(String, Predicate, Predicate)
+	 * @see ResourceSupport#findAllResourcesInPackage(String, ResourceFilter)
 	 */
 	public static List<Class<?>> findAllClassesInPackage(String basePackageName, Predicate<Class<?>> classFilter,
 			Predicate<String> classNameFilter) {
@@ -271,10 +299,14 @@ public final class ReflectionSupport {
 	 * @since 1.11
 	 * @see #findAllResourcesInClasspathRoot(URI, Predicate)
 	 * @see #findAllResourcesInModule(String, Predicate)
+	 * @deprecated Please use {@link ResourceSupport#findAllResourcesInPackage(String, ResourceFilter)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static List<Resource> findAllResourcesInPackage(String basePackageName, Predicate<Resource> resourceFilter) {
-		return ReflectionUtils.findAllResourcesInPackage(basePackageName, resourceFilter);
+		return toSupportResourcesList(
+			ResourceSupport.findAllResourcesInPackage(basePackageName, toResourceFilter(resourceFilter)));
 	}
 
 	/**
@@ -296,6 +328,7 @@ public final class ReflectionSupport {
 	 * @since 1.10
 	 * @see #streamAllClassesInClasspathRoot(URI, Predicate, Predicate)
 	 * @see #streamAllClassesInModule(String, Predicate, Predicate)
+	 * @see ResourceSupport#streamAllResourcesInPackage(String, ResourceFilter)
 	 */
 	@API(status = MAINTAINED, since = "1.10")
 	public static Stream<Class<?>> streamAllClassesInPackage(String basePackageName, Predicate<Class<?>> classFilter,
@@ -321,12 +354,16 @@ public final class ReflectionSupport {
 	 * @since 1.11
 	 * @see #streamAllResourcesInClasspathRoot(URI, Predicate)
 	 * @see #streamAllResourcesInModule(String, Predicate)
+	 * @deprecated Please use {@link ResourceSupport#streamAllResourcesInPackage(String, ResourceFilter)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static Stream<Resource> streamAllResourcesInPackage(String basePackageName,
 			Predicate<Resource> resourceFilter) {
 
-		return ReflectionUtils.streamAllResourcesInPackage(basePackageName, resourceFilter);
+		return toSupportResourcesStream(
+			ResourceSupport.streamAllResourcesInPackage(basePackageName, toResourceFilter(resourceFilter)));
 	}
 
 	/**
@@ -346,12 +383,38 @@ public final class ReflectionSupport {
 	 * @since 1.1.1
 	 * @see #findAllClassesInClasspathRoot(URI, Predicate, Predicate)
 	 * @see #findAllClassesInPackage(String, Predicate, Predicate)
+	 * @see ResourceSupport#findAllResourcesInModule(String, ResourceFilter)
 	 */
 	@API(status = MAINTAINED, since = "1.1.1")
 	public static List<Class<?>> findAllClassesInModule(String moduleName, Predicate<Class<?>> classFilter,
 			Predicate<String> classNameFilter) {
 
 		return ReflectionUtils.findAllClassesInModule(moduleName, classFilter, classNameFilter);
+	}
+
+	/**
+	 * Find all {@linkplain Class classes} in the supplied {@code module}
+	 * that match the specified {@code classFilter} and {@code classNameFilter}
+	 * predicates.
+	 *
+	 * <p>The module-path scanning algorithm searches recursively in all
+	 * packages contained in the module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>unnamed</em>
+	 * @param classFilter the class type filter; never {@code null}
+	 * @param classNameFilter the class name filter; never {@code null}
+	 * @return an immutable list of all such classes found; never {@code null}
+	 * but potentially empty
+	 * @since 6.1
+	 * @see #findAllClassesInClasspathRoot(URI, Predicate, Predicate)
+	 * @see #findAllClassesInPackage(String, Predicate, Predicate)
+	 * @see ResourceSupport#findAllResourcesInModule(String, ResourceFilter)
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static List<Class<?>> findAllClassesInModule(Module module, Predicate<Class<?>> classFilter,
+			Predicate<String> classNameFilter) {
+
+		return ReflectionUtils.findAllClassesInModule(module, classFilter, classNameFilter);
 	}
 
 	/**
@@ -369,10 +432,14 @@ public final class ReflectionSupport {
 	 * @since 1.11
 	 * @see #findAllResourcesInClasspathRoot(URI, Predicate)
 	 * @see #findAllResourcesInPackage(String, Predicate)
+	 * @deprecated Please use {@link ResourceSupport#findAllResourcesInModule(String, ResourceFilter)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static List<Resource> findAllResourcesInModule(String moduleName, Predicate<Resource> resourceFilter) {
-		return ReflectionUtils.findAllResourcesInModule(moduleName, resourceFilter);
+		return toSupportResourcesList(
+			ResourceSupport.findAllResourcesInModule(moduleName, toResourceFilter(resourceFilter)));
 	}
 
 	/**
@@ -415,10 +482,14 @@ public final class ReflectionSupport {
 	 * @since 1.11
 	 * @see #streamAllResourcesInClasspathRoot(URI, Predicate)
 	 * @see #streamAllResourcesInPackage(String, Predicate)
+	 * @deprecated Please use {@link ResourceSupport#streamAllResourcesInModule(String, ResourceFilter)} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static Stream<Resource> streamAllResourcesInModule(String moduleName, Predicate<Resource> resourceFilter) {
-		return ReflectionUtils.streamAllResourcesInModule(moduleName, resourceFilter);
+		return toSupportResourcesStream(
+			ResourceSupport.streamAllResourcesInModule(moduleName, toResourceFilter(resourceFilter)));
 	}
 
 	/**
@@ -533,10 +604,10 @@ public final class ReflectionSupport {
 	 * interface and traversing up the type hierarchy until such a method is
 	 * found or the type hierarchy is exhausted.
 	 *
-	 * <p>As of JUnit Platform 1.10, this method uses the {@link ClassLoader} of
-	 * the supplied {@code clazz} to load parameter types instead of using the
-	 * <em>default</em> {@code ClassLoader}, which allows parameter types to be
-	 * resolved in different {@code ClassLoader} arrangements.
+	 * <p>This method uses the {@link ClassLoader} of the supplied {@code clazz}
+	 * to load parameter types instead of using the <em>default</em>
+	 * {@code ClassLoader}, which allows parameter types to be resolved in different
+	 * {@code ClassLoader} arrangements.
 	 *
 	 * <p>The algorithm does not search for methods in {@link java.lang.Object}.
 	 *
@@ -631,11 +702,15 @@ public final class ReflectionSupport {
 	 * <p>This method does <strong>not</strong> search for nested classes
 	 * recursively.
 	 *
-	 * <p>As of JUnit Platform 1.6, this method detects cycles in <em>inner</em>
-	 * class hierarchies &mdash; from the supplied class up to the outermost
-	 * enclosing class &mdash; and throws a {@link JUnitException} if such a cycle
-	 * is detected. Cycles within inner class hierarchies <em>below</em> the
-	 * supplied class are not detected by this method.
+	 * <p>Nested classes declared in the same enclosing class or interface will
+	 * be ordered using an algorithm that is deterministic but intentionally
+	 * nonobvious.
+	 *
+	 * <p>This method detects cycles in <em>inner</em> class hierarchies &mdash;
+	 * from the supplied class up to the outermost enclosing class &mdash; and
+	 * throws a {@link JUnitException} if such a cycle is detected. Cycles within
+	 * inner class hierarchies <em>below</em> the supplied class are not detected
+	 * by this method.
 	 *
 	 * @param clazz the class to be searched; never {@code null}
 	 * @param predicate the predicate against which the list of nested classes is
@@ -657,11 +732,15 @@ public final class ReflectionSupport {
 	 * <p>This method does <strong>not</strong> search for nested classes
 	 * recursively.
 	 *
-	 * <p>As of JUnit Platform 1.6, this method detects cycles in <em>inner</em>
-	 * class hierarchies &mdash; from the supplied class up to the outermost
-	 * enclosing class &mdash; and throws a {@link JUnitException} if such a cycle
-	 * is detected. Cycles within inner class hierarchies <em>below</em> the
-	 * supplied class are not detected by this method.
+	 * <p>Nested classes declared in the same enclosing class or interface will
+	 * be ordered using an algorithm that is deterministic but intentionally
+	 * nonobvious.
+	 *
+	 * <p>This method detects cycles in <em>inner</em> class hierarchies &mdash;
+	 * from the supplied class up to the outermost enclosing class &mdash; and
+	 * throws a {@link JUnitException} if such a cycle is detected. Cycles within
+	 * inner class hierarchies <em>below</em> the supplied class are not detected
+	 * by this method.
 	 *
 	 * @param clazz the class to be searched; never {@code null}
 	 * @param predicate the predicate against which the list of nested classes is
@@ -690,9 +769,30 @@ public final class ReflectionSupport {
 	 * @since 1.12
 	 * @see Field#setAccessible(boolean)
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Field makeAccessible(Field field) {
 		return ReflectionUtils.makeAccessible(Preconditions.notNull(field, "field must not be null"));
+	}
+
+	@SuppressWarnings("removal")
+	private static ResourceFilter toResourceFilter(Predicate<Resource> resourceFilter) {
+		Preconditions.notNull(resourceFilter, "resourceFilter must not be null");
+		return ResourceFilter.of(r -> resourceFilter.test(Resource.of(r)));
+	}
+
+	@SuppressWarnings("removal")
+	static List<Resource> toSupportResourcesList(List<org.junit.platform.commons.io.Resource> resources) {
+		return toSupportResourcesStream(resources.stream()).toList();
+	}
+
+	@SuppressWarnings("removal")
+	static Set<Resource> toSupportResourcesSet(Set<org.junit.platform.commons.io.Resource> resources) {
+		return toSupportResourcesStream(resources.stream()).collect(Collectors.toCollection(LinkedHashSet::new));
+	}
+
+	@SuppressWarnings("removal")
+	static Stream<Resource> toSupportResourcesStream(Stream<org.junit.platform.commons.io.Resource> resources) {
+		return resources.map(Resource::of);
 	}
 
 }

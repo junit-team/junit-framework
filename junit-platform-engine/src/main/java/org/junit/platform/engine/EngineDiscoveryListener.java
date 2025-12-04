@@ -16,19 +16,16 @@ import static org.apiguardian.api.API.Status.STABLE;
 import org.apiguardian.api.API;
 
 /**
- * {@code EngineDiscoveryListener} contains {@link TestEngine} access to the
- * information necessary to discover tests and containers.
+ * {@code EngineDiscoveryListener} defines the API which enables a {@link TestEngine}
+ * to publish information about events that occur during test discovery.
  *
  * <p>All methods in this interface have empty <em>default</em> implementations.
  * Concrete implementations may therefore override one or more of these methods
  * to be notified of the selected events.
  *
- * <p>The methods declared in this interface <em>should</em> be called by
- * each {@link TestEngine} during test discovery. However, since this interface
- * was only added in 1.6, older engines might not yet do so.
- *
  * @since 1.6
  * @see EngineDiscoveryRequest#getDiscoveryListener()
+ * @see org.junit.platform.launcher.LauncherDiscoveryListener
  */
 @API(status = STABLE, since = "1.10")
 public interface EngineDiscoveryListener {
@@ -63,7 +60,7 @@ public interface EngineDiscoveryListener {
 	 * @since 1.13
 	 * @see DiscoveryIssue
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	default void issueEncountered(UniqueId engineId, DiscoveryIssue issue) {
 	}
 

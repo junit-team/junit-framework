@@ -11,7 +11,6 @@
 package org.junit.jupiter.migrationsupport.rules;
 
 import static java.util.Collections.unmodifiableList;
-import static java.util.Objects.requireNonNull;
 import static org.junit.platform.commons.support.AnnotationSupport.findPublicAnnotatedFields;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.support.HierarchyTraversalMode.TOP_DOWN;
@@ -102,7 +101,7 @@ class TestRuleSupport implements BeforeEachCallback, TestExecutionExceptionHandl
 
 		// If no appropriate @Rule annotated members were discovered, we then
 		// have to rethrow the exception in order not to silently swallow it.
-		// Fixes bug: https://github.com/junit-team/junit5/issues/1069
+		// Fixes bug: https://github.com/junit-team/junit-framework/issues/1069
 		if (numRuleAnnotatedMembers == 0) {
 			throw throwable;
 		}
@@ -147,8 +146,8 @@ class TestRuleSupport implements BeforeEachCallback, TestExecutionExceptionHandl
 		Object testInstance = context.getRequiredTestInstance();
 		Namespace namespace = Namespace.create(TestRuleSupport.class, context.getRequiredTestClass());
 		// @formatter:off
-		return new ArrayList<TestRuleAnnotatedMember>(requireNonNull(context.getStore(namespace)
-				.getOrComputeIfAbsent("rule-annotated-members", key -> findRuleAnnotatedMembers(testInstance), List.class)));
+		return new ArrayList<>(context.getStore(namespace)
+				.computeIfAbsent("rule-annotated-members", key -> findRuleAnnotatedMembers(testInstance), List.class));
 		// @formatter:on
 	}
 

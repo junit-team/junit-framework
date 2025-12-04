@@ -34,6 +34,11 @@ class NopLock implements ResourceLock {
 	}
 
 	@Override
+	public boolean tryAcquire() {
+		return true;
+	}
+
+	@Override
 	public ResourceLock acquire() {
 		return this;
 	}

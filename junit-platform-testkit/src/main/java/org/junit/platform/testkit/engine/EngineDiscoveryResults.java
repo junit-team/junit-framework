@@ -27,7 +27,7 @@ import org.junit.platform.engine.TestDescriptor;
  *
  * @since 1.13
  */
-@API(status = EXPERIMENTAL, since = "1.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public class EngineDiscoveryResults {
 
 	private final TestDescriptor engineDescriptor;

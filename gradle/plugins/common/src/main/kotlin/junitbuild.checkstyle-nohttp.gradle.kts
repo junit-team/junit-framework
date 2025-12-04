@@ -7,15 +7,17 @@ plugins {
 
 dependencies {
 	checkstyle(dependencyFromLibs("nohttp-checkstyle"))
-}
-
-configurations.checkstyle {
-	resolutionStrategy {
-		eachDependency {
-			// Workaround for CVE-2024-12798 and CVE-2024-12801
-			if (requested.group == "ch.qos.logback") {
-				useVersion(requiredVersionFromLibs("logback"))
+	constraints {
+		checkstyle("com.puppycrawl.tools:checkstyle") {
+			version {
+				require(requiredVersionFromLibs("checkstyle"))
 			}
+		}
+		checkstyle("ch.qos.logback:logback-classic") {
+			version {
+				require("1.5.19")
+			}
+			because("Workaround for CVE-2025-11226")
 		}
 	}
 }
@@ -27,7 +29,7 @@ tasks.register<Checkstyle>("checkstyleNohttp") {
 	config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleNohttp.xml"))
 	source = fileTree(layout.projectDirectory) {
 		exclude(".git/**", "**/.gradle/**")
-		exclude(".idea/**", ".eclipse/**")
+		exclude(".idea/**", "**/.settings/**", "**/.classpath", "**/.project")
 		exclude("**/*.class")
 		exclude("**/*.hprof")
 		exclude("**/*.jar")

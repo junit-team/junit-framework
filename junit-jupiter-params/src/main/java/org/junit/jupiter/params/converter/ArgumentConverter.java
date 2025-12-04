@@ -26,8 +26,12 @@ import org.junit.platform.commons.JUnitException;
  *
  * <p>Such an {@code ArgumentConverter} is applied to the method parameter
  * of a {@link org.junit.jupiter.params.ParameterizedTest @ParameterizedTest}
- * method with the help of a
- * {@link org.junit.jupiter.params.converter.ConvertWith @ConvertWith} annotation.
+ * or a constructor parameter or
+ * {@link org.junit.jupiter.params.Parameter @Parameter}-annotated field of a
+ * {@link org.junit.jupiter.params.ParameterizedClass @ParameterizedClass} with
+ * the help of a
+ * {@link org.junit.jupiter.params.converter.ConvertWith @ConvertWith}
+ * annotation.
  *
  * <p>Implementations must provide a no-args constructor or a single unambiguous
  * constructor to use {@linkplain ParameterResolver parameter resolution}. They
@@ -81,11 +85,10 @@ public interface ArgumentConverter {
 	 * conversion
 	 * @since 5.13
 	 */
-	@API(status = EXPERIMENTAL, since = "5.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	default @Nullable Object convert(@Nullable Object source, FieldContext context) throws ArgumentConversionException {
-		throw new JUnitException(
-			String.format("ArgumentConverter does not override the convert(Object, FieldContext) method. "
-					+ "Please report this issue to the maintainers of %s.",
-				getClass().getName()));
+		throw new JUnitException("""
+				ArgumentConverter does not override the convert(Object, FieldContext) method. \
+				Please report this issue to the maintainers of %s.""".formatted(getClass().getName()));
 	}
 }

@@ -84,4 +84,7 @@ class Assertions {
 		return "expected: <%d> but was: <%d>".formatted(expected, actual);
 	}
 
+	private Assertions() {
+	}
+
 }

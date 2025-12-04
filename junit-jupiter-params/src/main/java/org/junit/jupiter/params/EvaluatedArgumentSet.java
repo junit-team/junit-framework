@@ -75,8 +75,8 @@ class EvaluatedArgumentSet {
 	}
 
 	@Nullable
-	Object[] getConsumedNames() {
-		return extractFromNamed(this.consumed, Named::getName);
+	Object[] getConsumedArguments() {
+		return this.consumed;
 	}
 
 	@Nullable

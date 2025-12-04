@@ -108,7 +108,7 @@ class ParameterizedTestDemo {
 		@EmptySource
 		@ValueSource(strings = { " ", "   ", "\t", "\n" })
 		void nullEmptyAndBlankStrings(String text) {
-			assertTrue(text == null || text.trim().isEmpty());
+			assertTrue(text == null || text.isBlank());
 		}
 		// end::NullAndEmptySource_example1[]
 	}
@@ -121,7 +121,7 @@ class ParameterizedTestDemo {
 		@NullAndEmptySource
 		@ValueSource(strings = { " ", "   ", "\t", "\n" })
 		void nullEmptyAndBlankStrings(String text) {
-			assertTrue(text == null || text.trim().isEmpty());
+			assertTrue(text == null || text.isBlank());
 		}
 		// end::NullAndEmptySource_example2[]
 	}
@@ -314,10 +314,10 @@ class ParameterizedTestDemo {
 	// tag::CsvSource_example[]
 	@ParameterizedTest
 	@CsvSource({
-		"apple,		 1",
-		"banana,		2",
+		"apple,         1",
+		"banana,        2",
 		"'lemon, lime', 0xF1",
-		"strawberry,	700_000"
+		"strawberry,    700_000"
 	})
 	void testWithCsvSource(String fruit, int rank) {
 		assertNotNull(fruit);
@@ -341,7 +341,7 @@ class ParameterizedTestDemo {
 		assertNotEquals(0, reference);
 	}
 
-	@ParameterizedTest(name = "[{index}] {arguments}")
+	@ParameterizedTest
 	@CsvFileSource(resources = "/two-column.csv", useHeadersInDisplayName = true)
 	void testWithCsvFileSourceAndHeaders(String country, int reference) {
 		assertNotNull(country);
@@ -381,6 +381,9 @@ class ParameterizedTestDemo {
 
 		private final TestInfo testInfo;
 
+		// end::ArgumentsProviderWithConstructorInjection_example[]
+		@SuppressWarnings("RedundantModifier")
+		// tag::ArgumentsProviderWithConstructorInjection_example[]
 		public MyArgumentsProviderWithConstructorInjection(TestInfo testInfo) {
 			this.testInfo = testInfo;
 		}
@@ -579,7 +582,7 @@ class ParameterizedTestDemo {
 
 	// tag::custom_display_names[]
 	@DisplayName("Display name of container")
-	@ParameterizedTest(name = "{index} ==> the rank of ''{0}'' is {1}")
+	@ParameterizedTest(name = "{index} ==> the rank of {0} is {1}")
 	@CsvSource({ "apple, 1", "banana, 2", "'lemon, lime', 3" })
 	void testWithCustomDisplayNames(String fruit, int rank) {
 	}

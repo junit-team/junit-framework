@@ -10,17 +10,21 @@
 
 package org.junit.platform.commons.support;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * {@code Resource} represents a resource on the classpath.
+ *
+ * <p><strong>WARNING</strong>: a {@code Resource} must provide correct
+ * {@link Object#equals(Object) equals} and {@link Object#hashCode() hashCode}
+ * implementations since a {@code Resource} may potentially be stored in a
+ * collection or map.
  *
  * @since 1.11
  * @see ReflectionSupport#findAllResourcesInClasspathRoot(URI, Predicate)
@@ -29,38 +33,24 @@ import org.apiguardian.api.API;
  * @see ReflectionSupport#streamAllResourcesInClasspathRoot(URI, Predicate)
  * @see ReflectionSupport#streamAllResourcesInPackage(String, Predicate)
  * @see ReflectionSupport#streamAllResourcesInModule(String, Predicate)
+ * @deprecated Please use {@link org.junit.platform.commons.io.Resource} instead.
  */
-@API(status = EXPERIMENTAL, since = "1.11")
-public interface Resource {
+@SuppressWarnings("removal")
+@API(status = DEPRECATED, since = "1.14")
+@Deprecated(since = "1.14", forRemoval = true)
+public interface Resource extends org.junit.platform.commons.io.Resource {
 
 	/**
-	 * Get the name of this resource.
+	 * Create a new {@link Resource} from the supplied
+	 * {@link org.junit.platform.commons.io.Resource}.
 	 *
-	 * <p>The resource name is a {@code /}-separated path. The path is relative
-	 * to the classpath root in which the resource is located.
-	 *
-	 * @return the resource name; never {@code null}
+	 * @param resource the resource to copy attributes from; never {@code null}
+	 * @return a new {@code Resource}
+	 * @since 1.14
 	 */
-	String getName();
-
-	/**
-	 * Get the URI of this resource.
-	 *
-	 * @return the uri of the resource; never {@code null}
-	 */
-	URI getUri();
-
-	/**
-	 * Get an {@link InputStream} for reading this resource.
-	 *
-	 * <p>The default implementation delegates to {@link java.net.URL#openStream()}
-	 * for this resource's {@link #getUri() URI}.
-	 *
-	 * @return an input stream for this resource; never {@code null}
-	 * @throws IOException if an I/O exception occurs
-	 */
-	default InputStream getInputStream() throws IOException {
-		return getUri().toURL().openStream();
+	static Resource of(org.junit.platform.commons.io.Resource resource) {
+		Preconditions.notNull(resource, "resource must not be null");
+		return new DefaultResource(resource.getName(), resource.getUri());
 	}
 
 }

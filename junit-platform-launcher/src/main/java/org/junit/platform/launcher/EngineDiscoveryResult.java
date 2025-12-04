@@ -73,8 +73,7 @@ public class EngineDiscoveryResult {
 
 	private final Status status;
 
-	@Nullable
-	private final Throwable throwable;
+	private final @Nullable Throwable throwable;
 
 	private EngineDiscoveryResult(Status status, @Nullable Throwable throwable) {
 		this.status = status;

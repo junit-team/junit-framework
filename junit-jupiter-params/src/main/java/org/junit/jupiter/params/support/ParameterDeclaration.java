@@ -24,7 +24,7 @@ import org.apiguardian.api.API;
  * @since 5.13
  * @see ParameterDeclarations
  */
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public interface ParameterDeclaration {
 
 	/**

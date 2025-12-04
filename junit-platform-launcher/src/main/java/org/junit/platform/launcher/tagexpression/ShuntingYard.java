@@ -111,7 +111,7 @@ class ShuntingYard {
 
 	private ParseStatus findOperands(Token token, Operator currentOperator) {
 		while (currentOperator.hasLowerPrecedenceThan(previousOperator())
-				|| currentOperator.hasSamePrecedenceAs(previousOperator()) && currentOperator.isLeftAssociative()) {
+				|| (currentOperator.hasSamePrecedenceAs(previousOperator()) && currentOperator.isLeftAssociative())) {
 			TokenWith<Operator> tokenWithWithOperator = operators.pop();
 			ParseStatus parseStatus = tokenWithWithOperator.element().createAndAddExpressionTo(expressions,
 				tokenWithWithOperator.token());

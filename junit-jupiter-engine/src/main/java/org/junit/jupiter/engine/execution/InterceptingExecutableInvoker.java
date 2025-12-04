@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall.VoidMethodInterceptorCall;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 
 /**
@@ -65,6 +66,12 @@ public class InterceptingExecutableInvoker {
 		return invoke(invocation, invocation, extensionContext, extensionRegistry, interceptorCall);
 	}
 
+	public void invokeVoid(Method method, @Nullable Object target, ExtensionContext extensionContext,
+			ExtensionRegistry extensionRegistry, VoidMethodInterceptorCall interceptorCall) {
+		this.<@Nullable Void> invoke(method, target, extensionContext, extensionRegistry,
+			ReflectiveInterceptorCall.ofVoidMethod(interceptorCall));
+	}
+
 	/**
 	 * Invoke the supplied method with dynamic parameter resolution.
 	 *
@@ -78,11 +85,12 @@ public class InterceptingExecutableInvoker {
 	 * @param interceptorCall the call for intercepting this method invocation
 	 * via all registered {@linkplain InvocationInterceptor interceptors}
 	 */
-	public <T> T invoke(Method method, @Nullable Object target, ExtensionContext extensionContext,
-			ExtensionRegistry extensionRegistry, ReflectiveInterceptorCall<Method, T> interceptorCall) {
+	public <T extends @Nullable Object> T invoke(Method method, @Nullable Object target,
+			ExtensionContext extensionContext, ExtensionRegistry extensionRegistry,
+			ReflectiveInterceptorCall<Method, T> interceptorCall) {
 
-		@SuppressWarnings("unchecked")
-		Optional<Object> optionalTarget = (target instanceof Optional ? (Optional<Object>) target
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Optional<Object> optionalTarget = (target instanceof Optional optional ? optional
 				: Optional.ofNullable(target));
 		@Nullable
 		Object[] arguments = resolveParameters(method, optionalTarget, extensionContext, extensionRegistry);
@@ -110,12 +118,11 @@ public class InterceptingExecutableInvoker {
 		T apply(InvocationInterceptor interceptor, Invocation<T> invocation,
 				ReflectiveInvocationContext<E> invocationContext, ExtensionContext extensionContext) throws Throwable;
 
-		@SuppressWarnings("NullAway")
 		static ReflectiveInterceptorCall<Method, @Nullable Void> ofVoidMethod(VoidMethodInterceptorCall call) {
-			return ((interceptorChain, invocation, invocationContext, extensionContext) -> {
+			return (interceptorChain, invocation, invocationContext, extensionContext) -> {
 				call.apply(interceptorChain, invocation, invocationContext, extensionContext);
 				return null;
-			});
+			};
 		}
 
 		interface VoidMethodInterceptorCall {

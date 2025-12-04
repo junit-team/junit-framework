@@ -34,6 +34,7 @@ import org.junit.rules.ExpectedException;
  *
  * @since 5.0
  */
+@SuppressWarnings("removal")
 class ExpectedExceptionSupportTests {
 
 	@Test

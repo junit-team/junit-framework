@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.parallel;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.ElementType;
@@ -48,8 +48,7 @@ import org.junit.jupiter.api.ClassTemplate;
  * <p>Uniqueness of a shared resource is determined by both the {@link #value()}
  * and the {@link #mode()}. Duplicated shared resources do not cause errors.
  *
- * <p>Since JUnit Jupiter 5.4, this annotation is {@linkplain Inherited inherited}
- * within class hierarchies.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * <p>Since JUnit Jupiter 5.12, this annotation supports adding shared resources
  * dynamically at runtime via {@link #providers}. Resources declared "statically"
@@ -118,7 +117,7 @@ public @interface ResourceLock {
 	 * @see ResourceLocksProvider.Lock
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	Class<? extends ResourceLocksProvider>[] providers() default {};
 
 	/**
@@ -132,7 +131,7 @@ public @interface ResourceLock {
 	 * @see ResourceLockTarget
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	ResourceLockTarget target() default ResourceLockTarget.SELF;
 
 }

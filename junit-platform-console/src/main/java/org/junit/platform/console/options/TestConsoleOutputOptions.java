@@ -17,6 +17,7 @@ import java.util.Locale;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.console.output.Theme;
 
 /**
  * @since 1.10
@@ -25,23 +26,20 @@ import org.jspecify.annotations.Nullable;
 public class TestConsoleOutputOptions {
 
 	static final String DEFAULT_DETAILS_NAME = "tree";
-	static final Details DEFAULT_DETAILS = Details.valueOf(DEFAULT_DETAILS_NAME.toUpperCase(Locale.ROOT));
+	public static final Details DEFAULT_DETAILS = Details.valueOf(DEFAULT_DETAILS_NAME.toUpperCase(Locale.ROOT));
 	static final Theme DEFAULT_THEME = Theme.valueOf(ConsoleUtils.charset());
 
 	private boolean ansiColorOutputDisabled;
 
-	@Nullable
-	private Path colorPalettePath;
+	private @Nullable Path colorPalettePath;
 
 	private boolean isSingleColorPalette;
 	private Details details = DEFAULT_DETAILS;
 	private Theme theme = DEFAULT_THEME;
 
-	@Nullable
-	private Path stdoutPath;
+	private @Nullable Path stdoutPath;
 
-	@Nullable
-	private Path stderrPath;
+	private @Nullable Path stderrPath;
 
 	public boolean isAnsiColorOutputDisabled() {
 		return this.ansiColorOutputDisabled;

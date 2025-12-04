@@ -51,12 +51,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * custom <em>composed annotation</em> that inherits the semantics of this
  * annotation.
  *
- * <p>As of JUnit Jupiter 5.6, this annotation is a {@linkplain Repeatable
- * repeatable} annotation. Consequently, this annotation may be declared multiple
- * times on an {@link java.lang.reflect.AnnotatedElement AnnotatedElement} (i.e.,
- * test interface, test class, or test method). Specifically, this annotation will
- * be found if it is directly present, indirectly present, or meta-present on a
- * given element.
+ * <p>This annotation is a {@linkplain Repeatable repeatable} annotation and may
+ * be declared multiple times on an {@link java.lang.reflect.AnnotatedElement
+ * AnnotatedElement} such as a test interface, test class, or test method.
+ * Specifically, this annotation will be found if it is directly present,
+ * indirectly present, or meta-present on a given element.
  *
  * @since 5.1
  * @see org.junit.jupiter.api.condition.EnabledIf

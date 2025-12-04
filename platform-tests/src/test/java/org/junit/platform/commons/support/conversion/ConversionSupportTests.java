@@ -260,7 +260,7 @@ class ConversionSupportTests {
 
 	@Test
 	void convertsStringToURL() throws Exception {
-		assertConverts("https://junit.org/junit5", URL.class, URI.create("https://junit.org/junit5").toURL());
+		assertConverts("https://junit.org", URL.class, URI.create("https://junit.org").toURL());
 	}
 
 	// --- java.time -----------------------------------------------------------
@@ -294,10 +294,9 @@ class ConversionSupportTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void convertsStringToLocale() {
 		assertConverts("en", Locale.class, Locale.ENGLISH);
-		assertConverts("en_us", Locale.class, new Locale(Locale.US.toString()));
+		assertConverts("en-US", Locale.class, Locale.US);
 	}
 
 	@Test

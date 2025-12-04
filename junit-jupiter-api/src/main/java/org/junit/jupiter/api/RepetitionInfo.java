@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
@@ -58,7 +58,7 @@ public interface RepetitionInfo {
 	 * @since 5.10
 	 * @see #getFailureThreshold()
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	int getFailureCount();
 
 	/**
@@ -68,7 +68,7 @@ public interface RepetitionInfo {
 	 * @since 5.10
 	 * @see RepeatedTest#failureThreshold()
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	int getFailureThreshold();
 
 }

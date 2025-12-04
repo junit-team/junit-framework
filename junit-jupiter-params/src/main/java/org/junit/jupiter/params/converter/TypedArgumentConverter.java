@@ -13,6 +13,7 @@ package org.junit.jupiter.params.converter;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.support.FieldContext;
@@ -43,7 +44,8 @@ public abstract class TypedArgumentConverter<S, T extends @Nullable Object> impl
 	 * @param targetType the type of the target object to create from the source;
 	 * never {@code null}
 	 */
-	protected TypedArgumentConverter(Class<S> sourceType, Class<T> targetType) {
+	protected TypedArgumentConverter(Class<S> sourceType,
+			@SuppressWarnings("NullableProblems") Class<@NonNull T> targetType) {
 		this.sourceType = Preconditions.notNull(sourceType, "sourceType must not be null");
 		this.targetType = Preconditions.notNull(targetType, "targetType must not be null");
 	}
@@ -68,12 +70,12 @@ public abstract class TypedArgumentConverter<S, T extends @Nullable Object> impl
 		}
 		if (!this.sourceType.isInstance(source)) {
 			String message = "%s cannot convert objects of type [%s]. Only source objects of type [%s] are supported.".formatted(
-				getClass().getSimpleName(), source.getClass().getName(), this.sourceType.getName());
+				getClass().getSimpleName(), source.getClass().getTypeName(), this.sourceType.getTypeName());
 			throw new ArgumentConversionException(message);
 		}
 		if (!ReflectionUtils.isAssignableTo(this.targetType, actualTargetType)) {
 			String message = "%s cannot convert to type [%s]. Only target type [%s] is supported.".formatted(
-				getClass().getSimpleName(), actualTargetType.getName(), this.targetType.getName());
+				getClass().getSimpleName(), actualTargetType.getTypeName(), this.targetType.getTypeName());
 			throw new ArgumentConversionException(message);
 		}
 		return convert(this.sourceType.cast(source));

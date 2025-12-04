@@ -11,7 +11,6 @@
 package org.junit.jupiter.params;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.params.ParameterizedInvocationConstants.ARGUMENTS_PLACEHOLDER;
 import static org.junit.jupiter.params.ParameterizedInvocationConstants.ARGUMENTS_WITH_NAMES_PLACEHOLDER;
 import static org.junit.jupiter.params.ParameterizedInvocationConstants.ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER;
@@ -30,14 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.support.ParameterNameAndArgument;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.StringUtils;
@@ -46,6 +46,12 @@ import org.junit.platform.commons.util.StringUtils;
  * @since 5.0
  */
 class ParameterizedInvocationNameFormatter {
+
+	/**
+	 * Global cache for {arguments} pattern strings, keyed by the number of arguments.
+	 * @since 6.0
+	 */
+	private static final Map<Integer, String> argumentsPatternCache = new ConcurrentHashMap<>(8);
 
 	static final String DEFAULT_DISPLAY_NAME = "{default_display_name}";
 	static final String DEFAULT_DISPLAY_NAME_PATTERN = "[" + INDEX_PLACEHOLDER + "] "
@@ -57,11 +63,11 @@ class ParameterizedInvocationNameFormatter {
 			ParameterizedDeclarationContext<?> declarationContext) {
 
 		String name = declarationContext.getDisplayNamePattern();
-		String pattern = name.equals(DEFAULT_DISPLAY_NAME)
+		String pattern = DEFAULT_DISPLAY_NAME.equals(name)
 				? extensionContext.getConfigurationParameter(DISPLAY_NAME_PATTERN_KEY) //
 						.orElse(DEFAULT_DISPLAY_NAME_PATTERN)
 				: name;
-		pattern = Preconditions.notBlank(pattern.trim(),
+		pattern = Preconditions.notBlank(pattern.strip(),
 			() -> "Configuration error: @%s on %s must be declared with a non-empty name.".formatted(
 				declarationContext.getAnnotationName(),
 				declarationContext.getResolverFacade().getIndexedParameterDeclarations().getSourceElementDescription()));
@@ -87,9 +93,9 @@ class ParameterizedInvocationNameFormatter {
 		}
 	}
 
-	String format(int invocationIndex, EvaluatedArgumentSet arguments) {
+	String format(int invocationIndex, EvaluatedArgumentSet arguments, boolean quoteTextArguments) {
 		try {
-			return formatSafely(invocationIndex, arguments);
+			return formatSafely(invocationIndex, arguments, quoteTextArguments);
 		}
 		catch (Exception ex) {
 			String message = "Failed to format display name for parameterized test. "
@@ -98,9 +104,10 @@ class ParameterizedInvocationNameFormatter {
 		}
 	}
 
-	private String formatSafely(int invocationIndex, EvaluatedArgumentSet arguments) {
-		ArgumentsContext context = new ArgumentsContext(invocationIndex, arguments.getConsumedNames(),
-			arguments.getName());
+	@SuppressWarnings("JdkObsolete")
+	private String formatSafely(int invocationIndex, EvaluatedArgumentSet arguments, boolean quoteTextArguments) {
+		ArgumentsContext context = new ArgumentsContext(invocationIndex, arguments.getConsumedArguments(),
+			arguments.getName(), quoteTextArguments);
 		StringBuffer result = new StringBuffer(); // used instead of StringBuilder so MessageFormat can append directly
 		for (PartialFormatter partialFormatter : this.partialFormatters) {
 			partialFormatter.append(context, result);
@@ -161,8 +168,8 @@ class ParameterizedInvocationNameFormatter {
 			ParameterizedDeclarationContext<?> declarationContext, int argumentMaxLength) {
 
 		PartialFormatter argumentsWithNamesFormatter = new CachingByArgumentsLengthPartialFormatter(
-			length -> new MessageFormatPartialFormatter(argumentsWithNamesPattern(length, declarationContext),
-				argumentMaxLength));
+			length -> new MessageFormatPartialFormatter(argumentsPattern(length), argumentMaxLength, true,
+				declarationContext.getResolverFacade()));
 
 		PartialFormatter argumentSetNameFormatter = new ArgumentSetNameFormatter(
 			declarationContext.getAnnotationName());
@@ -183,25 +190,23 @@ class ParameterizedInvocationNameFormatter {
 		return formatters;
 	}
 
-	private static String argumentsWithNamesPattern(int length, ParameterizedDeclarationContext<?> declarationContext) {
-		ResolverFacade resolverFacade = declarationContext.getResolverFacade();
-		return IntStream.range(0, length) //
-				.mapToObj(index -> resolverFacade.getParameterName(index).map(name -> name + "=").orElse("") + "{"
-						+ index + "}") //
-				.collect(joining(", "));
-	}
-
 	private static String argumentsPattern(int length) {
-		return IntStream.range(0, length) //
-				.mapToObj(index -> "{" + index + "}") //
-				.collect(joining(", "));
+		return argumentsPatternCache.computeIfAbsent(length, //
+			key -> {
+				StringJoiner sj = new StringJoiner(", ");
+				for (int i = 0; i < length; i++) {
+					sj.add("{" + i + "}");
+				}
+				return sj.toString();
+			});
 	}
 
 	private record PlaceholderPosition(int index, String placeholder) {
 	}
 
+	@SuppressWarnings("ArrayRecordComponent")
 	private record ArgumentsContext(int invocationIndex, @Nullable Object[] consumedArguments,
-			Optional<String> argumentSetName) {
+			Optional<String> argumentSetName, boolean quoteTextArguments) {
 	}
 
 	@FunctionalInterface
@@ -234,38 +239,87 @@ class ParameterizedInvocationNameFormatter {
 
 		private final MessageFormat messageFormat;
 		private final int argumentMaxLength;
+		private final boolean generateNameValuePairs;
+		private final @Nullable ResolverFacade resolverFacade;
 
 		MessageFormatPartialFormatter(String pattern, int argumentMaxLength) {
+			this(pattern, argumentMaxLength, false, null);
+		}
+
+		MessageFormatPartialFormatter(String pattern, int argumentMaxLength, boolean generateNameValuePairs,
+				@Nullable ResolverFacade resolverFacade) {
 			this.messageFormat = new MessageFormat(pattern);
 			this.argumentMaxLength = argumentMaxLength;
+			this.generateNameValuePairs = generateNameValuePairs;
+			this.resolverFacade = resolverFacade;
 		}
 
 		// synchronized because MessageFormat is not thread-safe
 		@Override
 		public synchronized void append(ArgumentsContext context, StringBuffer result) {
-			this.messageFormat.format(makeReadable(context.consumedArguments), result, new FieldPosition(0));
+			this.messageFormat.format(makeReadable(context.consumedArguments, context.quoteTextArguments), result,
+				new FieldPosition(0));
 		}
 
-		private @Nullable Object[] makeReadable(@Nullable Object[] arguments) {
+		private @Nullable Object[] makeReadable(@Nullable Object[] arguments, boolean quoteTextArguments) {
+			@Nullable
 			Format[] formats = messageFormat.getFormatsByArgumentIndex();
 			@Nullable
 			Object[] result = Arrays.copyOf(arguments, Math.min(arguments.length, formats.length), Object[].class);
 			for (int i = 0; i < result.length; i++) {
 				if (formats[i] == null) {
-					result[i] = truncateIfExceedsMaxLength(StringUtils.nullSafeToString(arguments[i]));
+					Object argument = arguments[i];
+					String prefix = "";
+
+					if (argument instanceof ParameterNameAndArgument parameterNameAndArgument) {
+						// This supports the useHeadersInDisplayName attributes in @CsvSource and @CsvFileSource.
+						prefix = parameterNameAndArgument.getName() + " = ";
+						argument = parameterNameAndArgument.getPayload();
+					}
+					else if (this.generateNameValuePairs && this.resolverFacade != null) {
+						Optional<String> parameterName = this.resolverFacade.getParameterName(i);
+						if (parameterName.isPresent()) {
+							// This supports the {argumentsWithNames} pattern.
+							prefix = parameterName.get() + " = ";
+						}
+					}
+
+					if (argument instanceof Character ch) {
+						result[i] = prefix + (quoteTextArguments ? QuoteUtils.quote(ch) : ch);
+					}
+					else {
+						String argumentText = (argument == null ? "null"
+								: truncateIfExceedsMaxLength(StringUtils.nullSafeToString(argument)));
+						result[i] = prefix + (quoteTextArguments && argument instanceof CharSequence//
+								? QuoteUtils.quote(argumentText)
+								: argumentText);
+					}
 				}
 			}
 			return result;
 		}
 
-		private @Nullable String truncateIfExceedsMaxLength(@Nullable String argument) {
-			if (argument != null && argument.length() > this.argumentMaxLength) {
+		private String truncateIfExceedsMaxLength(String argument) {
+			if (argument.length() > this.argumentMaxLength) {
 				return argument.substring(0, this.argumentMaxLength - 1) + ELLIPSIS;
 			}
 			return argument;
 		}
 	}
 
+	/**
+	 * Caches formatters by the length of the consumed <em>arguments</em> which
+	 * may differ from the number of declared parameters.
+	 *
+	 * <p>For example, when using multiple providers or a provider that returns
+	 * argument arrays of different length, such as:
+	 *
+	 * <pre>
+	 * &#064;ParameterizedTest
+	 * &#064;CsvSource({"a", "a,b", "a,b,c"})
+	 * void test(ArgumentsAccessor accessor) {}
+	 * </pre>
+	 */
 	private static class CachingByArgumentsLengthPartialFormatter implements PartialFormatter {
 
 		private final ConcurrentMap<Integer, PartialFormatter> cache = new ConcurrentHashMap<>(1);

@@ -24,4 +24,7 @@ public class NamespacedHierarchicalStoreProviders {
 	public static NamespacedHierarchicalStore<Namespace> dummyNamespacedHierarchicalStoreWithNoParent() {
 		return new NamespacedHierarchicalStore<>(null, closeAutoCloseables());
 	}
+
+	private NamespacedHierarchicalStoreProviders() {
+	}
 }

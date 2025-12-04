@@ -75,7 +75,7 @@ public class LogRecordListener {
 	 * @see #stream(Class)
 	 * @see #stream(Class, Level)
 	 */
-	@SuppressWarnings("ConstantValue")
+	@SuppressWarnings({ "ConstantValue", "ReferenceEquality" })
 	public Stream<LogRecord> stream(Level level) {
 		// NOTE: we cannot use org.junit.platform.commons.util.Preconditions here
 		// since that would introduce a package cycle.
@@ -129,7 +129,7 @@ public class LogRecordListener {
 	 * @see #stream(Level)
 	 * @see #stream(Class)
 	 */
-	@SuppressWarnings("ConstantValue")
+	@SuppressWarnings({ "ConstantValue", "ReferenceEquality" })
 	public Stream<LogRecord> stream(Class<?> clazz, Level level) {
 		// NOTE: we cannot use org.junit.platform.commons.util.Preconditions here
 		// since that would introduce a package cycle.

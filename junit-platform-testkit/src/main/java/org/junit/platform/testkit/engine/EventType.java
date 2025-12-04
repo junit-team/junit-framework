@@ -10,7 +10,6 @@
 
 package org.junit.platform.testkit.engine;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
@@ -70,7 +69,7 @@ public enum EventType {
 	 * @since 1.12
 	 * @see org.junit.platform.engine.EngineExecutionListener#fileEntryPublished(TestDescriptor, FileEntry)
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	FILE_ENTRY_PUBLISHED
 
 }

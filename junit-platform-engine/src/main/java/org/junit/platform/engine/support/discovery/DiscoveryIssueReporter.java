@@ -34,7 +34,7 @@ import org.junit.platform.engine.UniqueId;
  * @since 1.13
  * @see SelectorResolver.Context
  */
-@API(status = EXPERIMENTAL, since = "1.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public interface DiscoveryIssueReporter {
 
 	/**
@@ -165,6 +165,7 @@ public interface DiscoveryIssueReporter {
 		 *
 		 * @return the composed condition; never {@code null}
 		 */
+		@SuppressWarnings("ShortCircuitBoolean")
 		default Condition<T> and(Condition<? super T> that) {
 			Preconditions.notNull(that, "condition must not be null");
 			return value -> this.check(value) & that.check(value);

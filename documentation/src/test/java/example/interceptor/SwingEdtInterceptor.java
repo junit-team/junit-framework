@@ -23,6 +23,9 @@ import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 // tag::user_guide[]
 public class SwingEdtInterceptor implements InvocationInterceptor {
 
+	//end::user_guide[]
+	@SuppressWarnings("NullAway")
+	//tag::user_guide[]
 	@Override
 	public void interceptTestMethod(Invocation<Void> invocation,
 			ReflectiveInvocationContext<Method> invocationContext,

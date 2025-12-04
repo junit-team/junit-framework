@@ -10,14 +10,12 @@
 
 package org.junit.platform.commons.util;
 
-import static java.util.stream.StreamSupport.stream;
-
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
 
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.support.scanning.ClasspathScanner;
-import org.junit.platform.commons.support.scanning.DefaultClasspathScanner;
 
 /**
  * @since 1.12
@@ -28,19 +26,23 @@ class ClasspathScannerLoader {
 		ServiceLoader<ClasspathScanner> serviceLoader = ServiceLoader.load(ClasspathScanner.class,
 			ClassLoaderUtils.getDefaultClassLoader());
 
-		List<ClasspathScanner> classpathScanners = stream(serviceLoader.spliterator(), false).toList();
+		List<Provider<ClasspathScanner>> classpathScanners = serviceLoader.stream().toList();
 
 		if (classpathScanners.size() == 1) {
-			return classpathScanners.get(0);
+			return classpathScanners.get(0).get();
 		}
 
 		if (classpathScanners.size() > 1) {
 			throw new JUnitException(
 				"There should not be more than one ClasspathScanner implementation present on the classpath but there were %d: %s".formatted(
-					classpathScanners.size(), classpathScanners));
+					classpathScanners.size(),
+					classpathScanners.stream().map(Provider::type).map(Class::getName).toList()));
 		}
 
 		return new DefaultClasspathScanner(ClassLoaderUtils::getDefaultClassLoader, ReflectionUtils::tryToLoadClass);
+	}
+
+	private ClasspathScannerLoader() {
 	}
 
 }

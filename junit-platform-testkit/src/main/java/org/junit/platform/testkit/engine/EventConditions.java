@@ -256,7 +256,7 @@ public final class EventConditions {
 	 *
 	 * @since 1.13
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static Condition<Event> uniqueId(String uniqueId) {
 		return uniqueId(UniqueId.parse(uniqueId));
 	}
@@ -269,7 +269,7 @@ public final class EventConditions {
 	 *
 	 * @since 1.13
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static Condition<Event> uniqueId(UniqueId uniqueId) {
 		return uniqueId(new Condition<>(isEqual(uniqueId), "equal to '%s'", uniqueId));
 	}
@@ -297,7 +297,7 @@ public final class EventConditions {
 	 *
 	 * @since 1.13
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static Condition<Event> uniqueId(Condition<? super UniqueId> condition) {
 		return new Condition<>(byTestDescriptor(where(TestDescriptor::getUniqueId, condition::matches)),
 			"descriptor with uniqueId %s", condition.description().value());
@@ -359,7 +359,7 @@ public final class EventConditions {
 	 *
 	 * @since 1.13
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static Condition<Event> legacyReportingName(String legacyReportingName) {
 		return new Condition<>(
 			byTestDescriptor(where(TestDescriptor::getLegacyReportingName, isEqual(legacyReportingName))),
@@ -531,7 +531,7 @@ public final class EventConditions {
 	 *
 	 * @since 1.12
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Condition<Event> fileEntry(Predicate<FileEntry> predicate) {
 		return new Condition<>(byPayload(FileEntry.class, predicate), "event for file entry with custom predicate");
 	}

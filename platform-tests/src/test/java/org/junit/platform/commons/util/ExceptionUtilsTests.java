@@ -12,19 +12,20 @@ package org.junit.platform.commons.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.ExceptionUtils.findNestedThrowables;
 import static org.junit.platform.commons.util.ExceptionUtils.pruneStackTrace;
 import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link ExceptionUtils}.
@@ -34,10 +35,10 @@ import org.junit.platform.commons.PreconditionViolationException;
 @SuppressWarnings("ThrowableNotThrown")
 class ExceptionUtilsTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void throwAsUncheckedExceptionWithNullException() {
-		assertThrows(PreconditionViolationException.class, () -> throwAsUncheckedException(null));
+		assertPreconditionViolationFor(() -> throwAsUncheckedException(null));
 	}
 
 	@Test
@@ -50,10 +51,10 @@ class ExceptionUtilsTests {
 		assertThrows(RuntimeException.class, () -> throwAsUncheckedException(new NumberFormatException()));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void readStackTraceForNullThrowable() {
-		assertThrows(PreconditionViolationException.class, () -> readStackTrace(null));
+		assertPreconditionViolationFor(() -> readStackTrace(null));
 	}
 
 	@Test
@@ -102,6 +103,30 @@ class ExceptionUtilsTests {
 
 		assertThat(exception.getStackTrace()) //
 				.noneMatch(element -> element.toString().contains("org.example.Class.method(file:123)"));
+	}
+
+	@Test
+	void pruneStackTraceRetainsStackFramesFromJUnitStart() {
+		// Non-test class frames from org.junit are filtered.
+		var testClassName = "com.example.project.HelloTest";
+		var testFileName = "HelloTest.java";
+
+		var exception = new JUnitException("expected");
+		var stackTrace = exception.getStackTrace();
+		var extendedStacktrace = Arrays.copyOfRange(stackTrace, 0, stackTrace.length + 2);
+		extendedStacktrace[0] = new StackTraceElement(testClassName, "stringLength", testFileName, 10);
+		extendedStacktrace[stackTrace.length] = new StackTraceElement("org.junit.start.JUnit", "run", "JUnit.java", 3);
+		extendedStacktrace[stackTrace.length + 1] = new StackTraceElement(testClassName, "main", testFileName, 5);
+		exception.setStackTrace(extendedStacktrace);
+
+		pruneStackTrace(exception, List.of(testClassName));
+
+		assertThat(exception.getStackTrace()) //
+				.extracting(StackTraceElement::toString) //
+				.containsExactly( //
+					"com.example.project.HelloTest.stringLength(HelloTest.java:10)", //
+					"org.junit.start.JUnit.run(JUnit.java:3)", //
+					"com.example.project.HelloTest.main(HelloTest.java:5)");
 	}
 
 	@Test

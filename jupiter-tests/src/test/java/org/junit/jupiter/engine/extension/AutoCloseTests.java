@@ -118,7 +118,7 @@ class AutoCloseTests extends AbstractJupiterTestEngineTests {
 	}
 
 	/**
-	 * @see <a href="https://github.com/junit-team/junit5/issues/3684">#3684</a>
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/3684">#3684</a>
 	 */
 	@Test
 	void fieldsAreProperlyClosedViaInterfaceMethods() {

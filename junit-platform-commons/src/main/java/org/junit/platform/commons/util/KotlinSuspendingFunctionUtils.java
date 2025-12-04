@@ -18,6 +18,7 @@ import static kotlin.reflect.jvm.KTypesJvm.getJvmErasure;
 import static kotlin.reflect.jvm.ReflectJvmMapping.getJavaType;
 import static kotlinx.coroutines.BuildersKt.runBlocking;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
+import static org.junit.platform.commons.util.ReflectionUtils.EMPTY_CLASS_ARRAY;
 import static org.junit.platform.commons.util.ReflectionUtils.getUnderlyingCause;
 
 import java.lang.reflect.Method;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
 
 import kotlin.Unit;
 import kotlin.coroutines.EmptyCoroutineContext;
@@ -60,7 +62,7 @@ class KotlinSuspendingFunctionUtils {
 	static Class<?>[] getParameterTypes(Method method) {
 		var parameterCount = method.getParameterCount();
 		if (parameterCount == 1) {
-			return new Class<?>[0];
+			return EMPTY_CLASS_ARRAY;
 		}
 		return Arrays.stream(method.getParameterTypes()).limit(parameterCount - 1).toArray(Class<?>[]::new);
 	}
@@ -100,6 +102,7 @@ class KotlinSuspendingFunctionUtils {
 					arguments.put(parameter, args[index]);
 					index++;
 				}
+				default -> throw new JUnitException("Unsupported parameter kind: " + parameter.getKind());
 			}
 		}
 		return arguments;
@@ -108,5 +111,8 @@ class KotlinSuspendingFunctionUtils {
 	private static KFunction<?> getKotlinFunction(Method method) {
 		return Preconditions.notNull(ReflectJvmMapping.getKotlinFunction(method),
 			() -> "Failed to get Kotlin function for method: " + method);
+	}
+
+	private KotlinSuspendingFunctionUtils() {
 	}
 }

@@ -81,7 +81,7 @@ class CompositeFilter<T> implements Filter<T> {
 		// @formatter:off
 		return filters.stream()
 				.map(Object::toString)
-				.map(value -> "(%s)".formatted(value))
+				.map("(%s)"::formatted)
 				.collect(joining(" and "));
 		// @formatter:on
 	}

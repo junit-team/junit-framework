@@ -44,6 +44,7 @@ import platform.tooling.support.ThirdPartyJars;
 class ModularUserGuideTests {
 
 	private static final String DOCUMENTATION_MODULE_DESCRIPTOR = """
+			@SuppressWarnings("removal")
 			open module documentation {
 			  exports example.testkit; // just here to ensure documentation example sources are compiled
 
@@ -83,17 +84,7 @@ class ModularUserGuideTests {
 		args.add(temp.resolve("destination").toString());
 
 		var lib = Files.createDirectories(temp.resolve("lib"));
-		ThirdPartyJars.copy(lib, "junit", "junit");
-		ThirdPartyJars.copy(lib, "org.assertj", "assertj-core");
-		// Byte Buddy is used by AssertJ's soft assertions which are used by the Engine Test Kit
-		ThirdPartyJars.copy(lib, "net.bytebuddy", "byte-buddy");
-		ThirdPartyJars.copy(lib, "org.apiguardian", "apiguardian-api");
-		ThirdPartyJars.copy(lib, "org.hamcrest", "hamcrest");
-		ThirdPartyJars.copy(lib, "org.jspecify", "jspecify");
-		ThirdPartyJars.copy(lib, "org.opentest4j", "opentest4j");
-		ThirdPartyJars.copy(lib, "org.opentest4j.reporting", "open-test-reporting-tooling-spi");
-		ThirdPartyJars.copy(lib, "com.google.jimfs", "jimfs");
-		ThirdPartyJars.copy(lib, "com.google.guava", "guava");
+		ThirdPartyJars.copyAll(lib);
 		loadAllJUnitModules(lib);
 		args.add("--module-path");
 		args.add(lib.toString());
@@ -136,6 +127,7 @@ class ModularUserGuideTests {
 				)) //
 				.addArguments("--add-modules", "documentation") //
 				.addArguments("--patch-module", "documentation=" + projectDir.resolve("src/test/resources")) //
+				.addArguments("--add-modules", "com.google.common") //
 				.addArguments("--module", "org.junit.platform.console") //
 				.addArguments("execute") //
 				.addArguments("--scan-modules") //
@@ -159,30 +151,16 @@ class ModularUserGuideTests {
 		var err = new StringWriter();
 
 		var args = compile(temp, out, err);
-		// args.forEach(System.out::println);
 
 		assertTrue(err.toString().isBlank(), () -> err + "\n\n" + String.join("\n", args));
 		var listing = treeWalk(temp);
 		assertLinesMatch(List.of( //
 			"destination", //
-			">> CLASSES >>", //
-			"lib", //
-			"lib/apiguardian-api-.+\\.jar", //
-			"lib/assertj-core-.+\\.jar", //
-			"lib/byte-buddy-.+", //
-			"lib/guava-.+\\.jar", //
-			"lib/hamcrest-.+\\.jar", //
-			"lib/jimfs-.+\\.jar", //
-			"lib/jspecify-.+\\.jar", //
-			"lib/junit-.+\\.jar", //
-			">> ALL JUNIT 5 JARS >>", //
-			"lib/opentest4j-.+\\.jar", //
+			">> CLASSES AND JARS >>", //
 			"src", //
 			"src/documentation", //
 			"src/documentation/module-info.java" //
 		), listing);
-		// System.out.println("______________");
-		// listing.forEach(System.out::println);
 
 		junit(temp, outputFiles);
 	}

@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedMethods;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
@@ -45,7 +45,6 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.pkg1.ClassLevelDir;
 import org.junit.platform.commons.util.pkg1.InstanceLevelDir;
 import org.junit.platform.commons.util.pkg1.SuperclassWithStaticPackagePrivateBeforeMethod;
@@ -94,7 +93,7 @@ class AnnotationUtilsTests {
 	}
 
 	/**
-	 * Test for https://github.com/junit-team/junit5/issues/1133
+	 * Test for https://github.com/junit-team/junit-framework/issues/1133
 	 */
 	@Test
 	void findInheritedAnnotationMetaPresentOnNonInheritedComposedAnnotationPresentOnSuperclass() {
@@ -210,10 +209,8 @@ class AnnotationUtilsTests {
 
 	@Test
 	void findRepeatableAnnotationsForNotRepeatableAnnotation() {
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> findRepeatableAnnotations(getClass(), Inherited.class));
-
-		assertThat(exception.getMessage()).isEqualTo(Inherited.class.getName() + " must be @Repeatable");
+		assertPreconditionViolationFor(() -> findRepeatableAnnotations(getClass(), Inherited.class))//
+				.withMessage(Inherited.class.getName() + " must be @Repeatable");
 	}
 
 	@Test
@@ -335,18 +332,16 @@ class AnnotationUtilsTests {
 			() -> "Extensions found for class " + clazz.getName());
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedMethodsForNullClass() {
-		assertThrows(PreconditionViolationException.class,
-			() -> findAnnotatedMethods(null, Annotation1.class, TOP_DOWN));
+		assertPreconditionViolationFor(() -> findAnnotatedMethods(null, Annotation1.class, TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedMethodsForNullAnnotationType() {
-		assertThrows(PreconditionViolationException.class,
-			() -> findAnnotatedMethods(ClassWithAnnotatedMethods.class, null, TOP_DOWN));
+		assertPreconditionViolationFor(() -> findAnnotatedMethods(ClassWithAnnotatedMethods.class, null, TOP_DOWN));
 	}
 
 	@Test
@@ -391,7 +386,7 @@ class AnnotationUtilsTests {
 	}
 
 	/*
-	 * see https://github.com/junit-team/junit5/issues/3553
+	 * see https://github.com/junit-team/junit-framework/issues/3553
 	 */
 	@Test
 	void findAnnotatedMethodsDoesNotAllowInstanceMethodToHideStaticMethod() throws Exception {
@@ -423,24 +418,23 @@ class AnnotationUtilsTests {
 
 	// === findAnnotatedFields() ===============================================
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsForNullClass() {
-		assertThrows(PreconditionViolationException.class,
-			() -> findAnnotatedFields(null, Annotation1.class, isStringField, TOP_DOWN));
+		assertPreconditionViolationFor(() -> findAnnotatedFields(null, Annotation1.class, isStringField, TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsForNullAnnotationType() {
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> findAnnotatedFields(ClassWithAnnotatedFields.class, null, isStringField, TOP_DOWN));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findAnnotatedFieldsForNullPredicate() {
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(
 			() -> findAnnotatedFields(ClassWithAnnotatedFields.class, Annotation1.class, null, TOP_DOWN));
 	}
 
@@ -511,7 +505,7 @@ class AnnotationUtilsTests {
 	}
 
 	/*
-	 * see https://github.com/junit-team/junit5/issues/3553
+	 * see https://github.com/junit-team/junit-framework/issues/3553
 	 */
 	@Test
 	void findAnnotatedFieldsDoesNotAllowInstanceFieldToHideStaticField() throws Exception {
@@ -534,25 +528,22 @@ class AnnotationUtilsTests {
 
 	// === findPublicAnnotatedFields() =========================================
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsForNullClass() {
-		assertThrows(PreconditionViolationException.class,
-			() -> findPublicAnnotatedFields(null, String.class, Annotation1.class));
+		assertPreconditionViolationFor(() -> findPublicAnnotatedFields(null, String.class, Annotation1.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsForNullFieldType() {
-		assertThrows(PreconditionViolationException.class,
-			() -> findPublicAnnotatedFields(getClass(), null, Annotation1.class));
+		assertPreconditionViolationFor(() -> findPublicAnnotatedFields(getClass(), null, Annotation1.class));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void findPublicAnnotatedFieldsForNullAnnotationType() {
-		assertThrows(PreconditionViolationException.class,
-			() -> findPublicAnnotatedFields(getClass(), String.class, null));
+		assertPreconditionViolationFor(() -> findPublicAnnotatedFields(getClass(), String.class, null));
 	}
 
 	@Test
@@ -996,16 +987,13 @@ class AnnotationUtilsTests {
 	// -------------------------------------------------------------------------
 
 	@Annotation1
-	@Nullable
-	private Boolean privateDirectlyAnnotatedField;
+	private @Nullable Boolean privateDirectlyAnnotatedField;
 
 	@Annotation1
-	@Nullable
-	public String directlyAnnotatedField;
+	public @Nullable String directlyAnnotatedField;
 
 	@ComposedAnnotation
-	@Nullable
-	public Integer metaAnnotatedField;
+	public @Nullable Integer metaAnnotatedField;
 
 	interface InterfaceWithAnnotatedFields {
 

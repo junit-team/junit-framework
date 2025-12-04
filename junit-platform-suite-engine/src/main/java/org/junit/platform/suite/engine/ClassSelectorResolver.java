@@ -21,12 +21,12 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineDiscoveryListener;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.UniqueId.Segment;
 import org.junit.platform.engine.discovery.ClassSelector;
 import org.junit.platform.engine.discovery.UniqueIdSelector;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 import org.junit.platform.engine.support.discovery.SelectorResolver;
@@ -40,19 +40,19 @@ final class ClassSelectorResolver implements SelectorResolver {
 	private final Predicate<String> classNameFilter;
 	private final SuiteEngineDescriptor suiteEngineDescriptor;
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 	private final EngineDiscoveryListener discoveryListener;
 	private final DiscoveryIssueReporter issueReporter;
 
 	ClassSelectorResolver(Predicate<String> classNameFilter, SuiteEngineDescriptor suiteEngineDescriptor,
-			ConfigurationParameters configurationParameters, OutputDirectoryProvider outputDirectoryProvider,
+			ConfigurationParameters configurationParameters, OutputDirectoryCreator outputDirectoryCreator,
 			EngineDiscoveryListener discoveryListener, DiscoveryIssueReporter issueReporter) {
 
 		this.isSuiteClass = new IsSuiteClass(issueReporter);
 		this.classNameFilter = classNameFilter;
 		this.suiteEngineDescriptor = suiteEngineDescriptor;
 		this.configurationParameters = configurationParameters;
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 		this.discoveryListener = discoveryListener;
 		this.issueReporter = issueReporter;
 	}
@@ -115,7 +115,7 @@ final class ClassSelectorResolver implements SelectorResolver {
 			return Optional.empty();
 		}
 
-		return Optional.of(new SuiteTestDescriptor(id, suiteClass, configurationParameters, outputDirectoryProvider,
+		return Optional.of(new SuiteTestDescriptor(id, suiteClass, configurationParameters, outputDirectoryCreator,
 			discoveryListener, issueReporter));
 	}
 

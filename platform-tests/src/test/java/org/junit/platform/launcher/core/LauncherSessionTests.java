@@ -10,14 +10,15 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
+import static org.junit.platform.launcher.core.LauncherExecutionRequestBuilder.executionRequest;
 import static org.junit.platform.launcher.core.LauncherFactoryForTestingPurposesOnly.createLauncherConfigBuilderWithDisabledServiceLoading;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.fakes.TestEngineStub;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherSession;
@@ -32,13 +33,13 @@ class LauncherSessionTests {
 			.addLauncherSessionListeners(firstSessionListener, secondSessionListener) //
 			.addTestEngines(new TestEngineStub()) //
 			.build();
-	LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request().build();
+	LauncherDiscoveryRequest discoveryRequest = discoveryRequest().build();
 
 	@Test
 	void callsRegisteredListenersWhenLauncherIsUsedDirectly() {
 		var launcher = LauncherFactory.create(launcherConfig);
 
-		var testPlan = launcher.discover(request);
+		var testPlan = launcher.discover(discoveryRequest);
 
 		var inOrder = inOrder(firstSessionListener, secondSessionListener);
 		var launcherSession = ArgumentCaptor.forClass(LauncherSession.class);
@@ -54,7 +55,28 @@ class LauncherSessionTests {
 		inOrder.verify(secondSessionListener).launcherSessionClosed(launcherSession.getValue());
 		inOrder.verify(firstSessionListener).launcherSessionClosed(launcherSession.getValue());
 
-		launcher.execute(request);
+		launcher.execute(discoveryRequest);
+
+		inOrder.verify(firstSessionListener).launcherSessionOpened(launcherSession.capture());
+		inOrder.verify(secondSessionListener).launcherSessionOpened(launcherSession.getValue());
+		inOrder.verify(secondSessionListener).launcherSessionClosed(launcherSession.getValue());
+		inOrder.verify(firstSessionListener).launcherSessionClosed(launcherSession.getValue());
+
+		testPlan = launcher.discover(discoveryRequest);
+
+		inOrder.verify(firstSessionListener).launcherSessionOpened(launcherSession.capture());
+		inOrder.verify(secondSessionListener).launcherSessionOpened(launcherSession.getValue());
+		inOrder.verify(secondSessionListener).launcherSessionClosed(launcherSession.getValue());
+		inOrder.verify(firstSessionListener).launcherSessionClosed(launcherSession.getValue());
+
+		launcher.execute(executionRequest(testPlan).build());
+
+		inOrder.verify(firstSessionListener).launcherSessionOpened(launcherSession.capture());
+		inOrder.verify(secondSessionListener).launcherSessionOpened(launcherSession.getValue());
+		inOrder.verify(secondSessionListener).launcherSessionClosed(launcherSession.getValue());
+		inOrder.verify(firstSessionListener).launcherSessionClosed(launcherSession.getValue());
+
+		launcher.execute(executionRequest(discoveryRequest).build());
 
 		inOrder.verify(firstSessionListener).launcherSessionOpened(launcherSession.capture());
 		inOrder.verify(secondSessionListener).launcherSessionOpened(launcherSession.getValue());
@@ -63,8 +85,8 @@ class LauncherSessionTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void callsRegisteredListenersWhenLauncherIsUsedViaSession() {
-		@SuppressWarnings("resource")
 		var session = LauncherFactory.openSession(launcherConfig);
 		var launcher = session.getLauncher();
 
@@ -73,15 +95,13 @@ class LauncherSessionTests {
 		inOrder.verify(secondSessionListener).launcherSessionOpened(session);
 		verifyNoMoreInteractions(firstSessionListener, secondSessionListener);
 
-		var testPlan = launcher.discover(request);
-
-		verifyNoMoreInteractions(firstSessionListener, secondSessionListener);
-
+		var testPlan = launcher.discover(discoveryRequest);
 		launcher.execute(testPlan);
+		launcher.execute(discoveryRequest);
 
-		verifyNoMoreInteractions(firstSessionListener, secondSessionListener);
-
-		launcher.execute(request);
+		testPlan = launcher.discover(discoveryRequest);
+		launcher.execute(executionRequest(testPlan).build());
+		launcher.execute(executionRequest(discoveryRequest).build());
 
 		verifyNoMoreInteractions(firstSessionListener, secondSessionListener);
 
@@ -93,17 +113,19 @@ class LauncherSessionTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void closedSessionCannotBeUsed() {
-		@SuppressWarnings("resource")
 		var session = LauncherFactory.openSession(launcherConfig);
 		var launcher = session.getLauncher();
-		var testPlan = launcher.discover(request);
+		var testPlan = launcher.discover(discoveryRequest);
 
 		session.close();
 
-		assertThrows(PreconditionViolationException.class, () -> launcher.discover(request));
-		assertThrows(PreconditionViolationException.class, () -> launcher.execute(testPlan));
-		assertThrows(PreconditionViolationException.class, () -> launcher.execute(request));
+		assertPreconditionViolationFor(() -> launcher.discover(discoveryRequest));
+		assertPreconditionViolationFor(() -> launcher.execute(testPlan));
+		assertPreconditionViolationFor(() -> launcher.execute(discoveryRequest));
+		assertPreconditionViolationFor(() -> launcher.execute(executionRequest(testPlan).build()));
+		assertPreconditionViolationFor(() -> launcher.execute(executionRequest(discoveryRequest).build()));
 	}
 
 }

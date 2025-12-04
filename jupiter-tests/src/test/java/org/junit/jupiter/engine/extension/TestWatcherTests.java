@@ -31,6 +31,7 @@ import java.util.logging.LogRecord;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
@@ -305,7 +306,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 		@TestFactory
 		@Disabled
 		Stream<DynamicTest> skippedTest() {
-			return Stream.of("A", "B").map(text -> dynamicTest(text, () -> fail()));
+			return Stream.of("A", "B").map(text -> dynamicTest(text, Assertions::fail));
 		}
 
 	}
@@ -433,7 +434,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 	/**
 	 * {@link TestWatcher} that retrieves data from the {@link ExtensionContext.Store}.
-	 * @see <a href="https://github.com/junit-team/junit5/issues/3944">#3944</a>
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/3944">#3944</a>
 	 */
 	static class DataRetrievingTestWatcher implements BeforeTestExecutionCallback, TestWatcher {
 

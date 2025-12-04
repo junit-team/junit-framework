@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
 
+@SuppressWarnings("removal")
 @ExtendWith(ExternalResourceSupport.class)
 class ExternalResourceSupportForDifferentDeclaredReturnTypesRulesTests {
 
@@ -57,10 +58,12 @@ class ExternalResourceSupportForDifferentDeclaredReturnTypesRulesTests {
 
 	@AfterAll
 	static void afterMethodsOfBothRulesWereExecuted() {
-		if (!afterOfRule1WasExecuted)
+		if (!afterOfRule1WasExecuted) {
 			fail();
-		if (!afterOfRule2WasExecuted)
+		}
+		if (!afterOfRule2WasExecuted) {
 			fail();
+		}
 	}
 
 	private static class MyExternalResource1 extends ExternalResource {

@@ -42,7 +42,7 @@ class EnabledIfEnvironmentVariableCondition
 	@Override
 	protected ConditionEvaluationResult evaluate(EnabledIfEnvironmentVariable annotation) {
 
-		String name = annotation.named().trim();
+		String name = annotation.named().strip();
 		String regex = annotation.matches();
 		Preconditions.notBlank(name, () -> "The 'named' attribute must not be blank in " + annotation);
 		Preconditions.notBlank(regex, () -> "The 'matches' attribute must not be blank in " + annotation);

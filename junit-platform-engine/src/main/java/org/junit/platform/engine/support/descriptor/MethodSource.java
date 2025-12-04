@@ -36,7 +36,7 @@ import org.junit.platform.engine.TestSource;
  * @see org.junit.platform.engine.discovery.MethodSelector
  */
 @API(status = STABLE, since = "1.0")
-public class MethodSource implements TestSource {
+public final class MethodSource implements TestSource {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -110,14 +110,11 @@ public class MethodSource implements TestSource {
 	private final String className;
 	private final String methodName;
 
-	@Nullable
-	private final String methodParameterTypes;
+	private final @Nullable String methodParameterTypes;
 
-	@Nullable
-	private Class<?> javaClass;
+	private @Nullable Class<?> javaClass;
 
-	@Nullable
-	private transient Method javaMethod;
+	private transient @Nullable Method javaMethod;
 
 	private MethodSource(String className, String methodName) {
 		this(className, methodName, null);
@@ -158,14 +155,14 @@ public class MethodSource implements TestSource {
 	/**
 	 * Get the method name of this source.
 	 */
-	public final String getMethodName() {
+	public String getMethodName() {
 		return this.methodName;
 	}
 
 	/**
 	 * Get the method parameter types of this source.
 	 */
-	public final @Nullable String getMethodParameterTypes() {
+	public @Nullable String getMethodParameterTypes() {
 		return this.methodParameterTypes;
 	}
 
@@ -180,7 +177,7 @@ public class MethodSource implements TestSource {
 	 * @see #getClassName()
 	 */
 	@API(status = STABLE, since = "1.7")
-	public final Class<?> getJavaClass() {
+	public Class<?> getJavaClass() {
 		return lazyLoadJavaClass();
 	}
 
@@ -195,7 +192,7 @@ public class MethodSource implements TestSource {
 	 * @see #getMethodName()
 	 */
 	@API(status = STABLE, since = "1.7")
-	public final Method getJavaMethod() {
+	public Method getJavaMethod() {
 		return lazyLoadJavaMethod();
 	}
 

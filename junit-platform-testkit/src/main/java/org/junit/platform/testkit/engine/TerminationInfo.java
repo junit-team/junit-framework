@@ -60,11 +60,9 @@ public class TerminationInfo {
 
 	private final boolean skipped;
 
-	@Nullable
-	private final String skipReason;
+	private final @Nullable String skipReason;
 
-	@Nullable
-	private final TestExecutionResult testExecutionResult;
+	private final @Nullable TestExecutionResult testExecutionResult;
 
 	private TerminationInfo(boolean skipped, @Nullable String skipReason,
 			@Nullable TestExecutionResult testExecutionResult) {

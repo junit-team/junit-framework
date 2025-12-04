@@ -17,10 +17,6 @@ import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
 import static org.junit.platform.testkit.engine.EventConditions.started;
 import static org.junit.platform.testkit.engine.EventConditions.test;
-import static org.junit.vintage.engine.Constants.PARALLEL_CLASS_EXECUTION;
-import static org.junit.vintage.engine.Constants.PARALLEL_EXECUTION_ENABLED;
-import static org.junit.vintage.engine.Constants.PARALLEL_METHOD_EXECUTION;
-import static org.junit.vintage.engine.Constants.PARALLEL_POOL_SIZE;
 import static org.junit.vintage.engine.descriptor.VintageTestDescriptor.SEGMENT_TYPE_RUNNER;
 import static org.junit.vintage.engine.descriptor.VintageTestDescriptor.SEGMENT_TYPE_TEST;
 import static org.junit.vintage.engine.samples.junit4.JUnit4ParallelClassesTestCase.FirstClassTestCase;
@@ -51,6 +47,7 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
+import org.junit.vintage.engine.Constants;
 import org.junit.vintage.engine.VintageTestEngine;
 import org.junit.vintage.engine.samples.junit4.JUnit4ParallelClassesTestCase;
 import org.junit.vintage.engine.samples.junit4.JUnit4ParallelMethodsTestCase;
@@ -180,12 +177,14 @@ class ParallelExecutionIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static EngineExecutionResults execute(int poolSize, boolean parallelClasses, boolean parallelMethods,
 			Class<?>... testClass) {
 		return EngineTestKit.execute(new VintageTestEngine(),
 			request(poolSize, parallelClasses, parallelMethods, testClass));
 	}
 
+	@SuppressWarnings("deprecation")
 	private static LauncherDiscoveryRequest request(int poolSize, boolean parallelClasses, boolean parallelMethods,
 			Class<?>... testClasses) {
 		var classSelectors = Arrays.stream(testClasses) //
@@ -194,10 +193,11 @@ class ParallelExecutionIntegrationTests {
 
 		return LauncherDiscoveryRequestBuilder.request() //
 				.selectors(classSelectors) //
-				.configurationParameter(PARALLEL_EXECUTION_ENABLED, String.valueOf(true)) //
-				.configurationParameter(PARALLEL_POOL_SIZE, String.valueOf(poolSize)) //
-				.configurationParameter(PARALLEL_CLASS_EXECUTION, String.valueOf(parallelClasses)) //
-				.configurationParameter(PARALLEL_METHOD_EXECUTION, String.valueOf(parallelMethods)) //
+				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED, String.valueOf(true)) //
+				.configurationParameter(Constants.PARALLEL_POOL_SIZE, String.valueOf(poolSize)) //
+				.configurationParameter(Constants.PARALLEL_CLASS_EXECUTION, String.valueOf(parallelClasses)) //
+				.configurationParameter(Constants.PARALLEL_METHOD_EXECUTION, String.valueOf(parallelMethods)) //
+				.enableImplicitConfigurationParameters(false) //
 				.build();
 	}
 

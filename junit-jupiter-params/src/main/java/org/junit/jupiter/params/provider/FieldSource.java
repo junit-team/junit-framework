@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -119,7 +119,7 @@ import org.apiguardian.api.API;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.11
  * @see MethodSource
@@ -134,7 +134,7 @@ import org.apiguardian.api.API;
 @Documented
 @Inherited
 @Repeatable(FieldSources.class)
-@API(status = EXPERIMENTAL, since = "5.11")
+@API(status = MAINTAINED, since = "5.13.3")
 @ArgumentsSource(FieldArgumentsProvider.class)
 @SuppressWarnings("exports")
 public @interface FieldSource {

@@ -54,12 +54,12 @@ class GradleStarterTests {
 
 		assertThat(result.stdOut()) //
 				.contains( //
-					"CalculatorParameterizedClassTests > [1] i=1 > parameterizedTest(int)", //
-					"CalculatorParameterizedClassTests > [1] i=1 > Inner > [1] 1 > regularTest() PASSED", //
-					"CalculatorParameterizedClassTests > [1] i=1 > Inner > [2] 2 > regularTest() PASSED", //
-					"CalculatorParameterizedClassTests > [2] i=2 > parameterizedTest(int)", //
-					"CalculatorParameterizedClassTests > [2] i=2 > Inner > [1] 1 > regularTest() PASSED", //
-					"CalculatorParameterizedClassTests > [2] i=2 > Inner > [2] 2 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [1] i = 1 > parameterizedTest(int)", //
+					"CalculatorParameterizedClassTests > [1] i = 1 > Inner > [1] 1 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [1] i = 1 > Inner > [2] 2 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [2] i = 2 > parameterizedTest(int)", //
+					"CalculatorParameterizedClassTests > [2] i = 2 > Inner > [1] 1 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [2] i = 2 > Inner > [2] 2 > regularTest() PASSED", //
 					"Using Java version: 17", //
 					"CalculatorTests > 1 + 1 = 2 PASSED", //
 					"CalculatorTests > add(int, int, int) > 0 + 1 = 1 PASSED", //
@@ -79,10 +79,10 @@ class GradleStarterTests {
 
 		assertThat(result.stdOut()) //
 				.contains( //
-					"CalculatorParameterizedClassTests > [1] i=1 > Inner > [1] 1 > regularTest() PASSED", //
-					"CalculatorParameterizedClassTests > [1] i=1 > Inner > [2] 2 > regularTest() PASSED", //
-					"CalculatorParameterizedClassTests > [2] i=2 > Inner > [1] 1 > regularTest() PASSED", //
-					"CalculatorParameterizedClassTests > [2] i=2 > Inner > [2] 2 > regularTest() PASSED" //
+					"CalculatorParameterizedClassTests > [1] i = 1 > Inner > [1] 1 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [1] i = 1 > Inner > [2] 2 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [2] i = 2 > Inner > [1] 1 > regularTest() PASSED", //
+					"CalculatorParameterizedClassTests > [2] i = 2 > Inner > [2] 2 > regularTest() PASSED" //
 				) //
 				.doesNotContain("parameterizedTest(int)", "CalculatorTests");
 
@@ -90,8 +90,8 @@ class GradleStarterTests {
 
 		assertThat(result.stdOut()) //
 				.contains( //
-					"CalculatorParameterizedClassTests > [1] i=1 > parameterizedTest(int)", //
-					"CalculatorParameterizedClassTests > [2] i=2 > parameterizedTest(int)" //
+					"CalculatorParameterizedClassTests > [1] i = 1 > parameterizedTest(int)", //
+					"CalculatorParameterizedClassTests > [2] i = 2 > parameterizedTest(int)" //
 				) //
 				.doesNotContain("regularTest()", "CalculatorTests");
 	}

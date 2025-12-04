@@ -11,11 +11,10 @@ This document is also available as a link:{userGuidePdfFileName}[PDF download].
 endif::linkToPdf[]
 endif::backend-html5[]
 
-[[overview-what-is-junit-5]]
+[[overview-what-is-junit]]
 === What is JUnit?
 
-Unlike previous versions of JUnit, JUnit 5 and later is composed of several different
-modules from three different sub-projects.
+JUnit is composed of several different modules from three different sub-projects.
 
 **JUnit {version} = _JUnit Platform_ + _JUnit Jupiter_ + _JUnit Vintage_**
 
@@ -36,7 +35,9 @@ sub-project provides a `TestEngine` for running Jupiter based tests on the platf
 
 **JUnit Vintage** provides a `TestEngine` for running JUnit 3 and JUnit 4 based tests on
 the platform. It requires JUnit 4.12 or later to be present on the class path or module
-path.
+path. Note, however, that the JUnit Vintage engine is deprecated and should only be used
+temporarily while migrating tests to JUnit Jupiter or another testing framework with
+native JUnit Platform support.
 
 [[overview-java-versions]]
 === Supported Java Versions
@@ -77,14 +78,14 @@ corresponding sections of this User Guide, organized by topic.
 ==== Example Projects
 
 To see complete, working examples of projects that you can copy and experiment with, the
-{junit5-samples-repo}[`junit5-samples`] repository is a good place to start. The
-`junit5-samples` repository hosts a collection of sample projects based on JUnit Jupiter,
+{junit-examples-repo}[`junit-examples`] repository is a good place to start. The
+`junit-examples` repository hosts a collection of example projects based on JUnit Jupiter,
 JUnit Vintage, and other testing frameworks. You'll find appropriate build scripts (e.g.,
 `build.gradle`, `pom.xml`, etc.) in the example projects. The links below highlight some
 of the combinations you can choose from.
 
-* For Gradle and Java, check out the `{junit5-jupiter-starter-gradle}` project.
-* For Gradle and Kotlin, check out the `{junit5-jupiter-starter-gradle-kotlin}` project.
-* For Gradle and Groovy, check out the `{junit5-jupiter-starter-gradle-groovy}` project.
-* For Maven, check out the `{junit5-jupiter-starter-maven}` project.
-* For Ant, check out the `{junit5-jupiter-starter-ant}` project.
+* For Gradle and Java, check out the `{junit-jupiter-starter-gradle}` project.
+* For Gradle and Kotlin, check out the `{junit-jupiter-starter-gradle-kotlin}` project.
+* For Gradle and Groovy, check out the `{junit-jupiter-starter-gradle-groovy}` project.
+* For Maven, check out the `{junit-jupiter-starter-maven}` project.
+* For Ant, check out the `{junit-jupiter-starter-ant}` project.

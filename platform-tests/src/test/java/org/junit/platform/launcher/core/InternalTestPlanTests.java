@@ -11,7 +11,7 @@
 package org.junit.platform.launcher.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -112,7 +112,7 @@ public class InternalTestPlanTests {
 
 	private LauncherDiscoveryResult createLauncherDiscoveryResult(EngineResultInfo result) {
 		var testEngineResults = Map.of(mock(TestEngine.class), result);
-		return new LauncherDiscoveryResult(testEngineResults, configParams, dummyOutputDirectoryProvider());
+		return new LauncherDiscoveryResult(testEngineResults, configParams, dummyOutputDirectoryCreator());
 	}
 
 }

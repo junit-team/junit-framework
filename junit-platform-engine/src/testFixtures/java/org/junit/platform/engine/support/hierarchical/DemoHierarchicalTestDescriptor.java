@@ -26,11 +26,9 @@ import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
  */
 public class DemoHierarchicalTestDescriptor extends AbstractTestDescriptor implements Node<DemoEngineExecutionContext> {
 
-	@Nullable
-	private final BiConsumer<DemoEngineExecutionContext, TestDescriptor> executeBlock;
+	private final @Nullable BiConsumer<DemoEngineExecutionContext, TestDescriptor> executeBlock;
 
-	@Nullable
-	private String skippedReason;
+	private @Nullable String skippedReason;
 
 	private boolean skipped;
 

@@ -13,6 +13,7 @@ package org.junit.platform.launcher.core;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
@@ -52,4 +53,8 @@ class DelegatingLauncher implements Launcher {
 		delegate.execute(testPlan, listeners);
 	}
 
+	@Override
+	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		delegate.execute(launcherExecutionRequest);
+	}
 }

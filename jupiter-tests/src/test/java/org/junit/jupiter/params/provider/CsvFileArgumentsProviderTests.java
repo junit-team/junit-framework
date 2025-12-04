@@ -13,7 +13,11 @@ package org.junit.jupiter.params.provider;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.CsvArgumentsProviderTests.isCsvParseException;
 import static org.junit.jupiter.params.provider.MockCsvAnnotationBuilder.csvFileSource;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotEmptyFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,8 +36,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileArgumentsProvider.InputStreamProvider;
+import org.junit.jupiter.params.support.ParameterNameAndArgument;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * @since 5.0
@@ -41,10 +45,25 @@ import org.junit.platform.commons.PreconditionViolationException;
 class CsvFileArgumentsProviderTests {
 
 	@Test
+	void providesArgumentsForEachSupportedLineSeparator() {
+		var annotation = csvFileSource()//
+				.resources("test.csv")//
+				.build();
+
+		var arguments = provideArguments(annotation, "foo, bar \n baz, qux \r quux, corge \r\n grault, garply");
+
+		assertThat(arguments).containsExactly(//
+			array("foo", "bar"), //
+			array("baz", "qux"), //
+			array("quux", "corge"), //
+			array("grault", "garply")//
+		);
+	}
+
+	@Test
 	void providesArgumentsForNewlineAndComma() {
 		var annotation = csvFileSource()//
 				.resources("test.csv")//
-				.lineSeparator("\n")//
 				.delimiter(',')//
 				.build();
 
@@ -57,7 +76,6 @@ class CsvFileArgumentsProviderTests {
 	void providesArgumentsForCarriageReturnAndSemicolon() {
 		var annotation = csvFileSource()//
 				.resources("test.csv")//
-				.lineSeparator("\r")//
 				.delimiter(';')//
 				.build();
 
@@ -99,12 +117,9 @@ class CsvFileArgumentsProviderTests {
 				.delimiterString(";")//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(annotation, "foo").findAny());
-
-		assertThat(exception)//
-				.hasMessageStartingWith("The delimiter and delimiterString attributes cannot be set simultaneously in")//
-				.hasMessageContaining("CsvFileSource");
+		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny())//
+				.withMessageStartingWith("The delimiter and delimiterString attributes cannot be set simultaneously in")//
+				.withMessageContaining("CsvFileSource");
 	}
 
 	@Test
@@ -117,6 +132,36 @@ class CsvFileArgumentsProviderTests {
 		var arguments = provideArguments(annotation, "foo, bar \n#baz, qux");
 
 		assertThat(arguments).containsExactly(array("foo", "bar"));
+	}
+
+	@Test
+	void honorsCustomCommentCharacter() {
+		var annotation = csvFileSource()//
+				.resources("test.csv")//
+				.commentCharacter(';')//
+				.delimiter(',')//
+				.build();
+
+		var arguments = provideArguments(annotation, "foo, bar \n;baz, qux");
+
+		assertThat(arguments).containsExactly(array("foo", "bar"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("org.junit.jupiter.params.provider.CsvArgumentsProviderTests#"
+			+ "invalidDelimiterQuoteCharacterAndCommentCharacterCombinations")
+	void throwsExceptionWhenControlCharactersNotDiffer(Object delimiter, char quoteCharacter, char commentCharacter) {
+		var builder = csvFileSource().resources("test.csv") //
+				.quoteCharacter(quoteCharacter).commentCharacter(commentCharacter);
+
+		var annotation = delimiter instanceof Character c //
+				? builder.delimiter(c).build() //
+				: builder.delimiterString(delimiter.toString()).build();
+
+		var message = "delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' "
+				+ "must all differ";
+		assertPreconditionViolationFor(() -> provideArguments(annotation, "foo").findAny()) //
+				.withMessage(message.formatted(delimiter, quoteCharacter, commentCharacter));
 	}
 
 	@Test
@@ -286,7 +331,19 @@ class CsvFileArgumentsProviderTests {
 				.build();
 
 		var arguments = provideArguments(new CsvFileArgumentsProvider(), annotation);
-		Stream<String[]> argumentsAsStrings = arguments.map(array -> new String[] { String.valueOf(array[0]) });
+
+		Stream<String[]> argumentsAsStrings = arguments.map(array -> {
+			String[] strings = new String[array.length];
+			for (int i = 0; i < array.length; i++) {
+				if (array[i] instanceof ParameterNameAndArgument parameterNameAndArgument) {
+					strings[i] = parameterNameAndArgument.getName() + " = " + parameterNameAndArgument.getPayload();
+				}
+				else {
+					throw new IllegalStateException("Unexpected argument type: " + array[i].getClass().getName());
+				}
+			}
+			return strings;
+		});
 
 		assertThat(argumentsAsStrings).containsExactly(array("foo = bar"), array("foo = baz"), array("foo = qux"),
 			array("foo = "));
@@ -298,10 +355,8 @@ class CsvFileArgumentsProviderTests {
 				.resources("/does-not-exist.csv")//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
-
-		assertThat(exception).hasMessageContaining("Classpath resource [/does-not-exist.csv] does not exist");
+		assertPreconditionViolationFor(() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray())//
+				.withMessageContaining("Classpath resource [/does-not-exist.csv] does not exist");
 	}
 
 	@Test
@@ -310,10 +365,8 @@ class CsvFileArgumentsProviderTests {
 				.resources("    ")//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotNullOrBlankFor("Classpath resource [    ]",
 			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
-
-		assertThat(exception).hasMessageContaining("Classpath resource [    ] must not be null or blank");
 	}
 
 	@Test
@@ -334,10 +387,8 @@ class CsvFileArgumentsProviderTests {
 				.files("    ")//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotNullOrBlankFor("File [    ]",
 			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
-
-		assertThat(exception).hasMessageContaining("File [    ] must not be null or blank");
 	}
 
 	@Test
@@ -347,10 +398,8 @@ class CsvFileArgumentsProviderTests {
 				.files()//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationNotEmptyFor("Resources or files",
 			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
-
-		assertThat(exception).hasMessageContaining("Resources or files must not be empty");
 	}
 
 	@Test
@@ -360,12 +409,9 @@ class CsvFileArgumentsProviderTests {
 				.resources("/bogus-charset.csv")//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray());
-
-		assertThat(exception)//
-				.hasMessageContaining("The charset supplied in Mock for CsvFileSource")//
-				.hasMessageEndingWith("is invalid");
+		assertPreconditionViolationFor(() -> provideArguments(new CsvFileArgumentsProvider(), annotation).toArray())//
+				.withMessageContaining("The charset supplied in Mock for CsvFileSource")//
+				.withMessageEndingWith("is invalid");
 	}
 
 	@Test
@@ -379,14 +425,13 @@ class CsvFileArgumentsProviderTests {
 
 		assertThat(exception)//
 				.hasMessageStartingWith("Failed to parse CSV input configured via Mock for CsvFileSource")//
-				.hasRootCauseInstanceOf(ArrayIndexOutOfBoundsException.class);
+				.rootCause().satisfies(isCsvParseException());
 	}
 
 	@Test
 	void emptyValueIsAnEmptyWithCustomNullValueString() {
 		var annotation = csvFileSource()//
 				.resources("test.csv")//
-				.lineSeparator("\n")//
 				.delimiter(',')//
 				.nullValues("NIL")//
 				.build();
@@ -461,11 +506,8 @@ class CsvFileArgumentsProviderTests {
 				.files(csvFile.toAbsolutePath().toString())//
 				.build();
 
-		var exception = assertThrows(PreconditionViolationException.class, //
-			() -> provideArguments(new CsvFileArgumentsProvider(), annotation).findAny());
-
-		assertThat(exception)//
-				.hasMessageStartingWith("maxCharsPerColumn must be a positive number or -1: " + maxCharsPerColumn);
+		assertPreconditionViolationFor(() -> provideArguments(new CsvFileArgumentsProvider(), annotation).findAny())//
+				.withMessageStartingWith("maxCharsPerColumn must be a positive number or -1: " + maxCharsPerColumn);
 	}
 
 	@Test
@@ -483,7 +525,7 @@ class CsvFileArgumentsProviderTests {
 
 		assertThat(exception)//
 				.hasMessageStartingWith("Failed to parse CSV input configured via Mock for CsvFileSource")//
-				.hasRootCauseInstanceOf(ArrayIndexOutOfBoundsException.class);
+				.rootCause().satisfies(isCsvParseException());
 	}
 
 	@Test

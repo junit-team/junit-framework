@@ -31,7 +31,7 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
  * @see org.junit.platform.engine.support.descriptor.PackageSource
  */
 @API(status = STABLE, since = "1.0")
-public class PackageSelector implements DiscoverySelector {
+public final class PackageSelector implements DiscoverySelector {
 
 	private final String packageName;
 

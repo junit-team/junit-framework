@@ -29,10 +29,10 @@ public class MapOfStringsParameterResolver implements ParameterResolver {
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Type type = parameterContext.getParameter().getParameterizedType();
-		if (!(type instanceof ParameterizedType)) {
+		if (!(type instanceof ParameterizedType parameterizedType)) {
 			return false;
 		}
-		Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (actualTypeArguments.length != 2) {
 			return false;
 		}

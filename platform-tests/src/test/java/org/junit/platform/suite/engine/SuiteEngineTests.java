@@ -10,11 +10,12 @@
 
 package org.junit.platform.suite.engine;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.TagFilter.excludeTags;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.hierarchicalOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.junit.platform.suite.engine.SuiteEngineDescriptor.ENGINE_ID;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.displayName;
@@ -22,15 +23,19 @@ import static org.junit.platform.testkit.engine.EventConditions.engine;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.EventConditions.skippedWithReason;
+import static org.junit.platform.testkit.engine.EventConditions.started;
 import static org.junit.platform.testkit.engine.EventConditions.test;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
@@ -38,20 +43,21 @@ import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.FilterResult;
 import org.junit.platform.engine.UniqueId;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 import org.junit.platform.launcher.core.NamespacedHierarchicalStoreProviders;
+import org.junit.platform.suite.api.AfterSuite;
+import org.junit.platform.suite.api.BeforeSuite;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.engine.testcases.ConfigurationSensitiveTestCase;
@@ -62,6 +68,7 @@ import org.junit.platform.suite.engine.testcases.MultipleTestsTestCase;
 import org.junit.platform.suite.engine.testcases.SingleTestTestCase;
 import org.junit.platform.suite.engine.testcases.TaggedTestTestCase;
 import org.junit.platform.suite.engine.testsuites.AbstractSuite;
+import org.junit.platform.suite.engine.testsuites.BlankSuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.ConfigurationSuite;
 import org.junit.platform.suite.engine.testsuites.CyclicSuite;
 import org.junit.platform.suite.engine.testsuites.DynamicSuite;
@@ -82,6 +89,7 @@ import org.junit.platform.suite.engine.testsuites.SuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteWithErroneousTestSuite;
 import org.junit.platform.suite.engine.testsuites.ThreePartCyclicSuite;
+import org.junit.platform.suite.engine.testsuites.WhitespaceSuiteDisplayNameSuite;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
 /**
@@ -96,9 +104,9 @@ class SuiteEngineTests {
 	@ValueSource(classes = { SelectClassesSuite.class, InheritedSuite.class })
 	void selectClasses(Class<?> suiteClass) {
 		// @formatter:off
-		var testKit = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(suiteClass))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir));
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(suiteClass));
+			var testKit = builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
@@ -296,9 +304,9 @@ class SuiteEngineTests {
 	@Test
 	void suiteSuite() {
 		// @formatter:off
-		EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SuiteSuite.class))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir))
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SuiteSuite.class));
+			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.testEvents()
 				.assertThatEvents()
@@ -313,9 +321,9 @@ class SuiteEngineTests {
 		// @formatter:off
 		UniqueId uniqId = UniqueId.forEngine(ENGINE_ID)
 				.append(SuiteTestDescriptor.SEGMENT_TYPE, SelectClassesSuite.class.getName());
-		EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectUniqueId(uniqId))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir))
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectUniqueId(uniqId));
+			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.testEvents()
 				.assertThatEvents()
@@ -368,10 +376,10 @@ class SuiteEngineTests {
 				.append(ClassTestDescriptor.SEGMENT_TYPE, MultipleTestsTestCase.class.getName())
 				.append(TestMethodTestDescriptor.SEGMENT_TYPE, "test()");
 
-		EngineTestKit.engine(ENGINE_ID)
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
-				.selectors(selectClass(SelectClassesSuite.class))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir))
+				.selectors(selectClass(SelectClassesSuite.class));
+			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.testEvents()
 				.assertThatEvents()
@@ -532,9 +540,9 @@ class SuiteEngineTests {
 				.source(ClassSource.from(CyclicSuite.class))
 				.build();
 
-		var testKit = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(CyclicSuite.class))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir));
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(CyclicSuite.class));
+			var testKit = builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.containsExactly(issue);
@@ -564,9 +572,9 @@ class SuiteEngineTests {
 	@Test
 	void threePartCyclicSuite() {
 		// @formatter:off
-		EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(ThreePartCyclicSuite.PartA.class))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir))
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(ThreePartCyclicSuite.PartA.class));
+			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
@@ -577,9 +585,9 @@ class SuiteEngineTests {
 	@Test
 	void selectByIdentifier() {
 		// @formatter:off
-		EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SelectByIdentifierSuite.class))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir))
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SelectByIdentifierSuite.class));
+			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.testEvents()
 				.assertThatEvents()
@@ -589,11 +597,11 @@ class SuiteEngineTests {
 	}
 
 	@Test
-	void passesOutputDirectoryProviderToEnginesInSuite() {
+	void passesOutputDirectoryCreatorToEnginesInSuite() {
 		// @formatter:off
-		EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SelectClassesSuite.class))
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(outputDir))
+		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SelectClassesSuite.class));
+			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.testEvents()
 				.assertThatEvents()
@@ -629,11 +637,6 @@ class SuiteEngineTests {
 		// @formatter:on
 	}
 
-	@Suite
-	@SelectClasses(SingleTestTestCase.class)
-	abstract private static class AbstractPrivateSuite {
-	}
-
 	@Test
 	void suiteEnginePassesRequestLevelStoreToSuiteTestDescriptors() {
 		UniqueId engineId = UniqueId.forEngine(SuiteEngineDescriptor.ENGINE_ID);
@@ -644,13 +647,120 @@ class SuiteEngineTests {
 
 		EngineExecutionListener listener = mock(EngineExecutionListener.class);
 		NamespacedHierarchicalStore<Namespace> requestLevelStore = NamespacedHierarchicalStoreProviders.dummyNamespacedHierarchicalStore();
+		var cancellationToken = CancellationToken.create();
 
-		ExecutionRequest request = ExecutionRequest.create(engineDescriptor, listener,
-			mock(ConfigurationParameters.class), mock(OutputDirectoryProvider.class), requestLevelStore);
+		ExecutionRequest request = mock();
+		when(request.getRootTestDescriptor()).thenReturn(engineDescriptor);
+		when(request.getEngineExecutionListener()).thenReturn(listener);
+		when(request.getStore()).thenReturn(requestLevelStore);
+		when(request.getCancellationToken()).thenReturn(cancellationToken);
 
 		new SuiteTestEngine().execute(request);
 
-		verify(mockDescriptor).execute(same(listener), same(requestLevelStore));
+		verify(mockDescriptor).execute(same(listener), same(requestLevelStore), same(cancellationToken));
+	}
+
+	@Test
+	void reportsSuiteClassAsSkippedWhenCancelledBeforeExecution() {
+		CancellingSuite.cancellationToken = CancellationToken.create();
+		try {
+			var testKit = EngineTestKit.engine(ENGINE_ID) //
+					.selectors(selectClass(CancellingSuite.class), selectClass(SelectMethodsSuite.class)) //
+					.cancellationToken(CancellingSuite.cancellationToken);
+
+			var results = testKit.execute();
+
+			results.allEvents() //
+					.assertStatistics(stats -> stats.started(3).succeeded(2).aborted(1).skipped(2)) //
+					.assertEventsMatchLooselyInOrder( //
+						event(container(CancellingSuite.class), started()), //
+						event(container(SingleTestTestCase.class), skippedWithReason("Execution cancelled")), //
+						event(container(CancellingSuite.class), finishedSuccessfully()), //
+						event(container(SelectMethodsSuite.class), skippedWithReason("Execution cancelled")) //
+					);
+		}
+		finally {
+			CancellingSuite.cancellationToken = null;
+		}
+	}
+
+	@Test
+	void reportsChildrenOfEnginesInSuiteAsSkippedWhenCancelledDuringExecution() {
+		CancellingSuite.cancellationToken = CancellationToken.create();
+		try {
+			var testKit = EngineTestKit.engine(ENGINE_ID) //
+					.selectors(selectClass(CancellingSuite.class)) //
+					.cancellationToken(CancellingSuite.cancellationToken);
+
+			var results = testKit.execute();
+
+			results.allEvents().assertThatEvents() //
+					.haveExactly(1, event(container(SingleTestTestCase.class),
+						skippedWithReason("Execution cancelled"))).haveExactly(0, event(test(), started()));
+
+			assertThat(CancellingSuite.afterCalled) //
+					.describedAs("@AfterSuite method was called") //
+					.isTrue();
+		}
+		finally {
+			CancellingSuite.cancellationToken = null;
+		}
+	}
+
+	@Test
+	void blankSuiteDisplayNameGeneratesWarning() {
+		var expectedMessage = "@SuiteDisplayName on %s must be declared with a non-blank value.".formatted(
+			BlankSuiteDisplayNameSuite.class.getName());
+		var expectedIssue = DiscoveryIssue.builder(Severity.WARNING, expectedMessage).source(
+			ClassSource.from(BlankSuiteDisplayNameSuite.class)).build();
+
+		var testKit = EngineTestKit.engine(ENGINE_ID).selectors(selectClass(BlankSuiteDisplayNameSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues()).contains(expectedIssue);
+	}
+
+	@Test
+	void whitespaceSuiteDisplayNameGeneratesWarning() {
+		var expectedMessage = "@SuiteDisplayName on %s must be declared with a non-blank value.".formatted(
+			WhitespaceSuiteDisplayNameSuite.class.getName());
+		var expectedIssue = DiscoveryIssue.builder(Severity.WARNING, expectedMessage).source(
+			ClassSource.from(WhitespaceSuiteDisplayNameSuite.class)).build();
+
+		var testKit = EngineTestKit.engine(ENGINE_ID).selectors(selectClass(WhitespaceSuiteDisplayNameSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues()).contains(expectedIssue);
+	}
+
+	@Test
+	void validSuiteDisplayNameGeneratesNoWarning() {
+		var testKit = EngineTestKit.engine(ENGINE_ID).selectors(selectClass(SuiteDisplayNameSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues()) //
+				.noneMatch(issue -> issue.message().contains("@SuiteDisplayName"));
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------
+
+	static class CancellingSuite extends SelectClassesSuite {
+
+		static @Nullable CancellationToken cancellationToken;
+		static boolean afterCalled;
+
+		@BeforeSuite
+		static void beforeSuite() {
+			CancellingSuite.afterCalled = false;
+			requireNonNull(cancellationToken).cancel();
+		}
+
+		@AfterSuite
+		static void afterSuite() {
+			afterCalled = true;
+		}
+	}
+
+	@Suite
+	@SelectClasses(SingleTestTestCase.class)
+	abstract private static class AbstractPrivateSuite {
 	}
 
 	@Suite

@@ -56,7 +56,7 @@ class ArgumentsAccessorKotlinTests {
     ): DefaultArgumentsAccessor {
         val context = mock(ExtensionContext::class.java)
         val classLoader = ArgumentsAccessorKotlinTests::class.java.classLoader
-        return DefaultArgumentsAccessor.create(context, invocationIndex, classLoader, arguments)
+        return DefaultArgumentsAccessor.create(invocationIndex, classLoader, arguments)
     }
 
     fun foo() {

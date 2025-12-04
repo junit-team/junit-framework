@@ -12,8 +12,8 @@ package org.junit.platform.engine.support.discovery;
 
 import java.util.function.Predicate;
 
+import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.junit.platform.commons.support.Resource;
 
 /**
  * Resource-related utilities to be used in conjunction with {@link ReflectionSupport}.
@@ -44,5 +44,8 @@ class ResourceUtils {
 		// classpath resource names do not start with /
 		String resourcePackagePath = classpathResourceName.substring(0, lastIndexOf);
 		return resourcePackagePath.replace(CLASSPATH_RESOURCE_PATH_SEPARATOR, PACKAGE_SEPARATOR_CHAR);
+	}
+
+	private ResourceUtils() {
 	}
 }

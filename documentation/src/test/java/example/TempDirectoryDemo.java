@@ -10,7 +10,6 @@
 
 package example;
 
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,6 +23,7 @@ import java.lang.annotation.Target;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -46,7 +46,7 @@ class TempDirectoryDemo {
 
 		new ListWriter(file).write("a", "b", "c");
 
-		assertEquals(singletonList("a,b,c"), Files.readAllLines(file));
+		assertEquals(List.of("a,b,c"), Files.readAllLines(file));
 	}
 	// end::user_guide_parameter_injection[]
 
@@ -59,7 +59,7 @@ class TempDirectoryDemo {
 		Path targetFile = Files.copy(sourceFile, target.resolve("test.txt"));
 
 		assertNotEquals(sourceFile, targetFile);
-		assertEquals(singletonList("a,b,c"), Files.readAllLines(targetFile));
+		assertEquals(List.of("a,b,c"), Files.readAllLines(targetFile));
 	}
 	// end::user_guide_multiple_directories[]
 
@@ -77,7 +77,7 @@ class TempDirectoryDemo {
 
 			new ListWriter(file).write("a", "b", "c");
 
-			assertEquals(singletonList("a,b,c"), Files.readAllLines(file));
+			assertEquals(List.of("a,b,c"), Files.readAllLines(file));
 		}
 
 		@Test

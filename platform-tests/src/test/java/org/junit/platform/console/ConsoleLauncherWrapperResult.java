@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.console.options.CommandResult;
+import org.junit.platform.console.command.CommandResult;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 /**
@@ -29,8 +29,7 @@ class ConsoleLauncherWrapperResult implements TestExecutionSummary {
 	final String err;
 	final int code;
 
-	@Nullable
-	private final TestExecutionSummary summary;
+	private final @Nullable TestExecutionSummary summary;
 
 	ConsoleLauncherWrapperResult(String[] args, String out, String err, CommandResult<?> result) {
 		this.args = args;
@@ -38,7 +37,7 @@ class ConsoleLauncherWrapperResult implements TestExecutionSummary {
 		this.err = err;
 		this.code = result.getExitCode();
 		this.summary = (TestExecutionSummary) result.getValue() //
-				.filter(it -> it instanceof TestExecutionSummary) //
+				.filter(TestExecutionSummary.class::isInstance) //
 				.orElse(null);
 	}
 

@@ -28,7 +28,7 @@ import org.junit.jupiter.params.ParameterizedClass;
  * @see ParameterizedClass
  * @see Parameter
  */
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public interface FieldContext extends AnnotatedElementContext {
 
 	/**

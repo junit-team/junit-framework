@@ -146,9 +146,9 @@ public class TestTemplateTestDescriptor extends MethodBasedTestDescriptor implem
 
 		@Override
 		protected String getZeroContextsProvidedErrorMessage(TestTemplateInvocationContextProvider provider) {
-			return String.format(
-				"Provider [%s] did not provide any invocation contexts, but was expected to do so. "
-						+ "You may override mayReturnZeroTestTemplateInvocationContexts() to allow this.",
+			return """
+					Provider [%s] did not provide any invocation contexts, but was expected to do so. \
+					You may override mayReturnZeroTestTemplateInvocationContexts() to allow this.""".formatted(
 				provider.getClass().getSimpleName());
 		}
 

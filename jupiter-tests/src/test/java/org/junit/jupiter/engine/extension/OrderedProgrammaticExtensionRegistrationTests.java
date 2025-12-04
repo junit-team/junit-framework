@@ -106,7 +106,7 @@ class OrderedProgrammaticExtensionRegistrationTests extends AbstractJupiterTestE
 	 * non-annotated "after" callbacks.
 	 *
 	 * @since 5.6
-	 * @see <a href="https://github.com/junit-team/junit5/issues/1924">gh-1924</a>
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/1924">gh-1924</a>
 	 */
 	@Test
 	void instanceLevelWithDefaultOrderPlusOneAndDefaultOrder() {
@@ -328,15 +328,15 @@ class OrderedProgrammaticExtensionRegistrationTests extends AbstractJupiterTestE
 
 		// @Order(3)
 		@RegisterExtension
-		static Extension extension1 = new BeforeEachExtension(1);
+		Extension extension1 = new BeforeEachExtension(1);
 
 		// @Order(2)
 		@RegisterExtension
-		static Extension extension2 = new BeforeEachExtension(2);
+		Extension extension2 = new BeforeEachExtension(2);
 
 		@Order(1)
 		@RegisterExtension
-		static Extension extension3 = new BeforeEachExtension(3);
+		Extension extension3 = new BeforeEachExtension(3);
 
 	}
 

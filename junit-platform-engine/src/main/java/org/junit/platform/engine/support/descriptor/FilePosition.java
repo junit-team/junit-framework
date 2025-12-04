@@ -32,7 +32,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * @since 1.0
  */
 @API(status = STABLE, since = "1.0")
-public class FilePosition implements Serializable {
+public final class FilePosition implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -118,8 +118,7 @@ public class FilePosition implements Serializable {
 
 	private final int line;
 
-	@Nullable
-	private final Integer column;
+	private final @Nullable Integer column;
 
 	private FilePosition(int line) {
 		Preconditions.condition(line > 0, "line number must be greater than zero");

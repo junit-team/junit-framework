@@ -157,7 +157,7 @@ public class ParameterResolutionUtils {
 
 			logger.trace(
 				() -> "ParameterResolver [%s] resolved a value of type [%s] for parameter [%s] in %s [%s].".formatted(
-					resolver.getClass().getName(), (value != null ? value.getClass().getName() : null),
+					resolver.getClass().getName(), (value != null ? value.getClass().getTypeName() : null),
 					parameterContext.getParameter(), asLabel(executable), executable.toGenericString()));
 
 			return value;
@@ -188,18 +188,18 @@ public class ParameterResolutionUtils {
 		if (!isAssignableTo(value, type)) {
 			String message;
 			if (value == null && type.isPrimitive()) {
-				message = String.format(
-					"ParameterResolver [%s] resolved a null value for parameter [%s] "
-							+ "in %s [%s], but a primitive of type [%s] is required.",
+				message = """
+						ParameterResolver [%s] resolved a null value for parameter [%s] \
+						in %s [%s], but a primitive of type [%s] is required.""".formatted(
 					resolver.getClass().getName(), parameter, asLabel(executable), executable.toGenericString(),
 					type.getName());
 			}
 			else {
-				message = String.format(
-					"ParameterResolver [%s] resolved a value of type [%s] for parameter [%s] "
-							+ "in %s [%s], but a value assignment compatible with [%s] is required.",
-					resolver.getClass().getName(), (value != null ? value.getClass().getName() : null), parameter,
-					asLabel(executable), executable.toGenericString(), type.getName());
+				message = """
+						ParameterResolver [%s] resolved a value of type [%s] for parameter [%s] \
+						in %s [%s], but a value assignment compatible with [%s] is required.""".formatted(
+					resolver.getClass().getName(), (value != null ? value.getClass().getTypeName() : null), parameter,
+					asLabel(executable), executable.toGenericString(), type.getTypeName());
 			}
 
 			throw new ParameterResolutionException(message);
@@ -208,6 +208,9 @@ public class ParameterResolutionUtils {
 
 	private static String asLabel(Executable executable) {
 		return executable instanceof Constructor ? "constructor" : "method";
+	}
+
+	private ParameterResolutionUtils() {
 	}
 
 }

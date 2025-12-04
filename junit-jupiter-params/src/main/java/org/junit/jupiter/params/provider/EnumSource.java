@@ -11,7 +11,7 @@
 package org.junit.jupiter.params.provider;
 
 import static java.util.stream.Collectors.toSet;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -46,7 +46,7 @@ import org.junit.platform.commons.util.Preconditions;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.0
  * @see org.junit.jupiter.params.provider.ArgumentsSource
@@ -109,7 +109,7 @@ public @interface EnumSource {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String from() default "";
 
 	/**
@@ -125,7 +125,7 @@ public @interface EnumSource {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String to() default "";
 
 	/**
@@ -188,7 +188,7 @@ public @interface EnumSource {
 		 * @since 5.9
 		 * @see java.util.stream.Stream#noneMatch(java.util.function.Predicate)
 		 */
-		@API(status = EXPERIMENTAL, since = "5.9")
+		@API(status = MAINTAINED, since = "5.13.3")
 		MATCH_NONE(Mode::validatePatterns, (name, patterns) -> patterns.stream().noneMatch(name::matches));
 
 		private final Validator validator;

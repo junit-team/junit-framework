@@ -24,6 +24,7 @@ import java.lang.module.ModuleReference;
 import java.lang.module.ResolvedModule;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,10 +35,10 @@ import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.io.Resource;
+import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.junit.platform.commons.support.DefaultResource;
-import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.support.scanning.ClassFilter;
 
 /**
@@ -72,15 +73,6 @@ public class ModuleUtils {
 				.map(ResolvedModule::name)
 				.collect(toCollection(LinkedHashSet::new));
 		// @formatter:on
-	}
-
-	/**
-	 * Java 9+ runtime supports the Java Platform Module System.
-	 *
-	 * @return {@code true}
-	 */
-	public static boolean isJavaPlatformModuleSystemAvailable() {
-		return true;
 	}
 
 	public static Optional<String> getModuleName(Class<?> type) {
@@ -119,6 +111,27 @@ public class ModuleUtils {
 	}
 
 	/**
+	 * Find all {@linkplain Class classes} for the given module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>unnamed</em>
+	 * @param filter the class filter to apply; never {@code null}
+	 * @return an immutable list of all such classes found; never {@code null}
+	 * but potentially empty
+	 * @since 6.1
+	 */
+	@API(status = INTERNAL, since = "6.1")
+	public static List<Class<?>> findAllClassesInModule(Module module, ClassFilter filter) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.condition(module.isNamed(), "Module must not be unnamed");
+		Preconditions.notNull(filter, "Class filter must not be null");
+
+		String name = module.getName();
+		logger.debug(() -> "Looking for classes in module: " + name);
+		var reference = module.getLayer().configuration().findModule(name).orElseThrow().reference();
+		return scan(Set.of(reference), filter, module.getClassLoader());
+	}
+
+	/**
 	 * Find all {@linkplain Resource resources} for the given module name.
 	 *
 	 * @param moduleName the name of the module to scan; never {@code null} or
@@ -129,17 +142,38 @@ public class ModuleUtils {
 	 * @since 1.11
 	 */
 	@API(status = INTERNAL, since = "1.11")
-	public static List<Resource> findAllResourcesInModule(String moduleName, Predicate<Resource> filter) {
+	public static List<Resource> findAllResourcesInModule(String moduleName, ResourceFilter filter) {
 		Preconditions.notBlank(moduleName, "Module name must not be null or empty");
 		Preconditions.notNull(filter, "Resource filter must not be null");
 
-		logger.debug(() -> "Looking for classes in module: " + moduleName);
+		logger.debug(() -> "Looking for resources in module: " + moduleName);
 		// @formatter:off
 		Set<ModuleReference> moduleReferences = streamResolvedModules(isEqual(moduleName))
 				.map(ResolvedModule::reference)
 				.collect(toSet());
 		// @formatter:on
 		return scan(moduleReferences, filter, ModuleUtils.class.getClassLoader());
+	}
+
+	/**
+	 * Find all {@linkplain Resource resources} for the given module.
+	 *
+	 * @param module the module to scan; never {@code null} or <em>empty</em>
+	 * @param filter the class filter to apply; never {@code null}
+	 * @return an immutable list of all such resources found; never {@code null}
+	 * but potentially empty
+	 * @since 6.1
+	 */
+	@API(status = INTERNAL, since = "6.1")
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter filter) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.condition(module.isNamed(), "Module must not be unnamed");
+		Preconditions.notNull(filter, "Resource filter must not be null");
+
+		String name = module.getName();
+		logger.debug(() -> "Looking for resources in module: " + name);
+		var reference = module.getLayer().configuration().findModule(name).orElseThrow().reference();
+		return scan(Set.of(reference), filter, module.getClassLoader());
 	}
 
 	/**
@@ -184,19 +218,18 @@ public class ModuleUtils {
 	}
 
 	/**
-	 * Scan for classes using the supplied set of module references, class
+	 * Scan for resources using the supplied set of module references, class
 	 * filter, and loader.
 	 */
-	private static List<Resource> scan(Set<ModuleReference> references, Predicate<Resource> filter,
-			ClassLoader loader) {
+	private static List<Resource> scan(Set<ModuleReference> references, ResourceFilter filter, ClassLoader loader) {
 		logger.debug(() -> "Scanning " + references.size() + " module references: " + references);
 		ModuleReferenceResourceScanner scanner = new ModuleReferenceResourceScanner(filter, loader);
-		List<Resource> classes = new ArrayList<>();
+		List<Resource> resources = new ArrayList<>();
 		for (ModuleReference reference : references) {
-			classes.addAll(scanner.scan(reference));
+			resources.addAll(scanner.scan(reference));
 		}
-		logger.debug(() -> "Found " + classes.size() + " classes: " + classes);
-		return List.copyOf(classes);
+		logger.debug(() -> "Found " + resources.size() + " resources: " + resources);
+		return List.copyOf(resources);
 	}
 
 	/**
@@ -221,9 +254,10 @@ public class ModuleUtils {
 			try (ModuleReader reader = reference.open()) {
 				try (Stream<String> names = reader.list()) {
 					// @formatter:off
-					return names.filter(name -> name.endsWith(".class"))
-							.map(this::className)
-							.filter(name -> !name.equals("module-info"))
+					return names.filter(name -> !name.endsWith("/")) // remove directories
+							.map(Path::of)
+							.filter(SearchPathUtils::isClassOrSourceFile)
+							.map(SearchPathUtils::determineFullyQualifiedClassName)
 							.filter(classFilter::match)
 							.<Class<?>> map(this::loadClassUnchecked)
 							.filter(classFilter::match)
@@ -234,15 +268,6 @@ public class ModuleUtils {
 			catch (IOException e) {
 				throw new JUnitException("Failed to read contents of " + reference + ".", e);
 			}
-		}
-
-		/**
-		 * Convert resource name to binary class name.
-		 */
-		private String className(String resourceName) {
-			resourceName = resourceName.substring(0, resourceName.length() - 6); // 6 = ".class".length()
-			resourceName = resourceName.replace('/', '.');
-			return resourceName;
 		}
 
 		/**
@@ -268,10 +293,10 @@ public class ModuleUtils {
 	 */
 	static class ModuleReferenceResourceScanner {
 
-		private final Predicate<Resource> resourceFilter;
+		private final ResourceFilter resourceFilter;
 		private final ClassLoader classLoader;
 
-		ModuleReferenceResourceScanner(Predicate<Resource> resourceFilter, ClassLoader classLoader) {
+		ModuleReferenceResourceScanner(ResourceFilter resourceFilter, ClassLoader classLoader) {
 			this.resourceFilter = resourceFilter;
 			this.classLoader = classLoader;
 		}
@@ -285,7 +310,7 @@ public class ModuleUtils {
 					// @formatter:off
 					return names.filter(name -> !name.endsWith(".class"))
 							.map(this::loadResourceUnchecked)
-							.filter(resourceFilter)
+							.filter(resourceFilter::match)
 							.toList();
 					// @formatter:on
 				}
@@ -298,13 +323,16 @@ public class ModuleUtils {
 		private Resource loadResourceUnchecked(String binaryName) {
 			try {
 				URI uri = requireNonNull(classLoader.getResource(binaryName)).toURI();
-				return new DefaultResource(binaryName, uri);
+				return Resource.of(binaryName, uri);
 			}
 			catch (NullPointerException | URISyntaxException e) {
 				throw new JUnitException("Failed to load resource with name '" + binaryName + "'.", e);
 			}
 		}
 
+	}
+
+	private ModuleUtils() {
 	}
 
 }

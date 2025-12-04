@@ -11,30 +11,27 @@
 package org.junit.platform.engine.discovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * @since 1.0
  */
 class ClassNameFilterTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includeClassNamePatternsChecksPreconditions() {
-		assertThatThrownBy(() -> ClassNameFilter.includeClassNamePatterns((String[]) null)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("patterns array must not be null or empty");
-		assertThatThrownBy(() -> ClassNameFilter.includeClassNamePatterns(new String[0])) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("patterns array must not be null or empty");
-		assertThatThrownBy(() -> ClassNameFilter.includeClassNamePatterns(new String[] { null })) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("patterns array must not contain null elements");
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.includeClassNamePatterns((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.includeClassNamePatterns(new String[0]));
+		assertPreconditionViolationFor(() -> ClassNameFilter.includeClassNamePatterns(new String[] { null }))//
+				.withMessage("patterns array must not contain null elements");
 	}
 
 	@Test
@@ -86,18 +83,15 @@ class ClassNameFilterTests {
 					+ secondRegex + "'");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludeClassNamePatternsChecksPreconditions() {
-		assertThatThrownBy(() -> ClassNameFilter.excludeClassNamePatterns((String[]) null)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("patterns array must not be null or empty");
-		assertThatThrownBy(() -> ClassNameFilter.excludeClassNamePatterns(new String[0])) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("patterns array must not be null or empty");
-		assertThatThrownBy(() -> ClassNameFilter.excludeClassNamePatterns(new String[] { null })) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("patterns array must not contain null elements");
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.excludeClassNamePatterns((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
+			() -> ClassNameFilter.excludeClassNamePatterns(new String[0]));
+		assertPreconditionViolationFor(() -> ClassNameFilter.excludeClassNamePatterns(new String[] { null }))//
+				.withMessage("patterns array must not contain null elements");
 	}
 
 	@Test

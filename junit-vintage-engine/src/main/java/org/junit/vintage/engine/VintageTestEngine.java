@@ -10,7 +10,7 @@
 
 package org.junit.vintage.engine;
 
-import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.junit.platform.engine.TestExecutionResult.successful;
 import static org.junit.vintage.engine.descriptor.VintageTestDescriptor.ENGINE_ID;
 
@@ -31,8 +31,11 @@ import org.junit.vintage.engine.execution.VintageExecutor;
  * The JUnit Vintage {@link TestEngine}.
  *
  * @since 4.12
+ * @deprecated Should only be used temporarily while migrating tests to JUnit
+ * Jupiter or another testing framework with native JUnit Platform support
  */
-@API(status = INTERNAL, since = "4.12")
+@Deprecated(since = "6.0")
+@API(status = DEPRECATED, since = "6.0")
 public final class VintageTestEngine implements TestEngine {
 
 	@Override
@@ -67,7 +70,8 @@ public final class VintageTestEngine implements TestEngine {
 		EngineExecutionListener engineExecutionListener = request.getEngineExecutionListener();
 		VintageEngineDescriptor engineDescriptor = (VintageEngineDescriptor) request.getRootTestDescriptor();
 		engineExecutionListener.executionStarted(engineDescriptor);
-		new VintageExecutor(engineDescriptor, engineExecutionListener, request).executeAllChildren();
+		new VintageExecutor(engineDescriptor, engineExecutionListener,
+			request.getConfigurationParameters()).executeAllChildren(request.getCancellationToken());
 		engineExecutionListener.executionFinished(engineDescriptor, successful());
 	}
 }

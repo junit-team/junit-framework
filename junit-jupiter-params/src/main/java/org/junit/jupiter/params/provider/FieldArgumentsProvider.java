@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.params.provider;
 
-import static java.lang.String.format;
 import static java.util.Arrays.stream;
 
 import java.lang.reflect.Field;
@@ -73,7 +72,7 @@ class FieldArgumentsProvider extends AnnotationBasedArgumentsProvider<FieldSourc
 	// package-private for testing
 	static Field findField(Class<?> testClass, String fieldName) {
 		Preconditions.notBlank(fieldName, "Field name must not be blank");
-		fieldName = fieldName.trim();
+		fieldName = fieldName.strip();
 
 		Class<?> clazz = testClass;
 		if (fieldName.contains("#") || fieldName.contains(".")) {
@@ -98,10 +97,10 @@ class FieldArgumentsProvider extends AnnotationBasedArgumentsProvider<FieldSourc
 
 	private static Field validateField(Field field, @Nullable Object testInstance) {
 		Preconditions.condition(field.getDeclaringClass().isInstance(testInstance) || ModifierSupport.isStatic(field),
-			() -> format("Field '%s' must be static: local @FieldSource fields must be static "
-					+ "unless the PER_CLASS @TestInstance lifecycle mode is used; "
-					+ "external @FieldSource fields must always be static.",
-				field.toGenericString()));
+			() -> """
+					Field '%s' must be static: local @FieldSource fields must be static \
+					unless the PER_CLASS @TestInstance lifecycle mode is used; \
+					external @FieldSource fields must always be static.""".formatted(field.toGenericString()));
 		return field;
 	}
 

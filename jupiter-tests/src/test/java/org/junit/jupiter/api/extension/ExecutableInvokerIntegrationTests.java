@@ -13,6 +13,8 @@ package org.junit.jupiter.api.extension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.lang.reflect.Constructor;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
@@ -62,7 +64,7 @@ public class ExecutableInvokerIntegrationTests extends AbstractJupiterTestEngine
 
 		static int constructorInvocations = 0;
 
-		public ExecuteConstructorTwiceTestCase(TestInfo testInfo,
+		ExecuteConstructorTwiceTestCase(TestInfo testInfo,
 				@ExtendWith(ExtensionContextParameterResolver.class) ExtensionContext extensionContext) {
 			assertNotNull(testInfo);
 			assertEquals(testInfo.getTestClass().orElseThrow(), extensionContext.getRequiredTestClass());
@@ -89,8 +91,9 @@ public class ExecutableInvokerIntegrationTests extends AbstractJupiterTestEngine
 
 		@Override
 		public void beforeAll(ExtensionContext context) throws Exception {
-			context.getExecutableInvoker() //
-					.invoke(context.getRequiredTestClass().getConstructor(TestInfo.class, ExtensionContext.class));
+			Constructor<?> constructor = context.getRequiredTestClass() //
+					.getDeclaredConstructor(TestInfo.class, ExtensionContext.class);
+			context.getExecutableInvoker().invoke(constructor);
 		}
 
 	}

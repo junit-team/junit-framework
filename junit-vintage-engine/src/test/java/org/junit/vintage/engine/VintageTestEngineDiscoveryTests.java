@@ -40,12 +40,15 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ClassUtils;
+import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.testkit.engine.EngineDiscoveryResults;
+import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.runner.manipulation.Filter;
 import org.junit.vintage.engine.samples.PlainOldJavaClassWithoutAnyTestsTestCase;
 import org.junit.vintage.engine.samples.junit3.JUnit3SuiteWithSingleTestCaseWithSingleTestWhichFails;
@@ -75,8 +78,6 @@ import org.junit.vintage.engine.samples.junit4.TestCaseRunWithJUnitPlatformRunne
  * @since 4.12
  */
 class VintageTestEngineDiscoveryTests {
-
-	VintageTestEngine engine = new VintageTestEngine();
 
 	@Test
 	void resolvesSimpleJUnit4TestClass() throws Exception {
@@ -702,6 +703,40 @@ class VintageTestEngineDiscoveryTests {
 		assertMethodSource(testClass.getMethod("test"), testMethodDescriptor);
 	}
 
+	@Test
+	void reportsNoDiscoveryIssuesWhenNoTestsAreFound() {
+		var request = discoveryRequestForClass(PlainOldJavaClassWithoutAnyTestsTestCase.class);
+
+		var results = discover(request);
+
+		assertThat(results.getDiscoveryIssues()).isEmpty();
+	}
+
+	@Test
+	void reportDiscoveryIssueWhenTestsAreFoundByDefault() {
+		var request = discoveryRequestForClass(PlainJUnit4TestCaseWithSingleTestWhichFails.class);
+
+		var results = discover(request);
+
+		assertThat(results.getDiscoveryIssues()).hasSize(1);
+
+		var issue = results.getDiscoveryIssues().getFirst();
+		assertThat(issue.severity()).isEqualTo(Severity.INFO);
+		assertThat(issue.message()).contains("JUnit Vintage engine is deprecated");
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	void reportNoDiscoveryIssueWhenTestsAreFoundButConfigurationParameterIsSet() {
+		var request = request() //
+				.selectors(selectClass(PlainJUnit4TestCaseWithSingleTestWhichFails.class)) //
+				.configurationParameter(Constants.DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME, "false").build();
+
+		var results = discover(request);
+
+		assertThat(results.getDiscoveryIssues()).isEmpty();
+	}
+
 	private TestDescriptor findChildByDisplayName(TestDescriptor runnerDescriptor, String displayName) {
 		// @formatter:off
 		var children = runnerDescriptor.getChildren();
@@ -715,7 +750,12 @@ class VintageTestEngineDiscoveryTests {
 	}
 
 	private TestDescriptor discoverTests(LauncherDiscoveryRequest discoveryRequest) {
-		return engine.discover(discoveryRequest, UniqueId.forEngine(engine.getId()));
+		return discover(discoveryRequest).getEngineDescriptor();
+	}
+
+	@SuppressWarnings("deprecation")
+	private static EngineDiscoveryResults discover(LauncherDiscoveryRequest discoveryRequest) {
+		return EngineTestKit.discover(new VintageTestEngine(), discoveryRequest);
 	}
 
 	private Path getClasspathRoot(Class<?> testClass) throws Exception {

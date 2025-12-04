@@ -11,19 +11,18 @@
 package org.junit.jupiter.api;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.platform.commons.util.Preconditions;
 
@@ -67,7 +66,9 @@ public interface TestReporter {
 	 * @see #publishEntry(String)
 	 */
 	default void publishEntry(String key, String value) {
-		this.publishEntry(Collections.singletonMap(key, value));
+		Preconditions.notBlank(key, "key must not be null or blank");
+		Preconditions.notBlank(value, "value must not be null or blank");
+		publishEntry(Map.of(key, value));
 	}
 
 	/**
@@ -84,7 +85,7 @@ public interface TestReporter {
 	 */
 	@API(status = STABLE, since = "5.3")
 	default void publishEntry(String value) {
-		this.publishEntry("value", value);
+		publishEntry("value", value);
 	}
 
 	/**
@@ -93,13 +94,36 @@ public interface TestReporter {
 	 * <p>The file will be copied to the report output directory replacing any
 	 * potentially existing file with the same name.
 	 *
-	 * @param file the file to be attached; never {@code null} or blank
+	 * @param file the file to be published; never {@code null}
+	 * @param mediaType the media type of the file; never {@code null}; use
+	 * {@link org.junit.jupiter.api.extension.MediaType#APPLICATION_OCTET_STREAM}
+	 * if unknown
+	 * @since 5.12
+	 * @deprecated Use {@link #publishFile(Path, MediaType)} instead.
+	 */
+	@Deprecated(since = "5.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "5.14")
+	@SuppressWarnings("removal")
+	default void publishFile(Path file, org.junit.jupiter.api.extension.MediaType mediaType) {
+		Preconditions.notNull(mediaType, "mediaType must not be null");
+		publishFile(file, MediaType.parse(mediaType.toString()));
+	}
+
+	/**
+	 * Publish the supplied file and attach it to the current test or container.
+	 *
+	 * <p>The file will be copied to the report output directory replacing any
+	 * potentially existing file with the same name.
+	 *
+	 * @param file the file to be published; never {@code null}
 	 * @param mediaType the media type of the file; never {@code null}; use
 	 * {@link MediaType#APPLICATION_OCTET_STREAM} if unknown
-	 * @since 5.12
+	 * @since 5.14
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.14")
 	default void publishFile(Path file, MediaType mediaType) {
+		Preconditions.notNull(file, "file must not be null");
+		Preconditions.notNull(mediaType, "mediaType must not be null");
 		Preconditions.condition(Files.exists(file), () -> "file must exist: " + file);
 		Preconditions.condition(Files.isRegularFile(file), () -> "file must be a regular file: " + file);
 		publishFile(file.getFileName().toString(), mediaType, path -> Files.copy(file, path, REPLACE_EXISTING));
@@ -112,13 +136,14 @@ public interface TestReporter {
 	 * <p>The entire directory will be copied to the report output directory
 	 * replacing any potentially existing files with the same name.
 	 *
-	 * @param directory the file to be attached; never {@code null} or blank
+	 * @param directory the directory to be published; never {@code null}
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	default void publishDirectory(Path directory) {
+		Preconditions.notNull(directory, "directory must not be null");
 		Preconditions.condition(Files.exists(directory), () -> "directory must exist: " + directory);
-		Preconditions.condition(Files.isDirectory(directory), () -> "directory must be a directory: " + directory);
+		Preconditions.condition(Files.isDirectory(directory), () -> "path must represent a directory: " + directory);
 		publishDirectory(directory.getFileName().toString(), path -> {
 			try (Stream<Path> stream = Files.walk(directory)) {
 				stream.forEach(source -> {
@@ -140,20 +165,46 @@ public interface TestReporter {
 	}
 
 	/**
-	 * Publish a file or directory with the supplied name and media type written
-	 * by the supplied action and attach it to the current test or container.
+	 * Publish a file with the supplied name and media type written by the supplied
+	 * action and attach it to the current test or container.
 	 *
 	 * <p>The {@link Path} passed to the supplied action will be relative to the
-	 * report output directory, but it's up to the action to write the file.
+	 * report output directory, but it is up to the action to write the file.
 	 *
-	 * @param name the name of the file to be attached; never {@code null} or
+	 * @param name the name of the file to be published; never {@code null} or
+	 * blank and must not contain any path separators
+	 * @param mediaType the media type of the file; never {@code null}; use
+	 * {@link org.junit.jupiter.api.extension.MediaType#APPLICATION_OCTET_STREAM}
+	 * if unknown
+	 * @param action the action to be executed to write the file; never {@code null}
+	 * @since 5.12
+	 * @deprecated Use {@link #publishFile(String, MediaType, ThrowingConsumer)} instead.
+	 */
+	@Deprecated(since = "5.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "5.14")
+	@SuppressWarnings("removal")
+	default void publishFile(String name, org.junit.jupiter.api.extension.MediaType mediaType,
+			ThrowingConsumer<Path> action) {
+
+		Preconditions.notNull(mediaType, "mediaType must not be null");
+		publishFile(name, MediaType.parse(mediaType.toString()), action);
+	}
+
+	/**
+	 * Publish a file with the supplied name and media type written by the supplied
+	 * action and attach it to the current test or container.
+	 *
+	 * <p>The {@link Path} passed to the supplied action will be relative to the
+	 * report output directory, but it is up to the action to write the file.
+	 *
+	 * @param name the name of the file to be published; never {@code null} or
 	 * blank and must not contain any path separators
 	 * @param mediaType the media type of the file; never {@code null}; use
 	 * {@link MediaType#APPLICATION_OCTET_STREAM} if unknown
 	 * @param action the action to be executed to write the file; never {@code null}
-	 * @since 5.12
+	 * @since 5.14
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.14")
 	default void publishFile(String name, MediaType mediaType, ThrowingConsumer<Path> action) {
 		throw new UnsupportedOperationException();
 	}
@@ -163,15 +214,16 @@ public interface TestReporter {
 	 * and attach it to the current test or container.
 	 *
 	 * <p>The {@link Path} passed to the supplied action will be relative to the
-	 * report output directory and point to an existing directory, but it's up
-	 * to the action to write files to it.
+	 * report output directory and will point to an existing directory, but it is
+	 * up to the action to write files to the directory.
 	 *
-	 * @param name the name of the directory to be attached; never {@code null}
+	 * @param name the name of the directory to be published; never {@code null}
 	 * or blank and must not contain any path separators
-	 * @param action the action to be executed to write the file; never {@code null}
+	 * @param action the action to be executed to write to the directory; never
+	 * {@code null}
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	default void publishDirectory(String name, ThrowingConsumer<Path> action) {
 		throw new UnsupportedOperationException();
 	}

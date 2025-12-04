@@ -54,7 +54,7 @@ class DefaultMethodOrdererContext implements MethodOrdererContext {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append("testClass", this.testClass.getName()).toString();
+		return new ToStringBuilder(this).append("methodDescriptors", methodDescriptors).toString();
 	}
 
 }

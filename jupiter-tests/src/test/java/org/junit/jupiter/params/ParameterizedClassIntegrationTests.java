@@ -57,6 +57,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -124,7 +125,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		var results = executeTestsForClass(classTemplateClass);
 
-		String parameterNamePrefix = classTemplateClass.getSimpleName().contains("Aggregator") ? "" : "value=";
+		String parameterNamePrefix = classTemplateClass.getSimpleName().contains("Aggregator") ? "" : "value = ";
 
 		results.allEvents().assertEventsMatchExactly( //
 			event(engine(), started()), //
@@ -176,7 +177,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(6).succeeded(6));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] value=null", "[2] value=");
+					.containsExactly("[1] value = null", "[2] value = \"\"");
 		}
 
 		@ParameterizedTest
@@ -188,8 +189,8 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(10).succeeded(10));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] name=foo, value=1", "[2] name=bar, value=2", "[3] name=baz, value=3",
-						"[4] name=qux, value=4");
+					.containsExactly("[1] name = \"foo\", value = \"1\"", "[2] name = \"bar\", value = \"2\"",
+						"[3] name = \"baz\", value = \"3\"", "[4] name = \"qux\", value = \"4\"");
 		}
 
 		@ParameterizedTest
@@ -201,7 +202,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(4).succeeded(4));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] value=FOO");
+					.containsExactly("[1] value = FOO");
 		}
 
 		@ParameterizedTest
@@ -213,7 +214,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(6).succeeded(6));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] value=FOO", "[2] value=BAR");
+					.containsExactly("[1] value = FOO", "[2] value = BAR");
 		}
 
 		@ParameterizedTest
@@ -225,7 +226,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(6).succeeded(6));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] value=foo", "[2] value=bar");
+					.containsExactly("[1] value = \"foo\"", "[2] value = \"bar\"");
 		}
 
 		@Test
@@ -247,7 +248,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(6).succeeded(6));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] value=foo", "[2] value=bar");
+					.containsExactly("[1] value = \"foo\"", "[2] value = \"bar\"");
 		}
 
 		@Test
@@ -269,7 +270,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(6).succeeded(6));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("[1] value=foo", "[2] value=bar");
+					.containsExactly("[1] value = \"foo\"", "[2] value = \"bar\"");
 		}
 
 		@Test
@@ -305,7 +306,8 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			results.allEvents().assertStatistics(stats -> stats.started(6).succeeded(6));
 			assertThat(invocationDisplayNames(results)) //
-					.containsExactly("1 | TesT | 1, foo | set", "2 | TesT | 2, bar | number=2, name=bar");
+					.containsExactly("1 | TesT | 1, \"foo\" | set",
+						"2 | TesT | 2, \"bar\" | number = 2, name = \"bar\"");
 		}
 
 		@Test
@@ -398,8 +400,8 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 			results.testEvents().assertStatistics(stats -> stats.started(8).succeeded(8));
 			assertThat(invocationDisplayNames(results)) //
 					.containsExactly( //
-						"[1] number=1", "[1] text=foo", "[2] text=bar", //
-						"[2] number=2", "[1] text=foo", "[2] text=bar" //
+						"[1] number = 1", "[1] text = \"foo\"", "[2] text = \"bar\"", //
+						"[2] number = 2", "[1] text = \"foo\"", "[2] text = \"bar\"" //
 					);
 			assertThat(allReportEntries(results)).map(it -> it.get("value")).containsExactly(
 			// @formatter:off
@@ -407,56 +409,56 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 					"beforeParameterizedClassInvocation: %s".formatted(classTemplateClass.getSimpleName()),
 					"beforeAll: InnerTestCase",
 					"beforeParameterizedClassInvocation: InnerTestCase",
-					"beforeEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [1] flag=true [InnerTestCase]",
+					"beforeEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [1] flag = true [InnerTestCase]",
 					"test(1, foo, true)",
-					"afterEach: [1] flag=true [InnerTestCase]",
-					"afterEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [InnerTestCase]",
+					"afterEach: [1] flag = true [InnerTestCase]",
+					"afterEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [InnerTestCase]",
 					"test(1, foo, false)",
-					"afterEach: [2] flag=false [InnerTestCase]",
-					"afterEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"afterEach: [2] flag = false [InnerTestCase]",
+					"afterEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
 					"afterParameterizedClassInvocation: InnerTestCase",
 					"beforeParameterizedClassInvocation: InnerTestCase",
-					"beforeEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [1] flag=true [InnerTestCase]",
+					"beforeEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [1] flag = true [InnerTestCase]",
 					"test(1, bar, true)",
-					"afterEach: [1] flag=true [InnerTestCase]",
-					"afterEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [InnerTestCase]",
+					"afterEach: [1] flag = true [InnerTestCase]",
+					"afterEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [InnerTestCase]",
 					"test(1, bar, false)",
-					"afterEach: [2] flag=false [InnerTestCase]",
-					"afterEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"afterEach: [2] flag = false [InnerTestCase]",
+					"afterEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
 					"afterParameterizedClassInvocation: InnerTestCase",
 					"afterAll: InnerTestCase",
 					"afterParameterizedClassInvocation: %s".formatted(classTemplateClass.getSimpleName()),
 					"beforeParameterizedClassInvocation: %s".formatted(classTemplateClass.getSimpleName()),
 					"beforeAll: InnerTestCase",
 					"beforeParameterizedClassInvocation: InnerTestCase",
-					"beforeEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [1] flag=true [InnerTestCase]",
+					"beforeEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [1] flag = true [InnerTestCase]",
 					"test(2, foo, true)",
-					"afterEach: [1] flag=true [InnerTestCase]",
-					"afterEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [InnerTestCase]",
+					"afterEach: [1] flag = true [InnerTestCase]",
+					"afterEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [InnerTestCase]",
 					"test(2, foo, false)",
-					"afterEach: [2] flag=false [InnerTestCase]",
-					"afterEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"afterEach: [2] flag = false [InnerTestCase]",
+					"afterEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
 					"afterParameterizedClassInvocation: InnerTestCase",
 					"beforeParameterizedClassInvocation: InnerTestCase",
-					"beforeEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [1] flag=true [InnerTestCase]",
+					"beforeEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [1] flag = true [InnerTestCase]",
 					"test(2, bar, true)",
-					"afterEach: [1] flag=true [InnerTestCase]",
-					"afterEach: [1] flag=true [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
-					"beforeEach: [2] flag=false [InnerTestCase]",
+					"afterEach: [1] flag = true [InnerTestCase]",
+					"afterEach: [1] flag = true [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"beforeEach: [2] flag = false [InnerTestCase]",
 					"test(2, bar, false)",
-					"afterEach: [2] flag=false [InnerTestCase]",
-					"afterEach: [2] flag=false [%s]".formatted(classTemplateClass.getSimpleName()),
+					"afterEach: [2] flag = false [InnerTestCase]",
+					"afterEach: [2] flag = false [%s]".formatted(classTemplateClass.getSimpleName()),
 					"afterParameterizedClassInvocation: InnerTestCase",
 					"afterAll: InnerTestCase",
 					"afterParameterizedClassInvocation: %s".formatted(classTemplateClass.getSimpleName()),
@@ -550,6 +552,17 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 					.haveExactly(1, finishedWithFailure(message(
 						"Configuration error: duplicate index declared in @Parameter(0) annotation on fields [int %s.i, long %s.l].".formatted(
 							classTemplateClass.getName(), classTemplateClass.getName()))));
+		}
+
+		@Test
+		void failsWithMeaningfulErrorWhenTooFewArgumentsProvidedForFieldInjection() {
+			var results = executeTestsForClass(NotEnoughArgumentsForFieldsTestCase.class);
+
+			results.containerEvents().assertThatEvents() //
+					.haveExactly(1, finishedWithFailure(message(withPlatformSpecificLineSeparator(
+						"""
+								Configuration error: @ParameterizedClass has 2 required parameters (due to field injection) but there was 1 argument provided.
+								Note: the provided arguments were [1]"""))));
 		}
 	}
 
@@ -725,13 +738,12 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 			var results = executeTestsForClass(LifecycleMethodWithInvalidParametersTestCase.class);
 
-			var expectedMessage = """
-					2 configuration errors:
-					- parameter 'value' with index 0 is incompatible with the parameter declared on the parameterized class: expected type 'int' but found 'long'
-					- parameter 'anotherValue' with index 1 must not be annotated with @ConvertWith
-					""";
-			expectedMessage = expectedMessage.trim() //
-					.replace("\n", System.lineSeparator()); // use platform-specific line separators
+			var expectedMessage = withPlatformSpecificLineSeparator(
+				"""
+						2 configuration errors:
+						- parameter 'value' with index 0 is incompatible with the parameter declared on the parameterized class: \
+						expected type 'int' but found 'long'
+						- parameter 'anotherValue' with index 1 must not be annotated with @ConvertWith""");
 
 			var failedResult = getFirstTestExecutionResult(results.containerEvents().failed());
 			assertThat(failedResult.getThrowable().orElseThrow()) //
@@ -794,6 +806,10 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	private static String withPlatformSpecificLineSeparator(String textBlock) {
+		return textBlock.replace("\n", System.lineSeparator());
+	}
+
 	// -------------------------------------------------------------------
 
 	private static Stream<String> invocationDisplayNames(EngineExecutionResults results) {
@@ -830,7 +846,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		private int value;
 		private final TestInfo testInfo;
 
-		public ConstructorInjectionTestCase(int value, TestInfo testInfo) {
+		ConstructorInjectionTestCase(int value, TestInfo testInfo) {
 			this.value = value;
 			this.testInfo = testInfo;
 		}
@@ -904,7 +920,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	}
 
 	@SuppressWarnings("JUnitMalformedDeclaration")
-	@ParameterizedClass
+	@ParameterizedClass(quoteTextArguments = false)
 	@CsvSource({ "-1", "1" })
 	record RecordWithBuiltInConverterTestCase(int value) {
 
@@ -957,7 +973,8 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	private static class CustomIntegerToStringConverter extends TypedArgumentConverter<Integer, String> {
+	@NullMarked
+	private static class CustomIntegerToStringConverter extends TypedArgumentConverter<Integer, @Nullable String> {
 
 		CustomIntegerToStringConverter() {
 			super(Integer.class, String.class);
@@ -1048,7 +1065,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	@ParameterizedClass
+	@ParameterizedClass(quoteTextArguments = false)
 	@ValueSource(ints = { -1, 1 })
 	@interface ParameterizedClassWithNegativeAndPositiveValue {
 	}
@@ -1694,6 +1711,22 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	}
 
 	@ParameterizedClass
+	@ValueSource(ints = 1)
+	static class NotEnoughArgumentsForFieldsTestCase {
+
+		@Parameter(0)
+		int i;
+
+		@Parameter(1)
+		String s;
+
+		@org.junit.jupiter.api.Test
+		void test() {
+			fail("should not be called");
+		}
+	}
+
+	@ParameterizedClass
 	@CsvSource({ "unused1, foo, unused2, bar", "unused4, baz, unused5, qux" })
 	static class InvalidUnusedParameterIndexesTestCase {
 
@@ -2091,14 +2124,14 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		@BeforeParameterizedClassInvocation
 		static void before3(AtomicInteger value, TestInfo testInfo) {
-			assertEquals("[1] value=1", testInfo.getDisplayName());
+			assertEquals("[1] value = 1", testInfo.getDisplayName());
 			value.incrementAndGet();
 		}
 
 		@BeforeParameterizedClassInvocation
 		static void before4(ArgumentsAccessor accessor, TestInfo testInfo) {
 			assertEquals(1, accessor.getInteger(0));
-			assertEquals("[1] value=1", testInfo.getDisplayName());
+			assertEquals("[1] value = 1", testInfo.getDisplayName());
 		}
 
 		@BeforeParameterizedClassInvocation
@@ -2110,7 +2143,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		@BeforeParameterizedClassInvocation
 		static void before5(AtomicInteger value, ArgumentsAccessor accessor, TestInfo testInfo) {
 			assertEquals(1, accessor.getInteger(0));
-			assertEquals("[1] value=1", testInfo.getDisplayName());
+			assertEquals("[1] value = 1", testInfo.getDisplayName());
 			value.incrementAndGet();
 		}
 
@@ -2123,7 +2156,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		static void after(AtomicInteger value, ArgumentsAccessor accessor, TestInfo testInfo) {
 			assertEquals(6, value.get());
 			assertEquals(1, accessor.getInteger(0));
-			assertEquals("[1] value=1", testInfo.getDisplayName());
+			assertEquals("[1] value = 1", testInfo.getDisplayName());
 		}
 	}
 

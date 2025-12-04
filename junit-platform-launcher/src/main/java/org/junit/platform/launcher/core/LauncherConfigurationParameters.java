@@ -12,14 +12,16 @@ package org.junit.platform.launcher.core;
 
 import static java.util.stream.Collectors.joining;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +36,7 @@ import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.CollectionUtils;
+import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -204,7 +207,7 @@ class LauncherConfigurationParameters implements ConfigurationParameters {
 
 		static ParameterProvider propertiesFile(String configFileName) {
 			Preconditions.notBlank(configFileName, "configFileName must not be null or blank");
-			Properties properties = loadClasspathResource(configFileName.trim());
+			Properties properties = loadClasspathResource(configFileName.strip());
 			return new ParameterProvider() {
 				@Override
 				public String getValue(String key) {
@@ -252,32 +255,9 @@ class LauncherConfigurationParameters implements ConfigurationParameters {
 		Properties props = new Properties();
 
 		try {
-			ClassLoader classLoader = ClassLoaderUtils.getDefaultClassLoader();
-			Set<URL> resources = new LinkedHashSet<>(Collections.list(classLoader.getResources(configFileName)));
-
-			if (!resources.isEmpty()) {
-
-				URL configFileUrl = CollectionUtils.getFirstElement(resources).get();
-
-				if (resources.size() > 1) {
-					logger.warn(() -> {
-						String formattedResourceList = Stream.concat( //
-							Stream.of(configFileUrl + " (*)"), //
-							resources.stream().skip(1).map(URL::toString) //
-						).collect(joining("\n- ", "\n- ", ""));
-						return "Discovered %d '%s' configuration files on the classpath (see below); only the first (*) will be used.%s".formatted(
-							resources.size(), configFileName, formattedResourceList);
-					});
-				}
-
-				logger.config(
-					() -> "Loading JUnit Platform configuration parameters from classpath resource [%s].".formatted(
-						configFileUrl));
-				URLConnection urlConnection = configFileUrl.openConnection();
-				urlConnection.setUseCaches(false);
-				try (InputStream inputStream = urlConnection.getInputStream()) {
-					props.load(inputStream);
-				}
+			URL configFileUrl = findConfigFile(configFileName);
+			if (configFileUrl != null) {
+				loadClasspathResource(configFileUrl, props);
 			}
 		}
 		catch (Exception ex) {
@@ -287,6 +267,59 @@ class LauncherConfigurationParameters implements ConfigurationParameters {
 		}
 
 		return props;
+	}
+
+	private static @Nullable URL findConfigFile(String configFileName) throws IOException {
+
+		ClassLoader classLoader = ClassLoaderUtils.getDefaultClassLoader();
+		List<URL> urls = Collections.list(classLoader.getResources(configFileName));
+
+		if (urls.size() == 1) {
+			return urls.get(0);
+		}
+
+		if (urls.size() > 1) {
+
+			List<URI> resources = urls.stream() //
+					.map(LauncherConfigurationParameters::toURI) //
+					.distinct() //
+					.toList();
+
+			URL configFileUrl = resources.get(0).toURL();
+
+			if (resources.size() > 1) {
+				logger.warn(() -> {
+					String formattedResourceList = Stream.concat( //
+						Stream.of(configFileUrl + " (*)"), //
+						resources.stream().skip(1).map(URI::toString) //
+					).collect(joining("\n- ", "\n- ", ""));
+					return "Discovered %d '%s' configuration files on the classpath (see below); only the first (*) will be used.%s".formatted(
+						resources.size(), configFileName, formattedResourceList);
+				});
+			}
+			return configFileUrl;
+		}
+
+		return null;
+	}
+
+	private static void loadClasspathResource(URL configFileUrl, Properties props) throws IOException {
+		logger.config(() -> "Loading JUnit Platform configuration parameters from classpath resource [%s].".formatted(
+			configFileUrl));
+		URLConnection urlConnection = configFileUrl.openConnection();
+		urlConnection.setUseCaches(false);
+		try (InputStream inputStream = urlConnection.getInputStream()) {
+			props.load(inputStream);
+		}
+	}
+
+	private static URI toURI(URL url) {
+		try {
+			return url.toURI();
+		}
+		catch (URISyntaxException e) {
+			throw ExceptionUtils.throwAsUncheckedException(e);
+		}
 	}
 
 }

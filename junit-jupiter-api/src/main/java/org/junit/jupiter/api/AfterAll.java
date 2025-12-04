@@ -36,14 +36,9 @@ import org.apiguardian.api.API;
  * <h2>Method Signatures</h2>
  *
  * <p>{@code @AfterAll} methods must have a {@code void} return type and must
- * be {@code static} by default. Consequently, {@code @AfterAll} methods are
- * not supported in {@link Nested @Nested} test classes or as <em>interface
- * default methods</em> unless the test class is annotated with
- * {@link TestInstance @TestInstance(Lifecycle.PER_CLASS)}. However, beginning
- * with Java 16 {@code @AfterAll} methods may be declared as {@code static} in
- * {@link Nested @Nested} test classes, in which case the {@code Lifecycle.PER_CLASS}
- * restriction no longer applies. In addition, {@code @AfterAll} methods may
- * optionally declare parameters to be resolved by
+ * be {@code static} unless the test class is annotated with
+ * {@link TestInstance @TestInstance(Lifecycle.PER_CLASS)}. In addition,
+ * {@code @AfterAll} methods may optionally declare parameters to be resolved by
  * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers}.
  *
  * <p>Using {@code private} visibility for {@code @AfterAll} methods is strongly

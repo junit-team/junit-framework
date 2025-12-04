@@ -19,7 +19,6 @@ import java.util.function.BiFunction;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.converter.DefaultArgumentConverter;
 import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.commons.util.Preconditions;
@@ -41,27 +40,27 @@ public class DefaultArgumentsAccessor implements ArgumentsAccessor {
 	private final @Nullable Object[] arguments;
 	private final BiFunction<@Nullable Object, Class<?>, @Nullable Object> converter;
 
-	public static DefaultArgumentsAccessor create(ExtensionContext context, int invocationIndex,
-			ClassLoader classLoader, @Nullable Object[] arguments) {
+	public static DefaultArgumentsAccessor create(int invocationIndex, ClassLoader classLoader,
+			@Nullable Object[] arguments) {
 		Preconditions.notNull(classLoader, "ClassLoader must not be null");
 
 		BiFunction<@Nullable Object, Class<?>, @Nullable Object> converter = (source,
-				targetType) -> new DefaultArgumentConverter(context) //
-						.convert(source, targetType, classLoader);
+				targetType) -> DefaultArgumentConverter.INSTANCE.convert(source, targetType, classLoader);
 		return new DefaultArgumentsAccessor(converter, invocationIndex, arguments);
 	}
 
 	private DefaultArgumentsAccessor(BiFunction<@Nullable Object, Class<?>, @Nullable Object> converter,
 			int invocationIndex, @Nullable Object... arguments) {
+		Preconditions.notNull(converter, "Converter must not be null");
 		Preconditions.condition(invocationIndex >= 1, () -> "Invocation index must be >= 1");
-		this.converter = Preconditions.notNull(converter, "Converter must not be null");
+		Preconditions.notNull(arguments, "Arguments array must not be null");
+		this.converter = converter;
 		this.invocationIndex = invocationIndex;
-		this.arguments = Preconditions.notNull(arguments, "Arguments array must not be null");
+		this.arguments = arguments;
 	}
 
 	@Override
-	@Nullable
-	public Object get(int index) {
+	public @Nullable Object get(int index) {
 		Preconditions.condition(index >= 0 && index < this.arguments.length,
 			() -> "index must be >= 0 and < %d".formatted(this.arguments.length));
 		return this.arguments[index];
@@ -140,7 +139,7 @@ public class DefaultArgumentsAccessor implements ArgumentsAccessor {
 
 	@Override
 	public List<@Nullable Object> toList() {
-		return Collections.unmodifiableList(Arrays.asList(this.arguments));
+		return Collections.<@Nullable Object> unmodifiableList(Arrays.asList(this.arguments));
 	}
 
 	@Override

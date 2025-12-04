@@ -198,13 +198,13 @@ class AssertLinesMatch {
 	}
 
 	static boolean isFastForwardLine(String line) {
-		line = line.trim();
+		line = line.strip();
 		return line.length() >= 4 && line.startsWith(">>") && line.endsWith(">>");
 	}
 
 	static int parseFastForwardLimit(String fastForwardLine) {
-		fastForwardLine = fastForwardLine.trim();
-		String text = fastForwardLine.substring(2, fastForwardLine.length() - 2).trim();
+		fastForwardLine = fastForwardLine.strip();
+		String text = fastForwardLine.substring(2, fastForwardLine.length() - 2).strip();
 		try {
 			int limit = Integer.parseInt(text);
 			condition(limit > 0, () -> "fast-forward(%d) limit must be greater than zero".formatted(limit));

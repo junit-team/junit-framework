@@ -66,7 +66,7 @@ class AssertNullAssertionsTests {
 
 	@SuppressWarnings("unused")
 	private void assertNullWithNonNullObjectWithNullStringReturnedFromToString(
-			@Nullable Supplier<String> messageSupplier) {
+			@Nullable Supplier<@Nullable String> messageSupplier) {
 		String actual = "null";
 		try {
 			if (messageSupplier == null) {
@@ -98,7 +98,7 @@ class AssertNullAssertionsTests {
 
 	@SuppressWarnings("unused")
 	private void assertNullWithNonNullObjectWithNullReferenceReturnedFromToString(
-			@Nullable Supplier<String> messageSupplier) {
+			@Nullable Supplier<@Nullable String> messageSupplier) {
 		Object actual = new NullToString();
 		try {
 			if (messageSupplier == null) {

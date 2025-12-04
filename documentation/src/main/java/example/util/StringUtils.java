@@ -26,4 +26,7 @@ public class StringUtils {
 		return true;
 	}
 
+	private StringUtils() {
+	}
+
 }

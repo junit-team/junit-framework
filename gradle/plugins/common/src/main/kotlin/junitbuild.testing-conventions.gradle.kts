@@ -1,13 +1,20 @@
 import com.gradle.develocity.agent.gradle.internal.test.PredictiveTestSelectionConfigurationInternal
 import com.gradle.develocity.agent.gradle.test.PredictiveTestSelectionMode
-import junitbuild.extensions.trackOperationSystemAsInput
-import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.bundleFromLibs
+import junitbuild.extensions.dependencyFromLibs
+import junitbuild.extensions.trackOperationSystemAsInput
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.internal.os.OperatingSystem
+import java.io.IOException
 import java.io.OutputStream
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.NoSuchFileException
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
 
 plugins {
 	`java-library`
@@ -22,6 +29,10 @@ var javaAgentClasspath = configurations.resolvable("javaAgentClasspath") {
 var openTestReportingCli = configurations.dependencyScope("openTestReportingCli")
 var openTestReportingCliClasspath = configurations.resolvable("openTestReportingCliClasspath") {
 	extendsFrom(openTestReportingCli.get())
+	attributes {
+		// Avoid using the shadowed variant of junit-platform-reporting
+		attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling::class, Bundling.EXTERNAL))
+	}
 }
 
 val generateOpenTestHtmlReport by tasks.registering(JavaExec::class) {
@@ -106,6 +117,8 @@ tasks.withType<Test>().configureEach {
 	systemProperty("log4j2.julLoggerAdapter", "org.apache.logging.log4j.jul.CoreLoggerAdapter")
 	// Avoid overhead (see https://logging.apache.org/log4j/2.x/manual/jmx.html#enabling-jmx)
 	systemProperty("log4j2.disableJmx", "true")
+	// https://github.com/raphw/byte-buddy/issues/1803
+	systemProperty("net.bytebuddy.safe", true)
 	// Required until ASM officially supports the JDK 14
 	systemProperty("net.bytebuddy.experimental", true)
 	if (buildParameters.testing.enableJFR) {
@@ -130,6 +143,7 @@ tasks.withType<Test>().configureEach {
 	jvmArgumentProviders += CommandLineArgumentProvider {
 		listOf(
 			"-Djunit.platform.reporting.open.xml.enabled=true",
+			"-Djunit.platform.reporting.open.xml.git.enabled=true",
 			"-Djunit.platform.reporting.output.dir=${reports.junitXml.outputLocation.get().asFile.absolutePath}/junit-{uniqueNumber}",
 		)
 	}
@@ -142,13 +156,38 @@ tasks.withType<Test>().configureEach {
 	}
 	jvmArgs("-Xshare:off") // https://github.com/mockito/mockito/issues/3111
 
-	val reportDirTree = objects.fileTree().from(reports.junitXml.outputLocation)
 	doFirst {
-		reportDirTree.visit {
-			if (name.startsWith("junit-")) {
-				file.deleteRecursively()
+		reports.junitXml.outputLocation.asFile.get()
+			.listFiles { _, name -> name.startsWith("junit-") }
+			?.forEach { dir ->
+				Files.walkFileTree(dir.toPath(), object : SimpleFileVisitor<Path>() {
+					override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+						return deleteIfExistsAndContinue(file)
+					}
+
+					override fun postVisitDirectory(dir: Path, ex: IOException?): FileVisitResult {
+						if (ex is NoSuchFileException) {
+							return FileVisitResult.CONTINUE
+						}
+						if (ex != null) {
+							throw ex
+						}
+						return deleteIfExistsAndContinue(dir)
+					}
+
+					private fun deleteIfExistsAndContinue(dir: Path): FileVisitResult {
+						Files.deleteIfExists(dir)
+						return FileVisitResult.CONTINUE
+					}
+
+					override fun visitFileFailed(file: Path, ex: IOException): FileVisitResult {
+						if (ex is NoSuchFileException) {
+							return FileVisitResult.CONTINUE
+						}
+						throw ex
+					}
+				})
 			}
-		}
 	}
 
 	finalizedBy(generateOpenTestHtmlReport)
@@ -161,14 +200,10 @@ dependencies {
 	testImplementation(dependencyFromLibs("testingAnnotations"))
 	testImplementation(project(":junit-jupiter"))
 
-	testRuntimeOnly(project(":junit-platform-engine"))
-	testRuntimeOnly(project(":junit-platform-jfr"))
+	testRuntimeOnly(project(":junit-platform-launcher"))
 	testRuntimeOnly(project(":junit-platform-reporting"))
 
 	testRuntimeOnly(bundleFromLibs("log4j"))
-	testRuntimeOnly(dependencyFromLibs("jfrPolyfill")) {
-		because("OpenJ9 does not include JFR")
-	}
 	testRuntimeOnly(dependencyFromLibs("openTestReporting-events")) {
 		because("it's required to run tests via IntelliJ which does not consumed the shadowed jar of junit-platform-reporting")
 	}

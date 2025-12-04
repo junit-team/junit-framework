@@ -79,11 +79,11 @@ class TokenizerTests {
 	}
 
 	private Stream<Integer> startIndicesExtractedFrom(String expression) {
-		return tokensExtractedFrom(expression).map(token -> token.startIndex());
+		return tokensExtractedFrom(expression).map(Token::startIndex);
 	}
 
 	private Stream<String> rawStringsExtractedFrom(String expression) {
-		return tokensExtractedFrom(expression).map(token -> token.rawString());
+		return tokensExtractedFrom(expression).map(Token::rawString);
 	}
 
 	private List<String> tokenStringsExtractedFrom(@Nullable String expression) {

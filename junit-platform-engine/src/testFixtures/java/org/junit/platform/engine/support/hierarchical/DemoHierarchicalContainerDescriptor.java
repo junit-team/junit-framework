@@ -23,8 +23,7 @@ import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 public class DemoHierarchicalContainerDescriptor extends AbstractTestDescriptor
 		implements Node<DemoEngineExecutionContext> {
 
-	@Nullable
-	private final Runnable beforeBlock;
+	private final @Nullable Runnable beforeBlock;
 
 	public DemoHierarchicalContainerDescriptor(UniqueId uniqueId, String displayName, @Nullable TestSource source,
 			@Nullable Runnable beforeBlock) {

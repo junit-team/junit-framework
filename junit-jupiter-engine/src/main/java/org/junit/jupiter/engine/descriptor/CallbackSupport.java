@@ -56,4 +56,7 @@ class CallbackSupport {
 
 	}
 
+	private CallbackSupport() {
+	}
+
 }

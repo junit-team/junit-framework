@@ -30,7 +30,8 @@ import org.junit.platform.commons.util.ExceptionUtils;
 @API(status = INTERNAL, since = "5.5")
 public class InvocationInterceptorChain {
 
-	public <T> T invoke(Invocation<T> invocation, ExtensionRegistry extensionRegistry, InterceptorCall<T> call) {
+	public <T extends @Nullable Object> T invoke(Invocation<T> invocation, ExtensionRegistry extensionRegistry,
+			InterceptorCall<T> call) {
 		List<InvocationInterceptor> interceptors = extensionRegistry.getExtensions(InvocationInterceptor.class);
 		if (interceptors.isEmpty()) {
 			return proceed(invocation);
@@ -74,12 +75,11 @@ public class InvocationInterceptorChain {
 
 		T apply(InvocationInterceptor interceptor, Invocation<T> invocation) throws Throwable;
 
-		@SuppressWarnings("NullAway")
 		static InterceptorCall<@Nullable Void> ofVoid(VoidInterceptorCall call) {
-			return ((interceptorChain, invocation) -> {
+			return (InvocationInterceptor interceptorChain, Invocation<@Nullable Void> invocation) -> {
 				call.apply(interceptorChain, invocation);
 				return null;
-			});
+			};
 		}
 
 	}

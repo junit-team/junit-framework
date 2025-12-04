@@ -10,29 +10,21 @@
 
 package org.junit.jupiter.params.provider;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.StreamSupport.stream;
-import static org.junit.jupiter.params.provider.CsvArgumentsProvider.getHeaders;
-import static org.junit.jupiter.params.provider.CsvArgumentsProvider.handleCsvException;
-import static org.junit.jupiter.params.provider.CsvArgumentsProvider.processCsvRecord;
-import static org.junit.jupiter.params.provider.CsvParserFactory.createParserFor;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import com.univocity.parsers.csv.CsvParser;
+import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvRecord;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.support.ParameterDeclarations;
 import org.junit.platform.commons.JUnitException;
@@ -57,8 +49,10 @@ class CsvFileArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvFileS
 	@Override
 	protected Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context,
 			CsvFileSource csvFileSource) {
+
 		Charset charset = getCharsetFrom(csvFileSource);
-		CsvParser csvParser = createParserFor(csvFileSource);
+
+		CsvReaderFactory.validate(csvFileSource);
 
 		Stream<Source> resources = Arrays.stream(csvFileSource.resources()).map(inputStreamProvider::classpathResource);
 		Stream<Source> files = Arrays.stream(csvFileSource.files()).map(inputStreamProvider::file);
@@ -68,12 +62,12 @@ class CsvFileArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvFileS
 		return Preconditions.notEmpty(sources, "Resources or files must not be empty")
 				.stream()
 				.map(source -> source.open(context))
-				.map(inputStream -> beginParsing(inputStream, csvFileSource, csvParser, charset))
-				.flatMap(parser -> toStream(parser, csvFileSource));
+				.map(inputStream -> CsvReaderFactory.createReaderFor(csvFileSource, inputStream, charset))
+				.flatMap(reader -> toStream(reader, csvFileSource));
 		// @formatter:on
 	}
 
-	private Charset getCharsetFrom(CsvFileSource csvFileSource) {
+	private static Charset getCharsetFrom(CsvFileSource csvFileSource) {
 		try {
 			return Charset.forName(csvFileSource.encoding());
 		}
@@ -82,81 +76,57 @@ class CsvFileArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvFileS
 		}
 	}
 
-	private CsvParser beginParsing(InputStream inputStream, CsvFileSource csvFileSource, CsvParser csvParser,
-			Charset charset) {
-		try {
-			csvParser.beginParsing(inputStream, charset);
-		}
-		catch (Throwable throwable) {
-			throw handleCsvException(throwable, csvFileSource);
-		}
-		return csvParser;
-	}
-
-	private Stream<Arguments> toStream(CsvParser csvParser, CsvFileSource csvFileSource) {
-		CsvParserIterator iterator = new CsvParserIterator(csvParser, csvFileSource);
-		return stream(spliteratorUnknownSize(iterator, Spliterator.ORDERED), false) //
-				.skip(csvFileSource.numLinesToSkip()) //
+	private static Stream<Arguments> toStream(CsvReader<? extends CsvRecord> reader, CsvFileSource csvFileSource) {
+		var spliterator = CsvExceptionHandlingSpliterator.delegatingTo(reader.spliterator(), csvFileSource);
+		boolean useHeadersInDisplayName = csvFileSource.useHeadersInDisplayName();
+		// @formatter:off
+		return StreamSupport.stream(spliterator, false)
+				.skip(csvFileSource.numLinesToSkip())
+				.map(record -> CsvArgumentsProvider.processCsvRecord(
+						record, useHeadersInDisplayName)
+				)
 				.onClose(() -> {
 					try {
-						csvParser.stopParsing();
+						reader.close();
 					}
 					catch (Throwable throwable) {
-						throw handleCsvException(throwable, csvFileSource);
+						throw CsvArgumentsProvider.handleCsvException(throwable, csvFileSource);
 					}
 				});
+		// @formatter:on
 	}
 
-	private static class CsvParserIterator implements Iterator<Arguments> {
+	private record CsvExceptionHandlingSpliterator<T>(Spliterator<T> delegate, CsvFileSource csvFileSource)
+			implements Spliterator<T> {
 
-		private final CsvParser csvParser;
-		private final CsvFileSource csvFileSource;
-		private final boolean useHeadersInDisplayName;
-		private final Set<String> nullValues;
-
-		@Nullable
-		private Arguments nextArguments;
-
-		private String @Nullable [] headers;
-
-		CsvParserIterator(CsvParser csvParser, CsvFileSource csvFileSource) {
-			this.csvParser = csvParser;
-			this.csvFileSource = csvFileSource;
-			this.useHeadersInDisplayName = csvFileSource.useHeadersInDisplayName();
-			this.nullValues = Set.of(csvFileSource.nullValues());
-			advance();
+		static <T> CsvExceptionHandlingSpliterator<T> delegatingTo(Spliterator<T> delegate,
+				CsvFileSource csvFileSource) {
+			return new CsvExceptionHandlingSpliterator<>(delegate, csvFileSource);
 		}
 
 		@Override
-		public boolean hasNext() {
-			return this.nextArguments != null;
-		}
-
-		@Override
-		public Arguments next() {
-			Arguments result = this.nextArguments;
-			advance();
-			return requireNonNull(result);
-		}
-
-		private void advance() {
+		public boolean tryAdvance(final Consumer<? super T> action) {
 			try {
-				String[] csvRecord = this.csvParser.parseNext();
-				if (csvRecord != null) {
-					// Lazily retrieve headers if necessary.
-					if (this.useHeadersInDisplayName && this.headers == null) {
-						this.headers = getHeaders(this.csvParser);
-					}
-					this.nextArguments = processCsvRecord(csvRecord, this.nullValues, this.useHeadersInDisplayName,
-						this.headers);
-				}
-				else {
-					this.nextArguments = null;
-				}
+				return delegate.tryAdvance(action);
 			}
 			catch (Throwable throwable) {
-				throw handleCsvException(throwable, this.csvFileSource);
+				throw CsvArgumentsProvider.handleCsvException(throwable, csvFileSource);
 			}
+		}
+
+		@Override
+		public Spliterator<T> trySplit() {
+			return delegate.trySplit();
+		}
+
+		@Override
+		public long estimateSize() {
+			return delegate.estimateSize();
+		}
+
+		@Override
+		public int characteristics() {
+			return delegate.characteristics();
 		}
 
 	}

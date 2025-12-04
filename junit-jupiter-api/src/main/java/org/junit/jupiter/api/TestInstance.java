@@ -46,9 +46,7 @@ import org.junit.jupiter.api.parallel.Execution;
  * as well as between non-static {@link BeforeAll @BeforeAll} and
  * {@link AfterAll @AfterAll} methods in the test class.</li>
  * <li>Declaration of non-static {@code @BeforeAll} and {@code @AfterAll} methods
- * in {@link Nested @Nested} test classes. Beginning with Java 16, {@code @BeforeAll}
- * and {@code @AfterAll} methods may be declared as {@code static} in
- * {@link Nested @Nested} test classes with either lifecycle mode.</li>
+ * in top-level or {@link Nested @Nested} test classes.</li>
  * <li>Declaration of {@code @BeforeAll} and {@code @AfterAll} on interface
  * {@code default} methods.</li>
  * <li>Simplified declaration of non-static {@code @BeforeAll} and {@code @AfterAll}

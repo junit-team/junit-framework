@@ -24,8 +24,7 @@ public class TestEngineSpy implements TestEngine {
 
 	private final String id;
 
-	@Nullable
-	public ExecutionRequest requestForExecution;
+	public @Nullable ExecutionRequest requestForExecution;
 
 	public TestEngineSpy() {
 		this(TestEngineSpy.class.getSimpleName());

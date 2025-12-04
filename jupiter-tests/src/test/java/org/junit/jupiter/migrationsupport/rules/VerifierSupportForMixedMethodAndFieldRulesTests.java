@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.Verifier;
 
+@SuppressWarnings("removal")
 @ExtendWith(VerifierSupport.class)
 public class VerifierSupportForMixedMethodAndFieldRulesTests {
 
@@ -53,10 +54,12 @@ public class VerifierSupportForMixedMethodAndFieldRulesTests {
 
 	@AfterAll
 	static void afterMethodsOfBothRulesWereExecuted() {
-		if (!afterOfRule1WasExecuted)
+		if (!afterOfRule1WasExecuted) {
 			fail();
-		if (!afterOfRule2WasExecuted)
+		}
+		if (!afterOfRule2WasExecuted) {
 			fail();
+		}
 	}
 
 }

@@ -53,10 +53,9 @@ public abstract class TypeBasedParameterResolver<T extends @Nullable Object> imp
 
 	private Type enclosedTypeOfParameterResolver() {
 		ParameterizedType typeBasedParameterResolverSuperclass = Preconditions.notNull(
-			findTypeBasedParameterResolverSuperclass(getClass()),
-			() -> String.format(
-				"Failed to discover parameter type supported by %s; "
-						+ "potentially caused by lacking parameterized type in class declaration.",
+			findTypeBasedParameterResolverSuperclass(getClass()), () -> """
+					Failed to discover parameter type supported by %s; \
+					potentially caused by lacking parameterized type in class declaration.""".formatted(
 				getClass().getName()));
 		return typeBasedParameterResolverSuperclass.getActualTypeArguments()[0];
 	}

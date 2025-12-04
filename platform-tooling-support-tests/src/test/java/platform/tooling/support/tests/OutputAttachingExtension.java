@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -27,20 +29,18 @@ import org.junit.platform.tests.process.ProcessStarter;
 
 class OutputAttachingExtension implements ParameterResolver, AfterTestExecutionCallback {
 
-	private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(
-		OutputAttachingExtension.class);
+	private static final Namespace NAMESPACE = Namespace.create(OutputAttachingExtension.class);
+
 	private static final MediaType MEDIA_TYPE = MediaType.create("text", "plain", ProcessStarter.OUTPUT_ENCODING);
 
 	@Override
-	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-			throws ParameterResolutionException {
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		return parameterContext.isAnnotated(FilePrefix.class);
 	}
 
 	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-			throws ParameterResolutionException {
-		var outputDir = extensionContext.getStore(NAMESPACE).getOrComputeIfAbsent("outputDir", __ -> {
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		var outputDir = extensionContext.getStore(NAMESPACE).computeIfAbsent("outputDir", __ -> {
 			try {
 				return new OutputDir(Files.createTempDirectory("output"));
 			}
@@ -61,7 +61,8 @@ class OutputAttachingExtension implements ParameterResolver, AfterTestExecutionC
 			try (var stream = Files.list(outputDir.root()).filter(Files::isRegularFile).sorted()) {
 				stream.filter(OutputAttachingExtension::notEmpty).forEach(file -> {
 					var fileName = file.getFileName().toString();
-					context.publishFile(fileName, MEDIA_TYPE, target -> Files.copy(file, target));
+					context.publishFile(fileName, MEDIA_TYPE,
+						target -> Files.copy(file, target, StandardCopyOption.REPLACE_EXISTING));
 				});
 			}
 		}
@@ -97,4 +98,5 @@ class OutputAttachingExtension implements ParameterResolver, AfterTestExecutionC
 			return new OutputFiles(root.resolve(prefix + "-stdout.txt"), root.resolve(prefix + "-stderr.txt"));
 		}
 	}
+
 }

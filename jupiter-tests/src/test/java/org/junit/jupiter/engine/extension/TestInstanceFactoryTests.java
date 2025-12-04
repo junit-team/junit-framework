@@ -531,11 +531,11 @@ class TestInstanceFactoryTests extends AbstractJupiterTestEngineTests {
 
 		private final int number;
 
-		public MultipleConstructorsTestCase(String text) {
+		MultipleConstructorsTestCase(String text) {
 			this.number = -1;
 		}
 
-		public MultipleConstructorsTestCase(int number) {
+		MultipleConstructorsTestCase(int number) {
 			this.number = number;
 		}
 
@@ -775,7 +775,7 @@ class TestInstanceFactoryTests extends AbstractJupiterTestEngineTests {
 	 */
 	private static class NullTestInstanceFactory implements TestInstanceFactory {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Override
 		public Object createTestInstance(TestInstanceFactoryContext factoryContext, ExtensionContext extensionContext) {
 			return null;

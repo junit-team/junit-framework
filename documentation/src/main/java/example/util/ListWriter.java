@@ -10,11 +10,10 @@
 
 package example.util;
 
-import static java.util.Collections.singletonList;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class ListWriter {
 
@@ -25,7 +24,7 @@ public class ListWriter {
 	}
 
 	public void write(String... items) throws IOException {
-		Files.write(file, singletonList(String.join(",", items)));
+		Files.write(file, List.of(String.join(",", items)));
 	}
 
 }

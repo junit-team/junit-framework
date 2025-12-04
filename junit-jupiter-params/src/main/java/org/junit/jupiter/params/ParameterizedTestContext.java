@@ -12,7 +12,6 @@ package org.junit.jupiter.params;
 
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.platform.commons.util.Preconditions;
 
@@ -22,7 +21,7 @@ import org.junit.platform.commons.util.Preconditions;
  *
  * @since 5.3
  */
-class ParameterizedTestContext implements ParameterizedDeclarationContext<TestTemplateInvocationContext> {
+class ParameterizedTestContext implements ParameterizedDeclarationContext<ParameterizedTestInvocationContext> {
 
 	private final Class<?> testClass;
 	private final Method method;
@@ -57,6 +56,11 @@ class ParameterizedTestContext implements ParameterizedDeclarationContext<TestTe
 	}
 
 	@Override
+	public boolean quoteTextArguments() {
+		return this.annotation.quoteTextArguments();
+	}
+
+	@Override
 	public boolean isAutoClosingArguments() {
 		return this.annotation.autoCloseArguments();
 	}
@@ -77,7 +81,7 @@ class ParameterizedTestContext implements ParameterizedDeclarationContext<TestTe
 	}
 
 	@Override
-	public TestTemplateInvocationContext createInvocationContext(ParameterizedInvocationNameFormatter formatter,
+	public ParameterizedTestInvocationContext createInvocationContext(ParameterizedInvocationNameFormatter formatter,
 			Arguments arguments, int invocationIndex) {
 		return new ParameterizedTestInvocationContext(this, formatter, arguments, invocationIndex);
 	}

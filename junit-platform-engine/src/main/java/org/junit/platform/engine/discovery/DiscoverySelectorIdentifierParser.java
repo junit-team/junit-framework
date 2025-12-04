@@ -10,7 +10,7 @@
 
 package org.junit.platform.engine.discovery;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
  * @since 1.11
  * @see DiscoverySelectors#parse(String)
  */
-@API(status = EXPERIMENTAL, since = "1.11")
+@API(status = MAINTAINED, since = "1.13.3")
 public interface DiscoverySelectorIdentifierParser {
 
 	/**

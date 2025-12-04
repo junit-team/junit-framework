@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -298,19 +298,20 @@ public @interface Timeout {
 	String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = "junit.jupiter.execution.timeout.afterall.method.default";
 
 	/**
-	 * Property name used to configure whether timeouts are applied to tests: {@value}.
+	 * Property name used to configure whether timeouts are applied to tests:
+	 * {@value}.
 	 *
 	 * <p>The value of this property will be used to toggle whether
 	 * {@link Timeout @Timeout} is applied to tests.</p>
 	 *
-	 * <h4>Supported timeout mode values:</h4>
+	 * <h4>Supported timeout mode values (case insensitive):</h4>
 	 * <ul>
-	 * <li>{@code enabled}: enables timeouts
-	 * <li>{@code disabled}: disables timeouts
-	 * <li>{@code disabled_on_debug}: disables timeouts while debugging
+	 * <li>{@code ENABLED}: enables timeouts
+	 * <li>{@code DISABLED}: disables timeouts
+	 * <li>{@code DISABLED_ON_DEBUG}: disables timeouts while debugging
 	 * </ul>
 	 *
-	 * <p>If not specified, the default is {@code enabled}.
+	 * <p>If not specified, the default is {@code ENABLED}.
 	 *
 	 * @since 5.6
 	 */
@@ -318,18 +319,21 @@ public @interface Timeout {
 	String TIMEOUT_MODE_PROPERTY_NAME = "junit.jupiter.execution.timeout.mode";
 
 	/**
-	 * Property name used to set the default thread mode for all testable and lifecycle
-	 * methods: "junit.jupiter.execution.timeout.thread.mode.default".
+	 * Property name used to set the default thread mode for all testable and
+	 * lifecycle methods: {@value}.
 	 *
-	 * <p>The value of this property will be used unless overridden by a {@link Timeout @Timeout}
-	 * annotation present on the method or on an enclosing test class (for testable methods).
+	 * <p>The value of this property will be used unless overridden by a
+	 * {@link Timeout @Timeout} annotation present on the method or on an
+	 * enclosing test class (for testable methods).
 	 *
-	 * <p>The supported values are {@code SAME_THREAD} or {@code SEPARATE_THREAD}, if none is provided
+	 * <p>The supported values are {@code SAME_THREAD} or
+	 * {@code SEPARATE_THREAD}, ignoring case. If none is provided,
 	 * {@code SAME_THREAD} is used as default.
 	 *
 	 * @since 5.9
+	 * @see #threadMode()
 	 */
-	@API(status = EXPERIMENTAL, since = "5.9")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = "junit.jupiter.execution.timeout.thread.mode.default";
 
 	/**
@@ -353,6 +357,7 @@ public @interface Timeout {
 	 * @return thread mode
 	 * @since 5.9
 	 * @see ThreadMode
+	 * @see #DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME
 	 */
 	@API(status = STABLE, since = "5.11")
 	ThreadMode threadMode() default ThreadMode.INFERRED;

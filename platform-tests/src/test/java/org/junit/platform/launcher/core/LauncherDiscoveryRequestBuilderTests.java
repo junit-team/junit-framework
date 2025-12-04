@@ -11,8 +11,8 @@
 package org.junit.platform.launcher.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.FilterResult.excluded;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
@@ -21,7 +21,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPacka
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.EngineFilter.includeEngines;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.DEFAULT_DISCOVERY_LISTENER_CONFIGURATION_PROPERTY_NAME;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
+import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
 import static org.junit.platform.launcher.listeners.discovery.LauncherDiscoveryListeners.abortOnFailure;
 import static org.junit.platform.launcher.listeners.discovery.LauncherDiscoveryListeners.logging;
 
@@ -32,7 +32,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
@@ -56,7 +55,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void modulesAreStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = LauncherDiscoveryRequestBuilder.request()
 					.selectors(
 							selectModule("java.base")
 					).build();
@@ -70,7 +69,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void packagesAreStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.selectors(
 							selectPackage("org.junit.platform.engine")
 					).build();
@@ -84,7 +83,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void classesAreStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.selectors(
 							selectClass(LauncherDiscoveryRequestBuilderTests.class.getName()),
 							selectClass(SampleTestClass.class)
@@ -101,7 +100,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void methodsByFullyQualifiedNameAreStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.selectors(selectMethod(fullyQualifiedMethodName()))
 					.build();
 			// @formatter:on
@@ -120,7 +119,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			var testMethod = testClass.getDeclaredMethod("test");
 
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.selectors(selectMethod(SampleTestClass.class.getName(), "test"))
 					.build();
 			// @formatter:on
@@ -139,7 +138,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			var testMethod = testClass.getDeclaredMethod("test");
 
 			// @formatter:off
-			var discoveryRequest = (DefaultDiscoveryRequest) request()
+			var discoveryRequest = (DefaultDiscoveryRequest) discoveryRequest()
 					.selectors(
 							selectMethod(testClass, "test")
 					).build();
@@ -159,7 +158,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			var id2 = UniqueId.forEngine("engine").append("foo", "id2");
 
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.selectors(
 							selectUniqueId(id1),
 							selectUniqueId(id2)
@@ -183,7 +182,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			TestEngine engine3 = new TestEngineStub("engine3");
 
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.filters(includeEngines(engine1.getId(), engine2.getId()))
 					.build();
 			// @formatter:on
@@ -201,7 +200,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			var filter1 = new DiscoveryFilterStub<>("filter1");
 			var filter2 = new DiscoveryFilterStub<>("filter2");
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.filters(filter1, filter2)
 					.build();
 			// @formatter:on
@@ -215,7 +214,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			var postFilter1 = new PostDiscoveryFilterStub("postFilter1");
 			var postFilter2 = new PostDiscoveryFilterStub("postFilter2");
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.filters(postFilter1, postFilter2)
 					.build();
 			// @formatter:on
@@ -226,12 +225,9 @@ class LauncherDiscoveryRequestBuilderTests {
 
 		@Test
 		void exceptionForIllegalFilterClass() {
-			Exception exception = assertThrows(PreconditionViolationException.class,
-				() -> request().filters(o -> excluded("reason")));
-
-			assertThat(exception).hasMessageStartingWith("Filter");
-			assertThat(exception).hasMessageEndingWith(
-				"must implement EngineFilter, PostDiscoveryFilter, or DiscoveryFilter.");
+			assertPreconditionViolationFor(() -> discoveryRequest().filters(o -> excluded("reason")))//
+					.withMessageStartingWith("Filter")//
+					.withMessageEndingWith("must implement EngineFilter, PostDiscoveryFilter, or DiscoveryFilter.");
 		}
 	}
 
@@ -240,7 +236,7 @@ class LauncherDiscoveryRequestBuilderTests {
 
 		@Test
 		void withoutConfigurationParametersSet_NoConfigurationParametersAreStoredInDiscoveryRequest() {
-			var discoveryRequest = request().build();
+			var discoveryRequest = discoveryRequest().build();
 
 			var configParams = discoveryRequest.getConfigurationParameters();
 			assertThat(configParams.get("key")).isNotPresent();
@@ -249,7 +245,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void configurationParameterAddedDirectly_isStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParameter("key", "value")
 					.build();
 			// @formatter:on
@@ -261,7 +257,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void configurationParameterAddedDirectlyTwice_overridesPreviousValueInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParameter("key", "value")
 					.configurationParameter("key", "value-new")
 					.build();
@@ -274,7 +270,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void multipleConfigurationParametersAddedDirectly_areStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParameter("key1", "value1")
 					.configurationParameter("key2", "value2")
 					.build();
@@ -288,7 +284,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void configurationParameterAddedByMap_isStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParameters(Map.of("key", "value"))
 					.build();
 			// @formatter:on
@@ -304,7 +300,7 @@ class LauncherDiscoveryRequestBuilderTests {
 			configurationParams.put("key2", "value2");
 
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParameters(configurationParams)
 					.build();
 			// @formatter:on
@@ -317,7 +313,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void configurationParametersResource_areStoredInDiscoveryRequest() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParametersResources("config-test.properties")
 					.build();
 			// @formatter:on
@@ -331,7 +327,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void configurationParametersResource_explicitConfigParametersOverrideResource() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParametersResources("config-test.properties")
 					.configurationParameter("com.example.prop.first", "first value override")
 					.build();
@@ -345,7 +341,7 @@ class LauncherDiscoveryRequestBuilderTests {
 		@Test
 		void configurationParametersResource_lastDeclaredResourceFileWins() {
 			// @formatter:off
-			var discoveryRequest = request()
+			var discoveryRequest = discoveryRequest()
 					.configurationParametersResources("config-test.properties")
 					.configurationParametersResources("config-test-override.properties")
 					.build();
@@ -362,14 +358,14 @@ class LauncherDiscoveryRequestBuilderTests {
 
 		@Test
 		void usesAbortOnFailureByDefault() {
-			var request = request().build();
+			var request = discoveryRequest().build();
 
 			assertThat(request.getDiscoveryListener()).isEqualTo(abortOnFailure());
 		}
 
 		@Test
 		void onlyAddsAbortOnFailureOnce() {
-			var request = request() //
+			var request = discoveryRequest() //
 					.listeners(abortOnFailure()) //
 					.configurationParameter(DEFAULT_DISCOVERY_LISTENER_CONFIGURATION_PROPERTY_NAME, "abortOnFailure") //
 					.build();
@@ -379,7 +375,7 @@ class LauncherDiscoveryRequestBuilderTests {
 
 		@Test
 		void onlyAddsLoggingOnce() {
-			var request = request() //
+			var request = discoveryRequest() //
 					.listeners(logging()) //
 					.configurationParameter(DEFAULT_DISCOVERY_LISTENER_CONFIGURATION_PROPERTY_NAME, "logging") //
 					.build();
@@ -389,7 +385,7 @@ class LauncherDiscoveryRequestBuilderTests {
 
 		@Test
 		void createsCompositeForMultipleListeners() {
-			var request = request() //
+			var request = discoveryRequest() //
 					.listeners(logging(), abortOnFailure()) //
 					.build();
 

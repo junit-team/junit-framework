@@ -10,14 +10,14 @@
 
 package org.junit.platform.engine;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.List;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 /**
  * {@code EngineDiscoveryRequest} provides a {@link TestEngine} access to the
@@ -86,15 +86,31 @@ public interface EngineDiscoveryRequest {
 	}
 
 	/**
-	 * Get the {@link OutputDirectoryProvider} for this request.
+	 * Get the
+	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
+	 * this request.
 	 *
 	 * @return the output directory provider; never {@code null}
 	 * @since 1.12
+	 * @deprecated Please use {@link #getOutputDirectoryCreator()} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
-	default OutputDirectoryProvider getOutputDirectoryProvider() {
+	@SuppressWarnings("removal")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "1.14")
+	default org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
+		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
+	}
+
+	/**
+	 * Get the {@link OutputDirectoryCreator} for this request.
+	 *
+	 * @return the output directory creator; never {@code null}
+	 * @since 1.14
+	 */
+	@API(status = MAINTAINED, since = "1.14")
+	default OutputDirectoryCreator getOutputDirectoryCreator() {
 		throw new JUnitException(
-			"OutputDirectoryProvider not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.");
+			"OutputDirectoryCreator not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.");
 	}
 
 }

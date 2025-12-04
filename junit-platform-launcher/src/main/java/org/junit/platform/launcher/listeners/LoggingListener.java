@@ -79,14 +79,15 @@ public class LoggingListener implements TestExecutionListener {
 	 * @see #forJavaUtilLogging()
 	 * @see #forJavaUtilLogging(Level)
 	 */
-	public static LoggingListener forBiConsumer(BiConsumer<Throwable, Supplier<String>> logger) {
+	public static LoggingListener forBiConsumer(BiConsumer<@Nullable Throwable, Supplier<String>> logger) {
 		return new LoggingListener(logger);
 	}
 
 	private final BiConsumer<@Nullable Throwable, Supplier<String>> logger;
 
-	private LoggingListener(BiConsumer<Throwable, Supplier<String>> logger) {
-		this.logger = Preconditions.notNull(logger, "logger must not be null");
+	private LoggingListener(BiConsumer<@Nullable Throwable, Supplier<String>> logger) {
+		Preconditions.notNull(logger, "logger must not be null");
+		this.logger = logger;
 	}
 
 	@Override

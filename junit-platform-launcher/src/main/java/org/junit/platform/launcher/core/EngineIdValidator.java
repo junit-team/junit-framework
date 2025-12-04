@@ -51,7 +51,7 @@ class EngineIdValidator {
 		return LoggerFactory.getLogger(EngineIdValidator.class);
 	}
 
-	// https://github.com/junit-team/junit5/issues/1557
+	// https://github.com/junit-team/junit-framework/issues/1557
 	private static boolean validateReservedIds(TestEngine testEngine) {
 		String engineId = Preconditions.notBlank(testEngine.getId(),
 			() -> "ID for TestEngine [%s] must not be null or blank".formatted(testEngine.getClass().getName()));

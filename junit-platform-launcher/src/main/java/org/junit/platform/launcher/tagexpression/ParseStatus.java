@@ -41,12 +41,12 @@ class ParseStatus {
 
 	static ParseStatus errorAt(Token token, String operatorRepresentation, String message) {
 		return error(
-			message + " for '" + operatorRepresentation + "' at index " + format(token.trimmedTokenStartIndex()));
+			message + " for '" + operatorRepresentation + "' at index " + format(token.strippedTokenStartIndex()));
 	}
 
 	static ParseStatus missingOperatorBetween(TokenWith<TagExpression> lhs, TokenWith<TagExpression> rhs) {
 		String lhsString = "'" + lhs.element() + "' at index " + format(lhs.token().lastCharacterIndex());
-		String rhsString = "'" + rhs.element() + "' at index " + format(rhs.token().trimmedTokenStartIndex());
+		String rhsString = "'" + rhs.element() + "' at index " + format(rhs.token().strippedTokenStartIndex());
 		return error("missing operator between " + lhsString + " and " + rhsString);
 	}
 
@@ -62,8 +62,7 @@ class ParseStatus {
 		return new ParseStatus(errorMessage);
 	}
 
-	@Nullable
-	final String errorMessage;
+	final @Nullable String errorMessage;
 
 	private ParseStatus(@Nullable String errorMessage) {
 		this.errorMessage = errorMessage;

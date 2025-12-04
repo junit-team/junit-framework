@@ -2,7 +2,7 @@ org.junit.vintage.engine@${version} jar:file:.+/junit-vintage-engine-\d.+\.jar..
 requires java.base mandated
 requires junit
 requires org.apiguardian.api static
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.platform.engine
 provides org.junit.platform.engine.TestEngine with org.junit.vintage.engine.VintageTestEngine
 contains org.junit.vintage.engine

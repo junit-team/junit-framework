@@ -16,7 +16,7 @@ import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
-// https://github.com/junit-team/junit5/issues/1836
+// https://github.com/junit-team/junit-framework/issues/1836
 object DisplayNameTests {
     @JvmStatic
     fun data() =
@@ -31,10 +31,14 @@ object DisplayNameTests {
     @ParameterizedTest
     @MethodSource("data")
     fun test(
-        char: String?,
+        str: String?,
         number: Int,
         info: TestInfo
     ) {
-        assertEquals("[$number] char=$char, number=$number", info.displayName)
+        if (str == null) {
+            assertEquals("[$number] str = null, number = $number", info.displayName)
+        } else {
+            assertEquals("[$number] str = \"$str\", number = $number", info.displayName)
+        }
     }
 }

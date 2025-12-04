@@ -26,7 +26,7 @@ import org.junit.jupiter.params.support.FieldContext;
  * @since 5.0
  * @see ArgumentsAggregator
  */
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public abstract class SimpleArgumentsAggregator implements ArgumentsAggregator {
 
 	public SimpleArgumentsAggregator() {

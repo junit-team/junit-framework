@@ -12,6 +12,7 @@ package org.junit.platform.launcher.core;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
@@ -138,7 +139,7 @@ class StreamInterceptor extends PrintStream {
 			}
 			int length = count - position;
 			count -= length;
-			return new String(buf, position, length);
+			return new String(buf, position, length, Charset.defaultCharset());
 		}
 	}
 }

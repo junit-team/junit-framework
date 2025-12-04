@@ -10,7 +10,6 @@
 
 package example;
 
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -83,7 +82,7 @@ class ClassTemplateDemo {
 				// tag::user_guide[]
 				@Override
 				public List<Extension> getAdditionalExtensions() {
-					return singletonList(new TestInstancePostProcessor() {
+					return List.of(new TestInstancePostProcessor() {
 						@Override
 						public void postProcessTestInstance(
 								// tag::custom_line_break[]

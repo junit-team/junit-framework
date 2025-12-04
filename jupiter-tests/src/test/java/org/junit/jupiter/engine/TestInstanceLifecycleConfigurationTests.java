@@ -10,8 +10,6 @@
 
 package org.junit.jupiter.engine;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
@@ -89,7 +87,7 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 		performAssertions(testClass, 1, 1, 0);
 
 		// Should pass with the config param
-		performAssertions(testClass, singletonMap(KEY, PER_CLASS.name()), 2, 0, 1, "beforeAll", "test", "afterAll");
+		performAssertions(testClass, Map.of(KEY, PER_CLASS.name()), 2, 0, 1, "beforeAll", "test", "afterAll");
 	}
 
 	@Test
@@ -101,7 +99,7 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 		performAssertions(testClass, 1, 1, 0);
 
 		// Should pass with the config param
-		performAssertions(testClass, singletonMap(KEY, PER_CLASS.name()), 2, 0, 1, "beforeAll", "test", "afterAll");
+		performAssertions(testClass, Map.of(KEY, PER_CLASS.name()), 2, 0, 1, "beforeAll", "test", "afterAll");
 	}
 
 	@Test
@@ -113,13 +111,13 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 	@Test
 	void instancePerMethodConfiguredViaExplicitAnnotationDeclarationThatOverridesConfigParam() {
 		Class<?> testClass = ExplicitInstancePerTestMethodTestCase.class;
-		performAssertions(testClass, singletonMap(KEY, PER_CLASS.name()), 2, 0, 1, "beforeAll", "test", "afterAll");
+		performAssertions(testClass, Map.of(KEY, PER_CLASS.name()), 2, 0, 1, "beforeAll", "test", "afterAll");
 	}
 
 	private void performAssertions(Class<?> testClass, int containers, int containersFailed, int tests,
 			String... methods) {
 
-		performAssertions(testClass, emptyMap(), containers, containersFailed, tests, methods);
+		performAssertions(testClass, Map.of(), containers, containersFailed, tests, methods);
 	}
 
 	private void performAssertions(Class<?> testClass, Map<String, String> configParams, int numContainers,

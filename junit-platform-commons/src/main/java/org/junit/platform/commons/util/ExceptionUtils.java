@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * Collection of utilities for working with exceptions.
@@ -39,6 +40,8 @@ import org.apiguardian.api.API;
  */
 @API(status = INTERNAL, since = "1.0")
 public final class ExceptionUtils {
+
+	private static final String JUNIT_START_PACKAGE_PREFIX = "org.junit.start.";
 
 	private static final String JUNIT_PLATFORM_LAUNCHER_PACKAGE_PREFIX = "org.junit.platform.launcher.";
 
@@ -69,6 +72,7 @@ public final class ExceptionUtils {
 	 * returns anything; the return type is merely present to allow this
 	 * method to be supplied as the operand in a {@code throw} statement
 	 */
+	@Contract("_ -> fail")
 	public static RuntimeException throwAsUncheckedException(Throwable t) {
 		Preconditions.notNull(t, "Throwable must not be null");
 		// The following line will never actually return an exception but rather
@@ -76,7 +80,8 @@ public final class ExceptionUtils {
 		return ExceptionUtils.throwAs(t);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Contract("_ -> fail")
+	@SuppressWarnings({ "unchecked", "TypeParameterUnusedInFormals" })
 	private static <T extends Throwable> T throwAs(Throwable t) throws T {
 		throw (T) t;
 	}
@@ -94,14 +99,21 @@ public final class ExceptionUtils {
 	}
 
 	/**
-	 * Prune the stack trace of the supplied {@link Throwable} by removing
-	 * {@linkplain StackTraceElement stack trace elements} from the {@code org.junit},
-	 * {@code jdk.internal.reflect}, and {@code sun.reflect} packages. If a
-	 * {@code StackTraceElement} matching one of the supplied {@code classNames}
-	 * is encountered, all subsequent elements in the stack trace will be retained.
+	 * Prune the stack trace of the supplied {@link Throwable}.
 	 *
-	 * <p>Additionally, all elements prior to and including the first JUnit Platform
-	 * Launcher call will be removed.
+	 * <p>Prune all {@linkplain StackTraceElement stack trace elements} up to one
+	 * of the supplied {@code classNames}. All subsequent elements in the stack
+	 * trace will be retained.
+	 *
+	 * <p>If the {@code classNames} do not match any of the stacktrace elements
+	 * then the {@code org.junit}, {@code jdk.internal.reflect}, and
+	 * {@code sun.reflect} packages are pruned.
+	 *
+	 * <p>Additionally:
+	 * <ul>
+	 *     <li>all elements prior to and including the first JUnit Platform Launcher call will be removed.
+	 *     <li>all elements prior to and including {@code org.junit.start} are kept.
+	 * </ul>
 	 *
 	 * @param throwable the {@code Throwable} whose stack trace should be pruned;
 	 * never {@code null}
@@ -117,6 +129,7 @@ public final class ExceptionUtils {
 
 		List<StackTraceElement> stackTrace = Arrays.asList(throwable.getStackTrace());
 		List<StackTraceElement> prunedStackTrace = new ArrayList<>();
+		List<StackTraceElement> junitStartStackTrace = new ArrayList<>(0);
 
 		Collections.reverse(stackTrace);
 
@@ -124,10 +137,18 @@ public final class ExceptionUtils {
 			StackTraceElement element = stackTrace.get(i);
 			String className = element.getClassName();
 
-			if (classNames.contains(className)) {
+			if (classNames.contains(className) && !includesJunitStart(stackTrace, i + 1)) {
+				// We found the test
+				// everything before that is not informative.
+				prunedStackTrace.clear();
 				// Include all elements called by the test
 				prunedStackTrace.addAll(stackTrace.subList(i, stackTrace.size()));
 				break;
+			}
+			else if (className.startsWith(JUNIT_START_PACKAGE_PREFIX)) {
+				junitStartStackTrace.addAll(prunedStackTrace);
+				prunedStackTrace.clear();
+				junitStartStackTrace.add(element);
 			}
 			else if (className.startsWith(JUNIT_PLATFORM_LAUNCHER_PACKAGE_PREFIX)) {
 				prunedStackTrace.clear();
@@ -137,8 +158,20 @@ public final class ExceptionUtils {
 			}
 		}
 
+		if (!junitStartStackTrace.isEmpty()) {
+			junitStartStackTrace.addAll(prunedStackTrace);
+			prunedStackTrace = junitStartStackTrace;
+		}
+
 		Collections.reverse(prunedStackTrace);
 		throwable.setStackTrace(prunedStackTrace.toArray(new StackTraceElement[0]));
+	}
+
+	private static boolean includesJunitStart(List<StackTraceElement> stackTrace, int fromIndex) {
+		return stackTrace.stream() //
+				.skip(fromIndex) //
+				.map(StackTraceElement::getClassName) //
+				.anyMatch(className -> className.startsWith(JUNIT_START_PACKAGE_PREFIX));
 	}
 
 	/**

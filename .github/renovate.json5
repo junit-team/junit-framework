@@ -12,13 +12,6 @@
       ],
     },
     {
-      matchCurrentValue: '/^4\\./',
-      allowedVersions: '(,5.0)',
-      matchPackageNames: [
-        'org.apache.groovy:{/,}**',
-      ],
-    },
-    {
       matchCurrentValue: '/^1\\./',
       allowedVersions: '/^1\\..*-groovy-2\\.*/',
       matchPackageNames: [

@@ -10,7 +10,7 @@
 
 package org.junit.platform.commons.support.conversion;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.commons.util.ReflectionUtils.getWrapperType;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import org.junit.platform.commons.util.ClassLoaderUtils;
  *
  * @since 1.11
  */
-@API(status = EXPERIMENTAL, since = "1.11")
+@API(status = MAINTAINED, since = "1.13.3")
 public final class ConversionSupport {
 
 	private static final List<StringToObjectConverter> stringToObjectConverters = List.of( //
@@ -75,15 +75,20 @@ public final class ConversionSupport {
 	 *
 	 * <ol>
 	 * <li>Search for a single, non-private static factory method in the target
-	 * type that converts from a String to the target type. Use the factory method
-	 * if present.</li>
+	 * type that converts from a {@link String} to the target type. Use the
+	 * factory method if present.</li>
 	 * <li>Search for a single, non-private constructor in the target type that
-	 * accepts a String. Use the constructor if present.</li>
+	 * accepts a {@link String}. Use the constructor if present.</li>
+	 * <li>Search for a single, non-private static factory method in the target
+	 * type that converts from a {@link CharSequence} to the target type. Use the
+	 * factory method if present.</li>
+	 * <li>Search for a single, non-private constructor in the target type that
+	 * accepts a {@link CharSequence}. Use the constructor if present.</li>
 	 * </ol>
 	 *
-	 * <p>If multiple suitable factory methods are discovered they will be ignored.
-	 * If neither a single factory method nor a single constructor is found, the
-	 * convention-based conversion strategy will not apply.
+	 * <p>If multiple suitable factory methods or constructors are discovered they
+	 * will be ignored. If neither a single factory method nor a single constructor
+	 * is found, the convention-based conversion strategy will not apply.
 	 *
 	 * @param source the source {@code String} to convert; may be {@code null}
 	 * but only if the target type is a reference type

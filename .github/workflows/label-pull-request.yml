@@ -1,0 +1,55 @@
+name: Copy labels from linked issues to PR
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize] # zizmor: ignore[dangerous-triggers]
+
+permissions: {}
+
+jobs:
+  copy_labels:
+    name: Copy labels
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const query = `
+              query($owner: String!, $repo: String!, $pr: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pr) {
+                    closingIssuesReferences(first: 10) {
+                      nodes {
+                        labels(first: 100) {
+                          nodes {
+                            name
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            
+            const {repository} = await github.graphql(query, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pr: context.issue.number
+            });
+            
+            let labels = Array.from(new Set(repository.pullRequest.closingIssuesReferences.nodes
+                .flatMap((node) => node.labels.nodes.map((label) => label.name))))
+                .filter((label) => !label.startsWith("status:") && label !== "up-for-grabs");
+            
+            if (labels.length > 0) {
+                console.log(`Adding labels to PR: ${labels}`);
+                await github.rest.issues.addLabels({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    labels: labels
+                });
+            }

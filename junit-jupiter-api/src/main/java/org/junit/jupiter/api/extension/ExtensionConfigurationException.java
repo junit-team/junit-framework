@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 import java.io.Serial;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 
 /**
@@ -33,7 +34,7 @@ public class ExtensionConfigurationException extends JUnitException {
 		super(message);
 	}
 
-	public ExtensionConfigurationException(String message, Throwable cause) {
+	public ExtensionConfigurationException(String message, @Nullable Throwable cause) {
 		super(message, cause);
 	}
 

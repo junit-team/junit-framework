@@ -15,7 +15,7 @@ import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.joining;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.util.FunctionUtils.where;
-import static org.junit.platform.suite.commons.SuiteLauncherDiscoveryRequestBuilder.request;
+import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuilder.request;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -27,16 +27,17 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.StringUtils;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.EngineDiscoveryListener;
 import org.junit.platform.engine.EngineExecutionListener;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.UniqueId.Segment;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
@@ -50,7 +51,6 @@ import org.junit.platform.launcher.core.LauncherDiscoveryResult;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
-import org.junit.platform.suite.commons.SuiteLauncherDiscoveryRequestBuilder;
 
 /**
  * {@link TestDescriptor} for tests based on the JUnit Platform Suite API.
@@ -68,23 +68,21 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	private final SuiteLauncherDiscoveryRequestBuilder discoveryRequestBuilder = request();
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 	private final Boolean failIfNoTests;
 	private final Class<?> suiteClass;
 	private final LifecycleMethods lifecycleMethods;
 
-	@Nullable
-	private LauncherDiscoveryResult launcherDiscoveryResult;
+	private @Nullable LauncherDiscoveryResult launcherDiscoveryResult;
 
-	@Nullable
-	private SuiteLauncher launcher;
+	private @Nullable SuiteLauncher launcher;
 
 	SuiteTestDescriptor(UniqueId id, Class<?> suiteClass, ConfigurationParameters configurationParameters,
-			OutputDirectoryProvider outputDirectoryProvider, EngineDiscoveryListener discoveryListener,
+			OutputDirectoryCreator outputDirectoryCreator, EngineDiscoveryListener discoveryListener,
 			DiscoveryIssueReporter issueReporter) {
-		super(id, getSuiteDisplayName(suiteClass), ClassSource.from(suiteClass));
+		super(id, getSuiteDisplayName(suiteClass, issueReporter), ClassSource.from(suiteClass));
 		this.configurationParameters = configurationParameters;
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 		this.failIfNoTests = getFailIfNoTests(suiteClass);
 		this.suiteClass = suiteClass;
 		this.lifecycleMethods = new LifecycleMethods(suiteClass, issueReporter);
@@ -120,11 +118,11 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 		// @formatter:off
 		LauncherDiscoveryRequest request = discoveryRequestBuilder
-				.filterStandardClassNamePatterns(true)
-				.enableImplicitConfigurationParameters(false)
+				.filterStandardClassNamePatterns()
+				.disableImplicitConfigurationParameters()
 				.parentConfigurationParameters(configurationParameters)
 				.applyConfigurationParametersFromSuite(suiteClass)
-				.outputDirectoryProvider(outputDirectoryProvider)
+				.outputDirectoryCreator(outputDirectoryCreator)
 				.build();
 		// @formatter:on
 		this.launcher = SuiteLauncher.create();
@@ -142,29 +140,43 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		return Type.CONTAINER;
 	}
 
-	private static String getSuiteDisplayName(Class<?> testClass) {
+	private static String getSuiteDisplayName(Class<?> suiteClass, DiscoveryIssueReporter issueReporter) {
 		// @formatter:off
-		return findAnnotation(testClass, SuiteDisplayName.class)
+		var nonBlank = issueReporter.createReportingCondition(StringUtils::isNotBlank, __ -> {
+			String message = "@SuiteDisplayName on %s must be declared with a non-blank value.".formatted(
+					suiteClass.getName());
+			return DiscoveryIssue.builder(DiscoveryIssue.Severity.WARNING, message)
+					.source(ClassSource.from(suiteClass))
+					.build();
+		}).toPredicate();
+
+		return findAnnotation(suiteClass, SuiteDisplayName.class)
 				.map(SuiteDisplayName::value)
-				.filter(StringUtils::isNotBlank)
-				.orElse(testClass.getSimpleName());
+				.filter(nonBlank)
+				.orElse(suiteClass.getSimpleName());
 		// @formatter:on
 	}
 
-	void execute(EngineExecutionListener parentEngineExecutionListener,
-			NamespacedHierarchicalStore<Namespace> requestLevelStore) {
-		parentEngineExecutionListener.executionStarted(this);
+	void execute(EngineExecutionListener executionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
+			CancellationToken cancellationToken) {
+
+		if (cancellationToken.isCancellationRequested()) {
+			executionListener.executionSkipped(this, "Execution cancelled");
+			return;
+		}
+
+		executionListener.executionStarted(this);
 		ThrowableCollector throwableCollector = new OpenTest4JAwareThrowableCollector();
 
 		executeBeforeSuiteMethods(throwableCollector);
 
-		TestExecutionSummary summary = executeTests(parentEngineExecutionListener, requestLevelStore,
+		TestExecutionSummary summary = executeTests(executionListener, requestLevelStore, cancellationToken,
 			throwableCollector);
 
 		executeAfterSuiteMethods(throwableCollector);
 
 		TestExecutionResult testExecutionResult = computeTestExecutionResult(summary, throwableCollector);
-		parentEngineExecutionListener.executionFinished(this, testExecutionResult);
+		executionListener.executionFinished(this, testExecutionResult);
 	}
 
 	private void executeBeforeSuiteMethods(ThrowableCollector throwableCollector) {
@@ -179,8 +191,10 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		}
 	}
 
-	private @Nullable TestExecutionSummary executeTests(EngineExecutionListener parentEngineExecutionListener,
-			NamespacedHierarchicalStore<Namespace> requestLevelStore, ThrowableCollector throwableCollector) {
+	private @Nullable TestExecutionSummary executeTests(EngineExecutionListener executionListener,
+			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken,
+			ThrowableCollector throwableCollector) {
+
 		if (throwableCollector.isNotEmpty()) {
 			return null;
 		}
@@ -190,7 +204,9 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		// be pruned accordingly.
 		LauncherDiscoveryResult discoveryResult = requireNonNull(this.launcherDiscoveryResult).withRetainedEngines(
 			getChildren()::contains);
-		return requireNonNull(launcher).execute(discoveryResult, parentEngineExecutionListener, requestLevelStore);
+
+		return requireNonNull(launcher).execute(discoveryResult, executionListener, requestLevelStore,
+			cancellationToken);
 	}
 
 	private void executeAfterSuiteMethods(ThrowableCollector throwableCollector) {

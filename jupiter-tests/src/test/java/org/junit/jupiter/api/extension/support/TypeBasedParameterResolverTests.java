@@ -12,8 +12,8 @@ package org.junit.jupiter.api.extension.support;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.support.ReflectionSupport;
 
 /**
@@ -45,12 +44,10 @@ class TypeBasedParameterResolverTests {
 
 	@Test
 	void missingTypeTypeBasedParameterResolver() {
-		PreconditionViolationException exception = assertThrows(PreconditionViolationException.class,
-			MissingTypeTypeBasedParameterResolver::new);
-		assertEquals(
-			"Failed to discover parameter type supported by " + MissingTypeTypeBasedParameterResolver.class.getName()
-					+ "; potentially caused by lacking parameterized type in class declaration.",
-			exception.getMessage());
+		assertPreconditionViolationFor(MissingTypeTypeBasedParameterResolver::new)//
+				.withMessage("Failed to discover parameter type supported by "
+						+ MissingTypeTypeBasedParameterResolver.class.getName()
+						+ "; potentially caused by lacking parameterized type in class declaration.");
 	}
 
 	@Test

@@ -69,10 +69,10 @@ abstract class AbstractOrderingVisitor implements TestDescriptor.Visitor {
 	/**
 	 * @param <CHILD> the type of children (containers or tests) to order
 	 */
-	protected <CHILD extends TestDescriptor, WRAPPER extends AbstractAnnotatedDescriptorWrapper<?>> void orderChildrenTestDescriptors(
-			TestDescriptor parentTestDescriptor, Class<CHILD> matchingChildrenType,
-			Optional<Consumer<CHILD>> validationAction, Function<CHILD, WRAPPER> descriptorWrapperFactory,
-			DescriptorWrapperOrderer<?, WRAPPER> descriptorWrapperOrderer) {
+	protected <PARENT extends TestDescriptor, CHILD extends TestDescriptor, WRAPPER extends AbstractAnnotatedDescriptorWrapper<?>> void orderChildrenTestDescriptors(
+			PARENT parentTestDescriptor, Class<CHILD> matchingChildrenType, Optional<Consumer<CHILD>> validationAction,
+			Function<CHILD, WRAPPER> descriptorWrapperFactory,
+			DescriptorWrapperOrderer<PARENT, ?, WRAPPER> descriptorWrapperOrderer) {
 
 		Stream<CHILD> matchingChildren = parentTestDescriptor.getChildren()//
 				.stream()//
@@ -101,7 +101,7 @@ abstract class AbstractOrderingVisitor implements TestDescriptor.Visitor {
 			Stream<TestDescriptor> nonMatchingTestDescriptors = children.stream()//
 					.filter(childTestDescriptor -> !matchingChildrenType.isInstance(childTestDescriptor));
 
-			descriptorWrapperOrderer.orderWrappers(matchingDescriptorWrappers,
+			descriptorWrapperOrderer.orderWrappers(parentTestDescriptor, matchingDescriptorWrappers,
 				message -> reportWarning(parentTestDescriptor, message));
 
 			Stream<TestDescriptor> orderedTestDescriptors = matchingDescriptorWrappers.stream()//
@@ -128,27 +128,27 @@ abstract class AbstractOrderingVisitor implements TestDescriptor.Visitor {
 	/**
 	 * @param <WRAPPER> the wrapper type for the children to order
 	 */
-	protected static class DescriptorWrapperOrderer<ORDERER, WRAPPER> {
+	protected static class DescriptorWrapperOrderer<PARENT extends TestDescriptor, ORDERER, WRAPPER> {
 
-		private static final DescriptorWrapperOrderer<?, ?> NOOP = new DescriptorWrapperOrderer<>(null, null, __ -> "",
-			___ -> "");
+		private static final DescriptorWrapperOrderer<?, ?, ?> NOOP = new DescriptorWrapperOrderer<>(null, null,
+			(__, ___) -> "", (__, ___) -> "");
 
 		@SuppressWarnings("unchecked")
-		protected static <ORDERER, WRAPPER> DescriptorWrapperOrderer<ORDERER, WRAPPER> noop() {
-			return (DescriptorWrapperOrderer<ORDERER, WRAPPER>) NOOP;
+		static <PARENT extends TestDescriptor, ORDERER, WRAPPER extends AbstractAnnotatedDescriptorWrapper<?>> DescriptorWrapperOrderer<PARENT, ORDERER, WRAPPER> noop() {
+			return (DescriptorWrapperOrderer<PARENT, ORDERER, WRAPPER>) NOOP;
 		}
 
 		@Nullable
 		private final ORDERER orderer;
 		@Nullable
-		private final Consumer<List<WRAPPER>> orderingAction;
+		private final OrderingAction<PARENT, WRAPPER> orderingAction;
 
-		private final MessageGenerator descriptorsAddedMessageGenerator;
-		private final MessageGenerator descriptorsRemovedMessageGenerator;
+		private final MessageGenerator<PARENT> descriptorsAddedMessageGenerator;
+		private final MessageGenerator<PARENT> descriptorsRemovedMessageGenerator;
 
-		DescriptorWrapperOrderer(@Nullable ORDERER orderer, @Nullable Consumer<List<WRAPPER>> orderingAction,
-				MessageGenerator descriptorsAddedMessageGenerator,
-				MessageGenerator descriptorsRemovedMessageGenerator) {
+		DescriptorWrapperOrderer(@Nullable ORDERER orderer, @Nullable OrderingAction<PARENT, WRAPPER> orderingAction,
+				MessageGenerator<PARENT> descriptorsAddedMessageGenerator,
+				MessageGenerator<PARENT> descriptorsRemovedMessageGenerator) {
 
 			this.orderer = orderer;
 			this.orderingAction = orderingAction;
@@ -165,18 +165,18 @@ abstract class AbstractOrderingVisitor implements TestDescriptor.Visitor {
 			return this.orderingAction != null;
 		}
 
-		private void orderWrappers(List<WRAPPER> wrappers, Consumer<String> errorHandler) {
+		private void orderWrappers(PARENT parentTestDescriptor, List<WRAPPER> wrappers, Consumer<String> errorHandler) {
 			List<WRAPPER> orderedWrappers = new ArrayList<>(wrappers);
-			requireNonNull(this.orderingAction).accept(orderedWrappers);
+			requireNonNull(this.orderingAction).order(parentTestDescriptor, orderedWrappers);
 			Map<Object, Integer> distinctWrappersToIndex = distinctWrappersToIndex(orderedWrappers);
 
 			int difference = orderedWrappers.size() - wrappers.size();
 			int distinctDifference = distinctWrappersToIndex.size() - wrappers.size();
 			if (difference > 0) { // difference >= distinctDifference
-				reportDescriptorsAddedWarning(difference, errorHandler);
+				reportDescriptorsAddedWarning(difference, errorHandler, parentTestDescriptor);
 			}
 			if (distinctDifference < 0) { // distinctDifference <= difference
-				reportDescriptorsRemovedWarning(distinctDifference, errorHandler);
+				reportDescriptorsRemovedWarning(distinctDifference, errorHandler, parentTestDescriptor);
 			}
 
 			wrappers.sort(comparing(wrapper -> distinctWrappersToIndex.getOrDefault(wrapper, -1)));
@@ -194,20 +194,29 @@ abstract class AbstractOrderingVisitor implements TestDescriptor.Visitor {
 			return toIndex;
 		}
 
-		private void reportDescriptorsAddedWarning(int number, Consumer<String> errorHandler) {
-			errorHandler.accept(this.descriptorsAddedMessageGenerator.generateMessage(number));
+		private void reportDescriptorsAddedWarning(int number, Consumer<String> errorHandler,
+				PARENT parentTestDescriptor) {
+			errorHandler.accept(this.descriptorsAddedMessageGenerator.generateMessage(parentTestDescriptor, number));
 		}
 
-		private void reportDescriptorsRemovedWarning(int number, Consumer<String> errorHandler) {
-			errorHandler.accept(this.descriptorsRemovedMessageGenerator.generateMessage(Math.abs(number)));
+		private void reportDescriptorsRemovedWarning(int number, Consumer<String> errorHandler,
+				PARENT parentTestDescriptor) {
+			errorHandler.accept(
+				this.descriptorsRemovedMessageGenerator.generateMessage(parentTestDescriptor, Math.abs(number)));
 		}
 
 	}
 
 	@FunctionalInterface
-	protected interface MessageGenerator {
+	protected interface OrderingAction<PARENT extends TestDescriptor, WRAPPER> {
 
-		String generateMessage(int number);
+		void order(PARENT testDescriptor, List<WRAPPER> wrappers);
+	}
+
+	@FunctionalInterface
+	protected interface MessageGenerator<PARENT extends TestDescriptor> {
+
+		String generateMessage(PARENT testDescriptor, int number);
 	}
 
 }

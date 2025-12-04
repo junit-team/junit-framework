@@ -25,7 +25,7 @@ import org.junit.platform.commons.util.Preconditions;
  *
  * @since 1.13
  */
-@API(status = EXPERIMENTAL, since = "1.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public interface DiscoveryIssue {
 
 	/**

@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.parallel;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.ElementType;
@@ -27,8 +27,7 @@ import org.junit.jupiter.api.TestInstance;
  * {@code @Execution} is used to configure the parallel execution
  * {@linkplain #value mode} of a test class or test method.
  *
- * <p>Since JUnit Jupiter 5.4, this annotation is {@linkplain Inherited inherited}
- * within class hierarchies.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * <h2>Default Execution Mode</h2>
  *
@@ -77,7 +76,7 @@ public @interface Execution {
 	 *
 	 * @since 5.4
 	 */
-	@API(status = EXPERIMENTAL, since = "5.9")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = "junit.jupiter.execution.parallel.mode.default";
 
 	/**
@@ -96,7 +95,7 @@ public @interface Execution {
 	 *
 	 * @since 5.4
 	 */
-	@API(status = EXPERIMENTAL, since = "5.9")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = "junit.jupiter.execution.parallel.mode.classes.default";
 
 	/**

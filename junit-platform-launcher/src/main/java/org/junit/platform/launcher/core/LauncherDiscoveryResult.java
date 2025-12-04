@@ -12,7 +12,6 @@ package org.junit.platform.launcher.core;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.Collection;
@@ -26,9 +25,9 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestEngine;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 /**
  * Represents the result of test discovery of the configured
@@ -41,13 +40,13 @@ public class LauncherDiscoveryResult {
 
 	private final Map<TestEngine, EngineResultInfo> testEngineResults;
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 
 	LauncherDiscoveryResult(Map<TestEngine, EngineResultInfo> testEngineResults,
-			ConfigurationParameters configurationParameters, OutputDirectoryProvider outputDirectoryProvider) {
+			ConfigurationParameters configurationParameters, OutputDirectoryCreator outputDirectoryCreator) {
 		this.testEngineResults = unmodifiableMap(new LinkedHashMap<>(testEngineResults));
 		this.configurationParameters = configurationParameters;
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 	}
 
 	public TestDescriptor getEngineTestDescriptor(TestEngine testEngine) {
@@ -67,8 +66,8 @@ public class LauncherDiscoveryResult {
 		return this.configurationParameters;
 	}
 
-	OutputDirectoryProvider getOutputDirectoryProvider() {
-		return this.outputDirectoryProvider;
+	OutputDirectoryCreator getOutputDirectoryCreator() {
+		return this.outputDirectoryCreator;
 	}
 
 	public Collection<TestEngine> getTestEngines() {
@@ -90,18 +89,15 @@ public class LauncherDiscoveryResult {
 		Map<TestEngine, EngineResultInfo> prunedTestEngineResults = retainEngines(predicate);
 		if (prunedTestEngineResults.size() < this.testEngineResults.size()) {
 			return new LauncherDiscoveryResult(prunedTestEngineResults, this.configurationParameters,
-				this.outputDirectoryProvider);
+				this.outputDirectoryCreator);
 		}
 		return this;
 	}
 
 	private Map<TestEngine, EngineResultInfo> retainEngines(Predicate<? super TestDescriptor> predicate) {
-		// @formatter:off
-		return this.testEngineResults.entrySet()
-				.stream()
-				.filter(entry -> predicate.test(entry.getValue().getRootDescriptor()))
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		// @formatter:on
+		var retainedEngines = new LinkedHashMap<>(this.testEngineResults);
+		retainedEngines.entrySet().removeIf(entry -> !predicate.test(entry.getValue().getRootDescriptor()));
+		return retainedEngines;
 	}
 
 	static class EngineResultInfo {

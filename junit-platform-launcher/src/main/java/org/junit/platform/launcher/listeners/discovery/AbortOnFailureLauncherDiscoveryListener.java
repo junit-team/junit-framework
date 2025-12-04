@@ -19,7 +19,7 @@ import org.junit.platform.launcher.LauncherDiscoveryListener;
  * @since 1.6
  * @see LauncherDiscoveryListeners#abortOnFailure()
  */
-class AbortOnFailureLauncherDiscoveryListener implements LauncherDiscoveryListener {
+final class AbortOnFailureLauncherDiscoveryListener implements LauncherDiscoveryListener {
 
 	@Override
 	public void engineDiscoveryFinished(UniqueId engineId, EngineDiscoveryResult result) {

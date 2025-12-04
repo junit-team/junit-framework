@@ -16,7 +16,7 @@
 module org.junit.platform.reporting {
 
 	requires static transitive org.apiguardian.api;
-	requires static org.jspecify;
+	requires static transitive org.jspecify;
 
 	requires java.xml;
 	requires org.junit.platform.commons;

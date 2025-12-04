@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.ExecutionRequest;
@@ -66,6 +67,7 @@ public final class SuiteTestEngine implements TestEngine {
 		SuiteEngineDescriptor suiteEngineDescriptor = (SuiteEngineDescriptor) request.getRootTestDescriptor();
 		EngineExecutionListener engineExecutionListener = request.getEngineExecutionListener();
 		NamespacedHierarchicalStore<Namespace> requestLevelStore = request.getStore();
+		CancellationToken cancellationToken = request.getCancellationToken();
 
 		engineExecutionListener.executionStarted(suiteEngineDescriptor);
 
@@ -73,7 +75,7 @@ public final class SuiteTestEngine implements TestEngine {
 		suiteEngineDescriptor.getChildren()
 				.stream()
 				.map(SuiteTestDescriptor.class::cast)
-				.forEach(suiteTestDescriptor -> suiteTestDescriptor.execute(engineExecutionListener, requestLevelStore));
+				.forEach(suiteTestDescriptor -> suiteTestDescriptor.execute(engineExecutionListener, requestLevelStore, cancellationToken));
 		// @formatter:on
 		engineExecutionListener.executionFinished(suiteEngineDescriptor, TestExecutionResult.successful());
 	}

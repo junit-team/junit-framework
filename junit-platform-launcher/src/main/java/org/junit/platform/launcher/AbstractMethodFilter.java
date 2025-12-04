@@ -51,7 +51,7 @@ abstract class AbstractMethodFilter implements MethodFilter {
 
 	protected @Nullable String getFullyQualifiedMethodNameFromDescriptor(TestDescriptor descriptor) {
 		return descriptor.getSource() //
-				.filter(source -> source instanceof MethodSource) //
+				.filter(MethodSource.class::isInstance) //
 				.map(methodSource -> getFullyQualifiedMethodNameWithoutParameters(((MethodSource) methodSource))) //
 				.orElse(null);
 	}

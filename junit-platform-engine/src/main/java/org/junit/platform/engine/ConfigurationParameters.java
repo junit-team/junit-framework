@@ -28,9 +28,9 @@ import org.junit.platform.commons.util.Preconditions;
  * <p>For example, the JUnit Jupiter engine uses a configuration parameter to
  * enable IDEs and build tools to deactivate conditional test execution.
  *
- * <p>As of JUnit Platform 1.8, configuration parameters are also made available to
- * implementations of the {@link org.junit.platform.launcher.TestExecutionListener}
- * API via the {@link org.junit.platform.launcher.TestPlan}.
+ * <p>Configuration parameters are also made available to implementations of the
+ * {@link org.junit.platform.launcher.TestExecutionListener} API via the
+ * {@link org.junit.platform.launcher.TestPlan}.
  *
  * @since 1.0
  * @see TestEngine
@@ -117,7 +117,7 @@ public interface ConfigurationParameters {
 	 * @see #CONFIG_FILE_NAME
 	 */
 	@API(status = STABLE, since = "1.3")
-	default <T> Optional<T> get(String key, Function<String, @Nullable T> transformer) {
+	default <T> Optional<T> get(String key, Function<? super String, ? extends @Nullable T> transformer) {
 		Preconditions.notNull(transformer, "transformer must not be null");
 		return get(key).map(input -> {
 			try {

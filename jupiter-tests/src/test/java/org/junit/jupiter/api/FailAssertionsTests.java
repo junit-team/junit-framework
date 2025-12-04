@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -73,11 +74,11 @@ class FailAssertionsTests {
 		}
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void failWithNullMessageSupplier() {
 		try {
-			fail((Supplier<String>) null);
+			fail((Supplier<@Nullable String>) null);
 			expectAssertionFailedError();
 		}
 		catch (AssertionFailedError ex) {
@@ -144,7 +145,7 @@ class FailAssertionsTests {
 		long count = Stream.empty()
 				.peek(element -> fail("peek should never be called"))
 				.filter(element -> fail("filter should never be called", new Throwable("cause")))
-				.map(element -> fail(new Throwable("map should never be called")))
+				.map(element -> Assertions.<Throwable> fail(new Throwable("map should never be called")))
 				.sorted((e1, e2) -> fail(() -> "sorted should never be called"))
 				.count();
 		// @formatter:on

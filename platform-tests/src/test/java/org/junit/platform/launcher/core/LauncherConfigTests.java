@@ -12,11 +12,10 @@ package org.junit.platform.launcher.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.fakes.TestEngineStub;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
@@ -30,20 +29,18 @@ import org.junit.platform.launcher.TestExecutionListener;
  */
 class LauncherConfigTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void preconditions() {
-		assertThrows(PreconditionViolationException.class,
-			() -> LauncherConfig.builder().addTestEngines((TestEngine[]) null));
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(() -> LauncherConfig.builder().addTestEngines((TestEngine[]) null));
+		assertPreconditionViolationFor(
 			() -> LauncherConfig.builder().addTestExecutionListeners((TestExecutionListener[]) null));
 
 		TestEngine engine = new TestEngineStub();
 		var listener = new TestExecutionListener() {
 		};
-		assertThrows(PreconditionViolationException.class,
-			() -> LauncherConfig.builder().addTestEngines(engine, engine, null));
-		assertThrows(PreconditionViolationException.class,
+		assertPreconditionViolationFor(() -> LauncherConfig.builder().addTestEngines(engine, engine, null));
+		assertPreconditionViolationFor(
 			() -> LauncherConfig.builder().addTestExecutionListeners(listener, listener, null));
 	}
 

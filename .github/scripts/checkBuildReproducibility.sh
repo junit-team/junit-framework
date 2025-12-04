@@ -11,7 +11,7 @@ function calculate_checksums() {
     ./gradlew \
         --configuration-cache \
         --no-build-cache \
-        -Porg.gradle.java.installations.auto-download=false \
+        -Dorg.gradle.java.installations.auto-download=false \
         -Dscan.tag.Reproducibility \
         clean \
         assemble

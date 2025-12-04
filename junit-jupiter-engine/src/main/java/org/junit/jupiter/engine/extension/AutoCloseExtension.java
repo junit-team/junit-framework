@@ -62,9 +62,10 @@ class AutoCloseExtension implements TestInstancePreDestroyCallback, AfterAllCall
 
 	private static void closeFields(Class<?> testClass, @Nullable Object testInstance,
 			ThrowableCollector throwableCollector) {
+
 		Predicate<Field> predicate = (testInstance == null ? ModifierSupport::isStatic : ModifierSupport::isNotStatic);
-		AnnotationSupport.findAnnotatedFields(testClass, AutoClose.class, predicate, BOTTOM_UP).forEach(
-			field -> throwableCollector.execute(() -> closeField(field, testInstance)));
+		AnnotationSupport.findAnnotatedFields(testClass, AutoClose.class, predicate, BOTTOM_UP)//
+				.forEach(field -> throwableCollector.execute(() -> closeField(field, testInstance)));
 	}
 
 	private static void closeField(Field field, @Nullable Object testInstance) throws Exception {
@@ -80,13 +81,13 @@ class AutoCloseExtension implements TestInstancePreDestroyCallback, AfterAllCall
 			logger.warn(() -> "Cannot @AutoClose field %s because it is null.".formatted(getQualifiedName(field)));
 		}
 		else {
-			invokeCloseMethod(field, fieldValue, methodName.trim());
+			invokeCloseMethod(field, fieldValue, methodName.strip());
 		}
 	}
 
 	private static void invokeCloseMethod(Field field, Object target, String methodName) throws Exception {
 		// Avoid reflection if we can directly invoke close() via AutoCloseable.
-		if (target instanceof AutoCloseable closeable && "close".equals(methodName)) {
+		if (target instanceof @SuppressWarnings("resource") AutoCloseable closeable && "close".equals(methodName)) {
 			closeable.close();
 			return;
 		}
@@ -94,8 +95,8 @@ class AutoCloseExtension implements TestInstancePreDestroyCallback, AfterAllCall
 		Class<?> targetType = target.getClass();
 		Method closeMethod = ReflectionSupport.findMethod(targetType, methodName).orElseThrow(
 			() -> new ExtensionConfigurationException(
-				"Cannot @AutoClose field %s because %s does not define method %s().".formatted(getQualifiedName(field),
-					targetType.getName(), methodName)));
+				"Cannot @AutoClose field %s because %s does not define method %s()."//
+						.formatted(getQualifiedName(field), targetType.getName(), methodName)));
 
 		closeMethod = ReflectionUtils.getInterfaceMethodIfPossible(closeMethod, targetType);
 		ReflectionSupport.invokeMethod(closeMethod, target);

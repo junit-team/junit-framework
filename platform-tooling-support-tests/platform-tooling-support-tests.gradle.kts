@@ -1,13 +1,14 @@
 import com.gradle.develocity.agent.gradle.internal.test.TestDistributionConfigurationInternal
 import junitbuild.extensions.capitalized
 import junitbuild.extensions.dependencyProject
+import junitbuild.extensions.javaModuleName
+import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.kotlin.dsl.support.listFilesOrdered
 import java.time.Duration
 
 plugins {
 	id("junitbuild.build-parameters")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.testing-conventions")
 }
@@ -19,6 +20,7 @@ javaLibrary {
 spotless {
 	java {
 		target(files(project.java.sourceSets.map { it.allJava }), "projects/**/*.java")
+		targetExclude("projects/junit-start/**/*.java") // due to compact source files and module imports
 	}
 	kotlin {
 		target("projects/**/*.kt")
@@ -43,6 +45,8 @@ val mavenDistributionClasspath = configurations.resolvable("mavenDistributionCla
 	extendsFrom(mavenDistribution.get())
 }
 
+val modularProjects: List<Project> by rootProject
+
 dependencies {
 	implementation(libs.commons.io) {
 		because("moving/deleting directory trees")
@@ -56,14 +60,22 @@ dependencies {
 		because("it uses the OS enum to support Windows")
 	}
 
-	thirdPartyJars(libs.junit4)
+	thirdPartyJars(libs.junit4) {
+		exclude(group = "org.hamcrest")
+	}
 	thirdPartyJars(libs.assertj)
 	thirdPartyJars(libs.apiguardian)
+	thirdPartyJars(libs.fastcsv)
 	thirdPartyJars(libs.hamcrest)
-	thirdPartyJars(libs.jspecify)
-	thirdPartyJars(libs.opentest4j)
-	thirdPartyJars(libs.openTestReporting.tooling.spi)
 	thirdPartyJars(libs.jimfs)
+	thirdPartyJars(libs.jspecify)
+	thirdPartyJars(kotlin("stdlib"))
+	thirdPartyJars(kotlin("reflect"))
+	thirdPartyJars(libs.kotlinx.coroutines)
+	thirdPartyJars(libs.opentest4j)
+	thirdPartyJars(libs.openTestReporting.events)
+	thirdPartyJars(libs.openTestReporting.tooling.spi)
+	thirdPartyJars(libs.picocli)
 
 	antJars(platform(projects.junitBom))
 	antJars(libs.bundles.ant)
@@ -126,9 +138,8 @@ val archUnit by testing.suites.registering(JvmTestSuite::class) {
 		}
 		implementation(libs.assertj)
 		runtimeOnly.bundle(libs.bundles.log4j)
-		val modularProjects: List<Project> by rootProject
 		modularProjects.forEach {
-			runtimeOnly(project(it.path))
+			implementation(project(it.path))
 		}
 	}
 
@@ -147,6 +158,12 @@ val archUnit by testing.suites.registering(JvmTestSuite::class) {
 				}
 			}
 		}
+	}
+}
+
+tasks.compileJava {
+	options.errorprone {
+		disableAllChecks = true
 	}
 }
 
@@ -174,7 +191,6 @@ val test by testing.suites.getting(JvmTestSuite::class) {
 		implementation(testFixtures(projects.junitPlatformReporting))
 		implementation(libs.snapshotTests.junit5)
 		implementation(libs.snapshotTests.xml)
-
 	}
 
 	targets {
@@ -197,6 +213,12 @@ val test by testing.suites.getting(JvmTestSuite::class) {
 				jvmArgumentProviders += JarPath(project, thirdPartyJarsClasspath.get(), "thirdPartyJars")
 				jvmArgumentProviders += JarPath(project, antJarsClasspath.get(), "antJars")
 				jvmArgumentProviders += MavenDistribution(project, unzipMavenDistribution, mavenDistributionDir)
+
+				systemProperty("junit.modules", modularProjects.map { it.javaModuleName }.joinToString(","))
+
+				jvmArgumentProviders += CommandLineArgumentProvider {
+					modularProjects.map { "-Djunit.moduleSourcePath.${it.javaModuleName}=${it.sourceSets["main"].allJava.sourceDirectories.filter { it.exists() }.asPath}" }
+				}
 
 				inputs.apply {
 					dir("projects").withPathSensitivity(RELATIVE)
@@ -222,12 +244,11 @@ val test by testing.suites.getting(JvmTestSuite::class) {
 						preferredMaxDuration = Duration.ofMillis(500)
 					}
 				}
-				jvmArgumentProviders += JavaHomeDir(project, 17, develocity.testDistribution.enabled)
+
 				jvmArgumentProviders += JavaHomeDir(project, 17, develocity.testDistribution.enabled)
 
 				val gradleJavaVersion = JavaVersion.current().majorVersion.toInt()
 				jvmArgumentProviders += JavaHomeDir(project, gradleJavaVersion, develocity.testDistribution.enabled)
-				jvmArgumentProviders += JavaHomeDir(project, gradleJavaVersion, develocity.testDistribution.enabled, nativeImage = true)
 				systemProperty("gradle.java.version", gradleJavaVersion)
 			}
 		}
@@ -254,7 +275,7 @@ class MavenRepo(project: Project, @get:Internal val repoDir: Provider<File>) : C
 	override fun asArguments() = listOf("-Dmaven.repo=${repoDir.get().absolutePath}")
 }
 
-class JavaHomeDir(project: Project, @Input val version: Int, testDistributionEnabled: Provider<Boolean>, @Input val nativeImage: Boolean = false) : CommandLineArgumentProvider {
+class JavaHomeDir(project: Project, @Input val version: Int, testDistributionEnabled: Provider<Boolean>) : CommandLineArgumentProvider {
 
 	@Internal
 	val javaLauncher: Property<JavaLauncher> = project.objects.property<JavaLauncher>()
@@ -262,7 +283,6 @@ class JavaHomeDir(project: Project, @Input val version: Int, testDistributionEna
 				try {
 					project.javaToolchains.launcherFor {
 						languageVersion = JavaLanguageVersion.of(version)
-						nativeImageCapable = nativeImage
 					}.get()
 				} catch (e: Exception) {
 					null
@@ -278,7 +298,7 @@ class JavaHomeDir(project: Project, @Input val version: Int, testDistributionEna
 		}
 		val metadata = javaLauncher.map { it.metadata }
 		val javaHome = metadata.map { it.installationPath.asFile.absolutePath }.orNull
-		return javaHome?.let { listOf("-Djava.home.$version${if (nativeImage) ".nativeImage" else ""}=$it") } ?: emptyList()
+		return javaHome?.let { listOf("-Djava.home.$version=$it") } ?: emptyList()
 	}
 }
 

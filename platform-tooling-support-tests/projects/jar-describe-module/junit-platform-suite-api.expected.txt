@@ -2,5 +2,5 @@ org.junit.platform.suite.api@${version} jar:file:.+/junit-platform-suite-api-\d.
 exports org.junit.platform.suite.api
 requires java.base mandated
 requires org.apiguardian.api static transitive
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.platform.commons transitive

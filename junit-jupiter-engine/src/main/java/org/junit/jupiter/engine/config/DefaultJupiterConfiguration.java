@@ -10,10 +10,14 @@
 
 package org.junit.jupiter.engine.config;
 
+import static java.util.function.Predicate.isEqual;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
+import static org.junit.jupiter.engine.config.FilteringConfigurationParameterConverter.exclude;
+import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.FORK_JOIN_POOL;
+import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.WORKER_THREAD_POOL;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +41,7 @@ import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 
 /**
@@ -48,51 +52,67 @@ import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 @API(status = INTERNAL, since = "5.4")
 public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
-	private final List<String> UNSUPPORTED_CONFIGURATION_PARAMETERS = List.of("junit.jupiter.tempdir.scope");
+	private static final List<String> UNSUPPORTED_CONFIGURATION_PARAMETERS = List.of( //
+		"junit.jupiter.tempdir.scope", //
+		"junit.jupiter.params.arguments.conversion.locale.format" //
+	);
 
-	private static final EnumConfigurationParameterConverter<ExecutionMode> executionModeConverter = //
+	private static final ConfigurationParameterConverter<ExecutionMode> executionModeConverter = //
 		new EnumConfigurationParameterConverter<>(ExecutionMode.class, "parallel execution mode");
 
-	private static final EnumConfigurationParameterConverter<Lifecycle> lifecycleConverter = //
+	private static final ConfigurationParameterConverter<Lifecycle> lifecycleConverter = //
 		new EnumConfigurationParameterConverter<>(Lifecycle.class, "test instance lifecycle mode");
 
-	private static final InstantiatingConfigurationParameterConverter<DisplayNameGenerator> displayNameGeneratorConverter = //
+	private static final ConfigurationParameterConverter<DisplayNameGenerator> displayNameGeneratorConverter = //
 		new InstantiatingConfigurationParameterConverter<>(DisplayNameGenerator.class, "display name generator");
 
-	private static final InstantiatingConfigurationParameterConverter<MethodOrderer> methodOrdererConverter = //
-		new InstantiatingConfigurationParameterConverter<>(MethodOrderer.class, "method orderer");
+	private static final ConfigurationParameterConverter<MethodOrderer> methodOrdererConverter = //
+		exclude(isEqual(MethodOrderer.Default.class.getName()),
+			new InstantiatingConfigurationParameterConverter<>(MethodOrderer.class, "method orderer"));
 
-	private static final InstantiatingConfigurationParameterConverter<ClassOrderer> classOrdererConverter = //
-		new InstantiatingConfigurationParameterConverter<>(ClassOrderer.class, "class orderer");
+	private static final ConfigurationParameterConverter<ClassOrderer> classOrdererConverter = //
+		exclude(isEqual(ClassOrderer.Default.class.getName()),
+			new InstantiatingConfigurationParameterConverter<>(ClassOrderer.class, "class orderer"));
 
-	private static final EnumConfigurationParameterConverter<CleanupMode> cleanupModeConverter = //
+	private static final ConfigurationParameterConverter<CleanupMode> cleanupModeConverter = //
 		new EnumConfigurationParameterConverter<>(CleanupMode.class, "cleanup mode");
 
 	private static final InstantiatingConfigurationParameterConverter<TempDirFactory> tempDirFactoryConverter = //
 		new InstantiatingConfigurationParameterConverter<>(TempDirFactory.class, "temp dir factory");
 
-	private static final EnumConfigurationParameterConverter<ExtensionContextScope> extensionContextScopeConverter = //
+	private static final ConfigurationParameterConverter<ExtensionContextScope> extensionContextScopeConverter = //
 		new EnumConfigurationParameterConverter<>(ExtensionContextScope.class, "extension context scope");
 
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 
 	public DefaultJupiterConfiguration(ConfigurationParameters configurationParameters,
-			OutputDirectoryProvider outputDirectoryProvider, DiscoveryIssueReporter issueReporter) {
+			OutputDirectoryCreator outputDirectoryCreator, DiscoveryIssueReporter issueReporter) {
 		this.configurationParameters = Preconditions.notNull(configurationParameters,
 			"ConfigurationParameters must not be null");
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 		validateConfigurationParameters(issueReporter);
 	}
 
 	private void validateConfigurationParameters(DiscoveryIssueReporter issueReporter) {
 		UNSUPPORTED_CONFIGURATION_PARAMETERS.forEach(key -> configurationParameters.get(key) //
 				.ifPresent(value -> {
-					var warning = DiscoveryIssue.create(Severity.WARNING,
-						"The '%s' configuration parameter is no longer supported: %s. Please remove it from your configuration.".formatted(
-							key, value));
+					var warning = DiscoveryIssue.create(Severity.WARNING, """
+							The '%s' configuration parameter is no longer supported. \
+							Please remove it from your configuration.""".formatted(key));
 					issueReporter.reportIssue(warning);
 				}));
+		if (isParallelExecutionEnabled()
+				&& configurationParameters.get(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME).isEmpty()) {
+			var info = DiscoveryIssue.create(Severity.INFO,
+				"Parallel test execution is enabled but the default ForkJoinPool-based executor service will be used. "
+						+ "Please give the new implementation based on a regular thread pool a try by setting the '"
+						+ PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME + "' configuration parameter to '"
+						+ WORKER_THREAD_POOL + "' and report any issues to the JUnit team. "
+						+ "Alternatively, set the configuration parameter to '" + FORK_JOIN_POOL
+						+ "' to hide this message and keep using the original implementation.");
+			issueReporter.reportIssue(info);
+		}
 	}
 
 	@Override
@@ -120,7 +140,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	}
 
 	@Override
-	public <T> Optional<T> getRawConfigurationParameter(String key, Function<String, T> transformer) {
+	public <T> Optional<T> getRawConfigurationParameter(String key, Function<? super String, ? extends T> transformer) {
 		return configurationParameters.get(key, transformer);
 	}
 
@@ -146,19 +166,19 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	@Override
 	public ExecutionMode getDefaultExecutionMode() {
-		return executionModeConverter.get(configurationParameters, DEFAULT_EXECUTION_MODE_PROPERTY_NAME,
+		return executionModeConverter.getOrDefault(configurationParameters, DEFAULT_EXECUTION_MODE_PROPERTY_NAME,
 			ExecutionMode.SAME_THREAD);
 	}
 
 	@Override
 	public ExecutionMode getDefaultClassesExecutionMode() {
-		return executionModeConverter.get(configurationParameters, DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME,
-			getDefaultExecutionMode());
+		return executionModeConverter.getOrDefault(configurationParameters,
+			DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME, getDefaultExecutionMode());
 	}
 
 	@Override
 	public Lifecycle getDefaultTestInstanceLifecycle() {
-		return lifecycleConverter.get(configurationParameters, DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME,
+		return lifecycleConverter.getOrDefault(configurationParameters, DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME,
 			Lifecycle.PER_METHOD);
 	}
 
@@ -186,7 +206,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	@Override
 	public CleanupMode getDefaultTempDirCleanupMode() {
-		return cleanupModeConverter.get(configurationParameters, DEFAULT_CLEANUP_MODE_PROPERTY_NAME, ALWAYS);
+		return cleanupModeConverter.getOrDefault(configurationParameters, DEFAULT_CLEANUP_MODE_PROPERTY_NAME, ALWAYS);
 	}
 
 	@Override
@@ -199,12 +219,12 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	@SuppressWarnings("deprecation")
 	@Override
 	public ExtensionContextScope getDefaultTestInstantiationExtensionContextScope() {
-		return extensionContextScopeConverter.get(configurationParameters,
+		return extensionContextScopeConverter.getOrDefault(configurationParameters,
 			DEFAULT_TEST_INSTANTIATION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, ExtensionContextScope.DEFAULT);
 	}
 
 	@Override
-	public OutputDirectoryProvider getOutputDirectoryProvider() {
-		return outputDirectoryProvider;
+	public OutputDirectoryCreator getOutputDirectoryCreator() {
+		return outputDirectoryCreator;
 	}
 }

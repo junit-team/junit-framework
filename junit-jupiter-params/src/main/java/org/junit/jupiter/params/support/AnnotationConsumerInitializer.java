@@ -41,6 +41,7 @@ public final class AnnotationConsumerInitializer {
 	private static final List<AnnotationConsumingMethodSignature> annotationConsumingMethodSignatures = asList( //
 		new AnnotationConsumingMethodSignature("accept", 1, 0), //
 		new AnnotationConsumingMethodSignature("provideArguments", 3, 2), //
+		new AnnotationConsumingMethodSignature("provideArguments", 2, 1), //
 		new AnnotationConsumingMethodSignature("convert", 3, 2));
 
 	private AnnotationConsumerInitializer() {

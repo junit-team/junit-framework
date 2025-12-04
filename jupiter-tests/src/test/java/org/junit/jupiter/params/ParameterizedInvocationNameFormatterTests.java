@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.ParameterizedInvocationConstants.ARGUMENTS_PLACEHOLDER;
 import static org.junit.jupiter.params.ParameterizedInvocationConstants.ARGUMENTS_WITH_NAMES_PLACEHOLDER;
 import static org.junit.jupiter.params.ParameterizedInvocationConstants.ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER;
@@ -49,10 +50,13 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.aggregator.SimpleArgumentsAggregator;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.support.ParameterNameAndArgument;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.support.ReflectionSupport;
 
 /**
+ * Tests for {@link ParameterizedInvocationNameFormatter}.
+ *
  * @since 5.0
  */
 @SuppressWarnings("ALL")
@@ -105,14 +109,14 @@ class ParameterizedInvocationNameFormatterTests {
 
 		var formattedName = format(formatter, 1, arguments("apple", "banana"));
 
-		assertThat(formattedName).isEqualTo("[1] apple, banana");
+		assertThat(formattedName).isEqualTo("[1] \"apple\", \"banana\"");
 	}
 
 	@Test
 	void formatsIndividualArguments() {
 		var formatter = formatter("{0} -> {1}", "enigma");
 
-		assertEquals("foo -> 42", format(formatter, 1, arguments("foo", 42)));
+		assertEquals("\"foo\" -> 42", format(formatter, 1, arguments("foo", 42)));
 	}
 
 	@Test
@@ -122,7 +126,7 @@ class ParameterizedInvocationNameFormatterTests {
 		// @formatter:off
 		Arguments args = arguments(
 			42,
-			99,
+			'$',
 			"enigma",
 			null,
 			new int[] { 1, 2, 3 },
@@ -131,7 +135,7 @@ class ParameterizedInvocationNameFormatterTests {
 		);
 		// @formatter:on
 
-		assertEquals("42, 99, enigma, null, [1, 2, 3], [foo, bar], [[2, 4], [3, 9]]", format(formatter, 1, args));
+		assertEquals("42, '$', \"enigma\", null, [1, 2, 3], [foo, bar], [[2, 4], [3, 9]]", format(formatter, 1, args));
 	}
 
 	@Test
@@ -140,7 +144,7 @@ class ParameterizedInvocationNameFormatterTests {
 		var formatter = formatter(ARGUMENTS_WITH_NAMES_PLACEHOLDER, "enigma", testMethod);
 
 		var formattedName = format(formatter, 1, arguments(42, "enigma", new Object[] { "foo", 1 }));
-		assertEquals("someNumber=42, someString=enigma, someArray=[foo, 1]", formattedName);
+		assertEquals("someNumber = 42, someString = \"enigma\", someArray = [foo, 1]", formattedName);
 	}
 
 	@Test
@@ -149,14 +153,14 @@ class ParameterizedInvocationNameFormatterTests {
 		var formatter = formatter(ARGUMENTS_WITH_NAMES_PLACEHOLDER, "enigma", testMethod);
 
 		var formattedName = format(formatter, 1, arguments(42, "foo", "bar"));
-		assertEquals("someNumber=42, foo, bar", formattedName);
+		assertEquals("someNumber = 42, \"foo\", \"bar\"", formattedName);
 	}
 
 	@Test
 	void formatsCompleteArgumentsListWithArrays() {
 		var formatter = formatter(ARGUMENTS_PLACEHOLDER, "enigma");
 
-		// Explicit test for https://github.com/junit-team/junit5/issues/814
+		// Explicit test for https://github.com/junit-team/junit-framework/issues/814
 		assertEquals("[foo, bar]", format(formatter, 1, arguments((Object) new String[] { "foo", "bar" })));
 
 		assertEquals("[foo, bar], 42, true", format(formatter, 1, arguments(new String[] { "foo", "bar" }, 42, true)));
@@ -167,8 +171,8 @@ class ParameterizedInvocationNameFormatterTests {
 		var pattern = DISPLAY_NAME_PLACEHOLDER + " " + INDEX_PLACEHOLDER + " :: " + ARGUMENTS_PLACEHOLDER + " :: {1}";
 		var formatter = formatter(pattern, "enigma");
 
-		assertEquals("enigma 1 :: foo, bar :: bar", format(formatter, 1, arguments("foo", "bar")));
-		assertEquals("enigma 2 :: foo, 42 :: 42", format(formatter, 2, arguments("foo", 42)));
+		assertEquals("enigma 1 :: \"foo\", \"bar\" :: \"bar\"", format(formatter, 1, arguments("foo", "bar")));
+		assertEquals("enigma 2 :: \"foo\", 42 :: 42", format(formatter, 2, arguments("foo", 42)));
 	}
 
 	@Test
@@ -176,7 +180,7 @@ class ParameterizedInvocationNameFormatterTests {
 		Object[] actual = { 1, "two", Byte.valueOf("-128"), new Integer[][] { { 2, 4 }, { 3, 9 } } };
 		var formatter = formatter(ARGUMENTS_PLACEHOLDER, "enigma");
 		var expected = Arrays.copyOf(actual, actual.length);
-		assertEquals("1, two, -128, [[2, 4], [3, 9]]", format(formatter, 1, arguments(actual)));
+		assertEquals("1, \"two\", -128, [[2, 4], [3, 9]]", format(formatter, 1, arguments(actual)));
 		assertArrayEquals(expected, actual);
 	}
 
@@ -201,7 +205,7 @@ class ParameterizedInvocationNameFormatterTests {
 
 		var formattedName = format(formatter, 1, arguments(new ToStringReturnsNull(), "foo"));
 
-		assertThat(formattedName).isEqualTo("null, foo");
+		assertThat(formattedName).isEqualTo("null, \"foo\"");
 	}
 
 	@Test
@@ -211,7 +215,7 @@ class ParameterizedInvocationNameFormatterTests {
 		var formattedName = format(formatter, 1, arguments(new ToStringThrowsException(), "foo"));
 
 		assertThat(formattedName).startsWith(ToStringThrowsException.class.getName() + "@");
-		assertThat(formattedName).endsWith("foo");
+		assertThat(formattedName).endsWith("\"foo\"");
 	}
 
 	@ParameterizedTest(name = "{0}")
@@ -241,7 +245,7 @@ class ParameterizedInvocationNameFormatterTests {
 
 		var formattedName = format(formatter, 1, arguments("foo"));
 
-		assertThat(formattedName).isEqualTo("foo, {1}");
+		assertThat(formattedName).isEqualTo("\"foo\", {1}");
 	}
 
 	@Test
@@ -250,7 +254,7 @@ class ParameterizedInvocationNameFormatterTests {
 
 		var formattedName = format(formatter, 1, arguments("foo", "bar"));
 
-		assertThat(formattedName).isEqualTo("foo");
+		assertThat(formattedName).isEqualTo("\"foo\"");
 	}
 
 	@Test
@@ -259,16 +263,16 @@ class ParameterizedInvocationNameFormatterTests {
 
 		var formattedName = format(formatter, 1, arguments("foo", "bar", "baz"));
 
-		assertThat(formattedName).isEqualTo("foo, baz");
+		assertThat(formattedName).isEqualTo("\"foo\", \"baz\"");
 	}
 
 	@Test
 	void truncatesArgumentsThatExceedMaxLength() {
 		var formatter = formatter("{arguments}", "display name", 3);
 
-		var formattedName = format(formatter, 1, arguments("fo", "foo", "fooo"));
+		var formattedName = format(formatter, 1, arguments("fo", "foo", "food"));
 
-		assertThat(formattedName).isEqualTo("fo, foo, fo…");
+		assertThat(formattedName).isEqualTo("\"fo\", \"foo\", \"fo…\"");
 	}
 
 	@Nested
@@ -304,7 +308,7 @@ class ParameterizedInvocationNameFormatterTests {
 
 			var formattedName = format(formatter, -1, argumentSet("Fruits", "apple", "banana"));
 
-			assertThat(formattedName).isEqualTo("Fruits :: apple, banana");
+			assertThat(formattedName).isEqualTo("Fruits :: \"apple\", \"banana\"");
 		}
 
 		@Test
@@ -318,7 +322,91 @@ class ParameterizedInvocationNameFormatterTests {
 			var name2 = format(formatter, 2, arguments("apple", "banana"));
 
 			assertThat(name1).isEqualTo("[1] Mixed Arguments Types :: Fruits");
-			assertThat(name2).isEqualTo("[2] Mixed Arguments Types :: fruit1=apple, fruit2=banana");
+			assertThat(name2).isEqualTo("[2] Mixed Arguments Types :: fruit1 = \"apple\", fruit2 = \"banana\"");
+		}
+
+	}
+
+	@Nested
+	class QuotedTextTests {
+
+		@ParameterizedTest
+		@CsvSource(delimiterString = "->", textBlock = """
+				'Jane Smith' -> 'Jane Smith'
+				\\           -> \\\\
+				"            -> \\"
+				# The following represents a single ' enclosed in ''.
+				''''         -> ''''
+				'\n'         -> \\n
+				'\r\n'       -> \\r\\n
+				'   \t   '   -> '   \\t   '
+				'\b'         -> \\b
+				'\f'         -> \\f
+				'\u0007'     -> '\u0007'
+				""")
+		void quotedStrings(String argument, String expected) {
+			var formatter = formatter(DEFAULT_DISPLAY_NAME, "IGNORED");
+
+			var formattedName = format(formatter, 1, arguments(argument));
+			assertThat(formattedName).isEqualTo("[1] " + '"' + expected + '"');
+		}
+
+		@ParameterizedTest
+		@CsvSource(quoteCharacter = '"', delimiterString = "->", textBlock = """
+				X        -> X
+				\\       -> \\\\
+				'        -> \\'
+				# The following represents a single " enclosed in "". The escaping is
+				# necessary, because three " characters in a row close the text block.
+				\"""\"   -> \"""\"
+				"\n"     -> \\n
+				"\r"     -> \\r
+				"\t"     -> \\t
+				"\b"     -> \\b
+				"\f"     -> \\f
+				"\u0007" -> "\u0007"
+				""")
+		void quotedCharacters(char argument, String expected) {
+			var formatter = formatter(DEFAULT_DISPLAY_NAME, "IGNORED");
+
+			var formattedName = format(formatter, 1, arguments(argument));
+			assertThat(formattedName).isEqualTo("[1] " + "'" + expected + "'");
+		}
+
+		@Test
+		void quotedStringsForArgumentsWithNames() {
+			var testMethod = ParameterizedTestCases.getMethod("processFruit", String.class, int.class);
+			var formatter = formatter(DEFAULT_DISPLAY_NAME, "IGNORED", testMethod);
+
+			var name1 = format(formatter, 1, arguments("apple", 42));
+			var name2 = format(formatter, 2, arguments("banana", 99));
+
+			assertThat(name1).isEqualTo("[1] fruit = \"apple\", ranking = 42");
+			assertThat(name2).isEqualTo("[2] fruit = \"banana\", ranking = 99");
+		}
+
+		@Test
+		void quotedStringsForArgumentsWithNamesAndNamedArguments() {
+			var testMethod = ParameterizedTestCases.getMethod("processFruit", String.class, int.class);
+			var formatter = formatter(DEFAULT_DISPLAY_NAME, "IGNORED", testMethod);
+
+			var name1 = format(formatter, 1, arguments(named("Apple", "apple"), 42));
+			var name2 = format(formatter, 2, arguments(named("Banana", "banana"), 99));
+
+			assertThat(name1).isEqualTo("[1] fruit = Apple, ranking = 42");
+			assertThat(name2).isEqualTo("[2] fruit = Banana, ranking = 99");
+		}
+
+		@Test
+		void quotedStringsForArgumentsWithNamesAndParameterNameAndArgument() {
+			var testMethod = ParameterizedTestCases.getMethod("processFruit", String.class, int.class);
+			var formatter = formatter(DEFAULT_DISPLAY_NAME, "IGNORED", testMethod);
+
+			var name1 = format(formatter, 1, arguments(new ParameterNameAndArgument("FRUIT", "apple"), 42));
+			var name2 = format(formatter, 2, arguments(new ParameterNameAndArgument("FRUCHT", "Banane"), 99));
+
+			assertThat(name1).isEqualTo("[1] FRUIT = \"apple\", ranking = 42");
+			assertThat(name2).isEqualTo("[2] FRUCHT = \"Banane\", ranking = 99");
 		}
 
 	}
@@ -345,7 +433,7 @@ class ParameterizedInvocationNameFormatterTests {
 
 	private static String format(ParameterizedInvocationNameFormatter formatter, int invocationIndex,
 			Arguments arguments) {
-		return formatter.format(invocationIndex, EvaluatedArgumentSet.allOf(arguments));
+		return formatter.format(invocationIndex, EvaluatedArgumentSet.allOf(arguments), true);
 	}
 
 	@NullUnmarked
@@ -380,6 +468,11 @@ class ParameterizedInvocationNameFormatterTests {
 		@ParameterizedTest
 		void parameterizedTestWithAggregator(int someNumber,
 				@AggregateWith(CustomAggregator.class) String someAggregatedString) {
+		}
+
+		@SuppressWarnings("unused")
+		@ParameterizedTest
+		void processFruit(String fruit, int ranking) {
 		}
 
 		@SuppressWarnings("unused")

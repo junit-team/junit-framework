@@ -301,7 +301,7 @@ class ParameterResolverTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Nested
-		// See https://github.com/junit-team/junit5/issues/1345
+		// See https://github.com/junit-team/junit-framework/issues/1345
 		class AnnotatedConstructorParameterNestedTestCase {
 
 			private final TestInfo innerTestInfo;
@@ -471,7 +471,7 @@ class ParameterResolverTests extends AbstractJupiterTestEngineTests {
 		 * {@code ExtensionRegistry} as the one used for the corresponding
 		 * {@code @Test} method.
 		 *
-		 * @see <a href="https://github.com/junit-team/junit5/issues/523">#523</a>
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/523">#523</a>
 		 */
 		@SuppressWarnings("JUnitMalformedDeclaration")
 		@BeforeEach

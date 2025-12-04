@@ -23,7 +23,7 @@ import org.junit.platform.commons.JUnitException;
  *
  * @since 1.13
  */
-@API(status = EXPERIMENTAL, since = "1.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public class DiscoveryIssueException extends JUnitException {
 
 	@Serial

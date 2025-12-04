@@ -21,9 +21,9 @@ class ParameterizedInvocationNameFormatterIntegrationTests {
         info: TestInfo
     ) {
         if (param.equals("foo")) {
-            assertEquals("[1] param=foo", info.displayName)
+            assertEquals("[1] param = \"foo\"", info.displayName)
         } else {
-            assertEquals("[2] param=bar", info.displayName)
+            assertEquals("[2] param = \"bar\"", info.displayName)
         }
     }
 
@@ -34,9 +34,9 @@ class ParameterizedInvocationNameFormatterIntegrationTests {
         info: TestInfo
     ) {
         if (param.equals("foo")) {
-            assertEquals("foo", info.displayName)
+            assertEquals("\"foo\"", info.displayName)
         } else {
-            assertEquals("bar", info.displayName)
+            assertEquals("\"bar\"", info.displayName)
         }
     }
 
@@ -56,14 +56,14 @@ class ParameterizedInvocationNameFormatterIntegrationTests {
         info: TestInfo
     ) {
         if (param.equals("foo")) {
-            assertEquals("displayName and 1st 'argument'(String, TestInfo) - foo", info.displayName)
+            assertEquals("displayName and 1st 'argument'(String, TestInfo) - \"foo\"", info.displayName)
         } else {
-            assertEquals("displayName and 1st 'argument'(String, TestInfo) - bar", info.displayName)
+            assertEquals("displayName and 1st 'argument'(String, TestInfo) - \"bar\"", info.displayName)
         }
     }
 
     @ValueSource(strings = ["foo", "bar"])
-    @ParameterizedTest(name = "{0} - {displayName}")
+    @ParameterizedTest(name = "{0} - {displayName}", quoteTextArguments = false)
     fun `1st 'argument' and displayName`(
         param: String,
         info: TestInfo

@@ -9,7 +9,7 @@ ${licenseHeader}
 package org.junit.jupiter.api.condition;
 
 import static org.apiguardian.api.API.Status.DEPRECATED;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
@@ -44,7 +44,7 @@ public enum JRE {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	UNDEFINED(-1),
 @for(var jre : allJres)
 	/**
@@ -107,15 +107,15 @@ public enum JRE {
 	 * @see Runtime.Version#feature()
 	 * @see #currentVersionNumber()
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public int version() {
 		return this.version;
 	}
 
 	/**
-	 * @return {@code true} if <em>this</em> {@code JRE} is known to be the
+	 * {@return {@code true} if <em>this</em> {@code JRE} is known to be the
 	 * Java Runtime Environment version for the currently executing JVM or if
-	 * the version is {@link #OTHER}
+	 * the version is {@link #OTHER}}
 	 *
 	 * @see #currentJre()
 	 * @see #currentVersionNumber()
@@ -125,22 +125,22 @@ public enum JRE {
 	}
 
 	/**
-	 * @return the {@link JRE} for the currently executing JVM, potentially
-	 * {@link #OTHER}
+	 * {@return the {@link JRE} for the currently executing JVM, potentially
+	 * {@link #OTHER}}
 	 *
 	 * @since 5.7
 	 * @see #currentVersionNumber()
 	 * @deprecated in favor of {@link #currentJre()}
 	 */
 	@API(status = DEPRECATED, since = "5.12")
-	@Deprecated
+	@Deprecated(since = "5.12")
 	public static JRE currentVersion() {
 		return currentJre();
 	}
 
 	/**
-	 * @return the {@link JRE} for the currently executing JVM, potentially
-	 * {@link #OTHER}
+	 * {@return the {@link JRE} for the currently executing JVM, potentially
+	 * {@link #OTHER}}
 	 *
 	 * @since 5.12
 	 * @see #currentVersionNumber()
@@ -156,28 +156,28 @@ public enum JRE {
 	}
 
 	/**
-	 * @return the version number for the currently executing JVM, or {@code -1}
-	 * if the current JVM version could not be determined
+	 * {@return the version number for the currently executing JVM, or {@code -1}
+	 * if the current JVM version could not be determined}
 	 *
 	 * @since 5.12
 	 * @see Runtime.Version#feature()
 	 * @see #currentJre()
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static int currentVersionNumber() {
 		return CURRENT_VERSION;
 	}
 
 	/**
-	 * @return {@code true} if the supplied version number is known to be the
+	 * {@return {@code true} if the supplied version number is known to be the
 	 * Java Runtime Environment version for the currently executing JVM or if
 	 * the supplied version number is {@code -1} and the current JVM version
-	 * could not be determined
+	 * could not be determined}
 	 *
 	 * @since 5.12
 	 * @see Runtime.Version#feature()
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static boolean isCurrentVersion(int version) {
 		return version == CURRENT_VERSION;
 	}

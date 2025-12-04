@@ -35,8 +35,8 @@ interface ResourceLockAware extends TestDescriptor {
 
 		Deque<ResourceLockAware> ancestors = new ArrayDeque<>();
 		TestDescriptor parent = this.getParent().orElse(null);
-		while (parent instanceof ResourceLockAware) {
-			ancestors.addFirst((ResourceLockAware) parent);
+		while (parent instanceof ResourceLockAware resourceLockAwareParent) {
+			ancestors.addFirst(resourceLockAwareParent);
 			parent = parent.getParent().orElse(null);
 		}
 

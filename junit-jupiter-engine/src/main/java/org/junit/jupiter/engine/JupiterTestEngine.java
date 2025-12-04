@@ -19,9 +19,9 @@ import org.junit.jupiter.engine.config.CachingJupiterConfiguration;
 import org.junit.jupiter.engine.config.DefaultJupiterConfiguration;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
-import org.junit.jupiter.engine.descriptor.LauncherStoreFacade;
 import org.junit.jupiter.engine.discovery.DiscoverySelectorResolver;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
+import org.junit.jupiter.engine.execution.LauncherStoreFacade;
 import org.junit.jupiter.engine.support.JupiterThrowableCollectorFactory;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
@@ -29,9 +29,9 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.config.PrefixedConfigurationParameters;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
-import org.junit.platform.engine.support.hierarchical.ForkJoinPoolHierarchicalTestExecutorService;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 
 /**
@@ -69,7 +69,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 			DiscoveryIssueReporter.forwarding(discoveryRequest.getDiscoveryListener(), uniqueId));
 		JupiterConfiguration configuration = new CachingJupiterConfiguration(
 			new DefaultJupiterConfiguration(discoveryRequest.getConfigurationParameters(),
-				discoveryRequest.getOutputDirectoryProvider(), issueReporter));
+				discoveryRequest.getOutputDirectoryCreator(), issueReporter));
 		JupiterEngineDescriptor engineDescriptor = new JupiterEngineDescriptor(uniqueId, configuration);
 		DiscoverySelectorResolver.resolveSelectors(discoveryRequest, engineDescriptor, issueReporter);
 		return engineDescriptor;
@@ -79,8 +79,8 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 	protected HierarchicalTestExecutorService createExecutorService(ExecutionRequest request) {
 		JupiterConfiguration configuration = getJupiterConfiguration(request);
 		if (configuration.isParallelExecutionEnabled()) {
-			return new ForkJoinPoolHierarchicalTestExecutorService(new PrefixedConfigurationParameters(
-				request.getConfigurationParameters(), Constants.PARALLEL_CONFIG_PREFIX));
+			return ParallelHierarchicalTestExecutorServiceFactory.create(new PrefixedConfigurationParameters(
+				request.getConfigurationParameters(), JupiterConfiguration.PARALLEL_CONFIG_PREFIX));
 		}
 		return super.createExecutorService(request);
 	}

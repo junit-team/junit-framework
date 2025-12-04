@@ -34,4 +34,7 @@ public class JupiterThrowableCollectorFactory {
 		return new OpenTest4JAndJUnit4AwareThrowableCollector();
 	}
 
+	private JupiterThrowableCollectorFactory() {
+	}
+
 }

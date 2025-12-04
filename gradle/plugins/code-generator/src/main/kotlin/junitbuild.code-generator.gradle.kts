@@ -5,10 +5,12 @@ plugins {
 	java
 }
 
-val templates by sourceSets.registering
+val templates by sourceSets.creating
+val templatesCompileOnly = configurations[templates.compileOnlyConfigurationName]
+
 dependencies {
-	add(templates.get().compileOnlyConfigurationName, dependencyFromLibs("jte"))
-	add(templates.get().compileOnlyConfigurationName, "junitbuild.base:code-generator-model")
+	templatesCompileOnly(dependencyFromLibs("jte"))
+	templatesCompileOnly("junitbuild.base:code-generator-model")
 }
 
 val license: License by rootProject.extra
@@ -18,17 +20,16 @@ val generateCode by tasks.registering
 sourceSets.named { it != templates.name }.configureEach {
 
 	val sourceSetName = name
-	val sourceSetTargetDir = rootTargetDir.map { it.dir(sourceSetName) }
 
 	val task = tasks.register(getTaskName("generateJreRelated", "SourceCode"), GenerateJreRelatedSourceCode::class) {
-		templateDir.convention(layout.dir(templates.map {
-			it.resources.srcDirs.single().resolve(sourceSetName)
+		templateDir.convention(layout.dir(provider {
+			templates.resources.srcDirs.single().resolve(sourceSetName)
 		}))
-		targetDir.convention(sourceSetTargetDir)
+		targetDir.convention(rootTargetDir.map { it.dir(sourceSetName) })
 		licenseHeaderFile.convention(license.headerFile)
 	}
 
-	java.srcDir(files(sourceSetTargetDir).builtBy(task))
+	java.srcDir(task.map { it.targetDir })
 
 	generateCode {
 		dependsOn(task)

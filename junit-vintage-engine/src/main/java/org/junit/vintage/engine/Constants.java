@@ -10,17 +10,19 @@
 
 package org.junit.vintage.engine;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
 
 /**
  * Collection of constants related to the {@link VintageTestEngine}.
  *
- * @since 5.12
+ * @deprecated Should only be used temporarily while migrating tests to JUnit
+ * Jupiter or another testing framework with native JUnit Platform support
  */
-@API(status = STABLE, since = "5.12")
+@Deprecated(since = "6.0")
+@API(status = DEPRECATED, since = "6.0")
 public final class Constants {
 
 	/**
@@ -31,7 +33,7 @@ public final class Constants {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String PARALLEL_EXECUTION_ENABLED = "junit.vintage.execution.parallel.enabled";
 
 	/**
@@ -43,7 +45,7 @@ public final class Constants {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String PARALLEL_POOL_SIZE = "junit.vintage.execution.parallel.pool-size";
 
 	/**
@@ -55,7 +57,7 @@ public final class Constants {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
 
 	/**
@@ -67,8 +69,20 @@ public final class Constants {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String PARALLEL_METHOD_EXECUTION = "junit.vintage.execution.parallel.methods";
+
+	/**
+	 * Property name used to configure whether the JUnit Vintage engine should
+	 * report discovery issues such as deprecation notices.
+	 *
+	 * <p>Set this property to {@code false} to disable reporting of discovery
+	 * issues. Defaults to {@code true}.
+	 *
+	 * @since 6.0.1
+	 */
+	@API(status = MAINTAINED, since = "6.0.1")
+	public static final String DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME = "junit.vintage.discovery.issue.reporting.enabled";
 
 	private Constants() {
 		/* no-op */

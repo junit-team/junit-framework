@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.io;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.File;
@@ -104,7 +104,7 @@ public @interface TempDir {
 	 *
 	 * @since 5.10
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_FACTORY_PROPERTY_NAME = "junit.jupiter.tempdir.factory.default";
 
 	/**
@@ -123,7 +123,7 @@ public @interface TempDir {
 	 * @since 5.10
 	 * @see TempDirFactory
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	Class<? extends TempDirFactory> factory() default TempDirFactory.class;
 
 	/**
@@ -135,7 +135,7 @@ public @interface TempDir {
 	 *
 	 * @since 5.9
 	 */
-	@API(status = EXPERIMENTAL, since = "5.9")
+	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_CLEANUP_MODE_PROPERTY_NAME = "junit.jupiter.tempdir.cleanup.mode.default";
 
 	/**

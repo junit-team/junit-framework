@@ -49,24 +49,22 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 	private static final Runnable NOOP = () -> {
 	};
 
+	static final SkipResult CANCELLED_SKIP_RESULT = SkipResult.skip("Execution cancelled");
+
 	private final NodeTestTaskContext taskContext;
 	private final TestDescriptor testDescriptor;
 	private final Node<C> node;
 	private final Runnable finalizer;
 
-	@Nullable
-	private C parentContext;
+	private @Nullable C parentContext;
 
-	@Nullable
-	private C context;
+	private @Nullable C context;
 
-	@Nullable
-	private SkipResult skipResult;
+	private @Nullable SkipResult skipResult;
 
 	private boolean started;
 
-	@Nullable
-	private ThrowableCollector throwableCollector;
+	private @Nullable ThrowableCollector throwableCollector;
 
 	NodeTestTask(NodeTestTaskContext taskContext, TestDescriptor testDescriptor) {
 		this(taskContext, testDescriptor, NOOP);
@@ -91,6 +89,11 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 	}
 
 	@Override
+	public TestDescriptor getTestDescriptor() {
+		return testDescriptor;
+	}
+
+	@Override
 	public String toString() {
 		return "NodeTestTask [" + testDescriptor + "]";
 	}
@@ -103,9 +106,11 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 	public void execute() {
 		try {
 			throwableCollector = taskContext.throwableCollectorFactory().create();
-			prepare();
+			if (!taskContext.cancellationToken().isCancellationRequested()) {
+				prepare();
+			}
 			if (throwableCollector.isEmpty()) {
-				checkWhetherSkipped();
+				throwableCollector.execute(() -> skipResult = checkWhetherSkipped());
 			}
 			if (throwableCollector.isEmpty() && !requiredSkipResult().isSkipped()) {
 				executeRecursively();
@@ -118,20 +123,20 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		finally {
 			// Ensure that the 'interrupted status' flag for the current thread
 			// is cleared for reuse of the thread in subsequent task executions.
-			// See https://github.com/junit-team/junit5/issues/1688
+			// See https://github.com/junit-team/junit-framework/issues/1688
 			if (Thread.interrupted()) {
-				logger.debug(() -> String.format(
-					"Execution of TestDescriptor with display name [%s] "
-							+ "and unique ID [%s] failed to clear the 'interrupted status' flag for the "
-							+ "current thread. JUnit has cleared the flag, but you may wish to investigate "
-							+ "why the flag was not cleared by user code.",
-					this.testDescriptor.getDisplayName(), this.testDescriptor.getUniqueId()));
+				logger.debug(() -> """
+						Execution of TestDescriptor with display name [%s] \
+						and unique ID [%s] failed to clear the 'interrupted status' flag for the \
+						current thread. JUnit has cleared the flag, but you may wish to investigate \
+						why the flag was not cleared by user code.""".formatted(this.testDescriptor.getDisplayName(),
+					this.testDescriptor.getUniqueId()));
 			}
 			finalizer.run();
 		}
 
 		// Clear reference to context to allow it to be garbage collected.
-		// See https://github.com/junit-team/junit5/issues/1578
+		// See https://github.com/junit-team/junit-framework/issues/1578
 		context = null;
 	}
 
@@ -139,12 +144,14 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		requiredThrowableCollector().execute(() -> context = node.prepare(requireNonNull(parentContext)));
 
 		// Clear reference to parent context to allow it to be garbage collected.
-		// See https://github.com/junit-team/junit5/issues/1578
+		// See https://github.com/junit-team/junit-framework/issues/1578
 		parentContext = null;
 	}
 
-	private void checkWhetherSkipped() {
-		requiredThrowableCollector().execute(() -> skipResult = node.shouldBeSkipped(requiredContext()));
+	private SkipResult checkWhetherSkipped() throws Exception {
+		return taskContext.cancellationToken().isCancellationRequested() //
+				? CANCELLED_SKIP_RESULT //
+				: node.shouldBeSkipped(requiredContext());
 	}
 
 	private void executeRecursively() {
@@ -192,7 +199,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		if (throwableCollector.isEmpty() && requiredSkipResult().isSkipped()) {
 			var skipResult = requiredSkipResult();
 			try {
-				node.nodeSkipped(requiredContext(), testDescriptor, skipResult);
+				node.nodeSkipped(requireNonNullElse(context, parentContext), testDescriptor, skipResult);
 			}
 			catch (Throwable throwable) {
 				UnrecoverableExceptions.rethrowIfUnrecoverable(throwable);
@@ -234,6 +241,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		private final Map<UniqueId, DynamicTaskState> unfinishedTasks = new ConcurrentHashMap<>();
 
 		@Override
+		@SuppressWarnings("FutureReturnValueIgnored")
 		public void execute(TestDescriptor testDescriptor) {
 			execute(testDescriptor, taskContext.listener());
 		}
@@ -257,7 +265,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 					testDescriptor, () -> unfinishedTasks.remove(uniqueId));
 				nodeTestTask.setParentContext(context);
 				unfinishedTasks.put(uniqueId, DynamicTaskState.unscheduled());
-				Future<Void> future = taskContext.executorService().submit(nodeTestTask);
+				var future = taskContext.executorService().submit(nodeTestTask);
 				unfinishedTasks.computeIfPresent(uniqueId, (__, state) -> DynamicTaskState.scheduled(future));
 				return future;
 			}
@@ -289,7 +297,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 			return UNSCHEDULED;
 		}
 
-		static DynamicTaskState scheduled(Future<Void> future) {
+		static DynamicTaskState scheduled(Future<@Nullable Void> future) {
 			return future::get;
 		}
 

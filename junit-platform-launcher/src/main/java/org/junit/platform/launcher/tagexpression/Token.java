@@ -16,10 +16,10 @@ package org.junit.platform.launcher.tagexpression;
 record Token(int startIndex, String rawString) {
 
 	String string() {
-		return rawString.trim();
+		return rawString.strip();
 	}
 
-	public int trimmedTokenStartIndex() {
+	public int strippedTokenStartIndex() {
 		return startIndex + rawString.indexOf(string());
 	}
 

@@ -176,4 +176,7 @@ class ApiReportGenerator {
 				.filter(m -> m.getAnnotationInfo(API.class) != null);
 	}
 
+	private ApiReportGenerator() {
+	}
+
 }

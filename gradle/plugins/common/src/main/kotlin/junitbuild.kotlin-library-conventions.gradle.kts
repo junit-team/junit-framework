@@ -1,3 +1,4 @@
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -20,7 +21,8 @@ tasks.withType<KotlinCompile>().configureEach {
 		languageVersion = apiVersion
 		allWarningsAsErrors.convention(true)
 		javaParameters = true
-		freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
+		freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+		freeCompilerArgs.add(jvmTarget.map { "-Xjdk-release=${JavaVersion.toVersion(it.target).majorVersion}" })
 	}
 }
 

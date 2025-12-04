@@ -10,6 +10,7 @@
 
 package org.junit.platform.launcher.core;
 
+import static org.junit.platform.commons.util.UnrecoverableExceptions.rethrowIfUnrecoverable;
 import static org.junit.platform.engine.SelectorResolutionResult.Status.FAILED;
 import static org.junit.platform.engine.SelectorResolutionResult.Status.UNRESOLVED;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -51,10 +53,10 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 	private static final Logger logger = LoggerFactory.getLogger(DiscoveryIssueCollector.class);
 
 	final List<DiscoveryIssue> issues = new ArrayList<>();
-	private final ConfigurationParameters configurationParameters;
+	private final Severity criticalSeverity;
 
 	DiscoveryIssueCollector(ConfigurationParameters configurationParameters) {
-		this.configurationParameters = configurationParameters;
+		this.criticalSeverity = getCriticalSeverity(configurationParameters);
 	}
 
 	@Override
@@ -78,7 +80,7 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 		}
 	}
 
-	static @Nullable TestSource toSource(DiscoverySelector selector) {
+	private static @Nullable TestSource toSource(DiscoverySelector selector) {
 		if (selector instanceof ClassSelector classSelector) {
 			return ClassSource.from(classSelector.getClassName());
 		}
@@ -96,17 +98,26 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 		if (selector instanceof PackageSelector packageSelector) {
 			return PackageSource.from(packageSelector.getPackageName());
 		}
-		if (selector instanceof FileSelector fileSelector) {
-			return fileSelector.getPosition() //
-					.map(DiscoveryIssueCollector::convert) //
-					.map(position -> FileSource.from(fileSelector.getFile(), position)) //
-					.orElseGet(() -> FileSource.from(fileSelector.getFile()));
+		try {
+			// Both FileSource and DirectorySource call File.getCanonicalFile() to normalize the reported file which
+			// can throw an exception for certain file names on certain file systems. UriSource.from(...) is affected
+			// as well because it may return a FileSource or DirectorySource
+			if (selector instanceof FileSelector fileSelector) {
+				return fileSelector.getPosition() //
+						.map(DiscoveryIssueCollector::convert) //
+						.map(position -> FileSource.from(fileSelector.getFile(), position)) //
+						.orElseGet(() -> FileSource.from(fileSelector.getFile()));
+			}
+			if (selector instanceof DirectorySelector directorySelector) {
+				return DirectorySource.from(directorySelector.getDirectory());
+			}
+			if (selector instanceof UriSelector uriSelector) {
+				return UriSource.from(uriSelector.getUri());
+			}
 		}
-		if (selector instanceof DirectorySelector directorySelector) {
-			return DirectorySource.from(directorySelector.getDirectory());
-		}
-		if (selector instanceof UriSelector uriSelector) {
-			return UriSource.from(uriSelector.getUri());
+		catch (Exception ex) {
+			rethrowIfUnrecoverable(ex);
+			logger.warn(ex, () -> "Failed to convert DiscoverySelector [%s] into TestSource".formatted(selector));
 		}
 		return null;
 	}
@@ -126,24 +137,21 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 		if (this.issues.isEmpty()) {
 			return DiscoveryIssueNotifier.NO_ISSUES;
 		}
-		return DiscoveryIssueNotifier.from(getCriticalSeverity(), this.issues);
+		return DiscoveryIssueNotifier.from(criticalSeverity, this.issues);
 	}
 
-	private Severity getCriticalSeverity() {
-		Severity defaultValue = Severity.ERROR;
-		return this.configurationParameters //
+	private static Severity getCriticalSeverity(ConfigurationParameters configurationParameters) {
+		return configurationParameters //
 				.get(LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, value -> {
 					try {
 						return Severity.valueOf(value.toUpperCase(Locale.ROOT));
 					}
 					catch (Exception e) {
-						logger.warn(() -> String.format(
-							"Invalid DiscoveryIssue.Severity '%s' set via the '%s' configuration parameter. "
-									+ "Falling back to the %s default value.",
-							value, LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, defaultValue));
-						return defaultValue;
+						throw new JUnitException(
+							"Invalid DiscoveryIssue.Severity '%s' set via the '%s' configuration parameter.".formatted(
+								value, LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME));
 					}
 				}) //
-				.orElse(defaultValue);
+				.orElse(Severity.ERROR);
 	}
 }

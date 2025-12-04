@@ -35,6 +35,7 @@ import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.jfr.JfrUtils;
 
 /**
  * Factory for creating {@link Launcher} instances by invoking {@link #create()}
@@ -139,6 +140,7 @@ public class LauncherFactory {
 		Set<TestEngine> engines = collectTestEngines(config);
 		List<PostDiscoveryFilter> filters = collectPostDiscoveryFilters(config);
 		DefaultLauncher launcher = new DefaultLauncher(engines, filters, sessionLevelStore);
+		JfrUtils.registerListeners(launcher);
 		registerLauncherDiscoveryListeners(config, launcher);
 		registerTestExecutionListeners(config, launcher, configurationParameters);
 

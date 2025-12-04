@@ -151,12 +151,11 @@ final class ExtensionUtils {
 
 		declarativeExtensionTypes.forEach(extensionType -> {
 			Class<?> valueType = value.getClass();
-			Preconditions.condition(!extensionType.equals(valueType),
-				() -> String.format(
-					"Failed to register extension via field [%s]. "
-							+ "The field registers an extension of type [%s] via @RegisterExtension and @ExtendWith, "
-							+ "but only one registration of a given extension type is permitted.",
-					field, valueType.getName()));
+			Preconditions.condition(!extensionType.equals(valueType), () -> """
+					Failed to register extension via field [%s]. \
+					The field registers an extension of type [%s] via @RegisterExtension and @ExtendWith, \
+					but only one registration of a given extension type is permitted.""".formatted(field,
+				valueType.getName()));
 		});
 
 		return (Extension) value;

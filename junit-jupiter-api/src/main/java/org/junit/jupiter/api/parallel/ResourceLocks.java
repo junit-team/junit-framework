@@ -28,8 +28,7 @@ import org.apiguardian.api.API;
  * completely optional since {@code @ResourceLock} is a
  * {@linkplain java.lang.annotation.Repeatable repeatable} annotation.
  *
- * <p>Since JUnit Jupiter 5.4, this annotation is {@linkplain Inherited inherited}
- * within class hierarchies.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @see ResourceLock
  * @since 5.3

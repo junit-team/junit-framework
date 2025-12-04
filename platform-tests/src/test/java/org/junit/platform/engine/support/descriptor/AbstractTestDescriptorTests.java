@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
@@ -111,8 +114,9 @@ class AbstractTestDescriptorTests implements TestDescriptorOrderChildrenTests {
 	@Test
 	void pruneLeaf() {
 		TestDescriptor.Visitor visitor = descriptor -> {
-			if (descriptor.getUniqueId().equals(UniqueId.root("leaf", "leaf1-1")))
+			if (descriptor.getUniqueId().equals(UniqueId.root("leaf", "leaf1-1"))) {
 				descriptor.removeFromHierarchy();
+			}
 		};
 		engineDescriptor.accept(visitor);
 
@@ -128,8 +132,9 @@ class AbstractTestDescriptorTests implements TestDescriptorOrderChildrenTests {
 	void pruneGroup() {
 		final var countVisited = new AtomicInteger();
 		TestDescriptor.Visitor visitor = descriptor -> {
-			if (descriptor.getUniqueId().equals(UniqueId.root("group", "group1")))
+			if (descriptor.getUniqueId().equals(UniqueId.root("group", "group1"))) {
 				descriptor.removeFromHierarchy();
+			}
 			countVisited.incrementAndGet();
 		};
 		engineDescriptor.accept(visitor);
@@ -164,6 +169,29 @@ class AbstractTestDescriptorTests implements TestDescriptorOrderChildrenTests {
 		return descriptor.getAncestors().stream().map(TestDescriptor::getUniqueId).toList();
 	}
 
+	@ParameterizedTest(name = "{0} \u27A1 {1}")
+	// NOTE: "\uFFFD" is the Unicode replacement character: �
+	@CsvSource(delimiterString = "->", textBlock = """
+			'carriage \r return'           -> 'carriage <CR> return'
+			'line \n feed'                 -> 'line <LF> feed'
+			'form \f feed'                 -> 'form \uFFFD feed'
+			'back \b space'                -> 'back \uFFFD space'
+			'tab \t tab'                   -> 'tab \uFFFD tab'
+			# Latin-1
+			'üñåé'                         -> 'üñåé'
+			# "hello" in Japanese
+			'こんにちは'                     -> 'こんにちは'
+			# 'hello world' in Thai
+			'สวัสดีชาวโลก'                   -> 'สวัสดีชาวโลก'
+			# bell sound/character
+			'ding \u0007 dong'             -> 'ding \uFFFD dong'
+			'Munch 😱 emoji'               -> 'Munch 😱 emoji'
+			'Zero\u200BWidth\u200BSpaces'  -> 'Zero\u200BWidth\u200BSpaces'
+			""")
+	void specialCharactersInDisplayNamesAreEscaped(String input, String expected) {
+		assertThat(new DemoDescriptor(input).getDisplayName()).isEqualTo(expected);
+	}
+
 }
 
 class GroupDescriptor extends AbstractTestDescriptor {
@@ -188,6 +216,19 @@ class LeafDescriptor extends AbstractTestDescriptor {
 	@Override
 	public Type getType() {
 		return Type.TEST;
+	}
+
+}
+
+class DemoDescriptor extends AbstractTestDescriptor {
+
+	DemoDescriptor(String displayName) {
+		super(mock(), displayName);
+	}
+
+	@Override
+	public Type getType() {
+		return Type.CONTAINER;
 	}
 
 }

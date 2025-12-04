@@ -11,36 +11,30 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.CONCURRENT;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.Constructor;
+import java.io.Serial;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.function.Try;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * A {@link ForkJoinPool}-based
@@ -48,10 +42,12 @@ import org.junit.platform.engine.ConfigurationParameters;
  * {@linkplain TestTask test tasks} with the configured parallelism.
  *
  * @since 1.3
- * @see ForkJoinPool
+ * @see ParallelHierarchicalTestExecutorServiceFactory
+ * @see ParallelExecutorServiceType#FORK_JOIN_POOL
  * @see DefaultParallelExecutionConfigurationStrategy
+ * @see ForkJoinPool
  */
-@API(status = STABLE, since = "1.10")
+@API(status = MAINTAINED, since = "1.10")
 public class ForkJoinPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	// package-private for testing
@@ -66,9 +62,18 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 * the supplied {@link ConfigurationParameters}.
 	 *
 	 * @see DefaultParallelExecutionConfigurationStrategy
+	 * @deprecated Please use
+	 * {@link ParallelHierarchicalTestExecutorServiceFactory#create(ConfigurationParameters)}
+	 * with configuration parameter
+	 * {@value ParallelHierarchicalTestExecutorServiceFactory#EXECUTOR_SERVICE_PROPERTY_NAME}
+	 * set to
+	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL FORK_JOIN_POOL}
+	 * instead.
 	 */
+	@API(status = DEPRECATED, since = "6.1")
+	@Deprecated(since = "6.1")
 	public ForkJoinPoolHierarchicalTestExecutorService(ConfigurationParameters configurationParameters) {
-		this(createConfiguration(configurationParameters));
+		this(DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters));
 	}
 
 	/**
@@ -76,8 +81,14 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 	 * the supplied {@link ParallelExecutionConfiguration}.
 	 *
 	 * @since 1.7
+	 * @deprecated Please use
+	 * {@link ParallelHierarchicalTestExecutorServiceFactory#create(ParallelExecutorServiceType, ParallelExecutionConfiguration)}
+	 * with
+	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL ParallelExecutorServiceType.FORK_JOIN_POOL}
+	 * instead.
 	 */
-	@API(status = STABLE, since = "1.10")
+	@API(status = DEPRECATED, since = "6.1")
+	@Deprecated(since = "6.1")
 	public ForkJoinPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration) {
 		this(configuration, TaskEventListener.NOOP);
 	}
@@ -90,40 +101,15 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 		LoggerFactory.getLogger(getClass()).config(() -> "Using ForkJoinPool with parallelism of " + parallelism);
 	}
 
-	private static ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.getStrategy(
-			configurationParameters);
-		return strategy.createConfiguration(configurationParameters);
-	}
-
 	private ForkJoinPool createForkJoinPool(ParallelExecutionConfiguration configuration) {
-		ForkJoinWorkerThreadFactory threadFactory = new WorkerThreadFactory();
-		// Try to use constructor available in Java >= 9
-		Callable<ForkJoinPool> constructorInvocation = sinceJava9Constructor() //
-				.map(sinceJava9ConstructorInvocation(configuration, threadFactory))
-				// Fallback for Java 8
-				.orElse(sinceJava7ConstructorInvocation(configuration, threadFactory));
-		return Try.call(constructorInvocation) //
-				.getOrThrow(cause -> new JUnitException("Failed to create ForkJoinPool", cause));
-	}
-
-	private static Optional<Constructor<ForkJoinPool>> sinceJava9Constructor() {
-		return Try.call(() -> ForkJoinPool.class.getDeclaredConstructor(int.class, ForkJoinWorkerThreadFactory.class,
-			UncaughtExceptionHandler.class, boolean.class, int.class, int.class, int.class, Predicate.class, long.class,
-			TimeUnit.class)) //
-				.toOptional();
-	}
-
-	private static Function<Constructor<ForkJoinPool>, Callable<ForkJoinPool>> sinceJava9ConstructorInvocation(
-			ParallelExecutionConfiguration configuration, ForkJoinWorkerThreadFactory threadFactory) {
-		return constructor -> () -> constructor.newInstance(configuration.getParallelism(), threadFactory, null, false,
-			configuration.getCorePoolSize(), configuration.getMaxPoolSize(), configuration.getMinimumRunnable(),
-			configuration.getSaturatePredicate(), configuration.getKeepAliveSeconds(), TimeUnit.SECONDS);
-	}
-
-	private static Callable<ForkJoinPool> sinceJava7ConstructorInvocation(ParallelExecutionConfiguration configuration,
-			ForkJoinWorkerThreadFactory threadFactory) {
-		return () -> new ForkJoinPool(configuration.getParallelism(), threadFactory, null, false);
+		try {
+			return new ForkJoinPool(configuration.getParallelism(), new WorkerThreadFactory(), null, false,
+				configuration.getCorePoolSize(), configuration.getMaxPoolSize(), configuration.getMinimumRunnable(),
+				configuration.getSaturatePredicate(), configuration.getKeepAliveSeconds(), TimeUnit.SECONDS);
+		}
+		catch (Exception cause) {
+			throw new JUnitException("Failed to create ForkJoinPool", cause);
+		}
 	}
 
 	@Override
@@ -160,9 +146,9 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 			new ExclusiveTask(tasks.get(0)).execSync();
 			return;
 		}
-		Deque<ExclusiveTask> isolatedTasks = new LinkedList<>();
-		Deque<ExclusiveTask> sameThreadTasks = new LinkedList<>();
-		Deque<ExclusiveTask> concurrentTasksInReverseOrder = new LinkedList<>();
+		Deque<ExclusiveTask> isolatedTasks = new ArrayDeque<>();
+		Deque<ExclusiveTask> sameThreadTasks = new ArrayDeque<>();
+		Deque<ExclusiveTask> concurrentTasksInReverseOrder = new ArrayDeque<>();
 		forkConcurrentTasks(tasks, isolatedTasks, sameThreadTasks, concurrentTasksInReverseOrder);
 		executeSync(sameThreadTasks);
 		joinConcurrentTasksInReverseOrderToEnableWorkStealing(concurrentTasksInReverseOrder);
@@ -221,7 +207,10 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 
 	// this class cannot not be serialized because TestTask is not Serializable
 	@SuppressWarnings({ "serial", "RedundantSuppression" })
-	class ExclusiveTask extends ForkJoinTask<Void> {
+	class ExclusiveTask extends ForkJoinTask<@Nullable Void> {
+
+		@Serial
+		private static final long serialVersionUID = 1;
 
 		private final TestTask testTask;
 
@@ -234,6 +223,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 		 *
 		 * @return {@code null} always
 		 */
+		@Override
 		public final Void getRawResult() {
 			return null;
 		}
@@ -241,6 +231,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 		/**
 		 * Requires null completion value.
 		 */
+		@Override
 		protected final void setRawResult(Void mustBeNull) {
 		}
 

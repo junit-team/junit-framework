@@ -11,7 +11,7 @@
 package org.junit.platform.commons.support;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.platform.commons.support.PreconditionAssertions.assertPreconditionViolationException;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.util.List;
 import java.util.function.Function;
@@ -24,11 +24,11 @@ import org.junit.platform.commons.util.ClassUtils;
  */
 class ClassSupportTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void nullSafeToStringPreconditions() {
 		Function<? super Class<?>, ? extends String> mapper = null;
-		assertPreconditionViolationException("Mapping function",
+		assertPreconditionViolationNotNullFor("Mapping function",
 			() -> ClassSupport.nullSafeToString(mapper, String.class, List.class));
 	}
 
@@ -41,4 +41,5 @@ class ClassSupportTests {
 		assertEquals(ClassUtils.nullSafeToString(classToStringMapper, String.class, List.class),
 			ClassSupport.nullSafeToString(classToStringMapper, String.class, List.class));
 	}
+
 }

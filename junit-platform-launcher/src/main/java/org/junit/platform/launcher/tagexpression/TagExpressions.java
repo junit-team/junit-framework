@@ -104,4 +104,7 @@ class TagExpressions {
 		};
 	}
 
+	private TagExpressions() {
+	}
+
 }

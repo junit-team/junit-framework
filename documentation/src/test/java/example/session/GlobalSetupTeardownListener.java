@@ -43,7 +43,7 @@ public class GlobalSetupTeardownListener implements LauncherSessionListener {
 				}
 				//tag::user_guide[]
 				NamespacedHierarchicalStore<Namespace> store = session.getStore(); // <1>
-				store.getOrComputeIfAbsent(Namespace.GLOBAL, "httpServer", key -> { // <2>
+				store.computeIfAbsent(Namespace.GLOBAL, "httpServer", key -> { // <2>
 					InetSocketAddress address = new InetSocketAddress(getLoopbackAddress(), 0);
 					HttpServer server;
 					try {

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExternalResource;
 
+@SuppressWarnings("removal")
 @ExtendWith(ExternalResourceSupport.class)
 public class ExternalResourceSupportForMultipleMethodRulesTests {
 
@@ -66,10 +67,12 @@ public class ExternalResourceSupportForMultipleMethodRulesTests {
 
 	@AfterAll
 	static void afterMethodsOfBothRulesWereExecuted() {
-		if (!afterOfRule1WasExecuted)
+		if (!afterOfRule1WasExecuted) {
 			fail();
-		if (!afterOfRule2WasExecuted)
+		}
+		if (!afterOfRule2WasExecuted) {
 			fail();
+		}
 	}
 
 }

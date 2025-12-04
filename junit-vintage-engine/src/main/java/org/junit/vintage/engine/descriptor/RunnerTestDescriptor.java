@@ -10,7 +10,6 @@
 
 package org.junit.vintage.engine.descriptor;
 
-import static java.util.Collections.singletonList;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.ArrayList;
@@ -56,8 +55,7 @@ public class RunnerTestDescriptor extends VintageTestDescriptor {
 	private final boolean ignored;
 	private boolean wasFiltered;
 
-	@Nullable
-	private List<Filter> filters = new ArrayList<>();
+	private @Nullable List<Filter> filters = new ArrayList<>();
 
 	public RunnerTestDescriptor(UniqueId uniqueId, Class<?> testClass, Runner runner, boolean ignored) {
 		super(uniqueId, runner.getDescription(), testClass.getSimpleName(), ClassSource.from(testClass));
@@ -73,6 +71,10 @@ public class RunnerTestDescriptor extends VintageTestDescriptor {
 
 	public Request toRequest() {
 		return new RunnerRequest(this.runner);
+	}
+
+	public Runner getRunner() {
+		return runner;
 	}
 
 	@Override
@@ -111,7 +113,7 @@ public class RunnerTestDescriptor extends VintageTestDescriptor {
 		if (wasFiltered) {
 			// filtering the runner may render intermediate Descriptions obsolete
 			// (e.g. test classes without any remaining children in a suite)
-			pruneDescriptorsForObsoleteDescriptions(singletonList(runner.getDescription()));
+			pruneDescriptorsForObsoleteDescriptions(List.of(runner.getDescription()));
 		}
 		if (rejectedExclusions.isEmpty()) {
 			super.prune();

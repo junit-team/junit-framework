@@ -94,6 +94,7 @@ public interface Filter<T> {
 	 *
 	 * @param adaptee the filter to be adapted
 	 * @param converter the converter function to apply
+	 * @deprecated without replacement
 	 */
 	@API(status = DEPRECATED, since = "6.0")
 	@Deprecated(since = "6.0", forRemoval = true)

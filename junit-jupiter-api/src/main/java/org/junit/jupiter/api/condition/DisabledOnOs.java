@@ -52,9 +52,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *
  * <h2>Warning</h2>
  *
- * <p>As of JUnit Jupiter 5.1, this annotation can only be declared once on an
- * {@link java.lang.reflect.AnnotatedElement AnnotatedElement} (i.e., test
- * interface, test class, or test method). If this annotation is directly
+ * <p>This annotation can only be declared once on an
+ * {@link java.lang.reflect.AnnotatedElement AnnotatedElement} such as a test
+ * interface, test class, or test method. If this annotation is directly
  * present, indirectly present, or meta-present multiple times on a given
  * element, only the first such annotation discovered by JUnit will be used;
  * any additional declarations will be silently ignored. Note, however, that

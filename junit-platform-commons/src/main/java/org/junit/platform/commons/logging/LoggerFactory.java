@@ -145,7 +145,7 @@ public final class LoggerFactory {
 		private void log(Level level, @Nullable Throwable throwable, Supplier<String> messageSupplier) {
 			boolean loggable = this.julLogger.isLoggable(level);
 			if (loggable || !listeners.isEmpty()) {
-				LogRecord logRecord = createLogRecord(level, throwable, nullSafeGet(messageSupplier));
+				LogRecord logRecord = createLogRecord(level, throwable, messageSupplier.get());
 				if (loggable) {
 					this.julLogger.log(logRecord);
 				}
@@ -153,7 +153,7 @@ public final class LoggerFactory {
 			}
 		}
 
-		private LogRecord createLogRecord(Level level, @Nullable Throwable throwable, @Nullable String message) {
+		private LogRecord createLogRecord(Level level, @Nullable Throwable throwable, String message) {
 			String sourceClassName = null;
 			String sourceMethodName = null;
 			boolean found = false;
@@ -178,10 +178,6 @@ public final class LoggerFactory {
 			logRecord.setResourceBundle(this.julLogger.getResourceBundle());
 
 			return logRecord;
-		}
-
-		private static @Nullable String nullSafeGet(@Nullable Supplier<@Nullable String> messageSupplier) {
-			return (messageSupplier != null ? messageSupplier.get() : null);
 		}
 
 	}

@@ -12,7 +12,6 @@ package org.junit.jupiter.engine.extension;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
 import static org.junit.jupiter.api.io.CleanupMode.DEFAULT;
@@ -96,7 +95,7 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 	private final JupiterConfiguration configuration;
 
-	public TempDirectory(JupiterConfiguration configuration) {
+	TempDirectory(JupiterConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
@@ -242,11 +241,11 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 	private static Object getPathOrFile(Class<?> elementType, AnnotatedElementContext elementContext,
 			TempDirFactory factory, CleanupMode cleanupMode, ExtensionContext extensionContext) {
 
-		Path path = requireNonNull(extensionContext.getStore(NAMESPACE.append(elementContext)) //
-				.getOrComputeIfAbsent(KEY,
+		Path path = extensionContext.getStore(NAMESPACE.append(elementContext)) //
+				.computeIfAbsent(KEY,
 					__ -> createTempDir(factory, cleanupMode, elementType, elementContext, extensionContext),
-					CloseablePath.class)) //
-							.get();
+					CloseablePath.class) //
+				.get();
 
 		return (elementType == Path.class) ? path : path.toFile();
 	}
@@ -439,9 +438,9 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 				private void warnAboutLinkWithTargetOutsideTempDir(String linkType, Path file) throws IOException {
 					Path realPath = file.toRealPath();
-					LOGGER.warn(() -> String.format(
-						"Deleting %s from location inside of temp dir (%s) "
-								+ "to location outside of temp dir (%s) but not the target file/directory",
+					LOGGER.warn(() -> """
+							Deleting %s from location inside of temp dir (%s) \
+							to location outside of temp dir (%s) but not the target file/directory""".formatted(
 						linkType, file, realPath));
 				}
 
@@ -526,6 +525,7 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 			return exception;
 		}
 
+		@SuppressWarnings("EmptyCatch")
 		private Path tryToDeleteOnExit(Path path) {
 			try {
 				path.toFile().deleteOnExit();

@@ -13,9 +13,10 @@ package org.junit.platform.commons.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -45,7 +46,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link CollectionUtils}.
@@ -57,19 +57,16 @@ class CollectionUtilsTests {
 	@Nested
 	class OnlyElement {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullCollection() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> CollectionUtils.getOnlyElement(null));
-			assertEquals("collection must not be null", exception.getMessage());
+			assertPreconditionViolationNotNullFor("collection", () -> CollectionUtils.getOnlyElement(null));
 		}
 
 		@Test
 		void emptyCollection() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> CollectionUtils.getOnlyElement(Set.of()));
-			assertEquals("collection must contain exactly one element: []", exception.getMessage());
+			assertPreconditionViolationFor(() -> CollectionUtils.getOnlyElement(Set.of()))//
+					.withMessage("collection must contain exactly one element: []");
 		}
 
 		@Test
@@ -81,21 +78,18 @@ class CollectionUtilsTests {
 
 		@Test
 		void multiElementCollection() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> CollectionUtils.getOnlyElement(List.of("foo", "bar")));
-			assertEquals("collection must contain exactly one element: [foo, bar]", exception.getMessage());
+			assertPreconditionViolationFor(() -> CollectionUtils.getOnlyElement(List.of("foo", "bar")))//
+					.withMessage("collection must contain exactly one element: [foo, bar]");
 		}
 	}
 
 	@Nested
 	class FirstElement {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void nullCollection() {
-			var exception = assertThrows(PreconditionViolationException.class,
-				() -> CollectionUtils.getFirstElement(null));
-			assertEquals("collection must not be null", exception.getMessage());
+			assertPreconditionViolationNotNullFor("collection", () -> CollectionUtils.getFirstElement(null));
 		}
 
 		@Test
@@ -183,21 +177,16 @@ class CollectionUtilsTests {
 			assertThat(CollectionUtils.isConvertibleToStream(null)).isFalse();
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void toStreamWithNull() {
-			Exception exception = assertThrows(PreconditionViolationException.class,
-				() -> CollectionUtils.toStream(null));
-
-			assertThat(exception).hasMessage("Object must not be null");
+			assertPreconditionViolationNotNullFor("Object", () -> CollectionUtils.toStream(null));
 		}
 
 		@Test
 		void toStreamWithUnsupportedObjectType() {
-			Exception exception = assertThrows(PreconditionViolationException.class,
-				() -> CollectionUtils.toStream("unknown"));
-
-			assertThat(exception).hasMessage("Cannot convert instance of java.lang.String into a Stream: unknown");
+			assertPreconditionViolationFor(() -> CollectionUtils.toStream("unknown"))//
+					.withMessage("Cannot convert instance of java.lang.String into a Stream: unknown");
 		}
 
 		@Test
@@ -292,10 +281,9 @@ class CollectionUtilsTests {
 		@Test
 		void throwWhenIteratorNamedMethodDoesNotReturnAnIterator() {
 			var o = new UnusableIteratorProvider("Test");
-			var e = assertThrows(PreconditionViolationException.class, () -> CollectionUtils.toStream(o));
-
-			assertEquals("Cannot convert instance of %s into a Stream: %s".formatted(
-				UnusableIteratorProvider.class.getName(), o), e.getMessage());
+			assertPreconditionViolationFor(() -> CollectionUtils.toStream(o))//
+					.withMessage("Cannot convert instance of %s into a Stream: %s".formatted(
+						UnusableIteratorProvider.class.getName(), o));
 		}
 
 		@Test

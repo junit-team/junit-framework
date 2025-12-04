@@ -62,4 +62,7 @@ public class DiscoverySelectorResolver {
 		resolver.resolve(request, engineDescriptor, issueReporter);
 	}
 
+	private DiscoverySelectorResolver() {
+	}
+
 }

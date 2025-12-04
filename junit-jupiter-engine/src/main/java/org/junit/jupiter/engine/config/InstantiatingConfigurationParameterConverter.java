@@ -22,26 +22,27 @@ import org.junit.platform.engine.ConfigurationParameters;
 /**
  * @since 5.5
  */
-class InstantiatingConfigurationParameterConverter<T> {
+class InstantiatingConfigurationParameterConverter<T> implements ConfigurationParameterConverter<T> {
 
 	private static final Logger logger = LoggerFactory.getLogger(InstantiatingConfigurationParameterConverter.class);
 
 	private final Class<T> clazz;
 	private final String name;
 
-	public InstantiatingConfigurationParameterConverter(Class<T> clazz, String name) {
+	InstantiatingConfigurationParameterConverter(Class<T> clazz, String name) {
 		this.clazz = clazz;
 		this.name = name;
 	}
 
-	Optional<T> get(ConfigurationParameters configurationParameters, String key) {
+	@Override
+	public Optional<T> get(ConfigurationParameters configurationParameters, String key) {
 		return supply(configurationParameters, key).get();
 	}
 
 	Supplier<Optional<T>> supply(ConfigurationParameters configurationParameters, String key) {
 		// @formatter:off
 		return configurationParameters.get(key)
-				.map(String::trim)
+				.map(String::strip)
 				.filter(className -> !className.isEmpty())
 				.map(className -> newInstanceSupplier(className, key))
 				.orElse(Optional::empty);
@@ -60,10 +61,9 @@ class InstantiatingConfigurationParameterConverter<T> {
 	}
 
 	private void logFailureMessage(String className, String key, Exception cause) {
-		logger.warn(cause,
-			() -> String.format("Failed to load default %s class '%s' set via the '%s' configuration parameter."
-					+ " Falling back to default behavior.",
-				this.name, className, key));
+		logger.warn(cause, () -> """
+				Failed to load default %s class '%s' set via the '%s' configuration parameter. \
+				Falling back to default behavior.""".formatted(this.name, className, key));
 	}
 
 	private void logSuccessMessage(String className, String key) {

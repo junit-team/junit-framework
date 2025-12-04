@@ -1,11 +1,11 @@
 import junitbuild.extensions.capitalized
-import junitbuild.extensions.dependencyProject
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.plugins.ide.eclipse.model.Classpath
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
 plugins {
-	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
+	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.junit4-compatibility")
 	id("junitbuild.testing-conventions")
 	id("junitbuild.jmh-conventions")
@@ -34,9 +34,7 @@ dependencies {
 	testImplementation(projects.junitPlatformCommons)
 	testImplementation(projects.junitPlatformConsole)
 	testImplementation(projects.junitPlatformEngine)
-	testImplementation(projects.junitPlatformJfr)
 	testImplementation(projects.junitPlatformLauncher)
-	testImplementation(projects.junitPlatformSuiteCommons)
 	testImplementation(projects.junitPlatformSuiteEngine)
 
 	// --- Things we are testing with ---------------------------------------------
@@ -56,6 +54,7 @@ dependencies {
 	testImplementation(libs.openTestReporting.tooling.core)
 	testImplementation(libs.picocli)
 	testImplementation(libs.bundles.xmlunit)
+	testImplementation(kotlin("stdlib"))
 	testImplementation(testFixtures(projects.junitJupiterApi))
 	testImplementation(testFixtures(projects.junitPlatformReporting))
 	testImplementation(projects.platformTests) {
@@ -70,7 +69,7 @@ dependencies {
 		// Add all projects to the classpath for tests using classpath scanning
 		testRuntimeOnly(it)
 	}
-	testRuntimeOnly(libs.groovy4) {
+	testRuntimeOnly(libs.groovy) {
 		because("`ReflectionUtilsTests.findNestedClassesWithInvalidNestedClassFile` needs it")
 	}
 	woodstox(libs.woodstox)
@@ -80,7 +79,7 @@ dependencies {
 	jmh(libs.junit4)
 
 	// --- ProcessStarter dependencies --------------------------------------------
-	processStarter.implementationConfigurationName(libs.groovy4) {
+	processStarter.implementationConfigurationName(libs.groovy) {
 		because("it provides convenience methods to handle process output")
 	}
 	processStarter.implementationConfigurationName(libs.commons.io) {
@@ -140,13 +139,13 @@ tasks {
 }
 
 eclipse {
-	classpath {
-		plusConfigurations.add(dependencyProject(projects.junitPlatformConsole).configurations["shadowedClasspath"])
-	}
-}
-
-idea {
-	module {
-		scopes["PROVIDED"]!!["plus"]!!.add(dependencyProject(projects.junitPlatformConsole).configurations["shadowedClasspath"])
+	classpath.file.whenMerged {
+		this as Classpath
+		entries.filterIsInstance<SourceFolder>().forEach {
+			if (it.path == "src/test/resources") {
+				// Exclude Foo.java and FooBar.java in the modules-2500 folder.
+				it.excludes.add("**/Foo*.java")
+			}
+		}
 	}
 }

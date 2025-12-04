@@ -73,6 +73,7 @@ class SelectorConverter {
 		}
 	}
 
+	@SuppressWarnings("JavaLangClash")
 	static class Package implements ITypeConverter<PackageSelector> {
 		@Override
 		public PackageSelector convert(String value) {
@@ -80,6 +81,7 @@ class SelectorConverter {
 		}
 	}
 
+	@SuppressWarnings("JavaLangClash")
 	static class Class implements ITypeConverter<ClassSelector> {
 		@Override
 		public ClassSelector convert(String value) {

@@ -15,12 +15,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.MediaType.TEXT_PLAIN;
+import static org.junit.jupiter.api.MediaType.TEXT_PLAIN_UTF_8;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.hierarchicalOutputDirectoryProvider;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrBlankFor;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -31,10 +34,9 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
@@ -47,17 +49,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.extension.PreInterruptCallback;
+import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.engine.config.DefaultJupiterConfiguration;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.DefaultTestInstances;
+import org.junit.jupiter.engine.execution.LauncherStoreFacade;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.EngineExecutionListener;
@@ -78,6 +82,8 @@ import org.mockito.ArgumentCaptor;
  */
 public class ExtensionContextTests {
 
+	private static final ThrowingConsumer<Path> failingAction = __ -> fail("should not be called");
+
 	private final JupiterConfiguration configuration = mock();
 	private final ExtensionRegistry extensionRegistry = mock();
 	private final LauncherStoreFacade launcherStoreFacade = new LauncherStoreFacade(
@@ -88,7 +94,7 @@ public class ExtensionContextTests {
 		when(configuration.getDefaultDisplayNameGenerator()).thenReturn(new DisplayNameGenerator.Standard());
 		when(configuration.getDefaultExecutionMode()).thenReturn(ExecutionMode.SAME_THREAD);
 		when(configuration.getDefaultClassesExecutionMode()).thenReturn(ExecutionMode.SAME_THREAD);
-		when(configuration.getOutputDirectoryProvider()).thenReturn(dummyOutputDirectoryProvider());
+		when(configuration.getOutputDirectoryCreator()).thenReturn(dummyOutputDirectoryCreator());
 	}
 
 	@Test
@@ -103,9 +109,9 @@ public class ExtensionContextTests {
 				() -> assertThat(engineContext.getTestClass()).isEmpty(),
 				() -> assertThat(engineContext.getTestInstance()).isEmpty(),
 				() -> assertThat(engineContext.getTestMethod()).isEmpty(),
-				() -> assertThrows(PreconditionViolationException.class, engineContext::getRequiredTestClass),
-				() -> assertThrows(PreconditionViolationException.class, engineContext::getRequiredTestInstance),
-				() -> assertThrows(PreconditionViolationException.class, engineContext::getRequiredTestMethod),
+				() -> assertPreconditionViolationFor(engineContext::getRequiredTestClass),
+				() -> assertPreconditionViolationFor(engineContext::getRequiredTestInstance),
+				() -> assertPreconditionViolationFor(engineContext::getRequiredTestMethod),
 				() -> assertThat(engineContext.getDisplayName()).isEqualTo(engineTestDescriptor.getDisplayName()),
 				() -> assertThat(engineContext.getParent()).isEmpty(),
 				() -> assertThat(engineContext.getRoot()).isSameAs(engineContext),
@@ -138,8 +144,8 @@ public class ExtensionContextTests {
 			() -> assertThat(outerExtensionContext.getTestInstance()).isEmpty(),
 			() -> assertThat(outerExtensionContext.getTestMethod()).isEmpty(),
 			() -> assertThat(outerExtensionContext.getRequiredTestClass()).isEqualTo(OuterClassTestCase.class),
-			() -> assertThrows(PreconditionViolationException.class, outerExtensionContext::getRequiredTestInstance),
-			() -> assertThrows(PreconditionViolationException.class, outerExtensionContext::getRequiredTestMethod),
+			() -> assertPreconditionViolationFor(outerExtensionContext::getRequiredTestInstance),
+			() -> assertPreconditionViolationFor(outerExtensionContext::getRequiredTestMethod),
 			() -> assertThat(outerExtensionContext.getDisplayName()).isEqualTo(outerClassDescriptor.getDisplayName()),
 			() -> assertThat(outerExtensionContext.getParent()).containsSame(parentExtensionContext),
 			() -> assertThat(outerExtensionContext.getExecutionMode()).isEqualTo(ExecutionMode.SAME_THREAD),
@@ -268,8 +274,8 @@ public class ExtensionContextTests {
 			engineExecutionListener, classTestDescriptor, PER_METHOD, configuration, extensionRegistry,
 			launcherStoreFacade, mock());
 
-		var map1 = Collections.singletonMap("key", "value");
-		var map2 = Collections.singletonMap("other key", "other value");
+		var map1 = Map.of("key", "value");
+		var map2 = Map.of("other key", "other value");
 
 		extensionContext.publishReportEntry(map1);
 		extensionContext.publishReportEntry(map2);
@@ -298,8 +304,7 @@ public class ExtensionContextTests {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir, engineExecutionListener,
 			classTestDescriptor);
 
-		extensionContext.publishFile("test1.txt", MediaType.TEXT_PLAIN_UTF_8,
-			file -> Files.writeString(file, "Test 1"));
+		extensionContext.publishFile("test1.txt", TEXT_PLAIN_UTF_8, file -> Files.writeString(file, "Test 1"));
 		extensionContext.publishDirectory("test2", dir -> {
 			Files.writeString(dir.resolve("nested1.txt"), "Nested content 1");
 			Files.writeString(dir.resolve("nested2.txt"), "Nested content 2");
@@ -312,7 +317,7 @@ public class ExtensionContextTests {
 
 		var fileEntry1 = fileEntries.getFirst();
 		assertThat(fileEntry1.getPath()).isEqualTo(tempDir.resolve("OuterClass/test1.txt"));
-		assertThat(fileEntry1.getMediaType()).contains(MediaType.TEXT_PLAIN_UTF_8.toString());
+		assertThat(fileEntry1.getMediaType()).contains(TEXT_PLAIN_UTF_8.toString());
 
 		var fileEntry2 = fileEntries.get(1);
 		assertThat(fileEntry2.getPath()).isEqualTo(tempDir.resolve("OuterClass/test2"));
@@ -321,14 +326,35 @@ public class ExtensionContextTests {
 		assertThat(fileEntry2.getPath().resolve("nested2.txt")).usingCharset(UTF_8).hasContent("Nested content 2");
 	}
 
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = { " ", " \t " })
+	@SuppressWarnings("DataFlowIssue") // publishFile() parameters are not @Nullable
+	void failsWhenAttemptingToPublishFileWithNullOrBlankName(@Nullable String name, @TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		assertPreconditionViolationNotNullOrBlankFor("name",
+			() -> extensionContext.publishFile(name, TEXT_PLAIN, failingAction));
+	}
+
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = { " ", " \t " })
+	@SuppressWarnings("DataFlowIssue") // publishDirectory() parameters are not @Nullable
+	void failsWhenAttemptingToPublishDirectoryWithNullOrBlankName(@Nullable String name, @TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		assertPreconditionViolationNotNullOrBlankFor("name",
+			() -> extensionContext.publishDirectory(name, failingAction));
+	}
+
 	@Test
 	void failsWhenAttemptingToPublishFileWithPathSeparators(@TempDir Path tempDir) {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir);
 		var name = "test" + File.separator + "subDir";
 
-		var exception = assertThrows(PreconditionViolationException.class, () -> extensionContext.publishFile(name,
-			MediaType.APPLICATION_OCTET_STREAM, __ -> fail("should not be called")));
-		assertThat(exception).hasMessage("name must not contain path separators: " + name);
+		assertPreconditionViolationFor(() -> extensionContext.publishFile(name, TEXT_PLAIN, failingAction))//
+				.withMessage("name must not contain path separators: " + name);
 	}
 
 	@Test
@@ -336,50 +362,55 @@ public class ExtensionContextTests {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir);
 		var name = "test" + File.separator + "subDir";
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> extensionContext.publishDirectory(name, __ -> fail("should not be called")));
-		assertThat(exception).hasMessage("name must not contain path separators: " + name);
+		assertPreconditionViolationFor(() -> extensionContext.publishDirectory(name, failingAction))//
+				.withMessage("name must not contain path separators: " + name);
 	}
 
 	@Test
 	void failsWhenAttemptingToPublishMissingFiles(@TempDir Path tempDir) {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir);
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> extensionContext.publishFile("test", MediaType.APPLICATION_OCTET_STREAM, Files::deleteIfExists));
-		assertThat(exception).hasMessage("Published path must exist: " + tempDir.resolve("OuterClass").resolve("test"));
+		assertPreconditionViolationFor(() -> extensionContext.publishFile("test", TEXT_PLAIN, Files::deleteIfExists)) //
+				.withMessage("Published path must exist: " + tempDir.resolve("OuterClass").resolve("test"));
 	}
 
 	@Test
 	void failsWhenAttemptingToPublishMissingDirectory(@TempDir Path tempDir) {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir);
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> extensionContext.publishDirectory("test", Files::delete));
-		assertThat(exception).hasMessage("Published path must exist: " + tempDir.resolve("OuterClass").resolve("test"));
+		assertPreconditionViolationFor(() -> extensionContext.publishDirectory("test", Files::delete)) //
+				.withMessage("Published path must exist: " + tempDir.resolve("OuterClass").resolve("test"));
 	}
 
 	@Test
 	void failsWhenAttemptingToPublishDirectoriesAsRegularFiles(@TempDir Path tempDir) {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir);
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> extensionContext.publishFile("test", MediaType.APPLICATION_OCTET_STREAM, Files::createDirectory));
-		assertThat(exception).hasMessage(
-			"Published path must be a regular file: " + tempDir.resolve("OuterClass").resolve("test"));
+		assertPreconditionViolationFor(() -> extensionContext.publishFile("test", TEXT_PLAIN, Files::createDirectory))//
+				.withMessage("Published path must be a regular file: " + tempDir.resolve("OuterClass").resolve("test"));
 	}
 
 	@Test
 	void failsWhenAttemptingToPublishRegularFilesAsDirectories(@TempDir Path tempDir) {
 		var extensionContext = createExtensionContextForFilePublishing(tempDir);
 
-		var exception = assertThrows(PreconditionViolationException.class,
-			() -> extensionContext.publishDirectory("test", dir -> {
-				Files.delete(dir);
-				Files.createFile(dir);
-			}));
-		assertThat(exception).hasMessage(
-			"Published path must be a directory: " + tempDir.resolve("OuterClass").resolve("test"));
+		assertPreconditionViolationFor(() -> extensionContext.publishDirectory("test", dir -> {
+			Files.delete(dir);
+			Files.createFile(dir);
+		})).withMessage("Published path must be a directory: " + tempDir.resolve("OuterClass").resolve("test"));
+	}
+
+	@Test
+	void allowsPublishingToTheSameDirectoryTwice(@TempDir Path tempDir) {
+		var extensionContext = createExtensionContextForFilePublishing(tempDir);
+
+		extensionContext.publishDirectory("test",
+			dir -> Files.writeString(dir.resolve("nested1.txt"), "Nested content 1"));
+		extensionContext.publishDirectory("test",
+			dir -> Files.writeString(dir.resolve("nested2.txt"), "Nested content 2"));
+
+		assertThat(tempDir.resolve("OuterClass/test/nested1.txt")).hasContent("Nested content 1");
+		assertThat(tempDir.resolve("OuterClass/test/nested2.txt")).hasContent("Nested content 2");
 	}
 
 	private ExtensionContext createExtensionContextForFilePublishing(Path tempDir) {
@@ -389,14 +420,14 @@ public class ExtensionContextTests {
 
 	private ExtensionContext createExtensionContextForFilePublishing(Path tempDir,
 			EngineExecutionListener engineExecutionListener, ClassTestDescriptor classTestDescriptor) {
-		when(configuration.getOutputDirectoryProvider()) //
-				.thenReturn(hierarchicalOutputDirectoryProvider(tempDir));
+		when(configuration.getOutputDirectoryCreator()) //
+				.thenReturn(hierarchicalOutputDirectoryCreator(tempDir));
 		return new ClassExtensionContext(mock(AbstractExtensionContext.class), engineExecutionListener,
 			classTestDescriptor, PER_METHOD, configuration, extensionRegistry, launcherStoreFacade, mock());
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "deprecation" })
 	void usingStore() {
 		var methodTestDescriptor = methodDescriptor();
 		var classTestDescriptor = outerClassDescriptor(methodTestDescriptor);
@@ -423,14 +454,17 @@ public class ExtensionContextTests {
 
 		final Object key2 = "key 2";
 		final var value2 = "other value";
-		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> value2));
-		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> value2, String.class));
+		assertEquals(value2, childStore.computeIfAbsent(key2, key -> value2));
+		assertEquals(value2, childStore.computeIfAbsent(key2, key -> "a different value", String.class));
+		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> "a different value"));
+		assertEquals(value2, childStore.getOrComputeIfAbsent(key2, key -> "a different value", String.class));
 		assertEquals(value2, childStore.get(key2));
 		assertEquals(value2, childStore.get(key2, String.class));
 
 		final Object parentKey = "parent key";
 		final var parentValue = "parent value";
 		parentStore.put(parentKey, parentValue);
+		assertEquals(parentValue, childStore.computeIfAbsent(parentKey, k -> "a different value"));
 		assertEquals(parentValue, childStore.getOrComputeIfAbsent(parentKey, k -> "a different value"));
 		assertEquals(parentValue, childStore.get(parentKey));
 	}
@@ -438,10 +472,14 @@ public class ExtensionContextTests {
 	@ParameterizedTest
 	@MethodSource("extensionContextFactories")
 	void configurationParameter(Function<JupiterConfiguration, ? extends ExtensionContext> extensionContextFactory) {
-		JupiterConfiguration echo = new DefaultJupiterConfiguration(new EchoParameters(),
-			dummyOutputDirectoryProvider(), mock());
+
 		var key = "123";
 		var expected = Optional.of(key);
+
+		ConfigurationParameters configurationParameters = mock();
+		when(configurationParameters.get("123")).thenReturn(expected);
+		JupiterConfiguration echo = new DefaultJupiterConfiguration(configurationParameters,
+			dummyOutputDirectoryCreator(), mock());
 
 		var context = extensionContextFactory.apply(echo);
 
@@ -536,25 +574,6 @@ public class ExtensionContextTests {
 
 		@Tag("method-tag")
 		void aMethod() {
-		}
-	}
-
-	private static class EchoParameters implements ConfigurationParameters {
-
-		@Override
-		public Optional<String> get(String key) {
-			return Optional.of(key);
-		}
-
-		@Override
-		public Optional<Boolean> getBoolean(String key) {
-			throw new UnsupportedOperationException("getBoolean(String) should not be called");
-		}
-
-		@Override
-		public Set<String> keySet() {
-			throw new UnsupportedOperationException("keySet() should not be called");
-
 		}
 	}
 

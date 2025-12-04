@@ -80,14 +80,14 @@ public class FilterResult {
 	}
 
 	/**
-	 * @return {@code true} if the filtered object should be included
+	 * {@return {@code true} if the filtered object should be included}
 	 */
 	public boolean included() {
 		return this.included;
 	}
 
 	/**
-	 * @return {@code true} if the filtered object should be excluded
+	 * {@return {@code true} if the filtered object should be excluded}
 	 */
 	public boolean excluded() {
 		return !included();

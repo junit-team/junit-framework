@@ -10,6 +10,9 @@
 
 package org.junit.platform.launcher.core;
 
+import static java.util.stream.Collectors.toMap;
+import static org.junit.platform.commons.util.StringUtils.nullSafeToString;
+
 import java.util.Map;
 
 import org.junit.platform.engine.ConfigurationParameters;
@@ -19,10 +22,14 @@ public class ConfigurationParametersFactoryForTests {
 	private ConfigurationParametersFactoryForTests() {
 	}
 
-	public static ConfigurationParameters create(Map<String, String> configParams) {
+	public static ConfigurationParameters create(Map<String, ?> configParams) {
 		return LauncherConfigurationParameters.builder() //
-				.explicitParameters(configParams) //
+				.explicitParameters(withStringValues(configParams)) //
 				.enableImplicitProviders(false) //
 				.build();
+	}
+
+	private static Map<String, String> withStringValues(Map<String, ?> configParams) {
+		return configParams.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> nullSafeToString(e.getValue())));
 	}
 }

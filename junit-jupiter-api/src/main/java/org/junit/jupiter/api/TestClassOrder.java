@@ -29,7 +29,8 @@ import org.apiguardian.api.API;
  * <p>If {@code @TestClassOrder} is not explicitly declared on a test class,
  * inherited from a parent class, declared on a test interface implemented by
  * a test class, or inherited from an {@linkplain Class#getEnclosingClass() enclosing
- * class}, {@code @Nested} test classes will be executed in arbitrary order.
+ * class}, {@code @Nested} test classes will be ordered using a default
+ * algorithm that is deterministic but intentionally nonobvious.
  *
  * <p>As an alternative to {@code @TestClassOrder}, a global {@link ClassOrderer}
  * can be configured for the entire test suite via the

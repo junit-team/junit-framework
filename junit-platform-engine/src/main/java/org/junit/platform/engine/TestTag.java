@@ -61,9 +61,9 @@ public final class TestTag implements Serializable {
 	 * <ul>
 	 * <li>A tag must not be {@code null}.</li>
 	 * <li>A tag must not be blank.</li>
-	 * <li>A trimmed tag must not contain whitespace.</li>
-	 * <li>A trimmed tag must not contain ISO control characters.</li>
-	 * <li>A trimmed tag must not contain {@linkplain #RESERVED_CHARACTERS
+	 * <li>A stripped tag must not contain whitespace.</li>
+	 * <li>A stripped tag must not contain ISO control characters.</li>
+	 * <li>A stripped tag must not contain {@linkplain #RESERVED_CHARACTERS
 	 * reserved characters}.</li>
 	 * </ul>
 	 *
@@ -75,7 +75,7 @@ public final class TestTag implements Serializable {
 	 * @return {@code true} if the supplied tag name conforms to the supported
 	 * syntax for tags
 	 * @see StringUtils#isNotBlank(String)
-	 * @see String#trim()
+	 * @see String#strip()
 	 * @see StringUtils#doesNotContainWhitespace(String)
 	 * @see StringUtils#doesNotContainIsoControlCharacter(String)
 	 * @see #RESERVED_CHARACTERS
@@ -85,7 +85,7 @@ public final class TestTag implements Serializable {
 		if (name == null) {
 			return false;
 		}
-		name = name.trim();
+		name = name.strip();
 
 		return !name.isEmpty() && //
 				StringUtils.doesNotContainWhitespace(name) && //
@@ -104,7 +104,7 @@ public final class TestTag implements Serializable {
 	 * is {@linkplain #isValid(String) valid} before attempting to create a
 	 * {@code TestTag} using this factory method.
 	 *
-	 * <p>Note: the supplied {@code name} will be {@linkplain String#trim() trimmed}.
+	 * <p>Note: the supplied {@code name} will be {@linkplain String#strip() stripped}.
 	 *
 	 * @param name the name of the tag; must be syntactically <em>valid</em>
 	 * @throws PreconditionViolationException if the supplied tag name is not
@@ -118,7 +118,7 @@ public final class TestTag implements Serializable {
 	private TestTag(String name) {
 		Preconditions.condition(TestTag.isValid(name),
 			() -> "Tag name [%s] must be syntactically valid".formatted(name));
-		this.name = name.trim();
+		this.name = name.strip();
 	}
 
 	/**
@@ -132,10 +132,7 @@ public final class TestTag implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof TestTag that) {
-			return Objects.equals(this.name, that.name);
-		}
-		return false;
+		return (obj instanceof TestTag that && Objects.equals(this.name, that.name));
 	}
 
 	@Override

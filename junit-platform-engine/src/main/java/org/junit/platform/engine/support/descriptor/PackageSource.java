@@ -30,7 +30,7 @@ import org.junit.platform.engine.TestSource;
  * @see org.junit.platform.engine.discovery.PackageSelector
  */
 @API(status = STABLE, since = "1.0")
-public class PackageSource implements TestSource {
+public final class PackageSource implements TestSource {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -60,13 +60,16 @@ public class PackageSource implements TestSource {
 	}
 
 	private PackageSource(String packageName) {
-		this.packageName = Preconditions.notBlank(packageName, "package name must not be null or blank");
+		Preconditions.notNull(packageName, "package name must not be null");
+		Preconditions.condition(packageName.isEmpty() || !packageName.isBlank(),
+			"package name must not contain only whitespace");
+		this.packageName = packageName;
 	}
 
 	/**
 	 * Get the package name of this test source.
 	 */
-	public final String getPackageName() {
+	public String getPackageName() {
 		return this.packageName;
 	}
 

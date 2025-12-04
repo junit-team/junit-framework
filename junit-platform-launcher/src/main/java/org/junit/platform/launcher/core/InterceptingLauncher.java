@@ -10,8 +10,10 @@
 
 package org.junit.platform.launcher.core;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.LauncherInterceptor;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
@@ -34,19 +36,25 @@ class InterceptingLauncher extends DelegatingLauncher {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		interceptor.intercept(() -> {
+		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherDiscoveryRequest, listeners);
 			return null;
 		});
 	}
 
 	@Override
-	@SuppressWarnings("NullAway")
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
-		interceptor.intercept(() -> {
+		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(testPlan, listeners);
+			return null;
+		});
+	}
+
+	@Override
+	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		interceptor.<@Nullable Object> intercept(() -> {
+			super.execute(launcherExecutionRequest);
 			return null;
 		});
 	}

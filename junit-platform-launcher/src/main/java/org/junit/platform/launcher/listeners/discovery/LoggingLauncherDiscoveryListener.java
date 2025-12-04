@@ -31,7 +31,7 @@ import org.junit.platform.launcher.LauncherDiscoveryRequest;
  * @since 1.6
  * @see LauncherDiscoveryListeners#logging()
  */
-class LoggingLauncherDiscoveryListener implements LauncherDiscoveryListener {
+final class LoggingLauncherDiscoveryListener implements LauncherDiscoveryListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggingLauncherDiscoveryListener.class);
 
@@ -69,14 +69,10 @@ class LoggingLauncherDiscoveryListener implements LauncherDiscoveryListener {
 	@Override
 	public void selectorProcessed(UniqueId engineId, DiscoverySelector selector, SelectorResolutionResult result) {
 		switch (result.getStatus()) {
-			case RESOLVED:
-				logger.debug(() -> selector + " was resolved by " + engineId);
-				break;
-			case FAILED:
-				logger.error(result.getThrowable().orElse(null),
-					() -> "Resolution of " + selector + " by " + engineId + " failed");
-				break;
-			case UNRESOLVED:
+			case RESOLVED -> logger.debug(() -> selector + " was resolved by " + engineId);
+			case FAILED -> logger.error(result.getThrowable().orElse(null),
+				() -> "Resolution of " + selector + " by " + engineId + " failed");
+			case UNRESOLVED -> {
 				Consumer<Supplier<String>> loggingConsumer = logger::debug;
 				if (selector instanceof UniqueIdSelector uniqueIdSelector) {
 					UniqueId uniqueId = uniqueIdSelector.getUniqueId();
@@ -85,7 +81,7 @@ class LoggingLauncherDiscoveryListener implements LauncherDiscoveryListener {
 					}
 				}
 				loggingConsumer.accept(() -> selector + " could not be resolved by " + engineId);
-				break;
+			}
 		}
 	}
 

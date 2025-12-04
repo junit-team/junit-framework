@@ -1,4 +1,4 @@
-import junitbuild.extensions.dependencyProject
+import junitbuild.extensions.withArchiveOperations
 import junitbuild.java.WriteArtifactsFile
 
 plugins {
@@ -22,6 +22,10 @@ dependencies {
 	osgiVerification(libs.openTestReporting.tooling.spi)
 }
 
+backwardCompatibilityChecks {
+	enabled = false // already checked by individual projects
+}
+
 tasks {
 	jar {
 		manifest {
@@ -33,19 +37,33 @@ tasks {
 		from(configurations.shadowedClasspath)
 		outputFile = layout.buildDirectory.file("shadowed-artifacts")
 	}
+	val extractThirdPartyLicenses by registering(Sync::class) {
+		from(withArchiveOperations { ops -> configurations.shadowedClasspath.flatMap { it.elements }.map { it.map(ops::zipTree) } })
+		into(layout.buildDirectory.dir("thirdPartyLicenses"))
+		include("LICENSE.txt")
+		include("LICENSE-junit.txt")
+		include("META-INF/LICENSE-*")
+		exclude("META-INF/LICENSE-notice.md")
+		eachFile {
+			val fileName = relativePath.lastName
+			relativePath = RelativePath(true, when (fileName) {
+				"LICENSE.txt" -> "LICENSE-hamcrest"
+				"LICENSE-junit.txt" -> "LICENSE-junit4"
+				else -> fileName
+			})
+		}
+		includeEmptyDirs = false
+	}
 	shadowJar {
-		// https://github.com/junit-team/junit5/issues/2557
+		// https://github.com/junit-team/junit-framework/issues/2557
 		// exclude compiled module declarations from any source (e.g. /*, /META-INF/versions/N/*)
 		exclude("**/module-info.class")
-		// https://github.com/junit-team/junit5/issues/761
+		// https://github.com/junit-team/junit-framework/issues/761
 		// prevent duplicates, add 3rd-party licenses explicitly
-		exclude("META-INF/LICENSE*.md")
-		from(dependencyProject(project.projects.junitPlatformConsole).projectDir) {
-			include("LICENSE-picocli.md")
-			into("META-INF")
-		}
-		from(dependencyProject(project.projects.junitJupiterParams).projectDir) {
-			include("LICENSE-univocity-parsers.md")
+		exclude("**/COPYRIGHT*")
+		exclude("META-INF/LICENSE*")
+		exclude("LICENSE*.txt") // JUnit 4 and Hamcrest
+		from(extractThirdPartyLicenses) {
 			into("META-INF")
 		}
 		from(shadowedArtifactsFile) {
@@ -69,9 +87,11 @@ tasks {
 			""")
 		}
 
+		duplicatesStrategy = DuplicatesStrategy.INCLUDE
 		mergeServiceFiles()
+		failOnDuplicateEntries = true
+
 		manifest.apply {
-			inheritFrom(jar.get().manifest)
 			attributes(mapOf(
 					"Specification-Title" to project.name,
 					"Implementation-Title" to project.name,
@@ -79,11 +99,6 @@ tasks {
 					// Pattern of key and value: `"Engine-Version-{YourTestEngine#getId()}": "47.11"`
 					"Engine-Version-junit-jupiter" to project.version,
 					"Engine-Version-junit-vintage" to project.version,
-					// Version-aware binaries are already included - set Multi-Release flag here.
-					// See https://openjdk.java.net/jeps/238 for details
-					// Note: the "jar --update ... --release X" command does not work with the
-					// shadowed JAR as it contains nested classes that do not comply with multi-release jars.
-					"Multi-Release" to true
 			))
 		}
 	}

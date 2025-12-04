@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.migrationsupport.rules;
 
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -36,8 +36,11 @@ import org.junit.rules.Verifier;
  * @see org.junit.rules.Verifier
  * @see org.junit.rules.TestRule
  * @see org.junit.Rule
+ * @deprecated Please implement {@link org.junit.jupiter.api.extension.AfterTestExecutionCallback} instead.
  */
-@API(status = STABLE, since = "5.7")
+@SuppressWarnings("removal")
+@API(status = DEPRECATED, since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
 public class VerifierSupport implements AfterEachCallback {
 
 	private final TestRuleSupport support = new TestRuleSupport(VerifierAdapter::new, Verifier.class);

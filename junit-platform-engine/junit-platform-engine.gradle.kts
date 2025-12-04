@@ -1,6 +1,5 @@
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	`java-test-fixtures`
 }
 
@@ -18,4 +17,8 @@ dependencies {
 
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
+}
+
+javadocConventions {
+	addExtraModuleReferences(projects.junitPlatformLauncher)
 }

@@ -10,7 +10,7 @@
 
 package org.junit.platform.suite.api;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -38,7 +38,7 @@ import org.apiguardian.api.API;
 @Target(ElementType.TYPE)
 @Inherited
 @Documented
-@API(status = EXPERIMENTAL, since = "1.11")
+@API(status = MAINTAINED, since = "1.13.3")
 @Repeatable(ConfigurationParametersResources.class)
 public @interface ConfigurationParametersResource {
 

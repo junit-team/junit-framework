@@ -10,11 +10,11 @@
 
 package org.junit.jupiter.engine;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.hierarchicalOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.junit.platform.testkit.engine.EventConditions.fileEntry;
 import static org.junit.platform.testkit.engine.EventConditions.reportEntry;
 
@@ -28,14 +28,13 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestReporter;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.reporting.FileEntry;
 
 /**
@@ -53,7 +52,7 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 		var request = request() //
 				.selectors(selectClass(MyReportingTestCase.class)) //
 				.configurationParameter(DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME, lifecycle.name()) //
-				.outputDirectoryProvider(hierarchicalOutputDirectoryProvider(tempDir));
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(tempDir));
 
 		var results = executeTests(request);
 
@@ -86,7 +85,7 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MyReportingTestCase {
 
-		public MyReportingTestCase(TestReporter reporter) {
+		MyReportingTestCase(TestReporter reporter) {
 			// Reported on class-level for PER_CLASS lifecycle and on method-level for PER_METHOD lifecycle
 			reporter.publishEntry("Constructor");
 			reporter.publishFile("constructor", MediaType.TEXT_PLAIN_UTF_8,
@@ -115,7 +114,7 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 				file -> Files.writeString(file, "succeedingTest"));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void invalidReportData(TestReporter reporter) {
 
@@ -123,20 +122,20 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 			Map<String, String> map = new HashMap<>();
 
 			map.put("key", null);
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry(map));
+			assertPreconditionViolationFor(() -> reporter.publishEntry(map));
 
 			map.clear();
 			map.put(null, "value");
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry(map));
+			assertPreconditionViolationFor(() -> reporter.publishEntry(map));
 
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry((Map<String, String>) null));
+			assertPreconditionViolationFor(() -> reporter.publishEntry((Map<String, String>) null));
 
 			// Key-Value pair
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry(null, "bar"));
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry("foo", null));
+			assertPreconditionViolationFor(() -> reporter.publishEntry(null, "bar"));
+			assertPreconditionViolationFor(() -> reporter.publishEntry("foo", null));
 
 			// Value
-			assertThrows(PreconditionViolationException.class, () -> reporter.publishEntry((String) null));
+			assertPreconditionViolationFor(() -> reporter.publishEntry((String) null));
 		}
 
 	}

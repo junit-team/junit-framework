@@ -16,11 +16,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.engine.discovery.JupiterUniqueIdBuilder.uniqueIdForMethod;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClassesByName;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResource;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResourceByName;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathRoots;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectDirectory;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectFile;
@@ -47,13 +51,11 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.commons.PreconditionViolationException;
-import org.junit.platform.commons.support.Resource;
+import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.test.TestClassLoader;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.DiscoverySelector;
@@ -69,12 +71,12 @@ class DiscoverySelectorsTests {
 	@Nested
 	class SelectUriTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectUriByName() {
-			assertViolatesPrecondition(() -> selectUri((String) null));
-			assertViolatesPrecondition(() -> selectUri("   "));
-			assertViolatesPrecondition(() -> selectUri("foo:"));
+			assertPreconditionViolationFor(() -> selectUri((String) null));
+			assertPreconditionViolationFor(() -> selectUri("   "));
+			assertPreconditionViolationFor(() -> selectUri("foo:"));
 
 			var uri = "https://junit.org";
 
@@ -82,22 +84,17 @@ class DiscoverySelectorsTests {
 			assertEquals(uri, selector.getUri().toString());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectUriByURI() {
-			assertViolatesPrecondition(() -> selectUri((URI) null));
-			assertViolatesPrecondition(() -> selectUri("   "));
+			assertPreconditionViolationFor(() -> selectUri((URI) null));
+			assertPreconditionViolationFor(() -> selectUri("   "));
 
 			var uri = URI.create("https://junit.org");
 
 			var selector = selectUri(uri);
 			assertEquals(uri, selector.getUri());
 		}
-
-	}
-
-	@Nested
-	class SelectFileTests {
 
 		@Test
 		void parseUriSelector() {
@@ -108,11 +105,16 @@ class DiscoverySelectorsTests {
 					.isEqualTo(URI.create("https://junit.org"));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	}
+
+	@Nested
+	class SelectFileTests {
+
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectFileByName() {
-			assertViolatesPrecondition(() -> selectFile((String) null));
-			assertViolatesPrecondition(() -> selectFile("   "));
+			assertPreconditionViolationFor(() -> selectFile((String) null));
+			assertPreconditionViolationFor(() -> selectFile("   "));
 
 			var path = "src/test/resources/do_not_delete_me.txt";
 
@@ -122,12 +124,12 @@ class DiscoverySelectorsTests {
 			assertEquals(Path.of(path), selector.getPath());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectFileByNameAndPosition() {
 			var filePosition = FilePosition.from(12, 34);
-			assertViolatesPrecondition(() -> selectFile((String) null, filePosition));
-			assertViolatesPrecondition(() -> selectFile("   ", filePosition));
+			assertPreconditionViolationFor(() -> selectFile((String) null, filePosition));
+			assertPreconditionViolationFor(() -> selectFile("   ", filePosition));
 
 			var path = "src/test/resources/do_not_delete_me.txt";
 
@@ -138,11 +140,11 @@ class DiscoverySelectorsTests {
 			assertEquals(filePosition, selector.getPosition().orElseThrow());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectFileByFileReference() throws Exception {
-			assertViolatesPrecondition(() -> selectFile((File) null));
-			assertViolatesPrecondition(() -> selectFile(new File("bogus/nonexistent.txt")));
+			assertPreconditionViolationFor(() -> selectFile((File) null));
+			assertPreconditionViolationFor(() -> selectFile(new File("bogus/nonexistent.txt")));
 
 			var currentDir = new File(".").getCanonicalFile();
 			var relativeDir = new File("..", currentDir.getName());
@@ -155,12 +157,12 @@ class DiscoverySelectorsTests {
 			assertEquals(Path.of(path), selector.getPath());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectFileByFileReferenceAndPosition() throws Exception {
 			var filePosition = FilePosition.from(12, 34);
-			assertViolatesPrecondition(() -> selectFile((File) null, filePosition));
-			assertViolatesPrecondition(() -> selectFile(new File("bogus/nonexistent.txt"), filePosition));
+			assertPreconditionViolationFor(() -> selectFile((File) null, filePosition));
+			assertPreconditionViolationFor(() -> selectFile(new File("bogus/nonexistent.txt"), filePosition));
 
 			var currentDir = new File(".").getCanonicalFile();
 			var relativeDir = new File("..", currentDir.getName());
@@ -173,11 +175,6 @@ class DiscoverySelectorsTests {
 			assertEquals(Path.of(path), selector.getPath());
 			assertEquals(FilePosition.from(12, 34), selector.getPosition().orElseThrow());
 		}
-
-	}
-
-	@Nested
-	class SelectDirectoryTests {
 
 		@Test
 		void parseFileSelectorWithRelativePath() {
@@ -232,11 +229,16 @@ class DiscoverySelectorsTests {
 						Optional.of(filePosition));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	}
+
+	@Nested
+	class SelectDirectoryTests {
+
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectDirectoryByName() {
-			assertViolatesPrecondition(() -> selectDirectory((String) null));
-			assertViolatesPrecondition(() -> selectDirectory("   "));
+			assertPreconditionViolationFor(() -> selectDirectory((String) null));
+			assertPreconditionViolationFor(() -> selectDirectory("   "));
 
 			var path = "src/test/resources";
 
@@ -246,11 +248,11 @@ class DiscoverySelectorsTests {
 			assertEquals(Path.of(path), selector.getPath());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectDirectoryByFileReference() throws Exception {
-			assertViolatesPrecondition(() -> selectDirectory((File) null));
-			assertViolatesPrecondition(() -> selectDirectory(new File("bogus/nonexistent")));
+			assertPreconditionViolationFor(() -> selectDirectory((File) null));
+			assertPreconditionViolationFor(() -> selectDirectory(new File("bogus/nonexistent")));
 
 			var currentDir = new File(".").getCanonicalFile();
 			var relativeDir = new File("..", currentDir.getName());
@@ -262,11 +264,6 @@ class DiscoverySelectorsTests {
 			assertEquals(directory.getCanonicalFile(), selector.getDirectory());
 			assertEquals(Path.of(path), selector.getPath());
 		}
-
-	}
-
-	@Nested
-	class SelectClasspathResourceTests {
 
 		@Test
 		void parseDirectorySelectorWithRelativePath() {
@@ -294,24 +291,33 @@ class DiscoverySelectorsTests {
 					.containsExactly(path, new File(path), Path.of(path));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	}
+
+	@Nested
+	class SelectClasspathResourceTests {
+
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectClasspathResourcesPreconditions() {
-			assertViolatesPrecondition(() -> selectClasspathResource((String) null));
-			assertViolatesPrecondition(() -> selectClasspathResource(""));
-			assertViolatesPrecondition(() -> selectClasspathResource("    "));
-			assertViolatesPrecondition(() -> selectClasspathResource("\t"));
-			assertViolatesPrecondition(() -> selectClasspathResource((Set<Resource>) null));
-			assertViolatesPrecondition(() -> selectClasspathResource(Collections.emptySet()));
-			assertViolatesPrecondition(() -> selectClasspathResource(Collections.singleton(null)));
-			assertViolatesPrecondition(() -> selectClasspathResource(Set.of(new StubResource(null))));
-			assertViolatesPrecondition(() -> selectClasspathResource(Set.of(new StubResource(""))));
-			assertViolatesPrecondition(
-				() -> selectClasspathResource(Set.of(new StubResource("a"), new StubResource("b"))));
+			// @formatter:off
+			assertPreconditionViolationFor(() -> selectClasspathResource((String) null));
+			assertPreconditionViolationFor(() -> selectClasspathResource(""));
+			assertPreconditionViolationFor(() -> selectClasspathResource("/"));
+			assertPreconditionViolationFor(() -> selectClasspathResource("    "));
+			assertPreconditionViolationFor(() -> selectClasspathResource("/   "));
+			assertPreconditionViolationFor(() -> selectClasspathResource("\t"));
+			assertPreconditionViolationFor(() -> selectClasspathResource("/\t"));
+			assertPreconditionViolationFor(() -> selectClasspathResourceByName(null));
+			assertPreconditionViolationFor(() -> selectClasspathResourceByName(Collections.emptySet()));
+			assertPreconditionViolationFor(() -> selectClasspathResourceByName(Collections.singleton(null)));
+			assertPreconditionViolationFor(() -> selectClasspathResourceByName(Set.of(new StubResource(null))));
+			assertPreconditionViolationFor(() -> selectClasspathResourceByName(Set.of(new StubResource(""))));
+			assertPreconditionViolationFor(() -> selectClasspathResourceByName(Set.of(new StubResource("a"), new StubResource("b"))));
+			// @formatter:on
 		}
 
 		@Test
-		void selectClasspathResources() {
+		void selectIndividualClasspathResources() {
 			// with unnecessary "/" prefix
 			var selector = selectClasspathResource("/foo/bar/spec.xml");
 			assertEquals("foo/bar/spec.xml", selector.getClasspathResourceName());
@@ -324,7 +330,7 @@ class DiscoverySelectorsTests {
 		@Test
 		void getSelectedClasspathResources() {
 			var selector = selectClasspathResource("org/junit/platform/commons/example.resource");
-			var classpathResources = selector.getClasspathResources();
+			var classpathResources = selector.getResources();
 			assertAll(() -> assertThat(classpathResources).hasSize(1), //
 				() -> assertThat(classpathResources) //
 						.extracting(Resource::getName) //
@@ -335,17 +341,17 @@ class DiscoverySelectorsTests {
 		@Test
 		void getMissingClasspathResources() {
 			var selector = selectClasspathResource("org/junit/platform/commons/no-such-example.resource");
-			assertViolatesPrecondition(selector::getClasspathResources);
+			assertPreconditionViolationFor(selector::getResources);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectClasspathResourcesWithFilePosition() {
 			var filePosition = FilePosition.from(12, 34);
-			assertViolatesPrecondition(() -> selectClasspathResource(null, filePosition));
-			assertViolatesPrecondition(() -> selectClasspathResource("", filePosition));
-			assertViolatesPrecondition(() -> selectClasspathResource("    ", filePosition));
-			assertViolatesPrecondition(() -> selectClasspathResource("\t", filePosition));
+			assertPreconditionViolationFor(() -> selectClasspathResource(null, filePosition));
+			assertPreconditionViolationFor(() -> selectClasspathResource("", filePosition));
+			assertPreconditionViolationFor(() -> selectClasspathResource("    ", filePosition));
+			assertPreconditionViolationFor(() -> selectClasspathResource("\t", filePosition));
 
 			// with unnecessary "/" prefix
 			var selector = selectClasspathResource("/foo/bar/spec.xml", filePosition);
@@ -414,27 +420,40 @@ class DiscoverySelectorsTests {
 	@Nested
 	class SelectModuleTests {
 
+		@SuppressWarnings("DataFlowIssue")
+		@Test
+		void selectModuleByNamePreconditions() {
+			assertPreconditionViolationFor(() -> selectModule((String) null));
+			assertPreconditionViolationFor(() -> selectModule(""));
+			assertPreconditionViolationFor(() -> selectModule("   "));
+		}
+
 		@Test
 		void selectModuleByName() {
 			var selector = selectModule("java.base");
 			assertEquals("java.base", selector.getModuleName());
 		}
 
+		@SuppressWarnings("DataFlowIssue")
 		@Test
-		void parseModuleByName() {
-			var selector = parseIdentifier(selectModule("java.base"));
-			assertThat(selector) //
-					.asInstanceOf(type(ModuleSelector.class)) //
-					.extracting(ModuleSelector::getModuleName) //
-					.isEqualTo("java.base");
+		void selectModuleByInstancePreconditions() {
+			assertPreconditionViolationFor(() -> selectModule((Module) null));
+			assertPreconditionViolationFor(() -> selectModule(getClass().getClassLoader().getUnnamedModule()));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
 		@Test
-		void selectModuleByNamePreconditions() {
-			assertViolatesPrecondition(() -> selectModule(null));
-			assertViolatesPrecondition(() -> selectModule(""));
-			assertViolatesPrecondition(() -> selectModule("   "));
+		void selectModuleByInstance() {
+			var module = Object.class.getModule();
+			var selector = selectModule(module);
+			assertEquals("java.base", selector.getModuleName());
+			assertSame(module, selector.getModule().orElseThrow());
+		}
+
+		@SuppressWarnings("DataFlowIssue")
+		@Test
+		void selectModulesByNamesPreconditions() {
+			assertPreconditionViolationFor(() -> selectModules(null));
+			assertPreconditionViolationFor(() -> selectModules(Set.of("a", " ")));
 		}
 
 		@Test
@@ -444,11 +463,13 @@ class DiscoverySelectorsTests {
 			assertThat(names).containsExactlyInAnyOrder("b", "a");
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
 		@Test
-		void selectModulesByNamesPreconditions() {
-			assertViolatesPrecondition(() -> selectModules(null));
-			assertViolatesPrecondition(() -> selectModules(Set.of("a", " ")));
+		void parseModuleSelector() {
+			var selector = parseIdentifier(selectModule("java.base"));
+			assertThat(selector) //
+					.asInstanceOf(type(ModuleSelector.class)) //
+					.extracting(ModuleSelector::getModuleName) //
+					.isEqualTo("java.base");
 		}
 
 	}
@@ -463,7 +484,7 @@ class DiscoverySelectorsTests {
 		}
 
 		@Test
-		void parsePackageByName() {
+		void parsePackageSelector() {
 			var selector = parseIdentifier(selectPackage(getClass().getPackage().getName()));
 			assertThat(selector) //
 					.asInstanceOf(type(PackageSelector.class)) //
@@ -507,24 +528,56 @@ class DiscoverySelectorsTests {
 			assertThat(selectors).extracting(ClasspathRootSelector::getClasspathRoot).containsExactly(jarUri);
 		}
 
+		@Test
+		void parseClasspathRootSelectorWithNonExistingDirectory() {
+			var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(Path.of("some/local/path"))));
+			assertThat(selectorStream).isEmpty();
+		}
+
+		@Test
+		void parseClasspathRootSelectorWithNonExistingJarFile() {
+			var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(Path.of("some.jar"))));
+			assertThat(selectorStream).isEmpty();
+		}
+
+		@Test
+		void parseClasspathRootSelectorWithExistingDirectory(@TempDir Path tempDir) {
+			var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(tempDir)));
+			var selector = selectorStream.findAny().orElseThrow();
+			assertThat(selector) //
+					.asInstanceOf(type(ClasspathRootSelector.class)) //
+					.extracting(ClasspathRootSelector::getClasspathRoot) //
+					.isEqualTo(tempDir.toUri());
+		}
+
+		@Test
+		void parseClasspathRootSelectorWithExistingJarFile() throws Exception {
+			var jarUri = requireNonNull(getClass().getResource("/jartest.jar")).toURI();
+			var jarPath = Path.of(jarUri);
+
+			var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(jarPath)));
+			var selector = selectorStream.findAny().orElseThrow();
+			assertThat(selector) //
+					.asInstanceOf(type(ClasspathRootSelector.class)) //
+					.extracting(ClasspathRootSelector::getClasspathRoot) //
+					.isEqualTo(jarUri);
+		}
+
 	}
 
 	@Nested
 	class SelectClassTests {
 
 		@Test
-		void selectClassByName() {
-			var selector = selectClass(getClass().getName());
+		void selectClassByReference() {
+			var selector = selectClass(getClass());
 			assertEquals(getClass(), selector.getJavaClass());
 		}
 
 		@Test
-		void pareClassByName() {
-			var selector = parseIdentifier(selectClass(getClass()));
-			assertThat(selector) //
-					.asInstanceOf(type(ClassSelector.class)) //
-					.extracting(ClassSelector::getJavaClass) //
-					.isEqualTo(getClass());
+		void selectClassByName() {
+			var selector = selectClass(getClass().getName());
+			assertEquals(getClass(), selector.getJavaClass());
 		}
 
 		@Test
@@ -539,86 +592,170 @@ class DiscoverySelectorsTests {
 			}
 		}
 
+		@Test
+		void parseClassSelector() {
+			var selector = parseIdentifier(selectClass(getClass()));
+			assertThat(selector) //
+					.asInstanceOf(type(ClassSelector.class)) //
+					.extracting(ClassSelector::getJavaClass) //
+					.isEqualTo(getClass());
+		}
+
+	}
+
+	/**
+	 * @since 6.0
+	 */
+	@Nested
+	class SelectClassesTests {
+
+		@Test
+		void selectClassesByReferenceViaVarargs() {
+			assertSelectClassesByReferenceResults(selectClasses(String.class, Integer.class));
+		}
+
+		@Test
+		void selectClassesByReferenceViaList() {
+			assertSelectClassesByReferenceResults(selectClasses(List.of(String.class, Integer.class)));
+		}
+
+		private static void assertSelectClassesByReferenceResults(List<ClassSelector> selectors) {
+			Class<?> class1 = String.class;
+			Class<?> class2 = Integer.class;
+
+			assertThat(selectors).satisfiesExactly(//
+				selector1 -> {
+					assertThat(selector1.getJavaClass()).isEqualTo(class1);
+					assertThat(selector1.getClassName()).isEqualTo(class1.getName());
+				}, //
+				selector2 -> {
+					assertThat(selector2.getJavaClass()).isEqualTo(class2);
+					assertThat(selector2.getClassName()).isEqualTo(class2.getName());
+				});
+
+		}
+
+		@Test
+		void selectClassesByNameViaVarargsWithExplicitClassLoader() throws Exception {
+			Class<?> class1 = Foo.class;
+			Class<?> class2 = Bar.class;
+
+			try (var testClassLoader = TestClassLoader.forClasses(class1, class2)) {
+				assertThat(selectClassesByName(testClassLoader, class1.getName(), class2.getName())).satisfiesExactly(
+					selector1 -> checkClassSelector(testClassLoader, selector1, class1), //
+					selector2 -> checkClassSelector(testClassLoader, selector2, class2)); //
+			}
+		}
+
+		@Test
+		void selectClassesByNameViaListWithExplicitClassLoader() throws Exception {
+			Class<?> class1 = Foo.class;
+			Class<?> class2 = Bar.class;
+
+			try (var testClassLoader = TestClassLoader.forClasses(class1, class2)) {
+				assertThat(selectClassesByName(testClassLoader, List.of(class1.getName(), class2.getName())))//
+						.satisfiesExactly(//
+							selector1 -> checkClassSelector(testClassLoader, selector1, class1), //
+							selector2 -> checkClassSelector(testClassLoader, selector2, class2)); //
+			}
+		}
+
+		private static void checkClassSelector(TestClassLoader testClassLoader, ClassSelector selector,
+				Class<?> clazz) {
+
+			assertThat(selector.getJavaClass().getName()).isEqualTo(clazz.getName());
+			assertThat(selector.getJavaClass()).isNotEqualTo(clazz);
+			assertThat(selector.getJavaClass().getClassLoader()).isSameAs(testClassLoader);
+			assertThat(selector.getClassLoader()).isSameAs(testClassLoader);
+		}
+
+		class Foo {
+		}
+
+		class Bar {
+		}
+
 	}
 
 	@Nested
 	class SelectMethodTests {
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectMethod(className, methodName)")
 		void selectMethodByClassNameAndMethodNamePreconditions() {
-			assertViolatesPrecondition(() -> selectMethod("TestClass", null));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", ""));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "  "));
-			assertViolatesPrecondition(() -> selectMethod((String) null, "method"));
-			assertViolatesPrecondition(() -> selectMethod("", "method"));
-			assertViolatesPrecondition(() -> selectMethod("   ", "method"));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", null));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", ""));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "  "));
+			assertPreconditionViolationFor(() -> selectMethod((String) null, "method"));
+			assertPreconditionViolationFor(() -> selectMethod("", "method"));
+			assertPreconditionViolationFor(() -> selectMethod("   ", "method"));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectMethod(className, methodName, parameterTypeNames)")
 		void selectMethodByClassNameMethodNameAndParameterTypeNamesPreconditions() {
-			assertViolatesPrecondition(() -> selectMethod("TestClass", null, "int"));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "", "int"));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "  ", "int"));
-			assertViolatesPrecondition(() -> selectMethod((String) null, "method", "int"));
-			assertViolatesPrecondition(() -> selectMethod("", "method", "int"));
-			assertViolatesPrecondition(() -> selectMethod("   ", "method", "int"));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "method", (String) null));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", null, "int"));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "", "int"));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "  ", "int"));
+			assertPreconditionViolationFor(() -> selectMethod((String) null, "method", "int"));
+			assertPreconditionViolationFor(() -> selectMethod("", "method", "int"));
+			assertPreconditionViolationFor(() -> selectMethod("   ", "method", "int"));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "method", (String) null));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectMethod(className, methodName, parameterTypes)")
 		void selectMethodByClassNameMethodNameAndParameterTypesPreconditions() {
-			assertViolatesPrecondition(() -> selectMethod("TestClass", null, int.class));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "", int.class));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "  ", int.class));
-			assertViolatesPrecondition(() -> selectMethod((String) null, "method", int.class));
-			assertViolatesPrecondition(() -> selectMethod("", "method", int.class));
-			assertViolatesPrecondition(() -> selectMethod("   ", "method", int.class));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "method", (Class<?>) null));
-			assertViolatesPrecondition(() -> selectMethod("TestClass", "method", new Class<?>[] { int.class, null }));
+			// @formatter:off
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", null, int.class));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "", int.class));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "  ", int.class));
+			assertPreconditionViolationFor(() -> selectMethod((String) null, "method", int.class));
+			assertPreconditionViolationFor(() -> selectMethod("", "method", int.class));
+			assertPreconditionViolationFor(() -> selectMethod("   ", "method", int.class));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "method", (Class<?>) null));
+			assertPreconditionViolationFor(() -> selectMethod("TestClass", "method", new Class<?>[] { int.class, null }));
+			// @formatter:on
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectMethod(class, methodName)")
 		void selectMethodByClassAndMethodNamePreconditions() {
-			assertViolatesPrecondition(() -> selectMethod(testClass(), (String) null));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), ""));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), "  "));
-			assertViolatesPrecondition(() -> selectMethod((Class<?>) null, "method"));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), (String) null));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), ""));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), "  "));
+			assertPreconditionViolationFor(() -> selectMethod((Class<?>) null, "method"));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectMethod(class, methodName, parameterTypeNames)")
 		void selectMethodByClassMethodNameAndParameterTypeNamesPreconditions() {
-			assertViolatesPrecondition(() -> selectMethod((Class<?>) null, "method", "int"));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), null, "int"));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), "", "int"));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), "  ", "int"));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), "method", (String) null));
+			assertPreconditionViolationFor(() -> selectMethod((Class<?>) null, "method", "int"));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), null, "int"));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), "", "int"));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), "  ", "int"));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), "method", (String) null));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectMethod(class, method)")
 		void selectMethodByClassAndMethodPreconditions() {
 			var method = getClass().getDeclaredMethods()[0];
-			assertViolatesPrecondition(() -> selectMethod(null, method));
-			assertViolatesPrecondition(() -> selectMethod(testClass(), (Method) null));
+			assertPreconditionViolationFor(() -> selectMethod(null, method));
+			assertPreconditionViolationFor(() -> selectMethod(testClass(), (Method) null));
 		}
 
 		@ParameterizedTest(name = "FQMN: ''{0}''")
 		@MethodSource("invalidFullyQualifiedMethodNames")
 		@DisplayName("Preconditions: selectMethod(FQMN)")
 		void selectMethodByFullyQualifiedNamePreconditions(String fqmn, String message) {
-			Exception exception = assertThrows(PreconditionViolationException.class, () -> selectMethod(fqmn));
-			assertThat(exception).hasMessageContaining(message);
+			assertPreconditionViolationFor(() -> selectMethod(fqmn)).withMessageContaining(message);
 		}
 
 		static Stream<Arguments> invalidFullyQualifiedMethodNames() {
@@ -1059,41 +1196,6 @@ class DiscoverySelectorsTests {
 
 	}
 
-	@Test
-	void parseClasspathRootsWithNonExistingDirectory() {
-		var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(Path.of("some/local/path"))));
-		assertThat(selectorStream).isEmpty();
-	}
-
-	@Test
-	void parseClasspathRootsWithNonExistingJarFile() {
-		var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(Path.of("some.jar"))));
-		assertThat(selectorStream).isEmpty();
-	}
-
-	@Test
-	void parseClasspathRootsWithExistingDirectory(@TempDir Path tempDir) {
-		var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(tempDir)));
-		var selector = selectorStream.findAny().orElseThrow();
-		assertThat(selector) //
-				.asInstanceOf(type(ClasspathRootSelector.class)) //
-				.extracting(ClasspathRootSelector::getClasspathRoot) //
-				.isEqualTo(tempDir.toUri());
-	}
-
-	@Test
-	void parseClasspathRootsWithExistingJarFile() throws Exception {
-		var jarUri = requireNonNull(getClass().getResource("/jartest.jar")).toURI();
-		var jarPath = Path.of(jarUri);
-
-		var selectorStream = parseIdentifiers(selectClasspathRoots(Set.of(jarPath)));
-		var selector = selectorStream.findAny().orElseThrow();
-		assertThat(selector) //
-				.asInstanceOf(type(ClasspathRootSelector.class)) //
-				.extracting(ClasspathRootSelector::getClasspathRoot) //
-				.isEqualTo(jarUri);
-	}
-
 	@Nested
 	class SelectNestedClassAndSelectNestedMethodTests {
 
@@ -1148,14 +1250,14 @@ class DiscoverySelectorsTests {
 			assertThat(parseIdentifier(selector)).isEqualTo(selector);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void selectNestedClassPreconditions() {
-			assertViolatesPrecondition(() -> selectNestedClass(null, "ClassName"));
-			assertViolatesPrecondition(() -> selectNestedClass(List.of(), "ClassName"));
-			assertViolatesPrecondition(() -> selectNestedClass(List.of("ClassName"), null));
-			assertViolatesPrecondition(() -> selectNestedClass(List.of("ClassName"), ""));
-			assertViolatesPrecondition(() -> selectNestedClass(List.of("ClassName"), " "));
+			assertPreconditionViolationFor(() -> selectNestedClass(null, "ClassName"));
+			assertPreconditionViolationFor(() -> selectNestedClass(List.of(), "ClassName"));
+			assertPreconditionViolationFor(() -> selectNestedClass(List.of("ClassName"), null));
+			assertPreconditionViolationFor(() -> selectNestedClass(List.of("ClassName"), ""));
+			assertPreconditionViolationFor(() -> selectNestedClass(List.of("ClassName"), " "));
 		}
 
 		@Test
@@ -1316,70 +1418,71 @@ class DiscoverySelectorsTests {
 			assertThat(parseIdentifier(selector)).isEqualTo(selector);
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectNestedMethod(enclosingClassNames, nestedClassName, methodName)")
 		void selectNestedMethodByEnclosingClassNamesAndMethodNamePreconditions() {
-			assertViolatesPrecondition(() -> selectNestedMethod(null, "ClassName", "methodName"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of(), "ClassName", "methodName"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), null, "methodName"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), " ", "methodName"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", null));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", " "));
+			assertPreconditionViolationFor(() -> selectNestedMethod(null, "ClassName", "methodName"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of(), "ClassName", "methodName"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), null, "methodName"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), " ", "methodName"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", null));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", " "));
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectNestedMethod(enclosingClassNames, nestedClassName, methodName, parameterTypeNames)")
 		void selectNestedMethodByEnclosingClassNamesMethodNameAndParameterTypeNamesPreconditions() {
-			assertViolatesPrecondition(() -> selectNestedMethod(null, "ClassName", "methodName", "int"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of(), "ClassName", "methodName", "int"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), null, "methodName", "int"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), " ", "methodName", "int"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", null, "int"));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", " ", "int"));
-			assertViolatesPrecondition(
-				() -> selectNestedMethod(List.of("ClassName"), "ClassName", "methodName", (String) null));
+			// @formatter:off
+			assertPreconditionViolationFor(() -> selectNestedMethod(null, "ClassName", "methodName", "int"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of(), "ClassName", "methodName", "int"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), null, "methodName", "int"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), " ", "methodName", "int"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", null, "int"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", " ", "int"));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", "methodName", (String) null));
+			// @formatter:on
 		}
 
 		/**
 		 * @since 1.10
 		 */
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectNestedMethod(enclosingClassNames, nestedClassName, methodName, parameterTypes)")
 		void selectNestedMethodByEnclosingClassNamesMethodNameAndParameterTypesPreconditions() {
-			assertViolatesPrecondition(() -> selectNestedMethod(null, "ClassName", "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of(), "ClassName", "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), null, "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), " ", "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", null, int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", " ", int.class));
-			assertViolatesPrecondition(
-				() -> selectNestedMethod(List.of("ClassName"), "ClassName", "methodName", (Class<?>) null));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of("ClassName"), "ClassName", "methodName",
-				new Class<?>[] { int.class, null }));
+			// @formatter:off
+			assertPreconditionViolationFor(() -> selectNestedMethod(null, "ClassName", "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of(), "ClassName", "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), null, "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), " ", "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", null, int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", " ", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", "methodName", (Class<?>) null));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of("ClassName"), "ClassName", "methodName", new Class<?>[] { int.class, null }));
+			// @formatter:on
 		}
 
 		/**
 		 * @since 1.10
 		 */
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		@DisplayName("Preconditions: selectNestedMethod(enclosingClasses, nestedClass, methodName, parameterTypes)")
 		void selectNestedMethodByEnclosingClassesClassMethodNameAndParameterTypesPreconditions() {
 			List<Class<?>> enclosingClassList = List.of(ClassWithNestedInnerClass.class);
 			Class<?> nestedClass = ClassWithNestedInnerClass.NestedClass.class;
 
-			assertViolatesPrecondition(() -> selectNestedMethod(null, nestedClass, "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(List.of(), nestedClass, "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(enclosingClassList, null, "methodName", int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(enclosingClassList, nestedClass, null, int.class));
-			assertViolatesPrecondition(() -> selectNestedMethod(enclosingClassList, nestedClass, " ", int.class));
-			assertViolatesPrecondition(
-				() -> selectNestedMethod(enclosingClassList, nestedClass, "methodName", (Class<?>) null));
-			assertViolatesPrecondition(() -> selectNestedMethod(enclosingClassList, nestedClass, "methodName",
-				new Class<?>[] { int.class, null }));
+			// @formatter:off
+			assertPreconditionViolationFor(() -> selectNestedMethod(null, nestedClass, "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(List.of(), nestedClass, "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(enclosingClassList, null, "methodName", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(enclosingClassList, nestedClass, null, int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(enclosingClassList, nestedClass, " ", int.class));
+			assertPreconditionViolationFor(() -> selectNestedMethod(enclosingClassList, nestedClass, "methodName", (Class<?>) null));
+			assertPreconditionViolationFor(() -> selectNestedMethod(enclosingClassList, nestedClass, "methodName", new Class<?>[] { int.class, null }));
+			// @formatter:on
 		}
 
 		static class ClassWithNestedInnerClass {
@@ -1410,6 +1513,7 @@ class DiscoverySelectorsTests {
 
 	@Nested
 	class SelectIterationTests {
+
 		@Test
 		void selectsIteration() throws Exception {
 			Class<?> clazz = DiscoverySelectorsTests.class;
@@ -1420,23 +1524,22 @@ class DiscoverySelectorsTests {
 			assertThat(selector.getIterationIndices()).containsExactly(23, 42);
 			assertThat(parseIdentifier(selector)).isEqualTo(selector);
 		}
+
 	}
 
 	@Nested
 	class SelectUniqueIdTests {
+
 		@Test
 		void selectsUniqueId() {
 			var selector = selectUniqueId(uniqueIdForMethod(DiscoverySelectorsTests.class, "myTest(int)"));
 			assertThat(selector.getUniqueId()).isNotNull();
 			assertThat(parseIdentifier(selector)).isEqualTo(selector);
 		}
+
 	}
 
 	// -------------------------------------------------------------------------
-
-	private void assertViolatesPrecondition(Executable precondition) {
-		assertThrows(PreconditionViolationException.class, precondition);
-	}
 
 	private static DiscoverySelector parseIdentifier(DiscoverySelector selector) {
 		return DiscoverySelectors.parse(toIdentifierString(selector)).orElseThrow();

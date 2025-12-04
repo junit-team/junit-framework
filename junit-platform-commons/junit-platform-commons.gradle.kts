@@ -1,7 +1,6 @@
 import junitbuild.extensions.javaModuleName
 
 plugins {
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.kotlin-library-conventions")
 	`java-test-fixtures`
 }
@@ -17,6 +16,16 @@ dependencies {
 	compileOnly(kotlin("stdlib"))
 	compileOnly(kotlin("reflect"))
 	compileOnly(libs.kotlinx.coroutines)
+
+	testFixturesImplementation(libs.assertj)
+}
+
+javadocConventions {
+	addExtraModuleReferences(projects.junitPlatformEngine)
+}
+
+eclipseConventions {
+	hideModularity = false
 }
 
 tasks.compileJava {

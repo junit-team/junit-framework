@@ -24,8 +24,7 @@ import org.junit.jupiter.api.Test;
 
 class NestedWithSeparateInheritanceTests extends SuperClass1 {
 
-	@Nullable
-	static List<String> lifecycleInvokingClassNames;
+	static @Nullable List<String> lifecycleInvokingClassNames;
 
 	static String OUTER = NestedWithSeparateInheritanceTests.class.getSimpleName();
 	static String NESTED = NestedClass.class.getSimpleName();

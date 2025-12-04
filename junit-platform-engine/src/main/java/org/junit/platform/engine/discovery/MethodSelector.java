@@ -10,8 +10,8 @@
 
 package org.junit.platform.engine.discovery;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.reflect.Method;
@@ -58,19 +58,16 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
  * @see org.junit.platform.engine.support.descriptor.MethodSource
  */
 @API(status = STABLE, since = "1.0")
-public class MethodSelector implements DiscoverySelector {
+public final class MethodSelector implements DiscoverySelector {
 
-	@Nullable
-	private final ClassLoader classLoader;
+	private final @Nullable ClassLoader classLoader;
 	private final String className;
 	private final String methodName;
 	private final String parameterTypeNames;
 
-	@Nullable
-	private volatile Class<?> javaClass;
+	private volatile @Nullable Class<?> javaClass;
 
-	@Nullable
-	private volatile Method javaMethod;
+	private volatile @Nullable Method javaMethod;
 
 	private volatile Class<?> @Nullable [] parameterTypes;
 
@@ -85,44 +82,38 @@ public class MethodSelector implements DiscoverySelector {
 	}
 
 	MethodSelector(Class<?> javaClass, String methodName, String parameterTypeNames) {
-		this.classLoader = javaClass.getClassLoader();
+		this(javaClass.getClassLoader(), javaClass.getName(), methodName, parameterTypeNames);
 		this.javaClass = javaClass;
-		this.className = javaClass.getName();
-		this.methodName = methodName;
-		this.parameterTypeNames = parameterTypeNames;
 	}
 
 	/**
 	 * @since 1.10
 	 */
 	MethodSelector(@Nullable ClassLoader classLoader, String className, String methodName, Class<?>... parameterTypes) {
-		this.classLoader = classLoader;
-		this.className = className;
-		this.methodName = methodName;
+		this(classLoader, className, methodName, ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.parameterTypes = parameterTypes.clone();
-		this.parameterTypeNames = ClassUtils.nullSafeToString(Class::getTypeName, this.parameterTypes);
 	}
 
 	/**
 	 * @since 1.10
 	 */
 	MethodSelector(Class<?> javaClass, String methodName, Class<?>... parameterTypes) {
-		this.classLoader = javaClass.getClassLoader();
+		this(javaClass.getClassLoader(), javaClass.getName(), methodName,
+			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.javaClass = javaClass;
-		this.className = javaClass.getName();
-		this.methodName = methodName;
 		this.parameterTypes = parameterTypes.clone();
-		this.parameterTypeNames = ClassUtils.nullSafeToString(Class::getTypeName, this.parameterTypes);
 	}
 
 	MethodSelector(Class<?> javaClass, Method method) {
-		this.classLoader = javaClass.getClassLoader();
+		this(javaClass, method, method.getParameterTypes());
+	}
+
+	private MethodSelector(Class<?> javaClass, Method method, Class<?>... parameterTypes) {
+		this(javaClass.getClassLoader(), javaClass.getName(), method.getName(),
+			ClassUtils.nullSafeToString(Class::getTypeName, parameterTypes));
 		this.javaClass = javaClass;
-		this.className = javaClass.getName();
 		this.javaMethod = method;
-		this.methodName = method.getName();
-		this.parameterTypes = method.getParameterTypes();
-		this.parameterTypeNames = ClassUtils.nullSafeToString(Class::getTypeName, this.parameterTypes);
+		this.parameterTypes = parameterTypes;
 	}
 
 	/**
@@ -131,7 +122,7 @@ public class MethodSelector implements DiscoverySelector {
 	 * @return the {@code ClassLoader}; potentially {@code null}
 	 * @since 1.10
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public @Nullable ClassLoader getClassLoader() {
 		return this.classLoader;
 	}
@@ -213,7 +204,7 @@ public class MethodSelector implements DiscoverySelector {
 	 * @see #getParameterTypeNames()
 	 * @see Method#getParameterTypes()
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public Class<?>[] getParameterTypes() {
 		return lazyLoadParameterTypes().clone();
 	}

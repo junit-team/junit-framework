@@ -55,7 +55,7 @@ public class ParameterizedLifecycleDemo {
 		}
 
 		//end::user_guide[]
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		//tag::user_guide[]
 		@AfterParameterizedClassInvocation
 		static void afterInvocation(TextFile textFile) throws Exception {
@@ -66,7 +66,7 @@ public class ParameterizedLifecycleDemo {
 		}
 
 		//end::user_guide[]
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		//tag::user_guide[]
 		@Test
 		void test() {

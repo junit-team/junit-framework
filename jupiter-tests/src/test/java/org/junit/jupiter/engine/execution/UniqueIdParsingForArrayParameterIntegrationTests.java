@@ -27,7 +27,7 @@ import org.junit.platform.testkit.engine.Event;
  * Integration tests for {@link UniqueId#parse(String)} for methods
  * with array type parameters.
  *
- * @see <a href="https://github.com/junit-team/junit5/issues/810">#810</a>
+ * @see <a href="https://github.com/junit-team/junit-framework/issues/810">#810</a>
  * @see org.junit.platform.engine.UniqueIdTests
  *
  * @since 5.0

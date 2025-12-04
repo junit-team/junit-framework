@@ -41,15 +41,19 @@ import org.junit.platform.engine.UniqueId;
 @API(status = STABLE, since = "1.0")
 public abstract class AbstractTestDescriptor implements TestDescriptor {
 
+	/**
+	 * The Unicode replacement character, often displayed as a black diamond with
+	 * a white question mark in it: {@value}
+	 */
+	private static final String UNICODE_REPLACEMENT_CHARACTER = "\uFFFD";
+
 	private final UniqueId uniqueId;
 
 	private final String displayName;
 
-	@Nullable
-	private final TestSource source;
+	private final @Nullable TestSource source;
 
-	@Nullable
-	private TestDescriptor parent;
+	private @Nullable TestDescriptor parent;
 
 	/**
 	 * The synchronized set of children associated with this {@code TestDescriptor}.
@@ -68,6 +72,10 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 	 * Create a new {@code AbstractTestDescriptor} with the supplied
 	 * {@link UniqueId} and display name.
 	 *
+	 * <p>As of JUnit 6.0, ISO control characters in the provided display name
+	 * will be replaced. See {@link #AbstractTestDescriptor(UniqueId, String, TestSource)}
+	 * for details.
+	 *
 	 * @param uniqueId the unique ID of this {@code TestDescriptor}; never
 	 * {@code null}
 	 * @param displayName the display name for this {@code TestDescriptor};
@@ -82,6 +90,17 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 	 * Create a new {@code AbstractTestDescriptor} with the supplied
 	 * {@link UniqueId}, display name, and source.
 	 *
+	 * <p>As of JUnit 6.0, ISO control characters in the provided display name
+	 * will be replaced according to the following table.
+	 *
+	 * <table class="plain">
+	 * <caption>Control Character Replacement</caption>
+	 * <tr><th> Original                </th><th> Replacement  </th><th> Description                                 </th></tr>
+	 * <tr><td> {@code \r}              </td><td> {@code <CR>} </td><td> Textual representation of a carriage return </td></tr>
+	 * <tr><td> {@code \n}              </td><td> {@code <LF>} </td><td> Textual representation of a line feed       </td></tr>
+	 * <tr><td> Other control character </td><td> &#xFFFD;     </td><td> Unicode replacement character (U+FFFD)      </td></tr>
+	 * </table>
+	 *
 	 * @param uniqueId the unique ID of this {@code TestDescriptor}; never
 	 * {@code null}
 	 * @param displayName the display name for this {@code TestDescriptor};
@@ -92,7 +111,8 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 	 */
 	protected AbstractTestDescriptor(UniqueId uniqueId, String displayName, @Nullable TestSource source) {
 		this.uniqueId = Preconditions.notNull(uniqueId, "UniqueId must not be null");
-		this.displayName = Preconditions.notBlank(displayName, "displayName must not be null or blank");
+		this.displayName = replaceControlCharacters(
+			Preconditions.notBlank(displayName, "displayName must not be null or blank"));
 		this.source = source;
 	}
 
@@ -192,6 +212,7 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 	}
 
 	@Override
+	@SuppressWarnings("EqualsGetClass")
 	public final boolean equals(Object other) {
 		if (other == null) {
 			return false;
@@ -206,6 +227,22 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + ": " + getUniqueId();
+	}
+
+	private static String replaceControlCharacters(String text) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < text.length(); i++) {
+			builder.append(replaceControlCharacter(text.charAt(i)));
+		}
+		return builder.toString();
+	}
+
+	private static String replaceControlCharacter(char ch) {
+		return switch (ch) {
+			case '\r' -> "<CR>";
+			case '\n' -> "<LF>";
+			default -> Character.isISOControl(ch) ? UNICODE_REPLACEMENT_CHARACTER : String.valueOf(ch);
+		};
 	}
 
 }

@@ -314,7 +314,7 @@ dependency to the test runtime classpath.
 Maven Surefire and Maven Failsafe provide
 https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html[native support]
 for executing tests on the JUnit Platform. The `pom.xml` file in the
-`{junit5-jupiter-starter-maven}` project demonstrates how to use the Maven Surefire plugin
+`{junit-jupiter-starter-maven}` project demonstrates how to use the Maven Surefire plugin
 and can serve as a starting point for configuring your Maven build.
 
 [WARNING]
@@ -553,13 +553,13 @@ the task a consistent and natural feel when compared to many other core Ant task
 Starting with version `1.10.6` of Ant, the `junitlauncher` task supports
 link:https://ant.apache.org/manual/Tasks/junitlauncher.html#fork[forking the tests in a separate JVM].
 
-The `build.xml` file in the `{junit5-jupiter-starter-ant}` project demonstrates how to use
+The `build.xml` file in the `{junit-jupiter-starter-ant}` project demonstrates how to use
 the task and can serve as a starting point.
 
 ===== Basic Usage
 
 The following example demonstrates how to configure the `junitlauncher` task to select a
-single test class (i.e., `org.myapp.test.MyFirstJUnit5Test`).
+single test class (i.e., `com.example.project.CalculatorTests`).
 
 [source,xml,indent=0]
 ----
@@ -572,7 +572,7 @@ single test class (i.e., `org.myapp.test.MyFirstJUnit5Test`).
 
 	<junitlauncher>
 		<classpath refid="test.classpath" />
-		<test name="org.myapp.test.MyFirstJUnit5Test" />
+		<test name="com.example.project.CalculatorTests" />
 	</junitlauncher>
 ----
 
@@ -748,10 +748,12 @@ include::{consoleLauncherDiscoverOptionsFile}[]
 ===== Executing tests
 
 .Exit Code
-NOTE: The `{ConsoleLauncher}` exits with a status code of `1` if any containers or tests
-failed. If no tests are discovered and the `--fail-if-no-tests` command-line option is
-supplied, the `ConsoleLauncher` exits with a status code of `2`. Otherwise, the exit code
-is `0`.
+NOTE: On successful runs, the `{ConsoleLauncher}` exits with a status code of `0`.
+All non-zero codes indicate an error of some sort. For example, status code `1`
+is returned if any containers or tests failed. If no tests are discovered and the
+`--fail-if-no-tests` command-line option is supplied, the `ConsoleLauncher` exits
+with a status code of `2`. Unexpected or invalid user input yields a status code
+of `3`. An exit code of `-1` indicates an unspecified error condition.
 
 ----
 include::{consoleLauncherExecuteOptionsFile}[]
@@ -767,14 +769,14 @@ include::{consoleLauncherEnginesOptionsFile}[]
 [[running-tests-console-launcher-argument-files]]
 ==== Argument Files (@-files)
 
-On some platforms you may run into system limitations on the length of a command line
-when creating a command line with lots of options or with long arguments.
+On some platforms you may run into system limitations on the length of a command line when
+creating a command line with lots of options or with long arguments.
 
-Since version 1.3, the `ConsoleLauncher` supports _argument files_, also known as
-_@-files_. Argument files are files that themselves contain arguments to be passed to the
-command. When the underlying https://github.com/remkop/picocli[picocli] command line
-parser encounters an argument beginning with the character `@`, it expands the contents
-of that file into the argument list.
+The `ConsoleLauncher` supports _argument files_, also known as _@-files_. Argument files
+are files that themselves contain arguments to be passed to the command. When the
+underlying https://github.com/remkop/picocli[picocli] command line parser encounters an
+argument beginning with the character `@`, it expands the contents of that file into the
+argument list.
 
 The arguments within a file can be separated by spaces or newlines. If an argument
 contains embedded whitespace, the whole argument should be wrapped in double or single
@@ -833,6 +835,39 @@ TEST = 34
 DYNAMIC = 35
 REPORTED = 37
 ----
+
+[[running-tests-source-launcher]]
+=== Source Launcher
+
+Starting with Java 25 it is possible to write minimal source code test programs
+using the `org.junit.start` module. For example, like in a `HelloTests.java`
+file reading:
+
+```java
+import module org.junit.start;
+
+void main() {
+  JUnit.run();
+}
+
+@Test
+void stringLength() {
+  Assertions.assertEquals(11, "Hello JUnit".length());
+}
+```
+With all required modular JAR files available in a local `lib/` directory, the
+following Java 25+ command will discover and execute tests using the JUnit Platform.
+It will also print the result tree to the console.
+
+```shell
+java --module-path lib --add-modules org.junit.start HelloTests.java
+╷
+└─ JUnit Jupiter ✔
+   └─ HelloTests ✔
+      └─ stringLength() ✔
+```
+
+Find JUnit's class API documentation here: {JUnit}
 
 [[running-tests-discovery-selectors]]
 === Discovery Selectors
@@ -961,9 +996,9 @@ own annotation or other means for users to specify tags.
 Regardless how a tag is specified, the JUnit Platform enforces the following rules:
 
 * A tag must not be `null` or _blank_.
-* A _trimmed_ tag must not contain whitespace.
-* A _trimmed_ tag must not contain ISO control characters.
-* A _trimmed_ tag must not contain any of the following _reserved characters_.
+* A _stripped_ tag must not contain whitespace.
+* A _stripped_ tag must not contain ISO control characters.
+* A _stripped_ tag must not contain any of the following _reserved characters_.
 - `,`: _comma_
 - `(`: _left parenthesis_
 - `)`: _right parenthesis_
@@ -971,8 +1006,8 @@ Regardless how a tag is specified, the JUnit Platform enforces the following rul
 - `|`: _vertical bar_
 - `!`: _exclamation point_
 
-NOTE: In the above context, "trimmed" means that leading and trailing whitespace
-characters have been removed.
+NOTE: In the above context, "stripped" means that leading and trailing whitespace
+characters have been removed using `java.lang.String.strip()`.
 
 [[running-tests-tag-expressions]]
 ==== Tag Expressions
@@ -1009,25 +1044,24 @@ expressions can be useful.
 | `+++catalog \| shipping+++`
 | all tests for *catalog* plus all tests for *shipping*
 
-| `+++catalog & shipping+++`
+| `+++catalog &amp; shipping+++`
 | all tests for the intersection between *catalog* and *shipping*
 
-| `+++product & !end-to-end+++`
+| `+++product &amp; !end-to-end+++`
 | all tests for *product*, but not the _end-to-end_ tests
 
-| `+++(micro \| integration) & (product \| shipping)+++`
+| `+++(micro \| integration) &amp; (product \| shipping)+++`
 | all _micro_ or _integration_ tests for *product* or *shipping*
 |===
 
 [[running-tests-capturing-output]]
 === Capturing Standard Output/Error
 
-Since version 1.3, the JUnit Platform provides opt-in support for capturing output
-printed to `System.out` and `System.err`. To enable it, set the
-`junit.platform.output.capture.stdout` and/or `junit.platform.output.capture.stderr`
-<<running-tests-config-params, configuration parameter>> to `true`. In addition, you may
-configure the maximum number of buffered bytes to be used per executed test or container
-using `junit.platform.output.capture.maxBuffer`.
+The JUnit Platform provides opt-in support for capturing output printed to `System.out`
+and `System.err`. To enable it, set the `junit.platform.output.capture.stdout` and/or
+`junit.platform.output.capture.stderr` <<running-tests-config-params, configuration
+parameter>> to `true`. In addition, you may configure the maximum number of buffered bytes
+to be used per executed test or container using `junit.platform.output.capture.maxBuffer`.
 
 If enabled, the JUnit Platform captures the corresponding output and publishes it as a
 report entry using the `stdout` or `stderr` keys to all registered
@@ -1107,43 +1141,34 @@ See <<junit-platform-reporting>> for details.
 [[running-tests-listeners-flight-recorder]]
 ==== Flight Recorder Support
 
-Since version 1.7, the JUnit Platform provides opt-in support for generating Flight
-Recorder events. https://openjdk.java.net/jeps/328[JEP 328] describes the Java Flight
-Recorder (JFR) as:
+The JUnit Platform provides opt-in support for generating Flight Recorder events.
+https://openjdk.java.net/jeps/328[JEP 328] describes the Java Flight Recorder (JFR) as
+follows.
 
-NOTE: Flight Recorder records events originating from applications, the JVM and the OS.
+> Flight Recorder records events originating from applications, the JVM, and the OS.
 Events are stored in a single file that can be attached to bug reports and examined by
 support engineers, allowing after-the-fact analysis of issues in the period leading up
 to a problem.
 
-In order to record Flight Recorder events generated while running tests, you need to:
-
-1. Ensure that you are using either Java 8 Update 262 or higher or Java 11 or later.
-2. Provide the `org.junit.platform.jfr` module (`junit-platform-jfr-{version}.jar`)
-   on the class-path or module-path at test runtime.
-3. Start flight recording when launching a test run. Flight Recorder can be started via
-   java command line option:
+In order to record Flight Recorder events generated while running tests, you need to
+start flight recording when launching a test suite via the following java command line
+option.
 
    -XX:StartFlightRecording:filename=...
 
 Please consult the manual of your build tool for the appropriate commands.
 
 To analyze the recorded events, use the
-https://docs.oracle.com/en/java/javase/14/docs/specs/man/jfr.html[jfr]
+https://docs.oracle.com/en/java/javase/17/docs/specs/man/jfr.html[jfr]
 command line tool shipped with recent JDKs or open the recording file with
 https://jdk.java.net/jmc/[JDK Mission Control].
-
-WARNING: Flight Recorder support is currently an _experimental_ feature. You're invited to
-give it a try and provide feedback to the JUnit team so they can improve and eventually
-<<api-evolution, promote>> this feature.
 
 [[stacktrace-pruning]]
 === Stack Trace Pruning
 
-Since version 1.10, the JUnit Platform provides built-in support for pruning stack traces
-produced by failing tests. This feature is enabled by default but can be disabled by
-setting the `junit.platform.stacktrace.pruning.enabled` _configuration parameter_ to
-`false`.
+The JUnit Platform provides built-in support for pruning stack traces produced by failing
+tests. This feature is enabled by default but can be disabled by setting the
+`junit.platform.stacktrace.pruning.enabled` _configuration parameter_ to `false`.
 
 When enabled, all calls from the `org.junit`, `jdk.internal.reflect`, and `sun.reflect`
 packages are removed from the stack trace, unless the calls occur after the test itself
@@ -1151,7 +1176,7 @@ or any of its ancestors. For that reason, calls to `{Assertions}` or `{Assumptio
 never be excluded.
 
 In addition, all elements prior to and including the first call from the JUnit Platform
-Launcher will be removed.
+`Launcher` will be removed.
 
 [[running-tests-discovery-issues]]
 === Discovery Issues

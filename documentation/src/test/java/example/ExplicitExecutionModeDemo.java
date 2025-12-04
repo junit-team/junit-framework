@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+//tag::user_guide[]
 @Execution(ExecutionMode.CONCURRENT)
 class ExplicitExecutionModeDemo {
 
@@ -27,4 +28,6 @@ class ExplicitExecutionModeDemo {
 	void testB() {
 		// overrides to same_thread
 	}
+
 }
+//end::user_guide[]

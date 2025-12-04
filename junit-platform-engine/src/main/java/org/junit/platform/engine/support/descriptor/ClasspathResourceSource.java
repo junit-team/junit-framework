@@ -33,7 +33,7 @@ import org.junit.platform.engine.TestSource;
  * @see org.junit.platform.engine.discovery.ClasspathResourceSelector
  */
 @API(status = STABLE, since = "1.0")
-public class ClasspathResourceSource implements TestSource {
+public final class ClasspathResourceSource implements TestSource {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -114,8 +114,7 @@ public class ClasspathResourceSource implements TestSource {
 
 	private final String classpathResourceName;
 
-	@Nullable
-	private final FilePosition filePosition;
+	private final @Nullable FilePosition filePosition;
 
 	private ClasspathResourceSource(String classpathResourceName) {
 		this(classpathResourceName, null);
@@ -145,7 +144,7 @@ public class ClasspathResourceSource implements TestSource {
 	/**
 	 * Get the {@link FilePosition}, if available.
 	 */
-	public final Optional<FilePosition> getPosition() {
+	public Optional<FilePosition> getPosition() {
 		return Optional.ofNullable(this.filePosition);
 	}
 

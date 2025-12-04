@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.migrationsupport.rules;
 
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -37,8 +37,11 @@ import org.junit.rules.ExternalResource;
  * @see org.junit.rules.ExternalResource
  * @see org.junit.rules.TestRule
  * @see org.junit.Rule
+ * @deprecated Please use {@link org.junit.jupiter.api.AutoClose @AutoClose} instead.
  */
-@API(status = STABLE, since = "5.7")
+@SuppressWarnings("removal")
+@API(status = DEPRECATED, since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
 public class ExternalResourceSupport implements BeforeEachCallback, AfterEachCallback {
 
 	private final TestRuleSupport support = new TestRuleSupport(ExternalResourceAdapter::new, ExternalResource.class);

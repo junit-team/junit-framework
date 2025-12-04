@@ -14,7 +14,6 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.synchronizedSet;
 import static java.util.Collections.unmodifiableSet;
 import static org.apiguardian.api.API.Status.DEPRECATED;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
@@ -31,9 +30,9 @@ import org.apiguardian.api.API;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
 
 /**
  * {@code TestPlan} describes the tree of tests and containers as discovered
@@ -67,7 +66,7 @@ public class TestPlan {
 
 	private final boolean containsTests;
 	private final ConfigurationParameters configurationParameters;
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 
 	/**
 	 * Construct a new {@code TestPlan} from the supplied collection of
@@ -81,16 +80,16 @@ public class TestPlan {
 	 * plan should be created; never {@code null}
 	 * @param configurationParameters the {@code ConfigurationParameters} for
 	 * this test plan; never {@code null}
-	 * @param outputDirectoryProvider the {@code OutputDirectoryProvider} for
+	 * @param outputDirectoryCreator the {@code OutputDirectoryProvider} for
 	 * this test plan; never {@code null}
 	 * @return a new test plan
 	 */
-	@API(status = INTERNAL, since = "1.13")
+	@API(status = INTERNAL, since = "1.14")
 	public static TestPlan from(boolean containsTests, Collection<TestDescriptor> engineDescriptors,
-			ConfigurationParameters configurationParameters, OutputDirectoryProvider outputDirectoryProvider) {
+			ConfigurationParameters configurationParameters, OutputDirectoryCreator outputDirectoryCreator) {
 		Preconditions.notNull(engineDescriptors, "Cannot create TestPlan from a null collection of TestDescriptors");
 		Preconditions.notNull(configurationParameters, "Cannot create TestPlan from null ConfigurationParameters");
-		TestPlan testPlan = new TestPlan(containsTests, configurationParameters, outputDirectoryProvider);
+		TestPlan testPlan = new TestPlan(containsTests, configurationParameters, outputDirectoryCreator);
 		TestDescriptor.Visitor visitor = descriptor -> testPlan.addInternal(TestIdentifier.from(descriptor));
 		engineDescriptors.forEach(engineDescriptor -> engineDescriptor.accept(visitor));
 		return testPlan;
@@ -98,10 +97,10 @@ public class TestPlan {
 
 	@API(status = INTERNAL, since = "1.4")
 	protected TestPlan(boolean containsTests, ConfigurationParameters configurationParameters,
-			OutputDirectoryProvider outputDirectoryProvider) {
+			OutputDirectoryCreator outputDirectoryCreator) {
 		this.containsTests = containsTests;
 		this.configurationParameters = configurationParameters;
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 	}
 
 	@API(status = INTERNAL, since = "1.8")
@@ -181,10 +180,10 @@ public class TestPlan {
 	 * @return the identifier with the supplied unique ID; never {@code null}
 	 * @throws PreconditionViolationException if no {@code TestIdentifier}
 	 * with the supplied unique ID is present in this test plan
-	 * @deprecated Use {@link #getTestIdentifier(UniqueId)}
+	 * @deprecated Use {@link #getTestIdentifier(UniqueId)} instead.
 	 */
 	@API(status = DEPRECATED, since = "1.10", consumers = "Gradle")
-	@Deprecated
+	@Deprecated(since = "1.10")
 	public TestIdentifier getTestIdentifier(String uniqueId) throws PreconditionViolationException {
 		Preconditions.notBlank(uniqueId, "unique ID must not be null or blank");
 		return getTestIdentifier(UniqueId.parse(uniqueId));
@@ -263,14 +262,30 @@ public class TestPlan {
 	}
 
 	/**
-	 * Get the {@link OutputDirectoryProvider} for this test plan.
+	 * Get the
+	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} for
+	 * this test plan.
 	 *
 	 * @return the output directory provider; never {@code null}
 	 * @since 1.12
+	 * @deprecated Please use {@link #getOutputDirectoryCreator()} instead
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
-	public OutputDirectoryProvider getOutputDirectoryProvider() {
-		return this.outputDirectoryProvider;
+	@SuppressWarnings("removal")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	public org.junit.platform.engine.reporting.OutputDirectoryProvider getOutputDirectoryProvider() {
+		return org.junit.platform.engine.reporting.OutputDirectoryProvider.castOrAdapt(getOutputDirectoryCreator());
+	}
+
+	/**
+	 * Get the {@link OutputDirectoryCreator} for this test plan.
+	 *
+	 * @return the output directory creator; never {@code null}
+	 * @since 1.14
+	 */
+	@API(status = MAINTAINED, since = "1.14")
+	public OutputDirectoryCreator getOutputDirectoryCreator() {
+		return outputDirectoryCreator;
 	}
 
 	/**
@@ -280,7 +295,7 @@ public class TestPlan {
 	 * @param visitor the visitor to accept; never {@code null}
 	 * @since 1.10
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public void accept(Visitor visitor) {
 		getRoots().forEach(it -> accept(visitor, it));
 	}
@@ -301,7 +316,7 @@ public class TestPlan {
 	 *
 	 * @since 1.10
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public interface Visitor {
 
 		/**

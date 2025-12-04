@@ -32,12 +32,12 @@ class InternalTestPlan extends TestPlan {
 	static InternalTestPlan from(LauncherDiscoveryResult discoveryResult) {
 		TestPlan delegate = TestPlan.from(discoveryResult.containsCriticalIssuesOrContainsTests(),
 			discoveryResult.getEngineTestDescriptors(), discoveryResult.getConfigurationParameters(),
-			discoveryResult.getOutputDirectoryProvider());
+			discoveryResult.getOutputDirectoryCreator());
 		return new InternalTestPlan(discoveryResult, delegate);
 	}
 
 	private InternalTestPlan(LauncherDiscoveryResult discoveryResult, TestPlan delegate) {
-		super(delegate.containsTests(), delegate.getConfigurationParameters(), delegate.getOutputDirectoryProvider());
+		super(delegate.containsTests(), delegate.getConfigurationParameters(), delegate.getOutputDirectoryCreator());
 		this.discoveryResult = discoveryResult;
 		this.delegate = delegate;
 	}

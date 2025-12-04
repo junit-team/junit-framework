@@ -38,8 +38,7 @@ class DynamicTestTestDescriptor extends DynamicNodeTestDescriptor {
 
 	private static final InvocationInterceptorChain interceptorChain = new InvocationInterceptorChain();
 
-	@Nullable
-	private DynamicTest dynamicTest;
+	private @Nullable DynamicTest dynamicTest;
 
 	DynamicTestTestDescriptor(UniqueId uniqueId, int index, DynamicTest dynamicTest, @Nullable TestSource source,
 			JupiterConfiguration configuration) {
@@ -65,14 +64,14 @@ class DynamicTestTestDescriptor extends DynamicNodeTestDescriptor {
 			requiredDynamicTest().getExecutable());
 		ExtensionContext extensionContext = context.getExtensionContext();
 		ExtensionRegistry extensionRegistry = context.getExtensionRegistry();
-		interceptorChain.invoke(toInvocation(), extensionRegistry, InterceptorCall.ofVoid(
-			(interceptor, wrappedInvocation) -> interceptor.interceptDynamicTest(wrappedInvocation,
-				dynamicTestInvocationContext, extensionContext)));
+		interceptorChain.<@Nullable Void> invoke(toInvocation(), extensionRegistry, InterceptorCall.ofVoid((
+				InvocationInterceptor interceptor,
+				InvocationInterceptor.Invocation<@Nullable Void> wrappedInvocation) -> interceptor.interceptDynamicTest(
+					wrappedInvocation, dynamicTestInvocationContext, extensionContext)));
 		return context;
 	}
 
-	@SuppressWarnings("NullAway")
-	private InvocationInterceptor.Invocation<Void> toInvocation() {
+	private InvocationInterceptor.Invocation<@Nullable Void> toInvocation() {
 		return () -> {
 			requiredDynamicTest().getExecutable().execute();
 			return null;
@@ -86,7 +85,7 @@ class DynamicTestTestDescriptor extends DynamicNodeTestDescriptor {
 	 * on the heap.
 	 *
 	 * @since 5.5
-	 * @see <a href="https://github.com/junit-team/junit5/issues/1865">Issue 1865</a>
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/1865">Issue 1865</a>
 	 */
 	@Override
 	public void after(JupiterEngineExecutionContext context) throws Exception {

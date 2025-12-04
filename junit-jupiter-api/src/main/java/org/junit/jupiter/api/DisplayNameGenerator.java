@@ -14,6 +14,7 @@ import static java.util.Collections.emptyList;
 import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.support.ModifierSupport.isStatic;
@@ -106,7 +107,7 @@ public interface DisplayNameGenerator {
 	 * @deprecated in favor of {@link #generateDisplayNameForNestedClass(List, Class)}
 	 */
 	@API(status = DEPRECATED, since = "5.12")
-	@Deprecated
+	@Deprecated(since = "5.12")
 	default String generateDisplayNameForNestedClass(Class<?> nestedClass) {
 		throw new UnsupportedOperationException(
 			"Implement generateDisplayNameForNestedClass(List<Class<?>>, Class<?>) instead");
@@ -131,7 +132,7 @@ public interface DisplayNameGenerator {
 	 * @return the display name for the nested class; never blank
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	default String generateDisplayNameForNestedClass(List<Class<?>> enclosingInstanceTypes, Class<?> nestedClass) {
 		return generateDisplayNameForNestedClass(nestedClass);
 	}
@@ -152,7 +153,7 @@ public interface DisplayNameGenerator {
 	 * @deprecated in favor of {@link #generateDisplayNameForMethod(List, Class, Method)}
 	 */
 	@API(status = DEPRECATED, since = "5.12")
-	@Deprecated
+	@Deprecated(since = "5.12")
 	default String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
 		throw new UnsupportedOperationException(
 			"Implement generateDisplayNameForMethod(List<Class<?>>, Class<?>, Method) instead");
@@ -180,7 +181,7 @@ public interface DisplayNameGenerator {
 	 * @return the display name for the test; never blank
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	default String generateDisplayNameForMethod(List<Class<?>> enclosingInstanceTypes, Class<?> testClass,
 			Method testMethod) {
 		return generateDisplayNameForMethod(testClass, testMethod);
@@ -208,7 +209,7 @@ public interface DisplayNameGenerator {
 	 * Standard {@code DisplayNameGenerator}.
 	 *
 	 * <p>This implementation matches the standard display name generation
-	 * behavior in place since JUnit Jupiter 5.0 was released.
+	 * behavior in place since JUnit Jupiter was introduced.
 	 */
 	class Standard implements DisplayNameGenerator {
 
@@ -338,7 +339,7 @@ public interface DisplayNameGenerator {
 		 */
 		@Target({ ElementType.TYPE, ElementType.METHOD })
 		@Retention(RetentionPolicy.RUNTIME)
-		@API(status = EXPERIMENTAL, since = "5.13")
+		@API(status = EXPERIMENTAL, since = "6.0")
 		public @interface SentenceFragment {
 
 			/**
@@ -390,7 +391,7 @@ public interface DisplayNameGenerator {
 
 			String sentenceFragment = findAnnotation(testClass, DisplayName.class)//
 					.map(DisplayName::value)//
-					.map(String::trim)//
+					.map(String::strip)//
 					.orElseGet(() -> getSentenceFragment(testClass));
 
 			if (enclosingClass == null || isStatic(testClass)) { // top-level class
@@ -507,7 +508,7 @@ public interface DisplayNameGenerator {
 					.map(sentenceFragment -> {
 						Preconditions.notBlank(sentenceFragment,
 							"@SentenceFragment on [%s] must be declared with a non-blank value.".formatted(element));
-						return sentenceFragment.trim();
+						return sentenceFragment.strip();
 					}) //
 					.orElse(null);
 		}

@@ -79,14 +79,14 @@ overridden.
 
 `*@BeforeAll*`:: Denotes that the annotated method should be executed _before_ *all*
 `@Test`, `@RepeatedTest`, `@ParameterizedTest`, and `@TestFactory` methods in the current
-class; analogous to JUnit 4's `@BeforeClass`. Such methods are inherited unless they are
-overridden and must be `static` unless the "per-class"
+top-level or `@Nested` test class; analogous to JUnit 4's `@BeforeClass`. Such methods are
+inherited unless they are overridden and must be `static` unless the "per-class"
 <<writing-tests-test-instance-lifecycle, test instance lifecycle>> is used.
 
 `*@AfterAll*`:: Denotes that the annotated method should be executed _after_ *all*
 `@Test`, `@RepeatedTest`, `@ParameterizedTest`, and `@TestFactory` methods in the current
-class; analogous to JUnit 4's `@AfterClass`. Such methods are inherited unless they are
-overridden and must be `static` unless the "per-class"
+top-level or `@Nested` test class; analogous to JUnit 4's `@AfterClass`. Such methods are
+inherited unless they are overridden and must be `static` unless the "per-class"
 <<writing-tests-test-instance-lifecycle, test instance lifecycle>> is used.
 
 `*@ParameterizedClass*`:: Denotes that the annotated class is a
@@ -109,12 +109,7 @@ multiple times depending on the number of invocation contexts returned by the re
 <<extensions-class-templates, providers>>. Such annotations are inherited.
 
 `*@Nested*`:: Denotes that the annotated class is a non-static
-<<writing-tests-nested, nested test class>>. On Java 8 through Java 15, `@BeforeAll` and
-`@AfterAll` methods cannot be used directly in a `@Nested` test class unless the
-"per-class" <<writing-tests-test-instance-lifecycle, test instance lifecycle>> is used.
-Beginning with Java 16, `@BeforeAll` and `@AfterAll` methods can be declared as `static`
-in a `@Nested` test class with either test instance lifecycle mode. Such annotations are
-not inherited.
+<<writing-tests-nested, nested test class>>. Such annotations are not inherited.
 
 `*@Tag*`:: Used to declare
 <<writing-tests-tagging-and-filtering, tags for filtering tests>>, either at the class or
@@ -312,6 +307,32 @@ by test runners and IDEs.
 include::{testDir}/example/DisplayNameDemo.java[tags=user_guide]
 ----
 
+[NOTE]
+====
+Control characters in text-based arguments in display names for parameterized tests are
+escaped by default. See <<writing-tests-parameterized-tests-display-names-quoted-text>>
+for details.
+
+Any remaining ISO control characters in a display name will be replaced as follows.
+
+[cols="25%,15%,60%"]
+|===
+| Original | Replacement | Description
+
+| ```\r```
+| ```<CR>```
+| Textual representation of a carriage return
+
+| ```\n```
+| ```<LF>```
+| Textual representation of a line feed
+
+| Other control character
+| ```�```
+| Unicode replacement character (U+FFFD)
+|===
+====
+
 [[writing-tests-display-name-generator]]
 ==== Display Name Generators
 
@@ -325,7 +346,7 @@ table lists the default display name generators available in Jupiter.
 |===
 | DisplayNameGenerator   | Behavior
 
-| `Standard`            | Matches the standard display name generation behavior in place since JUnit Jupiter 5.0 was released.
+| `Standard`            | Matches the standard display name generation behavior in place since JUnit Jupiter was introduced.
 | `Simple`              | Extends the functionality of `Standard` by removing trailing parentheses for methods with no parameters.
 | `ReplaceUnderscores`  | Replaces underscores with spaces.
 | `IndicativeSentences` | Generates complete sentences by concatenating the names of the test and the enclosing classes.
@@ -439,7 +460,7 @@ following precedence rules:
 === Assertions
 
 JUnit Jupiter comes with many of the assertion methods that JUnit 4 has and adds a few
-that lend themselves well to being used with Java 8 lambdas. All JUnit Jupiter assertions
+that lend themselves well to being used with Java lambdas. All JUnit Jupiter assertions
 are `static` methods in the `{Assertions}` class.
 
 Assertion methods optionally accept the assertion message as their third parameter, which
@@ -492,32 +513,47 @@ include::{kotlinTestDir}/example/KotlinAssertionsDemo.kt[tags=user_guide]
 ==== Third-party Assertion Libraries
 
 Even though the assertion facilities provided by JUnit Jupiter are sufficient for many
-testing scenarios, there are times when more power and additional functionality such as
-_matchers_ are desired or required. In such cases, the JUnit team recommends the use of
-third-party assertion libraries such as {AssertJ}, {Hamcrest}, {Truth}, etc. Developers
-are therefore free to use the assertion library of their choice.
+testing scenarios, there are times when more power and additional functionality are
+desired or required. In such cases, the JUnit team recommends the use of third-party
+assertion libraries such as {AssertJ}, {Hamcrest}, {Truth}, etc. Developers are therefore
+free to use the assertion library of their choice.
 
-For example, the combination of _matchers_ and a fluent API can be used to make
-assertions more descriptive and readable. However, JUnit Jupiter's `{Assertions}` class
-does not provide an
-https://junit.org/junit4/javadoc/latest/org/junit/Assert.html#assertThat[`assertThat()`]
-method like the one found in JUnit 4's `org.junit.Assert` class which accepts a Hamcrest
-https://junit.org/junit4/javadoc/latest/org/hamcrest/Matcher.html[`Matcher`]. Instead,
-developers are encouraged to use the built-in support for matchers provided by third-party
-assertion libraries.
-
-The following example demonstrates how to use the `assertThat()` support from Hamcrest in
-a JUnit Jupiter test. As long as the Hamcrest library has been added to the classpath,
-you can statically import methods such as `assertThat()`, `is()`, and `equalTo()` and
-then use them in tests like in the `assertWithHamcrestMatcher()` method below.
+For example, the following demonstrates how to use the `assertThat()` support from AssertJ
+in a JUnit Jupiter test. As long as the AssertJ library has been added to the classpath,
+you can statically import methods such as `assertThat()`, `assertThatException()`, etc.
+from `org.assertj.core.api.Assertions` and then use them in tests like in the
+`assertWithAssertJ()` method below.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/HamcrestAssertionsDemo.java[tags=user_guide]
+include::{testDir}/example/AssertJAssertionsDemo.java[tags=user_guide]
 ----
 
-Naturally, legacy tests based on the JUnit 4 programming model can continue using
-`org.junit.Assert#assertThat`.
+[TIP]
+.Excluding Jupiter’s Assertions From a Project’s Classpath
+====
+If you would like to enforce that all your tests use a certain third-party assertion
+library instead of Jupiter's, you can set up a rule using {Checkstyle} or another static
+analysis tool that fails the build if Jupiter's `Assertions` class is used.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+	<property name="severity" value="error" />
+	<module name="TreeWalker">
+    <module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="jupiterAssertions"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="org\.junit\.jupiter\.api\.(Assertions|Assumptions)\."/>
+			<property name="message" value="Jupiter Assertions/Assumptions should not be used in this project. Please use ... instead."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+	</module>
+</module>
+----
+====
 
 [[writing-tests-assumptions]]
 === Assumptions
@@ -533,8 +569,8 @@ current runtime environment.
   of marked as a failure.
 
 JUnit Jupiter comes with a subset of the _assumption_ methods that JUnit 4 provides and
-adds a few that lend themselves well to being used with Java 8 lambda expressions and
-method references.
+adds a few that lend themselves well to being used with Java lambda expressions and method
+references.
 
 All JUnit Jupiter assumptions are static methods in the `{Assumptions}` class.
 
@@ -546,6 +582,11 @@ include::{testDir}/example/AssumptionsDemo.java[tags=user_guide]
 NOTE: It is also possible to use methods from JUnit 4's `org.junit.Assume` class for
 assumptions. Specifically, JUnit Jupiter supports JUnit 4's `AssumptionViolatedException`
 to signal that a test should be aborted instead of marked as a failure.
+
+TIP: If you use AssertJ for assertions, you may also wish to use AssertJ for assumptions.
+To do so, you can statically import the `assumeThat()` method from
+`org.assertj.core.api.Assumptions` and then use AssertJ's fluent API to specify your
+assumptions.
 
 [[writing-tests-exceptions]]
 === Exception Handling
@@ -811,11 +852,12 @@ include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre
 
 Since the enum constants defined in {JRE} are static for any given JUnit release, you
 might find that you need to configure a Java version that is not supported by the `JRE`
-enum. For example, as of JUnit Jupiter 5.12 the `JRE` enum defines `JAVA_25` as the
-highest supported Java version. However, you may wish to run your tests against later
-versions of Java. To support such use cases, you can specify arbitrary Java versions via
-the `versions` attributes in `@EnabledOnJre` and `@DisabledOnJre` and via the `minVersion`
-and `maxVersion` attributes in `@EnabledForJreRange` and `@DisabledForJreRange`.
+enum. For example, when JUnit Jupiter 5.12 was released the `JRE` enum defined `JAVA_25`
+as the highest supported Java version. However, you may wish to run your tests against
+later versions of Java. To support such use cases, you can specify arbitrary Java versions
+via the `versions` attributes in `@EnabledOnJre` and `@DisabledOnJre` and via the
+`minVersion` and `maxVersion` attributes in `@EnabledForJreRange` and
+`@DisabledForJreRange`.
 
 The following listing demonstrates the use of these annotations with arbitrary Java
 versions.
@@ -855,10 +897,10 @@ include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_sys
 
 [TIP]
 ====
-As of JUnit Jupiter 5.6, `{EnabledIfSystemProperty}` and `{DisabledIfSystemProperty}` are
-_repeatable annotations_. Consequently, these annotations may be declared multiple times
-on a test interface, test class, or test method. Specifically, these annotations will be
-found if they are directly present, indirectly present, or meta-present on a given element.
+`{EnabledIfSystemProperty}` and `{DisabledIfSystemProperty}` are _repeatable annotations_.
+Consequently, these annotations may be declared multiple times on a test interface, test
+class, or test method. Specifically, these annotations will be found if they are directly
+present, indirectly present, or meta-present on a given element.
 ====
 
 [[writing-tests-conditional-execution-environment-variables]]
@@ -876,11 +918,10 @@ include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_env
 
 [TIP]
 ====
-As of JUnit Jupiter 5.6, `{EnabledIfEnvironmentVariable}` and
-`{DisabledIfEnvironmentVariable}` are _repeatable annotations_. Consequently, these
-annotations may be declared multiple times on a test interface, test class, or test
-method. Specifically, these annotations will be found if they are directly present,
-indirectly present, or meta-present on a given element.
+`{EnabledIfEnvironmentVariable}` and `{DisabledIfEnvironmentVariable}` are _repeatable
+annotations_. Consequently, these annotations may be declared multiple times on a test
+interface, test class, or test method. Specifically, these annotations will be found if
+they are directly present, indirectly present, or meta-present on a given element.
 ====
 
 [[writing-tests-conditional-execution-custom]]
@@ -990,6 +1031,11 @@ following built-in `MethodOrderer` implementations.
 * `{MethodOrderer_Random}`: orders test methods _pseudo-randomly_ and supports
   configuration of a custom _seed_
 
+The `MethodOrderer` configured on a test class is inherited by the `@Nested` test classes
+it contains, recursively. If you want to avoid that a `@Nested` test class uses the same
+`MethodOrderer` as its enclosing class, you can specify `{MethodOrderer_Default}` together
+with `{TestMethodOrder}`.
+
 NOTE: See also: <<extensions-execution-order-wrapping-behavior>>
 
 The following example demonstrates how to guarantee that test methods are executed in the
@@ -1078,6 +1124,8 @@ To configure test class execution order _locally_ for `@Nested` test classes, de
 want to order, and supply a class reference to the `ClassOrderer` implementation you would
 like to use directly in the `@TestClassOrder` annotation. The configured `ClassOrderer`
 will be applied recursively to `@Nested` test classes and their `@Nested` test classes.
+If you want to avoid that a `@Nested` test class uses the same `ClassOrderer` as its
+enclosing class, you can specify `{ClassOrderer_Default}` together with `@TestClassOrder`.
 Note that a local `@TestClassOrder` declaration always overrides an inherited
 `@TestClassOrder` declaration or a `ClassOrderer` configured globally via the
 `junit.jupiter.testclass.order.default` configuration parameter.
@@ -1111,12 +1159,7 @@ methods rely on state stored in instance variables, you may need to reset that s
 
 The "per-class" mode has some additional benefits over the default "per-method" mode.
 Specifically, with the "per-class" mode it becomes possible to declare `@BeforeAll` and
-`@AfterAll` on non-static methods as well as on interface `default` methods. The
-"per-class" mode therefore also makes it possible to use `@BeforeAll` and `@AfterAll`
-methods in `@Nested` test classes.
-
-NOTE: Beginning with Java 16, `@BeforeAll` and `@AfterAll` methods can be declared as
-`static` in `@Nested` test classes.
+`@AfterAll` on non-static methods as well as on interface `default` methods.
 
 If you are authoring tests using the Kotlin programming language, you may also find it
 easier to implement non-static `@BeforeAll` and `@AfterAll` lifecycle methods as well as
@@ -1189,13 +1232,7 @@ running the outer tests, because the setup code from the outer tests is always e
 
 NOTE: _Only non-static nested classes_ (i.e. _inner classes_) can serve as `@Nested` test
 classes. Nesting can be arbitrarily deep, and those inner classes are subject to full
-lifecycle support with one exception: `@BeforeAll` and `@AfterAll` methods do not work _by
-default_. The reason is that Java does not allow `static` members in inner classes prior
-to Java 16. However, this restriction can be circumvented by annotating a `@Nested` test
-class with `@TestInstance(Lifecycle.PER_CLASS)` (see
-<<writing-tests-test-instance-lifecycle>>). If you are using Java 16 or higher,
-`@BeforeAll` and `@AfterAll` methods can be declared as `static` in `@Nested` test
-classes, and this restriction no longer applies.
+lifecycle support, including `@BeforeAll` and `@AfterAll` methods on each level.
 
 [[writing-tests-nested-interoperability]]
 ==== Interoperability
@@ -1216,26 +1253,26 @@ Executing the above test class yields the following output:
 
 ....
 FruitTests ✔
-├─ [1] fruit=apple ✔
+├─ [1] fruit = "apple" ✔
 │  └─ QuantityTests ✔
-│     ├─ [1] quantity=23 ✔
+│     ├─ [1] quantity = 23 ✔
 │     │  └─ test(Duration) ✔
-│     │     ├─ [1] duration=PT1H ✔
-│     │     └─ [2] duration=PT2H ✔
-│     └─ [2] quantity=42 ✔
+│     │     ├─ [1] duration = "PT1H" ✔
+│     │     └─ [2] duration = "PT2H" ✔
+│     └─ [2] quantity = 42 ✔
 │        └─ test(Duration) ✔
-│           ├─ [1] duration=PT1H ✔
-│           └─ [2] duration=PT2H ✔
-└─ [2] fruit=banana ✔
+│           ├─ [1] duration = "PT1H" ✔
+│           └─ [2] duration = "PT2H" ✔
+└─ [2] fruit = "banana" ✔
    └─ QuantityTests ✔
-      ├─ [1] quantity=23 ✔
+      ├─ [1] quantity = 23 ✔
       │  └─ test(Duration) ✔
-      │     ├─ [1] duration=PT1H ✔
-      │     └─ [2] duration=PT2H ✔
-      └─ [2] quantity=42 ✔
+      │     ├─ [1] duration = "PT1H" ✔
+      │     └─ [2] duration = "PT2H" ✔
+      └─ [2] quantity = 42 ✔
          └─ test(Duration) ✔
-            ├─ [1] duration=PT1H ✔
-            └─ [2] duration=PT2H ✔
+            ├─ [1] duration = "PT1H" ✔
+            └─ [2] duration = "PT2H" ✔
 ....
 
 [[writing-tests-dependency-injection]]
@@ -1429,11 +1466,11 @@ void repeatedTest() {
 }
 ----
 
-Since JUnit Jupiter 5.10, `@RepeatedTest` can be configured with a failure threshold which
-signifies the number of failures after which remaining repetitions will be automatically
-skipped. Set the `failureThreshold` attribute to a positive number less than the total
-number of repetitions in order to skip the invocations of remaining repetitions after the
-specified number of failures has been encountered.
+`@RepeatedTest` can be configured with a failure threshold which signifies the number of
+failures after which remaining repetitions will be automatically skipped. Set the
+`failureThreshold` attribute to a positive number less than the total number of
+repetitions in order to skip the invocations of remaining repetitions after the specified
+number of failures has been encountered.
 
 For example, if you are using `@RepeatedTest` to repeatedly invoke a test that you suspect
 to be _flaky_, a single failure is sufficient to demonstrate that the test is flaky, and
@@ -1456,18 +1493,18 @@ display name can be configured for each repetition via the `name` attribute of t
 combination of static text and dynamic placeholders. The following placeholders are
 currently supported.
 
-- `{displayName}`: display name of the `@RepeatedTest` method
-- `{currentRepetition}`: the current repetition count
-- `{totalRepetitions}`: the total number of repetitions
+- `+{displayName}+`: display name of the `@RepeatedTest` method
+- `+{currentRepetition}+`: the current repetition count
+- `+{totalRepetitions}+`: the total number of repetitions
 
 The default display name for a given repetition is generated based on the following
-pattern: `"repetition {currentRepetition} of {totalRepetitions}"`. Thus, the display
+pattern: `"repetition +{currentRepetition}+ of +{totalRepetitions}+"`.Thus, the display
 names for individual repetitions of the previous `repeatedTest()` example would be:
-`repetition 1 of 10`, `repetition 2 of 10`, etc. If you would like the display name of
+`repetition 1 of 10`, `repetition 2 of 10`, etc.If you would like the display name of
 the `@RepeatedTest` method included in the name of each repetition, you can define your
-own custom pattern or use the predefined `RepeatedTest.LONG_DISPLAY_NAME` pattern. The
-latter is equal to `"{displayName} :: repetition {currentRepetition} of
-{totalRepetitions}"` which results in display names for individual repetitions like
+own custom pattern or use the predefined `RepeatedTest.LONG_DISPLAY_NAME` pattern.The
+latter is equal to `"+{displayName}+ :: repetition +{currentRepetition}+ of
++{totalRepetitions}+"` which results in display names for individual repetitions like
 `repeatedTest() :: repetition 1 of 10`, `repeatedTest() :: repetition 2 of 10`, etc.
 
 In order to retrieve information about the current repetition, the total number of
@@ -1487,15 +1524,15 @@ The `repeatedTest()` method is identical to the example from the previous sectio
 current repeated test.
 
 `repeatedTestWithFailureThreshold()` demonstrates how to set a failure threshold and
-simulates an unexpected failure for every second repetition. The resulting behavior can be
+simulates an unexpected failure for every second repetition.The resulting behavior can be
 viewed in the `ConsoleLauncher` output at the end of this section.
 
 The next two methods demonstrate how to include a custom `@DisplayName` for the
 `@RepeatedTest` method in the display name of each repetition. `customDisplayName()`
 combines a custom display name with a custom pattern and then uses `TestInfo` to verify
-the format of the generated display name. `Repeat!` is the `{displayName}` which comes
+the format of the generated display name. `Repeat!` is the `+{displayName}+` which comes
 from the `@DisplayName` declaration, and `1/1` comes from
-`{currentRepetition}/{totalRepetitions}`. In contrast,
+`+{currentRepetition}+/+{totalRepetitions}+`.In contrast,
 `customDisplayNameWithLongPattern()` uses the aforementioned predefined
 `RepeatedTest.LONG_DISPLAY_NAME` pattern.
 
@@ -1623,9 +1660,9 @@ following.
 
 ....
 palindromes(String) ✔
-├─ [1] candidate=racecar ✔
-├─ [2] candidate=radar ✔
-└─ [3] candidate=able was I ere I saw elba ✔
+├─ [1] candidate = "racecar" ✔
+├─ [2] candidate = "radar" ✔
+└─ [3] candidate = "able was I ere I saw elba" ✔
 ....
 
 The same `@ValueSource` annotation can be used to specify the source of arguments for a
@@ -1642,13 +1679,13 @@ following.
 
 ....
 PalindromeTests ✔
-├─ [1] candidate=racecar ✔
+├─ [1] candidate = "racecar" ✔
 │  ├─ palindrome() ✔
 │  └─ reversePalindrome() ✔
-├─ [2] candidate=radar ✔
+├─ [2] candidate = "radar" ✔
 │  ├─ palindrome() ✔
 │  └─ reversePalindrome() ✔
-└─ [3] candidate=able was I ere I saw elba ✔
+└─ [3] candidate = "able was I ere I saw elba" ✔
    ├─ palindrome() ✔
    └─ reversePalindrome() ✔
 ....
@@ -1712,9 +1749,8 @@ test class.
 include::{testDir}/example/ParameterizedClassDemo.java[tags=constructor_injection]
 ----
 
-If your programming language level you are using supports _records_ -- for example, Java
-16 or higher -- you may use them to implement parameterized classes that avoid the
-boilerplate code of declaring a test class constructor.
+You may use _records_ to implement parameterized classes that avoid the boilerplate code
+of declaring a test class constructor.
 
 [source,java,indent=0]
 ----
@@ -1786,8 +1822,6 @@ invocations.
 Other extensions can access the parameters and resolved arguments of a parameterized test
 or class by retrieving a `{ParameterInfo}` object from the `{ExtensionContext_Store}`.
 Please refer to the Javadoc of `{ParameterInfo}` for details.
-
-[[writing-tests-parameterized-tests-argument-aggregation]]
 
 [[writing-tests-parameterized-tests-sources]]
 ==== Sources of Arguments
@@ -2113,7 +2147,7 @@ It is also possible to provide a `Stream`, `DoubleStream`, `IntStream`, `LongStr
 iterator is wrapped in a `java.util.function.Supplier`. The following example demonstrates
 how to provide a `Supplier` of a `Stream` of named arguments. This parameterized test
 method will be invoked twice: with the values `"apple"` and `"banana"` and with display
-names `Apple` and `Banana`, respectively.
+names `"Apple"` and `"Banana"`, respectively.
 
 [source,java,indent=0]
 ----
@@ -2200,17 +2234,18 @@ by default. This behavior can be changed by setting the
 | `@CsvSource(value = { " apple , banana" }, ignoreLeadingAndTrailingWhitespace = false)` | `" apple "`, `" banana"`
 |===
 
-If the programming language you are using supports _text blocks_ -- for example, Java SE
-15 or higher -- you can alternatively use the `textBlock` attribute of `@CsvSource`. Each
-record within a text block represents a CSV record and results in one invocation of the
-parameterized class or test. The first record may optionally be used to supply CSV headers
-by setting the `useHeadersInDisplayName` attribute to `true` as in the example below.
+If the programming language you are using supports Java _text blocks_  or equivalent
+multi-line string literals, you can alternatively use the `textBlock` attribute of
+`@CsvSource`. Each record within a text block represents a CSV record and results in one
+invocation of the parameterized class or test. The first record may optionally be used to
+supply CSV headers by setting the `useHeadersInDisplayName` attribute to `true` as in the
+example below.
 
 Using a text block, the previous example can be implemented as follows.
 
 [source,java,indent=0]
 ----
-@ParameterizedTest(name = "[{index}] {arguments}")
+@ParameterizedTest
 @CsvSource(useHeadersInDisplayName = true, textBlock = """
 	FRUIT,         RANK
 	apple,         1
@@ -2226,19 +2261,23 @@ void testWithCsvSource(String fruit, int rank) {
 The generated display names for the previous example include the CSV header names.
 
 ----
-[1] FRUIT = apple, RANK = 1
-[2] FRUIT = banana, RANK = 2
-[3] FRUIT = lemon, lime, RANK = 0xF1
-[4] FRUIT = strawberry, RANK = 700_000
+[1] FRUIT = "apple", RANK = "1"
+[2] FRUIT = "banana", RANK = "2"
+[3] FRUIT = "lemon, lime", RANK = "0xF1"
+[4] FRUIT = "strawberry", RANK = "700_000"
 ----
 
 In contrast to CSV records supplied via the `value` attribute, a text block can contain
-comments. Any line beginning with a `+++#+++` symbol will be treated as a comment and
-ignored. Note, however, that the `+++#+++` symbol must be the first character on the line
-without any leading whitespace. It is therefore recommended that the closing text block
-delimiter (`"""`) be placed either at the end of the last line of input or on the
-following line, left aligned with the rest of the input (as can be seen in the example
-below which demonstrates formatting similar to a table).
+comments. Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be treated as a comment and ignored. Note that there is one exception
+to this rule: if the comment character appears within a quoted field, it loses
+its special meaning.
+
+The comment character must be the first character on the line without any leading
+whitespace. It is therefore recommended that the closing text block delimiter (`"""`)
+be placed either at the end of the last line of input or on the following line,
+left aligned with the rest of the input (as can be seen in the example below which
+demonstrates formatting similar to a table).
 
 [source,java,indent=0]
 ----
@@ -2263,7 +2302,7 @@ void testWithCsvSource(String fruit, int rank) {
 
 [NOTE]
 ====
-Java's https://docs.oracle.com/en/java/javase/15/text-blocks/index.html[text block]
+Java's https://docs.oracle.com/en/java/javase/17/text-blocks/index.html[text block]
 feature automatically removes _incidental whitespace_ when the code is compiled.
 However other JVM languages such as Groovy and Kotlin do not. Thus, if you are using a
 programming language other than Java and your text block contains comments or new lines
@@ -2288,8 +2327,8 @@ The default delimiter is a comma (`,`), but you can use another character by set
 cannot be set simultaneously.
 
 .Comments in CSV files
-NOTE: Any line beginning with a `+++#+++` symbol will be interpreted as a comment and will
-be ignored.
+NOTE: Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be interpreted as a comment and will be ignored.
 
 [source,java,indent=0]
 ----
@@ -2306,20 +2345,20 @@ The following listing shows the generated display names for the first two parame
 test methods above.
 
 ----
-[1] country=Sweden, reference=1
-[2] country=Poland, reference=2
-[3] country=United States of America, reference=3
-[4] country=France, reference=700_000
+[1] country = "Sweden", reference = "1"
+[2] country = "Poland", reference = "2"
+[3] country = "United States of America", reference = "3"
+[4] country = "France", reference = "700_000"
 ----
 
 The following listing shows the generated display names for the last parameterized test
 method above that uses CSV header names.
 
 ----
-[1] COUNTRY = Sweden, REFERENCE = 1
-[2] COUNTRY = Poland, REFERENCE = 2
-[3] COUNTRY = United States of America, REFERENCE = 3
-[4] COUNTRY = France, REFERENCE = 700_000
+[1] COUNTRY = "Sweden", REFERENCE = "1"
+[2] COUNTRY = "Poland", REFERENCE = "2"
+[3] COUNTRY = "United States of America", REFERENCE = "3"
+[4] COUNTRY = "France", REFERENCE = "700_000"
 ----
 
 In contrast to the default syntax used in `@CsvSource`, `@CsvFileSource` uses a double
@@ -2398,10 +2437,6 @@ The following annotations are repeatable:
 
 [[writing-tests-parameterized-tests-argument-count-validation]]
 ==== Argument Count Validation
-
-WARNING: Argument count validation is currently an _experimental_ feature. You're invited to
-give it a try and provide feedback to the JUnit team so they can improve and eventually
-<<api-evolution, promote>> this feature.
 
 By default, when an arguments source provides more arguments than the test method needs,
 those additional arguments are ignored and the test executes as usual.
@@ -2500,12 +2535,6 @@ integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
 | `java.util.UUID`           | `"d043e930-7b3b-48e3-bdbe-5a3ccfb833db"` -> `UUID.fromString("d043e930-7b3b-48e3-bdbe-5a3ccfb833db")`
 |===
 
-WARNING: To revert to the old `java.util.Locale` conversion behavior of version 5.12 and
-earlier (which called the deprecated `Locale(String)` constructor), you can set the
-`junit.jupiter.params.arguments.conversion.locale.format`
-<<running-tests-config-params, configuration parameter>> to `iso_639`. However, please
-note that this parameter is deprecated and will be removed in a future release.
-
 [[writing-tests-parameterized-tests-argument-conversion-implicit-fallback]]
 ====== Fallback String-to-Object Conversion
 
@@ -2515,11 +2544,12 @@ table, JUnit Jupiter also provides a fallback mechanism for automatic conversion
 method_ or a _factory constructor_ as defined below.
 
 - __factory method__: a non-private, `static` method declared in the target type that
-  accepts a single `String` argument and returns an instance of the target type. The name
-  of the method can be arbitrary and need not follow any particular convention.
+  accepts either a single `String` argument or a single `CharSequence` argument and
+  returns an instance of the target type. The name of the method can be arbitrary and need
+  not follow any particular convention.
 - __factory constructor__: a non-private constructor in the target type that accepts a
-  single `String` argument. Note that the target type must be declared as either a
-  top-level class or as a `static` nested class.
+  either a single `String` argument or a single `CharSequence` argument. Note that the
+  target type must be declared as either a top-level class or as a `static` nested class.
 
 NOTE: If multiple _factory methods_ are discovered, they will be ignored. If a _factory
 method_ and a _factory constructor_ are discovered, the factory method will be used
@@ -2648,11 +2678,18 @@ include::{testDir}/example/ParameterizedTestDemo.java[tags=ArgumentsAggregator_w
 ==== Customizing Display Names
 
 By default, the display name of a parameterized class or test invocation contains the
-invocation index and the `String` representation of all arguments for that specific
-invocation. Each argument is preceded by its parameter name (unless the argument is only
-available via an `ArgumentsAccessor` or `ArgumentAggregator`), if the parameter name is
-present in the bytecode (for Java, test code must be compiled with the `-parameters`
-compiler flag; for Kotlin, with `-java-parameters`).
+invocation index and a comma-separated list of the `String` representations of all
+arguments for that specific invocation. If parameter names are present in the bytecode,
+each argument will be preceded by its parameter name and an equals sign (unless the
+argument is only available via an `ArgumentsAccessor` or `ArgumentAggregator`) – for
+example, `firstName = "Jane"`.
+
+[TIP]
+====
+To ensure that parameter names are present in the bytecode, test code must be compiled
+with the `-parameters` compiler flag for Java or with the `-java-parameters` compiler flag
+for Kotlin.
+====
 
 However, you can customize invocation display names via the `name` attribute of the
 `@ParameterizedClass` or `@ParameterizedTest` annotation as in the following example.
@@ -2668,9 +2705,9 @@ the following.
 
 ....
 Display name of container ✔
-├─ 1 ==> the rank of 'apple' is 1 ✔
-├─ 2 ==> the rank of 'banana' is 2 ✔
-└─ 3 ==> the rank of 'lemon, lime' is 3 ✔
+├─ 1 ==> the rank of "apple" is "1" ✔
+├─ 2 ==> the rank of "banana" is "2" ✔
+└─ 3 ==> the rank of "lemon, lime" is "3" ✔
 ....
 ======
 
@@ -2757,6 +2794,69 @@ Note that `argumentSet(String, Object...)` is a static factory method defined in
 `org.junit.jupiter.params.provider.Arguments` interface.
 ====
 
+[[writing-tests-parameterized-tests-display-names-quoted-text]]
+===== Quoted Text-based Arguments
+
+As of JUnit Jupiter 6.0, text-based arguments in display names for parameterized tests are
+quoted by default. In this context, any `CharSequence` (such as a `String`) or `Character`
+is considered text. A `CharSequence` is wrapped in double quotes (`"`), and a `Character`
+is wrapped in single quotes (`'`).
+
+Special characters will be escaped in the quoted text. For example, carriage returns and
+line feeds will be escaped as `\\r` and `\\n`, respectively.
+
+[TIP]
+====
+This feature can be disabled by setting the `quoteTextArguments` attributes in
+`@ParameterizedClass` and `@ParameterizedTest` to `false`.
+====
+
+For example, given a string argument `"line 1\nline 2"`, the physical representation in
+the display name will be `"\"line 1\\nline 2\""` which is printed as `"line 1\nline 2"`.
+Similarly, given a string argument `"\t"`, the physical representation in the display name
+will be `"\"\\t\""` which is printed as `"\t"` instead of a blank string or invisible tab
+character. The same applies for a character argument `'\t'`, whose physical representation
+in the display name would be `"'\\t'"` which is printed as `'\t'`.
+
+For a concrete example, if you run the first `nullEmptyAndBlankStrings(String text)`
+parameterized test method from the
+<<writing-tests-parameterized-tests-sources-null-and-empty>> section above, the following
+display names are generated.
+
+----
+[1] text = null
+[2] text = ""
+[3] text = " "
+[4] text = "   "
+[5] text = "\t"
+[6] text = "\n"
+----
+
+If you run the first `testWithCsvSource(String fruit, int rank)` parameterized test method
+from the <<writing-tests-parameterized-tests-sources-CsvSource>> section above, the
+following display names are generated.
+
+----
+[1] fruit = "apple", rank = "1"
+[2] fruit = "banana", rank = "2"
+[3] fruit = "lemon, lime", rank = "0xF1"
+[4] fruit = "strawberry", rank = "700_000"
+----
+
+[NOTE]
+====
+The original source arguments are quoted when generating a display name, and this occurs
+before any implicit or explicit argument conversion is performed.
+
+For example, if a parameterized test accepts `3.14` as a `float` argument that was
+converted from `"3.14"` as an input string, `"3.14"` will be present in the display name
+instead of `3.14`. You can see the effect of this with the `rank` values in the above
+example.
+====
+
+[[writing-tests-parameterized-tests-display-names-default-pattern]]
+===== Default Display Name Pattern
+
 If you'd like to set a default name pattern for all parameterized classes and tests in
 your project, you can declare the `junit.jupiter.params.displayname.default` configuration
 parameter in the `junit-platform.properties` file as demonstrated in the following example (see
@@ -2766,6 +2866,9 @@ parameter in the `junit-platform.properties` file as demonstrated in the followi
 ----
 junit.jupiter.params.displayname.default = {index}
 ----
+
+[[writing-tests-parameterized-tests-display-names-precedence-rules]]
+===== Precedence Rules
 
 The display name for a parameterized class or test is determined according to the
 following precedence rules:
@@ -2999,6 +3102,29 @@ implementations.
 `UriSource` ::
   If none of the above `TestSource` implementations are applicable.
 
+[[writing-tests-dynamic-tests-parallel-execution]]
+==== Parallel Execution
+
+Dynamic tests and containers support
+<<writing-tests-parallel-execution, parallel execution>>. You can configure their
+`ExecutionMode` by using the `dynamicTest(Consumer)` and `dynamicContainer(Consumer)`
+factory methods as illustrated by the following example.
+
+[source,java,indent=0]
+----
+include::{testDir}/example/DynamicTestsDemo.java[tags=execution_mode]
+----
+
+Executing the above test factory method results in the following test tree and execution
+modes:
+
+* dynamicTestsWithConfiguredExecutionMode() -- `CONCURRENT` (from `@Execution` annotation)
+** Container A -- `CONCURRENT` (from `@Execution` annotation)
+*** not null -- `SAME_THREAD` (from `executionMode(...)` call)
+*** properties -- `CONCURRENT` (from `@Execution` annotation)
+**** length > 0 -- `CONCURRENT` (from `executionMode(...)` call)
+**** not empty -- `SAME_THREAD` (from `childExecutionMode(...)` call)
+** ... (same for "Container B" and "Container C")
 
 [[writing-tests-declarative-timeouts]]
 === Timeouts
@@ -3165,12 +3291,11 @@ This heuristic is queried by the `disabled_on_debug` mode.
 [[writing-tests-parallel-execution]]
 === Parallel Execution
 
-By default, JUnit Jupiter tests are run sequentially in a single thread. Running tests in
-parallel -- for example, to speed up execution -- is available as an opt-in feature since
-version 5.3. To enable parallel execution, set the
-`junit.jupiter.execution.parallel.enabled` configuration parameter to `true` -- for
-example, in `junit-platform.properties` (see <<running-tests-config-params>> for other
-options).
+By default, JUnit Jupiter tests are run sequentially in a single thread; however, running
+tests in parallel -- for example, to speed up execution -- is available as an opt-in
+feature. To enable parallel execution, set the `junit.jupiter.execution.parallel.enabled`
+configuration parameter to `true` -- for example, in `junit-platform.properties` (see
+<<running-tests-config-params>> for other options).
 
 Please note that enabling this property is only the first step required to execute tests
 in parallel. If enabled, test classes and methods will still be executed sequentially by
@@ -3211,7 +3336,7 @@ test class or method:
 
 [source,java]
 ----
-include::{testDir}/example/ExplicitExecutionModeDemo.java[]
+include::{testDir}/example/ExplicitExecutionModeDemo.java[tags=user_guide]
 ----
 
 This allows test classes or methods to opt in or out of concurrent execution regardless of
@@ -3306,6 +3431,33 @@ used instead.
 [[writing-tests-parallel-execution-config]]
 ==== Configuration
 
+[[writing-tests-parallel-execution-config-executor-service]]
+===== Executor Service
+
+If parallel execution is enabled, a thread pool is used behind the scenes to execute tests
+concurrently. You can configure which implementation of `HierarchicalTestExecutorService`
+is used be setting the `junit.jupiter.execution.parallel.config.executor-service`
+configuration parameter to one of the following options:
+
+`fork_join_pool` (default)::
+Use an executor service that is backed by a `ForkJoinPool` from the JDK. This will cause
+tests to be executed in a `ForkJoinWorkerThread`. In some cases, usages of
+`ForkJoinPool` in test or production code or calls to blocking JDK APIs may cause the
+number of concurrently executing tests to increase. To avoid this situation, please use
+`worker_thread_pool`.
+
+`worker_thread_pool` (experimental)::
+Use an executor service that is backed by a regular thread pool and does not create
+additional threads if test or production code uses `ForkJoinPool` or calls a blocking
+API in the JDK.
+
+WARNING: Using `worker_thread_pool` is currently an _experimental_ feature. You're invited
+to give it a try and provide feedback to the JUnit team so they can improve and eventually
+<<api-evolution, promote>> this feature.
+
+[[writing-tests-parallel-execution-config-strategies]]
+===== Strategies
+
 Properties such as the desired parallelism and the maximum pool size can be configured
 using a `{ParallelExecutionConfigurationStrategy}`. The JUnit Platform provides two
 implementations out of the box: `dynamic` and `fixed`. Alternatively, you may implement a
@@ -3337,14 +3489,13 @@ strategy with a factor of `1`. Consequently, the desired parallelism will be equ
 number of available processors/cores.
 
 .Parallelism alone does not imply maximum number of concurrent threads
-NOTE: By default JUnit Jupiter does not guarantee that the number of concurrently
-executing tests will not exceed the configured parallelism. For example, when using one
-of the synchronization mechanisms described in the next section, the `ForkJoinPool` that
-is used behind the scenes may spawn additional threads to ensure execution continues with
-sufficient parallelism.
-If you require such guarantees, with Java 9+, it is possible to limit the maximum number
-of concurrent threads by controlling the maximum pool size of the `dynamic`, `fixed` and
-`custom` strategies.
+NOTE: By default, JUnit Jupiter does not guarantee that the number of threads used to
+execute test will not exceed the configured parallelism. For example, when using one
+of the synchronization mechanisms described in the next section, the executor service
+implementation may spawn additional threads to ensure execution continues with sufficient
+parallelism. If you require such guarantees, it is possible to limit the maximum number of
+threads by configuring the maximum pool size of the `dynamic`, `fixed` and `custom`
+strategies.
 
 [[writing-tests-parallel-execution-config-properties]]
 ===== Relevant properties
@@ -3352,86 +3503,66 @@ of concurrent threads by controlling the maximum pool size of the `dynamic`, `fi
 The following table lists relevant properties for configuring parallel execution. See
 <<running-tests-config-params>> for details on how to set such properties.
 
-[cols="d,d,a,d"]
-|===
-|Property |Description |Supported Values |Default Value
+====== General
 
-| ```junit.jupiter.execution.parallel.enabled```
-| Enable parallel test execution
-|
-  * `true`
-  * `false`
-| ```false```
+`junit.jupiter.execution.parallel.enabled=true|false`::
+  Enable/disable parallel test execution (defaults to `false`).
 
-| ```junit.jupiter.execution.parallel.mode.default```
-| Default execution mode of nodes in the test tree
-|
-  * `concurrent`
-  * `same_thread`
-| ```same_thread```
+`junit.jupiter.execution.parallel.mode.default=concurrent|same_thread`::
+  Default execution mode of nodes in the test tree (defaults to `same_thread`).
 
-| ```junit.jupiter.execution.parallel.mode.classes.default```
-| Default execution mode of top-level classes
-|
-  * `concurrent`
-  * `same_thread`
-| ```same_thread```
+`junit.jupiter.execution.parallel.mode.classes.default=concurrent|same_thread`::
+  Default execution mode of top-level classes (defaults to `same_thread`).
 
-| ```junit.jupiter.execution.parallel.config.strategy```
-| Execution strategy for desired parallelism and maximum pool size
-|
-  * `dynamic`
-  * `fixed`
-  * `custom`
-| ```dynamic```
+`junit.jupiter.execution.parallel.config.executor-service=fork_join_pool|worker_thread_pool`::
+  Type of `HierarchicalTestExecutorService` to use for parallel execution (defaults to
+  `fork_join_pool`).
 
-| ```junit.jupiter.execution.parallel.config.dynamic.factor```
-| Factor to be multiplied by the number of available processors/cores to determine the
-  desired parallelism for the ```dynamic``` configuration strategy
-| a positive decimal number
-| ```1.0```
+`junit.jupiter.execution.parallel.config.strategy=dynamic|fixed|custom`::
+  Execution strategy for desired parallelism, maximum pool size, etc. (defaults to `dynamic`).
 
-| ```junit.jupiter.execution.parallel.config.dynamic.max-pool-size-factor```
-| Factor to be multiplied by the number of available processors/cores and the value of
+====== Dynamic strategy
+
+`junit.jupiter.execution.parallel.config.dynamic.factor=decimal`::
+  Factor to be multiplied by the number of available processors/cores to determine the
+  desired parallelism for the ```dynamic``` configuration strategy.
+  Must be a positive decimal number (defaults to `1.0`).
+
+`junit.jupiter.execution.parallel.config.dynamic.max-pool-size-factor=decimal`::
+  Factor to be multiplied by the number of available processors/cores and the value of
   `junit.jupiter.execution.parallel.config.dynamic.factor` to determine the desired
-  parallelism for the ```dynamic``` configuration strategy
-| a positive decimal number, must be greater than or equal to `1.0`
-| 256 + the value of `junit.jupiter.execution.parallel.config.dynamic.factor` multiplied
-  by the number of available processors/cores
+  parallelism for the ```dynamic``` configuration strategy.
+  Must be a positive decimal number greater than or equal to `1.0` (defaults to 256 plus
+  the value of `junit.jupiter.execution.parallel.config.dynamic.factor` multiplied by the
+  number of available processors/cores)
 
-| ```junit.jupiter.execution.parallel.config.dynamic.saturate```
-| Disable saturation of the underlying fork-join pool for the ```dynamic``` configuration
-strategy
-|
-* `true`
-* `false`
-| ```true```
+`junit.jupiter.execution.parallel.config.dynamic.saturate=true|false`::
+  Enable/disable saturation of the underlying `ForkJoinPool` for the ```dynamic```
+  configuration strategy (defaults to `true`). Only used if
+  `junit.jupiter.execution.parallel.config.executor-service` is set to `fork_join_pool`.
 
-| ```junit.jupiter.execution.parallel.config.fixed.parallelism```
-| Desired parallelism for the ```fixed``` configuration strategy
-| a positive integer
-| no default value
+====== Fixed strategy
 
-| ```junit.jupiter.execution.parallel.config.fixed.max-pool-size```
-| Desired maximum pool size of the underlying fork-join pool for the ```fixed```
-  configuration strategy
-| a positive integer, must be greater than or equal to `junit.jupiter.execution.parallel.config.fixed.parallelism`
-| 256 + the value of `junit.jupiter.execution.parallel.config.fixed.parallelism`
+`junit.jupiter.execution.parallel.config.fixed.parallelism=integer`::
+  Desired parallelism for the ```fixed``` configuration strategy (no default value). Must
+  be a positive integer.
 
-| ```junit.jupiter.execution.parallel.config.fixed.saturate```
-| Disable saturation of the underlying fork-join pool for the ```fixed``` configuration
-  strategy
-|
-  * `true`
-  * `false`
-| ```true```
+`junit.jupiter.execution.parallel.config.fixed.max-pool-size=integer`::
+  Desired maximum pool size of the underlying fork-join pool for the ```fixed```
+  configuration strategy. Must be a positive integer greater than or equal to
+  `junit.jupiter.execution.parallel.config.fixed.parallelism` (defaults to 256 plus the
+  value of `junit.jupiter.execution.parallel.config.fixed.parallelism`).
 
-| ```junit.jupiter.execution.parallel.config.custom.class```
-| Fully qualified class name of the _ParallelExecutionConfigurationStrategy_ to be
-  used for the ```custom``` configuration strategy
-| for example, _org.example.CustomStrategy_
-| no default value
-|===
+`junit.jupiter.execution.parallel.config.fixed.saturate=true|false`::
+  Enable/disable saturation of the underlying `ForkJoinPool` for the ```fixed```
+  configuration strategy (defaults to `true`). Only used if
+  `junit.jupiter.execution.parallel.config.executor-service` is set to `fork_join_pool`.
+
+====== Custom strategy
+
+`junit.jupiter.execution.parallel.config.custom.class=classname`::
+  Fully qualified class name of the `ParallelExecutionConfigurationStrategy` to be used
+  for the ```custom``` configuration strategy (no default value).
 
 [[writing-tests-parallel-execution-synchronization]]
 ==== Synchronization

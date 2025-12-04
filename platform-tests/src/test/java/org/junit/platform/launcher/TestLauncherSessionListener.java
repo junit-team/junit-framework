@@ -10,21 +10,19 @@
 
 package org.junit.platform.launcher;
 
+import org.jspecify.annotations.Nullable;
+
 public class TestLauncherSessionListener implements LauncherSessionListener {
 
+	public static @Nullable LauncherSession session;
+
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		return getClass() == obj.getClass();
+	public void launcherSessionOpened(LauncherSession session) {
+		TestLauncherSessionListener.session = session;
 	}
 
 	@Override
-	public int hashCode() {
-		return 1;
+	public void launcherSessionClosed(LauncherSession session) {
+		TestLauncherSessionListener.session = null;
 	}
 }

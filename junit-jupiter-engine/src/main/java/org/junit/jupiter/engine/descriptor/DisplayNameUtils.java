@@ -76,7 +76,7 @@ final class DisplayNameUtils {
 		return findAnnotation(element, DisplayName.class) //
 				.map(DisplayName::value) //
 				.filter(StringUtils::isNotBlank) //
-				.map(String::trim) //
+				.map(String::strip) //
 				.orElseGet(displayNameSupplier);
 	}
 
@@ -153,6 +153,9 @@ final class DisplayNameUtils {
 					}
 					return ReflectionSupport.newInstance(displayNameGeneratorClass);
 				});
+	}
+
+	private DisplayNameUtils() {
 	}
 
 }

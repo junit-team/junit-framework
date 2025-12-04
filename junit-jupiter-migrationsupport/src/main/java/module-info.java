@@ -12,11 +12,14 @@
  * Support for migrating from JUnit 4 to JUnit Jupiter.
  *
  * @since 5.0
+ * @deprecated Please migrate to the corresponding APIs and extensions provided
+ * by JUnit Jupiter.
  */
+@Deprecated(forRemoval = true)
 module org.junit.jupiter.migrationsupport {
 
 	requires static transitive org.apiguardian.api;
-	requires static org.jspecify;
+	requires static transitive org.jspecify;
 
 	requires transitive junit; // 4
 	requires transitive org.junit.jupiter.api;

@@ -11,10 +11,12 @@
 package org.junit.platform.launcher;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
+import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.reporting.ReportEntry;
 
 /**
@@ -162,7 +164,7 @@ public class LauncherConstants {
 	 *
 	 * @see LauncherInterceptor
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String ENABLE_LAUNCHER_INTERCEPTORS = "junit.platform.launcher.interceptors.enabled";
 
 	/**
@@ -178,7 +180,7 @@ public class LauncherConstants {
 	 *
 	 * <p>Value must be either {@code true} or {@code false}; defaults to {@code false}.
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String DRY_RUN_PROPERTY_NAME = "junit.platform.execution.dryRun.enabled";
 
 	/**
@@ -188,7 +190,7 @@ public class LauncherConstants {
 	 *
 	 * @see org.junit.platform.launcher.core.EngineExecutionOrchestrator
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME = "junit.platform.stacktrace.pruning.enabled";
 
 	/**
@@ -200,9 +202,11 @@ public class LauncherConstants {
 	 *
 	 * @since 1.12
 	 * @see #OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER
-	 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
+	 * @see org.junit.platform.engine.OutputDirectoryCreator
+	 * @see EngineDiscoveryRequest#getOutputDirectoryCreator()
+	 * @see TestPlan#getOutputDirectoryCreator()
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String OUTPUT_DIR_PROPERTY_NAME = "junit.platform.reporting.output.dir";
 
 	/**
@@ -216,7 +220,7 @@ public class LauncherConstants {
 	 * @since 1.12
 	 * @see #OUTPUT_DIR_PROPERTY_NAME
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER = "{uniqueNumber}";
 
 	/**
@@ -242,7 +246,7 @@ public class LauncherConstants {
 	 * @since 1.13
 	 * @see org.junit.platform.engine.DiscoveryIssue.Severity
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
 
 	/**
@@ -256,14 +260,13 @@ public class LauncherConstants {
 	 * <p>If not specified, the {@code Launcher} will report discovery issues
 	 * during the discovery phase if
 	 * {@link Launcher#discover(LauncherDiscoveryRequest)} is called, and during
-	 * the execution phase if
-	 * {@link Launcher#execute(LauncherDiscoveryRequest, TestExecutionListener...)}
+	 * the execution phase if {@link Launcher#execute(LauncherExecutionRequest)}
 	 * is called.
 	 *
 	 * @since 1.13
 	 * @see #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME
 	 */
-	@API(status = EXPERIMENTAL, since = "1.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	private LauncherConstants() {

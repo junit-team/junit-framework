@@ -44,4 +44,7 @@ public class MethodReflectionUtils {
 		}
 		return ReflectionSupport.invokeMethod(method, target, arguments);
 	}
+
+	private MethodReflectionUtils() {
+	}
 }

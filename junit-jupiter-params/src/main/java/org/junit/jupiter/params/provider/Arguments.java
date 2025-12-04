@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ public interface Arguments {
 	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_PLACEHOLDER
 	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
-	@API(status = EXPERIMENTAL, since = "5.11")
+	@API(status = MAINTAINED, since = "5.13.3")
 	static ArgumentSet argumentSet(String name, @Nullable Object... arguments) {
 		return new ArgumentSet(name, arguments);
 	}
@@ -212,7 +212,7 @@ public interface Arguments {
 	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_PLACEHOLDER
 	 * @see org.junit.jupiter.params.ParameterizedTest#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
-	@API(status = EXPERIMENTAL, since = "5.11")
+	@API(status = MAINTAINED, since = "5.13.3")
 	final class ArgumentSet implements Arguments {
 
 		private final String name;

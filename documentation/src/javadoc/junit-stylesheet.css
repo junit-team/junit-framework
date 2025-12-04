@@ -12,37 +12,38 @@
     /* Text colors for body and block elements */
     --body-text-color: #333;
     --block-text-color: #333;
-    /* Background colors for various structural elements */
-    --section-background-color: #f8f8f8;
     /* Colors for navigation bar and table captions */
     --navbar-background-color: #25a162;
     /* Background color for subnavigation and various headers */
     --subnav-background-color: #e8e8e8;
+    --subnav-link-color: var(--link-color);
     /* Background and text colors for selected tabs and navigation items */
     --selected-background-color: #dc524a;
     --selected-text-color: #fff;
     --selected-link-color: #651410;
     /* Background colors for generated tables */
+    --table-header-color: #eee;
     --even-row-color: #fff;
-    --odd-row-color: #eee;
+    --odd-row-color: #f6f6f6;
     /* Text color for page title */
     --title-color: #333;
     /* Text colors for links */
     --link-color: #dc524a;
     --link-color-active: #b62b23;
+    /* Table of contents */
+    --toc-background-color: #f8f8f8;
+    --toc-hover-color: #eee;
     /* Snippet colors */
     --snippet-background-color: #ebecee;
     --snippet-text-color: var(--block-text-color);
     --snippet-highlight-color: #fcdbd9;
     /* Border colors for structural elements and user defined tables */
-    --border-color: #ddd;
-    --table-border-color: #999;
+    --border-color: #eee;
+    --table-border-color: #eee;
     /* Highlight color for active search tag target */
     --search-tag-highlight-color: #ffff00;
-    /* Adjustments for icon and active background colors of copy-to-clipboard buttons */
-    --copy-button-background-color-active: rgba(168, 168, 168, 0.3);
-    /* Colors for invalid tag notifications */
-    --invalid-tag-background-color: #ffe6e6;
+    /* Copy button colors and filters */
+    --button-border-color: #b0b8c8;
 }
 
 .title {

@@ -46,7 +46,7 @@ class StreamInterceptorTests {
 				.mapToObj(String::valueOf)
 				.peek(i -> streamInterceptor.capture())
 				.peek(i -> targetStream.println(i))
-				.forEach(i -> assertEquals(i, streamInterceptor.consume().trim()));
+				.forEach(i -> assertEquals(i, streamInterceptor.consume().strip()));
 		// @formatter:on
 	}
 
@@ -118,6 +118,6 @@ class StreamInterceptorTests {
 		thread.start();
 		thread.join();
 
-		assertEquals("from non-test thread", streamInterceptor.consume().trim());
+		assertEquals("from non-test thread", streamInterceptor.consume().strip());
 	}
 }

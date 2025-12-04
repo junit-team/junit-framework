@@ -33,4 +33,7 @@ public class LauncherFactoryForTestingPurposesOnly {
 				.enableLauncherSessionListenerAutoRegistration(false);
 	}
 
+	private LauncherFactoryForTestingPurposesOnly() {
+	}
+
 }

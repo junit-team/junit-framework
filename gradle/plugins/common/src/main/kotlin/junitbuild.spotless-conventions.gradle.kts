@@ -1,3 +1,4 @@
+import com.diffplug.spotless.LineEnding
 import junitbuild.extensions.requiredVersionFromLibs
 
 plugins {
@@ -57,16 +58,7 @@ spotless {
 			licenseHeaderFile(license.headerFile)
 			trimTrailingWhitespace()
 			endWithNewline()
-		}
-		configurations.named { it.startsWith("spotless") }.configureEach {
-			// Workaround for CVE-2024-12798 and CVE-2024-12801
-			resolutionStrategy {
-				eachDependency {
-					if (requested.group == "ch.qos.logback") {
-						useVersion(requiredVersionFromLibs("logback"))
-					}
-				}
-			}
+			toggleOffOn("formatter:off", "formatter:on")
 		}
 	}
 
@@ -77,6 +69,10 @@ spotless {
 			endWithNewline()
 		}
 	}
+
+	// Explicitly configure line endings to avoid Spotless to search for .gitattributes file
+	// see https://github.com/gradle/gradle/issues/25469#issuecomment-3444231151
+	lineEndings = LineEnding.UNIX
 }
 
 tasks {

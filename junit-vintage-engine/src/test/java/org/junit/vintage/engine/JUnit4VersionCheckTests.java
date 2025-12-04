@@ -84,4 +84,5 @@ class JUnit4VersionCheckTests {
 				+ "an excludeEngines(\"junit-vintage\") filter.",
 			exception.getMessage());
 	}
+
 }

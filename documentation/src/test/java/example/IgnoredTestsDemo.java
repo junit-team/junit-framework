@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport;
 
 // @ExtendWith(IgnoreCondition.class)
+@SuppressWarnings("removal")
 @EnableJUnit4MigrationSupport
 class IgnoredTestsDemo {
 

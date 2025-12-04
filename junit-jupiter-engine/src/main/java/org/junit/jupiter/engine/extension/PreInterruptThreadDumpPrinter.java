@@ -18,24 +18,23 @@ import org.junit.jupiter.api.extension.PreInterruptContext;
 import org.junit.jupiter.engine.Constants;
 
 /**
- * The default implementation for {@link PreInterruptCallback},
- * which will print the stacks of all {@link Thread}s to {@code System.out}.
+ * Default implementation of {@link PreInterruptCallback}, which prints the stacks
+ * of all {@link Thread}s to {@code System.out}.
  *
- * <p>Note: This is disabled by default, and must be enabled with
- * {@link Constants#EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME}
+ * <p>Note: This is disabled by default and must be enabled via
+ * {@link Constants#EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME}.
  *
  * @since 5.12
  */
 final class PreInterruptThreadDumpPrinter implements PreInterruptCallback {
+
 	private static final String NL = "\n";
 
 	@Override
 	public void beforeThreadInterrupt(PreInterruptContext preInterruptContext, ExtensionContext extensionContext) {
-
 		Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
 
-		StringBuilder sb = new StringBuilder();
-		sb.append("Thread ");
+		StringBuilder sb = new StringBuilder("Thread ");
 		appendThreadName(sb, preInterruptContext.getThreadToInterrupt());
 		sb.append(" will be interrupted.");
 		sb.append(NL);
@@ -48,10 +47,9 @@ final class PreInterruptThreadDumpPrinter implements PreInterruptCallback {
 				appendThreadName(sb, thread);
 				for (StackTraceElement stackTraceElement : stack) {
 					sb.append(NL);
-					//Do the same prefix as java.lang.Throwable.printStackTrace(java.lang.Throwable.PrintStreamOrWriter)
+					// Use the same prefix as java.lang.Throwable.printStackTrace(PrintStreamOrWriter)
 					sb.append("\tat ");
-					sb.append(stackTraceElement.toString());
-
+					sb.append(stackTraceElement);
 				}
 				sb.append(NL);
 			}
@@ -61,23 +59,25 @@ final class PreInterruptThreadDumpPrinter implements PreInterruptCallback {
 	}
 
 	/**
-	 * Appends the {@link Thread} name and ID in a similar fashion as {@code jstack}.
-	 * @param sb the buffer
-	 * @param th the thread to append
+	 * Append the {@link Thread} name and ID in a similar fashion as {@code jstack}.
+	 * @param builder the builder to append to
+	 * @param thread the thread whose information should be appended
 	 */
-	private void appendThreadName(StringBuilder sb, Thread th) {
-		// Use same format as java.lang.management.ThreadInfo.toString
-		sb.append("\"");
-		sb.append(th.getName());
-		sb.append("\"");
-		if (th.isDaemon()) {
-			sb.append(" daemon");
+	@SuppressWarnings("deprecation") // Thread.getId() is deprecated on JDK 19+
+	private static void appendThreadName(StringBuilder builder, Thread thread) {
+		// Use same format as java.lang.management.ThreadInfo.toString()
+		builder.append("\"");
+		builder.append(thread.getName());
+		builder.append("\"");
+		if (thread.isDaemon()) {
+			builder.append(" daemon");
 		}
-		sb.append(" prio=");
-		sb.append(th.getPriority());
-		sb.append(" Id=");
-		sb.append(th.getId());
-		sb.append(" ");
-		sb.append(th.getState());
+		builder.append(" prio=");
+		builder.append(thread.getPriority());
+		builder.append(" Id=");
+		builder.append(thread.getId());
+		builder.append(" ");
+		builder.append(thread.getState());
 	}
+
 }

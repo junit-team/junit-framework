@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 import static org.junit.jupiter.api.parallel.Resources.SYSTEM_PROPERTIES;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -72,7 +71,7 @@ class DynamicSharedResourcesDemo {
 		public Set<Lock> provideForMethod(List<Class<?>> enclosingInstanceTypes, Class<?> testClass,
 				Method testMethod) {
 			ResourceAccessMode mode = testMethod.getName().startsWith("canSet") ? READ_WRITE : READ;
-			return Collections.singleton(new Lock(SYSTEM_PROPERTIES, mode));
+			return Set.of(new Lock(SYSTEM_PROPERTIES, mode));
 		}
 	}
 

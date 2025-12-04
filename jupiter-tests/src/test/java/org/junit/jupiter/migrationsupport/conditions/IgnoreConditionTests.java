@@ -35,6 +35,7 @@ import org.junit.platform.testkit.engine.Events;
  * @since 5.4
  * @see IgnoreAnnotationIntegrationTests
  */
+@SuppressWarnings("removal")
 class IgnoreConditionTests {
 
 	@Test

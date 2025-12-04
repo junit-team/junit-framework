@@ -13,12 +13,12 @@ package org.junit.platform.engine.discovery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link MethodSelector}.
@@ -55,8 +55,7 @@ class MethodSelectorTests {
 		assertThat(selector.getMethodName()).isEqualTo("method");
 		assertThat(selector.getParameterTypeNames()).isEqualTo("int, boolean");
 
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(selector::getJavaClass)//
+		assertPreconditionViolationFor(selector::getJavaClass)//
 				.withMessage("Could not load class with name: org.example.BogusClass")//
 				.withCauseInstanceOf(ClassNotFoundException.class);
 	}

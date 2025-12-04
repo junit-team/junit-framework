@@ -12,7 +12,7 @@ package org.junit.platform.launcher.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
@@ -207,7 +207,7 @@ class CompositeTestExecutionListenerTests {
 	}
 
 	private static TestPlan anyTestPlan() {
-		return TestPlan.from(true, Set.of(anyTestDescriptor()), mock(), dummyOutputDirectoryProvider());
+		return TestPlan.from(true, Set.of(anyTestDescriptor()), mock(), dummyOutputDirectoryCreator());
 	}
 
 	private static DemoMethodTestDescriptor anyTestDescriptor() {

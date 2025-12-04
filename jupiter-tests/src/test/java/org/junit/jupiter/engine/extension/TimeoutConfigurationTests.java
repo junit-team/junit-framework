@@ -18,6 +18,8 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Timeout.ThreadMode.SEPARATE_THREAD;
 import static org.junit.jupiter.engine.Constants.DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
@@ -30,17 +32,24 @@ import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_METHOD_TIMEOUT_PRO
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TIMEOUT_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.logging.LogRecordListener;
+import org.junit.platform.commons.util.RuntimeUtils;
+import org.mockito.stubbing.Answer;
 
 /**
  * @since 5.5
@@ -49,6 +58,27 @@ class TimeoutConfigurationTests {
 
 	ExtensionContext extensionContext = mock();
 	TimeoutConfiguration config = new TimeoutConfiguration(extensionContext);
+
+	@Test
+	void notDisabledByDefault() {
+		assertThat(config.isTimeoutDisabled()).isFalse();
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+			Enabled,           false
+			Disabled,          true
+			Disabled_ON_debug, false
+			""")
+	void disabledBasedOnTimeoutMode(String timeoutMode, boolean disabled) {
+		when(extensionContext.getConfigurationParameter(eq(TIMEOUT_MODE_PROPERTY_NAME), any())) //
+				.thenAnswer(callConverter(timeoutMode));
+
+		config = new TimeoutConfiguration(extensionContext);
+
+		assertThat(config.isTimeoutDisabled()) //
+				.isEqualTo("disabled_on_debug".equalsIgnoreCase(timeoutMode) ? RuntimeUtils.isDebugMode() : disabled);
+	}
 
 	@Test
 	void noTimeoutIfNoPropertiesAreSet() {
@@ -136,19 +166,24 @@ class TimeoutConfigurationTests {
 
 	@Test
 	void specificThreadModeIsUsed() {
-		when(extensionContext.getConfigurationParameter(DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME)).thenReturn(
-			Optional.of("SEPARATE_THREAD"));
+		when(extensionContext.getConfigurationParameter(eq(DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME), any())) //
+				.thenAnswer(callConverter("SEPARATE_THREAD"));
+
 		assertThat(config.getDefaultTimeoutThreadMode()).contains(SEPARATE_THREAD);
 	}
 
 	@Test
-	void logsInvalidThreadModeValueAndReturnEmpty(@TrackLogRecords LogRecordListener logRecordListener) {
-		when(extensionContext.getConfigurationParameter(DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME)).thenReturn(
-			Optional.of("invalid"));
+	void logsInvalidThreadModeValueAndReturnEmpty() {
+		when(extensionContext.getConfigurationParameter(eq(DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME), any())) //
+				.thenAnswer(callConverter("invalid"));
 
-		assertThat(config.getDefaultTimeoutThreadMode()).isNotPresent();
-		assertThat(logRecordListener.stream(Level.WARNING).map(LogRecord::getMessage)) //
-				.containsExactly(
-					"Invalid timeout thread mode 'invalid' set via the 'junit.jupiter.execution.timeout.thread.mode.default' configuration parameter.");
+		assertThatThrownBy(() -> config.getDefaultTimeoutThreadMode()) //
+				.hasMessage(
+					"Invalid timeout thread mode 'INVALID' set via the 'junit.jupiter.execution.timeout.thread.mode.default' configuration parameter.");
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Answer<?> callConverter(String value) {
+		return invocation -> Optional.ofNullable(invocation.getArgument(1, Function.class).apply(value));
 	}
 }

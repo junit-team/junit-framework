@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestEngine;
 
@@ -40,6 +41,9 @@ public abstract class HierarchicalTestEngine<C extends EngineExecutionContext> i
 	 * {@linkplain ExecutionRequest#getRootTestDescriptor() root} and notify
 	 * its {@linkplain ExecutionRequest#getEngineExecutionListener() execution
 	 * listener} of test execution events.
+	 *
+	 * <p>Supports cancellation via the {@link CancellationToken} passed in the
+	 * supplied {@code request}.
 	 *
 	 * @see Node
 	 * @see #createExecutorService

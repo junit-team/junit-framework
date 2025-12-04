@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.extension;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Timeout;
@@ -35,7 +36,7 @@ record TimeoutDuration(long value, TimeUnit unit) {
 
 	@Override
 	public String toString() {
-		String label = unit.name().toLowerCase();
+		String label = unit.name().toLowerCase(Locale.ROOT);
 		if (value == 1 && label.endsWith("s")) {
 			label = label.substring(0, label.length() - 1);
 		}

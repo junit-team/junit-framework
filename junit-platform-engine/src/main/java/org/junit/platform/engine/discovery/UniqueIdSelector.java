@@ -32,7 +32,7 @@ import org.junit.platform.engine.UniqueId;
  * @see DiscoverySelectors#selectUniqueId(UniqueId)
  */
 @API(status = STABLE, since = "1.0")
-public class UniqueIdSelector implements DiscoverySelector {
+public final class UniqueIdSelector implements DiscoverySelector {
 
 	private final UniqueId uniqueId;
 

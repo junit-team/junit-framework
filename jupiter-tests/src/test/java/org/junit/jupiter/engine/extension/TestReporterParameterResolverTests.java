@@ -31,7 +31,7 @@ class TestReporterParameterResolverTests {
 
 	TestReporterParameterResolver resolver = new TestReporterParameterResolver();
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void supports() {
 		Parameter parameter1 = findParameterOfMethod("methodWithTestReporterParameter", TestReporter.class);

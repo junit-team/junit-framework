@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class JupiterParamsIntegration {
 
-	@ParameterizedTest(name = "[{index}] argument={0}")
+	@ParameterizedTest(name = "[{index}] argument={0}", quoteTextArguments = false)
 	@ValueSource(strings = "test")
 	void parameterizedTest(String argument) {
 		assertEquals("test", argument);

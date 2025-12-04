@@ -4,6 +4,10 @@ plugins {
 
 group = "junitbuild"
 
+tasks.compileJava {
+	options.release = 21
+}
+
 buildParameters {
 	pluginId("junitbuild.build-parameters")
 	bool("ci") {
@@ -88,6 +92,14 @@ buildParameters {
 	group("publishing") {
 		bool("signArtifacts") {
 			description = "Sign artifacts before publishing them to Maven repos"
+		}
+		string("group") {
+			description = "Group ID for published Maven artifacts"
+		}
+	}
+	group("jitpack") {
+		string("version") {
+			description = "The version computed by Jitpack"
 		}
 	}
 	group("manifest") {

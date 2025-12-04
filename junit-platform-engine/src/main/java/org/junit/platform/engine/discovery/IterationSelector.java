@@ -13,8 +13,8 @@ package org.junit.platform.engine.discovery;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toCollection;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,8 +44,8 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
  * @since 1.9
  * @see DiscoverySelectors#selectIteration(DiscoverySelector, int...)
  */
-@API(status = EXPERIMENTAL, since = "1.9")
-public class IterationSelector implements DiscoverySelector {
+@API(status = MAINTAINED, since = "1.13.3")
+public final class IterationSelector implements DiscoverySelector {
 
 	private final DiscoverySelector parentSelector;
 	private final SortedSet<Integer> iterationIndices;

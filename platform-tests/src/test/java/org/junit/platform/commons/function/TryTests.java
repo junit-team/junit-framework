@@ -72,7 +72,7 @@ public class TryTests {
 		assertThat(exception.get()).isSameAs(cause);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void successfulTriesCanStoreNull() throws Exception {
 		var success = Try.success(null);
@@ -101,7 +101,7 @@ public class TryTests {
 		assertThat(failure).isEqualTo(Try.failure(cause));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void methodPreconditionsAreChecked() {
 		assertThrows(JUnitException.class, () -> Try.call(null));

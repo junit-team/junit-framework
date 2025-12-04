@@ -13,8 +13,6 @@ package platform.tooling.support.tests;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static platform.tooling.support.Helper.getJavaHomeWithNativeImageSupport;
-import static platform.tooling.support.ProcessStarters.getGradleJavaVersion;
 import static platform.tooling.support.tests.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
@@ -22,10 +20,10 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
-import org.opentest4j.TestAbortedException;
 
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
@@ -35,20 +33,16 @@ import platform.tooling.support.ProcessStarters;
  */
 @Order(Integer.MIN_VALUE)
 @DisabledOnOpenJ9
+@EnabledIfEnvironmentVariable(named = "GRAALVM_HOME", matches = ".+")
 class GraalVmStarterTests {
 
 	@Test
 	@Timeout(value = 10, unit = MINUTES)
 	void runsTestsInNativeImage(@TempDir Path workspace, @FilePrefix("gradle") OutputFiles outputFiles)
 			throws Exception {
-
-		var graalVmHome = getJavaHomeWithNativeImageSupport(getGradleJavaVersion());
-
 		var result = ProcessStarters.gradlew() //
 				.workingDir(copyToWorkspace(Projects.GRAALVM_STARTER, workspace)) //
-				.putEnvironment("GRAALVM_HOME",
-					graalVmHome.orElseThrow(TestAbortedException::new).toString()).addArguments(
-						"-Dmaven.repo=" + MavenRepo.dir()) //
+				.addArguments("-Dmaven.repo=" + MavenRepo.dir()) //
 				.addArguments("javaToolchains", "nativeTest", "--no-daemon", "--stacktrace", "--no-build-cache",
 					"--warning-mode=fail", "--refresh-dependencies") //
 				.redirectOutput(outputFiles) //

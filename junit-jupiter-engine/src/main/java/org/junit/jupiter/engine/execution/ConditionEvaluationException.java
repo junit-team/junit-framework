@@ -27,7 +27,7 @@ class ConditionEvaluationException extends JUnitException {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	public ConditionEvaluationException(String message, Throwable cause) {
+	ConditionEvaluationException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

@@ -16,6 +16,7 @@ import java.util.Deque;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.opentest4j.AssertionFailedError;
 
@@ -31,22 +32,27 @@ class AssertionUtils {
 		/* no-op */
 	}
 
+	@Contract(" -> fail")
 	static void fail() {
 		throw new AssertionFailedError();
 	}
 
+	@Contract("_ -> fail")
 	static void fail(@Nullable String message) {
 		throw new AssertionFailedError(message);
 	}
 
+	@Contract("_, _ -> fail")
 	static void fail(@Nullable String message, @Nullable Throwable cause) {
 		throw new AssertionFailedError(message, cause);
 	}
 
+	@Contract("_ -> fail")
 	static void fail(@Nullable Throwable cause) {
 		throw new AssertionFailedError(null, cause);
 	}
 
+	@Contract("_ -> fail")
 	static void fail(Supplier<@Nullable String> messageSupplier) {
 		throw new AssertionFailedError(nullSafeGet(messageSupplier));
 	}
@@ -58,11 +64,11 @@ class AssertionUtils {
 	static String getCanonicalName(Class<?> clazz) {
 		try {
 			String canonicalName = clazz.getCanonicalName();
-			return (canonicalName != null ? canonicalName : clazz.getName());
+			return (canonicalName != null ? canonicalName : clazz.getTypeName());
 		}
 		catch (Throwable t) {
 			UnrecoverableExceptions.rethrowIfUnrecoverable(t);
-			return clazz.getName();
+			return clazz.getTypeName();
 		}
 	}
 

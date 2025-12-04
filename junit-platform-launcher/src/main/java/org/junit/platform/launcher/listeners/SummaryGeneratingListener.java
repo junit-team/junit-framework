@@ -35,11 +35,9 @@ import org.junit.platform.launcher.TestPlan;
 @API(status = MAINTAINED, since = "1.0")
 public class SummaryGeneratingListener implements TestExecutionListener {
 
-	@Nullable
-	private TestPlan testPlan;
+	private @Nullable TestPlan testPlan;
 
-	@Nullable
-	private MutableTestExecutionSummary summary;
+	private @Nullable MutableTestExecutionSummary summary;
 
 	public SummaryGeneratingListener() {
 
@@ -113,27 +111,25 @@ public class SummaryGeneratingListener implements TestExecutionListener {
 
 		switch (testExecutionResult.getStatus()) {
 
-			case SUCCESSFUL: {
+			case SUCCESSFUL -> {
 				if (testIdentifier.isContainer()) {
 					summary.containersSucceeded.incrementAndGet();
 				}
 				if (testIdentifier.isTest()) {
 					summary.testsSucceeded.incrementAndGet();
 				}
-				break;
 			}
 
-			case ABORTED: {
+			case ABORTED -> {
 				if (testIdentifier.isContainer()) {
 					summary.containersAborted.incrementAndGet();
 				}
 				if (testIdentifier.isTest()) {
 					summary.testsAborted.incrementAndGet();
 				}
-				break;
 			}
 
-			case FAILED: {
+			case FAILED -> {
 				if (testIdentifier.isContainer()) {
 					summary.containersFailed.incrementAndGet();
 				}
@@ -142,12 +138,10 @@ public class SummaryGeneratingListener implements TestExecutionListener {
 				}
 				testExecutionResult.getThrowable().ifPresent(
 					throwable -> summary.addFailure(testIdentifier, throwable));
-				break;
 			}
 
-			default:
-				throw new PreconditionViolationException(
-					"Unsupported execution status:" + testExecutionResult.getStatus());
+			default -> throw new PreconditionViolationException(
+				"Unsupported execution status:" + testExecutionResult.getStatus());
 		}
 	}
 

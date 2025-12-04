@@ -29,7 +29,7 @@ import platform.tooling.support.MavenRepo;
 @Order(Integer.MAX_VALUE)
 class JarContainsManifestFirstTests {
 
-	@ParameterizedTest
+	@ParameterizedTest(quoteTextArguments = false)
 	@MethodSource("platform.tooling.support.Helper#loadModuleDirectoryNames")
 	void manifestFirst(String module) throws Exception {
 		var modulePath = MavenRepo.jar(module);
@@ -39,7 +39,7 @@ class JarContainsManifestFirstTests {
 		}
 
 		// JarInputStream expects the META-INF/MANIFEST.MF to be at the start of the JAR archive
-		try (final JarInputStream jarInputStream = new JarInputStream(new FileInputStream(modulePath.toFile()))) {
+		try (var jarInputStream = new JarInputStream(new FileInputStream(modulePath.toFile()))) {
 			assertNotNull(jarInputStream.getManifest(), "MANIFEST.MF should be available via JarInputStream");
 		}
 	}

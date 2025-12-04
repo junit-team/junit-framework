@@ -83,4 +83,7 @@ class DiscoverySelectorIdentifierParsers {
 
 	}
 
+	private DiscoverySelectorIdentifierParsers() {
+	}
+
 }

@@ -1,7 +1,7 @@
 org.junit.jupiter.engine@${version} jar:file:.+/junit-jupiter-engine-\d.+\.jar..module-info\.class
 requires java.base mandated
 requires org.apiguardian.api static
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.jupiter.api
 requires org.junit.platform.commons
 requires org.junit.platform.engine

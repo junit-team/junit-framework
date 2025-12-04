@@ -18,12 +18,14 @@ import static org.junit.platform.launcher.core.LauncherPhase.EXECUTION;
 import java.util.Collection;
 
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
@@ -85,28 +87,42 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(discoveryRequest, "LauncherDiscoveryRequest must not be null");
-		Preconditions.notNull(listeners, "TestExecutionListener array must not be null");
-		Preconditions.containsNoNullElements(listeners, "individual listeners must not be null");
-		execute(InternalTestPlan.from(discover(discoveryRequest, EXECUTION)), listeners);
+		var executionRequest = LauncherExecutionRequestBuilder.request(discoveryRequest) //
+				.listeners(listeners) //
+				.build();
+		execute(executionRequest);
 	}
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
-		Preconditions.notNull(testPlan, "TestPlan must not be null");
-		Preconditions.condition(testPlan instanceof InternalTestPlan, "TestPlan was not returned by this Launcher");
-		Preconditions.notNull(listeners, "TestExecutionListener array must not be null");
-		Preconditions.containsNoNullElements(listeners, "individual listeners must not be null");
-		execute((InternalTestPlan) testPlan, listeners);
+		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan) //
+				.listeners(listeners) //
+				.build();
+		execute(executionRequest);
+	}
+
+	@Override
+	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		var testPlan = launcherExecutionRequest.getTestPlan().map(it -> {
+			Preconditions.condition(it instanceof InternalTestPlan, "TestPlan was not returned by this Launcher");
+			return ((InternalTestPlan) it);
+		}).orElseGet(() -> {
+			Preconditions.condition(launcherExecutionRequest.getDiscoveryRequest().isPresent(),
+				"Either a TestPlan or LauncherDiscoveryRequest must be present in the LauncherExecutionRequest");
+			return InternalTestPlan.from(discover(launcherExecutionRequest.getDiscoveryRequest().get(), EXECUTION));
+		});
+		execute(testPlan, launcherExecutionRequest.getAdditionalTestExecutionListeners(),
+			launcherExecutionRequest.getCancellationToken());
 	}
 
 	private LauncherDiscoveryResult discover(LauncherDiscoveryRequest discoveryRequest, LauncherPhase phase) {
 		return discoveryOrchestrator.discover(discoveryRequest, phase);
 	}
 
-	private void execute(InternalTestPlan internalTestPlan, TestExecutionListener[] listeners) {
+	private void execute(InternalTestPlan internalTestPlan, Collection<? extends TestExecutionListener> listeners,
+			CancellationToken cancellationToken) {
 		try (NamespacedHierarchicalStore<Namespace> requestLevelStore = createRequestLevelStore()) {
-			executionOrchestrator.execute(internalTestPlan, requestLevelStore, listeners);
+			executionOrchestrator.execute(internalTestPlan, requestLevelStore, listeners, cancellationToken);
 		}
 	}
 

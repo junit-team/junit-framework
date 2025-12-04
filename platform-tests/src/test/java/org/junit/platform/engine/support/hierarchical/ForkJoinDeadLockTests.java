@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 import static org.junit.jupiter.api.parallel.Resources.SYSTEM_PROPERTIES;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.jupiter.api.Test;
@@ -32,13 +32,16 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.engine.Constants;
-import org.junit.platform.engine.discovery.ClassSelector;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
-// https://github.com/junit-team/junit5/issues/3945
+// https://github.com/junit-team/junit-framework/issues/3945
 @Timeout(10)
-public class ForkJoinDeadLockTests {
+@ParameterizedClass
+@EnumSource(ParallelExecutorServiceType.class)
+record ForkJoinDeadLockTests(ParallelExecutorServiceType executorServiceType) {
 
 	@Test
 	void forkJoinExecutionDoesNotLeadToDeadLock() {
@@ -55,10 +58,12 @@ public class ForkJoinDeadLockTests {
 		run(ClassLevelTestCase.class);
 	}
 
-	private static void run(Class<?>... classes) {
+	private void run(Class<?>... classes) {
 		EngineTestKit.engine("junit-jupiter") //
-				.selectors(Arrays.stream(classes).map(DiscoverySelectors::selectClass).toArray(ClassSelector[]::new)) //
+				.selectors(selectClasses(classes)) //
 				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //
+				.configurationParameter(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME,
+					executorServiceType.name()) //
 				.configurationParameter(Constants.DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent") //
 				.configurationParameter(Constants.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME, "concurrent") //
 				.configurationParameter(Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME, "fixed") //

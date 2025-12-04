@@ -66,4 +66,7 @@ class ServiceLoaderRegistry {
 		return LoggerFactory.getLogger(ServiceLoaderRegistry.class);
 	}
 
+	private ServiceLoaderRegistry() {
+	}
+
 }

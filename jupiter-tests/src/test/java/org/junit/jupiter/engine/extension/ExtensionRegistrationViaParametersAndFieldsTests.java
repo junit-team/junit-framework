@@ -70,14 +70,17 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
-import org.junit.jupiter.engine.config.JupiterConfiguration;
+import org.junit.jupiter.engine.Constants;
 import org.junit.jupiter.engine.execution.injection.sample.LongParameterResolver;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.commons.support.ModifierSupport;
 import org.junit.platform.commons.util.ExceptionUtils;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 
 /**
@@ -205,11 +208,15 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 		assertOneTestSucceeded(ProgrammaticTestInstancePostProcessorTestCase.class);
 	}
 
-	@Test
-	void createsExtensionPerInstance() {
+	@ParameterizedTest
+	@EnumSource(ParallelExecutorServiceType.class)
+	void createsExtensionPerInstance(
+			ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType executorServiceType) {
 		var results = executeTests(request() //
 				.selectors(selectClass(InitializationPerInstanceTestCase.class)) //
-				.configurationParameter(JupiterConfiguration.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //
+				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //
+				.configurationParameter(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME,
+					executorServiceType.name()) //
 		);
 		assertTestsSucceeded(results, 100);
 	}

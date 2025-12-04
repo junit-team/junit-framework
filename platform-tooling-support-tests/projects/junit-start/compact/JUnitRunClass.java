@@ -1,0 +1,20 @@
+/*
+ * Copyright 2015-2025 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
+
+import module org.junit.start;
+
+void main() {
+	JUnit.run(getClass());
+}
+
+@Test
+void substraction() {
+	Assertions.assertEquals(2, 3 - 1, "Subtraction error detected!");
+}

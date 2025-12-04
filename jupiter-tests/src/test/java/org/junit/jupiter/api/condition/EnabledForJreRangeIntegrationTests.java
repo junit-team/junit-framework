@@ -242,7 +242,7 @@ class EnabledForJreRangeIntegrationTests {
 	@EnabledForJreRange(minVersion = 21, maxVersion = Integer.MAX_VALUE)
 	void minVersion21MaxVersionMaxInteger() {
 		assertTrue(onKnownVersion());
-		assertTrue(JRE.currentVersionNumber() >= 17);
+		assertTrue(JRE.currentVersionNumber() >= 21);
 	}
 
 	@Test

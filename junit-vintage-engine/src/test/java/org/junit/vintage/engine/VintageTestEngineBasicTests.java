@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
  *
  * @since 4.12
  */
+@SuppressWarnings("deprecation")
 class VintageTestEngineBasicTests {
 
 	private final VintageTestEngine vintage = new VintageTestEngine();

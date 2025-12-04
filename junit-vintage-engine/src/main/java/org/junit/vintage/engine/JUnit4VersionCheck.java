@@ -74,4 +74,7 @@ class JUnit4VersionCheck {
 		}
 	}
 
+	private JUnit4VersionCheck() {
+	}
+
 }

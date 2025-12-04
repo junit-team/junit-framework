@@ -12,6 +12,7 @@ package org.junit.platform.engine;
 
 import static org.apiguardian.api.API.Status.STABLE;
 
+import java.lang.module.ModuleDescriptor;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
@@ -67,6 +68,10 @@ public interface TestEngine {
 	 * must be used to create unique IDs for children of the root's descriptor
 	 * by calling {@link UniqueId#append}.
 	 *
+	 * <p>Furthermore, implementations must publish events about test discovery
+	 * via the supplied {@link EngineDiscoveryRequest#getDiscoveryListener()
+	 * EngineDiscoveryListener}.
+	 *
 	 * @param discoveryRequest the discovery request; never {@code null}
 	 * @param uniqueId the unique ID to be used for this test engine's
 	 * {@code TestDescriptor}; never {@code null}
@@ -109,32 +114,36 @@ public interface TestEngine {
 	}
 
 	/**
-	 * Get the <em>Artifact ID</em> of the JAR in which this test engine is packaged.
+	 * Get the <em>Module Name</em> or <em>Artifact ID</em> of the JAR in which
+	 * this test engine is packaged.
 	 *
 	 * <p>This information is used solely for debugging and reporting purposes.
+	 *
+	 * <p>The default implementation first attempts to retrieve the
+	 * {@linkplain Module#getName() name} of the {@link Module} in which the
+	 * engine resides. If the module name is not available, the default
+	 * implementation then attempts to retrieve the artifact ID as explained
+	 * below.
 	 *
 	 * <p>The default implementation assumes the implementation title is equivalent
 	 * to the artifact ID and therefore attempts to query the
 	 * {@linkplain Package#getImplementationTitle() implementation title}
 	 * from the package attributes for the {@link Package} in which the engine
 	 * resides. Note that a package only has attributes if the information is
-	 * defined in the {@link java.util.jar.Manifest Manifest} of the JAR
-	 * containing that package, and if the class loader created the
-	 * {@link Package} instance with the attributes from the manifest.
+	 * defined in the {@link java.util.jar.Manifest Manifest} of the JAR containing
+	 * that package, and if the class loader created the {@link Package} instance
+	 * with the attributes from the manifest.
 	 *
 	 * <p>If the implementation title cannot be queried from the package
-	 * attributes, the default implementation returns an empty
-	 * {@link Optional}.
+	 * attributes, the default implementation returns an empty {@link Optional}.
 	 *
 	 * <p>Concrete test engine implementations may override this method in
 	 * order to determine the artifact ID by some other means.
 	 *
-	 * @implNote Since JUnit Platform version 1.1 this default implementation
-	 * returns the "module name" stored in the module (modular jar on the
-	 * module-path) of this test engine.
-	 *
-	 * @return an {@code Optional} containing the artifact ID; never
-	 * {@code null} but potentially empty if the artifact ID is unknown
+	 * @return an {@code Optional} containing the module name or artifact ID; never
+	 * {@code null} but potentially empty if neither the module name nor the artifact
+	 * ID can be determined
+	 * @see Module#getName()
 	 * @see Class#getPackage()
 	 * @see Package#getImplementationTitle()
 	 * @see #getGroupId()
@@ -153,10 +162,14 @@ public interface TestEngine {
 	 *
 	 * <p>This information is used solely for debugging and reporting purposes.
 	 *
-	 * <p>Initially, the default implementation tries to retrieve the engine
-	 * version from the manifest attribute named: {@code "Engine-Version-" + getId()}
+	 * <p>The default implementation first attempts to retrieve the version
+	 * from the JAR manifest attribute named {@code "Engine-Version-" + getId()}.
 	 *
-	 * <p>Then the default implementation attempts to query the
+	 * <p>If the manifest attribute is not available, an attempt is made to retrieve
+	 * the {@linkplain ModuleDescriptor#rawVersion() raw version} of the
+	 * {@link Module} in which the engine resides.
+	 *
+	 * <p>If the module version is not available, an attempt is made to query the
 	 * {@linkplain Package#getImplementationVersion() implementation version}
 	 * from the package attributes for the {@link Package} in which the engine
 	 * resides. Note that a package only has attributes if the information is
@@ -164,15 +177,11 @@ public interface TestEngine {
 	 * containing that package, and if the class loader created the
 	 * {@link Package} instance with the attributes from the manifest.
 	 *
-	 * <p>If the implementation version cannot be queried from the package
-	 * attributes, the default implementation returns {@code "DEVELOPMENT"}.
+	 * <p>If the implementation version cannot be determined, the default
+	 * implementation returns {@code "DEVELOPMENT"}.
 	 *
 	 * <p>Concrete test engine implementations may override this method to
 	 * determine the version by some other means.
-	 *
-	 * <p>implNote: Since JUnit Platform version 1.1 this default implementation
-	 * honors the "raw version" information stored in the module (modular jar
-	 * on the module-path) of this test engine.
 	 *
 	 * @return an {@code Optional} containing the version; never {@code null}
 	 * but potentially empty if the version is unknown

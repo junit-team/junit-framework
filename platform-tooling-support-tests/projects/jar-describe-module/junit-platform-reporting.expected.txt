@@ -5,7 +5,7 @@ exports org.junit.platform.reporting.open.xml
 requires java.base mandated
 requires java.xml
 requires org.apiguardian.api static transitive
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.platform.commons
 requires org.junit.platform.engine transitive
 requires org.junit.platform.launcher transitive

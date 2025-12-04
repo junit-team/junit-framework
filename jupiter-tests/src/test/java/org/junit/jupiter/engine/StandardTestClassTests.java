@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
 import org.junit.jupiter.api.AfterEach;
@@ -44,16 +45,18 @@ class StandardTestClassTests extends AbstractJupiterTestEngineTests {
 
 	@Test
 	void moreThanOneTestClassIsCorrectlyDiscovered() {
-		LauncherDiscoveryRequest request = request().selectors(selectClass(SecondOfTwoTestCases.class)).build();
+		LauncherDiscoveryRequest request = //
+			request().selectors(selectClasses(FirstOfTwoTestCases.class, SecondOfTwoTestCases.class)).build();
+
 		TestDescriptor engineDescriptor = discoverTests(request).getEngineDescriptor();
-		assertEquals(1 /*class*/ + 3 /*methods*/, engineDescriptor.getDescendants().size(),
+		assertEquals(2 /*class*/ + 6 /*methods*/, engineDescriptor.getDescendants().size(),
 			"# resolved test descriptors");
 	}
 
 	@Test
 	void moreThanOneTestClassIsExecuted() {
-		LauncherDiscoveryRequest request = request().selectors(selectClass(FirstOfTwoTestCases.class),
-			selectClass(SecondOfTwoTestCases.class)).build();
+		LauncherDiscoveryRequest request = //
+			request().selectors(selectClasses(FirstOfTwoTestCases.class, SecondOfTwoTestCases.class)).build();
 
 		EngineExecutionResults executionResults = executeTests(request);
 		Events containers = executionResults.containerEvents();

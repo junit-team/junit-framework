@@ -24,11 +24,9 @@ final class DefaultDiscoveryIssue implements DiscoveryIssue {
 	private final Severity severity;
 	private final String message;
 
-	@Nullable
-	private final TestSource source;
+	private final @Nullable TestSource source;
 
-	@Nullable
-	private final Throwable cause;
+	private final @Nullable Throwable cause;
 
 	DefaultDiscoveryIssue(Builder builder) {
 		this.severity = builder.severity;
@@ -59,8 +57,9 @@ final class DefaultDiscoveryIssue implements DiscoveryIssue {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null || getClass() != o.getClass())
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		DefaultDiscoveryIssue that = (DefaultDiscoveryIssue) o;
 		return this.severity == that.severity //
 				&& Objects.equals(this.message, that.message) //

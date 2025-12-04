@@ -41,13 +41,15 @@ class RandomOrdererUtils {
 				return Long.valueOf(configurationParameter);
 			}
 			catch (NumberFormatException ex) {
-				logger.warn(ex,
-					() -> String.format(
-						"Failed to convert configuration parameter [%s] with value [%s] to a long. "
-								+ "Using default seed [%s] as fallback.",
-						RANDOM_SEED_PROPERTY_NAME, configurationParameter, DEFAULT_SEED));
+				logger.warn(ex, () -> """
+						Failed to convert configuration parameter [%s] with value [%s] to a long. \
+						Using default seed [%s] as fallback.""".formatted(RANDOM_SEED_PROPERTY_NAME,
+					configurationParameter, DEFAULT_SEED));
 				return null;
 			}
 		});
+	}
+
+	private RandomOrdererUtils() {
 	}
 }

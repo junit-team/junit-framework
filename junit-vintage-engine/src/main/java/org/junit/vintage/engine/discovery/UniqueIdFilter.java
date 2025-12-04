@@ -18,7 +18,6 @@ import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.runner.Description;
@@ -34,10 +33,10 @@ class UniqueIdFilter extends Filter {
 	private final RunnerTestDescriptor runnerTestDescriptor;
 	private final UniqueId uniqueId;
 
-	@Nullable
+	@SuppressWarnings({ "NullAway.Init", "NotNullFieldNotInitialized" })
 	private Deque<Description> path;
 
-	@Nullable
+	@SuppressWarnings({ "NullAway.Init", "NotNullFieldNotInitialized" })
 	private Set<Description> descendants;
 
 	UniqueIdFilter(RunnerTestDescriptor runnerTestDescriptor, UniqueId uniqueId) {
@@ -45,6 +44,7 @@ class UniqueIdFilter extends Filter {
 		this.uniqueId = uniqueId;
 	}
 
+	@SuppressWarnings("ConstantValue")
 	private void ensureInitialized() {
 		if (descendants == null) {
 			Optional<? extends TestDescriptor> identifiedTestDescriptor = runnerTestDescriptor.findByUniqueId(uniqueId);
@@ -78,7 +78,6 @@ class UniqueIdFilter extends Filter {
 	}
 
 	@Override
-	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
 	public boolean shouldRun(Description description) {
 		ensureInitialized();
 		return path.contains(description) || descendants.contains(description);

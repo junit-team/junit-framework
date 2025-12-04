@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.params;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
@@ -88,7 +87,7 @@ public class ParameterizedInvocationConstants {
 	 * @see #ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 * @see org.junit.jupiter.params.provider.Arguments#argumentSet(String, Object...)
 	 */
-	@API(status = EXPERIMENTAL, since = "5.11")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String ARGUMENT_SET_NAME_PLACEHOLDER = "{argumentSetName}";
 
 	/**
@@ -106,7 +105,7 @@ public class ParameterizedInvocationConstants {
 	 * @see #DEFAULT_DISPLAY_NAME
 	 * @see org.junit.jupiter.params.provider.Arguments#argumentSet(String, Object...)
 	 */
-	@API(status = EXPERIMENTAL, since = "5.11")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER = "{argumentSetNameOrArgumentsWithNames}";
 
 	/**

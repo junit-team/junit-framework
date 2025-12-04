@@ -5,7 +5,6 @@ import net.ltgt.gradle.nullaway.nullaway
 
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.shadow-conventions")
 }
 
@@ -16,7 +15,7 @@ dependencies {
 	api(projects.junitPlatformReporting)
 
 	compileOnlyApi(libs.apiguardian)
-	compileOnly(libs.jspecify)
+	compileOnlyApi(libs.jspecify)
 
 	shadowed(libs.picocli)
 
@@ -28,6 +27,7 @@ dependencies {
 tasks {
 	compileJava {
 		options.compilerArgs.addAll(listOf(
+			"-Xlint:-module", // due to qualified exports
 			"--add-modules", "info.picocli",
 			"--add-reads", "${javaModuleName}=info.picocli"
 		))
@@ -46,7 +46,7 @@ tasks {
 		}
 	}
 	shadowJar {
-		exclude("META-INF/versions/9/module-info.class")
+		exclude("META-INF/**/module-info.class")
 		relocate("picocli", "org.junit.platform.console.shadow.picocli")
 		from(projectDir) {
 			include("LICENSE-picocli.md")
@@ -59,6 +59,12 @@ tasks {
 				"--main-class", "org.junit.platform.console.ConsoleLauncher",
 			)
 		})
+		bundle {
+			// Ignore warning for package that is only exported as "INTERNAL"
+			bnd("""
+				-fixupmessages.picocli.export: "Export org.junit.platform.console.options";is:=ignore
+			""")
+		}
 	}
 	codeCoverageClassesJar {
 		exclude("org/junit/platform/console/options/ConsoleUtils.class")

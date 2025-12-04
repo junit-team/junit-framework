@@ -4,7 +4,7 @@
 
 We welcome new contributors to the project!
 If you're interested, please check for [issues labeled with `up-for-grabs`
-that are not yet in progress](https://github.com/junit-team/junit5/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3Aup-for-grabs%20-label%3A%22status%3A%20in%20progress%22).
+that are not yet in progress](https://github.com/junit-team/junit-framework/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3Aup-for-grabs%20-label%3A%22status%3A%20in%20progress%22).
 Generally, before you work on an issue, post a comment and ask whether it can be started.
 Please wait for the core team to respond and assign the issue to you before making any code
 changes.
@@ -36,7 +36,7 @@ Issue: #999
 
 ## Pull Requests
 
-Our [Definition of Done](https://github.com/junit-team/junit5/wiki/Definition-of-Done)
+Our [Definition of Done](https://github.com/junit-team/junit-framework/wiki/Definition-of-Done)
 (DoD) offers some guidelines on what we expect from a pull request.
 Feel free to open a pull request that does not fulfill all criteria, e.g. to discuss
 a certain change before polishing it, but please be aware that we will only merge it
@@ -111,7 +111,7 @@ code -- class names, method names, variable names, etc.
 - Favor literals (e.g., `{@literal @}`) over HTML entities.
 - New classes and methods should declare a `@since ...` tag.
 - Use `@since 5.10` instead of `@since 5.10.0`.
-- Do not use `@author` tags. Instead, contributors are listed on the [GitHub](https://github.com/junit-team/junit5/graphs/contributors) page.
+- Do not use `@author` tags. Instead, contributors are listed on the [GitHub](https://github.com/junit-team/junit-framework/graphs/contributors) page.
 - Do not use verbs in third-person form in the first sentence of the Javadoc for a method -- for example, use "Discover tests..." instead of "Discovers tests...".
 
 #### Examples
@@ -125,11 +125,8 @@ See [`ExtensionContext`](junit-jupiter-api/src/main/java/org/junit/jupiter/api/e
 This project uses JSpecify's annotation to indicate nullability. In general, the approach
 is as follows:
 
-- The Gradle build is set up to treat all code as being `@NullMarked`
-- The descriptor of each module is annotated with `@NullMarked` for IDEs such as IntelliJ
-  IDEA to treat code correctly.
-- Fields, parameters, return types etc. may be annotated with `@Nullable`
-- A package can be excluded (temporarily) using `@NullUnmarked`
+- All packages are annotated with `@NullMarked`
+- Types of fields, parameters, return types etc. may be annotated with `@Nullable`
 
 ### Tests
 
@@ -151,8 +148,8 @@ is as follows:
 ### Logging
 
 - In general, logging should be used sparingly.
-- All logging must be performed via the internal `Logger` façade provided via the JUnit [LoggerFactory](https://github.com/junit-team/junit5/blob/main/junit-platform-commons/src/main/java/org/junit/platform/commons/logging/LoggerFactory.java).
-- Levels defined in JUnit's [Logger](https://github.com/junit-team/junit5/blob/main/junit-platform-commons/src/main/java/org/junit/platform/commons/logging/Logger.java) façade, which delegates to Java Util Logging (JUL) for the actual logging.
+- All logging must be performed via the internal `Logger` façade provided via the JUnit [LoggerFactory](https://github.com/junit-team/junit-framework/blob/main/junit-platform-commons/src/main/java/org/junit/platform/commons/logging/LoggerFactory.java).
+- Levels defined in JUnit's [Logger](https://github.com/junit-team/junit-framework/blob/main/junit-platform-commons/src/main/java/org/junit/platform/commons/logging/Logger.java) façade, which delegates to Java Util Logging (JUL) for the actual logging.
   - _error_ (JUL: `SEVERE`, Log4J: `ERROR`): extra information (in addition to an Exception) about errors that will halt execution
   - _warn_ (JUL: `WARNING`, Log4J: `WARN`): potential usage or configuration errors that should not halt execution
   - _info_ (JUL: `INFO`, Log4J: `INFO`): information the users might want to know but not by default
@@ -164,7 +161,7 @@ is as follows:
 
 The JUnit project uses the `@API` annotation from [API Guardian](https://github.com/apiguardian-team/apiguardian).
 Publicly available interfaces, classes, and methods have a defined lifecycle
-which is described in detail in the [User Guide](https://junit.org/junit5/docs/current/user-guide/#api-evolution).
+which is described in detail in the [User Guide](https://docs.junit.org/current/user-guide/#api-evolution).
 
 That following describes the deprecation process followed for API items.
 
@@ -180,8 +177,18 @@ To deprecate an item:
 
 ## Building the Project
 
-Please refer to [the readme](README.md#building-from-source) for the most common
-build commands.
+Please refer to [the readme](README.md#building-from-source) and [the documentation readme](documentation/README.md) for
+the most common build commands.
+
+### Build Cache
+
+Local builds can reuse outputs from previous CI builds via Gradle's [Build Cache](https://docs.gradle.org/current/userguide/build_cache.html).
+The default build cache server is located in the US.
+If you're in Europe, you can configure the build to use a build cache node located in the EU by adding the following to the `gradle.properties` file in your [Gradle user home](https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home):
+
+```properties
+junit.develocity.buildCache.server=https://eu-build-cache-ge.junit.org
+```
 
 ### Build Parameters
 

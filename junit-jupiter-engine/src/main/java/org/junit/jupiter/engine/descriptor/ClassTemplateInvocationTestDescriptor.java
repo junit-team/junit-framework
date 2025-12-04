@@ -49,8 +49,7 @@ public class ClassTemplateInvocationTestDescriptor extends JupiterTestDescriptor
 
 	private final ClassTemplateTestDescriptor parent;
 
-	@Nullable
-	private ClassTemplateInvocationContext invocationContext;
+	private @Nullable ClassTemplateInvocationContext invocationContext;
 
 	private final int index;
 

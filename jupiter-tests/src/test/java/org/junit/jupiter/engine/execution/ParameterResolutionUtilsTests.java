@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.execution;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -48,8 +49,7 @@ class ParameterResolutionUtilsTests {
 
 	private final MethodSource instance = mock();
 
-	@Nullable
-	private Method method;
+	private @Nullable Method method;
 
 	private final ExtensionContext extensionContext = mock();
 
@@ -63,6 +63,7 @@ class ParameterResolutionUtilsTests {
 		register(new StringParameterResolver());
 
 		Class<ConstructorInjectionTestCase> topLevelClass = ConstructorInjectionTestCase.class;
+		@Nullable
 		Object[] arguments = resolveConstructorParameters(topLevelClass, null);
 
 		assertThat(arguments).containsExactly(ENIGMA);
@@ -76,6 +77,7 @@ class ParameterResolutionUtilsTests {
 		ConstructorInjectionTestCase outer = ReflectionSupport.newInstance(outerClass, "str");
 
 		Class<ConstructorInjectionTestCase.NestedTestCase> innerClass = ConstructorInjectionTestCase.NestedTestCase.class;
+		@Nullable
 		Object[] arguments = resolveConstructorParameters(innerClass, outer);
 
 		assertThat(arguments).containsExactly(outer, 42);
@@ -101,6 +103,7 @@ class ParameterResolutionUtilsTests {
 		testMethodWithNoParameters();
 		throwDuringParameterResolution(new RuntimeException("boom!"));
 
+		@Nullable
 		Object[] arguments = resolveMethodParameters();
 
 		assertThat(arguments).isEmpty();
@@ -111,6 +114,7 @@ class ParameterResolutionUtilsTests {
 		testMethodWithASingleStringParameter();
 		thereIsAParameterResolverThatResolvesTheParameterTo("argument");
 
+		@Nullable
 		Object[] arguments = resolveMethodParameters();
 
 		assertThat(arguments).containsExactly("argument");
@@ -120,16 +124,14 @@ class ParameterResolutionUtilsTests {
 	void resolveMultipleArguments() {
 		testMethodWith("multipleParameters", String.class, Integer.class, Double.class);
 		register(ConfigurableParameterResolver.supportsAndResolvesTo(parameterContext -> {
-			switch (parameterContext.getIndex()) {
-				case 0:
-					return "0";
-				case 1:
-					return 1;
-				default:
-					return 2.0;
-			}
+			return switch (parameterContext.getIndex()) {
+				case 0 -> "0";
+				case 1 -> 1;
+				default -> 2.0;
+			};
 		}));
 
+		@Nullable
 		Object[] arguments = resolveMethodParameters();
 
 		assertThat(arguments).containsExactly("0", 1, 2.0);
@@ -141,12 +143,13 @@ class ParameterResolutionUtilsTests {
 		thereIsAParameterResolverThatDoesNotSupportThisParameter();
 		thereIsAParameterResolverThatResolvesTheParameterTo("something");
 
+		@Nullable
 		Object[] arguments = resolveMethodParameters();
 
 		assertThat(arguments).containsExactly("something");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void passContextInformationToParameterResolverMethods() {
 		anyTestMethodWithAtLeastOneParameter();
@@ -170,6 +173,7 @@ class ParameterResolutionUtilsTests {
 		testMethodWithASinglePrimitiveIntParameter();
 		thereIsAParameterResolverThatResolvesTheParameterTo(42);
 
+		@Nullable
 		Object[] arguments = resolveMethodParameters();
 
 		assertThat(arguments).containsExactly(42);
@@ -180,6 +184,7 @@ class ParameterResolutionUtilsTests {
 		testMethodWithASingleStringParameter();
 		thereIsAParameterResolverThatResolvesTheParameterTo(null);
 
+		@Nullable
 		Object[] arguments = resolveMethodParameters();
 
 		assertThat(arguments).hasSize(1);
@@ -244,6 +249,20 @@ class ParameterResolutionUtilsTests {
 				.contains("in method")
 				.contains("but a value assignment compatible with [java.lang.String] is required.");
 		// @formatter:on
+	}
+
+	@Test
+	void reportTypeMismatchBetweenParameterAndResolvedParameterWithArrayTypes() {
+		testMethodWithASingleStringArrayParameter();
+		thereIsAParameterResolverThatResolvesTheParameterTo(new int[][] {});
+
+		assertThatExceptionOfType(ParameterResolutionException.class)//
+				.isThrownBy(this::resolveMethodParameters)//
+				.withMessageContaining(//
+					"resolved a value of type [int[][]] for parameter [java.lang.String[]", //
+					"in method", //
+					"but a value assignment compatible with [java.lang.String[]] is required." //
+				);
 	}
 
 	@Test
@@ -312,6 +331,10 @@ class ParameterResolutionUtilsTests {
 
 	private void testMethodWithASingleStringParameter() {
 		testMethodWith("singleStringParameter", String.class);
+	}
+
+	private void testMethodWithASingleStringArrayParameter() {
+		testMethodWith("singleStringArrayParameter", String[].class);
 	}
 
 	private void testMethodWithASinglePrimitiveIntParameter() {
@@ -408,6 +431,8 @@ class ParameterResolutionUtilsTests {
 		void noParameter();
 
 		void singleStringParameter(String parameter);
+
+		void singleStringArrayParameter(String[] parameter);
 
 		void primitiveParameterInt(int parameter);
 

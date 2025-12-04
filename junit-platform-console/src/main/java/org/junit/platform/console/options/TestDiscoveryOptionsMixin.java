@@ -10,12 +10,15 @@
 
 package org.junit.platform.console.options;
 
+import static org.apiguardian.api.API.Status.INTERNAL;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.engine.DiscoverySelectorIdentifier;
 import org.junit.platform.engine.discovery.ClassNameFilter;
@@ -34,7 +37,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 
-class TestDiscoveryOptionsMixin {
+@API(status = INTERNAL, since = "1.14")
+public class TestDiscoveryOptionsMixin {
 
 	private static final String CP_OPTION = "cp";
 
@@ -42,78 +46,77 @@ class TestDiscoveryOptionsMixin {
 	SelectorOptions selectorOptions;
 
 	@ArgGroup(validate = false, order = 3, heading = "%n  For more information on selectors including syntax examples, see"
-			+ "%n  @|underline https://junit.org/junit5/docs/${junit.docs.version}/user-guide/#running-tests-discovery-selectors|@"
+			+ "%n  @|underline https://docs.junit.org/${junit.docs.version}/user-guide/#running-tests-discovery-selectors|@"
 			+ "%n%n@|bold FILTERS|@%n%n")
 	FilterOptions filterOptions;
 
 	@ArgGroup(validate = false, order = 4, heading = "%n@|bold RUNTIME CONFIGURATION|@%n%n")
 	RuntimeConfigurationOptions runtimeConfigurationOptions;
 
-	static class SelectorOptions {
+	public static class SelectorOptions {
 
-		@Nullable
 		@Option(names = { "--scan-classpath",
 				"--scan-class-path" }, converter = ClasspathEntriesConverter.class, paramLabel = "PATH", arity = "0..1", description = "Scan all directories on the classpath or explicit classpath roots. " //
 						+ "Without arguments, only directories on the system classpath as well as additional classpath " //
 						+ "entries supplied via -" + CP_OPTION + " (directories and JAR files) are scanned. " //
 						+ "Explicit classpath roots that are not on the classpath will be silently ignored. " //
 						+ "This option can be repeated.")
-		private List<Path> selectedClasspathEntries;
+		private @Nullable List<Path> selectedClasspathEntries;
 
 		@Option(names = "--scan-modules", description = "Scan all resolved modules for test discovery.")
 		private boolean scanModulepath;
 
 		@Option(names = { "-u",
 				"--select-uri" }, paramLabel = "URI", arity = "1..*", converter = SelectorConverter.Uri.class, description = "Select a URI for test discovery. This option can be repeated.")
-		private final List<UriSelector> selectedUris = new ArrayList<>();
+		private List<UriSelector> selectedUris = new ArrayList<>();
 
 		@Option(names = { "-f",
 				"--select-file" }, paramLabel = "FILE", arity = "1..*", converter = SelectorConverter.File.class, //
 				description = "Select a file for test discovery. "
 						+ "The line and column numbers can be provided as URI query parameters (e.g. foo.txt?line=12&column=34). "
 						+ "This option can be repeated.")
-		private final List<FileSelector> selectedFiles = new ArrayList<>();
+		private List<FileSelector> selectedFiles = new ArrayList<>();
 
 		@Option(names = { "-d",
 				"--select-directory" }, paramLabel = "DIR", arity = "1..*", converter = SelectorConverter.Directory.class, description = "Select a directory for test discovery. This option can be repeated.")
-		private final List<DirectorySelector> selectedDirectories = new ArrayList<>();
+		private List<DirectorySelector> selectedDirectories = new ArrayList<>();
 
 		@Option(names = { "-o",
 				"--select-module" }, paramLabel = "NAME", arity = "1..*", converter = SelectorConverter.Module.class, description = "Select single module for test discovery. This option can be repeated.")
-		private final List<ModuleSelector> selectedModules = new ArrayList<>();
+		private List<ModuleSelector> selectedModules = new ArrayList<>();
 
 		@Option(names = { "-p",
 				"--select-package" }, paramLabel = "PKG", arity = "1..*", converter = SelectorConverter.Package.class, description = "Select a package for test discovery. This option can be repeated.")
-		private final List<PackageSelector> selectedPackages = new ArrayList<>();
+		private List<PackageSelector> selectedPackages = new ArrayList<>();
 
 		@Option(names = { "-c",
 				"--select-class" }, paramLabel = "CLASS", arity = "1..*", converter = SelectorConverter.Class.class, description = "Select a class for test discovery. This option can be repeated.")
-		private final List<ClassSelector> selectedClasses = new ArrayList<>();
+		private List<ClassSelector> selectedClasses = new ArrayList<>();
 
 		@Option(names = { "-m",
 				"--select-method" }, paramLabel = "NAME", arity = "1..*", converter = SelectorConverter.Method.class, description = "Select a method for test discovery. This option can be repeated.")
-		private final List<MethodSelector> selectedMethods = new ArrayList<>();
+		private List<MethodSelector> selectedMethods = new ArrayList<>();
 
 		@Option(names = { "-r",
 				"--select-resource" }, paramLabel = "RESOURCE", arity = "1..*", converter = SelectorConverter.ClasspathResource.class, description = "Select a classpath resource for test discovery. This option can be repeated.")
-		private final List<ClasspathResourceSelector> selectedClasspathResources = new ArrayList<>();
+		private List<ClasspathResourceSelector> selectedClasspathResources = new ArrayList<>();
 
 		@Option(names = { "-i",
 				"--select-iteration" }, paramLabel = "PREFIX:VALUE[INDEX(..INDEX)?(,INDEX(..INDEX)?)*]", arity = "1..*", converter = SelectorConverter.Iteration.class, //
 				description = "Select iterations for test discovery via a prefixed identifier and a list of indexes or index ranges "
 						+ "(e.g. method:com.acme.Foo#m()[1..2] selects the first and second iteration of the m() method in the com.acme.Foo class). "
 						+ "This option can be repeated.")
-		private final List<IterationSelector> selectedIterations = new ArrayList<>();
+		private List<IterationSelector> selectedIterations = new ArrayList<>();
 
 		@Option(names = { "--select-unique-id",
 				"--uid" }, paramLabel = "UNIQUE-ID", arity = "1..*", converter = SelectorConverter.UniqueId.class, //
 				description = "Select a unique id for test discovery. This option can be repeated.")
-		private final List<UniqueIdSelector> selectedUniqueIds = new ArrayList<>();
+		private List<UniqueIdSelector> selectedUniqueIds = new ArrayList<>();
 
 		@Option(names = "--select", paramLabel = "PREFIX:VALUE", arity = "1..*", converter = SelectorConverter.Identifier.class, //
 				description = "Select via a prefixed identifier (e.g. method:com.acme.Foo#m selects the m() method in the com.acme.Foo class). "
 						+ "This option can be repeated.")
-		private final List<DiscoverySelectorIdentifier> selectorIdentifiers = new ArrayList<>();
+		private List<DiscoverySelectorIdentifier> selectorIdentifiers = new ArrayList<>();
 
 		SelectorOptions() {
 		}
@@ -136,7 +139,7 @@ class TestDiscoveryOptionsMixin {
 		}
 	}
 
-	static class FilterOptions {
+	public static class FilterOptions {
 
 		@Option(names = { "-n",
 				"--include-classname" }, paramLabel = "PATTERN", defaultValue = ClassNameFilter.STANDARD_INCLUDE_PATTERN, arity = "1", description = "Provide a regular expression to include only classes whose fully qualified names match. " //
@@ -144,50 +147,46 @@ class TestDiscoveryOptionsMixin {
 						+ "names that begin with \"Test\" or end with \"Test\" or \"Tests\". " //
 						+ "When this option is repeated, all patterns will be combined using OR semantics. " //
 						+ "Default: ${DEFAULT-VALUE}")
-		private final List<String> includeClassNamePatterns = new ArrayList<>();
+		private List<String> includeClassNamePatterns = new ArrayList<>();
 
 		@Option(names = { "-N",
 				"--exclude-classname" }, paramLabel = "PATTERN", arity = "1", description = "Provide a regular expression to exclude those classes whose fully qualified names match. " //
 						+ "When this option is repeated, all patterns will be combined using OR semantics.")
-		private final List<String> excludeClassNamePatterns = new ArrayList<>();
+		private List<String> excludeClassNamePatterns = new ArrayList<>();
 
-		@Option(names = {
-				"--include-package" }, paramLabel = "PKG", arity = "1", description = "Provide a package to be included in the test run. This option can be repeated.")
-		private final List<String> includePackages = new ArrayList<>();
+		@Option(names = "--include-package", paramLabel = "PKG", arity = "1", description = "?Provide a package to be included in the test run. This option can be repeated.")
+		private List<String> includePackages = new ArrayList<>();
 
-		@Option(names = {
-				"--exclude-package" }, paramLabel = "PKG", arity = "1", description = "Provide a package to be excluded from the test run. This option can be repeated.")
-		private final List<String> excludePackages = new ArrayList<>();
+		@Option(names = "--exclude-package", paramLabel = "PKG", arity = "1", description = "Provide a package to be excluded from the test run. This option can be repeated.")
+		private List<String> excludePackages = new ArrayList<>();
 
-		@Option(names = {
-				"--include-methodname" }, paramLabel = "PATTERN", arity = "1", description = "Provide a regular expression to include only methods whose fully qualified names without parameters match. " //
-						+ "When this option is repeated, all patterns will be combined using OR semantics.")
-		private final List<String> includeMethodNamePatterns = new ArrayList<>();
+		@Option(names = "--include-methodname", paramLabel = "PATTERN", arity = "1", description = "Provide a regular expression to include only methods whose fully qualified names without parameters match. " //
+				+ "When this option is repeated, all patterns will be combined using OR semantics.")
+		private List<String> includeMethodNamePatterns = new ArrayList<>();
 
-		@Option(names = {
-				"--exclude-methodname" }, paramLabel = "PATTERN", arity = "1", description = "Provide a regular expression to exclude those methods whose fully qualified names without parameters match. " //
-						+ "When this option is repeated, all patterns will be combined using OR semantics.")
-		private final List<String> excludeMethodNamePatterns = new ArrayList<>();
+		@Option(names = "--exclude-methodname", paramLabel = "PATTERN", arity = "1", description = "Provide a regular expression to exclude those methods whose fully qualified names without parameters match. " //
+				+ "When this option is repeated, all patterns will be combined using OR semantics.")
+		private List<String> excludeMethodNamePatterns = new ArrayList<>();
 
 		@Option(names = { "-t",
 				"--include-tag" }, paramLabel = "TAG", arity = "1", description = "Provide a tag or tag expression to include only tests whose tags match. "
 						+ //
 						"When this option is repeated, all patterns will be combined using OR semantics.")
-		private final List<String> includedTags = new ArrayList<>();
+		private List<String> includedTags = new ArrayList<>();
 
 		@Option(names = { "-T",
 				"--exclude-tag" }, paramLabel = "TAG", arity = "1", description = "Provide a tag or tag expression to exclude those tests whose tags match. "
 						+ //
 						"When this option is repeated, all patterns will be combined using OR semantics.")
-		private final List<String> excludedTags = new ArrayList<>();
+		private List<String> excludedTags = new ArrayList<>();
 
 		@Option(names = { "-e",
 				"--include-engine" }, paramLabel = "ID", arity = "1", description = "Provide the ID of an engine to be included in the test run. This option can be repeated.")
-		private final List<String> includedEngines = new ArrayList<>();
+		private List<String> includedEngines = new ArrayList<>();
 
 		@Option(names = { "-E",
 				"--exclude-engine" }, paramLabel = "ID", arity = "1", description = "Provide the ID of an engine to be excluded from the test run. This option can be repeated.")
-		private final List<String> excludedEngines = new ArrayList<>();
+		private List<String> excludedEngines = new ArrayList<>();
 
 		private void applyTo(TestDiscoveryOptions result) {
 			result.setIncludedClassNamePatterns(this.includeClassNamePatterns);
@@ -203,18 +202,17 @@ class TestDiscoveryOptionsMixin {
 		}
 	}
 
-	static class RuntimeConfigurationOptions {
+	public static class RuntimeConfigurationOptions {
 
 		@Option(names = { "-" + CP_OPTION, "--classpath",
 				"--class-path" }, converter = ClasspathEntriesConverter.class, paramLabel = "PATH", arity = "1", description = "Provide additional classpath entries "
 						+ "-- for example, for adding engines and their dependencies. This option can be repeated.")
-		private final List<Path> additionalClasspathEntries = new ArrayList<>();
+		private List<Path> additionalClasspathEntries = new ArrayList<>();
 
 		// Implementation note: the @Option annotation is on a setter method to allow validation.
-		private final Map<String, String> configurationParameters = new LinkedHashMap<>();
+		private Map<String, String> configurationParameters = new LinkedHashMap<>();
 
-		@Option(names = {
-				"--config-resource" }, paramLabel = "PATH", arity = "1", description = "Set configuration parameters for test discovery and execution via a classpath resource. This option can be repeated.")
+		@Option(names = "--config-resource", paramLabel = "PATH", arity = "1", description = "Set configuration parameters for test discovery and execution via a classpath resource. This option can be repeated.")
 		private List<String> configurationParametersResources = new ArrayList<>();
 
 		@CommandLine.Spec
@@ -227,7 +225,7 @@ class TestDiscoveryOptionsMixin {
 		 *
 		 * @param map the key-value pairs to add
 		 * @throws CommandLine.ParameterException if the map already contains this key
-		 * @see <a href="https://github.com/junit-team/junit5/issues/1308">#1308</a>
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/1308">#1308</a>
 		 */
 		@Option(names = "--config", paramLabel = "KEY=VALUE", arity = "1", description = "Set a configuration parameter for test discovery and execution. This option can be repeated.")
 		public void setConfigurationParameters(Map<String, String> map) {
@@ -253,7 +251,7 @@ class TestDiscoveryOptionsMixin {
 		}
 	}
 
-	TestDiscoveryOptions toTestDiscoveryOptions() {
+	public TestDiscoveryOptions toTestDiscoveryOptions() {
 		TestDiscoveryOptions result = new TestDiscoveryOptions();
 		if (this.selectorOptions != null) {
 			this.selectorOptions.applyTo(result);

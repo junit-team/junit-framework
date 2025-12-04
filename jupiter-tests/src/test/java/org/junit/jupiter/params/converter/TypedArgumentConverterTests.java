@@ -13,6 +13,7 @@ package org.junit.jupiter.params.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.support.ReflectionSupport;
 
 /**
@@ -48,16 +49,14 @@ class TypedArgumentConverterTests {
 		/**
 		 * @since 5.8
 		 */
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void preconditions() {
-			assertThatExceptionOfType(PreconditionViolationException.class)//
-					.isThrownBy(() -> new StringLengthArgumentConverter(null, Integer.class))//
-					.withMessage("sourceType must not be null");
+			assertPreconditionViolationNotNullFor("sourceType",
+				() -> new StringLengthArgumentConverter(null, Integer.class));
 
-			assertThatExceptionOfType(PreconditionViolationException.class)//
-					.isThrownBy(() -> new StringLengthArgumentConverter(String.class, null))//
-					.withMessage("targetType must not be null");
+			assertPreconditionViolationNotNullFor("targetType",
+				() -> new StringLengthArgumentConverter(String.class, null));
 		}
 
 		@Test
@@ -84,12 +83,52 @@ class TypedArgumentConverterTests {
 		}
 
 		@Test
+		void sourceTypeMismatchForArrayType() {
+			Parameter parameter = findParameterOfMethod("stringToByteArray", Byte[].class);
+			ParameterContext parameterContext = parameterContext(parameter);
+			assertThatExceptionOfType(ArgumentConversionException.class)//
+					.isThrownBy(() -> this.converter.convert(new String[][] {}, parameterContext))//
+					.withMessage("StringLengthArgumentConverter cannot convert objects of type [java.lang.String[][]]. "
+							+ "Only source objects of type [java.lang.String] are supported.");
+		}
+
+		@Test
+		void sourceTypeMismatchForPrimitiveArrayType() {
+			Parameter parameter = findParameterOfMethod("stringToByteArray", Byte[].class);
+			ParameterContext parameterContext = parameterContext(parameter);
+			assertThatExceptionOfType(ArgumentConversionException.class)//
+					.isThrownBy(() -> this.converter.convert(new byte[0], parameterContext))//
+					.withMessage("StringLengthArgumentConverter cannot convert objects of type [byte[]]. "
+							+ "Only source objects of type [java.lang.String] are supported.");
+		}
+
+		@Test
 		void targetTypeMismatch() {
 			Parameter parameter = findParameterOfMethod("stringToBoolean", Boolean.class);
 			ParameterContext parameterContext = parameterContext(parameter);
 			assertThatExceptionOfType(ArgumentConversionException.class)//
 					.isThrownBy(() -> this.converter.convert("enigma", parameterContext))//
 					.withMessage("StringLengthArgumentConverter cannot convert to type [java.lang.Boolean]. "
+							+ "Only target type [java.lang.Integer] is supported.");
+		}
+
+		@Test
+		void targetTypeMismatchForArrayType() {
+			Parameter parameter = findParameterOfMethod("stringToByteArray", Byte[].class);
+			ParameterContext parameterContext = parameterContext(parameter);
+			assertThatExceptionOfType(ArgumentConversionException.class)//
+					.isThrownBy(() -> this.converter.convert("enigma", parameterContext))//
+					.withMessage("StringLengthArgumentConverter cannot convert to type [java.lang.Byte[]]. "
+							+ "Only target type [java.lang.Integer] is supported.");
+		}
+
+		@Test
+		void targetTypeMismatchForPrimitiveArrayType() {
+			Parameter parameter = findParameterOfMethod("stringToPrimitiveByteArray", byte[].class);
+			ParameterContext parameterContext = parameterContext(parameter);
+			assertThatExceptionOfType(ArgumentConversionException.class)//
+					.isThrownBy(() -> this.converter.convert("enigma", parameterContext))//
+					.withMessage("StringLengthArgumentConverter cannot convert to type [byte[]]. "
 							+ "Only target type [java.lang.Integer] is supported.");
 		}
 
@@ -105,6 +144,12 @@ class TypedArgumentConverterTests {
 		}
 
 		void stringToBoolean(Boolean b) {
+		}
+
+		void stringToByteArray(Byte[] array) {
+		}
+
+		void stringToPrimitiveByteArray(byte[] array) {
 		}
 
 	}
@@ -159,6 +204,7 @@ class TypedArgumentConverterTests {
 	private @interface StringLength {
 	}
 
+	@NullMarked
 	private static class StringLengthArgumentConverter extends TypedArgumentConverter<String, Integer> {
 
 		StringLengthArgumentConverter() {

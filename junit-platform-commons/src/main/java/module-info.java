@@ -27,6 +27,7 @@ module org.junit.platform.commons {
 	exports org.junit.platform.commons;
 	exports org.junit.platform.commons.annotation;
 	exports org.junit.platform.commons.function;
+	exports org.junit.platform.commons.io;
 	exports org.junit.platform.commons.logging to
 			org.junit.jupiter.api,
 			org.junit.jupiter.engine,
@@ -50,11 +51,9 @@ module org.junit.platform.commons {
 			org.junit.jupiter.params,
 			org.junit.platform.console,
 			org.junit.platform.engine,
-			org.junit.platform.jfr,
 			org.junit.platform.launcher,
 			org.junit.platform.reporting,
 			org.junit.platform.suite.api,
-			org.junit.platform.suite.commons,
 			org.junit.platform.suite.engine,
 			org.junit.platform.testkit,
 			org.junit.vintage.engine;

@@ -24,7 +24,8 @@
 module org.junit.platform.launcher {
 
 	requires static transitive org.apiguardian.api;
-	requires static org.jspecify;
+	requires static transitive org.jspecify;
+	requires static jdk.jfr;
 
 	requires transitive java.logging;
 	requires transitive org.junit.platform.commons;

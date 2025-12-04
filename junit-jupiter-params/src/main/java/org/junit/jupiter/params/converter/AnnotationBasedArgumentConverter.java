@@ -11,7 +11,7 @@
 package org.junit.jupiter.params.converter;
 
 import static java.util.Objects.requireNonNull;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.annotation.Annotation;
 
@@ -32,12 +32,11 @@ import org.junit.platform.commons.util.Preconditions;
  * @see AnnotationConsumer
  * @see SimpleArgumentConverter
  */
-@API(status = EXPERIMENTAL, since = "5.10")
+@API(status = MAINTAINED, since = "5.13.3")
 public abstract class AnnotationBasedArgumentConverter<A extends Annotation>
 		implements ArgumentConverter, AnnotationConsumer<A> {
 
-	@Nullable
-	private A annotation;
+	private @Nullable A annotation;
 
 	public AnnotationBasedArgumentConverter() {
 	}
@@ -45,7 +44,7 @@ public abstract class AnnotationBasedArgumentConverter<A extends Annotation>
 	@Override
 	public final void accept(A annotation) {
 		this.annotation = Preconditions.notNull(annotation, "annotation must not be null");
-		;
+
 	}
 
 	@Override

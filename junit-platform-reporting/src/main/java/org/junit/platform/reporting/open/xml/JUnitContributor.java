@@ -11,7 +11,6 @@
 package org.junit.platform.reporting.open.xml;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.LinkedHashMap;
@@ -57,7 +56,7 @@ public class JUnitContributor implements Contributor {
 					return table;
 				}) //
 				.filter(table -> !table.isEmpty()) //
-				.map(table -> singletonList(Section.builder() //
+				.map(table -> List.of(Section.builder() //
 						.title("JUnit metadata") //
 						.order(15) //
 						.addBlock(KeyValuePairs.builder().content(table).build()) //

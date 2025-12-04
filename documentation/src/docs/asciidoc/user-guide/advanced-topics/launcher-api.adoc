@@ -7,12 +7,14 @@
 One of the prominent goals of the JUnit Platform is to make the interface between JUnit
 and its programmatic clients – build tools and IDEs – more powerful and stable. The
 purpose is to decouple the internals of discovering and executing tests from all the
-filtering and configuration that's necessary from the outside.
+filtering and configuration that is necessary from the outside.
 
-JUnit Platform introduces the concept of a `Launcher` that can be used to discover,
-filter, and execute tests. Moreover, third party test libraries – like Spock or Cucumber
-– can plug into the JUnit Platform's launching infrastructure by providing a custom
+JUnit Platform provides a `Launcher` API that can be used to discover, filter, and execute
+tests. Moreover, third party test libraries – like Spock or Cucumber – can plug into the
+JUnit Platform's launching infrastructure by providing a custom
 <<test-engines,TestEngine>>.
+
+image::launcher-api-diagram.svg[role=text-center]
 
 The launcher API is in the `{junit-platform-launcher}` module.
 
@@ -22,20 +24,20 @@ An example consumer of the launcher API is the `{ConsoleLauncher}` in the
 [[launcher-api-discovery]]
 ==== Discovering Tests
 
-Having _test discovery_ as a dedicated feature of the platform itself frees IDEs and build
-tools from most of the difficulties they had to go through to identify test classes and
-test methods in previous versions of JUnit.
+Having _test discovery_ as a dedicated feature of the platform frees IDEs and build tools
+from most of the difficulties they had to go through to identify test classes and test
+methods in previous versions of JUnit.
 
 Usage Example:
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/UsingTheLauncherDemo.java[tags=imports]
+include::{testDir}/example/UsingTheLauncherForDiscoveryDemo.java[tags=imports]
 ----
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/UsingTheLauncherDemo.java[tags=discovery]
+include::{testDir}/example/UsingTheLauncherForDiscoveryDemo.java[tags=discovery]
 ----
 
 You can select classes, methods, and all classes in a package or even search for all tests
@@ -353,3 +355,41 @@ between them.
 
 Alternatively, it's possible to inject resources into test engines by
 <<launcher-api-launcher-session-listeners-custom, registering a `LauncherSessionListener`>>.
+
+[[launcher-api-launcher-cancellation]]
+==== Cancelling a Running Test Execution
+
+The launcher API provides the ability to cancel a running test execution mid-flight while
+allowing engines to clean up resources. To request an execution to be cancelled, you need
+to call `cancel()` on the `{CancellationToken}` that is passed to `Launcher.execute` as
+part of the `{LauncherExecutionRequest}`.
+
+For example, implementing a listener that cancels test execution after the first test
+failed can be achieved as follows.
+
+[source,java,indent=0]
+----
+include::{testDir}/example/UsingTheLauncherDemo.java[tags=cancellation]
+----
+<1> Create a `{CancellationToken}`
+<2> Implement a `{TestExecutionListener}` that calls `cancel()` when a test fails
+<3> Register the cancellation token
+<4> Register the listener
+<5> Pass the `{LauncherExecutionRequest}` to `Launcher.execute`
+
+[NOTE]
+.Test Engine Support for Cancellation
+====
+Cancelling tests relies on <<test-engines>> checking and responding to the
+`{CancellationToken}` appropriately (see
+<<test-engines-requirements-cancellation, Test Engine Requirements>> for details). The
+`Launcher` will also check the token and cancel test execution when multiple test engines
+are present at runtime.
+
+At the time of writing, the following test engines support cancellation:
+
+* `{junit-jupiter-engine}`
+* `{junit-vintage-engine}`
+* `{junit-platform-suite-engine}`
+* Any `{TestEngine}` extending `{HierarchicalTestEngine}` such as Spock and Cucumber
+====

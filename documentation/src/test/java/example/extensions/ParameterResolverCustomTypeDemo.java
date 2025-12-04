@@ -58,7 +58,7 @@ public class ParameterResolverCustomTypeDemo {
 
 		private final int value;
 
-		public WrappedInteger(int value) {
+		WrappedInteger(int value) {
 			this.value = value;
 		}
 

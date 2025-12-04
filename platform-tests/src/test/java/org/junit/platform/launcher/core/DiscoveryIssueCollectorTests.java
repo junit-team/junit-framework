@@ -69,6 +69,7 @@ class DiscoveryIssueCollectorTests {
 			new Pair(selectClasspathResource("someResource", FilePosition.from(42, 23)),
 				ClasspathResourceSource.from("someResource",
 					org.junit.platform.engine.support.descriptor.FilePosition.from(42, 23))), //
+			new Pair(selectPackage(""), PackageSource.from("")), //
 			new Pair(selectPackage("some.package"), PackageSource.from("some.package")), //
 			new Pair(selectFile("someFile"), FileSource.from(new File("someFile"))), //
 			new Pair(selectFile("someFile", FilePosition.from(42)),

@@ -63,6 +63,8 @@ class JUnit4ParameterizedTests {
 			request()
 				.selectors(selector)
 				.filters(includeEngines("junit-vintage"))
+				.enableImplicitConfigurationParameters(false)
+				.forExecution()
 				.build()
 		);
 		// @formatter:on

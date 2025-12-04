@@ -7,9 +7,9 @@
 //    5.10.0-RC1, 5.10.0). The same version must be used in the file name and within the
 //    file.
 // 4) Replace MILESTONE_NUMBER with the appropriate milestone number. This is an integer
-//    which you can determine via https://github.com/junit-team/junit5/milestones/. If a
-//    GitHub milestone does not yet exist for the given VERSION, you will need to create
-//    a new GitHub milestone or ask a member of the JUnit team to create it for you.
+//    which you can determine via https://github.com/junit-team/junit-framework/milestones/.
+//    If a GitHub milestone does not yet exist for the given VERSION, you will need to
+//    create a new GitHub milestone or ask a member of the JUnit team to create it for you.
 // 5) 'include:' this new file in index.adoc.
 // 6) Delete this entire comment block.
 //
@@ -21,8 +21,8 @@
 *Scope:* ❓
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
-link:{junit5-repo}+/milestone/MILESTONE_NUMBER?closed=1+[VERSION] milestone page in the
-JUnit repository on GitHub.
+link:{junit-framework-repo}+/milestone/MILESTONE_NUMBER?closed=1+[VERSION] milestone page in the JUnit
+repository on GitHub.
 
 
 [[release-notes-VERSION-junit-platform]]

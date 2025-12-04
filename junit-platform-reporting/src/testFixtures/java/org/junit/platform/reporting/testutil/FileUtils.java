@@ -28,4 +28,7 @@ public class FileUtils {
 			throw new UncheckedIOException(e);
 		}
 	}
+
+	private FileUtils() {
+	}
 }

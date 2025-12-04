@@ -28,13 +28,12 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ClassTemplateInvocationContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.support.HierarchyTraversalMode;
 import org.junit.platform.commons.util.ReflectionUtils;
 
-class ParameterizedClassContext implements ParameterizedDeclarationContext<ClassTemplateInvocationContext> {
+class ParameterizedClassContext implements ParameterizedDeclarationContext<ParameterizedClassInvocationContext> {
 
 	private final Class<?> testClass;
 	private final ParameterizedClass annotation;
@@ -60,14 +59,14 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Class
 			this.injectionType = InjectionType.FIELDS;
 		}
 
-		this.beforeMethods = findLifecycleMethodsAndAssertStaticAndNonPrivate(testClass, testInstanceLifecycle,
-			TOP_DOWN, BeforeParameterizedClassInvocation.class, BeforeParameterizedClassInvocation::injectArguments,
+		this.beforeMethods = findLifecycleMethodsAndAssertStaticAndNonPrivate(testClass, TOP_DOWN,
+			BeforeParameterizedClassInvocation.class, BeforeParameterizedClassInvocation::injectArguments,
 			this.resolverFacade);
 
 		// Make a local copy since findAnnotatedMethods() returns an immutable list.
-		this.afterMethods = new ArrayList<>(findLifecycleMethodsAndAssertStaticAndNonPrivate(testClass,
-			testInstanceLifecycle, BOTTOM_UP, AfterParameterizedClassInvocation.class,
-			AfterParameterizedClassInvocation::injectArguments, this.resolverFacade));
+		this.afterMethods = new ArrayList<>(findLifecycleMethodsAndAssertStaticAndNonPrivate(testClass, BOTTOM_UP,
+			AfterParameterizedClassInvocation.class, AfterParameterizedClassInvocation::injectArguments,
+			this.resolverFacade));
 
 		// Since the bottom-up ordering of afterMethods will later be reversed when the
 		// AfterParameterizedClassInvocationMethodInvoker extensions are executed within
@@ -104,6 +103,11 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Class
 	}
 
 	@Override
+	public boolean quoteTextArguments() {
+		return this.annotation.quoteTextArguments();
+	}
+
+	@Override
 	public boolean isAutoClosingArguments() {
 		return this.annotation.autoCloseArguments();
 	}
@@ -124,8 +128,9 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Class
 	}
 
 	@Override
-	public ClassTemplateInvocationContext createInvocationContext(ParameterizedInvocationNameFormatter formatter,
+	public ParameterizedClassInvocationContext createInvocationContext(ParameterizedInvocationNameFormatter formatter,
 			Arguments arguments, int invocationIndex) {
+
 		return new ParameterizedClassInvocationContext(this, formatter, arguments, invocationIndex);
 	}
 
@@ -146,8 +151,8 @@ class ParameterizedClassContext implements ParameterizedDeclarationContext<Class
 	}
 
 	private static <A extends Annotation> List<ArgumentSetLifecycleMethod> findLifecycleMethodsAndAssertStaticAndNonPrivate(
-			Class<?> testClass, TestInstance.Lifecycle testInstanceLifecycle, HierarchyTraversalMode traversalMode,
-			Class<A> annotationType, Predicate<A> injectArgumentsPredicate, ResolverFacade resolverFacade) {
+			Class<?> testClass, HierarchyTraversalMode traversalMode, Class<A> annotationType,
+			Predicate<A> injectArgumentsPredicate, ResolverFacade resolverFacade) {
 
 		List<Method> methods = findAnnotatedMethods(testClass, annotationType, traversalMode);
 

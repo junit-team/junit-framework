@@ -67,9 +67,9 @@ import org.apiguardian.api.API;
  * that test engine (e.g., annotations specific to that test engine).
  *
  * <h2>Supported Target Elements</h2>
- * <p>Since JUnit Platform version 1.7, {@code @Testable} may target any
- * declaration {@linkplain java.lang.annotation.ElementType element type}. This
- * includes the aforementioned method, field, and class elements.
+ * <p>{@code @Testable} may target any declaration
+ * {@linkplain java.lang.annotation.ElementType element type}. This includes the
+ * aforementioned method, field, and class elements.
  *
  * @since 1.0
  */

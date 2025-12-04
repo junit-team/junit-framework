@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.StringUtils.containsIsoControlCharacter;
 import static org.junit.platform.commons.util.StringUtils.containsWhitespace;
 import static org.junit.platform.commons.util.StringUtils.doesNotContainIsoControlCharacter;
@@ -29,7 +29,6 @@ import static org.junit.platform.commons.util.StringUtils.replaceWhitespaceChara
 
 import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link StringUtils}.
@@ -50,7 +49,7 @@ class StringUtilsTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void whitespace() {
 		// @formatter:off
@@ -74,7 +73,7 @@ class StringUtilsTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void controlCharacters() {
 		// @formatter:off
@@ -98,7 +97,7 @@ class StringUtilsTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void replaceControlCharacters() {
 		assertNull(replaceIsoControlCharacters(null, ""));
@@ -109,10 +108,10 @@ class StringUtilsTests {
 		assertEquals("abc", replaceIsoControlCharacters("abc", "?"));
 		assertEquals("...", replaceIsoControlCharacters("...", "?"));
 
-		assertThrows(PreconditionViolationException.class, () -> replaceIsoControlCharacters("", null));
+		assertPreconditionViolationFor(() -> replaceIsoControlCharacters("", null));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void replaceWhitespaces() {
 		assertNull(replaceWhitespaceCharacters(null, ""));
@@ -126,7 +125,7 @@ class StringUtilsTests {
 		assertEquals(" ", replaceWhitespaceCharacters("\u000B", " "));
 		assertEquals(" ", replaceWhitespaceCharacters("\f", " "));
 
-		assertThrows(PreconditionViolationException.class, () -> replaceWhitespaceCharacters("", null));
+		assertPreconditionViolationFor(() -> replaceWhitespaceCharacters("", null));
 	}
 
 	@Test

@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -26,15 +26,14 @@ import org.junit.jupiter.api.function.Executable;
  * calling {@link Object#toString()} on the implementing instance but may be
  * overridden by concrete implementations to provide a more meaningful name.
  *
- * <p>On Java 16 or later, it is recommended to implement this interface using
- * a record type.
+ * <p>It is recommended to implement this interface using a record type.
  *
  * @since 5.11
  * @see DynamicTest#stream(Stream)
  * @see DynamicTest#stream(Iterator)
  */
 @FunctionalInterface
-@API(status = EXPERIMENTAL, since = "5.11")
+@API(status = MAINTAINED, since = "5.13.3")
 public interface NamedExecutable extends Named<Executable>, Executable {
 	@Override
 	default String getName() {

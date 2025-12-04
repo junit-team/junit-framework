@@ -13,6 +13,7 @@ package org.junit.platform.launcher.core;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.EngineExecutionListener;
@@ -46,8 +47,9 @@ class StackTracePruningEngineExecutionListener extends DelegatingEngineExecution
 	}
 
 	private static List<String> getTestClassNames(TestDescriptor testDescriptor) {
-		return testDescriptor.getAncestors() //
-				.stream() //
+		Stream<? extends TestDescriptor> self = Stream.of(testDescriptor);
+		Stream<? extends TestDescriptor> ancestors = testDescriptor.getAncestors().stream();
+		return Stream.concat(self, ancestors) //
 				.map(TestDescriptor::getSource) //
 				.flatMap(Optional::stream) //
 				.map(source -> {

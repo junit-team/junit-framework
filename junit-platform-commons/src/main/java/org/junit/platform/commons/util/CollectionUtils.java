@@ -14,7 +14,7 @@ import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
 import static org.apiguardian.api.API.Status.INTERNAL;
-import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
+import static org.junit.platform.commons.util.ReflectionUtils.invokeMethod;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
-import org.junit.platform.commons.support.ReflectionSupport;
 
 /**
  * Collection of utilities for working with {@link Collection Collections}.
@@ -61,7 +60,7 @@ public final class CollectionUtils {
 	 * @throws PreconditionViolationException if the collection is {@code null}
 	 * or does not contain exactly one element
 	 */
-	public static <T extends @Nullable Object> T getOnlyElement(Collection<T> collection) {
+	public static <T> T getOnlyElement(Collection<T> collection) {
 		Preconditions.notNull(collection, "collection must not be null");
 		Preconditions.condition(collection.size() == 1,
 			() -> "collection must contain exactly one element: " + collection);
@@ -85,8 +84,8 @@ public final class CollectionUtils {
 	}
 
 	private static <T extends @Nullable Object> T firstElement(Collection<T> collection) {
-		return collection instanceof List //
-				? ((List<T>) collection).get(0) //
+		return collection instanceof List<T> list //
+				? list.get(0) //
 				: collection.iterator().next();
 	}
 
@@ -194,7 +193,7 @@ public final class CollectionUtils {
 	}
 
 	private static Optional<Method> findIteratorMethod(Class<?> type) {
-		return ReflectionSupport.findMethod(type, "iterator") //
+		return ReflectionUtils.findMethod(type, "iterator") //
 				.filter(method -> method.getReturnType() == Iterator.class);
 	}
 

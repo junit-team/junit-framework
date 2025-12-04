@@ -24,6 +24,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.annotation.Contract;
 
 /**
  * A container object which may either contain a nullable value in case of
@@ -55,7 +56,7 @@ public abstract class Try<V extends @Nullable Object> {
 	 * @see #success(Object)
 	 * @see #failure(Exception)
 	 */
-	public static <V> Try<V> call(Callable<V> action) {
+	public static <V extends @Nullable Object> Try<V> call(Callable<V> action) {
 		checkNotNull(action, "action");
 		return Try.of(() -> success(action.call()));
 	}
@@ -83,6 +84,7 @@ public abstract class Try<V extends @Nullable Object> {
 	}
 
 	// Cannot use Preconditions due to package cycle
+	@Contract("null, _ -> fail; !null, _ -> param1")
 	private static <T> T checkNotNull(@Nullable T input, String title) {
 		if (input == null) {
 			// Cannot use PreconditionViolationException due to package cycle
@@ -193,7 +195,7 @@ public abstract class Try<V extends @Nullable Object> {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public final <E extends Exception> @NonNull V getNonNullOrThrow(
-			Function<? super @Nullable Exception, E> exceptionTransformer) throws E {
+			Function<@Nullable Exception, E> exceptionTransformer) throws E {
 		var value = getOrThrow(exceptionTransformer);
 		if (value == null) {
 			throw exceptionTransformer.apply(null);
@@ -249,7 +251,7 @@ public abstract class Try<V extends @Nullable Object> {
 
 	}
 
-	private static class Success<V extends @Nullable Object> extends Try<V> {
+	private static final class Success<V extends @Nullable Object> extends Try<V> {
 
 		private final V value;
 
@@ -327,7 +329,7 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 	}
 
-	private static class Failure<V extends @Nullable Object> extends Try<V> {
+	private static final class Failure<V extends @Nullable Object> extends Try<V> {
 
 		private final Exception cause;
 
@@ -364,11 +366,13 @@ public abstract class Try<V extends @Nullable Object> {
 			return Try.of(supplier::get);
 		}
 
+		@Contract(" -> fail")
 		@Override
 		public V get() throws Exception {
 			throw this.cause;
 		}
 
+		@Contract("_ -> fail")
 		@Override
 		public <E extends Exception> V getOrThrow(Function<? super Exception, E> exceptionTransformer) throws E {
 			checkNotNull(exceptionTransformer, "exceptionTransformer");

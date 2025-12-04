@@ -43,7 +43,7 @@ import org.junit.platform.engine.TestSource;
  * @see org.junit.platform.engine.discovery.ClassSelector
  */
 @API(status = STABLE, since = "1.0")
-public class ClassSource implements TestSource {
+public final class ClassSource implements TestSource {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -134,11 +134,9 @@ public class ClassSource implements TestSource {
 
 	private final String className;
 
-	@Nullable
-	private final FilePosition filePosition;
+	private final @Nullable FilePosition filePosition;
 
-	@Nullable
-	private Class<?> javaClass;
+	private @Nullable Class<?> javaClass;
 
 	private ClassSource(String className) {
 		this(className, null);
@@ -165,7 +163,7 @@ public class ClassSource implements TestSource {
 	 * @see #getJavaClass()
 	 * @see #getPosition()
 	 */
-	public final String getClassName() {
+	public String getClassName() {
 		return this.className;
 	}
 
@@ -179,7 +177,7 @@ public class ClassSource implements TestSource {
 	 * @see #getClassName()
 	 * @see #getPosition()
 	 */
-	public final Class<?> getJavaClass() {
+	public Class<?> getJavaClass() {
 		if (this.javaClass == null) {
 			// @formatter:off
 			this.javaClass = ReflectionSupport.tryToLoadClass(this.className).getNonNullOrThrow(
@@ -196,7 +194,7 @@ public class ClassSource implements TestSource {
 	 * @see #getClassName()
 	 * @see #getJavaClass()
 	 */
-	public final Optional<FilePosition> getPosition() {
+	public Optional<FilePosition> getPosition() {
 		return Optional.ofNullable(this.filePosition);
 	}
 

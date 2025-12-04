@@ -23,7 +23,7 @@ import org.apiguardian.api.API;
 
 /**
  * {@code @ArgumentsSources} is a simple container for one or more
- * {@link ArgumentsSource} annotations.
+ * {@link ArgumentsSource @ArgumentsSource} annotations.
  *
  * <p>Note, however, that use of the {@code @ArgumentsSources} container is completely
  * optional since {@code @ArgumentsSource} is a {@linkplain java.lang.annotation.Repeatable
@@ -31,7 +31,7 @@ import org.apiguardian.api.API;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.0
  * @see org.junit.jupiter.params.provider.ArgumentsSource

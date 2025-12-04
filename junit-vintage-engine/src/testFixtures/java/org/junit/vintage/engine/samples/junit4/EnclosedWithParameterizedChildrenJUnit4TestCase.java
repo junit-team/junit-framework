@@ -19,7 +19,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-// Source: https://github.com/junit-team/junit5/issues/3083
+// Source: https://github.com/junit-team/junit-framework/issues/3083
 @RunWith(Enclosed.class)
 public class EnclosedWithParameterizedChildrenJUnit4TestCase {
 

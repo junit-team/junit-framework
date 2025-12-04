@@ -95,8 +95,7 @@ public enum OS {
 
 	private static final Logger logger = LoggerFactory.getLogger(OS.class);
 
-	@Nullable
-	private static final OS CURRENT_OS = determineCurrentOs();
+	private static final @Nullable OS CURRENT_OS = determineCurrentOs();
 
 	/**
 	 * {@return the current operating system, if known; otherwise, {@code null}}
@@ -148,8 +147,8 @@ public enum OS {
 	}
 
 	/**
-	 * @return {@code true} if <em>this</em> {@code OS} is known to be the
-	 * operating system on which the current JVM is executing
+	 * {@return {@code true} if <em>this</em> {@code OS} is known to be the
+	 * operating system on which the current JVM is executing}
 	 */
 	public boolean isCurrentOs() {
 		return this == CURRENT_OS;

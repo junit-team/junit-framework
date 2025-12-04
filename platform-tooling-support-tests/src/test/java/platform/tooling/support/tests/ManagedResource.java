@@ -95,7 +95,7 @@ public @interface ManagedResource {
 				case PER_CONTEXT -> extensionContext;
 			};
 			return storingContext.getStore(Namespace.GLOBAL) //
-					.getOrComputeIfAbsent(type, Resource::new, Resource.class);
+					.computeIfAbsent(type, Resource::new, Resource.class);
 		}
 	}
 

@@ -48,13 +48,13 @@ class TimeoutInvocationFactory {
 	}
 
 	private ScheduledExecutorService getThreadExecutorForSameThreadInvocation() {
-		return store.getOrComputeIfAbsent(SingleThreadExecutorResource.class).get();
+		return store.computeIfAbsent(SingleThreadExecutorResource.class).get();
 	}
 
 	@SuppressWarnings({ "deprecation", "try" })
-	private static abstract class ExecutorResource implements Store.CloseableResource, AutoCloseable {
+	private abstract static class ExecutorResource implements Store.CloseableResource, AutoCloseable {
 
-		protected final ScheduledExecutorService executor;
+		private final ScheduledExecutorService executor;
 
 		ExecutorResource(ScheduledExecutorService executor) {
 			this.executor = executor;
@@ -78,7 +78,7 @@ class TimeoutInvocationFactory {
 	@SuppressWarnings("try")
 	static class SingleThreadExecutorResource extends ExecutorResource {
 
-		@SuppressWarnings("unused")
+		@SuppressWarnings({ "unused", "ThreadPriorityCheck" })
 		SingleThreadExecutorResource() {
 			super(Executors.newSingleThreadScheduledExecutor(runnable -> {
 				Thread thread = new Thread(runnable, "junit-jupiter-timeout-watcher");

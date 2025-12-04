@@ -7,6 +7,7 @@
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99999999" />
       <option name="IMPORT_LAYOUT_TABLE">
         <value>
+          <package name="" withSubpackages="true" static="false" module="true" />
           <package name="" withSubpackages="true" static="true" />
           <emptyLine />
           <package name="java" withSubpackages="true" static="false" />
@@ -84,6 +85,11 @@
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="JavaTemplateEngine">
+      <indentOptions>
+        <option name="USE_TAB_CHARACTER" value="true" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="XML">
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />
       </indentOptions>

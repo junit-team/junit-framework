@@ -9,7 +9,7 @@ exports org.junit.platform.engine.support.hierarchical
 exports org.junit.platform.engine.support.store
 requires java.base mandated
 requires org.apiguardian.api static transitive
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.platform.commons transitive
 requires org.opentest4j transitive
 uses org.junit.platform.engine.discovery.DiscoverySelectorIdentifierParser

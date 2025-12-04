@@ -17,7 +17,7 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.EngineDiscoveryRequest;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -49,19 +49,19 @@ final class DefaultDiscoveryRequest implements LauncherDiscoveryRequest {
 	// Listener for test discovery that may abort on errors.
 	private final LauncherDiscoveryListener discoveryListener;
 
-	private final OutputDirectoryProvider outputDirectoryProvider;
+	private final OutputDirectoryCreator outputDirectoryCreator;
 
 	DefaultDiscoveryRequest(List<DiscoverySelector> selectors, List<EngineFilter> engineFilters,
 			List<DiscoveryFilter<?>> discoveryFilters, List<PostDiscoveryFilter> postDiscoveryFilters,
 			LauncherConfigurationParameters configurationParameters, LauncherDiscoveryListener discoveryListener,
-			OutputDirectoryProvider outputDirectoryProvider) {
+			OutputDirectoryCreator outputDirectoryCreator) {
 		this.selectors = List.copyOf(selectors);
 		this.engineFilters = List.copyOf(engineFilters);
 		this.discoveryFilters = List.copyOf(discoveryFilters);
 		this.postDiscoveryFilters = List.copyOf(postDiscoveryFilters);
 		this.configurationParameters = configurationParameters;
 		this.discoveryListener = discoveryListener;
-		this.outputDirectoryProvider = outputDirectoryProvider;
+		this.outputDirectoryCreator = outputDirectoryCreator;
 	}
 
 	@Override
@@ -97,8 +97,8 @@ final class DefaultDiscoveryRequest implements LauncherDiscoveryRequest {
 	}
 
 	@Override
-	public OutputDirectoryProvider getOutputDirectoryProvider() {
-		return this.outputDirectoryProvider;
+	public OutputDirectoryCreator getOutputDirectoryCreator() {
+		return this.outputDirectoryCreator;
 	}
 
 }

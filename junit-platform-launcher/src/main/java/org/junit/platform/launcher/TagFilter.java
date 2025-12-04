@@ -33,7 +33,7 @@ import org.junit.platform.launcher.tagexpression.TagExpression;
  * <p>Tag expressions are boolean expressions with the following allowed
  * operators: {@code !} (not), {@code &} (and), and {@code |} (or). Parentheses
  * can be used to adjust for operator precedence. Please refer to the
- * <a href="https://junit.org/junit5/docs/current/user-guide/#running-tests-tag-expressions">JUnit User Guide</a>
+ * <a href="https://docs.junit.org/current/user-guide/#running-tests-tag-expressions">JUnit User Guide</a>
  * for usage examples.
  *
  * <p>Please note that a tag name is a valid tag expression. Thus, wherever a tag
@@ -128,8 +128,8 @@ public final class TagFilter {
 	}
 
 	private static PostDiscoveryFilter includeMatching(List<String> tagExpressions) {
-		Supplier<String> inclusionReason = () -> inclusionReasonExpressionSatisfy(tagExpressions);
-		Supplier<String> exclusionReason = () -> exclusionReasonExpressionNotSatisfy(tagExpressions);
+		Supplier<@Nullable String> inclusionReason = () -> inclusionReasonExpressionSatisfy(tagExpressions);
+		Supplier<@Nullable String> exclusionReason = () -> exclusionReasonExpressionNotSatisfy(tagExpressions);
 		List<TagExpression> parsedTagExpressions = parseAll(tagExpressions);
 		return descriptor -> {
 			Set<TestTag> tags = descriptor.getTags();
@@ -148,8 +148,8 @@ public final class TagFilter {
 	}
 
 	private static PostDiscoveryFilter excludeMatching(List<String> tagExpressions) {
-		Supplier<String> inclusionReason = () -> inclusionReasonExpressionNotSatisfy(tagExpressions);
-		Supplier<String> exclusionReason = () -> exclusionReasonExpressionSatisfy(tagExpressions);
+		Supplier<@Nullable String> inclusionReason = () -> inclusionReasonExpressionNotSatisfy(tagExpressions);
+		Supplier<@Nullable String> exclusionReason = () -> exclusionReasonExpressionSatisfy(tagExpressions);
 		List<TagExpression> parsedTagExpressions = parseAll(tagExpressions);
 		return descriptor -> {
 			Set<TestTag> tags = descriptor.getTags();
@@ -168,7 +168,7 @@ public final class TagFilter {
 	}
 
 	private static String formatToString(List<String> tagExpressions) {
-		return tagExpressions.stream().map(String::trim).sorted().collect(Collectors.joining(","));
+		return tagExpressions.stream().map(String::strip).sorted().collect(Collectors.joining(","));
 	}
 
 	private static List<TagExpression> parseAll(List<String> tagExpressions) {

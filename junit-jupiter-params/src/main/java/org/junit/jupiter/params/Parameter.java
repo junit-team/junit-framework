@@ -41,7 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD })
 @Documented
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public @interface Parameter {
 
 	/**

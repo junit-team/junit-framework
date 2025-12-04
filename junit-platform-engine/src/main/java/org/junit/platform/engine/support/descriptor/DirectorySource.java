@@ -29,7 +29,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * @see org.junit.platform.engine.discovery.DirectorySelector
  */
 @API(status = STABLE, since = "1.0")
-public class DirectorySource implements FileSystemSource {
+public final class DirectorySource implements FileSystemSource {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -62,7 +62,7 @@ public class DirectorySource implements FileSystemSource {
 	 * @return the source {@code URI}; never {@code null}
 	 */
 	@Override
-	public final URI getUri() {
+	public URI getUri() {
 		return getFile().toURI();
 	}
 
@@ -72,7 +72,7 @@ public class DirectorySource implements FileSystemSource {
 	 * @return the source directory; never {@code null}
 	 */
 	@Override
-	public final File getFile() {
+	public File getFile() {
 		return this.directory;
 	}
 

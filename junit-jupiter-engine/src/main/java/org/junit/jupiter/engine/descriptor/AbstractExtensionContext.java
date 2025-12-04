@@ -25,14 +25,15 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.extension.ExecutableInvoker;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.MediaType;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.DefaultExecutableInvoker;
+import org.junit.jupiter.engine.execution.LauncherStoreFacade;
 import org.junit.jupiter.engine.extension.ExtensionContextInternal;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 import org.junit.platform.commons.JUnitException;
@@ -54,9 +55,10 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 abstract class AbstractExtensionContext<T extends TestDescriptor> implements ExtensionContextInternal, AutoCloseable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractExtensionContext.class);
+	private static final Namespace CLOSEABLE_RESOURCE_LOGGING_NAMESPACE = Namespace.create(
+		AbstractExtensionContext.class, "CloseableResourceLogging");
 
-	@Nullable
-	private final ExtensionContext parent;
+	private final @Nullable ExtensionContext parent;
 	private final EngineExecutionListener engineExecutionListener;
 	private final T testDescriptor;
 	private final Set<String> tags;
@@ -87,40 +89,37 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 				.collect(collectingAndThen(toCollection(LinkedHashSet::new), Collections::unmodifiableSet));
 		// @formatter:on
 
-		this.valuesStore = createStore(parent, launcherStoreFacade, createCloseAction());
+		this.valuesStore = new NamespacedHierarchicalStore<>(getParentStore(parent), createCloseAction());
+	}
+
+	private NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> getParentStore(
+			@Nullable ExtensionContext parent) {
+		return parent == null //
+				? this.launcherStoreFacade.getRequestLevelStore() //
+				: ((AbstractExtensionContext<?>) parent).valuesStore;
 	}
 
 	@SuppressWarnings("deprecation")
-	private NamespacedHierarchicalStore.CloseAction<org.junit.platform.engine.support.store.Namespace> createCloseAction() {
+	private <N> NamespacedHierarchicalStore.CloseAction<N> createCloseAction() {
+		var store = this.launcherStoreFacade.getSessionLevelStore(CLOSEABLE_RESOURCE_LOGGING_NAMESPACE);
 		return (__, ___, value) -> {
 			boolean isAutoCloseEnabled = this.configuration.isClosingStoredAutoCloseablesEnabled();
 
-			if (value instanceof AutoCloseable closeable && isAutoCloseEnabled) {
+			if (isAutoCloseEnabled && value instanceof @SuppressWarnings("resource") AutoCloseable closeable) {
 				closeable.close();
 				return;
 			}
 
 			if (value instanceof Store.CloseableResource resource) {
 				if (isAutoCloseEnabled) {
-					LOGGER.warn(
-						() -> "Type implements CloseableResource but not AutoCloseable: " + value.getClass().getName());
+					store.computeIfAbsent(value.getClass(), type -> {
+						LOGGER.warn(() -> "Type implements CloseableResource but not AutoCloseable: " + type.getName());
+						return true;
+					});
 				}
 				resource.close();
 			}
 		};
-	}
-
-	private static NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> createStore(
-			@Nullable ExtensionContext parent, LauncherStoreFacade launcherStoreFacade,
-			NamespacedHierarchicalStore.CloseAction<org.junit.platform.engine.support.store.Namespace> closeAction) {
-		NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> parentStore;
-		if (parent == null) {
-			parentStore = launcherStoreFacade.getRequestLevelStore();
-		}
-		else {
-			parentStore = ((AbstractExtensionContext<?>) parent).valuesStore;
-		}
-		return new NamespacedHierarchicalStore<>(parentStore, closeAction);
 	}
 
 	@Override
@@ -145,28 +144,30 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 
 	@Override
 	public void publishFile(String name, MediaType mediaType, ThrowingConsumer<Path> action) {
-		Preconditions.notNull(name, "name must not be null");
+		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(mediaType, "mediaType must not be null");
 		Preconditions.notNull(action, "action must not be null");
 
-		publishFileEntry(name, action, file -> {
-			Preconditions.condition(Files.isRegularFile(file), () -> "Published path must be a regular file: " + file);
-			return FileEntry.from(file, mediaType.toString());
+		publishFileEntry(name, action, path -> {
+			Preconditions.condition(Files.isRegularFile(path), () -> "Published path must be a regular file: " + path);
+			return FileEntry.from(path, mediaType.toString());
 		});
 	}
 
 	@Override
 	public void publishDirectory(String name, ThrowingConsumer<Path> action) {
-		Preconditions.notNull(name, "name must not be null");
+		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(action, "action must not be null");
 
 		ThrowingConsumer<Path> enhancedAction = path -> {
-			Files.createDirectory(path);
+			if (!Files.isDirectory(path)) {
+				Files.createDirectory(path);
+			}
 			action.accept(path);
 		};
-		publishFileEntry(name, enhancedAction, file -> {
-			Preconditions.condition(Files.isDirectory(file), () -> "Published path must be a directory: " + file);
-			return FileEntry.from(file, null);
+		publishFileEntry(name, enhancedAction, path -> {
+			Preconditions.condition(Files.isDirectory(path), () -> "Published path must be a directory: " + path);
+			return FileEntry.from(path, null);
 		});
 	}
 
@@ -190,7 +191,7 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 
 	private Path createOutputDirectory() {
 		try {
-			return configuration.getOutputDirectoryProvider().createOutputDirectory(this.testDescriptor);
+			return configuration.getOutputDirectoryCreator().createOutputDirectory(this.testDescriptor);
 		}
 		catch (IOException e) {
 			throw new JUnitException("Failed to create output directory", e);
@@ -240,7 +241,8 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 	}
 
 	@Override
-	public <V> Optional<V> getConfigurationParameter(String key, Function<String, V> transformer) {
+	public <V> Optional<V> getConfigurationParameter(String key,
+			Function<? super String, ? extends @Nullable V> transformer) {
 		return this.configuration.getRawConfigurationParameter(key, transformer);
 	}
 

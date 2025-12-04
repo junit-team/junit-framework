@@ -10,7 +10,7 @@
 
 package org.junit.platform.launcher;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
@@ -22,7 +22,8 @@ import org.junit.platform.engine.reporting.ReportEntry;
 
 /**
  * Register a concrete implementation of this interface with a {@link Launcher}
- * to be notified of events that occur during test execution.
+ * or {@link LauncherExecutionRequest} to be notified of events that occur
+ * during test execution.
  *
  * <p>All methods in this interface have empty <em>default</em> implementations.
  * Concrete implementations may therefore override one or more of these methods
@@ -53,7 +54,7 @@ import org.junit.platform.engine.reporting.ReportEntry;
  * Jupiter engines comply with this contract, there is no way to guarantee this for
  * third-party engines.
  *
- * <p>As of JUnit Platform 1.8, a {@code TestExecutionListener} can access
+ * <p>A {@code TestExecutionListener} can access
  * {@linkplain org.junit.platform.engine.ConfigurationParameters configuration
  * parameters} via the {@link TestPlan#getConfigurationParameters()
  * getConfigurationParameters()} method in the {@code TestPlan} supplied to
@@ -194,8 +195,9 @@ public interface TestExecutionListener {
 	 *
 	 * @param testIdentifier describes the test or container to which the entry pertains
 	 * @param file the published {@code FileEntry}
+	 * @since 1.12
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	default void fileEntryPublished(TestIdentifier testIdentifier, FileEntry file) {
 	}
 }

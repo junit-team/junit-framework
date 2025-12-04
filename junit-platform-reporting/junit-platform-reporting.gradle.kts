@@ -2,7 +2,6 @@ import junitbuild.extensions.javaModuleName
 
 plugins {
 	id("junitbuild.java-library-conventions")
-	id("junitbuild.java-nullability-conventions")
 	id("junitbuild.shadow-conventions")
 	`java-test-fixtures`
 }
@@ -16,7 +15,7 @@ dependencies {
 	implementation(libs.openTestReporting.tooling.spi)
 
 	compileOnlyApi(libs.apiguardian)
-	compileOnly(libs.jspecify)
+	compileOnlyApi(libs.jspecify)
 
 	shadowed(libs.openTestReporting.events)
 

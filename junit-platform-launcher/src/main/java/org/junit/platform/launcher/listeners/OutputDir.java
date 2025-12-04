@@ -60,12 +60,7 @@ public class OutputDir {
 		Path outputDir;
 
 		if (customDir.isPresent() && StringUtils.isNotBlank(customDir.get())) {
-			String customPath = customDir.get();
-			while (customPath.contains(OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER)) {
-				customPath = OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER_PATTERN.matcher(customPath) //
-						.replaceFirst(String.valueOf(Math.abs(random.nextLong())));
-			}
-			outputDir = cwd.resolve(customPath);
+			outputDir = cwd.resolve(expandPlaceholders(customDir.get(), random));
 		}
 		else if (Files.exists(cwd.resolve("pom.xml"))) {
 			outputDir = cwd.resolve("target");
@@ -84,6 +79,15 @@ public class OutputDir {
 		return new OutputDir(outputDir.normalize(), random);
 	}
 
+	private static String expandPlaceholders(String customDir, SecureRandom random) {
+		String customPath = customDir;
+		while (customPath.contains(OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER)) {
+			customPath = OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER_PATTERN.matcher(customPath) //
+					.replaceFirst(String.valueOf(positiveLong(random)));
+		}
+		return customPath;
+	}
+
 	private final Path path;
 	private final SecureRandom random;
 
@@ -97,7 +101,7 @@ public class OutputDir {
 	}
 
 	public Path createFile(String prefix, String extension) throws UncheckedIOException {
-		String filename = "%s-%d.%s".formatted(prefix, Math.abs(random.nextLong()), extension);
+		String filename = "%s-%d.%s".formatted(prefix, positiveLong(random), extension);
 		Path outputFile = path.resolve(filename);
 
 		try {
@@ -109,6 +113,15 @@ public class OutputDir {
 		catch (IOException e) {
 			throw new UncheckedIOException("Failed to create output file: " + outputFile, e);
 		}
+	}
+
+	private static long positiveLong(SecureRandom random) {
+		var value = random.nextLong();
+		if (value == Long.MIN_VALUE) {
+			// ensure Math.abs returns positive value
+			value++;
+		}
+		return Math.abs(value);
 	}
 
 	/**

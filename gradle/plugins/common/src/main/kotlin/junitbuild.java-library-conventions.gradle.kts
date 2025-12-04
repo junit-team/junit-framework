@@ -1,29 +1,14 @@
-
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import junitbuild.extensions.isSnapshot
-import org.gradle.plugins.ide.eclipse.model.Classpath
-import org.gradle.plugins.ide.eclipse.model.Library
-import org.gradle.plugins.ide.eclipse.model.ProjectDependency
-import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
 plugins {
 	`java-library`
-	eclipse
-	idea
 	id("junitbuild.base-conventions")
 	id("junitbuild.build-parameters")
 	id("junitbuild.checkstyle-conventions")
+	id("junitbuild.eclipse-conventions")
 	id("junitbuild.jacoco-java-conventions")
-	id("org.openrewrite.rewrite")
-}
-
-rewrite {
-	activeRecipe("org.openrewrite.java.migrate.UpgradeToJava17")
-}
-
-dependencies {
-	rewrite(platform("org.openrewrite.recipe:rewrite-recipe-bom:latest.release"))
-	rewrite("org.openrewrite.recipe:rewrite-migrate-java")
+	id("junitbuild.java-errorprone-conventions")
 }
 
 val mavenizedProjects: List<Project> by rootProject.extra
@@ -33,76 +18,19 @@ val buildRevision: Any by rootProject.extra
 
 val extension = extensions.create<JavaLibraryExtension>("javaLibrary")
 
-eclipse {
-	jdt {
-		file {
-			// Set properties for org.eclipse.jdt.core.prefs
-			withProperties {
-				// Configure Eclipse projects with -parameters compiler flag.
-				setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
-			}
-		}
-	}
-	classpath.file.whenMerged {
-		this as Classpath
-		// Remove classpath entries for non-existent libraries added by various
-		// plugins, such as "junit-jupiter-api/build/classes/kotlin/testFixtures".
-		entries.removeIf { it is Library && !file(it.path).exists() }
-		// Remove classpath entries for the code generator model used by the
-		// Java Template Engine (JTE) which is used to generate the JRE enum and
-		// dependent tests.
-		entries.removeIf { it is ProjectDependency && it.path.equals("/code-generator-model") }
-		entries.filterIsInstance<SourceFolder>().forEach {
-			it.excludes.add("**/module-info.java")
-		}
-		entries.filterIsInstance<ProjectDependency>().forEach {
-			it.entryAttributes.remove("module")
-		}
-		entries.filterIsInstance<Library>().forEach {
-			it.entryAttributes.remove("module")
-		}
-	}
-}
-
 java {
 	modularity.inferModulePath = true
 }
 
 if (project in mavenizedProjects) {
 
+	apply(plugin = "junitbuild.javadoc-conventions")
 	apply(plugin = "junitbuild.publishing-conventions")
 	apply(plugin = "junitbuild.osgi-conventions")
+	apply(plugin = "junitbuild.backward-compatibility")
 
 	java {
-		withJavadocJar()
 		withSourcesJar()
-	}
-
-	tasks.javadoc {
-		options {
-			memberLevel = JavadocMemberLevel.PROTECTED
-			header = project.name
-			encoding = "UTF-8"
-			locale = "en"
-			(this as StandardJavadocDocletOptions).apply {
-				addBooleanOption("Xdoclint:all,-missing,-reference", true)
-				addBooleanOption("XD-Xlint:none", true)
-				addBooleanOption("html5", true)
-				addMultilineStringsOption("tag").value = listOf(
-						"apiNote:a:API Note:",
-						"implNote:a:Implementation Note:"
-				)
-				use(true)
-				noTimestamp(true)
-			}
-		}
-	}
-
-	tasks.named<Jar>("javadocJar").configure {
-		from(tasks.javadoc.map { File(it.destinationDir, "element-list") }) {
-			// For compatibility with older tools, e.g. NetBeans 11
-			rename { "package-list" }
-		}
 	}
 
 	tasks.named<Jar>("sourcesJar").configure {
@@ -119,9 +47,11 @@ if (project in mavenizedProjects) {
 		publications {
 			named<MavenPublication>("maven") {
 				from(components["java"])
-				versionMapping {
-					allVariants {
-						fromResolutionResult()
+				if (!buildParameters.jitpack.version.isPresent) {
+					versionMapping {
+						allVariants {
+							fromResolutionResult()
+						}
 					}
 				}
 				pom {
@@ -260,7 +190,7 @@ afterEvaluate {
 			sourceCompatibility = extension.mainJavaVersion.get().majorVersion
 			targetCompatibility = extension.mainJavaVersion.get().majorVersion
 		}
-		tasks.named<GroovyCompile>("compileTestGroovy").configure {
+		tasks.withType<GroovyCompile>().named { it.startsWith("compileTest") }.configureEach {
 			// Groovy compiler does not support the --release flag.
 			sourceCompatibility = extension.testJavaVersion.get().majorVersion
 			targetCompatibility = extension.testJavaVersion.get().majorVersion

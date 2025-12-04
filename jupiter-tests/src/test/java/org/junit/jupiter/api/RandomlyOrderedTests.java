@@ -13,7 +13,7 @@ package org.junit.jupiter.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME;
 import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -49,7 +49,7 @@ class RandomlyOrderedTests {
 				.configurationParameter(DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME, ClassOrderer.Random.class.getName())
 				.configurationParameter(DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME, MethodOrderer.Random.class.getName())
 				.configurationParameter(MethodOrderer.Random.RANDOM_SEED_PROPERTY_NAME, String.valueOf(randomSeed))
-				.selectors(selectClass(A_TestCase.class), selectClass(B_TestCase.class), selectClass(C_TestCase.class))
+				.selectors(selectClasses(A_TestCase.class, B_TestCase.class, C_TestCase.class))
 				.execute()
 				.testEvents();
 		// @formatter:on

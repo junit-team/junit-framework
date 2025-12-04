@@ -16,7 +16,7 @@
 module org.junit.jupiter.api {
 
 	requires static transitive org.apiguardian.api;
-	requires static org.jspecify;
+	requires static transitive org.jspecify;
 
 	requires transitive org.junit.platform.commons;
 	requires transitive org.opentest4j;
@@ -30,6 +30,7 @@ module org.junit.jupiter.api {
 	exports org.junit.jupiter.api.function;
 	exports org.junit.jupiter.api.io;
 	exports org.junit.jupiter.api.parallel;
+	exports org.junit.jupiter.api.timeout to org.junit.jupiter.engine;
 
 	opens org.junit.jupiter.api.condition to org.junit.platform.commons;
 }

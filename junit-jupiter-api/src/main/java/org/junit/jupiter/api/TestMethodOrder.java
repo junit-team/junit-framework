@@ -32,8 +32,9 @@ import org.junit.jupiter.api.parallel.Execution;
  * {@code @TestFactory}, or {@code @TestTemplate}.
  *
  * <p>If {@code @TestMethodOrder} is not explicitly declared on a test class,
- * inherited from a parent class, or declared on a test interface implemented by
- * a test class, test methods will be ordered using a default algorithm that is
+ * inherited from a parent class, declared on a test interface implemented by
+ * a test class, or inherited from an {@linkplain Class#getEnclosingClass() enclosing
+ * class}, test methods will be ordered using a default algorithm that is
  * deterministic but intentionally nonobvious.
  *
  * <p>As an alternative to {@code @TestMethodOrder}, a global {@link MethodOrderer}

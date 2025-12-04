@@ -43,8 +43,7 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 	private static final List<String> callSequence = new ArrayList<>();
 	private static final List<String> beforeEachMethodCallSequence = new ArrayList<>();
 
-	@Nullable
-	private static Optional<Throwable> actualExceptionInAfterEachCallback;
+	private static @Nullable Optional<Throwable> actualExceptionInAfterEachCallback;
 
 	@SuppressWarnings("OptionalAssignedToNull")
 	@BeforeEach

@@ -10,12 +10,10 @@
 
 package org.junit.platform.commons.util;
 
-import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
 import static org.apiguardian.api.API.Status.INTERNAL;
-import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode.BOTTOM_UP;
 import static org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode.TOP_DOWN;
 
@@ -49,6 +47,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,10 +58,10 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.function.Try;
+import org.junit.platform.commons.io.Resource;
+import org.junit.platform.commons.io.ResourceFilter;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.junit.platform.commons.support.DefaultResource;
-import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.support.scanning.ClassFilter;
 import org.junit.platform.commons.support.scanning.ClasspathScanner;
 
@@ -111,7 +111,7 @@ public final class ReflectionUtils {
 	// ++ => possessive quantifier
 	private static final Pattern SOURCE_CODE_SYNTAX_ARRAY_PATTERN = Pattern.compile("^([^\\[\\]]+)((?>\\[\\])++)$");
 
-	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+	static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
 	private static final ClasspathScanner classpathScanner = ClasspathScannerLoader.getInstance();
 
@@ -128,7 +128,7 @@ public final class ReflectionUtils {
 	 * <p>This serves as a cache to avoid repeated cycle detection for classes
 	 * that have already been checked.
 	 * @since 1.6
-	 * @see #detectInnerClassCycle(Class)
+	 * @see #detectInnerClassCycle(Class, CycleErrorHandling)
 	 */
 	private static final Set<String> noCyclesDetectedCache = ConcurrentHashMap.newKeySet();
 
@@ -215,6 +215,11 @@ public final class ReflectionUtils {
 
 		classNameToTypeMap = Collections.unmodifiableMap(classNamesToTypes);
 
+		primitiveToWrapperMap = createPrimitivesToWrapperMap();
+	}
+
+	@SuppressWarnings("IdentityHashMapUsage")
+	private static Map<Class<?>, Class<?>> createPrimitivesToWrapperMap() {
 		Map<Class<?>, Class<?>> primitivesToWrappers = new IdentityHashMap<>(8);
 
 		primitivesToWrappers.put(boolean.class, Boolean.class);
@@ -226,7 +231,7 @@ public final class ReflectionUtils {
 		primitivesToWrappers.put(float.class, Float.class);
 		primitivesToWrappers.put(double.class, Double.class);
 
-		primitiveToWrapperMap = Collections.unmodifiableMap(primitivesToWrappers);
+		return Collections.unmodifiableMap(primitivesToWrappers);
 	}
 
 	public static boolean isPublic(Class<?> clazz) {
@@ -638,9 +643,9 @@ public final class ReflectionUtils {
 	public static Try<@Nullable Object> tryToReadFieldValue(Field field, @Nullable Object instance) {
 		Preconditions.notNull(field, "Field must not be null");
 		Preconditions.condition((instance != null || isStatic(field)),
-			() -> String.format("Cannot read non-static field [%s] on a null instance.", field));
+			() -> "Cannot read non-static field [%s] on a null instance.".formatted(field));
 
-		return Try.call(() -> makeAccessible(field).get(instance));
+		return Try.<@Nullable Object> call(() -> makeAccessible(field).get(instance));
 	}
 
 	/**
@@ -654,7 +659,7 @@ public final class ReflectionUtils {
 	 * @return an immutable list of the values of the specified fields; never
 	 * {@code null} but may be empty or contain {@code null} entries
 	 */
-	public static List<@Nullable Object> readFieldValues(List<Field> fields, @Nullable Object instance) {
+	public static List<?> readFieldValues(List<Field> fields, @Nullable Object instance) {
 		return readFieldValues(fields, instance, field -> true);
 	}
 
@@ -671,8 +676,7 @@ public final class ReflectionUtils {
 	 * @return an immutable list of the values of the specified fields; never
 	 * {@code null} but may be empty or contain {@code null} entries
 	 */
-	public static List<@Nullable Object> readFieldValues(List<Field> fields, @Nullable Object instance,
-			Predicate<Field> predicate) {
+	public static List<?> readFieldValues(List<Field> fields, @Nullable Object instance, Predicate<Field> predicate) {
 		Preconditions.notNull(fields, "fields list must not be null");
 		Preconditions.notNull(predicate, "Predicate must not be null");
 
@@ -691,7 +695,7 @@ public final class ReflectionUtils {
 	public static @Nullable Object invokeMethod(Method method, @Nullable Object target, @Nullable Object... args) {
 		Preconditions.notNull(method, "Method must not be null");
 		Preconditions.condition((target != null || isStatic(method)),
-			() -> String.format("Cannot invoke non-static method [%s] on a null target.", method.toGenericString()));
+			() -> "Cannot invoke non-static method [%s] on a null target.".formatted(method.toGenericString()));
 
 		try {
 			return makeAccessible(method).invoke(target, args);
@@ -726,7 +730,7 @@ public final class ReflectionUtils {
 	@API(status = INTERNAL, since = "1.11")
 	public static Class<?> loadRequiredClass(String name, ClassLoader classLoader) throws JUnitException {
 		return tryToLoadClass(name, classLoader).getNonNullOrThrow(
-			cause -> new JUnitException(format("Could not load class [%s]", name), cause));
+			cause -> new JUnitException("Could not load class [%s]".formatted(name), cause));
 	}
 
 	/**
@@ -745,15 +749,15 @@ public final class ReflectionUtils {
 	public static Try<Class<?>> tryToLoadClass(String name, ClassLoader classLoader) {
 		Preconditions.notBlank(name, "Class name must not be null or blank");
 		Preconditions.notNull(classLoader, "ClassLoader must not be null");
-		String trimmedName = name.trim();
+		String strippedName = name.strip();
 
-		if (classNameToTypeMap.containsKey(trimmedName)) {
-			return Try.success(classNameToTypeMap.get(trimmedName));
+		if (classNameToTypeMap.containsKey(strippedName)) {
+			return Try.success(classNameToTypeMap.get(strippedName));
 		}
 
 		return Try.call(() -> {
 			// Arrays such as "java.lang.String[]", "int[]", "int[][][][]", etc.
-			Matcher matcher = SOURCE_CODE_SYNTAX_ARRAY_PATTERN.matcher(trimmedName);
+			Matcher matcher = SOURCE_CODE_SYNTAX_ARRAY_PATTERN.matcher(strippedName);
 			if (matcher.matches()) {
 				String componentTypeName = matcher.group(1);
 				String bracketPairs = matcher.group(2);
@@ -764,20 +768,12 @@ public final class ReflectionUtils {
 			}
 
 			// Fallback to standard VM class loading
-			return Class.forName(trimmedName, false, classLoader);
+			return Class.forName(strippedName, false, classLoader);
 		});
 	}
 
 	/**
-	 * Try to get {@linkplain Resource resources} by their name, using the
-	 * {@link ClassLoaderUtils#getDefaultClassLoader()}.
-	 *
-	 * <p>See {@link org.junit.platform.commons.support.ReflectionSupport#tryToGetResources(String)}
-	 * for details.
-	 *
-	 * @param classpathResourceName the name of the resources to load; never {@code null} or blank
-	 * @since 1.12
-	 * @see org.junit.platform.commons.support.ReflectionSupport#tryToGetResources(String, ClassLoader)
+	 * @see org.junit.platform.commons.support.ResourceSupport#tryToGetResources(String)
 	 */
 	@API(status = INTERNAL, since = "1.12")
 	public static Try<Set<Resource>> tryToGetResources(String classpathResourceName) {
@@ -785,15 +781,7 @@ public final class ReflectionUtils {
 	}
 
 	/**
-	 * Try to get {@linkplain Resource resources} by their name, using the
-	 * supplied {@link ClassLoader}.
-	 *
-	 * <p>See {@link org.junit.platform.commons.support.ReflectionSupport#tryToGetResources(String, ClassLoader)}
-	 * for details.
-	 *
-	 * @param classpathResourceName the name of the resources to load; never {@code null} or blank
-	 * @param classLoader the {@code ClassLoader} to use; never {@code null}
-	 * @since 1.12
+	 * @see org.junit.platform.commons.support.ResourceSupport#tryToGetResources(String, ClassLoader)
 	 */
 	@API(status = INTERNAL, since = "1.12")
 	public static Try<Set<Resource>> tryToGetResources(String classpathResourceName, ClassLoader classLoader) {
@@ -807,7 +795,7 @@ public final class ReflectionUtils {
 			List<URL> resources = Collections.list(classLoader.getResources(canonicalClasspathResourceName));
 			return resources.stream().map(url -> {
 				try {
-					return new DefaultResource(canonicalClasspathResourceName, url.toURI());
+					return Resource.of(canonicalClasspathResourceName, url.toURI());
 				}
 				catch (URISyntaxException e) {
 					throw ExceptionUtils.throwAsUncheckedException(e);
@@ -885,7 +873,7 @@ public final class ReflectionUtils {
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
 		Preconditions.notNull(parameterTypeNames, "Parameter type names must not be null");
 
-		return String.format("%s#%s(%s)", className, methodName, parameterTypeNames);
+		return "%s#%s(%s)".formatted(className, methodName, parameterTypeNames);
 	}
 
 	/**
@@ -999,7 +987,7 @@ public final class ReflectionUtils {
 	/**
 	 * @since 1.11
 	 */
-	public static List<Resource> findAllResourcesInClasspathRoot(URI root, Predicate<Resource> resourceFilter) {
+	public static List<Resource> findAllResourcesInClasspathRoot(URI root, ResourceFilter resourceFilter) {
 		return List.copyOf(classpathScanner.scanForResourcesInClasspathRoot(root, resourceFilter));
 	}
 
@@ -1013,7 +1001,7 @@ public final class ReflectionUtils {
 	/**
 	 * @since 1.11
 	 */
-	public static Stream<Resource> streamAllResourcesInClasspathRoot(URI root, Predicate<Resource> resourceFilter) {
+	public static Stream<Resource> streamAllResourcesInClasspathRoot(URI root, ResourceFilter resourceFilter) {
 		return findAllResourcesInClasspathRoot(root, resourceFilter).stream();
 	}
 
@@ -1045,7 +1033,7 @@ public final class ReflectionUtils {
 	/**
 	 * @since 1.11
 	 */
-	public static List<Resource> findAllResourcesInPackage(String basePackageName, Predicate<Resource> resourceFilter) {
+	public static List<Resource> findAllResourcesInPackage(String basePackageName, ResourceFilter resourceFilter) {
 		return List.copyOf(classpathScanner.scanForResourcesInPackage(basePackageName, resourceFilter));
 	}
 
@@ -1059,8 +1047,7 @@ public final class ReflectionUtils {
 	/**
 	 * @since 1.11
 	 */
-	public static Stream<Resource> streamAllResourcesInPackage(String basePackageName,
-			Predicate<Resource> resourceFilter) {
+	public static Stream<Resource> streamAllResourcesInPackage(String basePackageName, ResourceFilter resourceFilter) {
 		return findAllResourcesInPackage(basePackageName, resourceFilter).stream();
 	}
 
@@ -1072,6 +1059,16 @@ public final class ReflectionUtils {
 			Predicate<String> classNameFilter) {
 		// unmodifiable since returned by public, non-internal method(s)
 		return findAllClassesInModule(moduleName, ClassFilter.of(classNameFilter, classFilter));
+	}
+
+	/**
+	 * @since 6.1
+	 * @see org.junit.platform.commons.support.ReflectionSupport#findAllClassesInModule(Module, Predicate, Predicate)
+	 */
+	public static List<Class<?>> findAllClassesInModule(Module module, Predicate<Class<?>> classFilter,
+			Predicate<String> classNameFilter) {
+		// unmodifiable since returned by public, non-internal method(s)
+		return findAllClassesInModule(module, ClassFilter.of(classNameFilter, classFilter));
 	}
 
 	/**
@@ -1091,10 +1088,24 @@ public final class ReflectionUtils {
 	}
 
 	/**
+	 * @since 6.1
+	 */
+	public static List<Class<?>> findAllClassesInModule(Module module, ClassFilter classFilter) {
+		return List.copyOf(ModuleUtils.findAllClassesInModule(module, classFilter));
+	}
+
+	/**
 	 * @since 1.11
 	 */
-	public static List<Resource> findAllResourcesInModule(String moduleName, Predicate<Resource> resourceFilter) {
+	public static List<Resource> findAllResourcesInModule(String moduleName, ResourceFilter resourceFilter) {
 		return List.copyOf(ModuleUtils.findAllResourcesInModule(moduleName, resourceFilter));
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	public static List<Resource> findAllResourcesInModule(Module module, ResourceFilter resourceFilter) {
+		return List.copyOf(ModuleUtils.findAllResourcesInModule(module, resourceFilter));
 	}
 
 	/**
@@ -1107,7 +1118,7 @@ public final class ReflectionUtils {
 	/**
 	 * @since 1.11
 	 */
-	public static Stream<Resource> streamAllResourcesInModule(String moduleName, Predicate<Resource> resourceFilter) {
+	public static Stream<Resource> streamAllResourcesInModule(String moduleName, ResourceFilter resourceFilter) {
 		return findAllResourcesInModule(moduleName, resourceFilter).stream();
 	}
 
@@ -1115,14 +1126,20 @@ public final class ReflectionUtils {
 	 * @see org.junit.platform.commons.support.ReflectionSupport#findNestedClasses(Class, Predicate)
 	 */
 	public static List<Class<?>> findNestedClasses(Class<?> clazz, Predicate<Class<?>> predicate) {
+		return findNestedClasses(clazz, predicate, CycleErrorHandling.THROW_EXCEPTION);
+	}
+
+	/**
+	 * @since 1.13.2
+	 */
+	@API(status = INTERNAL, since = "1.13.2")
+	public static List<Class<?>> findNestedClasses(Class<?> clazz, Predicate<Class<?>> predicate,
+			CycleErrorHandling errorHandling) {
 		Preconditions.notNull(clazz, "Class must not be null");
 		Preconditions.notNull(predicate, "Predicate must not be null");
 
 		Set<Class<?>> candidates = new LinkedHashSet<>();
-		visitNestedClasses(clazz, predicate, nestedClass -> {
-			candidates.add(nestedClass);
-			return true;
-		});
+		visitAllNestedClasses(clazz, predicate, candidates::add, errorHandling);
 		return List.copyOf(candidates);
 	}
 
@@ -1133,47 +1150,73 @@ public final class ReflectionUtils {
 	 * <p>This method does <strong>not</strong> search for nested classes
 	 * recursively.
 	 *
+	 * <p>This method detects cycles in <em>inner</em> class hierarchies &mdash;
+	 * from the supplied class up to the outermost enclosing class &mdash; and
+	 * throws a {@link JUnitException} if such a cycle is detected. Cycles within
+	 * inner class hierarchies <em>below</em> the supplied class are not detected
+	 * by this method.
+	 *
 	 * @param clazz the class to be searched; never {@code null}
 	 * @param predicate the predicate against which the list of nested classes is
 	 * checked; never {@code null}
 	 * @return {@code true} if such a nested class is present
 	 * @throws JUnitException if a cycle is detected within an inner class hierarchy
+	 * @since 1.13.2
 	 */
-	@API(status = INTERNAL, since = "1.13")
-	public static boolean isNestedClassPresent(Class<?> clazz, Predicate<Class<?>> predicate) {
+	@API(status = INTERNAL, since = "1.13.2")
+	public static boolean isNestedClassPresent(Class<?> clazz, Predicate<Class<?>> predicate,
+			CycleErrorHandling errorHandling) {
 		Preconditions.notNull(clazz, "Class must not be null");
 		Preconditions.notNull(predicate, "Predicate must not be null");
+		Preconditions.notNull(errorHandling, "CycleErrorHandling must not be null");
 
-		boolean visitorWasNotCalled = visitNestedClasses(clazz, predicate, __ -> false);
-		return !visitorWasNotCalled;
+		AtomicBoolean foundNestedClass = new AtomicBoolean(false);
+		visitAllNestedClasses(clazz, predicate, __ -> foundNestedClass.setPlain(true), errorHandling);
+		return foundNestedClass.getPlain();
 	}
 
 	/**
-	 * since 1.10
+	 * @since 1.10
 	 * @see org.junit.platform.commons.support.ReflectionSupport#streamNestedClasses(Class, Predicate)
 	 */
+	@API(status = INTERNAL, since = "1.10")
 	public static Stream<Class<?>> streamNestedClasses(Class<?> clazz, Predicate<Class<?>> predicate) {
 		return findNestedClasses(clazz, predicate).stream();
 	}
 
-	private static boolean visitNestedClasses(Class<?> clazz, Predicate<Class<?>> predicate,
-			Visitor<Class<?>> visitor) {
+	/**
+	 * @since 1.13.2
+	 */
+	@API(status = INTERNAL, since = "1.13.2")
+	public static Stream<Class<?>> streamNestedClasses(Class<?> clazz, Predicate<Class<?>> predicate,
+			CycleErrorHandling errorHandling) {
+		return findNestedClasses(clazz, predicate, errorHandling).stream();
+	}
+
+	/**
+	 * Visit <em>all</em> nested classes without support for short-circuiting
+	 * in order to ensure all of them are checked for class cycles.
+	 */
+	private static void visitAllNestedClasses(Class<?> clazz, Predicate<Class<?>> predicate,
+			Consumer<Class<?>> consumer, CycleErrorHandling errorHandling) {
+
 		if (!isSearchable(clazz)) {
-			return true;
+			return;
 		}
 
 		if (isInnerClass(clazz) && predicate.test(clazz)) {
-			detectInnerClassCycle(clazz);
+			if (detectInnerClassCycle(clazz, errorHandling)) {
+				return;
+			}
 		}
 
 		try {
 			// Candidates in current class
-			for (Class<?> nestedClass : clazz.getDeclaredClasses()) {
+			for (Class<?> nestedClass : toSortedMutableList(clazz.getDeclaredClasses())) {
 				if (predicate.test(nestedClass)) {
-					detectInnerClassCycle(nestedClass);
-					boolean shouldContinue = visitor.accept(nestedClass);
-					if (!shouldContinue) {
-						return false;
+					consumer.accept(nestedClass);
+					if (detectInnerClassCycle(nestedClass, errorHandling)) {
+						return;
 					}
 				}
 			}
@@ -1183,30 +1226,20 @@ public final class ReflectionUtils {
 		}
 
 		// Search class hierarchy
-		boolean shouldContinue = visitNestedClasses(clazz.getSuperclass(), predicate, visitor);
-		if (!shouldContinue) {
-			return false;
-		}
+		visitAllNestedClasses(clazz.getSuperclass(), predicate, consumer, errorHandling);
 
 		// Search interface hierarchy
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			shouldContinue = visitNestedClasses(ifc, predicate, visitor);
-			if (!shouldContinue) {
-				return false;
-			}
+			visitAllNestedClasses(ifc, predicate, consumer, errorHandling);
 		}
-
-		return true;
 	}
 
 	/**
 	 * Detect a cycle in the inner class hierarchy in which the supplied class
 	 * resides &mdash; from the supplied class up to the outermost enclosing class
 	 * &mdash; and throw a {@link JUnitException} if a cycle is detected.
-	 *
 	 * <p>This method does <strong>not</strong> detect cycles within inner class
 	 * hierarchies <em>below</em> the supplied class.
-	 *
 	 * <p>If the supplied class is not an inner class and does not have a
 	 * searchable superclass, this method is effectively a no-op.
 	 *
@@ -1214,25 +1247,26 @@ public final class ReflectionUtils {
 	 * @see #isInnerClass(Class)
 	 * @see #isSearchable(Class)
 	 */
-	private static void detectInnerClassCycle(Class<?> clazz) {
+	private static boolean detectInnerClassCycle(Class<?> clazz, CycleErrorHandling errorHandling) {
 		Preconditions.notNull(clazz, "Class must not be null");
 		String className = clazz.getName();
 
 		if (noCyclesDetectedCache.contains(className)) {
-			return;
+			return false;
 		}
 
 		Class<?> superclass = clazz.getSuperclass();
 		if (isInnerClass(clazz) && isSearchable(superclass)) {
 			for (Class<?> enclosing = clazz.getEnclosingClass(); enclosing != null; enclosing = enclosing.getEnclosingClass()) {
 				if (superclass.equals(enclosing)) {
-					throw new JUnitException(String.format("Detected cycle in inner class hierarchy between %s and %s",
-						className, enclosing.getName()));
+					errorHandling.handle(clazz, enclosing);
+					return true;
 				}
 			}
 		}
 
 		noCyclesDetectedCache.add(className);
+		return false;
 	}
 
 	/**
@@ -1255,7 +1289,7 @@ public final class ReflectionUtils {
 					.toArray(Constructor[]::new);
 
 			Preconditions.condition(constructors.length == 1,
-				() -> String.format("Class [%s] must declare a single constructor", clazz.getName()));
+				() -> "Class [%s] must declare a single constructor".formatted(clazz.getName()));
 
 			return (Constructor<T>) constructors[0];
 		}
@@ -1308,6 +1342,7 @@ public final class ReflectionUtils {
 	 * @since 1.10
 	 * @see org.junit.platform.commons.support.ReflectionSupport#streamFields(Class, Predicate, org.junit.platform.commons.support.HierarchyTraversalMode)
 	 */
+	@API(status = INTERNAL, since = "1.10")
 	public static Stream<Field> streamFields(Class<?> clazz, Predicate<Field> predicate,
 			HierarchyTraversalMode traversalMode) {
 
@@ -1404,6 +1439,7 @@ public final class ReflectionUtils {
 	 * @since 1.11
 	 */
 	@API(status = INTERNAL, since = "1.11")
+	@SuppressWarnings("ReferenceEquality")
 	public static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
 		if (!isPublic(method) || method.getDeclaringClass().isInterface()) {
 			return method;
@@ -1448,6 +1484,9 @@ public final class ReflectionUtils {
 		return findMethod(clazz, methodName, resolveParameterTypes(clazz, methodName, parameterTypeNames));
 	}
 
+	/**
+	 * @since 1.10
+	 */
 	@API(status = INTERNAL, since = "1.10")
 	public static Class<?>[] resolveParameterTypes(Class<?> clazz, String methodName,
 			@Nullable String parameterTypeNames) {
@@ -1458,7 +1497,7 @@ public final class ReflectionUtils {
 
 		// @formatter:off
 		return Arrays.stream(parameterTypeNames.split(","))
-				.map(String::trim)
+				.map(String::strip)
 				.map(typeName -> loadRequiredParameterType(clazz, methodName, typeName))
 				.toArray(Class[]::new);
 		// @formatter:on
@@ -1470,7 +1509,7 @@ public final class ReflectionUtils {
 		// @formatter:off
 		return tryToLoadClass(typeName, classLoader)
 				.getNonNullOrThrow(cause -> new JUnitException(
-						String.format("Failed to load parameter type [%s] for method [%s] in class [%s].",
+						"Failed to load parameter type [%s] for method [%s] in class [%s].".formatted(
 								typeName, methodName, clazz.getName()), cause));
 		// @formatter:on
 	}
@@ -1534,10 +1573,10 @@ public final class ReflectionUtils {
 	 * @since 1.7
 	 * @see #findMethod(Class, String, Class...)
 	 */
-	@API(status = STABLE, since = "1.7")
+	@API(status = INTERNAL, since = "1.7")
 	public static Method getRequiredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
-		return ReflectionUtils.findMethod(clazz, methodName, parameterTypes).orElseThrow(
-			() -> new JUnitException(format("Could not find method [%s] in class [%s]", methodName, clazz.getName())));
+		return ReflectionUtils.findMethod(clazz, methodName, parameterTypes).orElseThrow(() -> new JUnitException(
+			"Could not find method [%s] in class [%s]".formatted(methodName, clazz.getName())));
 	}
 
 	/**
@@ -1570,6 +1609,7 @@ public final class ReflectionUtils {
 	 * @since 1.10
 	 * @see org.junit.platform.commons.support.ReflectionSupport#streamMethods(Class, Predicate, org.junit.platform.commons.support.HierarchyTraversalMode)
 	 */
+	@API(status = INTERNAL, since = "1.10")
 	public static Stream<Method> streamMethods(Class<?> clazz, Predicate<Method> predicate,
 			HierarchyTraversalMode traversalMode) {
 
@@ -1693,6 +1733,10 @@ public final class ReflectionUtils {
 		return toSortedMutableList(methods, ReflectionUtils::defaultMethodSorter);
 	}
 
+	private static List<Class<?>> toSortedMutableList(Class<?>[] classes) {
+		return toSortedMutableList(classes, ReflectionUtils::defaultClassSorter);
+	}
+
 	private static <T> List<T> toSortedMutableList(T[] items, Comparator<? super T> comparator) {
 		List<T> result = new ArrayList<>(items.length);
 		Collections.addAll(result, items);
@@ -1721,6 +1765,19 @@ public final class ReflectionUtils {
 			if (comparison == 0) {
 				comparison = method1.toString().compareTo(method2.toString());
 			}
+		}
+		return comparison;
+	}
+
+	/**
+	 * Class comparator to achieve deterministic but nonobvious order.
+	 */
+	private static int defaultClassSorter(Class<?> class1, Class<?> class2) {
+		String name1 = class1.getName();
+		String name2 = class2.getName();
+		int comparison = Integer.compare(name1.hashCode(), name2.hashCode());
+		if (comparison == 0) {
+			comparison = name1.compareTo(name2);
 		}
 		return comparison;
 	}
@@ -1808,20 +1865,32 @@ public final class ReflectionUtils {
 		}
 
 		// Cannot override a package-private method in another package.
-		if (isPackagePrivate(upper) && !declaredInSamePackage(upper, lower)) {
+		if (isPackagePrivate(upper) && !isDeclaredInSamePackage(upper, lower)) {
 			return false;
 		}
 
 		return hasCompatibleSignature(upper, lower.getName(), lower.getParameterTypes());
 	}
 
-	private static boolean isPackagePrivate(Member member) {
+	/**
+	 * @since 5.14.1
+	 */
+	@API(status = INTERNAL, since = "5.14.1")
+	public static boolean isPackagePrivate(Member member) {
 		int modifiers = member.getModifiers();
 		return !(Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers));
 	}
 
-	private static boolean declaredInSamePackage(Method m1, Method m2) {
-		return m1.getDeclaringClass().getPackageName().equals(m2.getDeclaringClass().getPackageName());
+	private static boolean isDeclaredInSamePackage(Method m1, Method m2) {
+		return isDeclaredInSamePackage(m1.getDeclaringClass(), m2.getDeclaringClass());
+	}
+
+	/**
+	 * @since 5.14.1
+	 */
+	@API(status = INTERNAL, since = "5.14.1")
+	public static boolean isDeclaredInSamePackage(Class<?> c1, Class<?> c2) {
+		return c1.getPackageName().equals(c2.getPackageName());
 	}
 
 	/**
@@ -1864,6 +1933,9 @@ public final class ReflectionUtils {
 		return type instanceof TypeVariable || type instanceof GenericArrayType;
 	}
 
+	/**
+	 * @since 1.11
+	 */
 	@API(status = INTERNAL, since = "1.11")
 	@SuppressWarnings("deprecation") // "AccessibleObject.isAccessible()" is deprecated in Java 9
 	public static <T extends Executable> T makeAccessible(T executable) {
@@ -1873,6 +1945,9 @@ public final class ReflectionUtils {
 		return executable;
 	}
 
+	/**
+	 * @since 1.12
+	 */
 	@API(status = INTERNAL, since = "1.12")
 	@SuppressWarnings("deprecation") // "AccessibleObject.isAccessible()" is deprecated in Java 9
 	public static Field makeAccessible(Field field) {
@@ -1930,20 +2005,34 @@ public final class ReflectionUtils {
 	 * exception}; otherwise, this method returns the supplied {@code Throwable}.
 	 */
 	static Throwable getUnderlyingCause(Throwable t) {
-		if (t instanceof InvocationTargetException) {
-			return getUnderlyingCause(((InvocationTargetException) t).getTargetException());
+		if (t instanceof InvocationTargetException ite) {
+			return getUnderlyingCause(ite.getTargetException());
 		}
 		return t;
 	}
 
-	private interface Visitor<T> {
+	/**
+	 * @since 1.13.2
+	 */
+	@API(status = INTERNAL, since = "1.13.2")
+	public enum CycleErrorHandling {
 
-		/**
-		 * @return {@code true} if the visitor should continue searching;
-		 * {@code false} if the visitor should stop
-		 */
-		boolean accept(T value);
+		THROW_EXCEPTION {
+			@Override
+			void handle(Class<?> clazz, Class<?> enclosing) {
+				throw new JUnitException("Detected cycle in inner class hierarchy between %s and %s".formatted(
+					clazz.getName(), enclosing.getName()));
+			}
+		},
 
+		ABORT_VISIT {
+			@Override
+			void handle(Class<?> clazz, Class<?> enclosing) {
+				// ignore
+			}
+		};
+
+		abstract void handle(Class<?> clazz, Class<?> enclosing);
 	}
 
 }

@@ -1,3 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.bat]
+end_of_line = crlf
+
+[*.md]
+# Trailing whitespace is important in Markdown (they distinguish a new line from a new paragraph)
+trim_trailing_whitespace = false
+
 [*.{kt,kts}]
 ij_kotlin_allow_trailing_comma = false
 ij_kotlin_allow_trailing_comma_on_call_site = false

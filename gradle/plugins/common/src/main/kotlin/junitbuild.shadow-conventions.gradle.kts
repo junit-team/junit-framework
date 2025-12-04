@@ -24,6 +24,10 @@ configurations {
 	}
 }
 
+shadow {
+	addShadowVariantIntoJavaComponent = false
+}
+
 tasks {
 	javadoc {
 		classpath += shadowedClasspath.get()
@@ -36,6 +40,10 @@ tasks {
 		exclude("META-INF/maven/**")
 		excludes.remove("module-info.class")
 		archiveClassifier = ""
+		from(sourceSets.main.get().output.classesDirs) {
+			include("module-info.class")
+		}
+		addMultiReleaseAttribute = false
 	}
 	jar {
 		dependsOn(shadowJar)

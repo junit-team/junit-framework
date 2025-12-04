@@ -18,7 +18,7 @@ import org.junit.jupiter.api.ClassTemplate;
 /**
  * {@code AfterClassTemplateInvocationCallback} defines the API for
  * {@link Extension Extensions} that wish to provide additional behavior
- * <strong>once</strong> before each invocation of a
+ * <strong>once</strong> after each invocation of a
  * {@link ClassTemplate @ClassTemplate}.
  *
  * <p>Concrete implementations often implement
@@ -34,7 +34,7 @@ import org.junit.jupiter.api.ClassTemplate;
  * <p>JUnit Jupiter guarantees <em>wrapping behavior</em> for multiple
  * registered extensions that implement lifecycle callbacks such as
  * {@link BeforeAllCallback}, {@link AfterAllCallback},
- * {@link AfterClassTemplateInvocationCallback},
+ * {@link BeforeClassTemplateInvocationCallback},
  * {@link AfterClassTemplateInvocationCallback}, {@link BeforeEachCallback},
  * {@link AfterEachCallback}, {@link BeforeTestExecutionCallback}, and
  * {@link AfterTestExecutionCallback}.
@@ -60,11 +60,11 @@ import org.junit.jupiter.api.ClassTemplate;
  * @see AfterTestExecutionCallback
  */
 @FunctionalInterface
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public interface AfterClassTemplateInvocationCallback extends Extension {
 
 	/**
-	 * Callback that is invoked <em>after</em> each invocation of a container
+	 * Callback that is invoked <em>after</em> each invocation of a class
 	 * template.
 	 *
 	 * @param context the current extension context; never {@code null}

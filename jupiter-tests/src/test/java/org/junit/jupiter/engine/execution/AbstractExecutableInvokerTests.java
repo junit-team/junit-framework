@@ -12,11 +12,6 @@ package org.junit.jupiter.engine.execution;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.ConfigurableParameterResolver;
-import static org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.ConstructorInjectionTestCase;
-import static org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.MethodSource;
-import static org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.NumberParameterResolver;
-import static org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.StringParameterResolver;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -28,6 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
+import org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.ConfigurableParameterResolver;
+import org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.ConstructorInjectionTestCase;
+import org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.MethodSource;
+import org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.NumberParameterResolver;
+import org.junit.jupiter.engine.execution.ParameterResolutionUtilsTests.StringParameterResolver;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -41,8 +41,7 @@ abstract class AbstractExecutableInvokerTests {
 
 	protected final MethodSource instance = mock();
 
-	@Nullable
-	protected Method method;
+	protected @Nullable Method method;
 
 	protected final ExtensionContext extensionContext = mock();
 

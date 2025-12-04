@@ -16,7 +16,7 @@
 module org.junit.platform.suite.api {
 
 	requires static transitive org.apiguardian.api;
-	requires static org.jspecify;
+	requires static transitive org.jspecify;
 
 	requires transitive org.junit.platform.commons;
 

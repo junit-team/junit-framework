@@ -35,7 +35,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * @since 1.0
  */
 @API(status = STABLE, since = "1.0")
-public class UniqueId implements Cloneable, Serializable {
+public final class UniqueId implements Cloneable, Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -84,15 +84,14 @@ public class UniqueId implements Cloneable, Serializable {
 
 	private final UniqueIdFormat uniqueIdFormat;
 
-	@SuppressWarnings({ "serial", "RedundantSuppression" }) // always used with serializable implementation (singletonList() or ArrayList)
+	@SuppressWarnings({ "serial", "RedundantSuppression" }) // always used with serializable implementation (List.copyOf())
 	private final List<Segment> segments;
 
 	// lazily computed
 	private transient int hashCode;
 
 	// lazily computed
-	@Nullable
-	private transient SoftReference<String> toString;
+	private transient @Nullable SoftReference<String> toString;
 
 	private UniqueId(UniqueIdFormat uniqueIdFormat, Segment segment) {
 		this(uniqueIdFormat, List.of(segment));
@@ -110,7 +109,7 @@ public class UniqueId implements Cloneable, Serializable {
 		this.segments = List.copyOf(segments);
 	}
 
-	final Optional<Segment> getRoot() {
+	Optional<Segment> getRoot() {
 		return this.segments.isEmpty() ? Optional.empty() : Optional.of(this.segments.get(0));
 	}
 
@@ -119,7 +118,7 @@ public class UniqueId implements Cloneable, Serializable {
 	 *
 	 * @see #forEngine(String)
 	 */
-	public final Optional<String> getEngineId() {
+	public Optional<String> getEngineId() {
 		return getRoot().filter(segment -> ENGINE_SEGMENT_TYPE.equals(segment.getType())).map(Segment::getValue);
 	}
 
@@ -127,7 +126,7 @@ public class UniqueId implements Cloneable, Serializable {
 	 * Get the immutable list of {@linkplain Segment segments} that make up this
 	 * {@code UniqueId}.
 	 */
-	public final List<Segment> getSegments() {
+	public List<Segment> getSegments() {
 		return this.segments;
 	}
 
@@ -145,7 +144,7 @@ public class UniqueId implements Cloneable, Serializable {
 	 * @param segmentType the type of the segment; never {@code null} or blank
 	 * @param value the value of the segment; never {@code null} or blank
 	 */
-	public final UniqueId append(String segmentType, String value) {
+	public UniqueId append(String segmentType, String value) {
 		return append(new Segment(segmentType, value));
 	}
 
@@ -160,7 +159,7 @@ public class UniqueId implements Cloneable, Serializable {
 	 * @since 1.1
 	 */
 	@API(status = STABLE, since = "1.1")
-	public final UniqueId append(Segment segment) {
+	public UniqueId append(Segment segment) {
 		Preconditions.notNull(segment, "segment must not be null");
 		List<Segment> baseSegments = new ArrayList<>(this.segments.size() + 1);
 		baseSegments.addAll(this.segments);
@@ -296,7 +295,7 @@ public class UniqueId implements Cloneable, Serializable {
 	 * <em>value</em>.
 	 */
 	@API(status = STABLE, since = "1.0")
-	public static class Segment implements Serializable {
+	public static final class Segment implements Serializable {
 
 		@Serial
 		private static final long serialVersionUID = 1L;

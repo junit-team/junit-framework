@@ -37,7 +37,7 @@ class CalculatorParameterizedClassTests {
 	@Nested
 	@ParameterizedClass
 	@ValueSource(ints = { 1, 2 })
-	@Disabled("https://github.com/junit-team/junit5/issues/4440")
+	@Disabled("https://github.com/junit-team/junit-framework/issues/4440")
 	class Inner {
 
 		final int j;

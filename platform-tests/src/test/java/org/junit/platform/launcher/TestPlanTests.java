@@ -10,7 +10,7 @@
 
 package org.junit.platform.launcher;
 
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
@@ -42,7 +42,7 @@ class TestPlanTests {
 		engineDescriptor2.addChild(test3);
 
 		var testPlan = TestPlan.from(true, List.of(engineDescriptor, engineDescriptor2), configParams,
-			dummyOutputDirectoryProvider());
+			dummyOutputDirectoryCreator());
 		var visitor = mock(TestPlan.Visitor.class);
 
 		testPlan.accept(visitor);

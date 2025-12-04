@@ -55,6 +55,7 @@ public class WatchedProcess {
 		}
 	}
 
+	@SuppressWarnings("EmptyCatch")
 	private static void closeQuietly(Optional<OutputStream> fileStream) {
 		if (fileStream.isEmpty()) {
 			return;

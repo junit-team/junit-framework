@@ -33,7 +33,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * <p>A {@code @ParameterizedClass} must specify at least one
  * {@link org.junit.jupiter.params.provider.ArgumentsProvider ArgumentsProvider}
  * via {@link org.junit.jupiter.params.provider.ArgumentsSource @ArgumentsSource}
- * or a corresponding composed annotation (e.g., {@code @ValueSource},
+ * or a corresponding composed annotation (such as {@code @ValueSource},
  * {@code @CsvSource}, etc.). The provider is responsible for providing a
  * {@link java.util.stream.Stream Stream} of
  * {@link org.junit.jupiter.params.provider.Arguments Arguments} that will be
@@ -52,7 +52,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * <p>A {@code @ParameterizedClass} constructor may declare additional
  * parameters at the end of its parameter list to be resolved by other
  * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers}
- * (e.g., {@code TestInfo}, {@code TestReporter}, etc.). Specifically, such a
+ * (such as {@code TestInfo}, {@code TestReporter}, etc.). Specifically, such a
  * constructor must declare formal parameters according to the following rules.
  *
  * <ol>
@@ -64,7 +64,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  *
  * <p>In this context, an <em>indexed parameter</em> is an argument for a given
  * index in the {@code Arguments} provided by an {@code ArgumentsProvider} that
- * is passed as an argument to the parameterized class at the same index in
+ * is supplied as an argument to the parameterized class at the same index in
  * the constructor's formal parameter list. An <em>aggregator</em> is any
  * parameter of type
  * {@link org.junit.jupiter.params.aggregator.ArgumentsAccessor ArgumentsAccessor}
@@ -112,8 +112,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  * <p>If you wish to execute custom code before or after each invocation of the
  * parameterized class, you may declare methods annotated with
  * {@link BeforeParameterizedClassInvocation @BeforeParameterizedClassInvocation}
- * or
- * {@link AfterParameterizedClassInvocation @AfterParameterizedClassInvocation}.
+ * or {@link AfterParameterizedClassInvocation @AfterParameterizedClassInvocation}.
  * This can, for example, be useful to initialize the arguments before they are
  * used.
  *
@@ -125,7 +124,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.13
  * @see Parameter
@@ -149,7 +148,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 @ClassTemplate
 @ExtendWith(ParameterizedClassExtension.class)
 @SuppressWarnings("exports")
@@ -198,8 +197,49 @@ public @interface ParameterizedClass {
 	 * a flag rather than a placeholder.
 	 *
 	 * @see java.text.MessageFormat
+	 * @see #quoteTextArguments()
 	 */
 	String name() default ParameterizedInvocationNameFormatter.DEFAULT_DISPLAY_NAME;
+
+	/**
+	 * Configure whether to enclose text-based argument values in quotes within
+	 * display names.
+	 *
+	 * <p>Defaults to {@code true}.
+	 *
+	 * <p>In this context, any {@link CharSequence} (such as a {@link String})
+	 * or {@link Character} is considered text. A {@code CharSequence} is wrapped
+	 * in double quotes ("), and a {@code Character} is wrapped in single quotes
+	 * (').
+	 *
+	 * <p>Special characters in Java strings and characters will be escaped in the
+	 * quoted text &mdash; for example, carriage returns and line feeds will be
+	 * escaped as {@code \\r} and {@code \\n}, respectively. In addition, any
+	 * {@linkplain Character#isISOControl(char) ISO control character} will be
+	 * represented as a question mark (?) in the quoted text.
+	 *
+	 * <p>For example, given a string argument {@code "line 1\nline 2"}, the
+	 * representation in the display name would be {@code "\"line 1\\nline 2\""}
+	 * (printed as {@code "line 1\nline 2"}) with the newline character escaped as
+	 * {@code "\\n"}. Similarly, given a string argument {@code "\t"}, the
+	 * representation in the display name would be {@code "\"\\t\""} (printed as
+	 * {@code "\t"}) instead of a blank string or invisible tab
+	 * character. The same applies for a character argument {@code '\t'}, whose
+	 * representation in the display name would be {@code "'\\t'"} (printed as
+	 * {@code '\t'}).
+	 *
+	 * <p>Please note that original source arguments are quoted when generating
+	 * a display name, before any implicit or explicit argument conversion is
+	 * performed. For example, if a parameterized class accepts {@code 3.14} as a
+	 * {@code float} argument that was converted from {@code "3.14"} as an input
+	 * string, {@code "3.14"} will be present in the display name instead of
+	 * {@code 3.14}.
+	 *
+	 * @since 6.0
+	 * @see #name()
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	boolean quoteTextArguments() default true;
 
 	/**
 	 * Configure whether all arguments of the parameterized class that implement

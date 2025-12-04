@@ -19,7 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
  * exist with regard to the "context" held by {@link NodeTestTask}.
  *
  * @since 5.3.1
- * @see <a href="https://github.com/junit-team/junit5/issues/1578">GitHub issue #1578</a>
+ * @see <a href="https://github.com/junit-team/junit-framework/issues/1578">GitHub issue #1578</a>
  */
 // Explicitly specifying Lifecycle.PER_METHOD to be certain that the
 // test instance state is recreated for every test method executed.

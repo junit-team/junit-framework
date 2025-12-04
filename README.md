@@ -1,4 +1,10 @@
-# <img src="https://junit.org/junit5/assets/img/junit5-logo.png" align="right" width="100">JUnit
+<h1>
+  <picture width="200">
+    <source media="(prefers-color-scheme: dark)" srcset="https://junit.org/assets/img/junit-logo-inverted-darker.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://junit.org/assets/img/junit-logo.svg">
+    <img alt="JUnit" src="https://junit.org/assets/img/junit-logo.svg" width="200">
+  </picture>
+</h1>
 
 This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
@@ -8,19 +14,19 @@ This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
 * **Gold Sponsors:** [JetBrains](https://jb.gg/junit-logo), [Netflix](https://www.netflix.com/)
 * **Silver Sponsors:** [Micromata](https://www.micromata.de), [Quo Card](https://quo-digital.jp)
-* **Bronze Sponsors:** [Premium Minds](https://www.premium-minds.com), [codefortynine](https://codefortynine.com), [Info Support](https://www.infosupport.com), [Code Intelligence](https://www.code-intelligence.com), [Route4Me](https://route4me.com/), [Testiny](https://www.testiny.io/)
+* **Bronze Sponsors:** [Premium Minds](https://www.premium-minds.com), [codefortynine](https://codefortynine.com), [Info Support](https://www.infosupport.com), [Code Intelligence](https://www.code-intelligence.com), [Route4Me](https://route4me.com/), [Testiny](https://www.testiny.io/), [LambdaTest](https://www.lambdatest.com)
 
 ## Latest Releases
 
-- General Availability (GA): [JUnit 5.12.2](https://github.com/junit-team/junit5/releases/tag/r5.12.2) (April 11, 2025)
-- Preview (Milestone/Release Candidate): [JUnit 5.13.0-RC1](https://github.com/junit-team/junit5/releases/tag/r5.13.0-RC1) (May 16, 2025)
+- General Availability (GA): [JUnit 6.0.1](https://github.com/junit-team/junit-framework/releases/tag/r6.0.1) (October 31, 2025)
+- Preview (Milestone/Release Candidate): [JUnit 6.1.0-M1](https://github.com/junit-team/junit-framework/releases/tag/r6.1.0-M1) (November 17, 2025)
 
 ## Documentation
 
 - [User Guide]
 - [Javadoc]
 - [Release Notes]
-- [Samples]
+- [Examples]
 
 ## Contributing
 
@@ -28,8 +34,8 @@ Contributions to JUnit are both welcomed and appreciated. For specific guideline
 regarding contributions, please see [CONTRIBUTING.md] in the root directory of the
 project. Those willing to use milestone or SNAPSHOT releases are encouraged
 to file feature requests and bug reports using the project's
-[issue tracker](https://github.com/junit-team/junit5/issues). Issues marked with an
-<a href="https://github.com/junit-team/junit5/issues?q=is%3Aissue+is%3Aopen+label%3Aup-for-grabs">`up-for-grabs`</a>
+[issue tracker](https://github.com/junit-team/junit-framework/issues). Issues marked with an
+<a href="https://github.com/junit-team/junit-framework/issues?q=is%3Aissue+is%3Aopen+label%3Aup-for-grabs">`up-for-grabs`</a>
 label are specifically targeted for community contributions.
 
 ## Getting Help
@@ -38,7 +44,7 @@ Ask JUnit-related questions on [StackOverflow] or use the Q&A category on [GitHu
 
 ## Continuous Integration Builds
 
-[![CI Status](https://github.com/junit-team/junit5/workflows/CI/badge.svg)](https://github.com/junit-team/junit5/actions) [![Cross-Version Status](https://github.com/junit-team/junit5/workflows/Cross-Version/badge.svg)](https://github.com/junit-team/junit5/actions)
+[![CI](https://github.com/junit-team/junit-framework/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/main.yml) [![Cross-Version](https://github.com/junit-team/junit-framework/actions/workflows/cross-version.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/cross-version.yml)
 
 Official CI build server used to perform quick checks on submitted pull requests and for
 build matrices including the latest released OpenJDK and early access builds of the next
@@ -70,7 +76,7 @@ task outputs from previous CI builds.
 
 ## Building from Source
 
-You need [JDK 21] to build JUnit. [Gradle toolchains] are used to detect and
+You need [JDK 25] to build JUnit. [Gradle toolchains] are used to detect and
 potentially download additional JDKs for compilation and test execution.
 
 All modules can be _built_ and _tested_ with the [Gradle Wrapper] using the following command:
@@ -84,24 +90,24 @@ projects via the following command:
 
 ## Dependency Metadata
 
-[![JUnit Jupiter version](https://img.shields.io/maven-central/v/org.junit.jupiter/junit-jupiter/5..svg?color=25a162&label=Jupiter)](https://central.sonatype.com/search?namespace=org.junit.jupiter)
-[![JUnit Vintage version](https://img.shields.io/maven-central/v/org.junit.vintage/junit-vintage-engine/5..svg?color=25a162&label=Vintage)](https://central.sonatype.com/search?namespace=org.junit.vintage)
-[![JUnit Platform version](https://img.shields.io/maven-central/v/org.junit.platform/junit-platform-commons/1..svg?color=25a162&label=Platform)](https://central.sonatype.com/search?namespace=org.junit.platform)
+[![JUnit Jupiter version](https://img.shields.io/maven-central/v/org.junit.jupiter/junit-jupiter/6..svg?color=25a162&label=Jupiter)](https://central.sonatype.com/search?namespace=org.junit.jupiter)
+[![JUnit Vintage version](https://img.shields.io/maven-central/v/org.junit.vintage/junit-vintage-engine/6..svg?color=25a162&label=Vintage)](https://central.sonatype.com/search?namespace=org.junit.vintage)
+[![JUnit Platform version](https://img.shields.io/maven-central/v/org.junit.platform/junit-platform-commons/6..svg?color=25a162&label=Platform)](https://central.sonatype.com/search?namespace=org.junit.platform)
 
 Consult the [Dependency Metadata] section of the [User Guide] for a list of all artifacts
 of the JUnit Platform, JUnit Jupiter, and JUnit Vintage.
 
 
-[Codecov]: https://codecov.io/gh/junit-team/junit5
-[CONTRIBUTING.md]: https://github.com/junit-team/junit5/blob/HEAD/CONTRIBUTING.md
-[Dependency Metadata]: https://junit.org/junit5/docs/current/user-guide/#dependency-metadata
-[GitHub Discussions]: https://github.com/junit-team/junit5/discussions/categories/q-a
+[Codecov]: https://codecov.io/gh/junit-team/junit-framework
+[CONTRIBUTING.md]: https://github.com/junit-team/junit-framework/blob/HEAD/CONTRIBUTING.md
+[Dependency Metadata]: https://docs.junit.org/current/user-guide/#dependency-metadata
+[GitHub Discussions]: https://github.com/junit-team/junit-framework/discussions/categories/q-a
 [Gradle toolchains]: https://docs.gradle.org/current/userguide/toolchains.html
 [Gradle Wrapper]: https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:using_wrapper
 [JaCoCo]: https://www.eclemma.org/jacoco/
-[Javadoc]: https://junit.org/junit5/docs/current/api/
-[JDK 21]: https://javaalmanac.io/jdk/21/
-[Release Notes]: https://junit.org/junit5/docs/current/release-notes/
-[Samples]: https://github.com/junit-team/junit5-samples
+[Javadoc]: https://docs.junit.org/current/api/
+[JDK 25]: https://javaalmanac.io/jdk/25/
+[Release Notes]: https://docs.junit.org/current/release-notes/
+[Examples]: https://github.com/junit-team/junit-examples
 [StackOverflow]: https://stackoverflow.com/questions/tagged/junit5
-[User Guide]: https://junit.org/junit5/docs/current/user-guide/
+[User Guide]: https://docs.junit.org/current/user-guide/

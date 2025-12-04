@@ -137,8 +137,7 @@ public class UniqueIdTrackingListener implements TestExecutionListener {
 
 	private boolean enabled;
 
-	@Nullable
-	private TestPlan testPlan;
+	private @Nullable TestPlan testPlan;
 
 	public UniqueIdTrackingListener() {
 		// to avoid missing-explicit-ctor warning

@@ -81,8 +81,7 @@ class Operator {
 	private final int precedence;
 	private final int arity;
 
-	@Nullable
-	private final Associativity associativity;
+	private final @Nullable Associativity associativity;
 
 	private final TagExpressionCreator tagExpressionCreator;
 

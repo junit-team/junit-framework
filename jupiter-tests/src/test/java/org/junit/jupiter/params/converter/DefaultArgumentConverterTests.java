@@ -12,26 +12,16 @@ package org.junit.jupiter.params.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.params.converter.DefaultArgumentConverter.DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME;
-import static org.junit.jupiter.params.converter.DefaultArgumentConverter.LocaleConversionFormat.BCP_47;
-import static org.junit.jupiter.params.converter.DefaultArgumentConverter.LocaleConversionFormat.ISO_639;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getClassLoader;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Locale;
-import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
@@ -46,8 +36,7 @@ import org.junit.platform.commons.util.ClassLoaderUtils;
  */
 class DefaultArgumentConverterTests {
 
-	private final ExtensionContext context = mock();
-	private final DefaultArgumentConverter underTest = spy(new DefaultArgumentConverter(context));
+	private final DefaultArgumentConverter underTest = spy(DefaultArgumentConverter.INSTANCE);
 
 	@Test
 	void isAwareOfNull() {
@@ -110,36 +99,6 @@ class DefaultArgumentConverterTests {
 		convert("value", int.class);
 
 		verify(underTest).convert("value", int.class, getClassLoader(DefaultArgumentConverterTests.class));
-	}
-
-	@Test
-	void convertsLocaleWithDefaultFormat() {
-		when(context.getConfigurationParameter(eq(DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME), any())) //
-				.thenReturn(Optional.empty());
-
-		assertConverts("en", Locale.class, Locale.ENGLISH);
-		assertConverts("en-US", Locale.class, Locale.US);
-	}
-
-	@Test
-	void convertsLocaleWithExplicitBcp47Format() {
-		when(context.getConfigurationParameter(eq(DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME), any())) //
-				.thenReturn(Optional.of(BCP_47));
-
-		assertConverts("en", Locale.class, Locale.ENGLISH);
-		assertConverts("en-US", Locale.class, Locale.US);
-	}
-
-	@Test
-	void delegatesLocaleConversionWithExplicitIso639Format() {
-		when(context.getConfigurationParameter(eq(DEFAULT_LOCALE_CONVERSION_FORMAT_PROPERTY_NAME), any())) //
-				.thenReturn(Optional.of(ISO_639));
-
-		doReturn(null).when(underTest).convert(any(), any(), any(ClassLoader.class));
-
-		convert("en", Locale.class);
-
-		verify(underTest).convert("en", Locale.class, getClassLoader(DefaultArgumentConverterTests.class));
 	}
 
 	@Test

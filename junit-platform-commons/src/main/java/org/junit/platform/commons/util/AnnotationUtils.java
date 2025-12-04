@@ -38,6 +38,7 @@ import java.util.function.Predicate;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode;
 
 /**
@@ -76,6 +77,7 @@ public final class AnnotationUtils {
 	 * @see org.junit.platform.commons.support.AnnotationSupport#isAnnotated(Optional, Class)
 	 */
 	@SuppressWarnings("NullableOptional")
+	@Contract("null, _ -> false")
 	public static boolean isAnnotated(@Nullable Optional<? extends AnnotatedElement> element,
 			Class<? extends Annotation> annotationType) {
 
@@ -102,6 +104,7 @@ public final class AnnotationUtils {
 	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see org.junit.platform.commons.support.AnnotationSupport#isAnnotated(AnnotatedElement, Class)
 	 */
+	@Contract("null, _ -> false")
 	public static boolean isAnnotated(@Nullable AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		return findAnnotation(element, annotationType).isPresent();
 	}
@@ -326,7 +329,7 @@ public final class AnnotationUtils {
 		findRepeatableAnnotations(element.getAnnotations(), annotationType, containerType, inherited, found, visited);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "GetClassOnAnnotation" })
 	private static <A extends Annotation> void findRepeatableAnnotations(Annotation[] candidates,
 			Class<A> annotationType, Class<? extends Annotation> containerType, boolean inherited, Set<A> found,
 			Set<Annotation> visited) {
@@ -381,7 +384,7 @@ public final class AnnotationUtils {
 		return repeatableAnnotationContainerCache.computeIfAbsent(candidateContainerType, candidate -> {
 			// @formatter:off
 			Repeatable repeatable = Arrays.stream(candidate.getMethods())
-					.filter(attribute -> attribute.getName().equals("value") && attribute.getReturnType().isArray())
+					.filter(attribute -> "value".equals(attribute.getName()) && attribute.getReturnType().isArray())
 					.findFirst()
 					.map(attribute -> attribute.getReturnType().getComponentType().getAnnotation(Repeatable.class))
 					.orElse(null);

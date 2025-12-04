@@ -51,8 +51,8 @@ public class Helper {
 					.filter(Matcher::matches) //
 					.map(matcher -> matcher.group(1)) //
 					.filter(name -> name.startsWith("junit-")) //
-					.filter(name -> !name.equals("junit-bom")) //
-					.filter(name -> !name.equals("junit-platform-console-standalone")).toList();
+					.filter(name -> !"junit-bom".equals(name)) //
+					.filter(name -> !"junit-platform-console-standalone".equals(name)).toList();
 		}
 		catch (Exception e) {
 			throw new AssertionError("loading module directory names failed: " + SETTINGS_GRADLE);
@@ -73,8 +73,6 @@ public class Helper {
 		return sources.filter(Objects::nonNull).findFirst().map(Path::of);
 	}
 
-	public static Optional<Path> getJavaHomeWithNativeImageSupport(int version) {
-		var value = System.getProperty("java.home." + version + ".nativeImage");
-		return Optional.ofNullable(value).map(Path::of);
+	private Helper() {
 	}
 }

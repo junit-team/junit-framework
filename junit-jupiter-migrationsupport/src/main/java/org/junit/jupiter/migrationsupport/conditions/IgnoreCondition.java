@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.migrationsupport.conditions;
 
-import static org.apiguardian.api.API.Status.STABLE;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
 import java.lang.reflect.AnnotatedElement;
@@ -32,8 +32,10 @@ import org.junit.platform.commons.util.StringUtils;
  * @see org.junit.jupiter.api.Disabled @Disabled
  * @see #evaluateExecutionCondition(ExtensionContext)
  * @see org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport
+ * @deprecated Please use {@link org.junit.jupiter.api.Disabled @Disabled} instead.
  */
-@API(status = STABLE, since = "5.7")
+@API(status = DEPRECATED, since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
 public class IgnoreCondition implements ExecutionCondition {
 
 	private static final ConditionEvaluationResult ENABLED = //

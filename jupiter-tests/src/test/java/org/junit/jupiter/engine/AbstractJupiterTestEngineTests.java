@@ -11,18 +11,21 @@
 package org.junit.jupiter.engine;
 
 import static kotlin.jvm.JvmClassMappingKt.getJavaClass;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.launcher.LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
-import static org.junit.platform.launcher.core.OutputDirectoryProviders.dummyOutputDirectoryProvider;
+import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.DiscoverySelector;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -50,6 +53,10 @@ public abstract class AbstractJupiterTestEngineTests {
 	}
 
 	protected EngineExecutionResults executeTests(DiscoverySelector... selectors) {
+		return executeTests(List.of(selectors));
+	}
+
+	protected EngineExecutionResults executeTests(List<? extends DiscoverySelector> selectors) {
 		return executeTests(request -> request.selectors(selectors));
 	}
 
@@ -65,6 +72,12 @@ public abstract class AbstractJupiterTestEngineTests {
 
 	protected EngineExecutionResults executeTests(LauncherDiscoveryRequest request) {
 		return EngineTestKit.execute(this.engine, request);
+	}
+
+	protected TestDescriptor discoverTestsWithoutIssues(LauncherDiscoveryRequest request) {
+		var results = discoverTests(request);
+		assertThat(results.getDiscoveryIssues()).isEmpty();
+		return results.getEngineDescriptor();
 	}
 
 	protected EngineDiscoveryResults discoverTestsForClass(Class<?> testClass) {
@@ -89,9 +102,17 @@ public abstract class AbstractJupiterTestEngineTests {
 		return EngineTestKit.discover(this.engine, request);
 	}
 
+	protected EngineTestKit.Builder jupiterTestEngine() {
+		return EngineTestKit.engine(this.engine) //
+				.outputDirectoryCreator(dummyOutputDirectoryCreator()) //
+				.configurationParameter(STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, String.valueOf(false)) //
+				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.INFO.name()) //
+				.enableImplicitConfigurationParameters(false);
+	}
+
 	protected static LauncherDiscoveryRequestBuilder defaultRequest() {
 		return request() //
-				.outputDirectoryProvider(dummyOutputDirectoryProvider()) //
+				.outputDirectoryCreator(dummyOutputDirectoryCreator()) //
 				.configurationParameter(STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, String.valueOf(false)) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.INFO.name()) //
 				.enableImplicitConfigurationParameters(false);

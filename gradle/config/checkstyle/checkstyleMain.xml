@@ -27,6 +27,27 @@
 			<property name="message" value="Please use class literals for primitives and void -- for example, int.class instead of Integer.TYPE."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="stringFormattingMethod"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="String\.format"/>
+			<property name="message" value="Please use String.formatted() (non-static) rather than String.format() (static)."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<!-- see https://github.com/junit-team/junit-framework/issues/4604 -->
+			<property name="id" value="jupiterAssertions"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="org\.junit\.jupiter\.api\.(Assertions|Assumptions)\."/>
+			<property name="message" value="Assertions/Assumptions should not be used in production code."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="HideUtilityClassConstructor"/>
+		<module name="ModifierOrder"/>
+		<module name="RedundantModifier"/>
+		<module name="EqualsAvoidNull"/>
+		<module name="EmptyStatement"/>
+		<module name="MissingDeprecated"/>
 	</module>
 
 	<module name="JavadocPackage" />

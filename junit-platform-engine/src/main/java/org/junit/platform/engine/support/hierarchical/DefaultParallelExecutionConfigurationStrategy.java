@@ -11,7 +11,7 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.Objects.requireNonNull;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.math.BigDecimal;
@@ -144,7 +144,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * @since 1.10
 	 * @see #FIXED
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = "fixed.max-pool-size";
 
 	/**
@@ -160,7 +160,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * @see #FIXED
 	 * @see #CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String CONFIG_FIXED_SATURATE_PROPERTY_NAME = "fixed.saturate";
 
 	/**
@@ -188,7 +188,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * @since 1.10
 	 * @see #DYNAMIC
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String CONFIG_DYNAMIC_MAX_POOL_SIZE_FACTOR_PROPERTY_NAME = "dynamic.max-pool-size-factor";
 
 	/**
@@ -204,7 +204,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * @see #DYNAMIC
 	 * @see #CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String CONFIG_DYNAMIC_SATURATE_PROPERTY_NAME = "dynamic.saturate";
 
 	/**
@@ -215,6 +215,10 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * @see #CUSTOM
 	 */
 	public static final String CONFIG_CUSTOM_CLASS_PROPERTY_NAME = "custom.class";
+
+	static ParallelExecutionConfiguration toConfiguration(ConfigurationParameters configurationParameters) {
+		return getStrategy(configurationParameters).createConfiguration(configurationParameters);
+	}
 
 	static ParallelExecutionConfigurationStrategy getStrategy(ConfigurationParameters configurationParameters) {
 		return valueOf(

@@ -23,18 +23,22 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.AnnotationBasedArgumentConverter;
 import org.junit.jupiter.params.converter.JavaTimeConversionPattern;
 import org.junit.jupiter.params.provider.AnnotationBasedArgumentsProvider;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.platform.commons.JUnitException;
 
 @DisplayName("AnnotationConsumerInitializer")
@@ -52,10 +56,11 @@ class AnnotationConsumerInitializerTests {
 					source -> assertThat(source.value()).containsExactly("a", "b"));
 	}
 
-	@Test
+	@ParameterizedTest
+	@FieldSource("argumentsProviders")
 	@DisplayName("should initialize annotation-based ArgumentsProvider")
-	void shouldInitializeAnnotationBasedArgumentsProvider() throws NoSuchMethodException {
-		var instance = new SomeAnnotationBasedArgumentsProvider();
+	void shouldInitializeAnnotationBasedArgumentsProvider(AbstractAnnotationBasedArgumentsProvider instance)
+			throws NoSuchMethodException {
 		var method = SubjectClass.class.getDeclaredMethod("foo");
 		var initialisedAnnotationConsumer = initialize(method, instance);
 
@@ -102,9 +107,11 @@ class AnnotationConsumerInitializerTests {
 		assertThatThrownBy(() -> initialize(parameter, instance)).isInstanceOf(JUnitException.class);
 	}
 
-	@Test
-	void shouldInitializeForEachAnnotations() throws NoSuchMethodException {
-		var instance = spy(new SomeAnnotationBasedArgumentsProvider());
+	@ParameterizedTest
+	@FieldSource("argumentsProviders")
+	void shouldInitializeForEachAnnotations(AbstractAnnotationBasedArgumentsProvider provider)
+			throws NoSuchMethodException {
+		var instance = spy(provider);
 		var method = SubjectClass.class.getDeclaredMethod("repeatableAnnotation", String.class);
 
 		initialize(method, instance);
@@ -112,13 +119,33 @@ class AnnotationConsumerInitializerTests {
 		verify(instance, times(2)).accept(any(CsvSource.class));
 	}
 
-	private static class SomeAnnotationBasedArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
+	static Supplier<List<Named<? extends AbstractAnnotationBasedArgumentsProvider>>> argumentsProviders = () -> List.of( //
+		Named.of("current", new SomeAnnotationBasedArgumentsProvider()), //
+		Named.of("deprecated", new DeprecatedAnnotationBasedArgumentsProvider()) //
+	);
+
+	private static abstract class AbstractAnnotationBasedArgumentsProvider
+			extends AnnotationBasedArgumentsProvider<CsvSource> {
 
 		List<CsvSource> annotations = new ArrayList<>();
+
+	}
+
+	private static class SomeAnnotationBasedArgumentsProvider extends AbstractAnnotationBasedArgumentsProvider {
 
 		@Override
 		protected Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters,
 				ExtensionContext context, CsvSource annotation) {
+			annotations.add(annotation);
+			return Stream.empty();
+		}
+	}
+
+	private static class DeprecatedAnnotationBasedArgumentsProvider extends AbstractAnnotationBasedArgumentsProvider {
+
+		@Override
+		@SuppressWarnings("deprecation")
+		protected Stream<? extends Arguments> provideArguments(ExtensionContext context, CsvSource annotation) {
 			annotations.add(annotation);
 			return Stream.empty();
 		}

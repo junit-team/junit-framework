@@ -11,13 +11,13 @@
 package org.junit.platform.testkit.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.rootCause;
 
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Tests for {@link TestExecutionResultConditions}.
@@ -34,17 +34,14 @@ class TestExecutionResultConditionsTests {
 
 	@Test
 	void rootCauseFailsForNullThrowable() {
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(() -> rootCauseCondition.matches(null))//
-				.withMessage("Throwable must not be null");
+		assertPreconditionViolationNotNullFor("Throwable", () -> rootCauseCondition.matches(null));
 	}
 
 	@Test
 	void rootCauseFailsForThrowableWithoutCause() {
 		Throwable throwable = new Throwable();
 
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(() -> rootCauseCondition.matches(throwable))//
+		assertPreconditionViolationFor(() -> rootCauseCondition.matches(throwable))//
 				.withMessage("Throwable does not have a cause");
 	}
 

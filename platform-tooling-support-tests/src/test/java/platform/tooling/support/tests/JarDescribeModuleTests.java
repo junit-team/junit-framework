@@ -33,7 +33,7 @@ import platform.tooling.support.ProcessStarters;
 @Order(Integer.MAX_VALUE)
 class JarDescribeModuleTests {
 
-	@ParameterizedTest
+	@ParameterizedTest(quoteTextArguments = false)
 	@MethodSource("platform.tooling.support.Helper#loadModuleDirectoryNames")
 	void describeModule(String module, @FilePrefix("jar") OutputFiles outputFiles) throws Exception {
 		var sourceDirectory = getSourceDirectory(Projects.JAR_DESCRIBE_MODULE);
@@ -49,11 +49,11 @@ class JarDescribeModuleTests {
 		assertEquals("", result.stdErr(), "error log isn't empty");
 
 		var expectedLines = replaceVersionPlaceholders(
-			Files.readString(sourceDirectory.resolve(module + ".expected.txt")).trim());
-		assertLinesMatch(expectedLines.lines().toList(), result.stdOut().trim().lines().toList());
+			Files.readString(sourceDirectory.resolve(module + ".expected.txt")).strip());
+		assertLinesMatch(expectedLines.lines().toList(), result.stdOut().strip().lines().toList());
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(quoteTextArguments = false)
 	@MethodSource("platform.tooling.support.Helper#loadModuleDirectoryNames")
 	void packageNamesStartWithNameOfTheModule(String module) {
 		var modulePath = MavenRepo.jar(module);

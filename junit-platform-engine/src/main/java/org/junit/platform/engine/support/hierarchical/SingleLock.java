@@ -10,7 +10,6 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
-import static java.util.Collections.singletonList;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 
 import java.util.List;
@@ -28,7 +27,7 @@ class SingleLock implements ResourceLock {
 	private final Lock lock;
 
 	SingleLock(ExclusiveResource resource, Lock lock) {
-		this.resources = singletonList(resource);
+		this.resources = List.of(resource);
 		this.lock = lock;
 	}
 
@@ -40,6 +39,11 @@ class SingleLock implements ResourceLock {
 	// for tests only
 	Lock getLock() {
 		return this.lock;
+	}
+
+	@Override
+	public boolean tryAcquire() {
+		return this.lock.tryLock();
 	}
 
 	@Override
@@ -84,4 +88,5 @@ class SingleLock implements ResourceLock {
 		}
 
 	}
+
 }

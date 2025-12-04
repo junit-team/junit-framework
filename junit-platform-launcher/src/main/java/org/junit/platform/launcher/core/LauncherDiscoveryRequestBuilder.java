@@ -10,7 +10,9 @@
 
 package org.junit.platform.launcher.core;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.launcher.LauncherConstants.OUTPUT_DIR_PROPERTY_NAME;
 
@@ -29,7 +31,7 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.Filter;
-import org.junit.platform.engine.reporting.OutputDirectoryProvider;
+import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
@@ -50,11 +52,12 @@ import org.junit.platform.launcher.listeners.discovery.LauncherDiscoveryListener
  * import static org.junit.platform.engine.discovery.ClassNameFilter.*;
  * import static org.junit.platform.launcher.EngineFilter.*;
  * import static org.junit.platform.launcher.TagFilter.*;
+ * import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;
  *
  * // ...
  *
- *   LauncherDiscoveryRequestBuilder.request()
- *     .selectors(
+ * LauncherDiscoveryRequest discoveryRequest = discoveryRequest()
+ *    .selectors(
  *        selectPackage("org.example.user"),
  *        selectClass("org.example.payment.PaymentTests"),
  *        selectClass(ShippingTests.class),
@@ -64,27 +67,30 @@ import org.junit.platform.launcher.listeners.discovery.LauncherDiscoveryListener
  *        selectMethod("org.example.order.OrderTests", "test4"),
  *        selectMethod(OrderTests.class, "test5"),
  *        selectMethod(OrderTests.class, testMethod),
- *        selectClasspathRoots(Collections.singleton(Paths.get("/my/local/path1"))),
  *        selectUniqueId("unique-id-1"),
  *        selectUniqueId("unique-id-2")
- *     )
- *     .filters(
+ *    )
+ *    .selectors(
+ *        selectClasspathRoots(Set.of(Paths.get("/my/local/path1")))
+ *    )
+ *   .filters(
  *        includeEngines("junit-jupiter", "spek"),
  *        // excludeEngines("junit-vintage"),
  *        includeTags("fast"),
  *        // excludeTags("slow"),
  *        includeClassNamePatterns(".*Test[s]?")
  *        // includeClassNamePatterns("org\.example\.tests.*")
- *     )
- *     .configurationParameter("key1", "value1")
- *     .configurationParameters(configParameterMap)
- *     .build();</pre>
+ *    )
+ *    .configurationParameter("key1", "value1")
+ *    .configurationParameters(configParameterMap)
+ *    .build();</pre>
  *
  * @since 1.0
  * @see org.junit.platform.engine.discovery.DiscoverySelectors
  * @see org.junit.platform.engine.discovery.ClassNameFilter
  * @see org.junit.platform.launcher.EngineFilter
  * @see org.junit.platform.launcher.TagFilter
+ * @see LauncherExecutionRequestBuilder
  */
 @API(status = STABLE, since = "1.0")
 public final class LauncherDiscoveryRequestBuilder {
@@ -111,19 +117,34 @@ public final class LauncherDiscoveryRequestBuilder {
 	private final List<LauncherDiscoveryListener> discoveryListeners = new ArrayList<>();
 	private boolean implicitConfigurationParametersEnabled = true;
 
-	@Nullable
-	private ConfigurationParameters parentConfigurationParameters;
+	private @Nullable ConfigurationParameters parentConfigurationParameters;
 
-	@Nullable
-	private OutputDirectoryProvider outputDirectoryProvider;
+	private @Nullable OutputDirectoryCreator outputDirectoryCreator;
 
 	/**
 	 * Create a new {@code LauncherDiscoveryRequestBuilder}.
 	 *
 	 * @return a new builder
+	 * @see #discoveryRequest()
 	 */
 	public static LauncherDiscoveryRequestBuilder request() {
 		return new LauncherDiscoveryRequestBuilder();
+	}
+
+	/**
+	 * Create a new {@code LauncherDiscoveryRequestBuilder}.
+	 *
+	 * <p>This method is an <em>alias</em> for {@link #request()} and is intended
+	 * to be used when statically imported &mdash; for example, via:
+	 * {@code import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.discoveryRequest;}
+	 *
+	 * @return a new builder
+	 * @since 6.0
+	 * @see #request()
+	 */
+	@API(status = STABLE, since = "6.0")
+	public static LauncherDiscoveryRequestBuilder discoveryRequest() {
+		return request();
 	}
 
 	private LauncherDiscoveryRequestBuilder() {
@@ -288,7 +309,8 @@ public final class LauncherDiscoveryRequestBuilder {
 	}
 
 	/**
-	 * Set the {@link OutputDirectoryProvider} to use for the request.
+	 * Set the
+	 * {@link org.junit.platform.engine.reporting.OutputDirectoryProvider} to use for the request.
 	 *
 	 * <p>If not specified, a default provider will be used that can be
 	 * configured via the {@value LauncherConstants#OUTPUT_DIR_PROPERTY_NAME}
@@ -298,13 +320,38 @@ public final class LauncherDiscoveryRequestBuilder {
 	 *                                never {@code null}
 	 * @return this builder for method chaining
 	 * @since 1.12
-	 * @see OutputDirectoryProvider
+	 * @see org.junit.platform.engine.reporting.OutputDirectoryProvider
+	 * @see LauncherConstants#OUTPUT_DIR_PROPERTY_NAME
+	 * @deprecated Please use
+	 * {@link #outputDirectoryCreator(OutputDirectoryCreator)} instead
+	 */
+	@SuppressWarnings("removal")
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	public LauncherDiscoveryRequestBuilder outputDirectoryProvider(
+			org.junit.platform.engine.reporting.OutputDirectoryProvider outputDirectoryProvider) {
+		return outputDirectoryCreator(outputDirectoryProvider);
+	}
+
+	/**
+	 * Set the {@link OutputDirectoryCreator} to use for the request.
+	 *
+	 * <p>If not specified, a default implementation will be used that can be
+	 * configured via the {@value LauncherConstants#OUTPUT_DIR_PROPERTY_NAME}
+	 * configuration parameter.
+	 *
+	 * @param outputDirectoryCreator the output directory creator to use;
+	 *                                never {@code null}
+	 * @return this builder for method chaining
+	 * @since 1.14
+	 * @see OutputDirectoryCreator
 	 * @see LauncherConstants#OUTPUT_DIR_PROPERTY_NAME
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
-	public LauncherDiscoveryRequestBuilder outputDirectoryProvider(OutputDirectoryProvider outputDirectoryProvider) {
-		this.outputDirectoryProvider = Preconditions.notNull(outputDirectoryProvider,
-			"outputDirectoryProvider must not be null");
+	@SuppressWarnings("removal")
+	@API(status = MAINTAINED, since = "1.14")
+	public LauncherDiscoveryRequestBuilder outputDirectoryCreator(OutputDirectoryCreator outputDirectoryCreator) {
+		this.outputDirectoryCreator = Preconditions.notNull(outputDirectoryCreator,
+			"outputDirectoryCreator must not be null");
 		return this;
 	}
 
@@ -326,23 +373,35 @@ public final class LauncherDiscoveryRequestBuilder {
 	}
 
 	/**
+	 * Builds this discovery request and returns a new builder for creating a
+	 * {@link org.junit.platform.launcher.LauncherExecutionRequest} that is
+	 * initialized to contain the resulting discovery request.
+	 *
+	 * @return a new {@link LauncherExecutionRequestBuilder}
+	 * @since 6.0
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public LauncherExecutionRequestBuilder forExecution() {
+		return LauncherExecutionRequestBuilder.request(build());
+	}
+
+	/**
 	 * Build the {@link LauncherDiscoveryRequest} that has been configured via
 	 * this builder.
 	 */
 	public LauncherDiscoveryRequest build() {
 		LauncherConfigurationParameters launcherConfigurationParameters = buildLauncherConfigurationParameters();
 		LauncherDiscoveryListener discoveryListener = getLauncherDiscoveryListener(launcherConfigurationParameters);
-		OutputDirectoryProvider outputDirectoryProvider = getOutputDirectoryProvider(launcherConfigurationParameters);
+		OutputDirectoryCreator outputDirectoryCreator = getOutputDirectoryCreator(launcherConfigurationParameters);
 		return new DefaultDiscoveryRequest(this.selectors, this.engineFilters, this.discoveryFilters,
-			this.postDiscoveryFilters, launcherConfigurationParameters, discoveryListener, outputDirectoryProvider);
+			this.postDiscoveryFilters, launcherConfigurationParameters, discoveryListener, outputDirectoryCreator);
 	}
 
-	private OutputDirectoryProvider getOutputDirectoryProvider(
-			LauncherConfigurationParameters configurationParameters) {
-		if (this.outputDirectoryProvider != null) {
-			return this.outputDirectoryProvider;
+	private OutputDirectoryCreator getOutputDirectoryCreator(LauncherConfigurationParameters configurationParameters) {
+		if (this.outputDirectoryCreator != null) {
+			return this.outputDirectoryCreator;
 		}
-		return new HierarchicalOutputDirectoryProvider(
+		return new HierarchicalOutputDirectoryCreator(
 			() -> OutputDir.create(configurationParameters.get(OUTPUT_DIR_PROPERTY_NAME)).toPath());
 	}
 

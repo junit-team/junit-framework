@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.extension;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Annotation;
@@ -94,7 +94,7 @@ public interface ParameterContext extends AnnotatedElementContext {
 	 * {@inheritDoc}
 	 * @since 5.10
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	@Override
 	default AnnotatedElement getAnnotatedElement() {
 		return getParameter();

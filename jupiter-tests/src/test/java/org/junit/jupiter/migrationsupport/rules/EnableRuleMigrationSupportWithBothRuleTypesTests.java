@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.Verifier;
 
+@SuppressWarnings("removal")
 @EnableRuleMigrationSupport
 public class EnableRuleMigrationSupportWithBothRuleTypesTests {
 
@@ -80,10 +81,12 @@ public class EnableRuleMigrationSupportWithBothRuleTypesTests {
 	static void afterMethodsOfBothRulesWereExecuted() {
 		assertEquals(1, numberOfRule1InstancesCreated);
 		assertEquals(1, numberOfRule2InstancesCreated);
-		if (!afterOfRule1WasExecuted)
+		if (!afterOfRule1WasExecuted) {
 			fail();
-		if (!afterOfRule2WasExecuted)
+		}
+		if (!afterOfRule2WasExecuted) {
 			fail();
+		}
 	}
 
 }

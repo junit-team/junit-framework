@@ -18,3 +18,7 @@
 - junit-platform-suite .+
 - junit-jupiter .+
 - junit-vintage .+
+>> LOGGER >>
+INFO: TestEngine with ID 'junit-vintage' encountered a non-critical issue during test discovery:
+
+(1) [INFO] The JUnit Vintage engine is deprecated and should only be used temporarily while migrating tests to JUnit Jupiter or another testing framework with native JUnit Platform support.

@@ -39,7 +39,7 @@ import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.AfterEachMethodAdapter;
 import org.junit.jupiter.engine.execution.BeforeEachMethodAdapter;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker;
-import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall;
+import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall.VoidMethodInterceptorCall;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
@@ -72,10 +72,8 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 
 	public static final String SEGMENT_TYPE = "method";
 	private static final InterceptingExecutableInvoker executableInvoker = new InterceptingExecutableInvoker();
-	private static final ReflectiveInterceptorCall<Method, Void> defaultInterceptorCall = ReflectiveInterceptorCall.ofVoidMethod(
-		InvocationInterceptor::interceptTestMethod);
-
-	private final ReflectiveInterceptorCall<Method, Void> interceptorCall;
+	private static final VoidMethodInterceptorCall defaultInterceptorCall = InvocationInterceptor::interceptTestMethod;
+	private final VoidMethodInterceptorCall interceptorCall;
 
 	public TestMethodTestDescriptor(UniqueId uniqueId, Class<?> testClass, Method testMethod,
 			Supplier<List<Class<?>>> enclosingInstanceTypes, JupiterConfiguration configuration) {
@@ -89,7 +87,7 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 	}
 
 	TestMethodTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
-			JupiterConfiguration configuration, ReflectiveInterceptorCall<Method, Void> interceptorCall) {
+			JupiterConfiguration configuration, VoidMethodInterceptorCall interceptorCall) {
 		super(uniqueId, displayName, testClass, testMethod, configuration);
 		this.interceptorCall = interceptorCall;
 	}
@@ -218,7 +216,7 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 			try {
 				Method testMethod = getTestMethod();
 				Object instance = extensionContext.getRequiredTestInstance();
-				executableInvoker.invoke(testMethod, instance, extensionContext, context.getExtensionRegistry(),
+				executableInvoker.invokeVoid(testMethod, instance, extensionContext, context.getExtensionRegistry(),
 					interceptorCall);
 			}
 			catch (Throwable throwable) {
@@ -285,15 +283,9 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 
 		invokeTestWatchers(context, true, watcher -> {
 			switch (status) {
-				case SUCCESSFUL:
-					watcher.testSuccessful(extensionContext);
-					break;
-				case ABORTED:
-					watcher.testAborted(extensionContext, result.getThrowable().orElse(null));
-					break;
-				case FAILED:
-					watcher.testFailed(extensionContext, result.getThrowable().orElse(null));
-					break;
+				case SUCCESSFUL -> watcher.testSuccessful(extensionContext);
+				case ABORTED -> watcher.testAborted(extensionContext, result.getThrowable().orElse(null));
+				case FAILED -> watcher.testFailed(extensionContext, result.getThrowable().orElse(null));
 			}
 		});
 	}

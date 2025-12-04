@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.extension;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -33,7 +33,7 @@ import org.junit.platform.commons.support.AnnotationSupport;
  *
  * @since 5.10
  */
-@API(status = EXPERIMENTAL, since = "5.10")
+@API(status = MAINTAINED, since = "5.13.3")
 public interface AnnotatedElementContext {
 
 	/**

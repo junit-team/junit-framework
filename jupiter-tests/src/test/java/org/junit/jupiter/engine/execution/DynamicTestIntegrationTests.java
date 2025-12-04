@@ -32,7 +32,7 @@ class DynamicTestIntegrationTests {
 	 * {@code -mx200m} VM argument will cause an {@link OutOfMemoryError} before
 	 * the 200 limit is reached.
 	 *
-	 * @see <a href="https://github.com/junit-team/junit5/issues/1865">Issue 1865</a>
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/1865">Issue 1865</a>
 	 */
 	@TestFactory
 	Stream<DynamicTest> generateDynamicTestsThatReferenceLargeAmountsOfMemory() {

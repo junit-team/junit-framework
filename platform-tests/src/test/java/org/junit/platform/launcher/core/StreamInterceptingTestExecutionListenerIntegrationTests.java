@@ -72,12 +72,14 @@ class StreamInterceptingTestExecutionListenerIntegrationTests {
 		}).when(listener).executionStarted(any());
 
 		var launcher = createLauncher(engine);
-		var discoveryRequest = request()//
+		var executionRequest = request()//
 				.selectors(selectUniqueId(test.getUniqueId()))//
 				.configurationParameter(configParam, String.valueOf(true))//
 				.configurationParameter(LauncherConstants.CAPTURE_MAX_BUFFER_PROPERTY_NAME, String.valueOf(5))//
+				.forExecution()//
+				.listeners(listener)//
 				.build();
-		launcher.execute(discoveryRequest, listener);
+		launcher.execute(executionRequest);
 
 		var testPlanArgumentCaptor = ArgumentCaptor.forClass(TestPlan.class);
 		var inOrder = inOrder(listener);
@@ -105,12 +107,14 @@ class StreamInterceptingTestExecutionListenerIntegrationTests {
 		assertThat(StreamInterceptor.registerStderr(1)).isPresent();
 
 		var launcher = createLauncher(engine);
-		var discoveryRequest = request()//
+		var listener = mock(TestExecutionListener.class);
+		var executionRequest = request()//
 				.selectors(selectUniqueId(test.getUniqueId()))//
 				.configurationParameter(configParam, String.valueOf(true))//
+				.forExecution()//
+				.listeners(listener)//
 				.build();
-		var listener = mock(TestExecutionListener.class);
-		launcher.execute(discoveryRequest, listener);
+		launcher.execute(executionRequest);
 
 		verify(listener, never()).reportingEntryPublished(any(), any());
 	}

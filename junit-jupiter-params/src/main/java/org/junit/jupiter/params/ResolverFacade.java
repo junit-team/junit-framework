@@ -58,7 +58,6 @@ import org.junit.jupiter.params.support.AnnotationConsumerInitializer;
 import org.junit.jupiter.params.support.FieldContext;
 import org.junit.jupiter.params.support.ParameterDeclaration;
 import org.junit.jupiter.params.support.ParameterDeclarations;
-import org.junit.jupiter.params.support.ParameterInfo;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.function.Try;
@@ -99,7 +98,9 @@ class ResolverFacade {
 		Stream.concat(uniqueIndexedParameters.values().stream(), aggregatorParameters.stream()) //
 				.forEach(declaration -> makeAccessible(declaration.getField()));
 
-		return new ResolverFacade(clazz, uniqueIndexedParameters, aggregatorParameters, 0);
+		var requiredParameterCount = new RequiredParameterCount(uniqueIndexedParameters.size(), "field injection");
+
+		return new ResolverFacade(clazz, uniqueIndexedParameters, aggregatorParameters, 0, requiredParameterCount);
 	}
 
 	static ResolverFacade create(Constructor<?> constructor, ParameterizedClass annotation) {
@@ -143,10 +144,10 @@ class ResolverFacade {
 				Preconditions.condition(
 					aggregatorParameters.isEmpty()
 							|| aggregatorParameters.lastKey() == declaration.getParameterIndex() - 1,
-					() -> String.format(
-						"@%s %s declares formal parameters in an invalid order: "
-								+ "argument aggregators must be declared after any indexed arguments "
-								+ "and before any arguments resolved by another ParameterResolver.",
+					() -> """
+							@%s %s declares formal parameters in an invalid order: \
+							argument aggregators must be declared after any indexed arguments \
+							and before any arguments resolved by another ParameterResolver.""".formatted(
 						annotation.annotationType().getSimpleName(),
 						DefaultParameterDeclarations.describe(executable)));
 				aggregatorParameters.put(declaration.getParameterIndex(), declaration);
@@ -156,25 +157,33 @@ class ResolverFacade {
 			}
 		}
 		return new ResolverFacade(executable, indexedParameters, new LinkedHashSet<>(aggregatorParameters.values()),
-			indexOffset);
+			indexOffset, null);
 	}
 
 	private final int parameterIndexOffset;
 	private final Map<ParameterDeclaration, Resolver> resolvers;
 	private final DefaultParameterDeclarations indexedParameterDeclarations;
 	private final Set<? extends ResolvableParameterDeclaration> aggregatorParameters;
+	private final @Nullable RequiredParameterCount requiredParameterCount;
 
 	private ResolverFacade(AnnotatedElement sourceElement,
 			NavigableMap<Integer, ? extends ResolvableParameterDeclaration> indexedParameters,
-			Set<? extends ResolvableParameterDeclaration> aggregatorParameters, int parameterIndexOffset) {
+			Set<? extends ResolvableParameterDeclaration> aggregatorParameters, int parameterIndexOffset,
+			@Nullable RequiredParameterCount requiredParameterCount) {
 		this.aggregatorParameters = aggregatorParameters;
 		this.parameterIndexOffset = parameterIndexOffset;
 		this.resolvers = new ConcurrentHashMap<>(indexedParameters.size() + aggregatorParameters.size());
 		this.indexedParameterDeclarations = new DefaultParameterDeclarations(sourceElement, indexedParameters);
+		this.requiredParameterCount = requiredParameterCount;
 	}
 
 	ParameterDeclarations getIndexedParameterDeclarations() {
 		return this.indexedParameterDeclarations;
+	}
+
+	@Nullable
+	RequiredParameterCount getRequiredParameterCount() {
+		return this.requiredParameterCount;
 	}
 
 	boolean isSupportedParameter(ParameterContext parameterContext, EvaluatedArgumentSet arguments) {
@@ -234,14 +243,14 @@ class ResolverFacade {
 		ResolverFacade lifecycleMethodResolverFacade = create(method, annotation);
 
 		Map<ParameterDeclaration, ResolvableParameterDeclaration> parameterDeclarationMapping = new HashMap<>();
-		List<String> errors = validateLifecycleMethodParameters(method, annotation, originalResolverFacade,
-			lifecycleMethodResolverFacade, parameterDeclarationMapping);
+		List<String> errors = validateLifecycleMethodParameters(originalResolverFacade, lifecycleMethodResolverFacade,
+			parameterDeclarationMapping);
 
 		return Try //
 				.call(() -> configurationErrorOrSuccess(errors,
 					() -> new DefaultArgumentSetLifecycleMethodParameterResolver(originalResolverFacade,
 						lifecycleMethodResolverFacade, parameterDeclarationMapping))) //
-				.getOrThrow(cause -> new ExtensionConfigurationException(
+				.getNonNullOrThrow(cause -> new ExtensionConfigurationException(
 					"Invalid @%s lifecycle method declaration: %s".formatted(
 						annotation.annotationType().getSimpleName(), method.toGenericString()),
 					cause));
@@ -336,8 +345,8 @@ class ResolverFacade {
 				.collect(toMap(Map.Entry::getKey, entry -> entry.getValue().get(0), (d, __) -> d, TreeMap::new)));
 	}
 
-	private static List<String> validateLifecycleMethodParameters(Method method, Annotation annotation,
-			ResolverFacade originalResolverFacade, ResolverFacade lifecycleMethodResolverFacade,
+	private static List<String> validateLifecycleMethodParameters(ResolverFacade originalResolverFacade,
+			ResolverFacade lifecycleMethodResolverFacade,
 			Map<ParameterDeclaration, ResolvableParameterDeclaration> parameterDeclarationMapping) {
 		List<ParameterDeclaration> actualDeclarations = lifecycleMethodResolverFacade.indexedParameterDeclarations.getAll();
 		List<String> errors = new ArrayList<>();
@@ -414,7 +423,7 @@ class ResolverFacade {
 		}
 		fields.stream() //
 				.filter(ModifierSupport::isFinal) //
-				.map(field -> "@Parameter field [%s] must not be declared as final".formatted(field)) //
+				.map("@Parameter field [%s] must not be declared as final"::formatted) //
 				.forEach(errors::add);
 	}
 
@@ -435,7 +444,7 @@ class ResolverFacade {
 					.map(clazz -> ParameterizedTestSpiInstantiator.instantiate(ArgumentConverter.class, clazz, extensionContext))
 					.map(converter -> AnnotationConsumerInitializer.initialize(declaration.getAnnotatedElement(), converter))
 					.map(Converter::new)
-					.orElseGet(() -> Converter.createDefault(extensionContext));
+					.orElse(Converter.DEFAULT);
 		} // @formatter:on
 		catch (Exception ex) {
 			throw parameterResolutionException("Error creating ArgumentConverter", ex, declaration.getParameterIndex());
@@ -479,9 +488,7 @@ class ResolverFacade {
 
 	private record Converter(ArgumentConverter argumentConverter) implements Resolver {
 
-		private static Converter createDefault(ExtensionContext context) {
-			return new Converter(new DefaultArgumentConverter(context));
-		}
+		static final Converter DEFAULT = new Converter(DefaultArgumentConverter.INSTANCE);
 
 		@Override
 		public @Nullable Object resolve(ParameterContext parameterContext, int parameterIndex,
@@ -498,6 +505,7 @@ class ResolverFacade {
 		@Override
 		public @Nullable Object resolve(FieldContext fieldContext, ExtensionContext extensionContext,
 				EvaluatedArgumentSet arguments, int invocationIndex) {
+
 			Object argument = arguments.getConsumedPayload(fieldContext.getParameterIndex());
 			try {
 				return this.argumentConverter.convert(argument, fieldContext);
@@ -603,7 +611,7 @@ class ResolverFacade {
 					|| isAnnotated(getAnnotatedElement(), AggregateWith.class);
 		}
 
-		protected abstract @Nullable Object resolve(Resolver resolver, ExtensionContext extensionContext,
+		abstract @Nullable Object resolve(Resolver resolver, ExtensionContext extensionContext,
 				EvaluatedArgumentSet arguments, int invocationIndex,
 				Optional<ParameterContext> originalParameterContext);
 	}
@@ -754,5 +762,8 @@ class ResolverFacade {
 				() -> this.originalResolverFacade.resolve(originalDeclaration, extensionContext, arguments,
 					invocationIndex, Optional.of(parameterContext)));
 		}
+	}
+
+	record RequiredParameterCount(int value, String reason) {
 	}
 }

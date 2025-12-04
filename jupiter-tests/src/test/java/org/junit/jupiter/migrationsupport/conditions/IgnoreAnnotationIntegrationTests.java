@@ -36,6 +36,7 @@ import org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport;
  * @since 5.4
  * @see IgnoreConditionTests
  */
+@SuppressWarnings("removal")
 class IgnoreAnnotationIntegrationTests {
 
 	@Nested

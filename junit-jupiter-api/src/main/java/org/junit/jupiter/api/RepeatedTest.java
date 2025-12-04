@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -191,7 +191,7 @@ public @interface RepeatedTest {
 	 * @return the failure threshold; must be greater than zero and less than the
 	 * total number of repetitions
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	int failureThreshold() default Integer.MAX_VALUE;
 
 }

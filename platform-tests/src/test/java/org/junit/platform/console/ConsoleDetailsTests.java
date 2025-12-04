@@ -41,7 +41,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.console.options.Details;
-import org.junit.platform.console.options.Theme;
+import org.junit.platform.console.output.Theme;
 import org.opentest4j.TestAbortedException;
 
 /**

@@ -4,13 +4,13 @@ plugins {
 	id("junitbuild.base-conventions")
 	id("junitbuild.build-metadata")
 	id("junitbuild.checkstyle-nohttp")
-	id("junitbuild.dependency-update-check")
 	id("junitbuild.jacoco-aggregation-conventions")
 	id("junitbuild.maven-central-publishing")
 	id("junitbuild.temp-maven-repo")
 }
 
 description = "JUnit"
+group = "org.junit"
 
 val license by extra(License(
 	name = "Eclipse Public License v2.0",
@@ -23,12 +23,10 @@ val platformProjects by extra(listOf(
 		projects.junitPlatformConsole,
 		projects.junitPlatformConsoleStandalone,
 		projects.junitPlatformEngine,
-		projects.junitPlatformJfr,
 		projects.junitPlatformLauncher,
 		projects.junitPlatformReporting,
 		projects.junitPlatformSuite,
 		projects.junitPlatformSuiteApi,
-		projects.junitPlatformSuiteCommons,
 		projects.junitPlatformSuiteEngine,
 		projects.junitPlatformTestkit
 ).map { dependencyProject(it) })
@@ -45,7 +43,7 @@ val vintageProjects by extra(listOf(
 	dependencyProject(projects.junitVintageEngine)
 ))
 
-val mavenizedProjects by extra(platformProjects + jupiterProjects + vintageProjects)
+val mavenizedProjects by extra(listOf(dependencyProject(projects.junitStart)) + platformProjects + jupiterProjects + vintageProjects)
 val modularProjects by extra(mavenizedProjects - setOf(dependencyProject(projects.junitPlatformConsoleStandalone)))
 
 dependencies {

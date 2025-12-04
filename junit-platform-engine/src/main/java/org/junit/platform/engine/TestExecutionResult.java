@@ -96,8 +96,7 @@ public class TestExecutionResult {
 
 	private final Status status;
 
-	@Nullable
-	private final Throwable throwable;
+	private final @Nullable Throwable throwable;
 
 	private TestExecutionResult(Status status, @Nullable Throwable throwable) {
 		this.status = Preconditions.notNull(status, "Status must not be null");

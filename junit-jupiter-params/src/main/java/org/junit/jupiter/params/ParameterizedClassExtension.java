@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ClassTemplateInvocationContext;
 import org.junit.jupiter.api.extension.ClassTemplateInvocationContextProvider;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -35,7 +34,7 @@ import org.junit.platform.commons.PreconditionViolationException;
 /**
  * @since 5.13
  */
-class ParameterizedClassExtension extends ParameterizedInvocationContextProvider<ClassTemplateInvocationContext>
+class ParameterizedClassExtension extends ParameterizedInvocationContextProvider<ParameterizedClassInvocationContext>
 		implements ClassTemplateInvocationContextProvider, ParameterResolver {
 
 	private static final String DECLARATION_CONTEXT_KEY = "context";
@@ -70,7 +69,7 @@ class ParameterizedClassExtension extends ParameterizedInvocationContextProvider
 	}
 
 	@Override
-	public Stream<? extends ClassTemplateInvocationContext> provideClassTemplateInvocationContexts(
+	public Stream<ParameterizedClassInvocationContext> provideClassTemplateInvocationContexts(
 			ExtensionContext extensionContext) {
 
 		return provideInvocationContexts(extensionContext, getDeclarationContext(extensionContext));

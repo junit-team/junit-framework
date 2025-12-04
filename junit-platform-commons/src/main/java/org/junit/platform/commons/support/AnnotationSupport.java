@@ -11,7 +11,6 @@
 package org.junit.platform.commons.support;
 
 import static org.apiguardian.api.API.Status.DEPRECATED;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.annotation.Annotation;
@@ -25,6 +24,7 @@ import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -44,6 +44,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
  * @see ClassSupport
  * @see ModifierSupport
  * @see ReflectionSupport
+ * @see ResourceSupport
  */
 @API(status = MAINTAINED, since = "1.0")
 public final class AnnotationSupport {
@@ -71,6 +72,8 @@ public final class AnnotationSupport {
 	 * @see #findRepeatableAnnotations(Optional, Class)
 	 */
 	@API(status = MAINTAINED, since = "1.3")
+	@Contract("null, _ -> false")
+	@SuppressWarnings("NullableOptional")
 	public static boolean isAnnotated(@Nullable Optional<? extends AnnotatedElement> element,
 			Class<? extends Annotation> annotationType) {
 
@@ -94,6 +97,7 @@ public final class AnnotationSupport {
 	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see #findRepeatableAnnotations(AnnotatedElement, Class)
 	 */
+	@Contract("null, _ -> false")
 	public static boolean isAnnotated(@Nullable AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		return AnnotationUtils.isAnnotated(element, annotationType);
 	}
@@ -113,6 +117,7 @@ public final class AnnotationSupport {
 	 * @see #findAnnotation(AnnotatedElement, Class)
 	 */
 	@API(status = MAINTAINED, since = "1.1")
+	@SuppressWarnings("NullableOptional")
 	public static <A extends Annotation> Optional<A> findAnnotation(
 			@Nullable Optional<? extends AnnotatedElement> element, Class<A> annotationType) {
 
@@ -172,7 +177,7 @@ public final class AnnotationSupport {
 	 * {@link #findAnnotation(Class, Class, List)} (for
 	 * {@code SearchOption.INCLUDE_ENCLOSING_CLASSES}) instead
 	 */
-	@Deprecated
+	@Deprecated(since = "1.12")
 	@API(status = DEPRECATED, since = "1.12")
 	@SuppressWarnings("deprecation")
 	public static <A extends Annotation> Optional<A> findAnnotation(@Nullable Class<?> clazz, Class<A> annotationType,
@@ -215,7 +220,7 @@ public final class AnnotationSupport {
 	 * @since 1.12
 	 * @see #findAnnotation(AnnotatedElement, Class)
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static <A extends Annotation> Optional<A> findAnnotation(@Nullable Class<?> clazz, Class<A> annotationType,
 			List<Class<?>> enclosingInstanceTypes) {
 
@@ -254,6 +259,7 @@ public final class AnnotationSupport {
 	 * @see #findRepeatableAnnotations(AnnotatedElement, Class)
 	 */
 	@API(status = MAINTAINED, since = "1.5")
+	@SuppressWarnings("NullableOptional")
 	public static <A extends Annotation> List<A> findRepeatableAnnotations(
 			@Nullable Optional<? extends AnnotatedElement> element, Class<A> annotationType) {
 
@@ -288,9 +294,8 @@ public final class AnnotationSupport {
 	 * <p>If the supplied {@code element} is {@code null}, this method returns
 	 * an empty list.
 	 *
-	 * <p>As of JUnit Platform 1.5, the search algorithm will also find
-	 * repeatable annotations used as meta-annotations on other repeatable
-	 * annotations.
+	 * <p>The search algorithm will also find repeatable annotations used as
+	 * meta-annotations on other repeatable annotations.
 	 *
 	 * @param <A> the annotation type
 	 * @param element the element to search on; may be {@code null}
@@ -450,7 +455,9 @@ public final class AnnotationSupport {
 		List<Field> fields = findAnnotatedFields(instance.getClass(), annotationType, ModifierSupport::isNotStatic,
 			HierarchyTraversalMode.TOP_DOWN);
 
-		return ReflectionUtils.readFieldValues(fields, instance);
+		@SuppressWarnings("unchecked")
+		List<@Nullable Object> result = (List<@Nullable Object>) ReflectionUtils.readFieldValues(fields, instance);
+		return result;
 	}
 
 	/**
@@ -482,7 +489,9 @@ public final class AnnotationSupport {
 		List<Field> fields = findAnnotatedFields(clazz, annotationType, ModifierSupport::isStatic,
 			HierarchyTraversalMode.TOP_DOWN);
 
-		return ReflectionUtils.readFieldValues(fields, null);
+		@SuppressWarnings("unchecked")
+		List<@Nullable Object> result = (List<@Nullable Object>) ReflectionUtils.readFieldValues(fields, null);
+		return result;
 	}
 
 	/**

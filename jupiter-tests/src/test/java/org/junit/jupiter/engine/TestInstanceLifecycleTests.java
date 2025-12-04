@@ -1163,7 +1163,7 @@ class TestInstanceLifecycleTests extends AbstractJupiterTestEngineTests {
 		@Nested
 		class InnerTestCase {
 
-			public InnerTestCase() {
+			InnerTestCase() {
 				incrementInstanceCount(InnerTestCase.class);
 			}
 

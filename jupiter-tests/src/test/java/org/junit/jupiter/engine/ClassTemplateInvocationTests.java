@@ -88,6 +88,7 @@ import org.junit.jupiter.engine.descriptor.TestFactoryTestDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
 import org.junit.jupiter.engine.descriptor.TestTemplateInvocationTestDescriptor;
 import org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.engine.TestTag;
@@ -979,8 +980,10 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 
 	@Test
 	void propagatesTagsFromEnclosingClassesToNestedClassTemplates() {
-		var engineDescriptor = discoverTestsForClass(
-			NestedClassTemplateWithTagOnEnclosingClassTestCase.class).getEngineDescriptor();
+		var request = defaultRequest() //
+				.selectors(selectClass(NestedClassTemplateWithTagOnEnclosingClassTestCase.class)) //
+				.build();
+		var engineDescriptor = discoverTestsWithoutIssues(request);
 		var classDescriptor = getOnlyElement(engineDescriptor.getChildren());
 		var nestedClassTemplateDescriptor = getOnlyElement(classDescriptor.getChildren());
 
@@ -988,6 +991,17 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 				.containsExactly("top-level");
 		assertThat(nestedClassTemplateDescriptor.getTags()).extracting(TestTag::getName) //
 				.containsExactlyInAnyOrder("top-level", "nested");
+	}
+
+	@Test
+	void ignoresComposedAnnotations() {
+		var request = defaultRequest() //
+				.selectors(selectClass(ParameterizedClass.class)) //
+				.build();
+
+		var engineDescriptor = discoverTestsWithoutIssues(request);
+
+		assertThat(engineDescriptor.getDescendants()).isEmpty();
 	}
 
 	// -------------------------------------------------------------------
@@ -1493,7 +1507,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			implements BeforeClassTemplateInvocationCallback, AfterClassTemplateInvocationCallback {
 
 		private final String prefix;
-		private final Function<String, Throwable> exceptionFactory;
+		private final Function<String, @Nullable Throwable> exceptionFactory;
 
 		@SuppressWarnings("unused")
 		ClassTemplateInvocationCallbacks() {
@@ -1504,7 +1518,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			this(prefix, __ -> null);
 		}
 
-		ClassTemplateInvocationCallbacks(String prefix, Function<String, Throwable> exceptionFactory) {
+		ClassTemplateInvocationCallbacks(String prefix, Function<String, @Nullable Throwable> exceptionFactory) {
 			this.prefix = prefix;
 			this.exceptionFactory = exceptionFactory;
 		}

@@ -85,4 +85,7 @@ public class JupiterUniqueIdBuilder {
 		return UniqueId.forEngine(JupiterEngineDescriptor.ENGINE_ID);
 	}
 
+	private JupiterUniqueIdBuilder() {
+	}
+
 }

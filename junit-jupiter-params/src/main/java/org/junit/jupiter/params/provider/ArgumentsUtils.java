@@ -35,13 +35,13 @@ final class ArgumentsUtils {
 		}
 
 		// Pass all multidimensional arrays "as is", in contrast to Object[].
-		// See https://github.com/junit-team/junit5/issues/1665
+		// See https://github.com/junit-team/junit-framework/issues/1665
 		if (ReflectionUtils.isMultidimensionalArray(item)) {
 			return arguments(item);
 		}
 
 		// Special treatment for one-dimensional reference arrays.
-		// See https://github.com/junit-team/junit5/issues/1665
+		// See https://github.com/junit-team/junit-framework/issues/1665
 		if (item instanceof Object[] objects) {
 			return arguments(objects);
 		}

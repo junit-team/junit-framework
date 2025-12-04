@@ -26,7 +26,7 @@ import org.junit.platform.commons.JUnitException;
  *
  * @since 5.13
  */
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public class TemplateInvocationValidationException extends JUnitException {
 
 	@Serial

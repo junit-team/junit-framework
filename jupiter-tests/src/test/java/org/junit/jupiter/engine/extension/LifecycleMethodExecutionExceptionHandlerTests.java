@@ -564,7 +564,7 @@ class LifecycleMethodExecutionExceptionHandlerTests extends AbstractJupiterTestE
 		private int afterEachCalls;
 		private int afterAllCalls;
 
-		public HandlerCallCounter() {
+		HandlerCallCounter() {
 			reset();
 		}
 

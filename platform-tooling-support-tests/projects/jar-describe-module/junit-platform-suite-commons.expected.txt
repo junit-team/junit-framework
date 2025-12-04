@@ -1,9 +1,0 @@
-org.junit.platform.suite.commons@${version} jar:file:.+/junit-platform-suite-commons-\d.+\.jar..module-info\.class
-requires java.base mandated
-requires org.apiguardian.api static transitive
-requires org.jspecify static
-requires org.junit.platform.commons
-requires org.junit.platform.engine
-requires org.junit.platform.launcher transitive
-requires org.junit.platform.suite.api
-qualified exports org.junit.platform.suite.commons to org.junit.platform.suite.engine

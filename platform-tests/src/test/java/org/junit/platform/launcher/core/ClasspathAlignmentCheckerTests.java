@@ -23,7 +23,9 @@ import java.util.regex.Pattern;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.PackageInfo;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.DisabledInEclipse;
 
 class ClasspathAlignmentCheckerTests {
 
@@ -36,7 +38,7 @@ class ClasspathAlignmentCheckerTests {
 	void wrapsLinkageErrorForUnalignedClasspath() {
 		var cause = new LinkageError();
 		AtomicInteger counter = new AtomicInteger();
-		Function<String, Package> packageLookup = name -> {
+		Function<String, @Nullable Package> packageLookup = name -> {
 			var pkg = mock(Package.class);
 			when(pkg.getName()).thenReturn(name);
 			when(pkg.getImplementationVersion()).thenReturn(counter.incrementAndGet() + ".0.0");
@@ -50,7 +52,7 @@ class ClasspathAlignmentCheckerTests {
 				.hasMessageStartingWith("The wrapped LinkageError is likely caused by the versions of "
 						+ "JUnit jars on the classpath/module path not being properly aligned.") //
 				.hasMessageContaining("Please ensure consistent versions are used") //
-				.hasMessageFindingMatch("https://junit\\.org/junit5/docs/.*/user-guide/#dependency-metadata") //
+				.hasMessageFindingMatch("https://docs\\.junit\\.org/.*/user-guide/#dependency-metadata") //
 				.hasMessageContaining("The following conflicting versions were detected:") //
 				.hasMessageContaining("- org.junit.jupiter.api: 1.0.0") //
 				.hasMessageContaining("- org.junit.jupiter.engine: 2.0.0") //
@@ -58,6 +60,7 @@ class ClasspathAlignmentCheckerTests {
 	}
 
 	@Test
+	@DisabledInEclipse
 	void allRootPackagesAreChecked() {
 		var allowedFileNames = Pattern.compile("junit-(?:platform|jupiter|vintage)-.+[\\d.]+(?:-SNAPSHOT)?\\.jar");
 		var classGraph = new ClassGraph() //
@@ -82,4 +85,5 @@ class ClasspathAlignmentCheckerTests {
 					.allMatch(name -> foundPackages.stream().anyMatch(it -> it.startsWith(name)));
 		}
 	}
+
 }

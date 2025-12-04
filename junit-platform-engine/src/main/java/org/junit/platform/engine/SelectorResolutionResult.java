@@ -88,8 +88,7 @@ public class SelectorResolutionResult {
 
 	private final Status status;
 
-	@Nullable
-	private final Throwable throwable;
+	private final @Nullable Throwable throwable;
 
 	private SelectorResolutionResult(Status status, @Nullable Throwable throwable) {
 		this.status = status;

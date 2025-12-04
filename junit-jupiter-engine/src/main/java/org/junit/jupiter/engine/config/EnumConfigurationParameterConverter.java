@@ -14,19 +14,19 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
 
 /**
  * @since 5.4
  */
 @API(status = INTERNAL, since = "5.8")
-public class EnumConfigurationParameterConverter<E extends Enum<E>> {
+public class EnumConfigurationParameterConverter<E extends Enum<E>> implements ConfigurationParameterConverter<E> {
 
 	private static final Logger logger = LoggerFactory.getLogger(EnumConfigurationParameterConverter.class);
 
@@ -38,36 +38,29 @@ public class EnumConfigurationParameterConverter<E extends Enum<E>> {
 		this.enumDisplayName = enumDisplayName;
 	}
 
-	E get(ConfigurationParameters configParams, String key, E defaultValue) {
-		Preconditions.notNull(configParams, "ConfigurationParameters must not be null");
-
-		return get(key, configParams::get, defaultValue);
+	@Override
+	public Optional<E> get(ConfigurationParameters configParams, String key) {
+		return configParams.get(key) //
+				.map(value -> convert(key, value));
 	}
 
-	public E get(String key, Function<String, Optional<String>> lookup, E defaultValue) {
+	public Optional<E> get(ExtensionContext extensionContext, String key) {
+		return extensionContext.getConfigurationParameter(key, value -> convert(key, value));
+	}
 
-		Optional<String> value = lookup.apply(key);
-
-		if (value.isPresent()) {
-			String constantName = null;
-			try {
-				constantName = value.get().trim().toUpperCase(Locale.ROOT);
-				E result = Enum.valueOf(enumType, constantName);
-				logger.config(() -> "Using %s '%s' set via the '%s' configuration parameter.".formatted(enumDisplayName,
-					result, key));
-				return result;
-			}
-			catch (Exception ex) {
-				// local copy necessary for use in lambda expression
-				String constant = constantName;
-				logger.warn(() -> String.format(
-					"Invalid %s '%s' set via the '%s' configuration parameter. "
-							+ "Falling back to the %s default value.",
-					enumDisplayName, constant, key, defaultValue.name()));
-			}
+	private E convert(String key, String value) {
+		String constantName = null;
+		try {
+			constantName = value.strip().toUpperCase(Locale.ROOT);
+			E result = Enum.valueOf(enumType, constantName);
+			logger.config(() -> "Using %s '%s' set via the '%s' configuration parameter.".formatted(enumDisplayName,
+				result, key));
+			return result;
 		}
-
-		return defaultValue;
+		catch (Exception ex) {
+			throw new JUnitException("Invalid %s '%s' set via the '%s' configuration parameter.".formatted(
+				enumDisplayName, constantName, key));
+		}
 	}
 
 }

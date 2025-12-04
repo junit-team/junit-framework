@@ -445,7 +445,7 @@ class AssertIterableEqualsAssertionsTests {
 	}
 
 	@Test
-	// https://github.com/junit-team/junit5/issues/2157
+	// https://github.com/junit-team/junit-framework/issues/2157
 	void assertIterableEqualsWithListOfPath() {
 		var expected = listOf(Path.of("1"));
 		var actual = listOf(Path.of("1"));
@@ -462,7 +462,7 @@ class AssertIterableEqualsAssertionsTests {
 	}
 
 	@Test
-	// https://github.com/junit-team/junit5/issues/2915
+	// https://github.com/junit-team/junit-framework/issues/2915
 	void assertIterableEqualsWithDifferentListOfPath() {
 		try {
 			var expected = listOf(Path.of("1").resolve("2"));

@@ -11,15 +11,12 @@
 package org.junit.platform.commons.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.test.TestClassLoader;
 
 /**
@@ -29,12 +26,10 @@ import org.junit.platform.commons.test.TestClassLoader;
  */
 class ClassLoaderUtilsTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getClassLoaderPreconditions() {
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(() -> ClassLoaderUtils.getClassLoader(null))//
-				.withMessage("Class must not be null");
+		assertPreconditionViolationNotNullFor("Class", () -> ClassLoaderUtils.getClassLoader(null));
 	}
 
 	@Test
@@ -101,11 +96,10 @@ class ClassLoaderUtilsTests {
 		}
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getLocationFromNullFails() {
-		var exception = assertThrows(PreconditionViolationException.class, () -> ClassLoaderUtils.getLocation(null));
-		assertEquals("object must not be null", exception.getMessage());
+		assertPreconditionViolationNotNullFor("object", () -> ClassLoaderUtils.getLocation(null));
 	}
 
 	@Test

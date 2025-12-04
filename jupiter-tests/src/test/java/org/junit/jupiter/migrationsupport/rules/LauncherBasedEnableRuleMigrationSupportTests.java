@@ -23,6 +23,7 @@ import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.Verifier;
 
+@SuppressWarnings("removal")
 class LauncherBasedEnableRuleMigrationSupportTests {
 
 	@Test

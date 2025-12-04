@@ -1,5 +1,6 @@
 /**
- * Extensions which provide (limited) support for JUnit 4 rules within JUnit Jupiter.
+ * <em>Deprecated</em> extensions which provide (limited) support for JUnit 4
+ * rules within JUnit Jupiter.
  */
 
 @NullMarked

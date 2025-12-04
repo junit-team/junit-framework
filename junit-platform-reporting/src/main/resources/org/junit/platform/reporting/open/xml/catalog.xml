@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-    <system systemId="https://junit.org/junit5/schemas/open-test-reporting/junit-1.9.xsd" uri="junit.xsd"/>
+    <system systemId="https://schemas.junit.org/open-test-reporting/junit-1.9.xsd" uri="junit.xsd"/>
 </catalog>

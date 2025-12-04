@@ -10,17 +10,15 @@
 
 package org.junit.jupiter.api.condition;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.BOGUS;
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.ENIGMA;
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.KEY1;
 import static org.junit.jupiter.api.condition.EnabledIfEnvironmentVariableIntegrationTests.KEY2;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotBlankFor;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExecutionCondition;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link EnabledIfEnvironmentVariableCondition}.
@@ -69,8 +67,7 @@ class EnabledIfEnvironmentVariableConditionTests extends AbstractExecutionCondit
 	 */
 	@Test
 	void blankNamedAttribute() {
-		Exception exception = assertThrows(PreconditionViolationException.class, this::evaluateCondition);
-		assertThat(exception).hasMessageContaining("The 'named' attribute must not be blank");
+		assertPreconditionViolationNotBlankFor("The 'named' attribute", this::evaluateCondition);
 	}
 
 	/**
@@ -78,8 +75,7 @@ class EnabledIfEnvironmentVariableConditionTests extends AbstractExecutionCondit
 	 */
 	@Test
 	void blankMatchesAttribute() {
-		Exception exception = assertThrows(PreconditionViolationException.class, this::evaluateCondition);
-		assertThat(exception).hasMessageContaining("The 'matches' attribute must not be blank");
+		assertPreconditionViolationNotBlankFor("The 'matches' attribute", this::evaluateCondition);
 	}
 
 	/**

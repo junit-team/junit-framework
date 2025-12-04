@@ -209,7 +209,7 @@ public class ClassTemplateTestDescriptor extends ClassBasedTestDescriptor implem
 	class ClassTemplateExecutor
 			extends TemplateExecutor<ClassTemplateInvocationContextProvider, ClassTemplateInvocationContext> {
 
-		public ClassTemplateExecutor() {
+		ClassTemplateExecutor() {
 			super(ClassTemplateTestDescriptor.this, ClassTemplateInvocationContextProvider.class);
 		}
 
@@ -239,9 +239,9 @@ public class ClassTemplateTestDescriptor extends ClassBasedTestDescriptor implem
 
 		@Override
 		protected String getZeroContextsProvidedErrorMessage(ClassTemplateInvocationContextProvider provider) {
-			return String.format(
-				"Provider [%s] did not provide any invocation contexts, but was expected to do so. "
-						+ "You may override mayReturnZeroClassTemplateInvocationContexts() to allow this.",
+			return """
+					Provider [%s] did not provide any invocation contexts, but was expected to do so. \
+					You may override mayReturnZeroClassTemplateInvocationContexts() to allow this.""".formatted(
 				provider.getClass().getSimpleName());
 		}
 

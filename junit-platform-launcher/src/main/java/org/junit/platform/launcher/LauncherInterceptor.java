@@ -10,7 +10,7 @@
 
 package org.junit.platform.launcher;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -32,8 +32,9 @@ import org.jspecify.annotations.Nullable;
  *     </li>
  *     <li>
  *         calls to {@link Launcher#discover(LauncherDiscoveryRequest)},
- *         {@link Launcher#execute(TestPlan, TestExecutionListener...)}, and
- *         {@link Launcher#execute(LauncherDiscoveryRequest, TestExecutionListener...)}
+ *         {@link Launcher#execute(TestPlan, TestExecutionListener...)},
+ *         {@link Launcher#execute(LauncherDiscoveryRequest, TestExecutionListener...)},
+ *         and {@link Launcher#execute(LauncherExecutionRequest)},
  *     </li>
  * </ul>
  *
@@ -53,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  * @see LauncherSession
  * @see LauncherConstants#ENABLE_LAUNCHER_INTERCEPTORS
  */
-@API(status = EXPERIMENTAL, since = "1.10")
+@API(status = MAINTAINED, since = "1.13.3")
 public interface LauncherInterceptor {
 
 	/**

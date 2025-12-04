@@ -10,8 +10,8 @@
 
 package org.junit.platform.engine.discovery;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.reflect.Method;
@@ -56,7 +56,7 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
  * @see MethodSelector
  */
 @API(status = STABLE, since = "1.6")
-public class NestedMethodSelector implements DiscoverySelector {
+public final class NestedMethodSelector implements DiscoverySelector {
 
 	private final NestedClassSelector nestedClassSelector;
 	private final MethodSelector methodSelector;
@@ -101,7 +101,7 @@ public class NestedMethodSelector implements DiscoverySelector {
 	 *
 	 * @since 1.10
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public @Nullable ClassLoader getClassLoader() {
 		return this.nestedClassSelector.getClassLoader();
 	}
@@ -192,7 +192,7 @@ public class NestedMethodSelector implements DiscoverySelector {
 	 * @see #getParameterTypeNames()
 	 * @see MethodSelector#getParameterTypes()
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public Class<?>[] getParameterTypes() {
 		return this.methodSelector.getParameterTypes();
 	}

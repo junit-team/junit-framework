@@ -7,15 +7,14 @@
 ${licenseHeader}
 package org.junit.jupiter.api.condition;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @for(var jre : supportedJresSortedByStringValue)<%--
 --%>import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava${jre.getVersion()};
 @endfor<%--
 --%>import static org.junit.jupiter.api.condition.JavaVersionPredicates.onKnownVersion;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExecutionCondition;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link DisabledOnJreCondition}, generated from
@@ -55,8 +54,7 @@ class DisabledOnJreConditionTests extends AbstractExecutionConditionTests {
 	 */
 	@Test
 	void missingVersionDeclaration() {
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(this::evaluateCondition)//
+		assertPreconditionViolationFor(this::evaluateCondition)//
 				.withMessage("You must declare at least one JRE or version in @DisabledOnJre");
 	}
 
@@ -65,8 +63,7 @@ class DisabledOnJreConditionTests extends AbstractExecutionConditionTests {
 	 */
 	@Test
 	void jreUndefined() {
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(this::evaluateCondition)//
+		assertPreconditionViolationFor(this::evaluateCondition)//
 				.withMessage("JRE.UNDEFINED is not supported in @DisabledOnJre");
 	}
 
@@ -75,8 +72,7 @@ class DisabledOnJreConditionTests extends AbstractExecutionConditionTests {
 	 */
 	@Test
 	void version7() {
-		assertThatExceptionOfType(PreconditionViolationException.class)//
-				.isThrownBy(this::evaluateCondition)//
+		assertPreconditionViolationFor(this::evaluateCondition)//
 				.withMessage("Version [7] in @DisabledOnJre must be greater than or equal to 8");
 	}
 

@@ -64,4 +64,7 @@ class MethodSourceSupport {
 		String[] methodSpec = ReflectionUtils.parseFullyQualifiedMethodName(fullyQualifiedMethodName);
 		return MethodSource.from(methodSpec[0], methodSpec[1], methodSpec[2]);
 	}
+
+	private MethodSourceSupport() {
+	}
 }

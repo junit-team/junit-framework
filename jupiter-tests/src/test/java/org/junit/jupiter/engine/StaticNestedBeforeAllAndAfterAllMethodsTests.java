@@ -25,7 +25,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 /**
  * Integration tests that verify support for {@code static} {@link BeforeAll} and
- * {@link AfterAll} methods in {@link Nested} tests on Java 16+.
+ * {@link AfterAll} methods in {@link Nested} tests.
  *
  * @since 5.9
  * @see BeforeAllAndAfterAllComposedAnnotationTests

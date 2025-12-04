@@ -32,22 +32,17 @@ import org.opentest4j.AssertionFailedError;
 @API(status = STABLE, since = "5.9")
 public class AssertionFailureBuilder {
 
-	@Nullable
-	private Object message;
+	private @Nullable Object message;
 
-	@Nullable
-	private Throwable cause;
+	private @Nullable Throwable cause;
 
 	private boolean mismatch;
 
-	@Nullable
-	private Object expected;
+	private @Nullable Object expected;
 
-	@Nullable
-	private Object actual;
+	private @Nullable Object actual;
 
-	@Nullable
-	private String reason;
+	private @Nullable String reason;
 
 	private boolean includeValuesInMessage = true;
 

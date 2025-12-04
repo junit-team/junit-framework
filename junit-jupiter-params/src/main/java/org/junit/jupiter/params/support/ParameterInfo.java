@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.params.support;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.DEPRECATED;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
  * {@code ParameterInfo} is used to provide information about the current
@@ -45,42 +44,46 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  * retrieving the {@code ParameterInfo} instance from the
  * {@link ExtensionContext.Store Store}.
  *
- *
  * @since 5.13
  * @see ParameterizedClass
  * @see ParameterizedTest
+ * @deprecated Please use {@link org.junit.jupiter.params.ParameterInfo} instead
  */
-@API(status = EXPERIMENTAL, since = "5.13")
-public interface ParameterInfo {
+@Deprecated(since = "5.14", forRemoval = true)
+@API(status = DEPRECATED, since = "5.14")
+public interface ParameterInfo extends org.junit.jupiter.params.ParameterInfo {
 
 	/**
 	 * The {@link Namespace} for accessing the
 	 * {@link ExtensionContext.Store Store} for {@code ParameterInfo}.
+	 * @deprecated Please use
+	 * {@link org.junit.jupiter.params.ParameterInfo#NAMESPACE} instead
 	 */
+	@Deprecated(since = "5.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "5.14")
 	Namespace NAMESPACE = Namespace.create(ParameterInfo.class);
 
 	/**
 	 * The key for retrieving the {@code ParameterInfo} instance from the
 	 * {@link ExtensionContext.Store Store}.
+	 * @deprecated Please use
+	 * {@link org.junit.jupiter.params.ParameterInfo#KEY} instead
 	 */
+	@Deprecated(since = "5.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "5.14")
 	Object KEY = ParameterInfo.class;
 
 	/**
 	 * {@return the closest {@code ParameterInfo} instance for the supplied
 	 * {@code ExtensionContext}; potentially {@code null}}
+	 * @deprecated Please use
+	 * {@link org.junit.jupiter.params.ParameterInfo#get(ExtensionContext)}
+	 * instead
 	 */
+	@Deprecated(since = "5.14", forRemoval = true)
+	@API(status = DEPRECATED, since = "5.14")
 	static @Nullable ParameterInfo get(ExtensionContext context) {
 		return context.getStore(NAMESPACE).get(KEY, ParameterInfo.class);
 	}
-
-	/**
-	 * {@return the declarations of all <em>indexed</em> parameters}
-	 */
-	ParameterDeclarations getDeclarations();
-
-	/**
-	 * {@return the accessor to the arguments of the current invocation}
-	 */
-	ArgumentsAccessor getArguments();
 
 }

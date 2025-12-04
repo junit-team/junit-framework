@@ -54,7 +54,7 @@ public interface ArgumentsProvider {
 	 * @deprecated Please implement
 	 * {@link #provideArguments(ParameterDeclarations, ExtensionContext)} instead.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.13")
 	@API(status = DEPRECATED, since = "5.13")
 	default Stream<? extends Arguments> provideArguments(@SuppressWarnings("unused") ExtensionContext context)
 			throws Exception {
@@ -72,17 +72,18 @@ public interface ArgumentsProvider {
 	 * @return a stream of arguments; never {@code null}
 	 * @since 5.13
 	 */
-	@API(status = EXPERIMENTAL, since = "5.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	default Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context)
 			throws Exception {
 		try {
 			return provideArguments(context);
 		}
 		catch (Exception e) {
-			throw new JUnitException(String.format(
-				"ArgumentsProvider does not override the provideArguments(ParameterDeclarations, ExtensionContext) method. "
-						+ "Please report this issue to the maintainers of %s.",
-				getClass().getName()), e);
+			String message = """
+					ArgumentsProvider does not override the provideArguments(ParameterDeclarations, ExtensionContext) method. \
+					Please report this issue to the maintainers of %s.""".formatted(
+				getClass().getName());
+			throw new JUnitException(message, e);
 		}
 	}
 

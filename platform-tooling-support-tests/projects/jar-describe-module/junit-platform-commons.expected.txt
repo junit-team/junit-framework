@@ -2,6 +2,7 @@ org.junit.platform.commons@${version} jar:file:.+/junit-platform-commons-\d.+\.j
 exports org.junit.platform.commons
 exports org.junit.platform.commons.annotation
 exports org.junit.platform.commons.function
+exports org.junit.platform.commons.io
 exports org.junit.platform.commons.support
 exports org.junit.platform.commons.support.conversion
 exports org.junit.platform.commons.support.scanning
@@ -15,4 +16,4 @@ requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
 uses org.junit.platform.commons.support.scanning.ClasspathScanner
 qualified exports org.junit.platform.commons.logging to org.junit.jupiter.api org.junit.jupiter.engine org.junit.jupiter.migrationsupport org.junit.jupiter.params org.junit.platform.console org.junit.platform.engine org.junit.platform.launcher org.junit.platform.reporting org.junit.platform.suite.api org.junit.platform.suite.engine org.junit.platform.testkit org.junit.vintage.engine
-qualified exports org.junit.platform.commons.util to org.junit.jupiter.api org.junit.jupiter.engine org.junit.jupiter.migrationsupport org.junit.jupiter.params org.junit.platform.console org.junit.platform.engine org.junit.platform.jfr org.junit.platform.launcher org.junit.platform.reporting org.junit.platform.suite.api org.junit.platform.suite.commons org.junit.platform.suite.engine org.junit.platform.testkit org.junit.vintage.engine
+qualified exports org.junit.platform.commons.util to org.junit.jupiter.api org.junit.jupiter.engine org.junit.jupiter.migrationsupport org.junit.jupiter.params org.junit.platform.console org.junit.platform.engine org.junit.platform.launcher org.junit.platform.reporting org.junit.platform.suite.api org.junit.platform.suite.engine org.junit.platform.testkit org.junit.vintage.engine

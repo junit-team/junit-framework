@@ -60,11 +60,11 @@ import org.junit.jupiter.api.ClassTemplate;
  * @see AfterTestExecutionCallback
  */
 @FunctionalInterface
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 public interface BeforeClassTemplateInvocationCallback extends Extension {
 
 	/**
-	 * Callback that is invoked <em>before</em> each invocation of a container
+	 * Callback that is invoked <em>before</em> each invocation of a class
 	 * template.
 	 *
 	 * @param context the current extension context; never {@code null}

@@ -31,7 +31,7 @@ following values.
                      incompatible way for *at least* the next minor release of the current
                      major version. If scheduled for removal, it will be demoted to `DEPRECATED` first.
 | `STABLE`         | Intended for features that will not be changed in a backwards-
-                     incompatible way in the current major version (`5.*`).
+                     incompatible way in the current major version (`6.*`).
 |===
 
 If the `@API` annotation is present on a type, it is considered to be applicable for all
@@ -41,7 +41,7 @@ value of lower stability.
 [[api-evolution-experimental-apis]]
 === Experimental APIs
 
-The following table lists which APIs are currently designated as _experimental_ via
+The following tables list which APIs are currently designated as _experimental_ via
 `@API(status = EXPERIMENTAL)`. Caution should be taken when relying on such APIs.
 
 include::{experimentalApisTableFile}[]
@@ -49,7 +49,7 @@ include::{experimentalApisTableFile}[]
 [[api-evolution-deprecated-apis]]
 === Deprecated APIs
 
-The following table lists which APIs are currently designated as _deprecated_ via
+The following tables list which APIs are currently designated as _deprecated_ via
 `@API(status = DEPRECATED)`. You should avoid using deprecated APIs whenever possible,
 since such APIs will likely be removed in an upcoming release.
 

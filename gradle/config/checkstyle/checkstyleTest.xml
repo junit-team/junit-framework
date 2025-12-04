@@ -19,6 +19,14 @@
 			<property name="message" value="Please use class literals for primitives and void -- for example, int.class instead of Integer.TYPE."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="stringFormattingMethod"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="String\.format"/>
+			<property name="message" value="Please use String.formatted() (non-static) rather than String.format() (static)."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="RedundantModifier"/>
 	</module>
 
 	<module name="SuppressWarningsFilter" />

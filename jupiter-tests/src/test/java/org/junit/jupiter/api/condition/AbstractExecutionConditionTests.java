@@ -55,8 +55,7 @@ abstract class AbstractExecutionConditionTests {
 
 	private final ExtensionContext context = mock();
 
-	@Nullable
-	private ConditionEvaluationResult result;
+	private @Nullable ConditionEvaluationResult result;
 
 	@BeforeAll
 	void ensureAllTestMethodsAreCovered() {

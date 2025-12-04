@@ -11,7 +11,6 @@
 package org.junit.jupiter.engine;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -612,7 +611,7 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 			return Stream.of(new TestTemplateInvocationContext() {
 				@Override
 				public List<Extension> getAdditionalExtensions() {
-					return singletonList(new AlwaysDisabledExecutionCondition());
+					return List.of(new AlwaysDisabledExecutionCondition());
 				}
 			});
 		}
@@ -702,7 +701,7 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 
 				@Override
 				public List<Extension> getAdditionalExtensions() {
-					return singletonList(new ParameterResolver() {
+					return List.of(new ParameterResolver() {
 
 						@Override
 						public boolean supportsParameter(ParameterContext parameterContext,
@@ -744,7 +743,7 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 
 				@Override
 				public List<Extension> getAdditionalExtensions() {
-					return singletonList((TestInstancePostProcessor) (testInstance, context) -> {
+					return List.of((TestInstancePostProcessor) (testInstance, context) -> {
 						Field field = testInstance.getClass().getDeclaredField("parameterInstanceVariable");
 						field.setAccessible(true);
 						field.set(testInstance, argument);
@@ -777,7 +776,7 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 
 				@Override
 				public List<Extension> getAdditionalExtensions() {
-					return singletonList(new LifecycleCallbackExtension());
+					return List.of(new LifecycleCallbackExtension());
 				}
 			};
 		}

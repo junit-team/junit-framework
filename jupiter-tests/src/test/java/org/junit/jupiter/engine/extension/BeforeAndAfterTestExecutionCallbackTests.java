@@ -45,8 +45,7 @@ class BeforeAndAfterTestExecutionCallbackTests extends AbstractJupiterTestEngine
 
 	private static final List<String> callSequence = new ArrayList<>();
 
-	@Nullable
-	private static Optional<Throwable> actualExceptionInAfterTestExecution;
+	private static @Nullable Optional<Throwable> actualExceptionInAfterTestExecution;
 
 	@SuppressWarnings("OptionalAssignedToNull")
 	@BeforeEach

@@ -43,8 +43,7 @@ public class ThrowableCollector {
 
 	private final Predicate<? super Throwable> abortedExecutionPredicate;
 
-	@Nullable
-	private Throwable throwable;
+	private @Nullable Throwable throwable;
 
 	/**
 	 * Create a new {@code ThrowableCollector} that uses the supplied

@@ -100,10 +100,8 @@ public class IsTestFactoryMethod extends IsTestableMethod {
 	}
 
 	private static DiscoveryIssue.Builder createTooGenericReturnTypeIssue(Method method) {
-		String message = String.format(
-			"The declared return type of @TestFactory method '%s' does not support static validation. It "
-					+ EXPECTED_RETURN_TYPE_MESSAGE + ".",
-			method.toGenericString());
+		String message = ("The declared return type of @TestFactory method '%s' does not support static validation. It "
+				+ EXPECTED_RETURN_TYPE_MESSAGE + ".").formatted(method.toGenericString());
 		return DiscoveryIssue.builder(Severity.INFO, message) //
 				.source(MethodSource.from(method));
 	}

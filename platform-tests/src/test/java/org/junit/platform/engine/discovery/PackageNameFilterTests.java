@@ -11,30 +11,27 @@
 package org.junit.platform.engine.discovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * @since 1.0
  */
 class PackageNameFilterTests {
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void includePackageChecksPreconditions() {
-		assertThatThrownBy(() -> PackageNameFilter.includePackageNames((String[]) null)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("packageNames array must not be null or empty");
-		assertThatThrownBy(() -> PackageNameFilter.includePackageNames(new String[0])) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("packageNames array must not be null or empty");
-		assertThatThrownBy(() -> PackageNameFilter.includePackageNames(new String[] { null })) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("packageNames array must not contain null elements");
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames array",
+			() -> PackageNameFilter.includePackageNames((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames array",
+			() -> PackageNameFilter.includePackageNames(new String[0]));
+		assertPreconditionViolationFor(() -> PackageNameFilter.includePackageNames(new String[] { null }))//
+				.withMessage("packageNames array must not contain null elements");
 	}
 
 	@Test
@@ -75,18 +72,15 @@ class PackageNameFilterTests {
 					+ includedPackage2 + "'");
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void excludePackageChecksPreconditions() {
-		assertThatThrownBy(() -> PackageNameFilter.excludePackageNames((String[]) null)) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("packageNames must not be null or empty");
-		assertThatThrownBy(() -> PackageNameFilter.excludePackageNames(new String[0])) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("packageNames must not be null or empty");
-		assertThatThrownBy(() -> PackageNameFilter.excludePackageNames(new String[] { null })) //
-				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("packageNames must not contain null elements");
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames",
+			() -> PackageNameFilter.excludePackageNames((String[]) null));
+		assertPreconditionViolationNotNullOrEmptyFor("packageNames",
+			() -> PackageNameFilter.excludePackageNames(new String[0]));
+		assertPreconditionViolationFor(() -> PackageNameFilter.excludePackageNames(new String[] { null }))//
+				.withMessage("packageNames must not contain null elements");
 	}
 
 	@Test

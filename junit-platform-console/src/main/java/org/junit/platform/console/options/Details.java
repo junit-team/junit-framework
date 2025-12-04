@@ -12,6 +12,8 @@ package org.junit.platform.console.options;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
 
+import java.util.Locale;
+
 import org.apiguardian.api.API;
 
 /**
@@ -58,7 +60,7 @@ public enum Details {
 	 */
 	@Override
 	public String toString() {
-		return name().toLowerCase();
+		return name().toLowerCase(Locale.ROOT);
 	}
 
 }

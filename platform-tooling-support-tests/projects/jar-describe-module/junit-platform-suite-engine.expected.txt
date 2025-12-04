@@ -1,11 +1,10 @@
 org.junit.platform.suite.engine@${version} jar:file:.+/junit-platform-suite-engine-\d.+\.jar..module-info\.class
 requires java.base mandated
 requires org.apiguardian.api static
-requires org.jspecify static
+requires org.jspecify static transitive
 requires org.junit.platform.commons
 requires org.junit.platform.engine
 requires org.junit.platform.launcher
 requires org.junit.platform.suite.api
-requires org.junit.platform.suite.commons
 provides org.junit.platform.engine.TestEngine with org.junit.platform.suite.engine.SuiteTestEngine
 contains org.junit.platform.suite.engine

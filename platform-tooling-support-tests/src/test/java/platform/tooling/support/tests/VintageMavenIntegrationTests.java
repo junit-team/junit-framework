@@ -45,7 +45,7 @@ class VintageMavenIntegrationTests {
 				.contains("Tests run: 0, Failures: 0, Errors: 0, Skipped: 0");
 	}
 
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "{0}", quoteTextArguments = false)
 	@ValueSource(strings = { "4.12", "4.13.2" })
 	void supportedVersions(String version, @FilePrefix("maven") OutputFiles outputFiles) throws Exception {
 		var result = run(outputFiles, version);

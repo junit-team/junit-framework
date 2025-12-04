@@ -46,6 +46,10 @@ class ClassContainerSelectorResolver implements SelectorResolver {
 
 	@Override
 	public Resolution resolve(ModuleSelector selector, Context context) {
+		if (selector.getModule().isPresent()) {
+			Module module = selector.getModule().get();
+			return classSelectors(findAllClassesInModule(module, classFilter, classNameFilter));
+		}
 		return classSelectors(findAllClassesInModule(selector.getModuleName(), classFilter, classNameFilter));
 	}
 

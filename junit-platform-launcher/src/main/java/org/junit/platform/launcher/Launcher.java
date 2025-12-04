@@ -10,6 +10,7 @@
 
 package org.junit.platform.launcher;
 
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
@@ -78,12 +79,11 @@ public interface Launcher {
 	 * {@link #execute(TestPlan, TestExecutionListener...)} for execution at
 	 * most once.
 	 *
-	 * @param launcherDiscoveryRequest the launcher discovery request; never
-	 * {@code null}
+	 * @param discoveryRequest the launcher discovery request; never {@code null}
 	 * @return an unmodifiable {@code TestPlan} that contains all resolved
 	 * {@linkplain TestIdentifier identifiers} from all registered engines
 	 */
-	TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest);
+	TestPlan discover(LauncherDiscoveryRequest discoveryRequest);
 
 	/**
 	 * Execute a {@link TestPlan} which is built according to the supplied
@@ -103,10 +103,12 @@ public interface Launcher {
 	 * performance degradation (e.g., classpath scanning) of running test
 	 * discovery twice.
 	 *
-	 * @param launcherDiscoveryRequest the launcher discovery request; never {@code null}
+	 * @param discoveryRequest the launcher discovery request; never {@code null}
 	 * @param listeners additional test execution listeners; never {@code null}
+	 * @see #execute(TestPlan, TestExecutionListener...)
+	 * @see #execute(LauncherExecutionRequest)
 	 */
-	void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners);
+	void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners);
 
 	/**
 	 * Execute the supplied {@link TestPlan} and notify
@@ -123,8 +125,40 @@ public interface Launcher {
 	 * @param testPlan the test plan to execute; never {@code null}
 	 * @param listeners additional test execution listeners; never {@code null}
 	 * @since 1.4
+	 * @see #execute(LauncherDiscoveryRequest, TestExecutionListener...)
+	 * @see #execute(LauncherExecutionRequest)
 	 */
 	@API(status = STABLE, since = "1.4")
 	void execute(TestPlan testPlan, TestExecutionListener... listeners);
+
+	/**
+	 * Execute tests according to the supplied {@link LauncherExecutionRequest} and
+	 * notify {@linkplain #registerTestExecutionListeners registered listeners} about
+	 * the progress and results of the execution.
+	 *
+	 * <p>Test execution listeners supplied
+	 * {@linkplain LauncherExecutionRequest#getAdditionalTestExecutionListeners()
+	 * as part of the request} are registered in addition to already registered
+	 * listeners but only for the supplied execution request.
+	 *
+	 * @apiNote If the execution request contains a {@link TestPlan} rather than
+	 * a {@link LauncherDiscoveryRequest}, it must not have been executed
+	 * previously.
+	 *
+	 * <p>If the execution request contains a {@link LauncherDiscoveryRequest},
+	 * calling this method will cause test discovery to be executed for all
+	 * registered engines. If the same {@link LauncherDiscoveryRequest} was
+	 * previously passed to {@link #discover(LauncherDiscoveryRequest)}, you
+	 * should instead provide the resulting {@link TestPlan} as part of the
+	 * supplied execution request to avoid the potential performance degradation
+	 * (e.g., classpath scanning) of running test discovery twice.
+	 *
+	 * @param executionRequest the launcher execution request; never {@code null}
+	 * @since 6.0
+	 * @see #execute(LauncherDiscoveryRequest, TestExecutionListener...)
+	 * @see #execute(TestPlan, TestExecutionListener...)
+	 */
+	@API(status = MAINTAINED, since = "6.0")
+	void execute(LauncherExecutionRequest executionRequest);
 
 }

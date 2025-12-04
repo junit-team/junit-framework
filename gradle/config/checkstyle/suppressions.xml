@@ -1,9 +1,7 @@
 <!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
 	<suppress checks="JavadocPackage"
-		files="junit-platform-commons[\\/]src[\\/]main[\\/]java.+?[\\/]org[\\/]junit[\\/]platform[\\/]commons[\\/]util[\\/]*"/>
-	<suppress checks="JavadocPackage"
-		files="junit-platform-console[\\/]src[\\/]main[\\/]java.+?[\\/]org[\\/]junit[\\/]platform[\\/]console[\\/]*"/>
-	<suppress checks="JavadocPackage"
 		files="junit-jupiter-api[\\/]build[\\/]generated[\\/]sources[\\/]jte[\\/]main[\\/]org[\\/]junit[\\/]jupiter[\\/]api[\\/]condition[\\/]*"/>
+	<suppress checks="NoHttp"
+		files="documentation[\\/]src[\\/]docs[\\/]asciidoc[\\/]user-guide[\\/]images[\\/]extensions_StoreHierarchy.svg"/>
 </suppressions>

@@ -11,12 +11,14 @@
 package org.junit.jupiter.api;
 
 import static java.util.Comparator.comparingInt;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.Collections;
 import java.util.Comparator;
 
 import org.apiguardian.api.API;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 
@@ -46,6 +48,7 @@ import org.junit.platform.commons.logging.LoggerFactory;
  *
  * <ul>
  * <li>{@link ClassOrderer.ClassName}</li>
+ * <li>{@link ClassOrderer.Default}</li>
  * <li>{@link ClassOrderer.DisplayName}</li>
  * <li>{@link ClassOrderer.OrderAnnotation}</li>
  * <li>{@link ClassOrderer.Random}</li>
@@ -96,6 +99,35 @@ public interface ClassOrderer {
 	 * {@linkplain ClassDescriptor class descriptors} to order; never {@code null}
 	 */
 	void orderClasses(ClassOrdererContext context);
+
+	/**
+	 * {@code ClassOrderer} that allows to explicitly specify that the default
+	 * ordering should be applied.
+	 *
+	 * <p>If the {@value #DEFAULT_ORDER_PROPERTY_NAME} is set, specifying this
+	 * {@code ClassOrderer} has the same effect as referencing the configured
+	 * class directly. Otherwise, it has the same effect as not specifying any
+	 * {@code ClassOrderer}.
+	 *
+	 * <p>This class can be used to reset the {@code ClassOrderer} for a
+	 * {@link Nested @Nested} class and its {@code @Nested} inner classes,
+	 * recursively, when a {@code ClassOrderer} is configured using
+	 * {@link TestClassOrder @TestClassOrder} on an enclosing class.
+	 *
+	 * @since 6.0
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	final class Default implements ClassOrderer {
+
+		private Default() {
+			throw new JUnitException("This class must not be instantiated");
+		}
+
+		@Override
+		public void orderClasses(ClassOrdererContext context) {
+			// never called
+		}
+	}
 
 	/**
 	 * {@code ClassOrderer} that sorts classes alphanumerically based on their

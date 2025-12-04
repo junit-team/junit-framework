@@ -60,4 +60,7 @@ public class FaultyTestEngines {
 			}
 		};
 	}
+
+	private FaultyTestEngines() {
+	}
 }

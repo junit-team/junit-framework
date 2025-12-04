@@ -96,7 +96,7 @@ public class ClassNamePatternFilterUtils {
 		// @formatter:off
 		return Optional.ofNullable(patterns)
 				.filter(StringUtils::isNotBlank)
-				.map(String::trim)
+				.map(String::strip)
 				.map(trimmedPatterns -> createPredicateFromPatterns(trimmedPatterns, classNameProvider, type))
 				.orElse(type == FilterType.EXCLUDE ? __ -> true : __ -> false);
 		// @formatter:on
@@ -120,7 +120,7 @@ public class ClassNamePatternFilterUtils {
 		// @formatter:off
 		return Arrays.stream(patterns.split(","))
 				.filter(StringUtils::isNotBlank)
-				.map(String::trim)
+				.map(String::strip)
 				.map(ClassNamePatternFilterUtils::replaceRegExElements)
 				.map(Pattern::compile)
 				.toList();

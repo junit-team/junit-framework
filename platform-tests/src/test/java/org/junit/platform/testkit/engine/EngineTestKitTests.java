@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
@@ -30,8 +31,12 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.platform.engine.CancellationToken;
+import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestEngine;
+import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
@@ -80,7 +85,7 @@ class EngineTestKitTests {
 			ArgumentCaptor<NamespacedHierarchicalStore<Namespace>> storeCaptor = forClass(
 				NamespacedHierarchicalStore.class);
 
-			verify(mockOrchestrator).execute(any(), any(), storeCaptor.capture());
+			verify(mockOrchestrator).execute(any(), any(), storeCaptor.capture(), eq(CancellationToken.disabled()));
 			assertNotNull(storeCaptor.getValue(), "Request level store should be passed to execute");
 		}
 	}
@@ -92,6 +97,23 @@ class EngineTestKitTests {
 			builder -> builder.enableImplicitConfigurationParameters(enabled));
 
 		assertThat(value).isEqualTo(Optional.ofNullable(expectedValue));
+	}
+
+	@Test
+	void cancellationTokenIsPassedToEngines() {
+		TestEngine testEngine = mock(TestEngine.class);
+		when(testEngine.getId()).thenReturn("test-engine");
+		when(testEngine.discover(any(), any())).thenReturn(
+			new EngineDescriptor(UniqueId.forEngine("test-engine"), "Engine"));
+
+		var cancellationToken = CancellationToken.create();
+
+		EngineTestKit.engine(testEngine).cancellationToken(cancellationToken).execute();
+
+		var executionRequest = forClass(ExecutionRequest.class);
+		verify(testEngine).execute(executionRequest.capture());
+
+		assertThat(executionRequest.getValue().getCancellationToken()).isSameAs(cancellationToken);
 	}
 
 	private Optional<String> executeExampleTestCaseAndCollectValue(UnaryOperator<EngineTestKit.Builder> configuration) {

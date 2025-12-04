@@ -34,15 +34,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  * <h2>Method Signatures</h2>
  *
  * <p>{@code @AfterParameterizedClassInvocation} methods must have a
- * {@code void} return type, must not be private, and must be {@code static} by
- * default. Consequently, {@code @AfterParameterizedClassInvocation} methods are
- * not supported in {@link org.junit.jupiter.api.Nested @Nested} test classes or
- * as <em>interface default methods</em> unless the test class is annotated with
+ * {@code void} return type, must not be private, and must be {@code static}
+ * unless the test class is annotated with
  * {@link org.junit.jupiter.api.TestInstance @TestInstance(Lifecycle.PER_CLASS)}.
- * However, beginning with Java 16 {@code @AfterParameterizedClassInvocation}
- * methods may be declared as {@code static} in
- * {@link org.junit.jupiter.api.Nested @Nested} test classes, in which case the
- * {@code Lifecycle.PER_CLASS} restriction no longer applies.
  *
  * <h2>Method Arguments</h2>
  *
@@ -157,7 +151,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@API(status = EXPERIMENTAL, since = "5.13")
+@API(status = EXPERIMENTAL, since = "6.0")
 @ClassTemplateInvocationLifecycleMethod(classTemplateAnnotation = ParameterizedClass.class, lifecycleMethodAnnotation = AfterParameterizedClassInvocation.class)
 public @interface AfterParameterizedClassInvocation {
 

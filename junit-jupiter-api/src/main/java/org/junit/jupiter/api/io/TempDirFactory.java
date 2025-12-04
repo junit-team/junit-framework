@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.io;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -45,7 +45,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * @see TempDir @TempDir
  */
 @FunctionalInterface
-@API(status = EXPERIMENTAL, since = "5.10")
+@API(status = MAINTAINED, since = "5.13.3")
 public interface TempDirFactory extends Closeable {
 
 	/**
@@ -73,7 +73,7 @@ public interface TempDirFactory extends Closeable {
 
 	/**
 	 * Standard {@link TempDirFactory} implementation which delegates to
-	 * {@link Files#createTempDirectory} using {@code "junit-,"} as prefix.
+	 * {@link Files#createTempDirectory} using {@code "junit-"} as prefix.
 	 *
 	 * <p>The created temporary directory is always created in the default
 	 * file system with the system's default temporary directory as its parent.

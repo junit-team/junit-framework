@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_CUSTOM_CLASS_PROPERTY_NAME;
 import static org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME;
@@ -38,6 +39,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * Collection of constants related to the {@link JupiterTestEngine}.
@@ -189,7 +192,7 @@ public final class Constants {
 	 *
 	 * @since 5.12
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME = JupiterConfiguration.EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME;
 
 	/**
@@ -216,7 +219,7 @@ public final class Constants {
 	 *
 	 * @since 5.13
 	 */
-	@API(status = EXPERIMENTAL, since = "5.13")
+	@API(status = EXPERIMENTAL, since = "6.0")
 	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = JupiterConfiguration.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME;
 
 	/**
@@ -236,7 +239,21 @@ public final class Constants {
 	@API(status = STABLE, since = "5.10")
 	public static final String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
 
-	static final String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
+	/**
+	 * Property name used to determine the desired
+	 * {@link ParallelExecutorServiceType ParallelExecutorServiceType}:
+	 * {@value}
+	 *
+	 * <p>Value must be
+	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL FORK_JOIN_POOL} or
+	 * {@link ParallelExecutorServiceType#WORKER_THREAD_POOL WORKER_THREAD_POOL},
+	 * ignoring case.
+	 *
+	 * @since 6.1
+	 * @see ParallelHierarchicalTestExecutorServiceFactory
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
 
 	/**
 	 * Property name used to select the
@@ -248,7 +265,7 @@ public final class Constants {
 	 * @since 5.3
 	 */
 	@API(status = STABLE, since = "5.10")
-	public static final String PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+	public static final String PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_PREFIX
 			+ CONFIG_STRATEGY_PROPERTY_NAME;
 
 	/**
@@ -260,7 +277,7 @@ public final class Constants {
 	 * @since 5.3
 	 */
 	@API(status = STABLE, since = "5.10")
-	public static final String PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+	public static final String PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_PREFIX
 			+ CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
 
 	/**
@@ -271,12 +288,10 @@ public final class Constants {
 	 * {@value #PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME}; defaults to
 	 * {@code 256 + fixed.parallelism}.
 	 *
-	 * <p>Note: This property only takes affect on Java 9+.
-	 *
 	 * @since 5.10
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
-	public static final String PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+	@API(status = MAINTAINED, since = "5.13.3")
+	public static final String PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_PREFIX
 			+ CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME;
 
 	/**
@@ -289,12 +304,10 @@ public final class Constants {
 	 *
 	 * <p>Value must either {@code true} or {@code false}; defaults to {@code true}.
 	 *
-	 * <p>Note: This property only takes affect on Java 9+.
-	 *
 	 * @since 5.10
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
-	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+	@API(status = MAINTAINED, since = "5.13.3")
+	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_PREFIX
 			+ CONFIG_FIXED_SATURATE_PROPERTY_NAME;
 
 	/**
@@ -307,7 +320,7 @@ public final class Constants {
 	 * @since 5.3
 	 */
 	@API(status = STABLE, since = "5.10")
-	public static final String PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+	public static final String PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_PREFIX
 			+ CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME;
 
 	/**
@@ -318,7 +331,7 @@ public final class Constants {
 	 * @since 5.3
 	 */
 	@API(status = STABLE, since = "5.10")
-	public static final String PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+	public static final String PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME = JupiterConfiguration.PARALLEL_CONFIG_PREFIX
 			+ CONFIG_CUSTOM_CLASS_PROPERTY_NAME;
 
 	/**
@@ -440,7 +453,7 @@ public final class Constants {
 	 * @see Timeout
 	 * @see Timeout.ThreadMode
 	 */
-	@API(status = EXPERIMENTAL, since = "5.9")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
 
 	/**
@@ -450,7 +463,7 @@ public final class Constants {
 	 * @since 5.10
 	 * @see TempDir#DEFAULT_FACTORY_PROPERTY_NAME
 	 */
-	@API(status = EXPERIMENTAL, since = "5.10")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME = TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
 
 	/**
@@ -460,7 +473,7 @@ public final class Constants {
 	 * @since 5.12
 	 * @see org.junit.jupiter.api.extension.TestInstantiationAwareExtension
 	 */
-	@API(status = EXPERIMENTAL, since = "5.12")
+	@API(status = MAINTAINED, since = "5.13.3")
 	public static final String DEFAULT_TEST_CLASS_INSTANCE_CONSTRUCTION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME = ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
 
 	private Constants() {

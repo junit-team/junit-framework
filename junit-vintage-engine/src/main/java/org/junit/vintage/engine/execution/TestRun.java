@@ -87,6 +87,12 @@ class TestRun {
 		return result;
 	}
 
+	Collection<TestDescriptor> getInProgressTestDescriptors() {
+		List<TestDescriptor> result = new ArrayList<>(inProgressDescriptors.keySet());
+		Collections.reverse(result);
+		return result;
+	}
+
 	boolean isDescendantOfRunnerTestDescriptor(TestDescriptor testDescriptor) {
 		return runnerDescendants.contains(testDescriptor);
 	}
@@ -248,6 +254,7 @@ class TestRun {
 		 *
 		 * @param description the {@code Description} to look up
 		 */
+		@SuppressWarnings("ReferenceEquality")
 		Optional<VintageTestDescriptor> getUnambiguously(Description description) {
 			if (descriptors.isEmpty()) {
 				return Optional.empty();
@@ -262,11 +269,11 @@ class TestRun {
 			// @formatter:on
 		}
 
-		public void incrementSkippedOrStarted() {
+		private void incrementSkippedOrStarted() {
 			skippedOrStartedCount++;
 		}
 
-		public Optional<VintageTestDescriptor> getNextUnstarted() {
+		private Optional<VintageTestDescriptor> getNextUnstarted() {
 			if (skippedOrStartedCount < descriptors.size()) {
 				return Optional.of(descriptors.get(skippedOrStartedCount));
 			}

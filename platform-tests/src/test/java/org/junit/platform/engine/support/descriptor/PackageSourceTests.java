@@ -11,14 +11,15 @@
 package org.junit.platform.engine.support.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for {@link PackageSource}.
@@ -32,26 +33,28 @@ class PackageSourceTests extends AbstractTestSourceTests {
 		return Stream.of(PackageSource.from("package.source"));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void packageSourceFromNullPackageName() {
-		assertThrows(PreconditionViolationException.class, () -> PackageSource.from((String) null));
+		assertPreconditionViolationFor(() -> PackageSource.from((String) null));
 	}
 
 	@Test
 	void packageSourceFromEmptyPackageName() {
-		assertThrows(PreconditionViolationException.class, () -> PackageSource.from("  "));
+		assertPreconditionViolationFor(() -> PackageSource.from("  "));
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void packageSourceFromNullPackageReference() {
-		assertThrows(PreconditionViolationException.class, () -> PackageSource.from((Package) null));
+		assertPreconditionViolationFor(() -> PackageSource.from((Package) null));
 	}
 
-	@Test
-	void packageSourceFromPackageName() {
-		var testPackage = getClass().getPackage().getName();
+	@ParameterizedTest
+	@ValueSource(classes = PackageSourceTests.class)
+	@ValueSource(strings = "DefaultPackageTestCase")
+	void packageSourceFromPackageName(Class<?> testClass) {
+		var testPackage = testClass.getPackage().getName();
 		var source = PackageSource.from(testPackage);
 
 		assertThat(source.getPackageName()).isEqualTo(testPackage);

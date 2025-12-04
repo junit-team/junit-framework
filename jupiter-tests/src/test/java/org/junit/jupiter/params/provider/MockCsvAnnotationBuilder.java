@@ -42,6 +42,7 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 	protected String[] nullValues = new String[0];
 	protected int maxCharsPerColumn = 4096;
 	protected boolean ignoreLeadingAndTrailingWhitespace = true;
+	private char commentCharacter = '#';
 
 	private MockCsvAnnotationBuilder() {
 	}
@@ -88,6 +89,11 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 		return getSelf();
 	}
 
+	B commentCharacter(char commentCharacter) {
+		this.commentCharacter = commentCharacter;
+		return getSelf();
+	}
+
 	abstract A build();
 
 	// -------------------------------------------------------------------------
@@ -129,6 +135,7 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 			when(annotation.nullValues()).thenReturn(super.nullValues);
 			when(annotation.maxCharsPerColumn()).thenReturn(super.maxCharsPerColumn);
 			when(annotation.ignoreLeadingAndTrailingWhitespace()).thenReturn(super.ignoreLeadingAndTrailingWhitespace);
+			when(annotation.commentCharacter()).thenReturn(super.commentCharacter);
 
 			// @CsvSource
 			when(annotation.value()).thenReturn(this.lines);
@@ -144,7 +151,6 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 		private String[] resources = {};
 		private String[] files = {};
 		private String encoding = "UTF-8";
-		private String lineSeparator = "\n";
 		private int numLinesToSkip = 0;
 
 		private MockCsvFileSourceBuilder() {
@@ -171,11 +177,6 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 			return this;
 		}
 
-		MockCsvFileSourceBuilder lineSeparator(String lineSeparator) {
-			this.lineSeparator = lineSeparator;
-			return this;
-		}
-
 		MockCsvFileSourceBuilder numLinesToSkip(int numLinesToSkip) {
 			this.numLinesToSkip = numLinesToSkip;
 			return this;
@@ -194,12 +195,12 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 			when(annotation.nullValues()).thenReturn(super.nullValues);
 			when(annotation.maxCharsPerColumn()).thenReturn(super.maxCharsPerColumn);
 			when(annotation.ignoreLeadingAndTrailingWhitespace()).thenReturn(super.ignoreLeadingAndTrailingWhitespace);
+			when(annotation.commentCharacter()).thenReturn(super.commentCharacter);
 
 			// @CsvFileSource
 			when(annotation.resources()).thenReturn(this.resources);
 			when(annotation.files()).thenReturn(this.files);
 			when(annotation.encoding()).thenReturn(this.encoding);
-			when(annotation.lineSeparator()).thenReturn(this.lineSeparator);
 			when(annotation.numLinesToSkip()).thenReturn(this.numLinesToSkip);
 
 			return annotation;

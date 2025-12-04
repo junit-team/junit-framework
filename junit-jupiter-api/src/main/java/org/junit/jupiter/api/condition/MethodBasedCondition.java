@@ -88,7 +88,7 @@ abstract class MethodBasedCondition<A extends Annotation> implements ExecutionCo
 		return invokeMethod(method, context, testInstance);
 	}
 
-	@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+	@SuppressWarnings("DataFlowIssue")
 	private static boolean invokeMethod(Method method, ExtensionContext context, @Nullable Object testInstance) {
 		if (method.getParameterCount() == 0) {
 			return (boolean) ReflectionSupport.invokeMethod(method, testInstance);

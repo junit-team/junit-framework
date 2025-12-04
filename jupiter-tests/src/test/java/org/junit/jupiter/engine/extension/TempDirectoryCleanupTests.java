@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.api.io.CleanupMode.NEVER;
 import static org.junit.jupiter.api.io.CleanupMode.ON_SUCCESS;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
@@ -157,7 +158,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 
 		@Test
 		void cleanupModeOnSuccessFailingThenPassingField() {
-			executeTests(selectClass(OnSuccessFailingFieldCase.class), selectClass(OnSuccessPassingFieldCase.class));
+			executeTests(selectClasses(OnSuccessFailingFieldCase.class, OnSuccessPassingFieldCase.class));
 
 			assertThat(onSuccessFailingFieldDir).exists();
 			assertThat(onSuccessPassingFieldDir).doesNotExist();

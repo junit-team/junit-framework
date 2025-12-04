@@ -10,7 +10,9 @@
 
 package org.junit.platform.engine.discovery;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.File;
@@ -29,8 +31,8 @@ import java.util.stream.Stream;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.junit.platform.commons.support.Resource;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.engine.DiscoverySelector;
@@ -244,6 +246,13 @@ public final class DiscoverySelectors {
 	 * {@linkplain Thread#getContextClassLoader() context class loader} of the
 	 * {@linkplain Thread thread} that uses these selectors.
 	 *
+	 * <p>The {@link Set} supplied to this method should have a reliable iteration
+	 * order to support reliable discovery and execution order. It is therefore
+	 * recommended that the set be a {@link java.util.SequencedSet} (on Java 21
+	 * or higher), {@link java.util.SortedSet}, {@link java.util.LinkedHashSet},
+	 * or similar. Note that {@link Set#of(Object[])} and related {@code Set.of()}
+	 * methods do not guarantee a reliable iteration order.
+	 *
 	 * @param classpathRoots set of directories and JAR files in the filesystem
 	 * that represent classpath roots; never {@code null}
 	 * @return a list of selectors for the supplied classpath roots; elements
@@ -283,7 +292,7 @@ public final class DiscoverySelectors {
 	 * @param classpathResourceName the name of the classpath resource; never
 	 * {@code null} or blank
 	 * @see #selectClasspathResource(String, FilePosition)
-	 * @see #selectClasspathResource(Set)
+	 * @see #selectClasspathResourceByName(Set)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -313,7 +322,7 @@ public final class DiscoverySelectors {
 	 * {@code null} or blank
 	 * @param position the position inside the classpath resource; may be {@code null}
 	 * @see #selectClasspathResource(String)
-	 * @see #selectClasspathResource(Set)
+	 * @see #selectClasspathResourceByName(Set)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
 	 * @see ClassLoader#getResourceAsStream(String)
@@ -339,6 +348,13 @@ public final class DiscoverySelectors {
 	 * named or unnamed modules. These resources are also considered to be
 	 * classpath resources.
 	 *
+	 * <p>The {@link Set} supplied to this method should have a reliable iteration
+	 * order to support reliable discovery and execution order. It is therefore
+	 * recommended that the set be a {@link java.util.SequencedSet} (on Java 21
+	 * or higher), {@link java.util.SortedSet}, {@link java.util.LinkedHashSet},
+	 * or similar. Note that {@link Set#of(Object[])} and related {@code Set.of()}
+	 * methods do not guarantee a reliable iteration order.
+	 *
 	 * @param classpathResources a set of classpath resources; never
 	 * {@code null} or empty. All resources must have the same name, may not
 	 * be {@code null} or blank.
@@ -347,9 +363,48 @@ public final class DiscoverySelectors {
 	 * @see #selectClasspathResource(String)
 	 * @see ClasspathResourceSelector
 	 * @see ReflectionSupport#tryToGetResources(String)
+	 * @deprecated Please use {@link #selectClasspathResourceByName(Set)} instead.
 	 */
-	@API(status = EXPERIMENTAL, since = "1.12")
-	public static ClasspathResourceSelector selectClasspathResource(Set<Resource> classpathResources) {
+	@API(status = DEPRECATED, since = "1.14")
+	@Deprecated(since = "1.14", forRemoval = true)
+	@SuppressWarnings("removal")
+	public static ClasspathResourceSelector selectClasspathResource(
+			Set<org.junit.platform.commons.support.Resource> classpathResources) {
+		return selectClasspathResourceByName(classpathResources);
+	}
+
+	/**
+	 * Create a {@code ClasspathResourceSelector} for the supplied classpath
+	 * resources.
+	 *
+	 * <p>Since {@linkplain org.junit.platform.engine.TestEngine engines} are not
+	 * expected to modify the classpath, the supplied resource must be on the
+	 * classpath of the
+	 * {@linkplain Thread#getContextClassLoader() context class loader} of the
+	 * {@linkplain Thread thread} that uses the resulting selector.
+	 *
+	 * <p>Note: Since Java 9, all resources are on the module path. Either in
+	 * named or unnamed modules. These resources are also considered to be
+	 * classpath resources.
+	 *
+	 * <p>The {@link Set} supplied to this method should have a reliable iteration
+	 * order to support reliable discovery and execution order. It is therefore
+	 * recommended that the set be a {@link java.util.SequencedSet} (on Java 21
+	 * or higher), {@link java.util.SortedSet}, {@link java.util.LinkedHashSet},
+	 * or similar. Note that {@link Set#of(Object[])} and related {@code Set.of()}
+	 * methods do not guarantee a reliable iteration order.
+	 *
+	 * @param classpathResources a set of classpath resources; never
+	 * {@code null} or empty. All resources must have the same name, may not
+	 * be {@code null} or blank.
+	 * @since 1.14
+	 * @see #selectClasspathResource(String, FilePosition)
+	 * @see #selectClasspathResource(String)
+	 * @see ClasspathResourceSelector
+	 * @see org.junit.platform.commons.support.ResourceSupport#tryToGetResources(String)
+	 */
+	@API(status = MAINTAINED, since = "1.14")
+	public static ClasspathResourceSelector selectClasspathResourceByName(Set<? extends Resource> classpathResources) {
 		Preconditions.notEmpty(classpathResources, "classpath resources must not be null or empty");
 		Preconditions.containsNoNullElements(classpathResources, "individual classpath resources must not be null");
 		List<String> resourceNames = classpathResources.stream().map(Resource::getName).distinct().toList();
@@ -370,13 +425,36 @@ public final class DiscoverySelectors {
 	@API(status = STABLE, since = "1.10")
 	public static ModuleSelector selectModule(String moduleName) {
 		Preconditions.notBlank(moduleName, "Module name must not be null or blank");
-		return new ModuleSelector(moduleName.trim());
+		return new ModuleSelector(moduleName.strip());
+	}
+
+	/**
+	 * Create a {@code ModuleSelector} for the supplied module.
+	 *
+	 * <p>The unnamed module is not supported.
+	 *
+	 * @param module the module to select; never {@code null} or <em>unnamed</em>
+	 * @since 6.1
+	 * @see ModuleSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static ModuleSelector selectModule(Module module) {
+		Preconditions.notNull(module, "Module must not be null");
+		Preconditions.condition(module.isNamed(), "Module must be named");
+		return new ModuleSelector(module);
 	}
 
 	/**
 	 * Create a list of {@code ModuleSelectors} for the supplied module names.
 	 *
 	 * <p>The unnamed module is not supported.
+	 *
+	 * <p>The {@link Set} supplied to this method should have a reliable iteration
+	 * order to support reliable discovery and execution order. It is therefore
+	 * recommended that the set be a {@link java.util.SequencedSet} (on Java 21
+	 * or higher), {@link java.util.SortedSet}, {@link java.util.LinkedHashSet},
+	 * or similar. Note that {@link Set#of(Object[])} and related {@code Set.of()}
+	 * methods do not guarantee a reliable iteration order.
 	 *
 	 * @param moduleNames the module names to select; never {@code null}, never
 	 * containing {@code null} or blank
@@ -407,9 +485,9 @@ public final class DiscoverySelectors {
 	 */
 	public static PackageSelector selectPackage(String packageName) {
 		Preconditions.notNull(packageName, "Package name must not be null");
-		Preconditions.condition(packageName.isEmpty() || !packageName.trim().isEmpty(),
+		Preconditions.condition(packageName.isEmpty() || !packageName.isBlank(),
 			"Package name must not contain only whitespace");
-		return new PackageSelector(packageName.trim());
+		return new PackageSelector(packageName.strip());
 	}
 
 	/**
@@ -444,10 +522,123 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see ClassSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static ClassSelector selectClass(@Nullable ClassLoader classLoader, String className) {
 		Preconditions.notBlank(className, "Class name must not be null or blank");
 		return new ClassSelector(classLoader, className);
+	}
+
+	/**
+	 * Create a {@code ClassSelector} for each supplied {@link Class}.
+	 *
+	 * @param classes the classes to select; never {@code null} and never containing
+	 * {@code null} class references
+	 * @since 6.0
+	 * @see #selectClass(Class)
+	 * @see #selectClasses(List)
+	 * @see ClassSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public static List<ClassSelector> selectClasses(Class<?>... classes) {
+		return selectClasses(List.of(classes));
+	}
+
+	/**
+	 * Create a {@code ClassSelector} for each supplied {@link Class}.
+	 *
+	 * @param classes the classes to select; never {@code null} and never containing
+	 * {@code null} class references
+	 * @since 6.0
+	 * @see #selectClass(Class)
+	 * @see #selectClasses(Class...)
+	 * @see ClassSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public static List<ClassSelector> selectClasses(List<Class<?>> classes) {
+		Preconditions.notNull(classes, "classes must not be null");
+		Preconditions.containsNoNullElements(classes, "Individual classes must not be null");
+
+		// @formatter:off
+		return classes.stream()
+				.distinct()
+				.map(DiscoverySelectors::selectClass)
+				.toList();
+		// @formatter:on
+	}
+
+	/**
+	 * Create a {@code ClassSelector} for each supplied class name.
+	 *
+	 * @param classNames the fully qualified names of the classes to select;
+	 * never {@code null} and never containing {@code null} or blank names
+	 * @since 6.0
+	 * @see #selectClass(String)
+	 * @see #selectClassesByName(List)
+	 * @see #selectClassesByName(ClassLoader, String...)
+	 * @see ClassSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public static List<ClassSelector> selectClassesByName(String... classNames) {
+		return selectClassesByName(List.of(classNames));
+	}
+
+	/**
+	 * Create a {@code ClassSelector} for each supplied class name.
+	 *
+	 * @param classNames the fully qualified names of the classes to select;
+	 * never {@code null} and never containing {@code null} or blank names
+	 * @since 6.0
+	 * @see #selectClass(String)
+	 * @see #selectClassesByName(String...)
+	 * @see #selectClassesByName(ClassLoader, List)
+	 * @see ClassSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public static List<ClassSelector> selectClassesByName(List<String> classNames) {
+		return selectClassesByName(null, classNames);
+	}
+
+	/**
+	 * Create a {@code ClassSelector} for each supplied class name, using the
+	 * supplied class loader.
+	 *
+	 * @param classLoader the class loader to use to load the classes, or {@code null}
+	 * to signal that the default {@code ClassLoader} should be used
+	 * @param classNames the fully qualified names of the classes to select;
+	 * never {@code null} and never containing {@code null} or blank names
+	 * @since 6.0
+	 * @see #selectClass(ClassLoader, String)
+	 * @see #selectClassesByName(ClassLoader, List)
+	 * @see ClassSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public static List<ClassSelector> selectClassesByName(@Nullable ClassLoader classLoader, String... classNames) {
+		return selectClassesByName(classLoader, List.of(classNames));
+	}
+
+	/**
+	 * Create a {@code ClassSelector} for each supplied class name, using the
+	 * supplied class loader.
+	 *
+	 * @param classLoader the class loader to use to load the classes, or {@code null}
+	 * to signal that the default {@code ClassLoader} should be used
+	 * @param classNames the fully qualified names of the classes to select;
+	 * never {@code null} and never containing {@code null} or blank names
+	 * @since 6.0
+	 * @see #selectClass(ClassLoader, String)
+	 * @see ClassSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.0")
+	public static List<ClassSelector> selectClassesByName(@Nullable ClassLoader classLoader, List<String> classNames) {
+		Preconditions.notNull(classNames, "classNames must not be null");
+		Preconditions.containsNoNullElements(classNames, "Individual class names must not be null");
+
+		// @formatter:off
+		return classNames.stream()
+				.distinct()
+				.map(className -> selectClass(classLoader, className))
+				.toList();
+		// @formatter:on
 	}
 
 	/**
@@ -512,7 +703,7 @@ public final class DiscoverySelectors {
 	 * @see #selectMethod(String)
 	 * @see MethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static MethodSelector selectMethod(@Nullable ClassLoader classLoader, String fullyQualifiedMethodName)
 			throws PreconditionViolationException {
 		String[] methodParts = ReflectionUtils.parseFullyQualifiedMethodName(fullyQualifiedMethodName);
@@ -544,7 +735,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see MethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static MethodSelector selectMethod(@Nullable ClassLoader classLoader, String className, String methodName) {
 		return selectMethod(classLoader, className, methodName, "");
 	}
@@ -588,13 +779,13 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see MethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static MethodSelector selectMethod(@Nullable ClassLoader classLoader, String className, String methodName,
 			String parameterTypeNames) {
 		Preconditions.notBlank(className, "Class name must not be null or blank");
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
 		Preconditions.notNull(parameterTypeNames, "Parameter type names must not be null");
-		return new MethodSelector(classLoader, className, methodName, parameterTypeNames.trim());
+		return new MethodSelector(classLoader, className, methodName, parameterTypeNames.strip());
 	}
 
 	/**
@@ -629,7 +820,7 @@ public final class DiscoverySelectors {
 		Preconditions.notNull(javaClass, "Class must not be null");
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
 		Preconditions.notNull(parameterTypeNames, "Parameter type names must not be null");
-		return new MethodSelector(javaClass, methodName, parameterTypeNames.trim());
+		return new MethodSelector(javaClass, methodName, parameterTypeNames.strip());
 	}
 
 	/**
@@ -644,7 +835,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see MethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static MethodSelector selectMethod(String className, String methodName, Class<?>... parameterTypes) {
 		Preconditions.notBlank(className, "Class name must not be null or blank");
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
@@ -665,7 +856,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see MethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static MethodSelector selectMethod(Class<?> javaClass, String methodName, Class<?>... parameterTypes) {
 		Preconditions.notNull(javaClass, "Class must not be null");
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
@@ -729,7 +920,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see NestedClassSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static NestedClassSelector selectNestedClass(@Nullable ClassLoader classLoader,
 			List<String> enclosingClassNames, String nestedClassName) {
 		Preconditions.notEmpty(enclosingClassNames, "Enclosing class names must not be null or empty");
@@ -765,7 +956,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see NestedMethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static NestedMethodSelector selectNestedMethod(@Nullable ClassLoader classLoader,
 			List<String> enclosingClassNames, String nestedClassName, String methodName)
 			throws PreconditionViolationException {
@@ -814,7 +1005,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see #selectNestedMethod(List, String, String, String)
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static NestedMethodSelector selectNestedMethod(@Nullable ClassLoader classLoader,
 			List<String> enclosingClassNames, String nestedClassName, String methodName, String parameterTypeNames) {
 
@@ -823,7 +1014,7 @@ public final class DiscoverySelectors {
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
 		Preconditions.notNull(parameterTypeNames, "Parameter types must not be null");
 		return new NestedMethodSelector(classLoader, enclosingClassNames, nestedClassName, methodName,
-			parameterTypeNames.trim());
+			parameterTypeNames.strip());
 	}
 
 	/**
@@ -840,7 +1031,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see NestedMethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static NestedMethodSelector selectNestedMethod(List<String> enclosingClassNames, String nestedClassName,
 			String methodName, Class<?>... parameterTypes) {
 
@@ -893,7 +1084,7 @@ public final class DiscoverySelectors {
 		Preconditions.notNull(nestedClass, "Nested class must not be null");
 		Preconditions.notBlank(methodName, "Method name must not be null or blank");
 		Preconditions.notNull(parameterTypeNames, "Parameter types must not be null");
-		return new NestedMethodSelector(enclosingClasses, nestedClass, methodName, parameterTypeNames.trim());
+		return new NestedMethodSelector(enclosingClasses, nestedClass, methodName, parameterTypeNames.strip());
 	}
 
 	/**
@@ -909,7 +1100,7 @@ public final class DiscoverySelectors {
 	 * @since 1.10
 	 * @see NestedMethodSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.10")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static NestedMethodSelector selectNestedMethod(List<Class<?>> enclosingClasses, Class<?> nestedClass,
 			String methodName, Class<?>... parameterTypes) {
 
@@ -973,7 +1164,7 @@ public final class DiscoverySelectors {
 	 * @since 1.9
 	 * @see IterationSelector
 	 */
-	@API(status = EXPERIMENTAL, since = "1.9")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static IterationSelector selectIteration(DiscoverySelector parentSelector, int... iterationIndices) {
 		Preconditions.notNull(parentSelector, "Parent selector must not be null");
 		Preconditions.notEmpty(iterationIndices, "iteration indices must not be empty");
@@ -990,7 +1181,7 @@ public final class DiscoverySelectors {
 	 * @since 1.11
 	 * @see DiscoverySelectorIdentifierParser
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Optional<? extends DiscoverySelector> parse(String identifier) {
 		return DiscoverySelectorIdentifierParsers.parse(identifier);
 	}
@@ -1005,7 +1196,7 @@ public final class DiscoverySelectors {
 	 * @since 1.11
 	 * @see DiscoverySelectorIdentifierParser
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Optional<? extends DiscoverySelector> parse(DiscoverySelectorIdentifier identifier) {
 		return DiscoverySelectorIdentifierParsers.parse(identifier);
 	}
@@ -1021,7 +1212,7 @@ public final class DiscoverySelectors {
 	 * @since 1.11
 	 * @see DiscoverySelectorIdentifierParser
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Stream<? extends DiscoverySelector> parseAll(String... identifiers) {
 		return DiscoverySelectorIdentifierParsers.parseAll(identifiers);
 	}
@@ -1037,7 +1228,7 @@ public final class DiscoverySelectors {
 	 * @since 1.11
 	 * @see DiscoverySelectorIdentifierParser
 	 */
-	@API(status = EXPERIMENTAL, since = "1.11")
+	@API(status = MAINTAINED, since = "1.13.3")
 	public static Stream<? extends DiscoverySelector> parseAll(Collection<DiscoverySelectorIdentifier> identifiers) {
 		return DiscoverySelectorIdentifierParsers.parseAll(identifiers);
 	}

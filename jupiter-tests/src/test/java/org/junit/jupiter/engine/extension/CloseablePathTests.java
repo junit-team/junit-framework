@@ -89,8 +89,7 @@ class CloseablePathTests extends AbstractJupiterTestEngineTests {
 	private final AnnotatedElementContext elementContext = mock();
 	private final ExtensionContext extensionContext = mock();
 
-	@Nullable
-	private CloseablePath closeablePath;
+	private @Nullable CloseablePath closeablePath;
 
 	@Target(METHOD)
 	@Retention(RUNTIME)
@@ -168,7 +167,7 @@ class CloseablePathTests extends AbstractJupiterTestEngineTests {
 			delete(closeablePath.get());
 		}
 
-		@SuppressWarnings({ "DataFlowIssue", "NullAway" })
+		@SuppressWarnings("DataFlowIssue")
 		@DisplayName("fails if the factory returns null")
 		@ParameterizedTest
 		@ElementTypeSource
