@@ -89,7 +89,7 @@ jobs:
           path: junit-examples
           persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
         with:
           java-version: 25
           distribution: temurin
@@ -225,7 +225,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
       - name: Set up JDK
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
         with:
           java-version: 25
           distribution: temurin
