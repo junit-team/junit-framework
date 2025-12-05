@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apiguardian.api.API;
@@ -134,18 +135,31 @@ public interface Arguments {
 
 	/**
 	 * Factory method for creating an instance of {@code Arguments} based on
-	 * the supplied {@link List} of {@code arguments}.
+	 * the supplied {@link Iterable} of {@code arguments}.
+	 *
+	 * <p>The iterable supplied to this method should be a finite collection
+	 * and have a reliable iteration order to provide arguments in a consistent
+	 * order to tests. It is therefore recommended that the iterable be a
+	 * {@link java.util.SequencedCollection} (on Java 21 or higher),
+	 * {@link java.util.List}, or similar.
 	 *
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an instance of {@code Arguments}; never {@code null}
 	 * @since 6.1
-	 * @see #argumentsFrom(List)
+	 * @see #argumentsFrom(Iterable)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	static Arguments from(List<@Nullable Object> arguments) {
+	static Arguments from(Iterable<?> arguments) {
 		Preconditions.notNull(arguments, "arguments must not be null");
-		return of(arguments.toArray());
+
+		if (arguments instanceof Collection<?> collection) {
+			return of(collection.toArray());
+		}
+
+		var collection = new ArrayList<>();
+		arguments.forEach(collection::add);
+		return of(collection.toArray());
 	}
 
 	/**
@@ -156,6 +170,12 @@ public interface Arguments {
 	 * intended to be used when statically imported &mdash; for example, via:
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentsFrom;}
 	 *
+	 * <p>The iterable supplied to this method should be a finite collection
+	 * and have a reliable iteration order to provide arguments in a consistent
+	 * order to tests. It is therefore recommended that the iterable be a
+	 * {@link java.util.SequencedCollection} (on Java 21 or higher),
+	 * {@link java.util.List}, or similar.
+	 *
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an instance of {@code Arguments}; never {@code null}
@@ -163,7 +183,7 @@ public interface Arguments {
 	 * @see #argumentSet(String, Object...)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	static Arguments argumentsFrom(List<@Nullable Object> arguments) {
+	static Arguments argumentsFrom(Iterable<?> arguments) {
 		return from(arguments);
 	}
 
@@ -175,6 +195,12 @@ public interface Arguments {
 	 * {@link #argumentSet(String, Object...)} when working with {@link List}
 	 * based inputs.
 	 *
+	 * <p>The iterable supplied to this method should be a finite collection
+	 * and have a reliable iteration order to provide arguments in a consistent
+	 * order to tests. It is therefore recommended that the iterable be a
+	 * {@link java.util.SequencedCollection} (on Java 21 or higher),
+	 * {@link java.util.List}, or similar.
+	 *
 	 * @param name the name of the argument set; must not be {@code null}
 	 * or blank
 	 * @param arguments the arguments to be used for an invocation of the test
@@ -184,10 +210,17 @@ public interface Arguments {
 	 * @see #argumentSet(String, Object...)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	static ArgumentSet argumentSetFrom(String name, List<@Nullable Object> arguments) {
+	static ArgumentSet argumentSetFrom(String name, Iterable<?> arguments) {
 		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(arguments, "arguments list must not be null");
-		return new ArgumentSet(name, arguments.toArray());
+
+		if (arguments instanceof Collection<?> collection) {
+			return new ArgumentSet(name, collection.toArray());
+		}
+
+		var collection = new ArrayList<>();
+		arguments.forEach(collection::add);
+		return new ArgumentSet(name, collection.toArray());
 	}
 
 	/**
@@ -203,6 +236,8 @@ public interface Arguments {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	default List<@Nullable Object> toList() {
+		// We could return List<?> here but the unbounded wildcard is painful
+		// to work with.
 		return new ArrayList<>(Arrays.asList(get()));
 	}
 

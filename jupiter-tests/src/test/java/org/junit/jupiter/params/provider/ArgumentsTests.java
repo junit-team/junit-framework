@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -17,7 +18,10 @@ import static org.junit.jupiter.params.provider.Arguments.of;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -70,7 +74,7 @@ class ArgumentsTests {
 
 	@Test
 	void fromSupportsListDefensiveCopy() {
-		var input = new ArrayList<@Nullable Object>(Arrays.asList(1, "two", null, 3.0));
+		var input = new ArrayList<@Nullable Object>(asList(1, "two", null, 3.0));
 		var arguments = Arguments.from(input);
 
 		// Modify input
@@ -82,16 +86,33 @@ class ArgumentsTests {
 	}
 
 	@Test
-	void argumentsFromSupportsList() {
-		var input = Arrays.<@Nullable Object> asList("a", 2, null);
+	void argumentsFromSupportsCollection() {
+		Collection<@Nullable Object> input = asList("a", 2, null);
 		var arguments = Arguments.argumentsFrom(input);
 
 		assertArrayEquals(new Object[] { "a", 2, null }, arguments.get());
 	}
 
 	@Test
-	void argumentSetSupportsList() {
-		var input = Arrays.<@Nullable Object> asList("x", null, 42);
+	void argumentsFromSupportsIterable() {
+		var input = new IterableWithNullableElements("a", 2, null);
+		var arguments = Arguments.argumentsFrom(input);
+
+		assertArrayEquals(new Object[] { "a", 2, null }, arguments.get());
+	}
+
+	@Test
+	void argumentSetSupportsCollection() {
+		Collection<@Nullable Object> input = asList("x", null, 42);
+		var argumentSet = Arguments.argumentSetFrom("list-test", input);
+
+		assertArrayEquals(new Object[] { "x", null, 42 }, argumentSet.get());
+		assertThat(argumentSet.getName()).isEqualTo("list-test");
+	}
+
+	@Test
+	void argumentSetSupportsIterable() {
+		var input = new IterableWithNullableElements("x", null, 42);
 		var argumentSet = Arguments.argumentSetFrom("list-test", input);
 
 		assertArrayEquals(new Object[] { "x", null, 42 }, argumentSet.get());
@@ -131,4 +152,19 @@ class ArgumentsTests {
 		result.add("extra");
 		assertThat(result).containsExactly("extra");
 	}
+
+	private static final class IterableWithNullableElements implements Iterable<@Nullable Object> {
+
+		private final Collection<@Nullable Object> collection;
+
+		private IterableWithNullableElements(@Nullable Object... items) {
+			this.collection = asList(items);
+		}
+
+		@Override
+		public @NotNull Iterator<@Nullable Object> iterator() {
+			return collection.iterator();
+		}
+	}
+
 }
