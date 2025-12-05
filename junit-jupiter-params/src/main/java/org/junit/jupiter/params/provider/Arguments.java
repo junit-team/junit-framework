@@ -74,6 +74,24 @@ public interface Arguments {
 	Object[] get();
 
 	/**
+	 * Convert the arguments to a new mutable {@link List} containing the same
+	 * elements as {@link #get()}.
+	 *
+	 * <p>This is useful for test logic that benefits from {@code List}
+	 * operations such as filtering, transformation, or assertions.
+	 *
+	 * @return a mutable List of arguments; never {@code null} but may contain
+	 * {@code null}
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	default List<@Nullable Object> toList() {
+		// We could return List<?> here but the unbounded wildcard is painful
+		// to work with.
+		return new ArrayList<>(Arrays.asList(get()));
+	}
+
+	/**
 	 * Factory method for creating an instance of {@code Arguments} based on
 	 * the supplied {@code arguments}.
 	 *
@@ -86,51 +104,6 @@ public interface Arguments {
 	static Arguments of(@Nullable Object... arguments) {
 		Preconditions.notNull(arguments, "arguments array must not be null");
 		return () -> arguments;
-	}
-
-	/**
-	 * Factory method for creating an instance of {@code Arguments} based on
-	 * the supplied {@code arguments}.
-	 *
-	 * <p>This method is an <em>alias</em> for {@link Arguments#of} and is
-	 * intended to be used when statically imported &mdash; for example, via:
-	 * {@code import static org.junit.jupiter.params.provider.Arguments.arguments;}
-	 *
-	 * @param arguments the arguments to be used for an invocation of the test
-	 * method; must not be {@code null} but may contain {@code null}
-	 * @return an instance of {@code Arguments}; never {@code null}
-	 * @since 5.3
-	 * @see #argumentSet(String, Object...)
-	 */
-	static Arguments arguments(@Nullable Object... arguments) {
-		return of(arguments);
-	}
-
-	/**
-	 * Factory method for creating an {@link ArgumentSet} based on the supplied
-	 * {@code name} and {@code arguments}.
-	 *
-	 * <p>Favor this method over {@link Arguments#of Arguments.of(...)} and
-	 * {@link Arguments#arguments arguments(...)} when you wish to assign a
-	 * name to the entire set of arguments.
-	 *
-	 * <p>This method is well suited to be used as a static import &mdash; for
-	 * example, via:
-	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSet;}.
-	 *
-	 * @param name the name of the argument set; must not be {@code null} or
-	*                blank
-	 * @param arguments the arguments to be used for an invocation of the test
-	 * method; must not be {@code null} but may contain {@code null}
-	 * @return an {@code ArgumentSet}; never {@code null}
-	 * @since 5.11
-	 * @see ArgumentSet
-	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
-	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
-	 */
-	@API(status = MAINTAINED, since = "5.13.3")
-	static ArgumentSet argumentSet(String name, @Nullable Object... arguments) {
-		return new ArgumentSet(name, arguments);
 	}
 
 	/**
@@ -164,6 +137,24 @@ public interface Arguments {
 
 	/**
 	 * Factory method for creating an instance of {@code Arguments} based on
+	 * the supplied {@code arguments}.
+	 *
+	 * <p>This method is an <em>alias</em> for {@link Arguments#of} and is
+	 * intended to be used when statically imported &mdash; for example, via:
+	 * {@code import static org.junit.jupiter.params.provider.Arguments.arguments;}
+	 *
+	 * @param arguments the arguments to be used for an invocation of the test
+	 * method; must not be {@code null} but may contain {@code null}
+	 * @return an instance of {@code Arguments}; never {@code null}
+	 * @since 5.3
+	 * @see #argumentSet(String, Object...)
+	 */
+	static Arguments arguments(@Nullable Object... arguments) {
+		return of(arguments);
+	}
+
+	/**
+	 * Factory method for creating an instance of {@code Arguments} based on
 	 * the supplied {@link List} of {@code arguments}.
 	 *
 	 * <p>This method is an <em>alias</em> for {@link Arguments#from} and is
@@ -185,6 +176,33 @@ public interface Arguments {
 	@API(status = EXPERIMENTAL, since = "6.1")
 	static Arguments argumentsFrom(Iterable<?> arguments) {
 		return from(arguments);
+	}
+
+	/**
+	 * Factory method for creating an {@link ArgumentSet} based on the supplied
+	 * {@code name} and {@code arguments}.
+	 *
+	 * <p>Favor this method over {@link Arguments#of Arguments.of(...)} and
+	 * {@link Arguments#arguments arguments(...)} when you wish to assign a
+	 * name to the entire set of arguments.
+	 *
+	 * <p>This method is well suited to be used as a static import &mdash; for
+	 * example, via:
+	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSet;}.
+	 *
+	 * @param name the name of the argument set; must not be {@code null} or
+	*                blank
+	 * @param arguments the arguments to be used for an invocation of the test
+	 * method; must not be {@code null} but may contain {@code null}
+	 * @return an {@code ArgumentSet}; never {@code null}
+	 * @since 5.11
+	 * @see ArgumentSet
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
+	 */
+	@API(status = MAINTAINED, since = "5.13.3")
+	static ArgumentSet argumentSet(String name, @Nullable Object... arguments) {
+		return new ArgumentSet(name, arguments);
 	}
 
 	/**
@@ -221,24 +239,6 @@ public interface Arguments {
 		var collection = new ArrayList<>();
 		arguments.forEach(collection::add);
 		return new ArgumentSet(name, collection.toArray());
-	}
-
-	/**
-	 * Convert the arguments to a new mutable {@link List} containing the same
-	 * elements as {@link #get()}.
-	 *
-	 * <p>This is useful for test logic that benefits from {@code List}
-	 * operations such as filtering, transformation, or assertions.
-	 *
-	 * @return a mutable List of arguments; never {@code null} but may contain
-	 * {@code null}
-	 * @since 6.1
-	 */
-	@API(status = EXPERIMENTAL, since = "6.1")
-	default List<@Nullable Object> toList() {
-		// We could return List<?> here but the unbounded wildcard is painful
-		// to work with.
-		return new ArrayList<>(Arrays.asList(get()));
 	}
 
 	/**
