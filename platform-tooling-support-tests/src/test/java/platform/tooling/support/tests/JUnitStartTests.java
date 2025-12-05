@@ -50,12 +50,12 @@ class JUnitStartTests {
 			}
 			for (var module : Helper.loadModuleDirectoryNames()) {
 				if (module.startsWith("junit-platform") || module.startsWith("junit-jupiter")
-						|| module.equals("junit-start")) {
-					if (module.equals("junit-jupiter-migrationsupport"))
+						|| "junit-start".equals(module)) {
+					if ("junit-jupiter-migrationsupport".equals(module))
 						continue;
 					if (module.startsWith("junit-platform-suite"))
 						continue;
-					if (module.equals("junit-platform-testkit"))
+					if ("junit-platform-testkit".equals(module))
 						continue;
 					var jar = MavenRepo.jar(module);
 					Files.copy(jar, lib.resolve(module + ".jar"));

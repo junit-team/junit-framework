@@ -101,6 +101,7 @@ commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin"
 develocity = { id = "com.gradle.develocity", version = "4.2.2" }
 download = { id = "de.undercouch.download", version = "5.6.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "4.3.0" }
+rewrite = { id = "org.openrewrite.rewrite", version = "7.21.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
 gitPublish = { id = "org.ajoberstar.git-publish", version = "5.1.3" }
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }

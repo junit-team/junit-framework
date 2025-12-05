@@ -1196,7 +1196,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		@Test
 		void test() {
-			assertTrue(value.equals("foo") || value.equals("bar"));
+			assertTrue("foo".equals(value) || "bar".equals(value));
 		}
 	}
 
@@ -1213,7 +1213,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		@Test
 		void test() {
-			assertTrue(value.equals("foo") || value.equals("bar"));
+			assertTrue("foo".equals(value) || "bar".equals(value));
 		}
 	}
 
@@ -1235,7 +1235,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		@Test
 		void test() {
-			assertTrue(value.equals("foo") || value.equals("bar"));
+			assertTrue("foo".equals(value) || "bar".equals(value));
 		}
 	}
 
@@ -1250,7 +1250,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		@Test
 		void test() {
-			assertTrue(value.equals("foo") || value.equals("bar"));
+			assertTrue("foo".equals(value) || "bar".equals(value));
 		}
 	}
 
@@ -1269,7 +1269,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	record ArgumentsSourceConstructorInjectionTestCase(String value) {
 		@Test
 		void test() {
-			assertTrue(value.equals("foo") || value.equals("bar"));
+			assertTrue("foo".equals(value) || "bar".equals(value));
 		}
 	}
 
@@ -1282,7 +1282,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 		@Test
 		void test() {
-			assertTrue(value.equals("foo") || value.equals("bar"));
+			assertTrue("foo".equals(value) || "bar".equals(value));
 		}
 	}
 

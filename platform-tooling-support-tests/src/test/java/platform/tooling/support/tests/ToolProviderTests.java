@@ -90,7 +90,7 @@ class ToolProviderTests {
 	void findAndRunJUnitOnTheClassPath() {
 		try (var loader = new URLClassLoader("junit", urls(lib), ClassLoader.getPlatformClassLoader())) {
 			var sl = ServiceLoader.load(ToolProvider.class, loader);
-			var junit = StreamSupport.stream(sl.spliterator(), false).filter(p -> p.name().equals("junit")).findFirst();
+			var junit = StreamSupport.stream(sl.spliterator(), false).filter(p -> "junit".equals(p.name())).findFirst();
 
 			assertTrue(junit.isPresent(), "Tool 'junit' not found in: " + lib);
 			assertJUnitPrintsHelpMessage(junit.get());
@@ -116,7 +116,7 @@ class ToolProviderTests {
 		var layer = bootLayer.defineModulesWithOneLoader(configuration, ClassLoader.getPlatformClassLoader());
 
 		var sl = ServiceLoader.load(layer, ToolProvider.class);
-		var junit = StreamSupport.stream(sl.spliterator(), false).filter(p -> p.name().equals("junit")).findFirst();
+		var junit = StreamSupport.stream(sl.spliterator(), false).filter(p -> "junit".equals(p.name())).findFirst();
 
 		assertTrue(junit.isPresent(), "Tool 'junit' not found in modules: " + modules);
 		assertJUnitPrintsHelpMessage(junit.get());

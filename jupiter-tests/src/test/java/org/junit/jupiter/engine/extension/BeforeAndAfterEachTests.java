@@ -231,7 +231,7 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		);
 		// @formatter:on
 
-		List<String> expected = beforeEachMethodCallSequence.getFirst().equals("beforeEachMethod1") ? list1 : list2;
+		List<String> expected = "beforeEachMethod1".equals(beforeEachMethodCallSequence.getFirst()) ? list1 : list2;
 
 		assertEquals(expected, callSequence, "wrong call sequence");
 

@@ -1023,7 +1023,7 @@ class DefaultLauncherTests {
 		inOrder.verify(executionListener).executionStarted(
 			argThat(d -> d.getUniqueIdObject().equals(UniqueId.forEngine("engine-id"))));
 		inOrder.verify(executionListener).executionSkipped(
-			argThat(d -> d.getUniqueIdObject().getLastSegment().getType().equals("container")),
+			argThat(d -> "container".equals(d.getUniqueIdObject().getLastSegment().getType())),
 			eq("Execution cancelled"));
 		inOrder.verify(executionListener).executionFinished(
 			argThat(d -> d.getUniqueIdObject().equals(UniqueId.forEngine("engine-id"))),
