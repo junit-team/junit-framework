@@ -98,6 +98,7 @@ public interface Arguments {
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an instance of {@code Arguments}; never {@code null}
+	 * @see #from(Iterable) 
 	 * @see #arguments(Object...)
 	 * @see #argumentSet(String, Object...)
 	 */
@@ -148,6 +149,7 @@ public interface Arguments {
 	 * @return an instance of {@code Arguments}; never {@code null}
 	 * @since 5.3
 	 * @see #argumentSet(String, Object...)
+	 * @see #argumentsFrom(Iterable)
 	 */
 	static Arguments arguments(@Nullable Object... arguments) {
 		return of(arguments);
@@ -155,7 +157,7 @@ public interface Arguments {
 
 	/**
 	 * Factory method for creating an instance of {@code Arguments} based on
-	 * the supplied {@link List} of {@code arguments}.
+	 * the supplied {@link Iterable} of {@code arguments}.
 	 *
 	 * <p>This method is an <em>alias</em> for {@link Arguments#from} and is
 	 * intended to be used when statically imported &mdash; for example, via:
@@ -171,7 +173,8 @@ public interface Arguments {
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an instance of {@code Arguments}; never {@code null}
 	 * @since 6.1
-	 * @see #argumentSet(String, Object...)
+	 * @see #arguments(Object...) 
+	 * @see #argumentSetFrom(String, Iterable)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	static Arguments argumentsFrom(Iterable<?> arguments) {
@@ -191,12 +194,13 @@ public interface Arguments {
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSet;}.
 	 *
 	 * @param name the name of the argument set; must not be {@code null} or
-	*                blank
+	*  blank
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an {@code ArgumentSet}; never {@code null}
 	 * @since 5.11
 	 * @see ArgumentSet
+	 * @see #argumentSetFrom(String, Iterable) 
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
@@ -207,12 +211,12 @@ public interface Arguments {
 
 	/**
 	 * Factory method for creating an {@link ArgumentSet} based on the supplied
-	 * {@code name} and {@link List} of {@code arguments}.
-	 *
-	 * <p>This method is a convenient alternative to
-	 * {@link #argumentSet(String, Object...)} when working with {@link List}
-	 * based inputs.
-	 *
+	 * {@code name} and {@link Iterable} of {@code arguments}.
+	 * 
+	 * <p>This method is well suited to be used as a static import &mdash; for
+	 * example, via:
+	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSetFrom;}.
+	 * 
 	 * <p>The iterable supplied to this method should be a finite collection
 	 * and have a reliable iteration order to provide arguments in a consistent
 	 * order to tests. It is therefore recommended that the iterable be a
@@ -225,7 +229,10 @@ public interface Arguments {
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an {@code ArgumentSet}; never {@code null}
 	 * @since 6.1
+	 * @see ArgumentSet
 	 * @see #argumentSet(String, Object...)
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
+	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	static ArgumentSet argumentSetFrom(String name, Iterable<?> arguments) {
