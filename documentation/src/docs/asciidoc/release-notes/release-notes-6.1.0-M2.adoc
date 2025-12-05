@@ -45,7 +45,15 @@ repository on GitHub.
 [[release-notes-6.1.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* Support the creation of `Arguments` from iterables. These additions make it
+  easier to dynamically build arguments from collections when using
+  `@ParameterizedTest`:
+** `Arguments.of(Iterable<?>)`
+** `Arguments.argumentsFrom(Iterable<?>)` (alias)
+** `Arguments.argumentSetFrom(String, Iterable<?>)`
+** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
+
+
 
 
 [[release-notes-6.1.0-M2-junit-vintage]]
