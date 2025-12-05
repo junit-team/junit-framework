@@ -54,8 +54,6 @@ repository on GitHub.
 ** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
 
 
-
-
 [[release-notes-6.1.0-M2-junit-vintage]]
 === JUnit Vintage
 
