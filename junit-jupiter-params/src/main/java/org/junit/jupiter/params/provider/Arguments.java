@@ -254,6 +254,7 @@ public interface Arguments {
 	 *
 	 * @since 5.11
 	 * @see Arguments#argumentSet(String, Object...)
+	 * @see Arguments#argumentSetFrom(String, Iterable)
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
