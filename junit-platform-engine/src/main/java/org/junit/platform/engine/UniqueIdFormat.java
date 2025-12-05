@@ -12,8 +12,6 @@ package org.junit.platform.engine;
 
 import static java.util.stream.Collectors.joining;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -33,10 +31,7 @@ import org.junit.platform.engine.UniqueId.Segment;
  *
  * @since 1.0
  */
-class UniqueIdFormat implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+class UniqueIdFormat {
 
 	private static final UniqueIdFormat defaultFormat = new UniqueIdFormat('[', ':', ']', '/');
 
