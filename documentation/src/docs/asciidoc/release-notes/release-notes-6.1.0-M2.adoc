@@ -45,7 +45,7 @@ repository on GitHub.
 [[release-notes-6.1.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* `JAVA_27` has been added to the `JRE` enum for use with `JRE`-based execution conditions.
 
 
 [[release-notes-6.1.0-M2-junit-vintage]]
