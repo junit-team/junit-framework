@@ -213,6 +213,10 @@ public interface Arguments {
 	 * Factory method for creating an {@link ArgumentSet} based on the supplied
 	 * {@code name} and {@link Iterable} of {@code arguments}.
 	 * 
+	 * <p>Favor this method over {@link Arguments#from(Iterable) Arguments.from(...)} and
+	 * {@link Arguments#argumentsFrom(Iterable) argumentsFrom(...)} when you wish to assign a
+	 * name to the entire set of arguments.
+	 * 
 	 * <p>This method is well suited to be used as a static import &mdash; for
 	 * example, via:
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSetFrom;}.
