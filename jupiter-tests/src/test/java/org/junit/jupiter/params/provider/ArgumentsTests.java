@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -170,7 +169,7 @@ class ArgumentsTests {
 		}
 
 		@Override
-		public @NotNull Iterator<@Nullable Object> iterator() {
+		public Iterator<@Nullable Object> iterator() {
 			return collection.iterator();
 		}
 	}
