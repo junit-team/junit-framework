@@ -31,6 +31,8 @@ jobs:
           type: ga
         - version: 26
           type: ea
+        - version: 27
+          type: ea
         - version: 26
           type: ea
           release: leyden
