@@ -65,8 +65,16 @@ class ArgumentsTests {
 	}
 
 	@Test
-	void fromSupportsList() {
-		var input = Arrays.<@Nullable Object> asList(1, "two", null, 3.0);
+	void fromSupportsCollection() {
+		Collection<@Nullable Object> input = Arrays.asList(1, "two", null, 3.0);
+		var arguments = Arguments.from(input);
+
+		assertArrayEquals(new Object[] { 1, "two", null, 3.0 }, arguments.get());
+	}
+
+	@Test
+	void fromSupportsIterable() {
+		var input = new IterableWithNullableElements(1, "two", null, 3.0);
 		var arguments = Arguments.from(input);
 
 		assertArrayEquals(new Object[] { 1, "two", null, 3.0 }, arguments.get());

@@ -98,7 +98,7 @@ public interface Arguments {
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an instance of {@code Arguments}; never {@code null}
-	 * @see #from(Iterable) 
+	 * @see #from(Iterable)
 	 * @see #arguments(Object...)
 	 * @see #argumentSet(String, Object...)
 	 */
@@ -173,7 +173,7 @@ public interface Arguments {
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an instance of {@code Arguments}; never {@code null}
 	 * @since 6.1
-	 * @see #arguments(Object...) 
+	 * @see #arguments(Object...)
 	 * @see #argumentSetFrom(String, Iterable)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
@@ -200,7 +200,7 @@ public interface Arguments {
 	 * @return an {@code ArgumentSet}; never {@code null}
 	 * @since 5.11
 	 * @see ArgumentSet
-	 * @see #argumentSetFrom(String, Iterable) 
+	 * @see #argumentSetFrom(String, Iterable)
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_PLACEHOLDER
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
@@ -212,15 +212,15 @@ public interface Arguments {
 	/**
 	 * Factory method for creating an {@link ArgumentSet} based on the supplied
 	 * {@code name} and {@link Iterable} of {@code arguments}.
-	 * 
+	 *
 	 * <p>Favor this method over {@link Arguments#from(Iterable) Arguments.from(...)} and
 	 * {@link Arguments#argumentsFrom(Iterable) argumentsFrom(...)} when you wish to assign a
 	 * name to the entire set of arguments.
-	 * 
+	 *
 	 * <p>This method is well suited to be used as a static import &mdash; for
 	 * example, via:
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSetFrom;}.
-	 * 
+	 *
 	 * <p>The iterable supplied to this method should be a finite collection
 	 * and have a reliable iteration order to provide arguments in a consistent
 	 * order to tests. It is therefore recommended that the iterable be a
@@ -244,12 +244,12 @@ public interface Arguments {
 		Preconditions.notNull(arguments, "arguments list must not be null");
 
 		if (arguments instanceof Collection<?> collection) {
-			return new ArgumentSet(name, collection.toArray());
+			return argumentSet(name, collection.toArray());
 		}
 
 		var collection = new ArrayList<>();
 		arguments.forEach(collection::add);
-		return new ArgumentSet(name, collection.toArray());
+		return argumentSet(name, collection.toArray());
 	}
 
 	/**
