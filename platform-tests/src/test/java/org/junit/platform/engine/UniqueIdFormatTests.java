@@ -69,8 +69,18 @@ class UniqueIdFormatTests {
 		}
 
 		@Override
+		public String getDefaultEngineUid() {
+			return getEngineUid();
+		}
+
+		@Override
 		public String getMethodUid() {
 			return "[engine:junit-jupiter]/[class:MyClass]/[method:myMethod]";
+		}
+
+		@Override
+		public String getDefaultMethodUid() {
+			return getMethodUid();
 		}
 
 	}
@@ -91,8 +101,18 @@ class UniqueIdFormatTests {
 		}
 
 		@Override
+		public String getDefaultEngineUid() {
+			return "[engine:junit-jupiter]";
+		}
+
+		@Override
 		public String getMethodUid() {
 			return "{engine=junit-jupiter},{class=MyClass},{method=myMethod}";
+		}
+
+		@Override
+		public String getDefaultMethodUid() {
+			return "[engine:junit-jupiter]/[class:MyClass]/[method:myMethod]";
 		}
 
 	}
@@ -110,7 +130,11 @@ class UniqueIdFormatTests {
 
 		String getEngineUid();
 
+		String getDefaultEngineUid();
+
 		String getMethodUid();
+
+		String getDefaultMethodUid();
 
 		@Test
 		default void parseMalformedUid() {
@@ -123,7 +147,7 @@ class UniqueIdFormatTests {
 			var parsedId = getFormat().parse(getEngineUid());
 			assertSegment(parsedId.getSegments().getFirst(), "engine", "junit-jupiter");
 			assertEquals(getEngineUid(), getFormat().format(parsedId));
-			assertEquals(getEngineUid(), parsedId.toString());
+			assertEquals(getDefaultEngineUid(), parsedId.toString());
 		}
 
 		@Test
@@ -133,7 +157,7 @@ class UniqueIdFormatTests {
 			assertSegment(parsedId.getSegments().get(1), "class", "MyClass");
 			assertSegment(parsedId.getSegments().get(2), "method", "myMethod");
 			assertEquals(getMethodUid(), getFormat().format(parsedId));
-			assertEquals(getMethodUid(), parsedId.toString());
+			assertEquals(getDefaultMethodUid(), parsedId.toString());
 		}
 
 	}
