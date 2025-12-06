@@ -540,7 +540,7 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		public void preConstructTestInstance(TestInstanceFactoryContext factoryContext, ExtensionContext context) {
 			assertThat(context.getTestInstance()).isNotPresent();
 			assertThat(context.getTestClass()).isPresent();
-			if (name.equals("legacy")) {
+			if ("legacy".equals(name)) {
 				assertThat(factoryContext.getTestClass()).isSameAs(context.getTestClass().get());
 			}
 			else if (context.getTestInstanceLifecycle().orElse(null) != TestInstance.Lifecycle.PER_CLASS) {

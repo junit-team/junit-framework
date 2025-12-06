@@ -100,7 +100,7 @@ import org.junit.platform.commons.util.pkg1.subpkg.SubclassWithNonStaticPackageP
  */
 class ReflectionUtilsTests {
 
-	private static final Predicate<Method> isFooMethod = method -> method.getName().equals("foo");
+	private static final Predicate<Method> isFooMethod = method -> "foo".equals(method.getName());
 	private static final Predicate<Method> methodContains1 = method -> method.getName().contains("1");
 	private static final Predicate<Method> methodContains2 = method -> method.getName().contains("2");
 	private static final Predicate<Method> methodContains4 = method -> method.getName().contains("4");
@@ -1270,7 +1270,7 @@ class ReflectionUtilsTests {
 
 		@Test
 		void isMethodPresent() {
-			Predicate<Method> isMethod1 = method -> (method.getName().equals("method1")
+			Predicate<Method> isMethod1 = method -> ("method1".equals(method.getName())
 					&& method.getParameterTypes().length == 1 && method.getParameterTypes()[0] == String.class);
 
 			assertThat(ReflectionUtils.isMethodPresent(MethodShadowingChild.class, isMethod1)).isTrue();
@@ -1504,7 +1504,7 @@ class ReflectionUtilsTests {
 		 */
 		@Test
 		void findMethodsFindsDistinctMethodsDeclaredInMultipleInterfaces() {
-			Predicate<Method> isStringsMethod = method -> method.getName().equals("strings");
+			Predicate<Method> isStringsMethod = method -> "strings".equals(method.getName());
 			assertThat(findMethods(DoubleInheritedInterfaceMethodTestCase.class, isStringsMethod)).hasSize(1);
 		}
 
@@ -1551,10 +1551,10 @@ class ReflectionUtilsTests {
 					.containsExactly(ChildClass.class.getMethod("otherMethod3"),
 						ParentClass.class.getMethod("otherMethod2"), GrandparentClass.class.getMethod("otherMethod1"));
 
-			assertThat(findMethods(ChildClass.class, method -> method.getName().equals("method2"), BOTTOM_UP))//
+			assertThat(findMethods(ChildClass.class, method -> "method2".equals(method.getName()), BOTTOM_UP))//
 					.containsExactly(ParentClass.class.getMethod("method2"));
 
-			assertThat(findMethods(ChildClass.class, method -> method.getName().equals("wrongName"), BOTTOM_UP))//
+			assertThat(findMethods(ChildClass.class, method -> "wrongName".equals(method.getName()), BOTTOM_UP))//
 					.isEmpty();
 
 			assertThat(findMethods(ParentClass.class, method -> method.getName().contains("method"), BOTTOM_UP))//
@@ -1573,10 +1573,10 @@ class ReflectionUtilsTests {
 					.containsExactly(GrandparentClass.class.getMethod("otherMethod1"),
 						ParentClass.class.getMethod("otherMethod2"), ChildClass.class.getMethod("otherMethod3"));
 
-			assertThat(findMethods(ChildClass.class, method -> method.getName().equals("method2"), TOP_DOWN))//
+			assertThat(findMethods(ChildClass.class, method -> "method2".equals(method.getName()), TOP_DOWN))//
 					.containsExactly(ParentClass.class.getMethod("method2"));
 
-			assertThat(findMethods(ChildClass.class, method -> method.getName().equals("wrongName"), TOP_DOWN))//
+			assertThat(findMethods(ChildClass.class, method -> "wrongName".equals(method.getName()), TOP_DOWN))//
 					.isEmpty();
 
 			assertThat(findMethods(ParentClass.class, method -> method.getName().contains("method"), TOP_DOWN))//

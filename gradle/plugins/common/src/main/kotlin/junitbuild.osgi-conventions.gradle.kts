@@ -99,14 +99,21 @@ val osgiVerificationClasspath = configurations.resolvable("osgiVerificationClass
 	extendsFrom(osgiVerification.get())
 }
 
+// Make the task available for calling from outside
+tasks.register("verifyOSGiTask") {
+	description = "Verifies OSGi metadata in the built jar"
+	group = "verification"
+	dependsOn(verify)
+}
+
 // Bnd's Resolve task is what verifies that a jar can be used in OSGi and
 // that its metadata is valid. If the metadata is invalid this task will
 // fail.
-val verifyOSGi by tasks.registering(Resolve::class) {
+val verify by tasks.registering(Resolve::class) {
 	bndrun = osgiProperties.flatMap { it.destinationFile }
 	outputBndrun = layout.buildDirectory.file("resolvedOSGiProperties.bndrun")
 	isReportOptional = false
-	// By default bnd will use jars found in:
+	// By default, bnd will use jars found in:
 	// 1. project.sourceSets.main.runtimeClasspath
 	// 2. project.configurations.archives.artifacts.files
 	// to validate the metadata.
@@ -115,8 +122,4 @@ val verifyOSGi by tasks.registering(Resolve::class) {
 	// end up in the dependencies of those projects.
 	bundles(osgiVerificationClasspath)
 	properties.empty()
-}
-
-tasks.check {
-	dependsOn(verifyOSGi)
 }

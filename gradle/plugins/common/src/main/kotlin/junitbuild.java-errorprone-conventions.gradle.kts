@@ -45,6 +45,7 @@ tasks.withType<JavaCompile>().configureEach {
 			error(
 				"CanonicalAnnotationSyntax",
 				"IsInstanceLambdaUsage",
+				"TryWithResourcesVariable",
 				"PackageLocation",
 				"RedundantStringConversion",
 				"RedundantStringEscape",

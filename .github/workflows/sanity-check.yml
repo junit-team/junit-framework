@@ -1,0 +1,48 @@
+name: Sanity Check 🕊
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+    paths:
+      - '.github/**'
+  pull_request:
+    paths:
+      - '.github/**'
+permissions: {}
+jobs:
+  validate:
+    name: Validate 📊
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout Repository 📥
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+      - name: Checkstyle ☑️
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: checkstyleMain
+      - name: Spotless ✨
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: spotlessCheck
+      - name: ArchUnit 🏛️
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: archUnit
+      - name: OSGi 🧩
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: verifyOSGiTask
+      - name: Rewrite ⚙️
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: rewriteDryRun -Dorg.gradle.jvmargs=-Xmx2G

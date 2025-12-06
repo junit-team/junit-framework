@@ -136,7 +136,7 @@ class DefaultClasspathScannerTests {
 	@Test
 	void scanForResourcesInClasspathRootWhenGenericRuntimeExceptionOccurs(LogRecordListener listener) throws Exception {
 		Predicate<Resource> runtimeExceptionSimulationFilter = resource -> {
-			if (resource.getName().equals("org/junit/platform/commons/other-example.resource")) {
+			if ("org/junit/platform/commons/other-example.resource".equals(resource.getName())) {
 				throw new RuntimeException("a generic exception");
 			}
 			return true;
