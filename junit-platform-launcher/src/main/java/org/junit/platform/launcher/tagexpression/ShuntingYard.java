@@ -10,7 +10,6 @@
 
 package org.junit.platform.launcher.tagexpression;
 
-import static java.lang.Integer.MIN_VALUE;
 import static java.util.Objects.requireNonNull;
 import static org.junit.platform.launcher.tagexpression.Operator.nullaryOperator;
 import static org.junit.platform.launcher.tagexpression.ParseStatus.emptyTagExpression;
@@ -34,7 +33,7 @@ class ShuntingYard {
 
 	private static final Operator RightParenthesis = nullaryOperator(")", -1);
 	private static final Operator LeftParenthesis = nullaryOperator("(", -2);
-	private static final Operator Sentinel = nullaryOperator("sentinel", MIN_VALUE);
+	private static final Operator Sentinel = nullaryOperator("sentinel", Integer.MIN_VALUE);
 	private static final Token SentinelToken = new Token(-1, "");
 
 	private final Operators validOperators = new Operators();
