@@ -38,7 +38,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
 public final class UniqueId implements Cloneable, Serializable {
 
 	@Serial
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	private static final String ENGINE_SEGMENT_TYPE = "engine";
 
@@ -79,10 +79,8 @@ public final class UniqueId implements Cloneable, Serializable {
 	 * @see #forEngine(String)
 	 */
 	public static UniqueId root(String segmentType, String value) {
-		return new UniqueId(UniqueIdFormat.getDefault(), new Segment(segmentType, value));
+		return new UniqueId(new Segment(segmentType, value));
 	}
-
-	private final UniqueIdFormat uniqueIdFormat;
 
 	@SuppressWarnings({ "serial", "RedundantSuppression" }) // always used with serializable implementation (List.copyOf())
 	private final List<Segment> segments;
@@ -93,19 +91,14 @@ public final class UniqueId implements Cloneable, Serializable {
 	// lazily computed
 	private transient @Nullable SoftReference<String> toString;
 
-	private UniqueId(UniqueIdFormat uniqueIdFormat, Segment segment) {
-		this(uniqueIdFormat, List.of(segment));
+	private UniqueId(Segment segment) {
+		this(List.of(segment));
 	}
 
 	/**
 	 * Initialize a {@code UniqueId} instance.
-	 *
-	 * @implNote A defensive copy of the segment list is <b>not</b> created by
-	 * this implementation. All callers should immediately drop the reference
-	 * to the list instance that they pass into this constructor.
 	 */
-	UniqueId(UniqueIdFormat uniqueIdFormat, List<Segment> segments) {
-		this.uniqueIdFormat = uniqueIdFormat;
+	UniqueId(List<Segment> segments) {
 		this.segments = List.copyOf(segments);
 	}
 
@@ -164,7 +157,7 @@ public final class UniqueId implements Cloneable, Serializable {
 		List<Segment> baseSegments = new ArrayList<>(this.segments.size() + 1);
 		baseSegments.addAll(this.segments);
 		baseSegments.add(segment);
-		return new UniqueId(this.uniqueIdFormat, baseSegments);
+		return new UniqueId(baseSegments);
 	}
 
 	/**
@@ -215,7 +208,7 @@ public final class UniqueId implements Cloneable, Serializable {
 	@API(status = STABLE, since = "1.5")
 	public UniqueId removeLastSegment() {
 		Preconditions.condition(this.segments.size() > 1, "Cannot remove last remaining segment");
-		return new UniqueId(uniqueIdFormat, List.copyOf(this.segments.subList(0, this.segments.size() - 1)));
+		return new UniqueId(this.segments.subList(0, this.segments.size() - 1));
 	}
 
 	/**
@@ -277,7 +270,7 @@ public final class UniqueId implements Cloneable, Serializable {
 		SoftReference<String> s = this.toString;
 		String value = s == null ? null : s.get();
 		if (value == null) {
-			value = this.uniqueIdFormat.format(this);
+			value = UniqueIdFormat.getDefault().format(this);
 			// this is a benign race like String#hash
 			// we potentially read and write values from multiple threads
 			// without a happens-before relationship
