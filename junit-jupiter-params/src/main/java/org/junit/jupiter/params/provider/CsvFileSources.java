@@ -23,7 +23,7 @@ import org.apiguardian.api.API;
 
 /**
  * {@code @CsvFileSources} is a simple container for one or more
- * {@link CsvFileSource} annotations.
+ * {@link CsvFileSource @CsvFileSource} annotations.
  *
  * <p>Note, however, that use of the {@code @CsvFileSources} container is completely
  * optional since {@code @CsvFileSource} is a {@linkplain java.lang.annotation.Repeatable
@@ -31,7 +31,7 @@ import org.apiguardian.api.API;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited to subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.11
  * @see CsvFileSource

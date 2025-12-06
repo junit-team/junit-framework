@@ -16,7 +16,7 @@ repository on GitHub.
 [[release-notes-6.1.0-M2-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* Clarify `TestDescriptor` implementation requirements.
 
 [[release-notes-6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -49,6 +49,8 @@ repository on GitHub.
 * Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
   methods for `AssertionFailureBuilder`. It allows user defined assertions to
   trim their stacktrace.
+* `JAVA_27` has been added to the `JRE` enum for use with `JRE`-based execution conditions.
+
 
 [[release-notes-6.1.0-M2-junit-vintage]]
 === JUnit Vintage

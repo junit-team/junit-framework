@@ -27,7 +27,7 @@ import org.junit.platform.commons.annotation.Testable;
  * <em>class template</em>.
  *
  * <p>In contrast to regular test classes, a class template is not directly
- * a test class but rather a template for a set of test classes. As such, it is
+ * a test class but rather a template for a set of test cases. As such, it is
  * designed to be invoked multiple times depending on the number of {@linkplain
  * org.junit.jupiter.api.extension.ClassTemplateInvocationContext invocation contexts}
  * returned by the registered {@linkplain
@@ -46,7 +46,7 @@ import org.junit.platform.commons.annotation.Testable;
  *
  * <h2>Inheritance</h2>
  *
- * <p>This annotation is inherited by subclasses.
+ * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
  *
  * @since 5.13
  * @see TestTemplate @TestTemplate

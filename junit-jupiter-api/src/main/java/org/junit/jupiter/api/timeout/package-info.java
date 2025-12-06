@@ -1,5 +1,5 @@
 /**
- * Internal JUnit Jupiter utilities.
+ * Internal JUnit Jupiter timeout utilities.
  *
  * <h2>DISCLAIMER</h2>
  *
@@ -9,6 +9,6 @@
  */
 
 @NullMarked
-package org.junit.jupiter.api.util;
+package org.junit.jupiter.api.timeout;
 
 import org.jspecify.annotations.NullMarked;

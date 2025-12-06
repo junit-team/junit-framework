@@ -15,8 +15,7 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 import org.apiguardian.api.API;
 
 /**
- * Dummy enum class used as default value for optional attributes of
- * annotations.
+ * Dummy enum class used as the default value for optional attributes of annotations.
  *
  * @since 5.6
  * @see EnumSource#value()

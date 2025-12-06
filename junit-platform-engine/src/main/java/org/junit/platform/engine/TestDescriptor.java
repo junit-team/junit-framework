@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
- * Mutable descriptor for a test or container that has been discovered by a
- * {@link TestEngine}.
+ * A descriptor with a mutable hierarchy for a test or container that has been
+ * discovered by a {@link TestEngine}.
  *
  * @since 1.0
  * @see TestEngine
@@ -41,6 +41,9 @@ public interface TestDescriptor {
 	 *
 	 * <p>Uniqueness must be guaranteed across an entire test plan,
 	 * regardless of how many engines are used behind the scenes.
+	 *
+	 * <p>The implementation must treat this property as immutable after test
+	 * discovery has completed.
 	 *
 	 * @return the {@code UniqueId} for this descriptor; never {@code null}
 	 */
@@ -77,6 +80,9 @@ public interface TestDescriptor {
 	/**
 	 * Get the set of {@linkplain TestTag tags} associated with this descriptor.
 	 *
+	 * <p>The implementation must treat this property as immutable after test
+	 * discovery has completed.
+	 *
 	 * @return the set of tags associated with this descriptor; never {@code null}
 	 * but potentially empty
 	 * @see TestTag
@@ -86,6 +92,9 @@ public interface TestDescriptor {
 	/**
 	 * Get the {@linkplain TestSource source} of the test or container described
 	 * by this descriptor, if available.
+	 *
+	 * <p>The implementation must treat this property as immutable after test
+	 * discovery has completed.
 	 *
 	 * @see TestSource
 	 */
@@ -105,6 +114,9 @@ public interface TestDescriptor {
 
 	/**
 	 * Get the immutable set of <em>children</em> of this descriptor.
+	 *
+	 * <p>The implementation must be consistent with {@link #isContainer()} such that
+	 * {@code !x.container()} implies {@code x.getChildren().isEmpty()}.
 	 *
 	 * @return the set of children of this descriptor; neither {@code null}
 	 * nor mutable, but potentially empty
@@ -140,6 +152,9 @@ public interface TestDescriptor {
 	 *
 	 * <p>A <em>descendant</em> is a child of this descriptor or a child of one of
 	 * its children, recursively.
+	 *
+	 * <p>The implementation must be consistent with {@link #isContainer()} such that
+	 * {@code !x.container()} implies {@code x.getDescendants().isEmpty()}.
 	 *
 	 * @see #getChildren()
 	 */
@@ -223,6 +238,9 @@ public interface TestDescriptor {
 	/**
 	 * Determine the {@link Type} of this descriptor.
 	 *
+	 * <p>The implementation must treat this property as immutable after test
+	 * discovery has completed.
+	 *
 	 * @return the descriptor type; never {@code null}.
 	 * @see #isContainer()
 	 * @see #isTest()
@@ -230,7 +248,14 @@ public interface TestDescriptor {
 	Type getType();
 
 	/**
-	 * Determine if this descriptor describes a container.
+	 * Determine if this descriptor describes a <em>container</em>.
+	 *
+	 * <p>A test descriptor is a <em>container</em> when it may contain other
+	 * containers or tests as its children. In addition to being a
+	 * <em>container</em> this test descriptor may also be a <em>test</em>.
+	 *
+	 * <p>The implementation must be consistent with {@link #getType()} such
+	 * that {@code x.isContainer()} equals {@code x.getType().isContainer()}.
 	 *
 	 * <p>The default implementation delegates to {@link Type#isContainer()}.
 	 */
@@ -239,7 +264,14 @@ public interface TestDescriptor {
 	}
 
 	/**
-	 * Determine if this descriptor describes a test.
+	 * Determine if this descriptor describes a <em>test</em>.
+	 *
+	 * <p>A test descriptor is a <em>test</em> when it verifies expected
+	 * behavior when executed. In addition to being a <em>test</em> this
+	 * test descriptor may also be a <em>container</em>.
+	 *
+	 * <p>The implementation must be consistent with {@link #getType()} such
+	 * that {@code x.isTest()} equals {@code x.getType().isTest()}.
 	 *
 	 * <p>The default implementation delegates to {@link Type#isTest()}.
 	 */
@@ -250,6 +282,10 @@ public interface TestDescriptor {
 	/**
 	 * Determine if this descriptor may register dynamic tests during execution.
 	 *
+	 * <p>The implementation must treat this property as immutable after test
+	 * discovery has completed and must be consistent with {@link #isContainer()}
+	 * such that {@code !x.container()} implies {@code !x.mayRegisterTests()}.
+	 *
 	 * <p>The default implementation assumes tests are usually known during
 	 * discovery and thus returns {@code false}.
 	 */
@@ -259,7 +295,7 @@ public interface TestDescriptor {
 
 	/**
 	 * Determine if the supplied descriptor (or any of its descendants)
-	 * {@linkplain TestDescriptor#isTest() is a test} or
+	 * {@linkplain TestDescriptor#isTest() is a <em>test</em>} or
 	 * {@linkplain TestDescriptor#mayRegisterTests() may potentially register
 	 * tests dynamically}.
 	 *
@@ -355,12 +391,14 @@ public interface TestDescriptor {
 	enum Type {
 
 		/**
-		 * Denotes that the {@link TestDescriptor} is for a <em>container</em>.
+		 * Denotes that the {@link TestDescriptor} is strictly for a
+		 * <em>container</em>. I.e. it is not also a <em>test</em>.
 		 */
 		CONTAINER,
 
 		/**
-		 * Denotes that the {@link TestDescriptor} is for a <em>test</em>.
+		 * Denotes that the {@link TestDescriptor} is strictly for a
+		 * <em>test</em>. I.e. it is not also a <em>container</em>.
 		 */
 		TEST,
 
