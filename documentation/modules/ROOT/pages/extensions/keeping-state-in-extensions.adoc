@@ -1,5 +1,4 @@
-[[extensions-keeping-state]]
-=== Keeping State in Extensions
+= Keeping State in Extensions
 
 Usually, an extension is instantiated only once. So the question becomes relevant: How do
 you keep the state from one invocation of an extension to the next? The
@@ -47,7 +46,7 @@ resource.
 [source,java,indent=0]
 .`_HttpServer_` resource implementing `_AutoCloseable_`
 ----
-include::{testDir}/example/extensions/HttpServerResource.java[tags=user_guide]
+include::example$java/example/extensions/HttpServerResource.java[tags=user_guide]
 ----
 
 This resource can then be stored in the desired `ExtensionContext`. It may be stored at
@@ -59,13 +58,13 @@ classes and methods.
 [source,java,indent=0]
 .Lazily storing in root context with `_Store.computeIfAbsent_`
 ----
-include::{testDir}/example/extensions/HttpServerExtension.java[tags=user_guide]
+include::example$java/example/extensions/HttpServerExtension.java[tags=user_guide]
 ----
 
 [source,java,indent=0]
 .A test case using the `_HttpServerExtension_`
 ----
-include::{testDir}/example/HttpServerDemo.java[tags=user_guide]
+include::example$java/example/HttpServerDemo.java[tags=user_guide]
 ----
 
 [[extensions-keeping-state-autocloseable-migration]]
@@ -93,4 +92,3 @@ public class MyResource implements Store.CloseableResource, AutoCloseable {
 This ensures that your resource will be properly closed regardless of which JUnit Jupiter
 version is being used.
 ====
-

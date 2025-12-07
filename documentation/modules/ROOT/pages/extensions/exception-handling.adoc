@@ -1,5 +1,4 @@
-[[extensions-exception-handling]]
-=== Exception Handling
+= Exception Handling
 
 Exceptions thrown during the test execution may be intercepted and handled accordingly
 before propagating further, so that certain actions like error logging or resource releasing
@@ -14,7 +13,7 @@ but rethrow any other type of exception.
 [source,java,indent=0]
 .An exception handling extension that filters IOExceptions in test execution
 ----
-include::{testDir}/example/exception/IgnoreIOExceptionExtension.java[tags=user_guide]
+include::example$java/example/exception/IgnoreIOExceptionExtension.java[tags=user_guide]
 ----
 
 Another example shows how to record the state of an application under test exactly at
@@ -26,7 +25,7 @@ status, this solution guarantees execution immediately after failing `@BeforeAll
 [source,java,indent=0]
 .An exception handling extension that records application state on error
 ----
-include::{testDir}/example/exception/RecordStateOnErrorExtension.java[tags=user_guide]
+include::example$java/example/exception/RecordStateOnErrorExtension.java[tags=user_guide]
 ----
 
 Multiple execution exception handlers may be invoked for the same lifecycle method in
@@ -43,6 +42,5 @@ test methods.
 [source,java,indent=0]
 .Registering multiple exception handling extensions
 ----
-include::{testDir}/example/exception/MultipleHandlersTestCase.java[tags=user_guide]
+include::example$java/example/exception/MultipleHandlersTestCase.java[tags=user_guide]
 ----
-

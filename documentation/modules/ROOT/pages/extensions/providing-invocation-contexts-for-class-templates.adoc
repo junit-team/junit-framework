@@ -1,5 +1,4 @@
-[[extensions-class-templates]]
-=== Providing Invocation Contexts for Class Templates
+= Providing Invocation Contexts for Class Templates
 
 A `{ClassTemplate}` class can only be executed when at least one
 `{ClassTemplateInvocationContextProvider}` is registered. Each such provider is
@@ -13,7 +12,7 @@ and implement a `{ClassTemplateInvocationContextProvider}`.
 [source,java,indent=0]
 .A class template with accompanying extension
 ----
-include::{testDir}/example/ClassTemplateDemo.java[tags=user_guide]
+include::example$java/example/ClassTemplateDemo.java[tags=user_guide]
 ----
 
 In this example, the class template will be invoked twice, meaning all test methods in
@@ -40,4 +39,3 @@ modifying the context.
 Please refer to the implementations of
 <<writing-tests-parameterized-tests, Parameterized Classes>> which uses this extension
 point to provide its functionality.
-
