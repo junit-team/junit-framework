@@ -1,3 +1,3 @@
-[[running-tests]]
-== Running Tests
+= Running Tests
 
+This section explains how to run tests from IDEs and build tools.
