@@ -1,5 +1,4 @@
-[[writing-tests-declarative-timeouts]]
-=== Timeouts
+= Timeouts
 
 The `@Timeout` annotation allows one to declare that a test, test factory, test template,
 or lifecycle method should fail if its execution time exceeds a given duration. The time
@@ -9,7 +8,7 @@ The following example shows how `@Timeout` is applied to lifecycle and test meth
 
 [source,java]
 ----
-include::{testDir}/example/TimeoutDemo.java[tags=user_guide]
+include::example$java/example/TimeoutDemo.java[tags=user_guide]
 ----
 
 To apply the same timeout to all test methods within a test class and all of its `@Nested`
@@ -28,7 +27,7 @@ If `@Timeout` is present on a `@TestTemplate` method — for example, a `@Repeat
 `@ParameterizedTest` — each invocation will have the given timeout applied to it.
 
 [[writing-tests-declarative-timeouts-thread-mode]]
-==== Thread mode
+== Thread mode
 
 The timeout can be applied using one of the following three thread modes: `SAME_THREAD`,
 `SEPARATE_THREAD`, or `INFERRED`.
@@ -49,7 +48,7 @@ provided configuration parameter is invalid or not present then `SAME_THREAD` is
 fallback.
 
 [[writing-tests-declarative-timeouts-default-timeouts]]
-==== Default Timeouts
+== Default Timeouts
 
 The following <<running-tests-config-params, configuration parameters>> can be used to
 specify default timeouts for all methods of a certain category unless they or an enclosing
@@ -102,7 +101,7 @@ omitted. Specifying no unit is equivalent to using seconds.
 
 
 [[writing-tests-declarative-timeouts-polling]]
-==== Using @Timeout for Polling Tests
+== Using @Timeout for Polling Tests
 
 When dealing with asynchronous code, it is common to write tests that poll while waiting
 for something to happen before performing any assertions. In some cases you can rewrite
@@ -120,7 +119,7 @@ until" logic very easily.
 
 [source,java]
 ----
-include::{testDir}/example/PollingTimeoutDemo.java[tags=user_guide,indent=0]
+include::example$java/example/PollingTimeoutDemo.java[tags=user_guide,indent=0]
 ----
 
 NOTE: If you need more control over polling intervals and greater flexibility with
@@ -129,7 +128,7 @@ link:https://github.com/awaitility/awaitility[Awaitility].
 
 
 [[writing-tests-declarative-timeouts-debugging]]
-==== Debugging Timeouts
+== Debugging Timeouts
 
 Registered <<extensions-preinterrupt-callback>> extensions are called prior to invoking
 `Thread.interrupt()` on the thread that is executing the timed out method. This allows to
@@ -138,7 +137,7 @@ diagnosing the cause of a timeout.
 
 
 [[writing-tests-declarative-timeouts-debugging-thread-dump]]
-===== Thread Dump on Timeout
+=== Thread Dump on Timeout
 
 JUnit registers a default implementation of the <<extensions-preinterrupt-callback>>
 extension point that dumps the stacks of all threads to `System.out` if enabled by setting
@@ -147,7 +146,7 @@ the `junit.jupiter.execution.timeout.threaddump.enabled`
 
 
 [[writing-tests-declarative-timeouts-mode]]
-==== Disable @Timeout Globally
+== Disable @Timeout Globally
 
 When stepping through your code in a debug session, a fixed timeout limit may influence
 the result of the test, e.g. mark the test as failed although all assertions were met.
@@ -158,5 +157,3 @@ and `disabled_on_debug`. The default mode is `enabled`.
 A VM runtime is considered to run in debug mode when one of its input parameters starts
 with `-agentlib:jdwp` or `-Xrunjdwp`.
 This heuristic is queried by the `disabled_on_debug` mode.
-
-

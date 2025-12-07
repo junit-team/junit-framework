@@ -1,5 +1,4 @@
-[[writing-tests-classes-and-methods]]
-=== Test Classes and Methods
+= Test Classes and Methods
 
 Test methods and lifecycle methods may be declared locally within the current test class,
 inherited from superclasses, or inherited from interfaces (see
@@ -45,7 +44,7 @@ lifecycle methods. For further information on runtime semantics, see
 [source,java,indent=0]
 .A standard Java test class
 ----
-include::{testDir}/example/StandardTests.java[tags=user_guide]
+include::example$java/example/StandardTests.java[tags=user_guide]
 ----
 
 It is also possible to use Java `record` classes as test classes as illustrated by the
@@ -54,7 +53,7 @@ following example.
 [source,java,indent=0]
 .A test class written as a Java record
 ----
-include::{testDir}/example/MyFirstJUnitJupiterRecordTests.java[tags=user_guide]
+include::example$java/example/MyFirstJUnitJupiterRecordTests.java[tags=user_guide]
 ----
 
 Test and lifecycle methods may be written in Kotlin and may optionally use the `suspend`
@@ -63,7 +62,7 @@ keyword for testing code using coroutines.
 [source,kotlin]
 .A test class written in Kotlin
 ----
-include::{kotlinTestDir}/example/KotlinCoroutinesDemo.kt[tags=user_guide]
+include::example$kotlin/example/KotlinCoroutinesDemo.kt[tags=user_guide]
 ----
 
 NOTE: Using suspending functions as test or lifecycle methods requires
@@ -72,4 +71,3 @@ https://central.sonatype.com/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotli
 and
 https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core[`kotlinx-coroutines-core`]
 to be present on the classpath or module path.
-

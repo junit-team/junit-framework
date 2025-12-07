@@ -1,5 +1,4 @@
-[[writing-tests-assumptions]]
-=== Assumptions
+= Assumptions
 
 Assumptions are typically used whenever it does not make sense to continue execution of a
 given test — for example, if the test depends on something that does not exist in the
@@ -19,7 +18,7 @@ All JUnit Jupiter assumptions are static methods in the `{Assumptions}` class.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/AssumptionsDemo.java[tags=user_guide]
+include::example$java/example/AssumptionsDemo.java[tags=user_guide]
 ----
 
 NOTE: It is also possible to use methods from JUnit 4's `org.junit.Assume` class for
@@ -30,4 +29,3 @@ TIP: If you use AssertJ for assertions, you may also wish to use AssertJ for ass
 To do so, you can statically import the `assumeThat()` method from
 `org.assertj.core.api.Assumptions` and then use AssertJ's fluent API to specify your
 assumptions.
-

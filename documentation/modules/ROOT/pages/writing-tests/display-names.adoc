@@ -1,5 +1,4 @@
-[[writing-tests-display-names]]
-=== Display Names
+= Display Names
 
 Test classes and test methods can declare custom display names via `@DisplayName` -- with
 spaces, special characters, and even emojis -- that will be displayed in test reports and
@@ -7,7 +6,7 @@ by test runners and IDEs.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/DisplayNameDemo.java[tags=user_guide]
+include::example$java/example/DisplayNameDemo.java[tags=user_guide]
 ----
 
 [NOTE]
@@ -37,7 +36,7 @@ Any remaining ISO control characters in a display name will be replaced as follo
 ====
 
 [[writing-tests-display-name-generator]]
-==== Display Name Generators
+== Display Name Generators
 
 JUnit Jupiter supports custom display name generators that can be configured via the
 `@DisplayNameGeneration` annotation.
@@ -64,7 +63,7 @@ generator.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/DisplayNameGeneratorDemo.java[tags=user_guide_replace_underscores]
+include::example$java/example/DisplayNameGeneratorDemo.java[tags=user_guide_replace_underscores]
 ----
 
 Running the above test class results in the following display names.
@@ -85,7 +84,7 @@ following example.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/DisplayNameGeneratorDemo.java[tags=user_guide_indicative_sentences]
+include::example$java/example/DisplayNameGeneratorDemo.java[tags=user_guide_indicative_sentences]
 ----
 
 Running the above test class results in the following display names.
@@ -106,7 +105,7 @@ With `IndicativeSentences`, you can optionally specify custom sentence fragments
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/DisplayNameGeneratorDemo.java[tags=user_guide_custom_sentence_fragments]
+include::example$java/example/DisplayNameGeneratorDemo.java[tags=user_guide_custom_sentence_fragments]
 ----
 
 Running the above test class results in the following display names.
@@ -123,7 +122,7 @@ A year is a leap year ✔
 
 
 [[writing-tests-display-name-generator-default]]
-==== Setting the Default Display Name Generator
+== Setting the Default Display Name Generator
 
 You can use the `junit.jupiter.displayname.generator.default`
 <<running-tests-config-params, configuration parameter>> to specify the fully qualified
@@ -158,4 +157,3 @@ following precedence rules:
 3. by calling the default `DisplayNameGenerator` configured via the configuration
    parameter, if present
 4. by calling `org.junit.jupiter.api.DisplayNameGenerator.Standard`
-

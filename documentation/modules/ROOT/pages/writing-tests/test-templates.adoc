@@ -1,5 +1,4 @@
-[[writing-tests-test-templates]]
-=== Test Templates
+= Test Templates
 
 A `{TestTemplate}` method is not a regular test case but rather a template for a test
 case. As such, it is designed to be invoked multiple times depending on the number of
@@ -12,4 +11,3 @@ method with full support for the same lifecycle callbacks and extensions. Please
 NOTE: <<writing-tests-repeated-tests>> and
 <<writing-tests-parameterized-tests, Parameterized Tests>> are built-in specializations of
 test templates.
-
