@@ -17,6 +17,13 @@ repository on GitHub.
 ==== Bug Fixes
 
 * Make `ConsoleLauncher` compatible with JDK 26 by avoiding final field mutations.
+* Fix a concurrency bug in `NamespacedHierarchicalStore.computeIfAbsent` where
+  the `defaultCreator` function was executed while holding the store's internal
+  map lock. Under parallel execution, this could cause threads using the store to
+  block each other and temporarily see a missing or incorrectly initialized state
+  for values created via `computeIfAbsent`. The method now evaluates
+  `defaultCreator` outside the critical section using a memoizing supplier,
+  aligning its behavior with the deprecated `getOrComputeIfAbsent`.
 
 [[v6.0.2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
