@@ -1,5 +1,8 @@
 /**
- * This package contains all files of the DefaultLocaleExtension and DefaultTimeZoneExtension.
+ * {@code java.util}-related support in JUnit Jupiter.
+ *
+ * @see org.junit.jupiter.api.util.DefaultLocale
+ * @see org.junit.jupiter.api.util.DefaultTimeZone
  */
 
 @NullMarked

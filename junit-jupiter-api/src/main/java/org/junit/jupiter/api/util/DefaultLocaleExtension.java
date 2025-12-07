@@ -10,35 +10,30 @@
 
 package org.junit.jupiter.api.util;
 
-import static org.apiguardian.api.API.Status.STABLE;
-
 import java.util.Locale;
 import java.util.Optional;
 
-import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.util.LocaleProvider.NullLocaleProvider;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
 
-@API(status = STABLE, since = "6.1")
-public final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
+/**
+ * @since 6.1
+ */
+final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
 	private static final Namespace NAMESPACE = Namespace.create(DefaultLocaleExtension.class);
 
 	private static final String CUSTOM_KEY = "CustomLocale";
 	private static final String DEFAULT_KEY = "DefaultLocale";
 
-	public DefaultLocaleExtension() {
-	}
-
 	@Override
-	public void beforeAll(ExtensionContext context) throws Exception {
+	public void beforeAll(ExtensionContext context) {
 		createLocaleFromAnnotation(context) //
 				.ifPresent(locale -> store(context, CUSTOM_KEY, locale));
 	}

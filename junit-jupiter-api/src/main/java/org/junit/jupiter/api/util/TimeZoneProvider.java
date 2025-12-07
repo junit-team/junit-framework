@@ -10,15 +10,19 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.STABLE;
+
 import java.util.TimeZone;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 
-@API(status = API.Status.STABLE, since = "6.1")
+/**
+ * Custom {@link TimeZone} provider for use with
+ * {@link DefaultTimeZone#timeZoneProvider()}.
+ *
+ * @since 6.1
+ */
+@API(status = STABLE, since = "6.1")
 public interface TimeZoneProvider extends Supplier<TimeZone> {
-
-	interface NullTimeZoneProvider extends TimeZoneProvider {
-	}
-
 }

@@ -34,4 +34,5 @@ module org.junit.jupiter.api {
 	exports org.junit.jupiter.api.util;
 
 	opens org.junit.jupiter.api.condition to org.junit.platform.commons;
+	opens org.junit.jupiter.api.util to org.junit.platform.commons;
 }

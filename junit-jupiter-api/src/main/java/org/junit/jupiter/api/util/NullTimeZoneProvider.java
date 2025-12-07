@@ -10,19 +10,8 @@
 
 package org.junit.jupiter.api.util;
 
-import static org.apiguardian.api.API.Status.STABLE;
-
-import java.util.Locale;
-import java.util.function.Supplier;
-
-import org.apiguardian.api.API;
-
 /**
- * Custom {@link Locale} provider for use with
- * {@link DefaultLocale#localeProvider()}.
- *
  * @since 6.1
  */
-@API(status = STABLE, since = "6.1")
-public interface LocaleProvider extends Supplier<Locale> {
+interface NullTimeZoneProvider extends TimeZoneProvider {
 }

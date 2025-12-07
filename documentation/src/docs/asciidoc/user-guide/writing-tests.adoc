@@ -3835,6 +3835,7 @@ work on the test class level and on the test method level, and are inherited fro
 higher-level containers. After the annotated element has been executed, the initial
 default value is restored.
 
+[[writing-tests-built-in-extensions-DefaultLocale]]
 ===== @DefaultLocale
 
 The default `Locale` can be specified using an
@@ -3885,6 +3886,7 @@ include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_l
 
 NOTE: The provider implementation must have a no-args (or the default) constructor.
 
+[[writing-tests-built-in-extensions-DefaultTimeZone]]
 ===== @DefaultTimeZone
 
 The default `TimeZone` is specified according to the

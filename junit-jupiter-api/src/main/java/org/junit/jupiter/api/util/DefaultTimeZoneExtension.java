@@ -10,35 +10,30 @@
 
 package org.junit.jupiter.api.util;
 
-import static org.apiguardian.api.API.Status.STABLE;
-
 import java.util.Optional;
 import java.util.TimeZone;
 
-import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.util.TimeZoneProvider.NullTimeZoneProvider;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
 
-@API(status = STABLE, since = "6.1")
-public final class DefaultTimeZoneExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
+/**
+ * @since 6.1
+ */
+final class DefaultTimeZoneExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback {
 
 	private static final Namespace NAMESPACE = Namespace.create(DefaultTimeZoneExtension.class);
 
 	private static final String CUSTOM_KEY = "CustomTimeZone";
 	private static final String DEFAULT_KEY = "DefaultTimeZone";
 
-	public DefaultTimeZoneExtension() {
-	}
-
 	@Override
-	public void beforeAll(ExtensionContext context) throws Exception {
+	public void beforeAll(ExtensionContext context) {
 		createTimeZoneFromAnnotation(context) //
 				.ifPresent(timeZone -> store(context, CUSTOM_KEY, timeZone));
 	}

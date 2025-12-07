@@ -10,50 +10,58 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.STABLE;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.TimeZone;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * {@code @DefaultTimeZone} is a JUnit Jupiter extension to change the value
- * returned by {@link java.util.TimeZone#getDefault()} for a test execution.
+ * {@code @DefaultTimeZone} is a JUnit Jupiter extension for changing the value
+ * returned by {@link TimeZone#getDefault()} for a test execution.
  *
- * <p>The {@link java.util.TimeZone} to set as the default {@code TimeZone} is
- * configured by specifying the {@code TimeZone} ID as defined by
- * {@link java.util.TimeZone#getTimeZone(String)}. After the annotated element
- * has been executed, the default {@code TimeZone} will be restored to its
- * original value.</p>
+ * <p>The {@link TimeZone} to set as the default {@code TimeZone} is configured
+ * by specifying the {@code TimeZone} ID as defined by
+ * {@link TimeZone#getTimeZone(String)}. After the annotated element has been
+ * executed, the default {@code TimeZone} will be restored to its original
+ * value.
  *
  * <p>{@code @DefaultTimeZone} can be used on the method and on the class
  * level. It is inherited from higher-level containers, but can only be used
  * once per method or class. If a class is annotated, the configured
  * {@code TimeZone} will be the default {@code TimeZone} for all tests inside
  * that class. Any method level configurations will override the class level
- * default {@code TimeZone}.</p>
+ * default {@code TimeZone}.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution" target="_top">parallel test execution</a>,
- * all tests annotated with {@link DefaultTimeZone}, {@link ReadsDefaultTimeZone}, and {@link WritesDefaultTimeZone}
- * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
+ * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution">parallel test execution</a>,
+ * all tests annotated with {@link DefaultTimeZone @DefaultTimeZone},
+ * {@link ReadsDefaultTimeZone @ReadsDefaultTimeZone}, and
+ * {@link WritesDefaultTimeZone @WritesDefaultTimeZone} are scheduled in a way that
+ * guarantees correctness under mutation of shared global state.
  *
- * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-DefaultLocaleAndTimeZone" target="_top">the documentation on <code>@DefaultLocale</code> and <code>@DefaultTimeZone</code></a>.</p>
+ * <p>For more details and examples, see the
+ * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-DefaultTimeZone">User Guide</a>.
  *
  * @since 6.1
- * @see java.util.TimeZone#getDefault()
+ * @see TimeZone#getDefault()
+ * @see ReadsDefaultTimeZone
+ * @see WritesDefaultTimeZone
  * @see DefaultLocale
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @WritesDefaultTimeZone
-@API(status = API.Status.STABLE, since = "6.1")
+@API(status = STABLE, since = "6.1")
 @ExtendWith(DefaultTimeZoneExtension.class)
+@SuppressWarnings("exports")
 public @interface DefaultTimeZone {
 
 	/**
@@ -69,6 +77,6 @@ public @interface DefaultTimeZone {
 	 * This is mutually exclusive with other properties, if any other property is given a value it
 	 * will result in an {@link org.junit.jupiter.api.extension.ExtensionConfigurationException}.
 	 */
-	Class<? extends TimeZoneProvider> timeZoneProvider() default TimeZoneProvider.NullTimeZoneProvider.class;
+	Class<? extends TimeZoneProvider> timeZoneProvider() default NullTimeZoneProvider.class;
 
 }

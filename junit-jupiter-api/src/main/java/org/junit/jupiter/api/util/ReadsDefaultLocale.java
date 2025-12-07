@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.STABLE;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -22,22 +24,27 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
 
 /**
- * Marks tests that read the default locale but don't use the locale extension themselves.
+ * Marks tests that <em>read</em> the default locale but don't use the
+ * {@link DefaultLocale @DefaultLocale} extension themselves.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution" target="_top">parallel test execution</a>,
- * all tests annotated with {@link DefaultLocale}, {@link ReadsDefaultLocale}, and {@link WritesDefaultLocale}
- * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
+ * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution">parallel test execution</a>,
+ * all tests annotated with {@link DefaultLocale @DefaultLocale},
+ * {@link ReadsDefaultLocale @ReadsDefaultLocale}, and
+ * {@link WritesDefaultLocale} are scheduled in a way that guarantees
+ * correctness under mutation of shared global state.
  *
- * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-DefaultLocaleAndTimeZone" target="_top">the documentation on <code>@DefaultLocale</code> and <code>@DefaultTimeZone</code></a>.</p>
+ * <p>For more details and examples, see the
+ * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-DefaultLocale">User Guide</a>.
  *
  * @since 6.1
+ * @see DefaultLocale
+ * @see WritesDefaultLocale
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })
 @Inherited
 @ResourceLock(value = Resources.LOCALE, mode = ResourceAccessMode.READ)
-@API(status = API.Status.STABLE, since = "6.1")
+@API(status = STABLE, since = "6.1")
 public @interface ReadsDefaultLocale {
 }

@@ -17,7 +17,7 @@ import java.util.Locale;
  *
  * @since 6.1
  */
-class JupiterLocaleUtils {
+final class JupiterLocaleUtils {
 
 	private JupiterLocaleUtils() {
 		// private constructor to prevent instantiation of utility class
