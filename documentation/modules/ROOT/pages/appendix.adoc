@@ -1,8 +1,7 @@
-[[appendix]]
-== Appendix
+= Appendix
 
 [[reproducible-builds]]
-=== Reproducible Builds
+== Reproducible Builds
 
 JUnit aims for its non-javadoc JARs to be https://reproducible-builds.org/[reproducible].
 
@@ -14,7 +13,7 @@ Central/Sonatype and produce the same output artifact locally, confirming that t
 artifacts in the repositories were actually generated from this source code.
 
 [[dependency-metadata]]
-=== Dependency Metadata
+== Dependency Metadata
 
 Artifacts for final releases and milestones are deployed to {Maven_Central}. Consult
 https://central.sonatype.org/consume/[Sonatype's documentation] for how to consume those
@@ -46,7 +45,7 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
 ====
 
 [[dependency-metadata-junit-platform]]
-==== JUnit Platform
+=== JUnit Platform
 
 * *Group ID*: `org.junit.platform`
 * *Version*: `{version}`
@@ -85,7 +84,7 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
      accessing the results via a fluent API to verify the expected results.
 
 [[dependency-metadata-junit-jupiter]]
-==== JUnit Jupiter
+=== JUnit Jupiter
 
 * *Group ID*: `org.junit.jupiter`
 * *Version*: `{version}`
@@ -105,7 +104,7 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
     support for JUnit 4's `@Ignore` annotation and for running selected JUnit 4 rules.
 
 [[dependency-metadata-junit-vintage]]
-==== JUnit Vintage
+=== JUnit Vintage
 
 * *Group ID*: `org.junit.vintage`
 * *Version*: `{version}`
@@ -116,7 +115,7 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
     APIs or tests written using testing frameworks built on those APIs.
 
 [[dependency-metadata-junit-bom]]
-==== Bill of Materials (BOM)
+=== Bill of Materials (BOM)
 
 The _Bill of Materials_ POM provided under the following Maven coordinates can be used to
 ease dependency management when referencing multiple of the above artifacts using
@@ -128,7 +127,7 @@ or https://docs.gradle.org/current/userguide/platforms.html#sub:bom_import[Gradl
 * *Version*: `{version}`
 
 [[dependency-metadata-dependencies]]
-==== Dependencies
+=== Dependencies
 
 Most of the above artifacts have a dependency in their published Maven POMs on the
 following _@API Guardian_ JAR.
@@ -145,6 +144,6 @@ following _OpenTest4J_ JAR.
 * *Version*: `{ota4j-version}`
 
 [[dependency-diagram]]
-=== Dependency Diagram
+== Dependency Diagram
 
 image::component-diagram.svg[]
