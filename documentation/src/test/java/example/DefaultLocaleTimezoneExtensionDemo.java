@@ -81,12 +81,10 @@ public class DefaultLocaleTimezoneExtensionDemo {
 	}
 
 	static class EnglishProvider implements LocaleProvider {
-
 		@Override
 		public Locale get() {
 			return Locale.ENGLISH;
 		}
-
 	}
 	// end::default_locale_with_provider[]
 
@@ -131,12 +129,10 @@ public class DefaultLocaleTimezoneExtensionDemo {
 	}
 
 	static class UtcTimeZoneProvider implements TimeZoneProvider {
-
 		@Override
 		public TimeZone get() {
 			return TimeZone.getTimeZone(ZoneOffset.UTC);
 		}
-
 	}
 	// end::default_time_zone_with_provider[]
 

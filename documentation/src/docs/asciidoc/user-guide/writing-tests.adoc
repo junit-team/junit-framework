@@ -3828,50 +3828,55 @@ include::{testDir}/example/AutoCloseDemo.java[tags=user_guide_example]
 [[writing-tests-built-in-extensions-DefaultLocaleAndTimeZone]]
 ==== The @DefaultLocale and @DefaultTimeZone Extensions
 
-----
-include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tags=default_locale_language]
-----
+The `{DefaultLocale}` and `{DefaultTimeZone}` annotations can be used to change the values
+returned from `Locale.getDefault()` and `TimeZone.getDefault()`, respectively, which are
+often used implicitly when no specific locale or time zone is chosen. Both annotations
+work on the test class level and on the test method level, and are inherited from
+higher-level containers. After the annotated element has been executed, the initial
+default value is restored.
 
-The `@DefaultLocale` and `@DefaultTimeZone` annotations can be used to change the values returned from `Locale.getDefault()` and `TimeZone.getDefault()`, respectively, which are often used implicitly when no specific locale or time zone is chosen.
-Both annotations work on the test class level and on the test method level, and are inherited from higher-level containers.
-After the annotated element has been executed, the initial default value is restored.
+===== @DefaultLocale
 
-===== `@DefaultLocale`
-
-The default `Locale` can be specified using an {jdk-javadoc-base-url}/java.base/java/util/Locale.html#forLanguageTag-java.lang.String-[IETF BCP 47 language tag string]
+The default `Locale` can be specified using an
+{jdk-javadoc-base-url}/java.base/java/util/Locale.html#forLanguageTag-java.lang.String-[IETF BCP 47 language tag string].
 
 [source,java,indent=0]
 ----
 include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tags=default_locale_language]
 ----
 
-Alternatively the default `Locale` can be created using the following attributes of which a {jdk-javadoc-base-url}/java.base/java/util/Locale.Builder.html[Locale Builder] can create an instance with:
+Alternatively, the default `Locale` can be created using the following attributes from
+which a {jdk-javadoc-base-url}/java.base/java/util/Locale.Builder.html[`Locale.Builder`]
+can create an instance:
 
 * `language` or
 * `language` and `country` or
 * `language`, `country`, and `variant`
 
-NOTE: The variant needs to be a string which follows the https://www.rfc-editor.org/rfc/rfc5646.html[IETF BCP 47 / RFC 5646] syntax!
+NOTE: The variant needs to be a string which follows the
+https://www.rfc-editor.org/rfc/rfc5646.html[IETF BCP 47 / RFC 5646] syntax
 
 [source,java,indent=0]
 ----
 include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_language_alternatives]
 ----
 
-Note that mixing language tag configuration and constructor based configuration will cause an `ExtensionConfigurationException` to be thrown.
-Furthermore, a `variant` can only be specified if `country` is also specified.
-If `variant` is specified without `country`, an `ExtensionConfigurationException` will be thrown.
+Mixing language tag configuration (via the annotation's `value` attributed) and
+attributed-based configuration will cause an exception to be thrown. Furthermore, a
+`variant` can only be specified if `country` is also specified. Otherwise, an exception
+will be thrown.
 
-Any method level `@DefaultLocale` configurations will override class level configurations.
+Any method-level `@DefaultLocale` configurations will override class-level configurations.
 
 [source,java,indent=0]
 ----
 include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_class_level]
 ----
 
-NOTE: A class-level configuration means that the specified locale is set before and reset after each individual test in the annotated class.
+NOTE: A class-level configuration means that the specified locale is set before and reset
+after each individual test in the annotated class.
 
-If your use case is not covered, you can implement the `LocaleProvider` interface.
+If your use case is not covered, you can implement the `{LocaleProvider}` interface.
 
 [source,java,indent=0]
 ----
@@ -3880,9 +3885,11 @@ include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_l
 
 NOTE: The provider implementation must have a no-args (or the default) constructor.
 
-===== `@DefaultTimeZone`
+===== @DefaultTimeZone
 
-The default `TimeZone` is specified according to the https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html#getTimeZone-java.lang.String-[TimeZone.getTimeZone(String)] method.
+The default `TimeZone` is specified according to the
+{jdk-javadoc-base-url}/java.base/java/util/TimeZone.html#getTimeZone(java.lang.String)[TimeZone.getTimeZone(String)]
+method.
 
 [source,java,indent=0]
 ----
@@ -3896,9 +3903,10 @@ Any method level `@DefaultTimeZone` configurations will override class level con
 include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_class_level]
 ----
 
-NOTE: A class-level configuration means that the specified time zone is set before and reset after each individual test in the annotated class.
+NOTE: A class-level configuration means that the specified time zone is set before and
+reset after each individual test in the annotated class.
 
-If your use case is not covered, you can implement the `TimeZoneProvider` interface.
+If your use case is not covered, you can implement the `{TimeZoneProvider}` interface.
 
 [source,java,indent=0]
 ----
@@ -3907,18 +3915,24 @@ include::{testDir}/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_t
 
 NOTE: The provider implementation must have a no-args (or the default) constructor.
 
-===== Thread-Safety
+===== Thread Safety
 
-Since default locale and time zone are global state, reading and writing them during https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution[parallel test execution] can lead to unpredictable results and flaky tests.
-The `@DefaultLocale` and `@DefaultTimeZone` extensions are prepared for that and tests annotated with them will never execute in parallel (thanks to https://docs.junit.org/current/api/org.junit.jupiter.api/org/junit/jupiter/api/parallel/ResourceLock.html[resource locks]) to guarantee correct test results.
+Since the default locale and time zone are global state, reading and writing them during
+<<writing-tests-parallel-execution, parallel test execution>> can lead to unpredictable
+results and flaky tests. The `@DefaultLocale` and `@DefaultTimeZone` extensions are
+prepared for that and tests annotated with them will never execute in parallel (thanks to
+`{ResourceLock}`) to guarantee correct test results.
 
-However, this does not cover all possible cases.
-Tested code that reads or writes default locale and time zone _independently_ of the extensions can still run in parallel to them and may thus behave erratically when, for example, it unexpectedly reads a locale set by the extension in another thread.
-Tests that cover code that reads or writes the default locale or time zone need to be annotated with the respective annotation:
+However, this does not cover all possible cases. Tested code that reads or writes default
+locale and time zone _independently_ of the extensions can still run in parallel to them
+and may thus behave erratically when, for example, it unexpectedly reads a locale set by
+the extension in another thread. Tests that cover code that reads or writes the default
+locale or time zone need to be annotated with the respective annotation:
 
-* `@ReadsDefaultLocale`
-* `@ReadsDefaultTimeZone`
-* `@WritesDefaultLocale`
-* `@WritesDefaultTimeZone`
+* `{ReadsDefaultLocale}`
+* `{ReadsDefaultTimeZone}`
+* `{WritesDefaultLocale}`
+* `{WritesDefaultTimeZone}`
 
-Tests annotated in this way will never execute in parallel with tests annotated with `@DefaultLocale` or `@DefaultTimeZone`.
+Tests annotated in this way will never execute in parallel with tests annotated with
+`@DefaultLocale` or `@DefaultTimeZone`.
