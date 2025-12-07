@@ -15,8 +15,7 @@ any method that is directly annotated or meta-annotated with
 `@BeforeAll`, `@AfterAll`, `@BeforeEach`, or `@AfterEach`.
 
 Test Class::
-any top-level class, `static` member class, or <<writing-tests-nested,
-`@Nested` class>> that contains at least one _test method_, i.e. a _container_.
+any top-level class, `static` member class, or xref:writing-tests/nested-tests.adoc[`@Nested` class] that contains at least one _test method_, i.e. a _container_.
 Test classes must not be `abstract` and must have a single constructor.
 Java `record` classes are supported as well.
 

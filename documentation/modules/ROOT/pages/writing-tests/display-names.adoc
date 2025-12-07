@@ -12,7 +12,7 @@ include::example$java/example/DisplayNameDemo.java[tags=user_guide]
 [NOTE]
 ====
 Control characters in text-based arguments in display names for parameterized tests are
-escaped by default. See <<writing-tests-parameterized-tests-display-names-quoted-text>>
+escaped by default. See xref:writing-tests/parameterized-classes-and-tests.adoc#tests-display-names-quoted-text[Quoted Text-based Arguments]
 for details.
 
 Any remaining ISO control characters in a display name will be replaced as follows.
@@ -35,7 +35,7 @@ Any remaining ISO control characters in a display name will be replaced as follo
 |===
 ====
 
-[[writing-tests-display-name-generator]]
+[[generator]]
 == Display Name Generators
 
 JUnit Jupiter supports custom display name generators that can be configured via the
@@ -121,11 +121,11 @@ A year is a leap year ✔
 ======
 
 
-[[writing-tests-display-name-generator-default]]
+[[generator-default]]
 == Setting the Default Display Name Generator
 
 You can use the `junit.jupiter.displayname.generator.default`
-<<running-tests-config-params, configuration parameter>> to specify the fully qualified
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the fully qualified
 class name of the `DisplayNameGenerator` you would like to use by default. Just like for
 display name generators configured via the `@DisplayNameGeneration` annotation, the
 supplied class has to implement the `DisplayNameGenerator` interface. The default display
@@ -147,7 +147,7 @@ junit.jupiter.displayname.generator.default = \
 Similarly, you can specify the fully qualified name of any custom class that implements
 `DisplayNameGenerator`.
 
-[[writing-tests-display-name-generator-precedence-rules]]
+[[generator-precedence-rules]]
 In summary, the display name for a test class or method is determined according to the
 following precedence rules:
 

@@ -17,7 +17,7 @@ short-circuiting boolean OR operator.
 
 See the source code of `{DisabledCondition}` and `{Disabled}` for concrete examples.
 
-[[extensions-conditions-deactivation]]
+[[deactivation]]
 == Deactivating Conditions
 
 Sometimes it can be useful to run a test suite _without_ certain conditions being active.
@@ -27,14 +27,14 @@ order to see if they are still _broken_. To do this, provide a pattern for the
 conditions should be deactivated (i.e., not evaluated) for the current test run. The
 pattern can be supplied as a JVM system property, as a _configuration parameter_ in the
 `LauncherDiscoveryRequest` that is passed to the `Launcher`, or via the JUnit Platform
-configuration file (see <<running-tests-config-params>> for details).
+configuration file (see xref:running-tests/configuration-parameters.adoc[] for details).
 
 For example, to deactivate JUnit's `@Disabled` condition, you can start your JVM with the
 following system property.
 
 `-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition`
 
-[[extensions-conditions-deactivation-patterns]]
+[[deactivation-patterns]]
 === Pattern Matching Syntax
 
-Refer to <<running-tests-config-params-deactivation-pattern>> for details.
+Refer to xref:running-tests/configuration-parameters.adoc#pattern[Pattern Matching Syntax] for details.

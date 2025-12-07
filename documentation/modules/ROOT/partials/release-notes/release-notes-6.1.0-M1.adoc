@@ -1,4 +1,4 @@
-[[release-notes-6.1.0-M1]]
+[[v6.1.0-M1]]
 == 6.1.0-M1
 
 *Date of Release:* November 17, 2025
@@ -14,17 +14,17 @@ link:{junit-framework-repo}+/milestone/104?closed=1+[6.1.0-M1] milestone page in
 repository on GitHub.
 
 
-[[release-notes-6.1.0-M1-junit-platform]]
+[[v6.1.0-M1-junit-platform]]
 === JUnit Platform
 
-[[release-notes-6.1.0-M1-junit-platform-deprecations-and-breaking-changes]]
+[[v6.1.0-M1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * Deprecate constructors for `ForkJoinPoolHierarchicalTestExecutorService` in favor of the
   new `ParallelHierarchicalTestExecutorServiceFactory` that also supports
   `WorkerThreadPoolHierarchicalTestExecutorService`.
 
-[[release-notes-6.1.0-M1-junit-platform-new-features-and-improvements]]
+[[v6.1.0-M1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Support for creating a `ModuleSelector` from a `java.lang.Module` and using
@@ -42,15 +42,15 @@ repository on GitHub.
   `false`.
 
 
-[[release-notes-6.1.0-M1-junit-jupiter]]
+[[v6.1.0-M1-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-6.1.0-M1-junit-jupiter-new-features-and-improvements]]
+[[v6.1.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Introduce new module `org.junit.start` for writing and running tests. It simplifies
   using JUnit in compact source files together with a single `module import` statement.
-  Find an example at the <<../user-guide/#running-tests-source-launcher, User Guide>>.
+  Find an example at the xref:running-tests/source-launcher.adoc[User Guide].
 * Introduce new `dynamicTest(Consumer<? super Configuration>)` factory method for dynamic
   tests. It allows configuring the `ExecutionMode` of the dynamic test in addition to its
   display name, test source URI, and executable.
@@ -65,10 +65,10 @@ repository on GitHub.
   `junit.jupiter.execution.parallel.config.executor-service` configuration parameter to
   in order to add support for `WorkerThreadPoolHierarchicalTestExecutorService`. Please
   refer to the
-  <<../user-guide/index.adoc#writing-tests-parallel-execution-config-executor-service, User Guide>>
+  xref:writing-tests/parallel-execution.adoc#config-executor-service[User Guide]
   for details.
 
-[[release-notes-6.1.0-M1-junit-vintage]]
+[[v6.1.0-M1-junit-vintage]]
 === JUnit Vintage
 
 No changes.

@@ -3,9 +3,9 @@
 When executing a test class that contains one or more test methods, a number of extension
 callbacks are called in addition to the user-supplied test and lifecycle methods.
 
-NOTE: See also: <<writing-tests-test-execution-order>>
+NOTE: See also: xref:writing-tests/test-execution-order.adoc[]
 
-[[extensions-execution-order-overview]]
+[[overview]]
 == User and Extension Code
 
 The following diagram illustrates the relative order of user-supplied code and extension
@@ -13,12 +13,12 @@ code. User-supplied test and lifecycle methods are shown in orange, with callbac
 implemented by extensions shown in blue. The grey box denotes the execution of a single
 test method and will be repeated for every test method in the test class.
 
-[[extensions-execution-order-diagram]]
+[[diagram]]
 .User code and extension code
 image::extensions_lifecycle.png[]
 
 The following table further explains the sixteen steps in the
-<<extensions-execution-order-diagram>> diagram.
+<<diagram>> diagram.
 
 . *interface* `*org.junit.jupiter.api.extension.BeforeAllCallback*` +
 extension code executed before all tests of the container are executed
@@ -29,7 +29,7 @@ user code executed before all tests of the container are executed
 extension code for handling exceptions thrown from `@BeforeAll` methods
 . *interface* `*org.junit.jupiter.api.extension.BeforeClassTemplateInvocationCallback*` +
 extension code executed before each class template invocation is executed (only applicable
-if the test class is a <<writing-tests-class-templates, class template>>)
+if the test class is a xref:writing-tests/class-templates.adoc[class template])
 . *interface* `*org.junit.jupiter.api.extension.BeforeEachCallback*` +
 extension code executed before each test is executed
 . *annotation* `*org.junit.jupiter.api.BeforeEach*` +
@@ -54,7 +54,7 @@ extension code for handling exceptions thrown from `@AfterEach` methods
 extension code executed after each test is executed
 . *interface* `*org.junit.jupiter.api.extension.AfterClassTemplateInvocationCallback*` +
 extension code executed after each class template invocation is executed (only applicable
-if the test class is a <<writing-tests-class-templates, class template>>)
+if the test class is a xref:writing-tests/class-templates.adoc[class template])
 . *annotation* `*org.junit.jupiter.api.AfterAll*` +
 user code executed after all tests of the container are executed
 . *interface* `*org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler
@@ -69,9 +69,9 @@ corresponding lifecycle callback. For further details on the various lifecycle c
 please consult the respective Javadoc for each annotation and extension.
 
 All invocations of user code methods in the above table can additionally be intercepted
-by implementing <<extensions-intercepting-invocations, `InvocationInterceptor`>>.
+by implementing xref:extensions/intercepting-invocations.adoc[`InvocationInterceptor`].
 
-[[extensions-execution-order-wrapping-behavior]]
+[[wrapping-behavior]]
 == Wrapping Behavior of Callbacks
 
 JUnit Jupiter always guarantees _wrapping_ behavior for multiple registered extensions
@@ -89,7 +89,7 @@ callbacks implemented by `Extension2`. `Extension1` is therefore said to _wrap_
 `Extension2`.
 
 JUnit Jupiter also guarantees _wrapping_ behavior within class and interface hierarchies
-for user-supplied _lifecycle methods_ (see <<writing-tests-definitions>>).
+for user-supplied _lifecycle methods_ (see xref:writing-tests/definitions.adoc[]).
 
 * `@BeforeAll` methods are inherited from superclasses as long as they are not
   _overridden_. Furthermore, `@BeforeAll` methods from superclasses will be executed
@@ -233,6 +233,6 @@ image::extensions_BrokenLifecycleMethodConfigDemo.png[caption='',title='BrokenLi
 [TIP]
 ====
 Due to the aforementioned behavior, the JUnit Team recommends that developers declare at
-most one of each type of _lifecycle method_ (see <<writing-tests-definitions>>) per test
+most one of each type of _lifecycle method_ (see xref:writing-tests/definitions.adoc[]) per test
 class or test interface unless there are no dependencies between such lifecycle methods.
 ====

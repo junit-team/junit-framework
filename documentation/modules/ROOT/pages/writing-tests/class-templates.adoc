@@ -6,7 +6,7 @@ contexts returned by the registered providers. Thus, it must be used in conjunct
 registered `{ClassTemplateInvocationContextProvider}` extension.
 Each invocation of a class template behaves like the execution of a regular test class
 with full support for the same lifecycle callbacks and extensions. Please refer to
-<<extensions-class-templates>> for usage examples.
+xref:extensions/providing-invocation-contexts-for-class-templates.adoc[] for usage examples.
 
-NOTE: <<writing-tests-parameterized-tests, Parameterized Classes>> are a built-in
+NOTE: xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Classes] are a built-in
 specialization of class templates.

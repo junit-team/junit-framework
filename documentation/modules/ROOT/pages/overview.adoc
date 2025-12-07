@@ -11,26 +11,26 @@ This document is also available as a link:{userGuidePdfFileName}[PDF download].
 endif::linkToPdf[]
 endif::backend-html5[]
 
-[[overview-what-is-junit]]
+[[what-is-junit]]
 == What is JUnit?
 
 JUnit is composed of several different modules from three different sub-projects.
 
 **JUnit {version} = _JUnit Platform_ + _JUnit Jupiter_ + _JUnit Vintage_**
 
-The **JUnit Platform** serves as a foundation for <<launcher-api,launching testing
-frameworks>> on the JVM. It also defines the `{TestEngine}` API for developing a testing
+The **JUnit Platform** serves as a foundation for xref:advanced-topics/launcher-api.adoc[launching testing
+frameworks] on the JVM. It also defines the `{TestEngine}` API for developing a testing
 framework that runs on the platform. Furthermore, the platform provides a
-<<running-tests-console-launcher,Console Launcher>> to launch the platform from the
-command line and the <<junit-platform-suite-engine>> for running a custom test suite using
+xref:running-tests/console-launcher.adoc[Console Launcher] to launch the platform from the
+command line and the xref:advanced-topics/junit-platform-suite-engine.adoc[] for running a custom test suite using
 one or more test engines on the platform. First-class support for the JUnit Platform also
-exists in popular IDEs (see <<running-tests-ide-intellij-idea>>,
-<<running-tests-ide-eclipse>>, <<running-tests-ide-netbeans>>, and
-<<running-tests-ide-vscode>>) and build tools (see <<running-tests-build-gradle>>,
-<<running-tests-build-maven>>, and <<running-tests-build-ant>>).
+exists in popular IDEs (see xref:running-tests/ide-support.adoc#intellij-idea[IntelliJ IDEA],
+xref:running-tests/ide-support.adoc#eclipse[Eclipse], xref:running-tests/ide-support.adoc#netbeans[NetBeans], and
+xref:running-tests/ide-support.adoc#vscode[Visual Studio Code]) and build tools (see xref:running-tests/build-support.adoc#gradle[Gradle],
+xref:running-tests/build-support.adoc#maven[Maven], and xref:running-tests/build-support.adoc#ant[Ant]).
 
-**JUnit Jupiter** is the combination of the <<writing-tests,programming model>> and
-<<extensions,extension model>> for writing JUnit tests and extensions. The Jupiter
+**JUnit Jupiter** is the combination of the xref:writing-tests/intro.adoc[programming model] and
+xref:extensions/overview.adoc[extension model] for writing JUnit tests and extensions. The Jupiter
 sub-project provides a `TestEngine` for running Jupiter based tests on the platform.
 
 **JUnit Vintage** provides a `TestEngine` for running JUnit 3 and JUnit 4 based tests on
@@ -39,42 +39,42 @@ path. Note, however, that the JUnit Vintage engine is deprecated and should only
 temporarily while migrating tests to JUnit Jupiter or another testing framework with
 native JUnit Platform support.
 
-[[overview-java-versions]]
+[[java-versions]]
 == Supported Java Versions
 
 JUnit requires Java 17 (or higher) at runtime. However, you can still test code that
 has been compiled with previous versions of the JDK.
 
-[[overview-getting-help]]
+[[getting-help]]
 == Getting Help
 
 Ask JUnit-related questions on {StackOverflow} or use the {DiscussionsQA}.
 
-[[overview-getting-started]]
+[[getting-started]]
 == Getting Started
 
-[[overview-getting-started-junit-artifacts]]
+[[getting-started-junit-artifacts]]
 === Downloading JUnit Artifacts
 
 To find out what artifacts are available for download and inclusion in your project, refer
-to <<dependency-metadata>>. To set up dependency management for your build, refer to
-<<running-tests-build>> and the <<overview-getting-started-example-projects>>.
+to xref:appendix.adoc#dependency-metadata[Dependency Metadata]. To set up dependency management for your build, refer to
+xref:running-tests/build-support.adoc[] and the <<getting-started-example-projects>>.
 
-[[overview-getting-started-features]]
+[[getting-started-features]]
 === JUnit Features
 
 To find out what features are available in JUnit {version} and how to use them, read the
 corresponding sections of this User Guide, organized by topic.
 
-* <<writing-tests, Writing Tests in JUnit Jupiter>>
-* <<migrating-from-junit4, Migrating from JUnit 4 to JUnit Jupiter>>
-* <<running-tests>>
-* <<extensions, Extension Model for JUnit Jupiter>>
+* xref:writing-tests/intro.adoc[Writing Tests in JUnit Jupiter]
+* xref:migrating-from-junit4.adoc[Migrating from JUnit 4 to JUnit Jupiter]
+* xref:running-tests/intro.adoc[]
+* xref:extensions/overview.adoc[Extension Model for JUnit Jupiter]
 * Advanced Topics
-  - <<launcher-api>>
-  - <<testkit>>
+  - xref:advanced-topics/launcher-api.adoc[]
+  - xref:advanced-topics/testkit.adoc[]
 
-[[overview-getting-started-example-projects]]
+[[getting-started-example-projects]]
 === Example Projects
 
 To see complete, working examples of projects that you can copy and experiment with, the

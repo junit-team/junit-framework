@@ -1,16 +1,16 @@
 = Registering Extensions
 
 Extensions can be registered _declaratively_ via
-<<extensions-registration-declarative,`@ExtendWith`>>, _programmatically_ via
-<<extensions-registration-programmatic,`@RegisterExtension`>>, or _automatically_ via
-Java's <<extensions-registration-automatic,`ServiceLoader`>> mechanism.
+<<registration-declarative, `@ExtendWith`>>, _programmatically_ via
+<<registration-programmatic, `@RegisterExtension`>>, or _automatically_ via
+Java's <<registration-automatic, `ServiceLoader`>> mechanism.
 
-[[extensions-registration-declarative]]
+[[registration-declarative]]
 == Declarative Extension Registration
 
 Developers can register one or more extensions _declaratively_ by annotating a test
-interface, test class, test method, or custom _<<writing-tests-meta-annotations,composed
-annotation>>_ with `@ExtendWith(...)` and supplying class references for the extensions to
+interface, test class, test method, or custom _xref:writing-tests/annotations.adoc#annotations[composed
+annotation]_ with `@ExtendWith(...)` and supplying class references for the extensions to
 register. `@ExtendWith` may also be declared on fields or on parameters in test class
 constructors, in test methods, and in `@BeforeAll`, `@AfterAll`, `@BeforeEach`, and
 `@AfterEach` lifecycle methods.
@@ -72,7 +72,7 @@ be extended by the `DatabaseExtension` and `WebServerExtension`, **in exactly th
 ====
 
 If you wish to combine multiple extensions in a reusable way, you can define a custom
-_<<writing-tests-meta-annotations,composed annotation>>_ and use `@ExtendWith` as a
+_xref:writing-tests/annotations.adoc#annotations[composed annotation]_ and use `@ExtendWith` as a
 _meta-annotation_ as in the following code listing. Then `@DatabaseAndWebServerExtension`
 can be used in place of `@ExtendWith({ DatabaseExtension.class, WebServerExtension.class })`.
 
@@ -104,7 +104,7 @@ include::example$java/example/extensions/Random.java[tags=user_guide]
 include::example$java/example/extensions/RandomNumberDemo.java[tags=user_guide]
 ----
 
-[[extensions-RandomNumberExtension]]
+[[RandomNumberExtension]]
 The following code listing provides an example of how one might choose to implement such a
 `RandomNumberExtension`. This implementation works for the use cases in
 `RandomNumberDemo`; however, it may not prove robust enough to cover all use cases -- for
@@ -129,8 +129,7 @@ include::example$java/example/extensions/RandomNumberExtension.java[tags=user_gu
 Extensions registered declaratively via `@ExtendWith` on fields will be ordered relative
 to `@RegisterExtension` fields and other `@ExtendWith` fields using an algorithm that is
 deterministic but intentionally nonobvious. However, `@ExtendWith` fields can be ordered
-using the `@Order` annotation. See the <<extensions-registration-programmatic-order,
-Extension Registration Order>> tip for `@RegisterExtension` fields for details.
+using the `@Order` annotation. See the <<registration-programmatic-order, Extension Registration Order>> tip for `@RegisterExtension` fields for details.
 ====
 
 [TIP]
@@ -139,27 +138,27 @@ Extension Registration Order>> tip for `@RegisterExtension` fields for details.
 Extensions registered declaratively via `@ExtendWith` on fields in superclasses will be
 inherited.
 
-See <<extensions-registration-inheritance, Extension Inheritance>> for details.
+See <<registration-inheritance, Extension Inheritance>> for details.
 ====
 
 NOTE: `@ExtendWith` fields may be either `static` or non-static. The documentation on
-<<extensions-registration-programmatic-static-fields, Static Fields>> and
-<<extensions-registration-programmatic-instance-fields, Instance Fields>> for
+<<registration-programmatic-static-fields, Static Fields>> and
+<<registration-programmatic-instance-fields, Instance Fields>> for
 `@RegisterExtension` fields also applies to `@ExtendWith` fields.
 
-[[extensions-registration-programmatic]]
+[[registration-programmatic]]
 == Programmatic Extension Registration
 
 Developers can register extensions _programmatically_ by annotating fields in test classes
 with `{RegisterExtension}`.
 
 When an extension is registered _declaratively_ via
-<<extensions-registration-declarative,`@ExtendWith`>>, it can typically only be configured
+<<registration-declarative, `@ExtendWith`>>, it can typically only be configured
 via annotations. In contrast, when an extension is registered via `@RegisterExtension`, it
 can be configured _programmatically_ -- for example, in order to pass arguments to the
 extension's constructor, a static factory method, or a builder API.
 
-[[extensions-registration-programmatic-order]]
+[[registration-programmatic-order]]
 [TIP]
 .Extension Registration Order
 ====
@@ -188,13 +187,13 @@ relative to other programmatically registered extensions.
 Extensions registered via `@RegisterExtension` or `@ExtendWith` on fields in superclasses
 will be inherited.
 
-See <<extensions-registration-inheritance, Extension Inheritance>> for details.
+See <<registration-inheritance, Extension Inheritance>> for details.
 ====
 
 NOTE: `@RegisterExtension` fields must not be `null` (at evaluation time) but may be
 either `static` or non-static.
 
-[[extensions-registration-programmatic-static-fields]]
+[[registration-programmatic-static-fields]]
 === Static Fields
 
 If a `@RegisterExtension` field is `static`, the extension will be registered after
@@ -220,7 +219,7 @@ lifecycle methods annotated with `@BeforeAll` or `@AfterAll` as well as `@Before
 include::example$java/example/registration/WebServerDemo.java[tags=user_guide]
 ----
 
-[[extensions-registration-programmatic-static-fields-kotlin]]
+[[registration-programmatic-static-fields-kotlin]]
 ==== Static Fields in Kotlin
 
 The Kotlin programming language does not have the concept of a `static` field. However,
@@ -237,7 +236,7 @@ has been ported to Kotlin.
 include::example$kotlin/example/registration/KotlinWebServerDemo.kt[tags=user_guide]
 ----
 
-[[extensions-registration-programmatic-instance-fields]]
+[[registration-programmatic-instance-fields]]
 === Instance Fields
 
 If a `@RegisterExtension` field is non-static (i.e., an instance field), the extension
@@ -262,11 +261,11 @@ instance of the extension via the `docs` field if necessary.
 include::example$java/example/registration/DocumentationDemo.java[tags=user_guide]
 ----
 
-[[extensions-registration-automatic]]
+[[registration-automatic]]
 == Automatic Extension Registration
 
-In addition to <<extensions-registration-declarative,declarative extension registration>>
-and <<extensions-registration-programmatic,programmatic extension registration>> support
+In addition to <<registration-declarative, declarative extension registration>>
+and <<registration-programmatic, programmatic extension registration>> support
 using annotations, JUnit Jupiter also supports _global extension registration_ via Java's
 `{ServiceLoader}` mechanism, allowing third-party extensions to be auto-detected and
 automatically registered based on what is available in the classpath.
@@ -275,14 +274,14 @@ Specifically, a custom extension can be registered by supplying its fully qualif
 name in a file named `org.junit.jupiter.api.extension.Extension` within the
 `/META-INF/services` folder in its enclosing JAR file.
 
-[[extensions-registration-automatic-enabling]]
+[[registration-automatic-enabling]]
 === Enabling Automatic Extension Detection
 
 Auto-detection is an advanced feature and is therefore not enabled by default. To enable
 it, set the `junit.jupiter.extensions.autodetection.enabled` _configuration parameter_ to
 `true`. This can be supplied as a JVM system property, as a _configuration parameter_ in
 the `LauncherDiscoveryRequest` that is passed to the `Launcher`, or via the JUnit Platform
-configuration file (see <<running-tests-config-params>> for details).
+configuration file (see xref:running-tests/configuration-parameters.adoc[] for details).
 
 For example, to enable auto-detection of extensions, you can start your JVM with the
 following system property.
@@ -293,11 +292,11 @@ When auto-detection is enabled, extensions discovered via the `{ServiceLoader}` 
 will be added to the extension registry after JUnit Jupiter's global extensions (e.g.,
 support for `TestInfo`, `TestReporter`, etc.).
 
-[[extensions-registration-automatic-filtering]]
+[[registration-automatic-filtering]]
 === Filtering Auto-detected Extensions
 
 The list of auto-detected extensions can be filtered using include and exclude patterns
-via the following <<running-tests-config-params, configuration parameters>>:
+via the following xref:running-tests/configuration-parameters.adoc[configuration parameters]:
 
 `junit.jupiter.extensions.autodetection.include=<patterns>`::
     Comma-separated list of _include_ patterns for auto-detected extensions.
@@ -308,9 +307,9 @@ Include patterns are applied _before_ exclude patterns. If both include and excl
 patterns are provided, only extensions that match at least one include pattern and do not
 match any exclude pattern will be auto-detected.
 
-See <<running-tests-config-params-deactivation-pattern>> for details on the pattern syntax.
+See xref:running-tests/configuration-parameters.adoc#pattern[Pattern Matching Syntax] for details on the pattern syntax.
 
-[[extensions-registration-inheritance]]
+[[registration-inheritance]]
 == Extension Inheritance
 
 Registered extensions are inherited within test class hierarchies with top-down semantics.
@@ -324,8 +323,7 @@ be registered before extensions registered declaratively via `@ExtendWith` on a 
 Similarly, extensions registered programmatically via `@RegisterExtension` or
 `@ExtendWith` on fields in a superclass will be registered before extensions registered
 programmatically via `@RegisterExtension` or `@ExtendWith` on fields in a subclass, unless
-`@Order` is used to alter that behavior (see <<extensions-registration-programmatic-order,
-Extension Registration Order>> for details).
+`@Order` is used to alter that behavior (see <<registration-programmatic-order, Extension Registration Order>> for details).
 
 NOTE: A specific extension implementation can only be registered once for a given
 extension context and its parent contexts. Consequently, any attempt to register a

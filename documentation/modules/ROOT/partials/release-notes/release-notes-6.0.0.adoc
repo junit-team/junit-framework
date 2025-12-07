@@ -1,4 +1,4 @@
-[[release-notes-6.0.0]]
+[[v6.0.0]]
 == 6.0.0
 
 *Date of Release:* September 30, 2025

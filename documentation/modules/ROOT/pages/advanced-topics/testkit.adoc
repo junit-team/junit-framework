@@ -2,9 +2,9 @@
 
 The `junit-platform-testkit` artifact provides support for executing a test plan on the
 JUnit Platform and then verifying the expected results. This support is currently limited
-to the execution of a single `TestEngine` (see <<testkit-engine>>).
+to the execution of a single `TestEngine` (see <<engine>>).
 
-[[testkit-engine]]
+[[engine]]
 == Engine Test Kit
 
 The `{testkit-engine-package}` package provides support for discovering and executing a
@@ -21,7 +21,7 @@ to build your `LauncherDiscoveryRequest`, you must use one of the `discover()` o
 
 The following test class written using JUnit Jupiter will be used in subsequent examples.
 
-[[testkit-engine-ExampleTestCase]]
+[[engine-ExampleTestCase]]
 [source,java,indent=0]
 ----
 include::example$java/example/ExampleTestCase.java[tags=user_guide]
@@ -33,7 +33,7 @@ own `TestEngine` implementation, you need to use its unique engine ID. Alternati
 may test your own `TestEngine` by supplying an instance of it to the
 `EngineTestKit.engine(TestEngine)` static factory method.
 
-[[testkit-engine-discovery]]
+[[engine-discovery]]
 == Verifying Test Discovery
 
 The following test demonstrates how to verify that a `TestPlan` was discovered as expected
@@ -44,12 +44,12 @@ by the JUnit Jupiter `TestEngine`.
 include::example$java/example/testkit/EngineTestKitDiscoveryDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
-<2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
+<2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Discover the `TestPlan`.
 <4> Assert engine root descriptor has expected display name.
 <5> Assert no discovery issues were encountered.
 
-[[testkit-engine-statistics]]
+[[engine-statistics]]
 == Asserting Execution Statistics
 
 One of the most common features of the Test Kit is the ability to assert statistics
@@ -62,7 +62,7 @@ For details on what statistics are available, consult the Javadoc for `{EventSta
 include::example$java/example/testkit/EngineTestKitStatisticsDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
-<2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
+<2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
 <4> Filter by _container_ events.
 <5> Assert statistics for _container_ events.
@@ -71,17 +71,17 @@ include::example$java/example/testkit/EngineTestKitStatisticsDemo.java[tags=user
 
 NOTE: In the `verifyJupiterContainerStats()` test method, the counts for the `started` and
 `succeeded` statistics are `2` since the `JupiterTestEngine` and the
-<<testkit-engine-ExampleTestCase, `ExampleTestCase`>> class are both considered containers.
+<<engine-ExampleTestCase, `ExampleTestCase`>> class are both considered containers.
 
-[[testkit-engine-events]]
+[[engine-events]]
 == Asserting Events
 
-If you find that <<testkit-engine-statistics, asserting statistics>> alone is insufficient
+If you find that <<engine-statistics, asserting statistics>> alone is insufficient
 for verifying the expected behavior of test execution, you can work directly with the
 recorded `{Event}` elements and perform assertions against them.
 
 For example, if you want to verify the reason that the `skippedTest()` method in
-<<testkit-engine-ExampleTestCase, `ExampleTestCase`>> was skipped, you can do that as
+<<engine-ExampleTestCase, `ExampleTestCase`>> was skipped, you can do that as
 follows.
 
 [TIP]
@@ -99,8 +99,7 @@ events, consult the Javadoc for `{EventConditions}`.
 include::example$java/example/testkit/EngineTestKitSkippedMethodDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
-<2> Select the `skippedTest()` method in the <<testkit-engine-ExampleTestCase,
-    `ExampleTestCase`>> test class.
+<2> Select the `skippedTest()` method in the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
 <4> Filter by _test_ events.
 <5> Save the _test_ `Events` to a local variable.
@@ -109,7 +108,7 @@ include::example$java/example/testkit/EngineTestKitSkippedMethodDemo.java[tags=u
     `skippedTest` with `"for demonstration purposes"` as the _reason_.
 
 If you want to verify the type of exception thrown from the `failingTest()` method in
-<<testkit-engine-ExampleTestCase, `ExampleTestCase`>>, you can do that as follows.
+<<engine-ExampleTestCase, `ExampleTestCase`>>, you can do that as follows.
 
 [TIP]
 ====
@@ -123,7 +122,7 @@ events and execution results, consult the Javadoc for `{EventConditions}` and
 include::example$java/example/testkit/EngineTestKitFailedMethodDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
-<2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
+<2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
 <4> Filter by _test_ events.
 <5> Assert that the recorded _test_ events contain exactly one failing test named
@@ -137,7 +136,7 @@ achieve this via the `assertEventsMatchExactly()` method in the `EngineTestKit` 
 [TIP]
 ====
 Since `assertEventsMatchExactly()` matches conditions exactly in the order in which the
-events were fired, <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> has been
+events were fired, <<engine-ExampleTestCase, `ExampleTestCase`>> has been
 annotated with `@TestMethodOrder(OrderAnnotation.class)` and each test method has been
 annotated with `@Order(...)`. This allows us to enforce the order in which the test
 methods are executed, which in turn allows our `verifyAllJupiterEvents()` test to be
@@ -153,7 +152,7 @@ respectively.
 include::example$java/example/testkit/EngineTestKitAllEventsDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
-<2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
+<2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
 <4> Filter by _all_ events.
 <5> Print all events to the supplied `writer` for debugging purposes. Debug information

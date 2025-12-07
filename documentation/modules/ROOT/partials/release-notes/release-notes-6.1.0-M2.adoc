@@ -1,4 +1,4 @@
-[[release-notes-6.1.0-M2]]
+[[v6.1.0-M2]]
 == 6.1.0-M2
 
 *Date of Release:* ❓
@@ -9,59 +9,59 @@ For a complete list of all _closed_ issues and pull requests for this release, c
 link:{junit-framework-repo}+/milestone/112?closed=1+[6.1.0-M2] milestone page in the JUnit
 repository on GitHub.
 
-[[release-notes-6.1.0-M2-junit-platform]]
+[[v6.1.0-M2-junit-platform]]
 === JUnit Platform
 
-[[release-notes-6.1.0-M2-junit-platform-bug-fixes]]
+[[v6.1.0-M2-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
 * Clarify `TestDescriptor` implementation requirements.
 
-[[release-notes-6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
+[[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * ❓
 
-[[release-notes-6.1.0-M2-junit-platform-new-features-and-improvements]]
+[[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * ❓
 
-[[release-notes-6.1.0-M2-junit-jupiter]]
+[[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-6.1.0-M2-junit-jupiter-bug-fixes]]
+[[v6.1.0-M2-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * ❓
 
-[[release-notes-6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
+[[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * ❓
 
-[[release-notes-6.1.0-M2-junit-jupiter-new-features-and-improvements]]
+[[v6.1.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * `JAVA_27` has been added to the `JRE` enum for use with `JRE`-based execution conditions.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
   `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
-  <<../user-guide/index.adoc#writing-tests-built-in-extensions-DefaultLocaleAndTimeZone, User Guide>>.
+  xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
 
-[[release-notes-6.1.0-M2-junit-vintage]]
+[[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage
 
-[[release-notes-6.1.0-M2-junit-vintage-bug-fixes]]
+[[v6.1.0-M2-junit-vintage-bug-fixes]]
 ==== Bug Fixes
 
 * ❓
 
-[[release-notes-6.1.0-M2-junit-vintage-deprecations-and-breaking-changes]]
+[[v6.1.0-M2-junit-vintage-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * ❓
 
-[[release-notes-6.1.0-M2-junit-vintage-new-features-and-improvements]]
+[[v6.1.0-M2-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * ❓

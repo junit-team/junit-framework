@@ -5,7 +5,7 @@ separate libraries, JUnit Jupiter includes a few user-facing extension implement
 that are considered so generally useful that users shouldn't have to add another
 dependency.
 
-[[writing-tests-built-in-extensions-TempDirectory]]
+[[TempDirectory]]
 == The @TempDir Extension
 
 The built-in `{TempDirectory}` extension is used to create and clean up a temporary
@@ -51,7 +51,7 @@ temporary directory will only be deleted after the test if the test completed su
 
 The default cleanup mode is `ALWAYS`. You can use the
 `junit.jupiter.tempdir.cleanup.mode.default`
-<<running-tests-config-params, configuration parameter>> to override this default.
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to override this default.
 
 [source,java,indent=0]
 .A test class with a temporary directory that doesn't get cleaned up
@@ -92,7 +92,7 @@ temporary directory. The following example demonstrates how to achieve that.
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_jimfs]
 ----
 
-`@TempDir` can also be used as a <<writing-tests-meta-annotations, meta-annotation>> to
+`@TempDir` can also be used as a xref:writing-tests/annotations.adoc#annotations[meta-annotation] to
 reduce repetition. The following code listing shows how to create a custom `@JimfsTempDir`
 annotation that can be used as a drop-in replacement for
 `@TempDir(factory = JimfsTempDirFactory.class)`.
@@ -116,8 +116,7 @@ annotation is declared on might expose additional attributes to configure the fa
 Such annotations and related attributes can be accessed via the `AnnotatedElementContext`
 parameter of the `createTempDirectory(...)` method.
 
-You can use the `junit.jupiter.tempdir.factory.default` <<running-tests-config-params,
-configuration parameter>> to specify the fully qualified class name of the
+You can use the `junit.jupiter.tempdir.factory.default` xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the fully qualified class name of the
 `TempDirFactory` you would like to use by default. Just like for factories configured via
 the `factory` attribute of the `@TempDir` annotation, the supplied class has to implement
 the `TempDirFactory` interface. The default factory will be used for all `@TempDir`
@@ -131,7 +130,7 @@ precedence rules:
 parameter, if present
 3. Otherwise, `org.junit.jupiter.api.io.TempDirFactory$Standard` will be used.
 
-[[writing-tests-built-in-extensions-AutoClose]]
+[[AutoClose]]
 == The @AutoClose Extension
 
 The built-in `{AutoCloseExtension}` automatically closes resources associated with fields.
@@ -180,7 +179,7 @@ include::example$java/example/AutoCloseDemo.java[tags=user_guide_example]
 <2> `WebClient` implements `java.lang.AutoCloseable` which defines a `close()` method that
     will be invoked after each `@Test` method.
 
-[[writing-tests-built-in-extensions-DefaultLocaleAndTimeZone]]
+[[DefaultLocaleAndTimeZone]]
 == The @DefaultLocale and @DefaultTimeZone Extensions
 
 The `{DefaultLocale}` and `{DefaultTimeZone}` annotations can be used to change the values
@@ -190,7 +189,7 @@ work on the test class level and on the test method level, and are inherited fro
 higher-level containers. After the annotated element has been executed, the initial
 default value is restored.
 
-[[writing-tests-built-in-extensions-DefaultLocale]]
+[[DefaultLocale]]
 === @DefaultLocale
 
 The default `Locale` can be specified using an
@@ -241,7 +240,7 @@ include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=defaul
 
 NOTE: The provider implementation must have a no-args (or the default) constructor.
 
-[[writing-tests-built-in-extensions-DefaultTimeZone]]
+[[DefaultTimeZone]]
 === @DefaultTimeZone
 
 The default `TimeZone` is specified according to the
@@ -275,7 +274,7 @@ NOTE: The provider implementation must have a no-args (or the default) construct
 === Thread Safety
 
 Since the default locale and time zone are global state, reading and writing them during
-<<writing-tests-parallel-execution, parallel test execution>> can lead to unpredictable
+xref:writing-tests/parallel-execution.adoc[parallel test execution] can lead to unpredictable
 results and flaky tests. The `@DefaultLocale` and `@DefaultTimeZone` extensions are
 prepared for that and tests annotated with them will never execute in parallel (thanks to
 `{ResourceLock}`) to guarantee correct test results.

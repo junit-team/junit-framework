@@ -6,13 +6,13 @@ each of these interfaces in the `{extension-api-package}` package for further de
 
 * `{BeforeAllCallback}`
 ** `{BeforeClassTemplateInvocationCallback}` (only applicable for
-   <<writing-tests-class-templates, class templates>>)
+   xref:writing-tests/class-templates.adoc[class templates])
 *** `{BeforeEachCallback}`
 **** `{BeforeTestExecutionCallback}`
 **** `{AfterTestExecutionCallback}`
 *** `{AfterEachCallback}`
 ** `{AfterClassTemplateInvocationCallback}` (only applicable for
-   <<writing-tests-class-templates, class templates>>)
+   xref:writing-tests/class-templates.adoc[class templates])
 * `{AfterAllCallback}`
 
 .Implementing Multiple Extension APIs
@@ -20,7 +20,7 @@ NOTE: Extension developers may choose to implement any number of these interface
 within a single extension. Consult the source code of the `{SpringExtension}` for a
 concrete example.
 
-[[extensions-lifecycle-callbacks-before-after-execution]]
+[[before-after-execution]]
 == Before and After Test Execution Callbacks
 
 `{BeforeTestExecutionCallback}` and `{AfterTestExecutionCallback}` define the APIs for
@@ -34,7 +34,7 @@ The following example shows how to use these callbacks to calculate and log the 
 time of a test method. `TimingExtension` implements both `BeforeTestExecutionCallback`
 and `AfterTestExecutionCallback` in order to time and log the test execution.
 
-[[extensions-lifecycle-callbacks-timing-extension]]
+[[timing-extension]]
 [source,java,indent=0]
 .An extension that times and logs the execution of test methods
 ----

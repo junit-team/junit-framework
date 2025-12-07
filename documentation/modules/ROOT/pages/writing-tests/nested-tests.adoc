@@ -29,11 +29,11 @@ NOTE: _Only non-static nested classes_ (i.e. _inner classes_) can serve as `@Nes
 classes. Nesting can be arbitrarily deep, and those inner classes are subject to full
 lifecycle support, including `@BeforeAll` and `@AfterAll` methods on each level.
 
-[[writing-tests-nested-interoperability]]
+[[interoperability]]
 == Interoperability
 
 `@Nested` may be combined with
-<<writing-tests-parameterized-tests, `@ParameterizedClass`>> in which case the nested test
+xref:writing-tests/parameterized-classes-and-tests.adoc[`@ParameterizedClass`] in which case the nested test
 class is parameterized.
 
 The following example illustrates how to combine `@Nested` with `@ParameterizedClass` and

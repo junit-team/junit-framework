@@ -2,7 +2,7 @@
 
 Test engines may encounter issues during test discovery. For example, the declaration of a
 test class or method may be invalid. To avoid such issues from going unnoticed, the JUnit
-Platform provides a <<test-engines-discovery-issues, mechanism for test engines>> to
+Platform provides a xref:advanced-topics/engines.adoc#discovery-issues[mechanism for test engines] to
 report them with different severity levels:
 
 INFO::
@@ -22,7 +22,7 @@ _critical_ severity, its tests will not be executed. Instead, the engine will be
 as failed during execution with a `{DiscoveryIssueException}` listing all critical issues.
 Non-critical issues will be logged but will not prevent the engine from executing its
 tests. The `junit.platform.discovery.issue.severity.critical`
-<<running-tests-config-params, configuration parameter>> can be used to set the critical
+xref:running-tests/configuration-parameters.adoc[configuration parameter] can be used to set the critical
 severity level. Currently, the default value is `ERROR` but it may be changed in a future
 release.
 

@@ -1,18 +1,18 @@
 = JUnit Platform Suite Engine
 
 The Suite Engine supports the declarative selection and execution of tests from _any_ test
-engine on the JUnit Platform using the <<launcher-api>>.
+engine on the JUnit Platform using the xref:advanced-topics/launcher-api.adoc[].
 
 image::junit-platform-suite-engine-diagram.svg[role=text-center]
 
-[[junit-platform-suite-engine-setup]]
+[[setup]]
 == Setup
 
 In addition to the `junit-platform-suite-api` and `junit-platform-suite-engine` artifacts,
 you need _at least one_ other test engine and its dependencies on the classpath. See
-<<dependency-metadata>> for details regarding group IDs, artifact IDs, and versions.
+xref:appendix.adoc#dependency-metadata[Dependency Metadata] for details regarding group IDs, artifact IDs, and versions.
 
-[[junit-platform-suite-engine-setup-required-dependencies]]
+[[setup-required-dependencies]]
 === Required Dependencies
 
 * `junit-platform-suite-api` in _test_ scope: artifact containing annotations needed to
@@ -24,7 +24,7 @@ NOTE: Both of the required dependencies are aggregated in the `junit-platform-su
 artifact which can be declared in _test_ scope instead of declaring explicit dependencies
 on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 
-[[junit-platform-suite-engine-setup-transitive-dependencies]]
+[[setup-transitive-dependencies]]
 === Transitive Dependencies
 
 * `junit-platform-launcher` in _test_ scope
@@ -32,7 +32,7 @@ on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 * `junit-platform-commons` in _test_ scope
 * `opentest4j` in _test_ scope
 
-[[junit-platform-suite-engine-example]]
+[[example]]
 == @Suite Example
 
 Annotate a class with `@Suite` to have it marked as a test suite on the JUnit Platform. As
@@ -60,7 +60,7 @@ suite, respectively.
 include::example$java/example/BeforeAndAfterSuiteDemo.java[tags=user_guide]
 ----
 
-[[junit-platform-suite-engine-duplicate-test-execution]]
+[[duplicate-test-execution]]
 == Duplicate Test Execution
 
 Depending on the declared selectors, different suites may contain the same tests,
@@ -75,5 +75,5 @@ include only the `junit-platform-suite` engine, or use a custom naming pattern. 
 example, name all suites `*Suite` and all tests `*Test`, and configure your build tool to
 include only the former.
 
-Alternatively, consider <<running-tests-tags, using tags>> to select specific groups of
+Alternatively, consider xref:running-tests/tags.adoc[using tags] to select specific groups of
 tests.
