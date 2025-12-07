@@ -1,8 +1,9 @@
-import org.antora.gradle.AntoraExtension
+import com.github.gradle.node.npm.task.NpxTask
 
 plugins {
-	id("org.antora")
+	id("com.github.node-gradle.node")
 	id("io.spring.antora.generate-antora-yml")
+	id("junitbuild.build-parameters")
 }
 
 repositories {
@@ -35,10 +36,39 @@ val generateAntoraPlaybook by tasks.registering(Copy::class) {
 		}
 		return@filter result
 	}
-	into(layout.buildDirectory.dir("antora"))
+	into(layout.buildDirectory.dir("antora-playbook"))
 }
 
-the<AntoraExtension>().apply {
-	setOptions(mapOf("clean" to true, "stacktrace" to true, "fetch" to true))
-	playbook = generateAntoraPlaybook.map { it.rootSpec.destinationDir.resolve("antora-playbook.yml") }
+node {
+	download = buildParameters.antora.downloadNode
+	version = providers.fileContents(layout.projectDirectory.file(".tool-versions")).asText.map {
+		it.substringAfter("nodejs").trim()
+	}
+}
+
+tasks.npmInstall {
+	args.addAll("--no-audit", "--no-package-lock", "--no-fund")
+}
+
+tasks.register<NpxTask>("antora") {
+	dependsOn(tasks.npmInstall)
+	description = "Runs Antora to generate a documentation site described by the playbook file."
+
+	command = "antora"
+	args.addAll("--clean", "--stacktrace", "--fetch")
+
+	args.add("--to-dir")
+	val outputDir = layout.buildDirectory.dir("antora-site")
+	args.add(outputDir.map { it.asFile.toRelativeString(layout.projectDirectory.asFile) })
+	outputs.dir(outputDir)
+
+	outputs.upToDateWhen { false } // not all inputs are tracked
+
+	val playbook = generateAntoraPlaybook.map { it.rootSpec.destinationDir.resolve("antora-playbook.yml") }
+	args.add(playbook.map { it.toRelativeString(layout.projectDirectory.asFile) })
+	inputs.file(playbook)
+
+	doLast {
+		println("Antora site built in ${outputDir.get().asFile.absoluteFile}")
+	}
 }
