@@ -35,7 +35,8 @@ repository on GitHub.
 [[release-notes-6.0.2-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* Allow using `@ResourceLock` on classes annotated with `@ClassTemplate` (or
+  `@ParameterizedClass`).
 
 [[release-notes-6.0.2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
