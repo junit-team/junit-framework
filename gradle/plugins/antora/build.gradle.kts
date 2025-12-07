@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-	implementation(libs.plugins.antora.markerCoordinates)
+	implementation(projects.buildParameters)
 	implementation(libs.plugins.node.markerCoordinates)
 	implementation(libs.plugins.spring.antora.markerCoordinates)
 }
