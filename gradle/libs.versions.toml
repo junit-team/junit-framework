@@ -88,7 +88,6 @@ log4j = ["log4j-core", "log4j-jul"]
 xmlunit = ["xmlunit-assertj", "xmlunit-placeholders", "xmlunit-jakarta-jaxb-impl", "jaxb-api", "jaxb-runtime"]
 
 [plugins]
-antora = { id = "org.antora", version = "1.0.0" }
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.4" }
 commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.4.0" }
@@ -100,7 +99,7 @@ jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 jreleaser = { id = "org.jreleaser", version = "1.21.0" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.2.21" }
-node = { id = "com.github.node-gradle.node", version = "5.0.0" }
+node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "2.3.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.1.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.3.0" }

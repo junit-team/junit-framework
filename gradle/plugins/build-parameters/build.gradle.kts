@@ -114,4 +114,10 @@ buildParameters {
 			description = "Overrides the value of the 'Created-By' jar manifest entry"
 		}
 	}
+	group("antora") {
+		bool("downloadNode") {
+			description = "Whether to download Node.js from the Gradle build"
+			defaultValue = true
+		}
+	}
 }
