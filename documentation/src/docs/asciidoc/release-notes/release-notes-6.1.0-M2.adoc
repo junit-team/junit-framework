@@ -52,6 +52,7 @@ repository on GitHub.
 ** `Arguments.argumentsFrom(Iterable<?>)` (alias)
 ** `Arguments.argumentSetFrom(String, Iterable<?>)`
 ** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
+* `JAVA_27` has been added to the `JRE` enum for use with `JRE`-based execution conditions.
 
 
 [[release-notes-6.1.0-M2-junit-vintage]]
