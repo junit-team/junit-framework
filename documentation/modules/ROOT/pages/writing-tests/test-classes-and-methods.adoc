@@ -1,0 +1,73 @@
+= Test Classes and Methods
+
+Test methods and lifecycle methods may be declared locally within the current test class,
+inherited from superclasses, or inherited from interfaces (see
+xref:writing-tests/test-interfaces-and-default-methods.adoc[]). In addition, test methods and
+lifecycle methods must not be `abstract` and must not return a value (except `@TestFactory`
+methods which are required to return a value).
+
+[NOTE]
+.Class and method visibility
+====
+Test classes, test methods, and lifecycle methods are not required to be `public`, but
+they must _not_ be `private`.
+
+It is generally recommended to omit the `public` modifier for test classes, test methods,
+and lifecycle methods unless there is a technical reason for doing so – for example, when
+a test class is extended by a test class in another package. Another technical reason for
+making classes and methods `public` is to simplify testing on the module path when using
+the Java Module System.
+====
+
+[NOTE]
+.Field and method inheritance
+====
+Fields in test classes are inherited. For example, a `@TempDir` field from a superclass
+will always be applied in a subclass.
+
+Test methods and lifecycle methods are inherited unless they are overridden according to
+the visibility rules of the Java language. For example, a `@Test` method from a superclass
+will always be applied in a subclass unless the subclass explicitly overrides the method.
+Similarly, if a package-private `@Test` method is declared in a superclass that resides in
+a different package than the subclass, that `@Test` method will always be applied in the
+subclass since the subclass cannot override a package-private method from a superclass in
+a different package.
+
+See also: xref:extensions/supported-utilities-in-extensions.adoc#search-semantics[Field and Method Search Semantics]
+====
+
+The following test class demonstrates the use of `@Test` methods and all supported
+lifecycle methods. For further information on runtime semantics, see
+xref:writing-tests/test-execution-order.adoc[] and
+xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc#wrapping-behavior[Wrapping Behavior of Callbacks].
+
+[source,java,indent=0]
+.A standard Java test class
+----
+include::example$java/example/StandardTests.java[tags=user_guide]
+----
+
+It is also possible to use Java `record` classes as test classes as illustrated by the
+following example.
+
+[source,java,indent=0]
+.A test class written as a Java record
+----
+include::example$java/example/MyFirstJUnitJupiterRecordTests.java[tags=user_guide]
+----
+
+Test and lifecycle methods may be written in Kotlin and may optionally use the `suspend`
+keyword for testing code using coroutines.
+
+[source,kotlin]
+.A test class written in Kotlin
+----
+include::example$kotlin/example/KotlinCoroutinesDemo.kt[tags=user_guide]
+----
+
+NOTE: Using suspending functions as test or lifecycle methods requires
+https://central.sonatype.com/artifact/org.jetbrains.kotlin/kotlin-stdlib[`kotlin-stdlib`],
+https://central.sonatype.com/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotlin-reflect`],
+and
+https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core[`kotlinx-coroutines-core`]
+to be present on the classpath or module path.

@@ -38,3 +38,6 @@ checksums*
 # snapshot-tests
 *.snapshot_actual
 *.snapshot_raw
+
+# Antora
+/documentation/node_modules/

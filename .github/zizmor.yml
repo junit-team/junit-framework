@@ -1,0 +1,5 @@
+rules:
+  cache-poisoning:
+    ignore:
+      # reports issues for setup-node which isn't used while releasing
+      - main.yml

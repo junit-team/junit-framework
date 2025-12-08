@@ -1,0 +1,90 @@
+= Dependency Injection for Constructors and Methods
+
+In all prior JUnit versions, test constructors or methods were not allowed to have
+parameters (at least not with the standard `Runner` implementations). As one of the major
+changes in JUnit Jupiter, both test constructors and methods are now permitted to have
+parameters. This allows for greater flexibility and enables _Dependency Injection_ for
+constructors and methods.
+
+`{ParameterResolver}` defines the API for test extensions that wish to _dynamically_
+resolve parameters at runtime. If a _test class_ constructor, a _test method_, or a
+_lifecycle method_ (see xref:writing-tests/definitions.adoc[]) accepts a parameter, the parameter
+must be resolved at runtime by a registered `ParameterResolver`.
+
+There are currently three built-in resolvers that are registered automatically.
+
+* `{TestInfoParameterResolver}`: if a constructor or method parameter is of type
+  `{TestInfo}`, the `TestInfoParameterResolver` will supply an instance of `TestInfo`
+  corresponding to the current container or test as the value for the parameter. The
+  `TestInfo` can then be used to retrieve information about the current container or test
+  such as the display name, the test class, the test method, and associated tags. The
+  display name is either a technical name, such as the name of the test class or test
+  method, or a custom name configured via `@DisplayName`.
++
+`{TestInfo}` acts as a drop-in replacement for the `TestName` rule from JUnit 4. The
+following demonstrates how to have `TestInfo` injected into a `@BeforeAll` method, test
+class constructor, `@BeforeEach` method, and `@Test` method.
+
+[source,java,indent=0]
+----
+include::example$java/example/TestInfoDemo.java[tags=user_guide]
+----
+
+* `{RepetitionExtension}`: if a method parameter in a `@RepeatedTest`, `@BeforeEach`, or
+  `@AfterEach` method is of type `{RepetitionInfo}`, the `RepetitionExtension` will supply
+  an instance of `RepetitionInfo`. `RepetitionInfo` can then be used to retrieve
+  information about the current repetition, the total number of repetitions, the number of
+  repetitions that have failed, and the failure threshold for the corresponding
+  `@RepeatedTest`. Note, however, that `RepetitionExtension` is not registered outside the
+  context of a `@RepeatedTest`. See xref:writing-tests/repeated-tests.adoc#examples[Repeated Test Examples].
+
+* `{TestReporterParameterResolver}`: if a constructor or method parameter is of type
+  `{TestReporter}`, the `TestReporterParameterResolver` will supply an instance of
+  `TestReporter`. The `TestReporter` can be used to publish additional data about the
+  current test run or attach files to it. The data can be consumed in a
+  `{TestExecutionListener}` via the `reportingEntryPublished()` or `fileEntryPublished()`
+  method, respectively. This allows them to be viewed in IDEs or included in reports.
++
+In JUnit Jupiter you should use `TestReporter` where you used to print information to
+`stdout` or `stderr` in JUnit 4. Some IDEs print report entries to `stdout` or display
+them in the user interface for test results.
+
+[source,java,indent=0]
+----
+include::example$java/example/TestReporterDemo.java[tags=user_guide]
+----
+
+NOTE: Other parameter resolvers must be explicitly enabled by registering appropriate
+xref:extensions/overview.adoc[extensions] via `@ExtendWith`.
+
+Check out the `{RandomParametersExtension}` for an example of a custom
+`{ParameterResolver}`. While not intended to be production-ready, it demonstrates the
+simplicity and expressiveness of both the extension model and the parameter resolution
+process. `MyRandomParametersTest` demonstrates how to inject random values into `@Test`
+methods.
+
+[source,java,indent=0]
+----
+@ExtendWith(RandomParametersExtension.class)
+class MyRandomParametersTest {
+
+	@Test
+	void injectsInteger(@Random int i, @Random int j) {
+		assertNotEquals(i, j);
+	}
+
+	@Test
+	void injectsDouble(@Random double d) {
+		assertEquals(0.0, d, 1.0);
+	}
+
+}
+----
+
+For real-world use cases, check out the source code for the `{MockitoExtension}` and the
+`{SpringExtension}`.
+
+When the type of the parameter to inject is the only condition for your
+`{ParameterResolver}`, you can use the generic `{TypeBasedParameterResolver}` base class.
+The `supportsParameters` method is implemented behind the scenes and supports
+parameterized types.

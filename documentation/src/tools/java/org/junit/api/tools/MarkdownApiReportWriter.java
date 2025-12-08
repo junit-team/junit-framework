@@ -35,13 +35,13 @@ class MarkdownApiReportWriter extends AbstractApiReportWriter {
 	}
 
 	@Override
-	protected String h4(String header) {
-		return "#### " + header;
+	protected String h3(String header) {
+		return "### " + header;
 	}
 
 	@Override
-	protected String h5(String header) {
-		return "##### " + header;
+	protected String h4(String header) {
+		return "#### " + header;
 	}
 
 	@Override

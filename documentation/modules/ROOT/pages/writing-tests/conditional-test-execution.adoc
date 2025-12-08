@@ -1,0 +1,222 @@
+= Conditional Test Execution
+
+The xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`] extension API in JUnit Jupiter allows
+developers to either _enable_ or _disable_ a test class or test method based on certain
+conditions _programmatically_. The simplest example of such a condition is the built-in
+`{DisabledCondition}` which supports the `{Disabled}` annotation (see
+xref:writing-tests/disabling-tests.adoc[]).
+
+In addition to `@Disabled`, JUnit Jupiter also supports several other annotation-based
+conditions in the `org.junit.jupiter.api.condition` package that allow developers to
+enable or disable test classes and test methods _declaratively_. If you wish to provide
+details about why they might be disabled, every annotation associated with these built-in
+conditions has a `disabledReason` attribute available for that purpose.
+
+When multiple `ExecutionCondition` extensions are registered, a test class or test method
+is disabled as soon as one of the conditions returns _disabled_. If a test class is
+disabled, all test methods within that class are automatically disabled as well. If a test
+method is disabled, that prevents execution of the test method and method-level lifecycle
+callbacks such as `@BeforeEach` methods, `@AfterEach` methods, and corresponding extension
+APIs. However, that does not prevent the test class from being instantiated, and it does
+not prevent the execution of class-level lifecycle callbacks such as `@BeforeAll` methods,
+`@AfterAll` methods, and corresponding extension APIs.
+
+See xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`] and the following sections for
+details.
+
+[TIP]
+.Composed Annotations
+====
+Note that any of the _conditional_ annotations listed in the following sections may also
+be used as a meta-annotation in order to create a custom _composed annotation_. For
+example, the `@TestOnMac` annotation in the
+<<os-demo, @EnabledOnOs demo>> shows how you can
+combine `@Test` and `@EnabledOnOs` in a single, reusable annotation.
+====
+
+[NOTE]
+====
+_Conditional_ annotations in JUnit Jupiter are not `@Inherited`. Consequently, if you wish
+to apply the same semantics to subclasses, each conditional annotation must be redeclared
+on each subclass.
+====
+
+[WARNING]
+====
+Unless otherwise stated, each of the _conditional_ annotations listed in the following
+sections can only be declared once on a given test interface, test class, or test method.
+If a conditional annotation is directly present, indirectly present, or meta-present
+multiple times on a given element, only the first such annotation discovered by JUnit will
+be used; any additional declarations will be silently ignored. Note, however, that each
+conditional annotation may be used in conjunction with other conditional annotations in
+the `org.junit.jupiter.api.condition` package.
+====
+
+[[os]]
+== Operating System and Architecture Conditions
+
+A container or test may be enabled or disabled on a particular operating system,
+architecture, or combination of both via the `{EnabledOnOs}` and `{DisabledOnOs}`
+annotations.
+
+[[os-demo]]
+[source,java,indent=0]
+.Conditional execution based on operating system
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_os]
+----
+
+[[architectures-demo]]
+[source,java,indent=0]
+.Conditional execution based on architecture
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_architecture]
+----
+
+[[jre]]
+== Java Runtime Environment Conditions
+
+A container or test may be enabled or disabled on particular versions of the Java Runtime
+Environment (JRE) via the `{EnabledOnJre}` and `{DisabledOnJre}` annotations or on a
+particular range of versions of the JRE via the `{EnabledForJreRange}` and
+`{DisabledForJreRange}` annotations. The range effectively defaults to `JRE.JAVA_8` as the
+lower bound and `JRE.OTHER` as the upper bound, which allows usage of half open ranges.
+
+The following listing demonstrates the use of these annotations with predefined {JRE} enum
+constants.
+
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre]
+----
+
+Since the enum constants defined in {JRE} are static for any given JUnit release, you
+might find that you need to configure a Java version that is not supported by the `JRE`
+enum. For example, when JUnit Jupiter 5.12 was released the `JRE` enum defined `JAVA_25`
+as the highest supported Java version. However, you may wish to run your tests against
+later versions of Java. To support such use cases, you can specify arbitrary Java versions
+via the `versions` attributes in `@EnabledOnJre` and `@DisabledOnJre` and via the
+`minVersion` and `maxVersion` attributes in `@EnabledForJreRange` and
+`@DisabledForJreRange`.
+
+The following listing demonstrates the use of these annotations with arbitrary Java
+versions.
+
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre_arbitrary_versions]
+----
+
+[[native]]
+== Native Image Conditions
+
+A container or test may be enabled or disabled within a
+https://www.graalvm.org/reference-manual/native-image/[GraalVM native image] via the
+`{EnabledInNativeImage}` and `{DisabledInNativeImage}` annotations. These annotations are
+typically used when running tests within a native image using the Gradle and Maven
+plug-ins from the GraalVM https://graalvm.github.io/native-build-tools/latest/[Native
+Build Tools] project.
+
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_native]
+----
+
+[[system-properties]]
+== System Property Conditions
+
+A container or test may be enabled or disabled based on the value of the `named` JVM
+system property via the `{EnabledIfSystemProperty}` and `{DisabledIfSystemProperty}`
+annotations. The value supplied via the `matches` attribute will be interpreted as a
+regular expression.
+
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_system_property]
+----
+
+[TIP]
+====
+`{EnabledIfSystemProperty}` and `{DisabledIfSystemProperty}` are _repeatable annotations_.
+Consequently, these annotations may be declared multiple times on a test interface, test
+class, or test method. Specifically, these annotations will be found if they are directly
+present, indirectly present, or meta-present on a given element.
+====
+
+[[environment-variables]]
+== Environment Variable Conditions
+
+A container or test may be enabled or disabled based on the value of the `named`
+environment variable from the underlying operating system via the
+`{EnabledIfEnvironmentVariable}` and `{DisabledIfEnvironmentVariable}` annotations. The
+value supplied via the `matches` attribute will be interpreted as a regular expression.
+
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_environment_variable]
+----
+
+[TIP]
+====
+`{EnabledIfEnvironmentVariable}` and `{DisabledIfEnvironmentVariable}` are _repeatable
+annotations_. Consequently, these annotations may be declared multiple times on a test
+interface, test class, or test method. Specifically, these annotations will be found if
+they are directly present, indirectly present, or meta-present on a given element.
+====
+
+[[custom]]
+== Custom Conditions
+
+As an alternative to implementing an xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`], a
+container or test may be enabled or disabled based on a _condition method_ configured via
+the `{EnabledIf}` and `{DisabledIf}` annotations. A condition method must have a `boolean`
+return type and may accept either no arguments or a single `ExtensionContext` argument.
+
+The following test class demonstrates how to configure a local method named
+`customCondition` via `@EnabledIf` and `@DisabledIf`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_custom]
+----
+
+Alternatively, the condition method can be located outside the test class. In this case,
+it must be referenced by its _fully qualified name_ as demonstrated in the following
+example.
+
+[source,java,indent=0]
+----
+package example;
+
+include::example$java/example/ExternalCustomConditionDemo.java[tags=user_guide_external_custom_condition]
+----
+
+[NOTE]
+====
+There are several cases where a condition method would need to be `static`:
+
+- when `@EnabledIf` or `@DisabledIf` is used at class level
+- when `@EnabledIf` or `@DisabledIf` is used on a `@ParameterizedTest` or a
+  `@TestTemplate` method
+- when the condition method is located in an external class
+
+In any other case, you can use either static methods or instance methods as condition
+methods.
+====
+
+[TIP]
+====
+It is often the case that you can use an existing static method in a utility class as a
+custom condition.
+
+For example, `java.awt.GraphicsEnvironment` provides a `public static boolean isHeadless()`
+method that can be used to determine if the current environment does not support a
+graphical display. Thus, if you have a test that depends on graphical support you can
+disable it when such support is unavailable as follows.
+
+[source,java,indent=0]
+----
+@DisabledIf(value = "java.awt.GraphicsEnvironment#isHeadless",
+	disabledReason = "headless environment")
+----
+====

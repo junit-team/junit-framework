@@ -1,0 +1,40 @@
+= Conditional Test Execution
+
+`{ExecutionCondition}` defines the `Extension` API for programmatic, _conditional test
+execution_.
+
+An `ExecutionCondition` is _evaluated_ for each container (e.g., a test class) to
+determine if all the tests it contains should be executed based on the supplied
+`ExtensionContext`. Similarly, an `ExecutionCondition` is _evaluated_ for each test to
+determine if a given test method should be executed based on the supplied
+`ExtensionContext`.
+
+When multiple `ExecutionCondition` extensions are registered, a container or test is
+disabled as soon as one of the conditions returns _disabled_. Thus, there is no guarantee
+that a condition is evaluated because another extension might have already caused a
+container or test to be disabled. In other words, the evaluation works like the
+short-circuiting boolean OR operator.
+
+See the source code of `{DisabledCondition}` and `{Disabled}` for concrete examples.
+
+[[deactivation]]
+== Deactivating Conditions
+
+Sometimes it can be useful to run a test suite _without_ certain conditions being active.
+For example, you may wish to run tests even if they are annotated with `@Disabled` in
+order to see if they are still _broken_. To do this, provide a pattern for the
+`junit.jupiter.conditions.deactivate` _configuration parameter_ to specify which
+conditions should be deactivated (i.e., not evaluated) for the current test run. The
+pattern can be supplied as a JVM system property, as a _configuration parameter_ in the
+`LauncherDiscoveryRequest` that is passed to the `Launcher`, or via the JUnit Platform
+configuration file (see xref:running-tests/configuration-parameters.adoc[] for details).
+
+For example, to deactivate JUnit's `@Disabled` condition, you can start your JVM with the
+following system property.
+
+`-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition`
+
+[[deactivation-patterns]]
+=== Pattern Matching Syntax
+
+Refer to xref:running-tests/configuration-parameters.adoc#pattern[Pattern Matching Syntax] for details.

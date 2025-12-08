@@ -1,0 +1,547 @@
+= Build Support
+
+[[gradle]]
+== Gradle
+
+Starting with https://docs.gradle.org/4.6/release-notes.html[version 4.6], Gradle provides
+https://docs.gradle.org/current/userguide/java_testing.html#using_junit5[native support]
+for executing tests on the JUnit Platform. To enable it, you need to specify
+`useJUnitPlatform()` within a `test` task declaration in `build.gradle`:
+
+[source,groovy,indent=0]
+[subs=attributes+]
+----
+test {
+	useJUnitPlatform()
+}
+----
+
+Filtering by xref:running-tests/tags.adoc[tags],
+xref:running-tests/tags.adoc#expressions[tag expressions], or engines is also supported:
+
+[source,groovy,indent=0]
+[subs=attributes+]
+----
+test {
+	useJUnitPlatform {
+		includeTags("fast", "smoke & feature-a")
+		// excludeTags("slow", "ci")
+		includeEngines("junit-jupiter")
+		// excludeEngines("junit-vintage")
+	}
+}
+----
+
+Please refer to the
+https://docs.gradle.org/current/userguide/java_testing.html[official Gradle documentation]
+for a comprehensive list of options.
+
+[[gradle-bom]]
+=== Aligning dependency versions
+
+TIP: See <<spring-boot>> for details on how to override the version
+of JUnit used in your Spring Boot application.
+
+Unless you're using Spring Boot which defines its own way of managing dependencies, it is
+recommended to use the JUnit Platform xref:appendix.adoc#dependency-metadata-junit-bom[Bill of Materials (BOM)] to align the
+versions of all JUnit artifacts.
+
+[source,groovy,indent=0]
+[subs=attributes+]
+.Explicit platform dependency on the BOM
+----
+dependencies {
+	testImplementation(platform("org.junit:junit-bom:{version}"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+Using the BOM allows you to omit the version when declaring dependencies on all artifacts
+with the `org.junit.platform`, `org.junit.jupiter`, and `org.junit.vintage` group IDs.
+
+Since all JUnit artifacts declare a
+https://docs.gradle.org/current/userguide/platforms.html[platform] dependency on the BOM,
+you usually don't need to declare an explicit dependency on it yourself. Instead, it's
+sufficient to declare _one_ regular dependency that includes a version number. Gradle will
+then pull in the BOM automatically so you can omit the version for all other JUnit
+artifacts.
+
+[source,groovy,indent=0]
+[subs=attributes+]
+.Implicit platform dependency on the BOM
+----
+dependencies {
+	testImplementation("org.junit.jupiter:junit-jupiter:{version}") // <1>
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher") // <2>
+}
+----
+<1> Dependency declaration with explicit version. Pulls in the `junit-bom` automatically.
+<2> Dependency declaration without version. The version is supplied by the `junit-bom`.
+
+[WARNING]
+.Declaring a dependency on junit-platform-launcher
+====
+Even though pre-8.0 versions of Gradle don't require declaring an explicit
+dependency on `junit-platform-launcher`, it is recommended to do so to ensure the versions
+of JUnit artifacts on the test runtime classpath are aligned.
+
+Moreover, doing so is recommended and in some cases even required when importing the
+project into an IDE like xref:running-tests/ide-support.adoc#eclipse[Eclipse] or
+xref:running-tests/ide-support.adoc#intellij-idea[IntelliJ IDEA].
+====
+
+[[gradle-engines-configure]]
+=== Configuring Test Engines
+
+In order to run any tests at all, a `TestEngine` implementation must be on the classpath.
+
+To configure support for JUnit Jupiter based tests, configure a `testImplementation` dependency
+on the dependency-aggregating JUnit Jupiter artifact similar to the following.
+
+[source,groovy,indent=0]
+[subs=attributes+]
+----
+dependencies {
+	testImplementation("org.junit.jupiter:junit-jupiter:{version}")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+Alternatively, you can use Gradle's
+https://docs.gradle.org/current/userguide/jvm_test_suite_plugin.html[JVM Test Suite]
+support.
+
+[source,kotlin,indent=0]
+[subs=attributes+]
+.Kotlin DSL
+----
+testing {
+	suites {
+		named<JvmTestSuite>("test") {
+			useJUnitJupiter("{version}")
+		}
+	}
+}
+----
+
+[source,groovy,indent=0]
+[subs=attributes+]
+.Groovy DSL
+----
+testing {
+	suites {
+		test {
+			useJUnitJupiter("{version}")
+		}
+	}
+}
+----
+
+The JUnit Platform can run JUnit 4 based tests as long as you configure a `testImplementation`
+dependency on JUnit 4 and a `testRuntimeOnly` dependency on the JUnit Vintage `TestEngine`
+implementation similar to the following.
+
+[source,groovy,indent=0]
+[subs=attributes+]
+----
+dependencies {
+	testImplementation("junit:junit:{junit4-version}")
+	testRuntimeOnly("org.junit.vintage:junit-vintage-engine:{version}")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+----
+
+[[gradle-config-params]]
+=== Configuration Parameters
+
+The standard Gradle `test` task currently does not provide a dedicated DSL to set JUnit
+Platform xref:running-tests/configuration-parameters.adoc[configuration parameters] to influence test
+discovery and execution. However, you can provide configuration parameters within the
+build script via system properties (as shown below) or via the
+`junit-platform.properties` file.
+
+[source,groovy,indent=0]
+----
+test {
+	// ...
+	systemProperty("junit.jupiter.conditions.deactivate", "*")
+	systemProperty("junit.jupiter.extensions.autodetection.enabled", true)
+	systemProperty("junit.jupiter.testinstance.lifecycle.default", "per_class")
+	// ...
+}
+----
+
+[[gradle-logging]]
+=== Configuring Logging (optional)
+
+JUnit uses the Java Logging APIs in the `java.util.logging` package (a.k.a. _JUL_) to
+emit warnings and debug information. Please refer to the official documentation of
+`{LogManager}` for configuration options.
+
+Alternatively, it's possible to redirect log messages to other logging frameworks such as
+{Log4j} or {Logback}. To use a logging framework that provides a custom implementation of
+`{LogManager}`, set the `java.util.logging.manager` system property to the _fully
+qualified class name_ of the `{LogManager}` implementation to use. The example below
+demonstrates how to configure Log4j{nbsp}2.x (see {Log4j_JDK_Logging_Adapter} for
+details).
+
+[source,groovy,indent=0]
+[subs=attributes+]
+----
+test {
+	systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+	// Avoid overhead (see https://logging.apache.org/log4j/2.x/manual/jmx.html#enabling-jmx)
+	systemProperty("log4j2.disableJmx", "true")
+}
+----
+
+Other logging frameworks provide different means to redirect messages logged using
+`java.util.logging`. For example, for {Logback} you can use the
+https://www.slf4j.org/legacy.html#jul-to-slf4j[JUL to SLF4J Bridge] by adding it as a
+dependency to the test runtime classpath.
+
+[[maven]]
+== Maven
+
+Maven Surefire and Maven Failsafe provide
+https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html[native support]
+for executing tests on the JUnit Platform. The `pom.xml` file in the
+`{junit-jupiter-starter-maven}` project demonstrates how to use the Maven Surefire plugin
+and can serve as a starting point for configuring your Maven build.
+
+[WARNING]
+.Minimum required version of Maven Surefire/Failsafe
+====
+As of JUnit 6.0, the minimum required version of Maven Surefire/Failsafe is 3.0.0.
+====
+
+[[maven-bom]]
+=== Aligning dependency versions
+
+Unless you're using Spring Boot which defines its own way of managing dependencies, it is
+recommended to use the JUnit Platform xref:appendix.adoc#dependency-metadata-junit-bom[Bill of Materials (BOM)] to align the
+versions of all JUnit artifacts.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+<dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.junit</groupId>
+			<artifactId>junit-bom</artifactId>
+			<version>{version}</version>
+			<type>pom</type>
+			<scope>import</scope>
+		</dependency>
+	</dependencies>
+</dependencyManagement>
+----
+
+Using the BOM allows you to omit the version when declaring dependencies on all artifacts
+with the `org.junit.platform`, `org.junit.jupiter`, and `org.junit.vintage` group IDs.
+
+TIP: See <<spring-boot>> for details on how to override the version
+of JUnit used in your Spring Boot application.
+
+[[maven-engines-configure]]
+=== Configuring Test Engines
+
+In order to have Maven Surefire or Maven Failsafe run any tests at all, at least one
+`TestEngine` implementation must be added to the test classpath.
+
+To configure support for JUnit Jupiter based tests, configure `test` scoped dependencies
+on the JUnit Jupiter API and the JUnit Jupiter `TestEngine` implementation similar to the
+following.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+	<!-- ... -->
+	<dependencies>
+		<!-- ... -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>{version}</version> <!-- can be omitted when using the BOM -->
+			<scope>test</scope>
+		</dependency>
+		<!-- ... -->
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>{surefire-version}</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>{surefire-version}</version>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- ... -->
+----
+
+Maven Surefire and Maven Failsafe can run JUnit 4 based tests alongside Jupiter tests as
+long as you configure `test` scoped dependencies on JUnit 4 and the JUnit Vintage
+`TestEngine` implementation similar to the following.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+	<!-- ... -->
+	<dependencies>
+		<!-- ... -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>{junit4-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>{version}</version> <!-- can be omitted when using the BOM -->
+			<scope>test</scope>
+		</dependency>
+		<!-- ... -->
+	</dependencies>
+	<!-- ... -->
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>{surefire-version}</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>{surefire-version}</version>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- ... -->
+----
+
+[[maven-filter-test-class-names]]
+=== Filtering by Test Class Names
+
+The Maven Surefire Plugin will scan for test classes whose fully qualified names match
+the following patterns.
+
+- `+++**/Test*.java+++`
+- `+++**/*Test.java+++`
+- `+++**/*Tests.java+++`
+- `+++**/*TestCase.java+++`
+
+Moreover, it will exclude all nested classes (including static member classes) by default.
+
+Note, however, that you can override this default behavior by configuring explicit
+`include` and `exclude` rules in your `pom.xml` file. For example, to keep Maven Surefire
+from excluding static member classes, you can override its exclude rules as follows.
+
+[source,xml,indent=0]
+[subs=attributes+]
+.Overriding exclude rules of Maven Surefire
+----
+	<!-- ... -->
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>{surefire-version}</version>
+				<configuration>
+					<excludes>
+						<exclude/>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- ... -->
+----
+
+Please see the
+https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html[Inclusions and Exclusions of Tests]
+documentation for Maven Surefire for details.
+
+[[maven-filter-tags]]
+=== Filtering by Tags
+
+You can filter tests by xref:running-tests/tags.adoc[tags] or
+xref:running-tests/tags.adoc#expressions[tag expressions] using the following configuration
+properties.
+
+- to include _tags_ or _tag expressions_, use `groups`.
+- to exclude _tags_ or _tag expressions_, use `excludedGroups`.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+	<!-- ... -->
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>{surefire-version}</version>
+				<configuration>
+					<groups>acceptance | !feature-a</groups>
+					<excludedGroups>integration, regression</excludedGroups>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- ... -->
+----
+
+[[maven-config-params]]
+=== Configuration Parameters
+
+You can set JUnit Platform xref:running-tests/configuration-parameters.adoc[configuration parameters] to
+influence test discovery and execution by declaring the `configurationParameters`
+property and providing key-value pairs using the Java `Properties` file syntax (as shown
+below) or via the `junit-platform.properties` file.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+	<!-- ... -->
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>{surefire-version}</version>
+				<configuration>
+					<properties>
+						<configurationParameters>
+							junit.jupiter.conditions.deactivate = *
+							junit.jupiter.extensions.autodetection.enabled = true
+							junit.jupiter.testinstance.lifecycle.default = per_class
+						</configurationParameters>
+					</properties>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- ... -->
+----
+
+[[ant]]
+== Ant
+
+Starting with version `1.10.3`, link:https://ant.apache.org/[Ant] has a
+link:https://ant.apache.org/manual/Tasks/junitlauncher.html[`junitlauncher`] task that
+provides native support for launching tests on the JUnit Platform. The `junitlauncher`
+task is solely responsible for launching the JUnit Platform and passing it the selected
+collection of tests. The JUnit Platform then delegates to registered test engines to
+discover and execute the tests.
+
+The `junitlauncher` task attempts to align as closely as possible with native Ant
+constructs such as
+link:https://ant.apache.org/manual/Types/resources.html#collection[resource collections]
+for allowing users to select the tests that they want executed by test engines. This gives
+the task a consistent and natural feel when compared to many other core Ant tasks.
+
+Starting with version `1.10.6` of Ant, the `junitlauncher` task supports
+link:https://ant.apache.org/manual/Tasks/junitlauncher.html#fork[forking the tests in a separate JVM].
+
+The `build.xml` file in the `{junit-jupiter-starter-ant}` project demonstrates how to use
+the task and can serve as a starting point.
+
+=== Basic Usage
+
+The following example demonstrates how to configure the `junitlauncher` task to select a
+single test class (i.e., `com.example.project.CalculatorTests`).
+
+[source,xml,indent=0]
+----
+	<path id="test.classpath">
+		<!-- The location where you have your compiled classes -->
+		<pathelement location="${build.classes.dir}" />
+	</path>
+
+	<!-- ... -->
+
+	<junitlauncher>
+		<classpath refid="test.classpath" />
+		<test name="com.example.project.CalculatorTests" />
+	</junitlauncher>
+----
+
+The `test` element allows you to specify a single test class that you want to be selected
+and executed. The `classpath` element allows you to specify the classpath to be used to
+launch the JUnit Platform. This classpath will also be used to locate test classes that
+are part of the execution.
+
+The following example demonstrates how to configure the `junitlauncher` task to select
+test classes from multiple locations.
+
+[source,xml,indent=0]
+----
+	<path id="test.classpath">
+		<!-- The location where you have your compiled classes -->
+		<pathelement location="${build.classes.dir}" />
+	</path>
+	<!-- ... -->
+	<junitlauncher>
+		<classpath refid="test.classpath" />
+		<testclasses outputdir="${output.dir}">
+			<fileset dir="${build.classes.dir}">
+				<include name="org/example/**/demo/**/" />
+			</fileset>
+			<fileset dir="${some.other.dir}">
+				<include name="org/myapp/**/" />
+			</fileset>
+		</testclasses>
+	</junitlauncher>
+----
+
+In the above example, the `testclasses` element allows you to select multiple test
+classes that reside in different locations.
+
+For further details on usage and configuration options please refer to the official Ant
+documentation for the
+link:https://ant.apache.org/manual/Tasks/junitlauncher.html[`junitlauncher` task].
+
+[[spring-boot]]
+== Spring Boot
+
+link:https://spring.io/projects/spring-boot[Spring Boot] provides automatic support for
+managing the version of JUnit used in your project. In addition, the
+`spring-boot-starter-test` artifact automatically includes testing libraries such as JUnit
+Jupiter, AssertJ, Mockito, etc.
+
+If your build relies on dependency management support from Spring Boot, you should not
+import JUnit's xref:appendix.adoc#dependency-metadata-junit-bom[Bill of Materials (BOM)] in your build script since that would
+result in duplicate (and potentially conflicting) management of JUnit dependencies.
+
+If you need to override the version of a dependency used in your Spring Boot application,
+you have to override the exact name of the
+link:https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#appendix.dependency-versions.properties[version property]
+defined in the BOM used by the Spring Boot plugin. For example, the name of the JUnit
+Jupiter version property in Spring Boot is `junit-jupiter.version`. The mechanism for
+changing a dependency version is documented for both
+link:https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#managing-dependencies.dependency-management-plugin.customizing[Gradle]
+and
+link:https://docs.spring.io/spring-boot/docs/current/maven-plugin/reference/htmlsingle/#using.parent-pom[Maven].
+
+With Gradle you can override the JUnit Jupiter version by including the following in your
+`build.gradle` file.
+
+[source,groovy,indent=0]
+[subs=attributes+]
+----
+	ext['junit-jupiter.version'] = '{version}'
+----
+
+With Maven you can override the JUnit Jupiter version by including the following in your
+`pom.xml` file.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+	<properties>
+		<junit-jupiter.version>{version}</junit-jupiter.version>
+	</properties>
+----
