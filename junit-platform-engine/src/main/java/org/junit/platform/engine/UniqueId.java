@@ -12,6 +12,11 @@ package org.junit.platform.engine;
 
 import static org.apiguardian.api.API.Status.STABLE;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
 import java.io.Serial;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
@@ -38,7 +43,12 @@ import org.junit.platform.commons.util.ToStringBuilder;
 public final class UniqueId implements Cloneable, Serializable {
 
 	@Serial
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 1L;
+
+	@Serial
+	@SuppressWarnings("UnusedVariable")
+	private static final ObjectStreamField[] serialPersistentFields = ObjectStreamClass.lookup(
+		SerializedForm.class).getFields();
 
 	private static final String ENGINE_SEGMENT_TYPE = "engine";
 
@@ -82,8 +92,10 @@ public final class UniqueId implements Cloneable, Serializable {
 		return new UniqueId(new Segment(segmentType, value));
 	}
 
-	@SuppressWarnings({ "serial", "RedundantSuppression" }) // always used with serializable implementation (List.copyOf())
-	private final List<Segment> segments;
+	@SuppressWarnings({ "serial", "RedundantSuppression" })
+	// always used with serializable implementation (List.copyOf())
+	// This is effectively final but not technically due to late initialization when deserializing
+	private /* final */ List<Segment> segments;
 
 	// lazily computed
 	private transient int hashCode;
@@ -227,6 +239,18 @@ public final class UniqueId implements Cloneable, Serializable {
 		return super.clone();
 	}
 
+	@Serial
+	private void writeObject(ObjectOutputStream s) throws IOException {
+		SerializedForm serializedForm = new SerializedForm(this);
+		serializedForm.serialize(s);
+	}
+
+	@Serial
+	private void readObject(ObjectInputStream s) throws ClassNotFoundException, IOException {
+		SerializedForm serializedForm = SerializedForm.deserialize(s);
+		segments = serializedForm.segments;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -352,6 +376,44 @@ public final class UniqueId implements Cloneable, Serializable {
 			// @formatter:on
 		}
 
+	}
+
+	/**
+	 * Represents the serialized output of {@code UniqueId}. The fields on this
+	 * class match the fields that {@code UniqueId} had prior to 6.1.
+	 */
+	private static final class SerializedForm implements Serializable {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		@SuppressWarnings({ "serial", "RedundantSuppression" })
+		// always used with serializable implementation (List.copyOf())
+		private final List<Segment> segments;
+		private final UniqueIdFormat uniqueIdFormat;
+
+		SerializedForm(UniqueId uniqueId) {
+			this.segments = uniqueId.segments;
+			this.uniqueIdFormat = UniqueIdFormat.getDefault();
+		}
+
+		@SuppressWarnings("unchecked")
+		private SerializedForm(ObjectInputStream.GetField fields) throws IOException, ClassNotFoundException {
+			this.segments = (List<Segment>) fields.get("segments", null);
+			this.uniqueIdFormat = UniqueIdFormat.getDefault();
+		}
+
+		void serialize(ObjectOutputStream s) throws IOException {
+			ObjectOutputStream.PutField fields = s.putFields();
+			fields.put("segments", segments);
+			fields.put("uniqueIdFormat", uniqueIdFormat);
+			s.writeFields();
+		}
+
+		static SerializedForm deserialize(ObjectInputStream s) throws IOException, ClassNotFoundException {
+			ObjectInputStream.GetField fields = s.readFields();
+			return new SerializedForm(fields);
+		}
 	}
 
 }
