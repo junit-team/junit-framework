@@ -1,0 +1,1314 @@
+= Parameterized Classes and Tests
+
+_Parameterized tests_ make it possible to run a test method multiple times with different
+arguments. They are declared just like regular `@Test` methods but use the
+`{ParameterizedTest}` annotation instead.
+
+_Parameterized classes_ make it possible to run _all_ tests in a test class, including
+xref:writing-tests/nested-tests.adoc[], multiple times with different arguments. They are declared just
+like regular test classes and may contain any supported test method type (including
+`@ParameterizedTest`) but annotated with the `{ParameterizedClass}` annotation.
+
+WARNING: _Parameterized classes_ are currently an _experimental_ feature. You're invited
+to give it a try and provide feedback to the JUnit team so they can improve and eventually
+xref:api-evolution.adoc[promote] this feature.
+
+Regardless of whether you are parameterizing a test method or a test class, you must
+declare at least one <<tests-sources, source>> that will
+provide the arguments for each invocation and then
+<<tests-consuming-arguments, consume>> the arguments in the
+parameterized method or class, respectively.
+
+The following example demonstrates a parameterized test that uses the `@ValueSource`
+annotation to specify a `String` array as the source of arguments.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=first_example]
+----
+
+When executing the above parameterized test method, each invocation will be reported
+separately. For instance, the `ConsoleLauncher` will print output similar to the
+following.
+
+....
+palindromes(String) ✔
+├─ [1] candidate = "racecar" ✔
+├─ [2] candidate = "radar" ✔
+└─ [3] candidate = "able was I ere I saw elba" ✔
+....
+
+The same `@ValueSource` annotation can be used to specify the source of arguments for a
+`@ParameterizedClass`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedClassDemo.java[tags=first_example]
+----
+
+When executing the above parameterized test class, each invocation will be reported
+separately. For instance, the `ConsoleLauncher` will print output similar to the
+following.
+
+....
+PalindromeTests ✔
+├─ [1] candidate = "racecar" ✔
+│  ├─ palindrome() ✔
+│  └─ reversePalindrome() ✔
+├─ [2] candidate = "radar" ✔
+│  ├─ palindrome() ✔
+│  └─ reversePalindrome() ✔
+└─ [3] candidate = "able was I ere I saw elba" ✔
+   ├─ palindrome() ✔
+   └─ reversePalindrome() ✔
+....
+
+[[tests-setup]]
+== Required Setup
+
+In order to use parameterized classes or tests you need to add a dependency on the
+`junit-jupiter-params` artifact. Please refer to xref:appendix.adoc#dependency-metadata[Dependency Metadata] for details.
+
+[[tests-consuming-arguments]]
+== Consuming Arguments
+
+[[tests-consuming-arguments-methods]]
+=== Parameterized Tests
+
+Parameterized test methods _consume_ arguments directly from the configured source (see
+<<tests-sources>>) following a one-to-one correlation between
+argument source index and method parameter index (see examples in
+<<tests-sources-CsvSource>>). However, a parameterized test
+method may also choose to _aggregate_ arguments from the source into a single object
+passed to the method (see <<tests-argument-aggregation>>).
+Additional arguments may also be provided by a `ParameterResolver` (e.g., to obtain an
+instance of `TestInfo`, `TestReporter`, etc.). Specifically, a parameterized test method
+must declare formal parameters according to the following rules.
+
+* Zero or more _indexed parameters_ must be declared first.
+* Zero or more _aggregators_ must be declared next.
+* Zero or more arguments supplied by a `ParameterResolver` must be declared last.
+
+In this context, an _indexed parameter_ is an argument for a given index in the
+`{Arguments}` provided by an `{ArgumentsProvider}` that is passed as an argument to the
+parameterized method at the same index in the method's formal parameter list. An
+_aggregator_ is any parameter of type `{ArgumentsAccessor}` or any parameter annotated
+with `{AggregateWith}`.
+
+[[tests-consuming-arguments-classes]]
+=== Parameterized Classes
+
+Parameterized classes _consume_ arguments directly from the configured source (see
+<<tests-sources>>); either via their unique constructor or via
+field injection. If a `{Parameter}`-annotated field is declared in the parameterized class
+or one of its superclasses, field injection will be used. Otherwise, constructor injection
+will be used.
+
+[[tests-consuming-arguments-constructor-injection]]
+==== Constructor Injection
+
+WARNING: Constructor injection can only be used with the (default) `PER_METHOD`
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] mode. Please use
+<<tests-consuming-arguments-field-injection, field injection>>
+with the `PER_CLASS` mode instead.
+
+For constructor injection, the same rules apply as defined for
+<<tests-consuming-arguments-methods, parameterized tests>>
+above. In the following example, two arguments are injected into the constructor of the
+test class.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedClassDemo.java[tags=constructor_injection]
+----
+
+You may use _records_ to implement parameterized classes that avoid the boilerplate code
+of declaring a test class constructor.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedRecordDemo.java[tags=example]
+----
+
+[[tests-consuming-arguments-field-injection]]
+==== Field Injection
+
+For field injection, the following rules apply for fields annotated with `@Parameter`.
+
+* Zero or more _indexed parameters_ may be declared; each must have a unique index
+  specified in its `@Parameter(index)` annotation. The index may be omitted if there is
+  only one indexed parameter. If there are at least two indexed parameter declarations,
+  there must be declarations for all indexes from 0 to the largest declared index.
+* Zero or more _aggregators_ may be declared; each without specifying an index in its
+  `@Parameter` annotation.
+* Zero or more other fields may be declared as usual as long as they're not annotated with
+  `@Parameter`.
+
+In this context, an _indexed parameter_ is an argument for a given index in the
+`{Arguments}` provided by an `{ArgumentsProvider}` that is injected into a field annotated
+with `@Parameter(index)`. An _aggregator_ is any `@Parameter`-annotated field of type
+{ArgumentsAccessor} or any field annotated with {AggregateWith}.
+
+The following example demonstrates how to use field injection to consume multiple
+arguments in a parameterized class.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedClassDemo.java[tags=field_injection]
+----
+
+If field injection is used, no constructor parameters will be resolved with arguments from
+the source. Other xref:writing-tests/dependency-injection-for-constructors-and-methods.adoc[`ParameterResolver` extensions]
+may resolve constructor parameters as usual, though.
+
+[[tests-consuming-arguments-lifecycle-method]]
+==== Lifecycle Methods
+
+`{BeforeParameterizedClassInvocation}` and `{AfterParameterizedClassInvocation}` can also
+be used to consume arguments if their `injectArguments` attribute is set to `true` (the
+default). If so, their method signatures must follow the same rules apply as defined for
+<<tests-consuming-arguments-methods, parameterized tests>> and
+additionally use the same parameter types as the _indexed parameters_ of the parameterized
+test class. Please refer to the Javadoc of `{BeforeParameterizedClassInvocation}` and
+`{AfterParameterizedClassInvocation}` for details and to the
+<<tests-lifecycle-interop-classes, Lifecycle>> section for an
+example.
+
+[NOTE]
+.AutoCloseable arguments
+====
+Arguments that implement `java.lang.AutoCloseable` (or `java.io.Closeable` which extends
+`java.lang.AutoCloseable`) will be automatically closed after the parameterized class or
+test invocation.
+
+To prevent this from happening, set the `autoCloseArguments` attribute in
+`@ParameterizedTest` to `false`. Specifically, if an argument that implements
+`AutoCloseable` is reused for multiple invocations of the same parameterized class or test
+method, you must specify the `autoCloseArguments = false` on the `{ParameterizedClass}` or
+`{ParameterizedTest}` annotation to ensure that the argument is not closed between
+invocations.
+====
+
+[[tests-consuming-arguments-other-extensions]]
+=== Other Extensions
+
+Other extensions can access the parameters and resolved arguments of a parameterized test
+or class by retrieving a `{ParameterInfo}` object from the `{ExtensionContext_Store}`.
+Please refer to the Javadoc of `{ParameterInfo}` for details.
+
+[[tests-sources]]
+== Sources of Arguments
+
+Out of the box, JUnit Jupiter provides quite a few _source_ annotations. Each of the
+following subsections provides a brief overview and an example for each of them. Please
+refer to the Javadoc in the `{params-provider-package}` package for additional
+information.
+
+TIP: All source annotations in this section are applicable to both `{ParameterizedClass}`
+and `{ParameterizedTest}`. For the sake of brevity, the examples in this section will only
+show how to use them with `{ParameterizedTest}` methods.
+
+[[tests-sources-ValueSource]]
+=== @ValueSource
+
+`@ValueSource` is one of the simplest possible sources. It lets you specify a single
+array of literal values and can only be used for providing a single argument per
+parameterized test invocation.
+
+The following types of literal values are supported by `@ValueSource`.
+
+- `short`
+- `byte`
+- `int`
+- `long`
+- `float`
+- `double`
+- `char`
+- `boolean`
+- `java.lang.String`
+- `java.lang.Class`
+
+For example, the following `@ParameterizedTest` method will be invoked three times, with
+the values `1`, `2`, and `3` respectively.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ValueSource_example]
+----
+
+[[tests-sources-null-and-empty]]
+=== Null and Empty Sources
+
+In order to check corner cases and verify proper behavior of our software when it is
+supplied _bad input_, it can be useful to have `null` and _empty_ values supplied to our
+parameterized tests. The following annotations serve as sources of `null` and empty values
+for parameterized tests that accept a single argument.
+
+* `{NullSource}`: provides a single `null` argument to the annotated `@ParameterizedClass`
+   or `@ParameterizedTest`.
+   - `@NullSource` cannot be used for a parameter that has a primitive type.
+* `{EmptySource}`: provides a single _empty_ argument to the annotated
+  `@ParameterizedClass` or `@ParameterizedTest` for parameters of the following types:
+  `java.lang.String`, `java.util.Collection` (and concrete subtypes with a `public` no-arg
+  constructor), `java.util.List`, `java.util.Set`, `java.util.SortedSet`,
+  `java.util.NavigableSet`, `java.util.Map` (and concrete subtypes with a `public` no-arg
+  constructor), `java.util.SortedMap`, `java.util.NavigableMap`, primitive arrays (e.g.,
+  `int[]`, `char[][]`, etc.), object arrays (e.g., `String[]`, `Integer[][]`, etc.).
+* `{NullAndEmptySource}`: a _composed annotation_ that combines the functionality of
+  `@NullSource` and `@EmptySource`.
+
+If you need to supply multiple varying types of _blank_ strings to a parameterized
+class or test, you can achieve that using
+<<tests-sources-ValueSource>> -- for example,
+`@ValueSource(strings = {"{nbsp}", "{nbsp}{nbsp}{nbsp}", "\t", "\n"})`.
+
+You can also combine `@NullSource`, `@EmptySource`, and `@ValueSource` to test a wider
+range of `null`, _empty_, and _blank_ input. The following example demonstrates how to
+achieve this for strings.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=NullAndEmptySource_example1]
+----
+
+Making use of the composed `@NullAndEmptySource` annotation simplifies the above as
+follows.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=NullAndEmptySource_example2]
+----
+
+NOTE: Both variants of the `nullEmptyAndBlankStrings(String)` parameterized test method
+result in six invocations: 1 for `null`, 1 for the empty string, and 4 for the explicit
+blank strings supplied via `@ValueSource`.
+
+[[tests-sources-EnumSource]]
+=== @EnumSource
+
+`@EnumSource` provides a convenient way to use `Enum` constants.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_example]
+----
+
+The annotation's `value` attribute is optional. When omitted, the declared type of the
+first parameter is used. The test will fail if it does not reference an enum type.
+Thus, the `value` attribute is required in the above example because the method parameter
+is declared as `TemporalUnit`, i.e. the interface implemented by `ChronoUnit`, which isn't
+an enum type. Changing the method parameter type to `ChronoUnit` allows you to omit the
+explicit enum type from the annotation as follows.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_example_autodetection]
+----
+
+The annotation provides an optional `names` attribute that lets you specify which
+constants shall be used, like in the following example.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_include_example]
+----
+
+In addition to `names`, you can use the `from` and `to` attributes to specify a range of
+constants. The range starts from the constant specified in the `from` attribute and
+includes all subsequent constants up to and including the one specified in the `to`
+attribute, based on the natural order of the enum constants.
+
+If `from` and `to` attributes are omitted, they default to the first and last constants
+in the enum type, respectively. If all `names`, `from`, and `to` attributes are omitted,
+all constants will be used. The following example demonstrates how to specify a range of
+constants.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_range_example]
+----
+
+The `@EnumSource` annotation also provides an optional `mode` attribute that enables
+fine-grained control over which constants are passed to the test method. For example, you
+can exclude names from the enum constant pool or specify regular expressions as in the
+following examples.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_exclude_example]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_regex_example]
+----
+
+You can also combine `mode` with the `from`, `to` and `names` attributes to define a
+range of constants while excluding specific values from that range as shown below.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_range_exclude_example]
+----
+
+[[tests-sources-MethodSource]]
+=== @MethodSource
+
+`{MethodSource}` allows you to refer to one or more _factory_ methods of the test class
+or external classes.
+
+Factory methods within the test class must be `static` unless the test class is annotated
+with `@TestInstance(Lifecycle.PER_CLASS)`; whereas, factory methods in external classes
+must always be `static`.
+
+Each factory method must generate a _stream_ of _arguments_, and each set of arguments
+within the stream will be provided as the physical arguments for individual invocations
+of the annotated `@ParameterizedClass` or `@ParameterizedTest`. Generally speaking this
+translates to a `Stream` of `Arguments` (i.e., `Stream<Arguments>`); however, the actual
+concrete return type can take on many forms. In this context, a "stream" is anything that
+JUnit can reliably convert into a `Stream`, such as `Stream`, `DoubleStream`,
+`LongStream`, `IntStream`, `Collection`, `Iterator`, `Iterable`, an array of objects or
+primitives, or any type that provides an `iterator(): Iterator` method (such as, for
+example, a `kotlin.sequences.Sequence`). The "arguments" within the stream can be supplied
+as an instance of `Arguments`, an array of objects (e.g., `Object[]`), or a single value
+if the parameterized class or test method accepts a single argument.
+
+If the return type is `Stream` or one of the primitive streams,
+JUnit will properly close it by calling `BaseStream.close()`,
+making it safe to use a resource such as `Files.lines()`.
+
+If you only need a single parameter, you can return a `Stream` of instances of the
+parameter type as demonstrated in the following example.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=simple_MethodSource_example]
+----
+
+For a `@ParameterizedClass`, providing a factory method name via `@MethodSource` is
+mandatory. For a `@ParameterizedTest`, if you do not explicitly provide a factory method
+name, JUnit Jupiter will search for a _factory_ method with the same name as the current
+`@ParameterizedTest` method by convention. This is demonstrated in the following example.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=simple_MethodSource_without_value_example]
+----
+
+Streams for primitive types (`DoubleStream`, `IntStream`, and `LongStream`) are also
+supported as demonstrated by the following example.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=primitive_MethodSource_example]
+----
+
+If a parameterized class or test method declares multiple parameters, you need to return a
+collection, stream, or array of `Arguments` instances or object arrays as shown below (see
+the Javadoc for `{MethodSource}` for further details on supported return types). Note that
+`arguments(Object...)` is a static factory method defined in the `Arguments` interface. In
+addition, `Arguments.of(Object...)` may be used as an alternative to
+`arguments(Object...)`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=multi_arg_MethodSource_example]
+----
+
+An external, `static` _factory_ method can be referenced by providing its _fully qualified
+method name_ as demonstrated in the following example.
+
+[source,java,indent=0]
+----
+package example;
+
+include::example$java/example/ExternalMethodSourceDemo.java[tags=external_MethodSource_example]
+----
+
+Factory methods can declare parameters, which will be provided by registered
+implementations of the `ParameterResolver` extension API. In the following example, the
+factory method is referenced by its name since there is only one such method in the test
+class. If there are several local methods with the same name, parameters can also be
+provided to differentiate them – for example, `@MethodSource("factoryMethod()")` or
+`@MethodSource("factoryMethod(java.lang.String)")`. Alternatively, the factory method
+can be referenced by its fully qualified method name, e.g.
+`@MethodSource("example.MyTests#factoryMethod(java.lang.String)")`.
+
+[source,java,indent=0]
+----
+include::example$java/example/MethodSourceParameterResolutionDemo.java[tags=parameter_resolution_MethodSource_example]
+----
+
+[[tests-sources-FieldSource]]
+=== @FieldSource
+
+`{FieldSource}` allows you to refer to one or more fields of the test class or external
+classes.
+
+Fields within the test class must be `static` unless the test class is annotated with
+`@TestInstance(Lifecycle.PER_CLASS)`; whereas, fields in external classes must always be
+`static`.
+
+Each field must be able to supply a _stream_ of arguments, and each set of "arguments"
+within the "stream" will be provided as the physical arguments for individual invocations
+of the annotated `@ParameterizedClass` or `@ParameterizedTest`.
+
+In this context, a "stream" is anything that JUnit can reliably convert to a `Stream`;
+however, the actual concrete field type can take on many forms. Generally speaking this
+translates to a `Collection`, an `Iterable`, a `Supplier` of a stream (`Stream`,
+`DoubleStream`, `LongStream`, or `IntStream`), a `Supplier` of an `Iterator`, an array of
+objects or primitives, or any type that provides an `iterator(): Iterator` method (such
+as, for example, a `kotlin.sequences.Sequence`). Each set of "arguments" within the
+"stream" can be supplied as an instance of `Arguments`, an array of objects (for example,
+`Object[]`, `String[]`, etc.), or a single value if the parameterized class or test method accepts
+a single argument.
+
+[WARNING]
+====
+In contrast to the supported return types for
+<<tests-sources-MethodSource, `@MethodSource`>> factory
+methods, the value of a `@FieldSource` field cannot be an instance of `Stream`,
+`DoubleStream`, `LongStream`, `IntStream`, or `Iterator`, since the values of such types
+are _consumed_ the first time they are processed. However, if you wish to use one of
+these types, you can wrap it in a `Supplier` — for example, `Supplier<IntStream>`.
+====
+
+If the `Supplier` return type is `Stream` or one of the primitive streams,
+JUnit will properly close it by calling `BaseStream.close()`,
+making it safe to use a resource such as `Files.lines()`.
+
+Please note that a one-dimensional array of objects supplied as a set of "arguments" will
+be handled differently than other types of arguments. Specifically, all the elements of a
+one-dimensional array of objects will be passed as individual physical arguments to the
+`@ParameterizedClass` or `@ParameterizedTest`. See the Javadoc for `{FieldSource}` for
+further details.
+
+For a `@ParameterizedClass`, providing a field name via `@FieldSource` is mandatory. For a
+`@ParameterizedTest`, if you do not explicitly provide a field name, JUnit Jupiter will
+search in the test class for a field that has the same name as the current
+`@ParameterizedTest` method by convention. This is demonstrated in the following example.
+This parameterized test method will be invoked twice: with the values `"apple"` and
+`"banana"`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=default_field_FieldSource_example]
+----
+
+The following example demonstrates how to provide a single explicit field name via
+`@FieldSource`. This parameterized test method will be invoked twice: with the values
+`"apple"` and `"banana"`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=explicit_field_FieldSource_example]
+----
+
+The following example demonstrates how to provide multiple explicit field names via
+`@FieldSource`. This example uses the `listOfFruits` field from the previous example as
+well as the `additionalFruits` field. Consequently, this parameterized test method will
+be invoked four times: with the values `"apple"`, `"banana"`, `"cherry"`, and
+`"dewberry"`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=multiple_fields_FieldSource_example]
+----
+
+It is also possible to provide a `Stream`, `DoubleStream`, `IntStream`, `LongStream`, or
+`Iterator` as the source of arguments via a `@FieldSource` field as long as the stream or
+iterator is wrapped in a `java.util.function.Supplier`. The following example demonstrates
+how to provide a `Supplier` of a `Stream` of named arguments. This parameterized test
+method will be invoked twice: with the values `"apple"` and `"banana"` and with display
+names `"Apple"` and `"Banana"`, respectively.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=named_arguments_FieldSource_example]
+----
+
+[NOTE]
+====
+Note that `arguments(Object...)` is a static factory method defined in the
+`org.junit.jupiter.params.provider.Arguments` interface.
+
+Similarly, `named(String, Object)` is a static factory method defined in the
+`org.junit.jupiter.api.Named` interface.
+====
+
+If a parameterized class or test method declares multiple parameters, the corresponding
+`@FieldSource` field must be able to provide a collection, stream supplier, or array of
+`Arguments` instances or object arrays as shown below (see the Javadoc for `{FieldSource}`
+for further details on supported types).
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=multi_arg_FieldSource_example]
+----
+
+[NOTE]
+====
+Note that `arguments(Object...)` is a static factory method defined in the
+`org.junit.jupiter.params.provider.Arguments` interface.
+====
+
+An external, `static` `@FieldSource` field can be referenced by providing its
+_fully qualified field name_ as demonstrated in the following example.
+
+[source,java,indent=0]
+----
+include::example$java/example/ExternalFieldSourceDemo.java[tags=external_field_FieldSource_example]
+----
+
+[[tests-sources-CsvSource]]
+=== @CsvSource
+
+`@CsvSource` allows you to express argument lists as comma-separated values (i.e., CSV
+`String` literals). Each string provided via the `value` attribute in `@CsvSource`
+represents a CSV record and results in one invocation of the parameterized class or
+test. The first record may optionally be used to supply CSV headers (see the Javadoc for
+the `useHeadersInDisplayName` attribute for details and an example).
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=CsvSource_example]
+----
+
+The default delimiter is a comma (`,`), but you can use another character by setting the
+`delimiter` attribute. Alternatively, the `delimiterString` attribute allows you to use a
+`String` delimiter instead of a single character. However, both delimiter attributes
+cannot be set simultaneously.
+
+By default, `@CsvSource` uses a single quote (`'`) as its quote character, but this can be
+changed via the `quoteCharacter` attribute. See the `'lemon, lime'` value in the example
+above and in the table below. An empty, quoted value (`''`) results in an empty `String`
+unless the `emptyValue` attribute is set; whereas, an entirely _empty_ value is
+interpreted as a `null` reference. By specifying one or more `nullValues`, a custom value
+can be interpreted as a `null` reference (see the `NIL` example in the table below). An
+`ArgumentConversionException` is thrown if the target type of a `null` reference is a
+primitive type.
+
+NOTE: An _unquoted_ empty value will always be converted to a `null` reference regardless
+of any custom values configured via the `nullValues` attribute.
+
+Except within a quoted string, leading and trailing whitespace in a CSV column is trimmed
+by default. This behavior can be changed by setting the
+`ignoreLeadingAndTrailingWhitespace` attribute to `true`.
+
+[cols="50,50"]
+|===
+| Example Input                                                                           | Resulting Argument List
+
+| `@CsvSource({ "apple, banana" })`                                                       | `"apple"`, `"banana"`
+| `@CsvSource({ "apple, 'lemon, lime'" })`                                                | `"apple"`, `"lemon, lime"`
+| `@CsvSource({ "apple, ''" })`                                                           | `"apple"`, `""`
+| `@CsvSource({ "apple, " })`                                                             | `"apple"`, `null`
+| `@CsvSource(value = { "apple, banana, NIL" }, nullValues = "NIL")`                      | `"apple"`, `"banana"`, `null`
+| `@CsvSource(value = { " apple , banana" }, ignoreLeadingAndTrailingWhitespace = false)` | `" apple "`, `" banana"`
+|===
+
+If the programming language you are using supports Java _text blocks_  or equivalent
+multi-line string literals, you can alternatively use the `textBlock` attribute of
+`@CsvSource`. Each record within a text block represents a CSV record and results in one
+invocation of the parameterized class or test. The first record may optionally be used to
+supply CSV headers by setting the `useHeadersInDisplayName` attribute to `true` as in the
+example below.
+
+Using a text block, the previous example can be implemented as follows.
+
+[source,java,indent=0]
+----
+@ParameterizedTest
+@CsvSource(useHeadersInDisplayName = true, textBlock = """
+	FRUIT,         RANK
+	apple,         1
+	banana,        2
+	'lemon, lime', 0xF1
+	strawberry,    700_000
+	""")
+void testWithCsvSource(String fruit, int rank) {
+	// ...
+}
+----
+
+The generated display names for the previous example include the CSV header names.
+
+----
+[1] FRUIT = "apple", RANK = "1"
+[2] FRUIT = "banana", RANK = "2"
+[3] FRUIT = "lemon, lime", RANK = "0xF1"
+[4] FRUIT = "strawberry", RANK = "700_000"
+----
+
+In contrast to CSV records supplied via the `value` attribute, a text block can contain
+comments. Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be treated as a comment and ignored. Note that there is one exception
+to this rule: if the comment character appears within a quoted field, it loses
+its special meaning.
+
+The comment character must be the first character on the line without any leading
+whitespace. It is therefore recommended that the closing text block delimiter (`"""`)
+be placed either at the end of the last line of input or on the following line,
+left aligned with the rest of the input (as can be seen in the example below which
+demonstrates formatting similar to a table).
+
+[source,java,indent=0]
+----
+@ParameterizedTest
+@CsvSource(delimiter = '|', quoteCharacter = '"', textBlock = """
+	#-----------------------------
+	#    FRUIT     |     RANK
+	#-----------------------------
+	     apple     |      1
+	#-----------------------------
+	     banana    |      2
+	#-----------------------------
+	  "lemon lime" |     0xF1
+	#-----------------------------
+	   strawberry  |    700_000
+	#-----------------------------
+	""")
+void testWithCsvSource(String fruit, int rank) {
+	// ...
+}
+----
+
+[NOTE]
+====
+Java's https://docs.oracle.com/en/java/javase/17/text-blocks/index.html[text block]
+feature automatically removes _incidental whitespace_ when the code is compiled.
+However other JVM languages such as Groovy and Kotlin do not. Thus, if you are using a
+programming language other than Java and your text block contains comments or new lines
+within quoted strings, you will need to ensure that there is no leading whitespace within
+your text block.
+====
+
+[[tests-sources-CsvFileSource]]
+=== @CsvFileSource
+
+`@CsvFileSource` lets you use comma-separated value (CSV) files from the classpath or the
+local file system. Each record from a CSV file results in one invocation of the
+parameterized class or test. The first record may optionally be used to supply CSV
+headers. You can instruct JUnit to ignore the headers via the `numLinesToSkip` attribute.
+If you would like for the headers to be used in the display names, you can set the
+`useHeadersInDisplayName` attribute to `true`. The examples below demonstrate the use of
+`numLinesToSkip` and `useHeadersInDisplayName`.
+
+The default delimiter is a comma (`,`), but you can use another character by setting the
+`delimiter` attribute. Alternatively, the `delimiterString` attribute allows you to use a
+`String` delimiter instead of a single character. However, both delimiter attributes
+cannot be set simultaneously.
+
+.Comments in CSV files
+NOTE: Any line beginning with the value of the `commentCharacter` attribute (`+++#+++`
+by default) will be interpreted as a comment and will be ignored.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=CsvFileSource_example]
+----
+
+[source,csv,indent=0]
+.two-column.csv
+----
+include::example$resources/two-column.csv[]
+----
+
+The following listing shows the generated display names for the first two parameterized
+test methods above.
+
+----
+[1] country = "Sweden", reference = "1"
+[2] country = "Poland", reference = "2"
+[3] country = "United States of America", reference = "3"
+[4] country = "France", reference = "700_000"
+----
+
+The following listing shows the generated display names for the last parameterized test
+method above that uses CSV header names.
+
+----
+[1] COUNTRY = "Sweden", REFERENCE = "1"
+[2] COUNTRY = "Poland", REFERENCE = "2"
+[3] COUNTRY = "United States of America", REFERENCE = "3"
+[4] COUNTRY = "France", REFERENCE = "700_000"
+----
+
+In contrast to the default syntax used in `@CsvSource`, `@CsvFileSource` uses a double
+quote (`+++"+++`) as the quote character by default, but this can be changed via the
+`quoteCharacter` attribute. See the `"United States of America"` value in the example
+above. An empty, quoted value (`+++""+++`) results in an empty `String` unless the
+`emptyValue` attribute is set; whereas, an entirely _empty_ value is interpreted as a
+`null` reference. By specifying one or more `nullValues`, a custom value can be
+interpreted as a `null` reference. An `ArgumentConversionException` is thrown if the
+target type of a `null` reference is a primitive type.
+
+NOTE: An _unquoted_ empty value will always be converted to a `null` reference regardless
+of any custom values configured via the `nullValues` attribute.
+
+Except within a quoted string, leading and trailing whitespace in a CSV column is trimmed
+by default. This behavior can be changed by setting the
+`ignoreLeadingAndTrailingWhitespace` attribute to `true`.
+
+[[tests-sources-ArgumentsSource]]
+=== @ArgumentsSource
+
+`@ArgumentsSource` can be used to specify a custom, reusable `ArgumentsProvider`. Note
+that an implementation of `ArgumentsProvider` must be declared as either a top-level
+class or as a `static` nested class.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsSource_example]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsProvider_example]
+----
+
+If you wish to implement a custom `ArgumentsProvider` that also consumes an annotation
+(like built-in providers such as `{ValueArgumentsProvider}` or `{CsvArgumentsProvider}`),
+you have the possibility to extend the `{AnnotationBasedArgumentsProvider}` class.
+
+Moreover, `ArgumentsProvider` implementations may declare constructor parameters in case
+they need to be resolved by a registered `ParameterResolver` as demonstrated in the
+following example.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsProviderWithConstructorInjection_example]
+----
+
+[[repeatable-sources]]
+=== Multiple sources using repeatable annotations
+
+Repeatable annotations provide a convenient way to specify multiple sources from
+different providers.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=repeatable_annotations]
+----
+
+Following the above parameterized test, a test case will run for each argument:
+
+----
+[1] foo
+[2] bar
+----
+
+The following annotations are repeatable:
+
+* `@ValueSource`
+* `@EnumSource`
+* `@MethodSource`
+* `@FieldSource`
+* `@CsvSource`
+* `@CsvFileSource`
+* `@ArgumentsSource`
+
+[[tests-argument-count-validation]]
+== Argument Count Validation
+
+By default, when an arguments source provides more arguments than the test method needs,
+those additional arguments are ignored and the test executes as usual.
+This can lead to bugs where arguments are never passed to the parameterized class or
+method.
+
+To prevent this, you can set argument count validation to 'strict'.
+Then, any additional arguments will cause an error instead.
+
+To change this behavior for all tests, set the
+`junit.jupiter.params.argumentCountValidation`
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to `strict`.
+To change this behavior for a single parameterized class or test method,
+use the `argumentCountValidation` attribute of the `@ParameterizedClass` or
+`@ParameterizedTest` annotation:
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=argument_count_validation]
+----
+
+[[tests-argument-conversion]]
+== Argument Conversion
+
+[[tests-argument-conversion-widening]]
+=== Widening Conversion
+
+JUnit Jupiter supports
+https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.2[Widening Primitive
+Conversion] for arguments supplied to a `@ParameterizedClass` or `@ParameterizedTest`.
+For example, a parameterized class or test method annotated with
+`@ValueSource(ints = { 1, 2, 3 })` can be declared to accept not only an argument of type
+`int` but also an argument of type `long`, `float`, or `double`.
+
+[[tests-argument-conversion-implicit]]
+=== Implicit Conversion
+
+To support use cases like `@CsvSource`, JUnit Jupiter provides a number of built-in
+implicit type converters. The conversion process depends on the declared type of each
+method parameter.
+
+For example, if a `@ParameterizedClass` or `@ParameterizedTest` declares a parameter
+of type `TimeUnit` and the actual type supplied by the declared source is a `String`, the
+string will be automatically converted into the corresponding `TimeUnit` enum constant.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=implicit_conversion_example]
+----
+
+`String` instances are implicitly converted to the following target types.
+
+NOTE: Decimal, hexadecimal, and octal `String` literals will be converted to their
+integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
+
+[[tests-argument-conversion-implicit-table]]
+[cols="10,90"]
+|===
+| Target Type | Example
+
+| `boolean`/`Boolean`        | `"true"`                                 -> `true` _(only accepts values 'true' or 'false', case-insensitive)_
+| `byte`/`Byte`              | `"15"`, `"0xF"`, or `"017"`              -> `(byte) 15`
+| `char`/`Character`         | `"o"`                                    -> `'o'`
+| `short`/`Short`            | `"15"`, `"0xF"`, or `"017"`              -> `(short) 15`
+| `int`/`Integer`            | `"15"`, `"0xF"`, or `"017"`              -> `15`
+| `long`/`Long`              | `"15"`, `"0xF"`, or `"017"`              -> `15L`
+| `float`/`Float`            | `"1.0"`                                  -> `1.0f`
+| `double`/`Double`          | `"1.0"`                                  -> `1.0d`
+| `Enum` subclass            | `"SECONDS"`                              -> `TimeUnit.SECONDS`
+| `java.io.File`             | `"/path/to/file"`                        -> `new File("/path/to/file")`
+| `java.lang.Class`          | `"java.lang.Integer"`                    -> `java.lang.Integer.class` _(use `$` for nested classes, e.g. `"java.lang.Thread$State"`)_
+| `java.lang.Class`          | `"byte"`                                 -> `byte.class` _(primitive types are supported)_
+| `java.lang.Class`          | `"char[]"`                               -> `char[].class` _(array types are supported)_
+| `java.math.BigDecimal`     | `"123.456e789"`                          -> `new BigDecimal("123.456e789")`
+| `java.math.BigInteger`     | `"1234567890123456789"`                  -> `new BigInteger("1234567890123456789")`
+| `java.net.URI`             | `"https://junit.org/"`                   -> `URI.create("https://junit.org/")`
+| `java.net.URL`             | `"https://junit.org/"`                   -> `URI.create("https://junit.org/").toURL()`
+| `java.nio.charset.Charset` | `"UTF-8"`                                -> `Charset.forName("UTF-8")`
+| `java.nio.file.Path`       | `"/path/to/file"`                        -> `Paths.get("/path/to/file")`
+| `java.time.Duration`       | `"PT3S"`                                 -> `Duration.ofSeconds(3)`
+| `java.time.Instant`        | `"1970-01-01T00:00:00Z"`                 -> `Instant.ofEpochMilli(0)`
+| `java.time.LocalDateTime`  | `"2017-03-14T12:34:56.789"`              -> `LocalDateTime.of(2017, 3, 14, 12, 34, 56, 789_000_000)`
+| `java.time.LocalDate`      | `"2017-03-14"`                           -> `LocalDate.of(2017, 3, 14)`
+| `java.time.LocalTime`      | `"12:34:56.789"`                         -> `LocalTime.of(12, 34, 56, 789_000_000)`
+| `java.time.MonthDay`       | `"--03-14"`                              -> `MonthDay.of(3, 14)`
+| `java.time.OffsetDateTime` | `"2017-03-14T12:34:56.789Z"`             -> `OffsetDateTime.of(2017, 3, 14, 12, 34, 56, 789_000_000, ZoneOffset.UTC)`
+| `java.time.OffsetTime`     | `"12:34:56.789Z"`                        -> `OffsetTime.of(12, 34, 56, 789_000_000, ZoneOffset.UTC)`
+| `java.time.Period`         | `"P2M6D"`                                -> `Period.of(0, 2, 6)`
+| `java.time.YearMonth`      | `"2017-03"`                              -> `YearMonth.of(2017, 3)`
+| `java.time.Year`           | `"2017"`                                 -> `Year.of(2017)`
+| `java.time.ZonedDateTime`  | `"2017-03-14T12:34:56.789Z"`             -> `ZonedDateTime.of(2017, 3, 14, 12, 34, 56, 789_000_000, ZoneOffset.UTC)`
+| `java.time.ZoneId`         | `"Europe/Berlin"`                        -> `ZoneId.of("Europe/Berlin")`
+| `java.time.ZoneOffset`     | `"+02:30"`                               -> `ZoneOffset.ofHoursMinutes(2, 30)`
+| `java.util.Currency`       | `"JPY"`                                  -> `Currency.getInstance("JPY")`
+| `java.util.Locale`         | `"en-US"`                                -> `Locale.forLanguageTag("en-US")`
+| `java.util.UUID`           | `"d043e930-7b3b-48e3-bdbe-5a3ccfb833db"` -> `UUID.fromString("d043e930-7b3b-48e3-bdbe-5a3ccfb833db")`
+|===
+
+[[tests-argument-conversion-implicit-fallback]]
+==== Fallback String-to-Object Conversion
+
+In addition to implicit conversion from strings to the target types listed in the above
+table, JUnit Jupiter also provides a fallback mechanism for automatic conversion from a
+`String` to a given target type if the target type declares exactly one suitable _factory
+method_ or a _factory constructor_ as defined below.
+
+- __factory method__: a non-private, `static` method declared in the target type that
+  accepts either a single `String` argument or a single `CharSequence` argument and
+  returns an instance of the target type. The name of the method can be arbitrary and need
+  not follow any particular convention.
+- __factory constructor__: a non-private constructor in the target type that accepts a
+  either a single `String` argument or a single `CharSequence` argument. Note that the
+  target type must be declared as either a top-level class or as a `static` nested class.
+
+NOTE: If multiple _factory methods_ are discovered, they will be ignored. If a _factory
+method_ and a _factory constructor_ are discovered, the factory method will be used
+instead of the constructor.
+
+For example, in the following `@ParameterizedTest` method, the `Book` argument will be
+created by invoking the `Book.fromTitle(String)` factory method and passing `"42 Cats"`
+as the title of the book.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=implicit_fallback_conversion_example]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=implicit_fallback_conversion_example_Book]
+----
+
+[[tests-argument-conversion-explicit]]
+=== Explicit Conversion
+
+Instead of relying on implicit argument conversion, you may explicitly specify an
+`ArgumentConverter` to use for a certain parameter using the `@ConvertWith` annotation
+like in the following example. Note that an implementation of `ArgumentConverter` must be
+declared as either a top-level class or as a `static` nested class.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=explicit_conversion_example]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=explicit_conversion_example_ToStringArgumentConverter]
+----
+
+If the converter is only meant to convert one type to another, you can extend
+`TypedArgumentConverter` to avoid boilerplate type checks.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=explicit_conversion_example_TypedArgumentConverter]
+----
+
+Explicit argument converters are meant to be implemented by test and extension authors.
+Thus, `junit-jupiter-params` only provides a single explicit argument converter that may
+also serve as a reference implementation: `JavaTimeArgumentConverter`. It is used via the
+composed annotation `JavaTimeConversionPattern`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=explicit_java_time_converter]
+----
+
+If you wish to implement a custom `ArgumentConverter` that also consumes an annotation
+(like `JavaTimeArgumentConverter`), you have the possibility to extend the
+`{AnnotationBasedArgumentConverter}` class.
+
+[[tests-argument-aggregation]]
+== Argument Aggregation
+
+By default, each _argument_ provided to a `@ParameterizedClass` or `@ParameterizedTest`
+corresponds to a single method parameter. Consequently, argument sources which are
+expected to supply a large number of arguments can lead to large constructor or method
+signatures, respectively.
+
+In such cases, an `{ArgumentsAccessor}` can be used instead of multiple parameters. Using
+this API, you can access the provided arguments through a single argument passed to your
+test method. In addition, type conversion is supported as discussed in
+<<tests-argument-conversion-implicit>>.
+
+Besides, you can retrieve the current test invocation index with
+`ArgumentsAccessor.getInvocationIndex()`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAccessor_example]
+----
+
+_An instance of `ArgumentsAccessor` is automatically injected into any parameter of type
+`ArgumentsAccessor`._
+
+[[tests-argument-aggregation-custom]]
+=== Custom Aggregators
+
+Apart from direct access to the arguments of a `@ParameterizedClass` or
+`@ParameterizedTest` using an `ArgumentsAccessor`, JUnit Jupiter also supports the usage
+of custom, reusable _aggregators_.
+
+To use a custom aggregator, implement the `{ArgumentsAggregator}` interface and register
+it via the `@AggregateWith` annotation on a compatible parameter of the
+`@ParameterizedClass` or `@ParameterizedTest`. The result of the aggregation will then be
+provided as an argument for the corresponding parameter when the parameterized test is
+invoked. Note that an implementation of `ArgumentsAggregator` must be declared as either a
+top-level class or as a `static` nested class.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAggregator_example]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAggregator_example_PersonAggregator]
+----
+
+If you find yourself repeatedly declaring `@AggregateWith(MyTypeAggregator.class)` for
+multiple parameterized classes or methods across your codebase, you may wish to create a
+custom _composed annotation_ such as `@CsvToMyType` that is meta-annotated with
+`@AggregateWith(MyTypeAggregator.class)`. The following example demonstrates this in
+action with a custom `@CsvToPerson` annotation.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAggregator_with_custom_annotation_example]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAggregator_with_custom_annotation_example_CsvToPerson]
+----
+
+
+[[tests-display-names]]
+== Customizing Display Names
+
+By default, the display name of a parameterized class or test invocation contains the
+invocation index and a comma-separated list of the `String` representations of all
+arguments for that specific invocation. If parameter names are present in the bytecode,
+each argument will be preceded by its parameter name and an equals sign (unless the
+argument is only available via an `ArgumentsAccessor` or `ArgumentAggregator`) – for
+example, `firstName = "Jane"`.
+
+[TIP]
+====
+To ensure that parameter names are present in the bytecode, test code must be compiled
+with the `-parameters` compiler flag for Java or with the `-java-parameters` compiler flag
+for Kotlin.
+====
+
+However, you can customize invocation display names via the `name` attribute of the
+`@ParameterizedClass` or `@ParameterizedTest` annotation as in the following example.
+
+======
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=custom_display_names]
+----
+
+When executing the above method using the `ConsoleLauncher` you will see output similar to
+the following.
+
+....
+Display name of container ✔
+├─ 1 ==> the rank of "apple" is "1" ✔
+├─ 2 ==> the rank of "banana" is "2" ✔
+└─ 3 ==> the rank of "lemon, lime" is "3" ✔
+....
+======
+
+[NOTE]
+====
+Please note that `name` is a `MessageFormat` pattern. Thus, a single quote (`'`) needs to
+be represented as a doubled single quote (`''`) in order to be displayed.
+====
+
+The following placeholders are supported within custom display names.
+
+[cols="20,80"]
+|===
+| Placeholder                              | Description
+
+| `\{displayName}`                         | the display name of the method
+| `\{index}`                               | the current invocation index (1-based)
+| `\{arguments}`                           | the complete, comma-separated arguments list
+| `\{argumentsWithNames}`                  | the complete, comma-separated arguments list with parameter names
+| `\{argumentSetName}`                     | the name of the argument set
+| `\{argumentSetNameOrArgumentsWithNames}` | `\{argumentSetName}` or `\{argumentsWithNames}`, depending on how the arguments are supplied
+| `\{0}`, `\{1}`, ...                      | an individual argument
+|===
+
+NOTE: When including arguments in display names, their string representations are truncated
+if they exceed the configured maximum length. The limit is configurable via the
+`junit.jupiter.params.displayname.argument.maxlength` configuration parameter and defaults
+to 512 characters.
+
+When using `@MethodSource`, `@FieldSource`, or `@ArgumentsSource`, you can provide custom
+names for individual arguments or custom names for entire sets of arguments.
+
+Use the `{Named}` API to provide a custom name for an individual argument, and the custom
+name will be used if the argument is included in the invocation display name, like in the
+example below.
+
+======
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=named_arguments]
+----
+
+When executing the above method using the `ConsoleLauncher` you will see output similar to
+the following.
+
+....
+A parameterized test with named arguments ✔
+├─ 1: An important file ✔
+└─ 2: Another file ✔
+....
+======
+
+[NOTE]
+====
+Note that `arguments(Object...)` is a static factory method defined in the
+`org.junit.jupiter.params.provider.Arguments` interface.
+
+Similarly, `named(String, Object)` is a static factory method defined in the
+`org.junit.jupiter.api.Named` interface.
+====
+
+Use the `ArgumentSet` API to provide a custom name for the entire set of arguments, and
+the custom name will be used as the display name, like in the example below.
+
+======
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=named_argument_set]
+----
+
+When executing the above method using the `ConsoleLauncher` you will see output similar to
+the following.
+
+....
+A parameterized test with named argument sets ✔
+├─ [1] Important files ✔
+└─ [2] Other files ✔
+....
+======
+
+[NOTE]
+====
+Note that `argumentSet(String, Object...)` is a static factory method defined in the
+`org.junit.jupiter.params.provider.Arguments` interface.
+====
+
+[[tests-display-names-quoted-text]]
+=== Quoted Text-based Arguments
+
+As of JUnit Jupiter 6.0, text-based arguments in display names for parameterized tests are
+quoted by default. In this context, any `CharSequence` (such as a `String`) or `Character`
+is considered text. A `CharSequence` is wrapped in double quotes (`"`), and a `Character`
+is wrapped in single quotes (`'`).
+
+Special characters will be escaped in the quoted text. For example, carriage returns and
+line feeds will be escaped as `\\r` and `\\n`, respectively.
+
+[TIP]
+====
+This feature can be disabled by setting the `quoteTextArguments` attributes in
+`@ParameterizedClass` and `@ParameterizedTest` to `false`.
+====
+
+For example, given a string argument `"line 1\nline 2"`, the physical representation in
+the display name will be `"\"line 1\\nline 2\""` which is printed as `"line 1\nline 2"`.
+Similarly, given a string argument `"\t"`, the physical representation in the display name
+will be `"\"\\t\""` which is printed as `"\t"` instead of a blank string or invisible tab
+character. The same applies for a character argument `'\t'`, whose physical representation
+in the display name would be `"'\\t'"` which is printed as `'\t'`.
+
+For a concrete example, if you run the first `nullEmptyAndBlankStrings(String text)`
+parameterized test method from the
+<<tests-sources-null-and-empty>> section above, the following
+display names are generated.
+
+----
+[1] text = null
+[2] text = ""
+[3] text = " "
+[4] text = "   "
+[5] text = "\t"
+[6] text = "\n"
+----
+
+If you run the first `testWithCsvSource(String fruit, int rank)` parameterized test method
+from the <<tests-sources-CsvSource>> section above, the
+following display names are generated.
+
+----
+[1] fruit = "apple", rank = "1"
+[2] fruit = "banana", rank = "2"
+[3] fruit = "lemon, lime", rank = "0xF1"
+[4] fruit = "strawberry", rank = "700_000"
+----
+
+[NOTE]
+====
+The original source arguments are quoted when generating a display name, and this occurs
+before any implicit or explicit argument conversion is performed.
+
+For example, if a parameterized test accepts `3.14` as a `float` argument that was
+converted from `"3.14"` as an input string, `"3.14"` will be present in the display name
+instead of `3.14`. You can see the effect of this with the `rank` values in the above
+example.
+====
+
+[[tests-display-names-default-pattern]]
+=== Default Display Name Pattern
+
+If you'd like to set a default name pattern for all parameterized classes and tests in
+your project, you can declare the `junit.jupiter.params.displayname.default` configuration
+parameter in the `junit-platform.properties` file as demonstrated in the following example (see
+xref:running-tests/configuration-parameters.adoc[] for other options).
+
+[source,properties,indent=0]
+----
+junit.jupiter.params.displayname.default = {index}
+----
+
+[[tests-display-names-precedence-rules]]
+=== Precedence Rules
+
+The display name for a parameterized class or test is determined according to the
+following precedence rules:
+
+1. `name` attribute in `@ParameterizedClass` or `@ParameterizedTest`, if present
+2. value of the `junit.jupiter.params.displayname.default` configuration parameter, if present
+3. `DEFAULT_DISPLAY_NAME` constant defined in
+   `org.junit.jupiter.params.ParameterizedInvocationConstants`
+
+[[tests-lifecycle-interop]]
+== Lifecycle and Interoperability
+
+[[tests-lifecycle-interop-methods]]
+=== Parameterized Tests
+
+Each invocation of a parameterized test has the same lifecycle as a regular `@Test`
+method. For example, `@BeforeEach` methods will be executed before each invocation.
+Similar to xref:writing-tests/dynamic-tests.adoc[], invocations will appear one by one in the
+test tree of an IDE. You may at will mix regular `@Test` methods and `@ParameterizedTest`
+methods within the same test class.
+
+You may use `ParameterResolver` extensions with `@ParameterizedTest` methods. However,
+method parameters that are resolved by argument sources need to come first in the
+parameter list. Since a test class may contain regular tests as well as parameterized
+tests with different parameter lists, values from argument sources are not resolved for
+lifecycle methods (e.g. `@BeforeEach`) and test class constructors.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=ParameterResolver_example]
+----
+
+[[tests-lifecycle-interop-classes]]
+=== Parameterized Classes
+
+Each invocation of a parameterized class has the same lifecycle as a regular test class.
+For example, `@BeforeAll` methods will be executed _once_ before all invocations and
+`@BeforeEach` methods will be executed before each _test method_ invocation. Similar to
+xref:writing-tests/dynamic-tests.adoc[], invocations will appear one by one in the test tree of an
+IDE.
+
+You may use `ParameterResolver` extensions with `@ParameterizedClass` constructors.
+However, if constructor injection is used, constructor parameters that are resolved by
+argument sources need to come first in the parameter list. Values from argument sources
+are not resolved for regular lifecycle methods (e.g. `@BeforeEach`).
+
+In addition to regular lifecycle methods, parameterized classes may declare
+`{BeforeParameterizedClassInvocation}` and `{AfterParameterizedClassInvocation}` lifecycle
+methods that are called once before/after each invocation of the parameterized class.
+These methods must be `static` unless the parameterized class is configured to use
+`@TestInstance(Lifecycle.PER_CLASS)` (see xref:writing-tests/test-instance-lifecycle.adoc[]).
+
+These lifecycle methods may optionally declare parameters that are resolved depending on
+the setting of the `injectArguments` annotation attribute. If it is set to `false`, the
+parameters must be resolved by other registered {ParameterResolver} extensions. If the
+attribute is set to `true` (the default), the method may declare parameters that match the
+arguments of the parameterized class (see the Javadoc of
+`{BeforeParameterizedClassInvocation}` and `{AfterParameterizedClassInvocation}` for
+details). This may, for example, be used to initialize the used arguments as demonstrated
+by the following example.
+
+[source,java,indent=0]
+.Using parameterized class lifecycle methods
+----
+include::example$java/example/ParameterizedLifecycleDemo.java[tags=example]
+----
+<1> Initialization of the argument _before_ each invocation of the parameterized class
+<2> Usage of the previously initialized argument in a test method
+<3> Validation and cleanup of the argument _after_ each invocation of the parameterized
+    class

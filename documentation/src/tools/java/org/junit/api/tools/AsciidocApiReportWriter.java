@@ -34,13 +34,13 @@ class AsciidocApiReportWriter extends AbstractApiReportWriter {
 	}
 
 	@Override
-	protected String h4(String header) {
-		return "[discrete]%n==== %s".formatted(header);
+	protected String h3(String header) {
+		return "%n=== %s".formatted(header);
 	}
 
 	@Override
-	protected String h5(String header) {
-		return "[discrete]%n===== %s".formatted(header);
+	protected String h4(String header) {
+		return "%n==== %s".formatted(header);
 	}
 
 	@Override

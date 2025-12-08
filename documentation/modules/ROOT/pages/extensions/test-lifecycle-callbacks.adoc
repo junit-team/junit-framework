@@ -1,0 +1,58 @@
+= Test Lifecycle Callbacks
+
+The following interfaces define the APIs for extending tests at various points in the
+test execution lifecycle. Consult the following sections for examples and the Javadoc for
+each of these interfaces in the `{extension-api-package}` package for further details.
+
+* `{BeforeAllCallback}`
+** `{BeforeClassTemplateInvocationCallback}` (only applicable for
+   xref:writing-tests/class-templates.adoc[class templates])
+*** `{BeforeEachCallback}`
+**** `{BeforeTestExecutionCallback}`
+**** `{AfterTestExecutionCallback}`
+*** `{AfterEachCallback}`
+** `{AfterClassTemplateInvocationCallback}` (only applicable for
+   xref:writing-tests/class-templates.adoc[class templates])
+* `{AfterAllCallback}`
+
+.Implementing Multiple Extension APIs
+NOTE: Extension developers may choose to implement any number of these interfaces
+within a single extension. Consult the source code of the `{SpringExtension}` for a
+concrete example.
+
+[[before-after-execution]]
+== Before and After Test Execution Callbacks
+
+`{BeforeTestExecutionCallback}` and `{AfterTestExecutionCallback}` define the APIs for
+`Extensions` that wish to add behavior that will be executed _immediately before_ and
+_immediately after_ a test method is executed, respectively. As such, these callbacks are
+well suited for timing, tracing, and similar use cases. If you need to implement
+callbacks that are invoked _around_ `@BeforeEach` and `@AfterEach` methods, implement
+`BeforeEachCallback` and `AfterEachCallback` instead.
+
+The following example shows how to use these callbacks to calculate and log the execution
+time of a test method. `TimingExtension` implements both `BeforeTestExecutionCallback`
+and `AfterTestExecutionCallback` in order to time and log the test execution.
+
+[[timing-extension]]
+[source,java,indent=0]
+.An extension that times and logs the execution of test methods
+----
+include::example$java/example/timing/TimingExtension.java[tags=user_guide]
+----
+
+Since the `TimingExtensionTests` class registers the `TimingExtension` via `@ExtendWith`,
+its tests will have this timing applied when they execute.
+
+[source,java,indent=0]
+.A test class that uses the example TimingExtension
+----
+include::example$java/example/timing/TimingExtensionTests.java[tags=user_guide]
+----
+
+The following is an example of the logging produced when `TimingExtensionTests` is run.
+
+....
+INFO: Method [sleep20ms] took 24 ms.
+INFO: Method [sleep50ms] took 53 ms.
+....

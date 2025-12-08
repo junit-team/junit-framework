@@ -1,0 +1,71 @@
+= Nested Tests
+
+`@Nested` tests give the test writer more capabilities to express the relationship among
+several groups of tests. Such nested tests make use of Java's nested classes and
+facilitate hierarchical thinking about the test structure. Here's an elaborate example,
+both as source code and as a screenshot of the execution within an IDE.
+
+[source,java,indent=0]
+.Nested test suite for testing a stack
+----
+include::example$java/example/TestingAStackDemo.java[tags=user_guide]
+----
+
+When executing this example in an IDE, the test execution tree in the GUI will look
+similar to the following image.
+
+image::writing-tests_nested_test_ide.png[caption='',title='Executing a nested test in an IDE']
+
+In this example, preconditions from outer tests are used in inner tests by defining
+hierarchical lifecycle methods for the setup code. For example, `createNewStack()` is a
+`@BeforeEach` lifecycle method that is used in the test class in which it is defined and
+in all levels in the nesting tree below the class in which it is defined.
+
+The fact that setup code from outer tests is run before inner tests are executed gives you
+the ability to run all tests independently. You can even run inner tests alone without
+running the outer tests, because the setup code from the outer tests is always executed.
+
+NOTE: _Only non-static nested classes_ (i.e. _inner classes_) can serve as `@Nested` test
+classes. Nesting can be arbitrarily deep, and those inner classes are subject to full
+lifecycle support, including `@BeforeAll` and `@AfterAll` methods on each level.
+
+[[interoperability]]
+== Interoperability
+
+`@Nested` may be combined with
+xref:writing-tests/parameterized-classes-and-tests.adoc[`@ParameterizedClass`] in which case the nested test
+class is parameterized.
+
+The following example illustrates how to combine `@Nested` with `@ParameterizedClass` and
+`@ParameterizedTest`.
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedClassDemo.java[tags=nested]
+----
+
+Executing the above test class yields the following output:
+
+....
+FruitTests ✔
+├─ [1] fruit = "apple" ✔
+│  └─ QuantityTests ✔
+│     ├─ [1] quantity = 23 ✔
+│     │  └─ test(Duration) ✔
+│     │     ├─ [1] duration = "PT1H" ✔
+│     │     └─ [2] duration = "PT2H" ✔
+│     └─ [2] quantity = 42 ✔
+│        └─ test(Duration) ✔
+│           ├─ [1] duration = "PT1H" ✔
+│           └─ [2] duration = "PT2H" ✔
+└─ [2] fruit = "banana" ✔
+   └─ QuantityTests ✔
+      ├─ [1] quantity = 23 ✔
+      │  └─ test(Duration) ✔
+      │     ├─ [1] duration = "PT1H" ✔
+      │     └─ [2] duration = "PT2H" ✔
+      └─ [2] quantity = 42 ✔
+         └─ test(Duration) ✔
+            ├─ [1] duration = "PT1H" ✔
+            └─ [2] duration = "PT2H" ✔
+....

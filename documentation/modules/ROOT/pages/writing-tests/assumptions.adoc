@@ -1,0 +1,31 @@
+= Assumptions
+
+Assumptions are typically used whenever it does not make sense to continue execution of a
+given test — for example, if the test depends on something that does not exist in the
+current runtime environment.
+
+* When an assumption is valid, the assumption method does not throw an exception, and
+  execution of the test continues as usual.
+* When an assumption is invalid, the assumption method throws an exception of type
+  `org.opentest4j.TestAbortedException` to signal that the test should be aborted instead
+  of marked as a failure.
+
+JUnit Jupiter comes with a subset of the _assumption_ methods that JUnit 4 provides and
+adds a few that lend themselves well to being used with Java lambda expressions and method
+references.
+
+All JUnit Jupiter assumptions are static methods in the `{Assumptions}` class.
+
+[source,java,indent=0]
+----
+include::example$java/example/AssumptionsDemo.java[tags=user_guide]
+----
+
+NOTE: It is also possible to use methods from JUnit 4's `org.junit.Assume` class for
+assumptions. Specifically, JUnit Jupiter supports JUnit 4's `AssumptionViolatedException`
+to signal that a test should be aborted instead of marked as a failure.
+
+TIP: If you use AssertJ for assertions, you may also wish to use AssertJ for assumptions.
+To do so, you can statically import the `assumeThat()` method from
+`org.assertj.core.api.Assumptions` and then use AssertJ's fluent API to specify your
+assumptions.

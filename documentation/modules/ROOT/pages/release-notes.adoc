@@ -1,0 +1,20 @@
+= Release Notes
+:page-aliases: release-notes/index.adoc
+//
+//
+
+This document contains the change log for all JUnit releases since 6.0 GA.
+
+Please refer to the xref:overview.adoc[User Guide] for comprehensive
+reference documentation for programmers writing tests, extension authors, and engine
+authors as well as build tool and IDE vendors.
+
+include::partial$release-notes/release-notes-6.1.0-M2.adoc[]
+
+include::partial$release-notes/release-notes-6.1.0-M1.adoc[]
+
+include::partial$release-notes/release-notes-6.0.2.adoc[]
+
+include::partial$release-notes/release-notes-6.0.1.adoc[]
+
+include::partial$release-notes/release-notes-6.0.0.adoc[]

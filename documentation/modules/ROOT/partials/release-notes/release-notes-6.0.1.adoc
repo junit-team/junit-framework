@@ -1,0 +1,72 @@
+[[v6.0.1]]
+== 6.0.1
+
+*Date of Release:* October 31, 2025
+
+*Scope:* Bug fixes and enhancements since 6.0.0
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/110?closed=1+[6.0.1] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v6.0.1-junit-platform]]
+=== JUnit Platform
+
+[[v6.0.1-junit-platform-bug-fixes]]
+==== Bug Fixes
+
+* The `jdk.jfr` package is now an optional import when using the `junit-platform-launcher`
+  as an OSGi bundle.
+
+[[v6.0.1-junit-platform-new-features-and-improvements]]
+==== New Features and Improvements
+
+* Legacy documentation regarding Java 8 compatibility has been removed from the User Guide.
+
+
+[[v6.0.1-junit-jupiter]]
+=== JUnit Jupiter
+
+[[v6.0.1-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* A regression introduced in version 6.0.0 caused an exception when using `@CsvSource` or
+  `@CsvFileSource` if the `delimiter` or `delimiterString` attribute was set to `+++#+++`.
+  This occurred because `+++#+++` was used as the default comment character without an
+  option to change it. To resolve this, a new `commentCharacter` attribute has been added
+  to both annotations. Its default value remains `+++#+++`, but it can now be customized
+  to avoid conflicts with other control characters.
+* Fix `IllegalAccessError` thrown when using the Kotlin-specific `assertDoesNotThrow`
+  assertion.
+* Stop reporting discovery issues for synthetic methods, particularly in conjunction with
+  Kotlin suspend functions.
+* Fix support for test methods with the same signature as package-private methods declared
+  in super classes in different packages.
+
+[[v6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* The `org.junit.jupiter.migrationsupport` module descriptor has been marked as deprecated
+  for removal.
+
+[[v6.0.1-junit-jupiter-new-features-and-improvements]]
+==== New Features and Improvements
+
+* The `@CsvSource` and `@CsvFileSource` annotations now allow specifying a custom comment
+  character using the new `commentCharacter` attribute.
+* Improve error message when `@ParameterizedClass` is used with field injection without
+  providing enough arguments.
+* Allow calling the `TypedArgumentConverter` constructor for `@Nullable T` target types
+  without having to cast class literals to `Class<@Nullable T>`.
+
+
+[[v6.0.1-junit-vintage]]
+=== JUnit Vintage
+
+[[v6.0.1-junit-vintage-new-features-and-improvements]]
+==== New Features and Improvements
+
+* Allow disabling the reporting of discovery issues by the JUnit Vintage engine (including
+  the one reported for its deprecation) by setting the new
+  `junit.vintage.discovery.issue.reporting.enabled` configuration parameter to `false`.

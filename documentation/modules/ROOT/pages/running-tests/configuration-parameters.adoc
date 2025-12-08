@@ -1,0 +1,76 @@
+= Configuration Parameters
+
+In addition to instructing the platform which test classes and test engines to include,
+which packages to scan, etc., it is sometimes necessary to provide additional custom
+configuration parameters that are specific to a particular test engine, listener, or
+registered extension. For example, the JUnit Jupiter `TestEngine` supports _configuration
+parameters_ for the following use cases.
+
+- xref:writing-tests/test-instance-lifecycle.adoc#default[Changing the Default Test Instance Lifecycle]
+- xref:extensions/registering-extensions.adoc#registration-automatic-enabling[Enabling Automatic Extension Detection]
+- xref:extensions/conditional-test-execution.adoc#deactivation[Deactivating Conditions]
+- xref:writing-tests/display-names.adoc#generator-default[Setting the Default Display Name Generator]
+
+_Configuration Parameters_ are text-based key-value pairs that can be supplied to test
+engines running on the JUnit Platform via one of the following mechanisms.
+
+1. The `configurationParameter()` and `configurationParameters()` methods in
+   `LauncherDiscoveryRequestBuilder` which
+   is used to build a request supplied to the xref:advanced-topics/launcher-api.adoc[Launcher API].
+    +
+   When running tests via one of the tools provided by the JUnit Platform you can specify
+   configuration parameters as follows:
+   * xref:running-tests/console-launcher.adoc[Console Launcher]: use the `--config` command-line
+     option.
+   * xref:running-tests/build-support.adoc#gradle-config-params[Gradle]: use the `systemProperty` or
+     `systemProperties` DSL.
+   * xref:running-tests/build-support.adoc#maven-config-params[Maven Surefire provider]: use the
+     `configurationParameters` property.
+2. The `configurationParametersResources()` method in `LauncherDiscoveryRequestBuilder`.
+    +
+   When running tests via the xref:running-tests/console-launcher.adoc[Console Launcher] you can
+   specify custom configuration files using the `--config-resource` command-line option.
+3. JVM system properties.
+4. The JUnit Platform default configuration file: a file named `junit-platform.properties`
+   in the root of the class path that follows the syntax rules for Java `Properties`
+   files.
+
+NOTE: Configuration parameters are looked up in the exact order defined above.
+Consequently, configuration parameters supplied directly to the `Launcher` take
+precedence over those supplied via custom configuration files, system properties, and the
+default configuration file. Similarly, configuration parameters supplied via system
+properties take precedence over those supplied via the default configuration file.
+
+[[pattern]]
+== Pattern Matching Syntax
+
+This section describes the pattern matching syntax that is applied to the _configuration
+parameters_ used for the following features.
+
+- xref:extensions/conditional-test-execution.adoc#deactivation[Deactivating Conditions]
+- xref:advanced-topics/launcher-api.adoc#listeners-custom-deactivation[Deactivating a TestExecutionListener]
+- xref:running-tests/stack-trace-pruning.adoc[]
+- xref:extensions/registering-extensions.adoc#registration-automatic-filtering[Filtering Auto-detected Extensions]
+
+If the value for the given _configuration parameter_ consists solely of an asterisk
+(`+++*+++`), the pattern will match against all candidate classes. Otherwise, the value
+will be treated as a comma-separated list of patterns where each pattern will be matched
+against the fully qualified class name (_FQCN_) of each candidate class. Any dot (`.`) in
+a pattern will match against a dot (`.`) or a dollar sign (`$`) in a FQCN. Any asterisk
+(`+++*+++`) will match against one or more characters in a FQCN. All other characters in a
+pattern will be matched one-to-one against a FQCN.
+
+Examples:
+
+- `+++*+++`: matches all candidate classes.
+- `+++org.junit.*+++`: matches all candidate classes under the `org.junit` base package and
+  any of its subpackages.
+- `+++*.MyCustomImpl+++`: matches every candidate class whose simple class name is exactly
+  `MyCustomImpl`.
+- `+++*System*+++`: matches every candidate class whose FQCN contains `System`.
+- `+++*System*+++, +++*Unit*+++`: matches every candidate class whose FQCN contains
+  `System` or `Unit`.
+- `org.example.MyCustomImpl`: matches the candidate class whose FQCN is exactly
+  `org.example.MyCustomImpl`.
+- `org.example.MyCustomImpl, org.example.TheirCustomImpl`: matches candidate classes whose
+  FQCN is exactly `org.example.MyCustomImpl` or `org.example.TheirCustomImpl`.

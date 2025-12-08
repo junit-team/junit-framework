@@ -1,0 +1,87 @@
+= Using Listeners and Interceptors
+
+The JUnit Platform provides the following listener APIs that allow JUnit, third parties,
+and custom user code to react to events fired at various points during the discovery and
+execution of a `TestPlan`.
+
+* `{LauncherSessionListener}`: receives events when a `{LauncherSession}` is opened and
+  closed.
+* `{LauncherInterceptor}`: intercepts test discovery and execution in the context of a
+  `LauncherSession`.
+* `{LauncherDiscoveryListener}`: receives events that occur during test discovery.
+* `{TestExecutionListener}`: receives events that occur during test execution.
+
+The `LauncherSessionListener` API is typically implemented by build tools or IDEs and
+registered automatically for you in order to support some feature of the build tool or IDE.
+
+The `LauncherDiscoveryListener` and `TestExecutionListener` APIs are often implemented in
+order to produce some form of report or to display a graphical representation of the test
+plan in an IDE. Such listeners may be implemented and automatically registered by a build
+tool or IDE, or they may be included in a third-party library – potentially registered
+for you automatically. You can also implement and register your own listeners.
+
+For details on registering and configuring listeners, see the following sections of this
+guide.
+
+* xref:advanced-topics/launcher-api.adoc#launcher-session-listeners-custom[Registering a LauncherSessionListener]
+* xref:advanced-topics/launcher-api.adoc#launcher-interceptors-custom[Registering a LauncherInterceptor]
+* xref:advanced-topics/launcher-api.adoc#launcher-discovery-listeners-custom[Registering a LauncherDiscoveryListener]
+* xref:advanced-topics/launcher-api.adoc#listeners-custom[Registering a TestExecutionListener]
+* xref:advanced-topics/launcher-api.adoc#listeners-config[Configuring a TestExecutionListener]
+* xref:advanced-topics/launcher-api.adoc#listeners-custom-deactivation[Deactivating a TestExecutionListener]
+
+The JUnit Platform provides the following listeners which you may wish to use with your
+test suite.
+
+xref:advanced-topics/junit-platform-reporting.adoc[] ::
+  `{LegacyXmlReportGeneratingListener}` can be used via the
+  xref:running-tests/console-launcher.adoc[] or registered manually to generate XML reports
+  compatible with the de facto standard for JUnit 4 based test reports.
++
+`{OpenTestReportGeneratingListener}` generates an XML report in the event-based format
+specified by {OpenTestReporting}. It is auto-registered and can be enabled and
+configured via xref:running-tests/configuration-parameters.adoc[].
++
+See xref:advanced-topics/junit-platform-reporting.adoc[] for details.
+
+<<recorder>> ::
+  `FlightRecordingExecutionListener` and `FlightRecordingDiscoveryListener` that generate
+  Java Flight Recorder events during test discovery and execution.
+
+`{LoggingListener}` ::
+  `TestExecutionListener` for logging informational messages for all events via a
+  `BiConsumer` that consumes `Throwable` and `Supplier<String>`.
+
+`{SummaryGeneratingListener}` ::
+  `TestExecutionListener` that generates a summary of the test execution which can be
+  printed via a `PrintWriter`.
+
+`{UniqueIdTrackingListener}` ::
+  `TestExecutionListener` that that tracks the unique IDs of all tests that were skipped
+  or executed during the execution of the `TestPlan` and generates a file containing the
+  unique IDs once execution of the `TestPlan` has finished.
+
+[[recorder]]
+== Flight Recorder Support
+
+The JUnit Platform provides opt-in support for generating Flight Recorder events.
+https://openjdk.java.net/jeps/328[JEP 328] describes the Java Flight Recorder (JFR) as
+follows.
+
+> Flight Recorder records events originating from applications, the JVM, and the OS.
+Events are stored in a single file that can be attached to bug reports and examined by
+support engineers, allowing after-the-fact analysis of issues in the period leading up
+to a problem.
+
+In order to record Flight Recorder events generated while running tests, you need to
+start flight recording when launching a test suite via the following java command line
+option.
+
+   -XX:StartFlightRecording:filename=...
+
+Please consult the manual of your build tool for the appropriate commands.
+
+To analyze the recorded events, use the
+https://docs.oracle.com/en/java/javase/17/docs/specs/man/jfr.html[jfr]
+command line tool shipped with recent JDKs or open the recording file with
+https://jdk.java.net/jmc/[JDK Mission Control].
