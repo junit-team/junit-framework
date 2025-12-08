@@ -318,7 +318,14 @@ class UniqueIdTests {
 		}
 
 		@Test
-		void deserializeromJunit60() throws IOException, ClassNotFoundException {
+		void deserializeFromJunit60() throws IOException, ClassNotFoundException {
+			/*
+			 Serialized representation of:
+			 	new UniqueId(
+			 		new UniqueIdFormat('[', ':', ']', '/'),
+			 		List.of(new Segment("engine", "junit-jupiter"))
+			 );
+			 */
 			var uniqueIdFromJunit60 = Base64.getMimeDecoder().decode("""
 					rO0ABXNyACJvcmcuanVuaXQucGxhdGZvcm0uZW5naW5lLlVuaXF1ZUlkAAAAAAAAAAECAAJMAAhzZWdtZW50c3QAEExqYXZhL3V0
 					aWwvTGlzdDtMAA51bmlxdWVJZEZvcm1hdHQAKkxvcmcvanVuaXQvcGxhdGZvcm0vZW5naW5lL1VuaXF1ZUlkRm9ybWF0O3hwc3IA
@@ -343,6 +350,13 @@ class UniqueIdTests {
 
 		@Test
 		void deserializeFromJunit60IgnoresCustomFormat() throws IOException, ClassNotFoundException {
+			/*
+			  Serialized representation of:
+				new UniqueId(
+					new UniqueIdFormat('{', '=', '}', ','),
+					List.of(new Segment("engine", "junit-jupiter"))
+			 );
+			 */
 			var uniqueIdWithCustomFormatFromJunit60 = Base64.getMimeDecoder().decode("""
 					rO0ABXNyACJvcmcuanVuaXQucGxhdGZvcm0uZW5naW5lLlVuaXF1ZUlkAAAAAAAAAAECAAJMAAhzZWdtZW50c3QAEExqYXZhL3V0
 					aWwvTGlzdDtMAA51bmlxdWVJZEZvcm1hdHQAKkxvcmcvanVuaXQvcGxhdGZvcm0vZW5naW5lL1VuaXF1ZUlkRm9ybWF0O3hwc3IA
