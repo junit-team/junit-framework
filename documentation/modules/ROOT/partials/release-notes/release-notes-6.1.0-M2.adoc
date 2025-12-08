@@ -25,7 +25,8 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* The `UniqueId.uniqueIdFormat` field has been removed, reducing the size of `UniqueId`
+  objects.
 
 [[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
@@ -47,6 +48,7 @@ repository on GitHub.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
   `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
+
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage
