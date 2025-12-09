@@ -55,7 +55,7 @@ tasks.register<NpxTask>("antora") {
 	description = "Runs Antora to generate a documentation site described by the playbook file."
 
 	command = "antora"
-	args.addAll("--clean", "--stacktrace", "--fetch")
+	args.addAll("--clean", "--stacktrace", "--fetch", "--log-format=pretty", "--log-level=all")
 
 	args.add("--to-dir")
 	val outputDir = layout.buildDirectory.dir("antora-site")
@@ -68,7 +68,7 @@ tasks.register<NpxTask>("antora") {
 	args.add(playbook.map { it.toRelativeString(layout.projectDirectory.asFile) })
 	inputs.file(playbook)
 
-	doLast {
-		println("Antora site built in ${outputDir.get().asFile.absoluteFile}")
+	execOverrides {
+		environment["IS_TTY"] = true
 	}
 }
