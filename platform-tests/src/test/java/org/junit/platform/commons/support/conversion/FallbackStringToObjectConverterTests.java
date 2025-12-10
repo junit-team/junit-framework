@@ -12,6 +12,8 @@ package org.junit.platform.commons.support.conversion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.commons.support.ReflectionSupport.findMethod;
+import static org.junit.platform.commons.support.conversion.FallbackStringToObjectConverter.DeprecationStatus.EXCLUDE_DEPRECATED;
+import static org.junit.platform.commons.support.conversion.FallbackStringToObjectConverter.DeprecationStatus.INCLUDE_DEPRECATED;
 import static org.junit.platform.commons.util.ReflectionUtils.getDeclaredConstructor;
 
 import java.lang.reflect.Constructor;
@@ -32,7 +34,8 @@ import org.junit.platform.commons.util.ReflectionUtils;
  */
 class FallbackStringToObjectConverterTests {
 
-	private static final IsFactoryMethod isBookFactoryMethod = new IsFactoryMethod(Book.class, String.class, false);
+	private static final IsFactoryMethod isBookFactoryMethod = new IsFactoryMethod(Book.class, String.class,
+		INCLUDE_DEPRECATED);
 
 	private static final FallbackStringToObjectConverter converter = new FallbackStringToObjectConverter();
 
@@ -41,8 +44,8 @@ class FallbackStringToObjectConverterTests {
 		assertThat(isBookFactoryMethod).rejects(bookMethod("factory", Object.class));
 		assertThat(isBookFactoryMethod).rejects(bookMethod("factory", Number.class));
 		assertThat(isBookFactoryMethod).rejects(bookMethod("factory", StringBuilder.class));
-		assertThat(new IsFactoryMethod(Record2.class, String.class, false)).rejects(record2Method("from"));
-		assertThat(new IsFactoryMethod(Record2.class, String.class, true)).rejects(record2Method("from"));
+		assertThat(new IsFactoryMethod(Record2.class, String.class, INCLUDE_DEPRECATED)).rejects(record2Method("from"));
+		assertThat(new IsFactoryMethod(Record2.class, String.class, EXCLUDE_DEPRECATED)).rejects(record2Method("from"));
 	}
 
 	@Test
@@ -57,52 +60,52 @@ class FallbackStringToObjectConverterTests {
 
 	@Test
 	void isFactoryMethodForValidMethodsNoDeprecated() {
-		assertThat(new IsFactoryMethod(Book.class, String.class, false))//
+		assertThat(new IsFactoryMethod(Book.class, String.class, INCLUDE_DEPRECATED))//
 				.accepts(bookMethod("factory", String.class));
-		assertThat(new IsFactoryMethod(Book.class, String.class, true))//
+		assertThat(new IsFactoryMethod(Book.class, String.class, EXCLUDE_DEPRECATED))//
 				.accepts(bookMethod("factory", String.class));
 
-		assertThat(new IsFactoryMethod(Book.class, CharSequence.class, false))//
+		assertThat(new IsFactoryMethod(Book.class, CharSequence.class, INCLUDE_DEPRECATED))//
 				.accepts(bookMethod("factory", CharSequence.class));
-		assertThat(new IsFactoryMethod(Book.class, CharSequence.class, true))//
+		assertThat(new IsFactoryMethod(Book.class, CharSequence.class, EXCLUDE_DEPRECATED))//
 				.accepts(bookMethod("factory", CharSequence.class));
 
-		assertThat(new IsFactoryMethod(Newspaper.class, String.class, false))//
+		assertThat(new IsFactoryMethod(Newspaper.class, String.class, INCLUDE_DEPRECATED))//
 				.accepts(newspaperMethod("from"), newspaperMethod("of"));
-		assertThat(new IsFactoryMethod(Newspaper.class, String.class, true))//
+		assertThat(new IsFactoryMethod(Newspaper.class, String.class, EXCLUDE_DEPRECATED))//
 				.accepts(newspaperMethod("from"), newspaperMethod("of"));
 
-		assertThat(new IsFactoryMethod(Magazine.class, String.class, false))//
+		assertThat(new IsFactoryMethod(Magazine.class, String.class, INCLUDE_DEPRECATED))//
 				.accepts(magazineMethod("from"), magazineMethod("of"));
-		assertThat(new IsFactoryMethod(Magazine.class, String.class, true))//
+		assertThat(new IsFactoryMethod(Magazine.class, String.class, EXCLUDE_DEPRECATED))//
 				.accepts(magazineMethod("from"), magazineMethod("of"));
 
-		assertThat(new IsFactoryMethod(Record2.class, CharSequence.class, false))//
+		assertThat(new IsFactoryMethod(Record2.class, CharSequence.class, INCLUDE_DEPRECATED))//
 				.accepts(record2Method("from"));
-		assertThat(new IsFactoryMethod(Record2.class, CharSequence.class, true))//
+		assertThat(new IsFactoryMethod(Record2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
 				.accepts(record2Method("from"));
 	}
 
 	@Test
 	void isFactoryMethodForValidMethodsWithDeprecated() {
-		assertThat(new IsFactoryMethod(Book2.class, String.class, false))//
+		assertThat(new IsFactoryMethod(Book2.class, String.class, INCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factory", String.class));
-		assertThat(new IsFactoryMethod(Book2.class, String.class, true))//
+		assertThat(new IsFactoryMethod(Book2.class, String.class, EXCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factory", String.class));
 
-		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, false))//
+		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, INCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factory", CharSequence.class));
-		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, true))//
+		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factory", CharSequence.class));
 
-		assertThat(new IsFactoryMethod(Book2.class, String.class, false))//
+		assertThat(new IsFactoryMethod(Book2.class, String.class, INCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factoryDeprecated", String.class));
-		assertThat(new IsFactoryMethod(Book2.class, String.class, true))//
+		assertThat(new IsFactoryMethod(Book2.class, String.class, EXCLUDE_DEPRECATED))//
 				.rejects(bookWithDeprecatedMethod("factoryDeprecated", String.class));
 
-		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, false))//
+		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, INCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factoryDeprecated", CharSequence.class));
-		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, true))//
+		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
 				.rejects(bookWithDeprecatedMethod("factoryDeprecated", CharSequence.class));
 	}
 
