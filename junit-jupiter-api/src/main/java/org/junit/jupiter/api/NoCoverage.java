@@ -12,8 +12,8 @@ package org.junit.jupiter.api;
 
 final class NoCoverage {
 
-	NoCoverage() {
-
+	private NoCoverage() {
+		/* no-op */
 	}
 
 	int methodWithoutCoverage() {
