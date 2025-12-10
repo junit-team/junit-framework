@@ -49,8 +49,8 @@ repository on GitHub.
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
 * Trim internal stack frames from `AssertionFailedError` stack traces.
 * Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
-methods for `AssertionFailureBuilder`. These allow user defined assertions to
-trim their stacktrace.
+  methods for `AssertionFailureBuilder`. These allow user defined assertions to
+  trim their stacktrace.
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage
