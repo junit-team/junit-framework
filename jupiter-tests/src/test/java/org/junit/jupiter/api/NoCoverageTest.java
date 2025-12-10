@@ -10,17 +10,12 @@
 
 package org.junit.jupiter.api;
 
-final class NoCoverage {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-	NoCoverage() {
-		/* no-op */
-	}
+class NoCoverageTest {
 
-	int methodWithoutCoverage() {
-		int c = 0;
-		for (int i = 0; i < 100; i++) {
-			c += i;
-		}
-		return c;
+	@Test
+	void test() {
+		assertEquals(new NoCoverage().methodWithoutCoverage(), 4950);
 	}
 }
