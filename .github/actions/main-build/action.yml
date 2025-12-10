@@ -4,7 +4,7 @@ inputs:
   arguments:
     required: true
     description: Gradle arguments
-    default: :platform-tooling-support-tests:test build eclipse --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+    default: :platform-tooling-support-tests:test build eclipse --rerun-tasks --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
   encryptionKey:
     required: true
     description: Gradle cache encryption key
