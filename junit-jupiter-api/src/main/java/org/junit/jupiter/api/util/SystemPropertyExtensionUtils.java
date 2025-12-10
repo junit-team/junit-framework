@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 /**
  * Utility methods for the SystemPropertiesExtension.
  */
-class SystemPropertyExtensionUtils {
+final class SystemPropertyExtensionUtils {
 
 	private SystemPropertyExtensionUtils() {
 		// private constructor to prevent instantiation of utility class
