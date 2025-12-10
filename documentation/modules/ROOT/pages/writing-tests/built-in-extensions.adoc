@@ -305,21 +305,21 @@ For example, clearing a system property for a test execution can be done as foll
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_clear_simple]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_clear_simple]
 ----
 
 And setting a system property for a test execution:
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_set_simple]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_set_simple]
 ----
 
 As mentioned before, both annotations are repeatable, and they can also be combined:
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_set_and_clear]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_set_and_clear]
 
 ----
 
@@ -327,7 +327,7 @@ Note that class-level configurations are overwritten by method-level configurati
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_at_class_level]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_at_class_level]
 ----
 
 [NOTE]
@@ -347,7 +347,7 @@ In this example, `@RestoreSystemProperties` is used on a test method, ensuring a
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_restore_test]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_restore_test]
 ----
 
 When `@RestoreSystemProperties` is used on a test class, any system properties changes made during the entire lifecycle of the test class, including test methods, `@BeforeAll`, `@BeforeEach` and 'after' methods, are restored after the test class' lifecycle is complete.
@@ -359,14 +359,14 @@ Note that `SomeOtherTestClass` uses the `@ReadsSystemProperty` annotation: This 
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_setup]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_setup]
 ----
 
 Some other test class, running later:
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
 ----
 
 == Using `@ClearSystemProperty`, `@SetSystemProperty`, and `@RestoreSystemProperties` together
@@ -377,7 +377,7 @@ Basic configuration can be specified using `Set` and `Clear` and the image size 
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_method_combine_all_test]
+include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_method_combine_all_test]
 ----
 
 [NOTE]
