@@ -1,0 +1,138 @@
+= Test Execution Order
+
+By default, test classes and methods will be ordered using an algorithm that is
+deterministic but intentionally nonobvious. This ensures that subsequent runs of a test
+suite execute test classes and test methods in the same order, thereby allowing for
+repeatable builds.
+
+NOTE: See xref:writing-tests/definitions.adoc[] for a definition of _test method_ and _test class_.
+
+[[methods]]
+== Method Order
+
+Although true _unit tests_ typically should not rely on the order in which they are
+executed, there are times when it is necessary to enforce a specific test method execution
+order -- for example, when writing _integration tests_ or _functional tests_ where the
+sequence of the tests is important, especially in conjunction with
+`@TestInstance(Lifecycle.PER_CLASS)`.
+
+To control the order in which test methods are executed, annotate your test class or test
+interface with `{TestMethodOrder}` and specify the desired `{MethodOrderer}`
+implementation. You can implement your own custom `MethodOrderer` or use one of the
+following built-in `MethodOrderer` implementations.
+
+* `{MethodOrderer_DisplayName}`: sorts test methods _alphanumerically_ based on their
+  display names (see xref:writing-tests/display-names.adoc#generator-precedence-rules[display name
+  generation precedence rules])
+* `{MethodOrderer_MethodName}`: sorts test methods _alphanumerically_ based on their names
+  and formal parameter lists
+* `{MethodOrderer_OrderAnnotation}`: sorts test methods _numerically_ based on values
+  specified via the `{Order}` annotation
+* `{MethodOrderer_Random}`: orders test methods _pseudo-randomly_ and supports
+  configuration of a custom _seed_
+
+The `MethodOrderer` configured on a test class is inherited by the `@Nested` test classes
+it contains, recursively. If you want to avoid that a `@Nested` test class uses the same
+`MethodOrderer` as its enclosing class, you can specify `{MethodOrderer_Default}` together
+with `{TestMethodOrder}`.
+
+NOTE: See also: xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc#wrapping-behavior[Wrapping Behavior of Callbacks]
+
+The following example demonstrates how to guarantee that test methods are executed in the
+order specified via the `@Order` annotation.
+
+[source,java,indent=0]
+----
+include::example$java/example/OrderedTestsDemo.java[tags=user_guide]
+----
+
+[[methods-default]]
+=== Setting the Default Method Orderer
+
+You can use the `junit.jupiter.testmethod.order.default` xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the fully qualified class name of the
+`{MethodOrderer}` you would like to use by default. Just like for the orderer configured
+via the `{TestMethodOrder}` annotation, the supplied class has to implement the
+`MethodOrderer` interface. The default orderer will be used for all tests unless the
+`@TestMethodOrder` annotation is present on an enclosing test class or test interface.
+
+For example, to use the `{MethodOrderer_OrderAnnotation}` method orderer by default, you
+should set the configuration parameter to the corresponding fully qualified class name
+(e.g., in `src/test/resources/junit-platform.properties`):
+
+[source,properties,indent=0]
+----
+junit.jupiter.testmethod.order.default = \
+    org.junit.jupiter.api.MethodOrderer$OrderAnnotation
+----
+
+Similarly, you can specify the fully qualified name of any custom class that implements
+`MethodOrderer`.
+
+[[classes]]
+== Class Order
+
+Although test classes typically should not rely on the order in which they are executed,
+there are times when it is desirable to enforce a specific test class execution order. You
+may wish to execute test classes in a random order to ensure there are no accidental
+dependencies between test classes, or you may wish to order test classes to optimize build
+time as outlined in the following scenarios.
+
+* Run previously failing tests and faster tests first: "fail fast" mode
+* With parallel execution enabled, schedule longer tests first: "shortest test plan
+  execution duration" mode
+* Various other use cases
+
+To configure test class execution order _globally_ for the entire test suite, use the
+`junit.jupiter.testclass.order.default` xref:running-tests/configuration-parameters.adoc[configuration
+parameter] to specify the fully qualified class name of the `{ClassOrderer}` you would
+like to use. The supplied class must implement the `ClassOrderer` interface.
+
+You can implement your own custom `ClassOrderer` or use one of the following built-in
+`ClassOrderer` implementations.
+
+* `{ClassOrderer_ClassName}`: sorts test classes _alphanumerically_ based on their fully
+  qualified class names
+* `{ClassOrderer_DisplayName}`: sorts test classes _alphanumerically_ based on their
+  display names (see xref:writing-tests/display-names.adoc#generator-precedence-rules[display name
+  generation precedence rules])
+* `{ClassOrderer_OrderAnnotation}`: sorts test classes _numerically_ based on values
+  specified via the `{Order}` annotation
+* `{ClassOrderer_Random}`: orders test classes _pseudo-randomly_ and supports
+  configuration of a custom _seed_
+
+For example, for the `@Order` annotation to be honored on _test classes_, you should
+configure the `{ClassOrderer_OrderAnnotation}` class orderer using the configuration
+parameter with the corresponding fully qualified class name (e.g., in
+`src/test/resources/junit-platform.properties`):
+
+[source,properties,indent=0]
+----
+junit.jupiter.testclass.order.default = \
+    org.junit.jupiter.api.ClassOrderer$OrderAnnotation
+----
+
+The configured `ClassOrderer` will be applied to all top-level test classes (including
+`static` nested test classes) and `@Nested` test classes.
+
+NOTE: Top-level test classes will be ordered relative to each other; whereas, `@Nested`
+test classes will be ordered relative to other `@Nested` test classes sharing the same
+_enclosing class_.
+
+To configure test class execution order _locally_ for `@Nested` test classes, declare the
+`{TestClassOrder}` annotation on the enclosing class for the `@Nested` test classes you
+want to order, and supply a class reference to the `ClassOrderer` implementation you would
+like to use directly in the `@TestClassOrder` annotation. The configured `ClassOrderer`
+will be applied recursively to `@Nested` test classes and their `@Nested` test classes.
+If you want to avoid that a `@Nested` test class uses the same `ClassOrderer` as its
+enclosing class, you can specify `{ClassOrderer_Default}` together with `@TestClassOrder`.
+Note that a local `@TestClassOrder` declaration always overrides an inherited
+`@TestClassOrder` declaration or a `ClassOrderer` configured globally via the
+`junit.jupiter.testclass.order.default` configuration parameter.
+
+The following example demonstrates how to guarantee that `@Nested` test classes are
+executed in the order specified via the `@Order` annotation.
+
+[source,java,indent=0]
+----
+include::example$java/example/OrderedNestedTestClassesDemo.java[tags=user_guide]
+----

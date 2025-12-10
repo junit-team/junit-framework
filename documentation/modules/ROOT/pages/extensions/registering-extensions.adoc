@@ -1,0 +1,330 @@
+= Registering Extensions
+
+Extensions can be registered _declaratively_ via
+<<registration-declarative, `@ExtendWith`>>, _programmatically_ via
+<<registration-programmatic, `@RegisterExtension`>>, or _automatically_ via
+Java's <<registration-automatic, `ServiceLoader`>> mechanism.
+
+[[registration-declarative]]
+== Declarative Extension Registration
+
+Developers can register one or more extensions _declaratively_ by annotating a test
+interface, test class, test method, or custom _xref:writing-tests/annotations.adoc#annotations[composed
+annotation]_ with `@ExtendWith(...)` and supplying class references for the extensions to
+register. `@ExtendWith` may also be declared on fields or on parameters in test class
+constructors, in test methods, and in `@BeforeAll`, `@AfterAll`, `@BeforeEach`, and
+`@AfterEach` lifecycle methods.
+
+For example, to register a `WebServerExtension` for a particular test method, you would
+annotate the test method as follows. We assume the `WebServerExtension` starts a local web
+server and injects the server's URL into parameters annotated with `@WebServerUrl`.
+
+[source,java,indent=0]
+----
+@Test
+@ExtendWith(WebServerExtension.class)
+void getProductList(@WebServerUrl String serverUrl) {
+	WebClient webClient = new WebClient();
+	// Use WebClient to connect to web server using serverUrl and verify response
+	assertEquals(200, webClient.get(serverUrl + "/products").getResponseStatus());
+}
+----
+
+To register the `WebServerExtension` for all tests in a particular class and its
+subclasses, you would annotate the test class as follows.
+
+[source,java,indent=0]
+----
+@ExtendWith(WebServerExtension.class)
+class MyTests {
+	// ...
+}
+----
+
+Multiple extensions can be registered together like this:
+
+[source,java,indent=0]
+----
+@ExtendWith({ DatabaseExtension.class, WebServerExtension.class })
+class MyFirstTests {
+	// ...
+}
+----
+
+As an alternative, multiple extensions can be registered separately like this:
+
+[source,java,indent=0]
+----
+@ExtendWith(DatabaseExtension.class)
+@ExtendWith(WebServerExtension.class)
+class MySecondTests {
+	// ...
+}
+----
+
+[TIP]
+.Extension Registration Order
+====
+Extensions registered declaratively via `@ExtendWith` at the class level, method level, or
+parameter level will be executed in the order in which they are declared in the source
+code. For example, the execution of tests in both `MyFirstTests` and `MySecondTests` will
+be extended by the `DatabaseExtension` and `WebServerExtension`, **in exactly that order**.
+====
+
+If you wish to combine multiple extensions in a reusable way, you can define a custom
+_xref:writing-tests/annotations.adoc#annotations[composed annotation]_ and use `@ExtendWith` as a
+_meta-annotation_ as in the following code listing. Then `@DatabaseAndWebServerExtension`
+can be used in place of `@ExtendWith({ DatabaseExtension.class, WebServerExtension.class })`.
+
+[source,java,indent=0]
+----
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@ExtendWith({ DatabaseExtension.class, WebServerExtension.class })
+public @interface DatabaseAndWebServerExtension {
+}
+----
+
+The above examples demonstrate how `@ExtendWith` can be applied at the class level or at
+the method level; however, for certain use cases it makes sense for an extension to be
+registered declaratively at the field or parameter level. Consider a
+`RandomNumberExtension` which generates random numbers that can be injected into a field or
+via a parameter in a constructor, test method, or lifecycle method. If the extension
+provides a `@Random` annotation that is meta-annotated with
+`@ExtendWith(RandomNumberExtension.class)` (see listing below), the extension can be used
+transparently as in the following `RandomNumberDemo` example.
+
+[source,java,indent=0]
+----
+include::example$java/example/extensions/Random.java[tags=user_guide]
+----
+
+[source,java,indent=0]
+----
+include::example$java/example/extensions/RandomNumberDemo.java[tags=user_guide]
+----
+
+[[RandomNumberExtension]]
+The following code listing provides an example of how one might choose to implement such a
+`RandomNumberExtension`. This implementation works for the use cases in
+`RandomNumberDemo`; however, it may not prove robust enough to cover all use cases -- for
+example, the random number generation support is limited to integers; it uses
+`java.util.Random` instead of `java.security.SecureRandom`; etc. In any case, it is
+important to note which extension APIs are implemented and for what reasons.
+
+Specifically, `RandomNumberExtension` implements the following extension APIs:
+
+- `BeforeAllCallback`: to support static field injection
+- `TestInstancePostProcessor`: to support non-static field injection
+- `ParameterResolver`: to support constructor and method injection
+
+[source,java,indent=0]
+----
+include::example$java/example/extensions/RandomNumberExtension.java[tags=user_guide]
+----
+
+[TIP]
+.Extension Registration Order for `@ExtendWith` on Fields
+====
+Extensions registered declaratively via `@ExtendWith` on fields will be ordered relative
+to `@RegisterExtension` fields and other `@ExtendWith` fields using an algorithm that is
+deterministic but intentionally nonobvious. However, `@ExtendWith` fields can be ordered
+using the `@Order` annotation. See the <<registration-programmatic-order, Extension Registration Order>> tip for `@RegisterExtension` fields for details.
+====
+
+[TIP]
+.Extension Inheritance
+====
+Extensions registered declaratively via `@ExtendWith` on fields in superclasses will be
+inherited.
+
+See <<registration-inheritance, Extension Inheritance>> for details.
+====
+
+NOTE: `@ExtendWith` fields may be either `static` or non-static. The documentation on
+<<registration-programmatic-static-fields, Static Fields>> and
+<<registration-programmatic-instance-fields, Instance Fields>> for
+`@RegisterExtension` fields also applies to `@ExtendWith` fields.
+
+[[registration-programmatic]]
+== Programmatic Extension Registration
+
+Developers can register extensions _programmatically_ by annotating fields in test classes
+with `{RegisterExtension}`.
+
+When an extension is registered _declaratively_ via
+<<registration-declarative, `@ExtendWith`>>, it can typically only be configured
+via annotations. In contrast, when an extension is registered via `@RegisterExtension`, it
+can be configured _programmatically_ -- for example, in order to pass arguments to the
+extension's constructor, a static factory method, or a builder API.
+
+[[registration-programmatic-order]]
+[TIP]
+.Extension Registration Order
+====
+By default, extensions registered programmatically via `@RegisterExtension` or
+declaratively via `@ExtendWith` on fields will be ordered using an algorithm that is
+deterministic but intentionally nonobvious. This ensures that subsequent runs of a test
+suite execute extensions in the same order, thereby allowing for repeatable builds.
+However, there are times when extensions need to be registered in an explicit order. To
+achieve that, annotate `@RegisterExtension` fields or `@ExtendWith` fields with `{Order}`.
+
+Any `@RegisterExtension` field or `@ExtendWith` field not annotated with `@Order` will be
+ordered using the _default_ order which has a value of `Integer.MAX_VALUE / 2`. This
+allows `@Order` annotated extension fields to be explicitly ordered before or after
+non-annotated extension fields. Extensions with an explicit order value less than the
+default order value will be registered before non-annotated extensions. Similarly,
+extensions with an explicit order value greater than the default order value will be
+registered after non-annotated extensions. For example, assigning an extension an explicit
+order value that is greater than the default order value allows _before_ callback
+extensions to be registered last and _after_ callback extensions to be registered first,
+relative to other programmatically registered extensions.
+====
+
+[TIP]
+.Extension Inheritance
+====
+Extensions registered via `@RegisterExtension` or `@ExtendWith` on fields in superclasses
+will be inherited.
+
+See <<registration-inheritance, Extension Inheritance>> for details.
+====
+
+NOTE: `@RegisterExtension` fields must not be `null` (at evaluation time) but may be
+either `static` or non-static.
+
+[[registration-programmatic-static-fields]]
+=== Static Fields
+
+If a `@RegisterExtension` field is `static`, the extension will be registered after
+extensions that are registered at the class level via `@ExtendWith`. Such _static
+extensions_ are not limited in which extension APIs they can implement. Extensions
+registered via static fields may therefore implement class-level and instance-level
+extension APIs such as `BeforeAllCallback`, `AfterAllCallback`,
+`TestInstancePostProcessor`, and `TestInstancePreDestroyCallback` as well as method-level
+extension APIs such as `BeforeEachCallback`, etc.
+
+In the following example, the `server` field in the test class is initialized
+programmatically by using a builder pattern supported by the `WebServerExtension`. The
+configured `WebServerExtension` will be automatically registered as an extension at the
+class level -- for example, in order to start the server before all tests in the class
+and then stop the server after all tests in the class have completed. In addition, static
+lifecycle methods annotated with `@BeforeAll` or `@AfterAll` as well as `@BeforeEach`,
+`@AfterEach`, and `@Test` methods can access the instance of the extension via the
+`server` field if necessary.
+
+[source,java,indent=0]
+.Registering an extension via a static field in Java
+----
+include::example$java/example/registration/WebServerDemo.java[tags=user_guide]
+----
+
+[[registration-programmatic-static-fields-kotlin]]
+==== Static Fields in Kotlin
+
+The Kotlin programming language does not have the concept of a `static` field. However,
+the compiler can be instructed to generate a `private static` field using the `@JvmStatic`
+annotation in Kotlin. If you want the Kotlin compiler to generate a `public static` field,
+you can use the `@JvmField` annotation instead.
+
+The following example is a version of the `WebServerDemo` from the previous section that
+has been ported to Kotlin.
+
+[source,kotlin,indent=0]
+.Registering an extension via a static field in Kotlin
+----
+include::example$kotlin/example/registration/KotlinWebServerDemo.kt[tags=user_guide]
+----
+
+[[registration-programmatic-instance-fields]]
+=== Instance Fields
+
+If a `@RegisterExtension` field is non-static (i.e., an instance field), the extension
+will be registered after the test class has been instantiated and after each registered
+`TestInstancePostProcessor` has been given a chance to post-process the test instance
+(potentially injecting the instance of the extension to be used into the annotated
+field). Thus, if such an _instance extension_ implements class-level or instance-level
+extension APIs such as `BeforeAllCallback`, `AfterAllCallback`, or
+`TestInstancePostProcessor`, those APIs will not be honored. Instance extensions will be
+registered _before_ extensions that are registered at the method level via `@ExtendWith`.
+
+In the following example, the `docs` field in the test class is initialized
+programmatically by invoking a custom `lookUpDocsDir()` method and supplying the result
+to the static `forPath()` factory method in the `DocumentationExtension`. The configured
+`DocumentationExtension` will be automatically registered as an extension at the method
+level. In addition, `@BeforeEach`, `@AfterEach`, and `@Test` methods can access the
+instance of the extension via the `docs` field if necessary.
+
+[source,java,indent=0]
+.An extension registered via an instance field
+----
+include::example$java/example/registration/DocumentationDemo.java[tags=user_guide]
+----
+
+[[registration-automatic]]
+== Automatic Extension Registration
+
+In addition to <<registration-declarative, declarative extension registration>>
+and <<registration-programmatic, programmatic extension registration>> support
+using annotations, JUnit Jupiter also supports _global extension registration_ via Java's
+`{ServiceLoader}` mechanism, allowing third-party extensions to be auto-detected and
+automatically registered based on what is available in the classpath.
+
+Specifically, a custom extension can be registered by supplying its fully qualified class
+name in a file named `org.junit.jupiter.api.extension.Extension` within the
+`/META-INF/services` folder in its enclosing JAR file.
+
+[[registration-automatic-enabling]]
+=== Enabling Automatic Extension Detection
+
+Auto-detection is an advanced feature and is therefore not enabled by default. To enable
+it, set the `junit.jupiter.extensions.autodetection.enabled` _configuration parameter_ to
+`true`. This can be supplied as a JVM system property, as a _configuration parameter_ in
+the `LauncherDiscoveryRequest` that is passed to the `Launcher`, or via the JUnit Platform
+configuration file (see xref:running-tests/configuration-parameters.adoc[] for details).
+
+For example, to enable auto-detection of extensions, you can start your JVM with the
+following system property.
+
+`-Djunit.jupiter.extensions.autodetection.enabled=true`
+
+When auto-detection is enabled, extensions discovered via the `{ServiceLoader}` mechanism
+will be added to the extension registry after JUnit Jupiter's global extensions (e.g.,
+support for `TestInfo`, `TestReporter`, etc.).
+
+[[registration-automatic-filtering]]
+=== Filtering Auto-detected Extensions
+
+The list of auto-detected extensions can be filtered using include and exclude patterns
+via the following xref:running-tests/configuration-parameters.adoc[configuration parameters]:
+
+`junit.jupiter.extensions.autodetection.include=<patterns>`::
+    Comma-separated list of _include_ patterns for auto-detected extensions.
+`junit.jupiter.extensions.autodetection.exclude=<patterns>`::
+    Comma-separated list of _exclude_ patterns for auto-detected extensions.
+
+Include patterns are applied _before_ exclude patterns. If both include and exclude
+patterns are provided, only extensions that match at least one include pattern and do not
+match any exclude pattern will be auto-detected.
+
+See xref:running-tests/configuration-parameters.adoc#pattern[Pattern Matching Syntax] for details on the pattern syntax.
+
+[[registration-inheritance]]
+== Extension Inheritance
+
+Registered extensions are inherited within test class hierarchies with top-down semantics.
+Similarly, extensions registered at the class-level are inherited at the method-level.
+This applies to all extensions, independent of how they are registered (declaratively or
+programmatically).
+
+This means that extensions registered declaratively via `@ExtendWith` on a superclass will
+be registered before extensions registered declaratively via `@ExtendWith` on a subclass.
+
+Similarly, extensions registered programmatically via `@RegisterExtension` or
+`@ExtendWith` on fields in a superclass will be registered before extensions registered
+programmatically via `@RegisterExtension` or `@ExtendWith` on fields in a subclass, unless
+`@Order` is used to alter that behavior (see <<registration-programmatic-order, Extension Registration Order>> for details).
+
+NOTE: A specific extension implementation can only be registered once for a given
+extension context and its parent contexts. Consequently, any attempt to register a
+duplicate extension implementation will be ignored.

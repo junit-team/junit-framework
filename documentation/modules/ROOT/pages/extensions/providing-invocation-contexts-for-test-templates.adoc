@@ -1,0 +1,35 @@
+= Providing Invocation Contexts for Test Templates
+
+A `{TestTemplate}` method can only be executed when at least one
+`{TestTemplateInvocationContextProvider}` is registered. Each such provider is responsible
+for providing a `Stream` of `{TestTemplateInvocationContext}` instances. Each context may
+specify a custom display name and a list of additional extensions that will only be used
+for the next invocation of the `{TestTemplate}` method.
+
+The following example shows how to write a test template as well as how to register and
+implement a `{TestTemplateInvocationContextProvider}`.
+
+[source,java,indent=0]
+.A test template with accompanying extension
+----
+include::example$java/example/TestTemplateDemo.java[tags=user_guide]
+----
+
+In this example, the test template will be invoked twice. The display names of the
+invocations will be `apple` and `banana` as specified by the invocation context. Each
+invocation registers a custom `{ParameterResolver}` which is used to resolve the method
+parameter. The output when using the `ConsoleLauncher` is as follows.
+
+....
+└─ testTemplate(String) ✔
+   ├─ apple ✔
+   └─ banana ✔
+....
+
+The `{TestTemplateInvocationContextProvider}` extension API is primarily intended for
+implementing different kinds of tests that rely on repetitive invocation of a test-like
+method albeit in different contexts — for example, with different parameters, by preparing
+the test class instance differently, or multiple times without modifying the context.
+Please refer to the implementations of xref:writing-tests/repeated-tests.adoc[] or
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] which use this extension point
+to provide their functionality.

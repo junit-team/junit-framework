@@ -1,0 +1,11 @@
+= Writing Tests
+
+The following example provides a glimpse at the minimum requirements for writing a test in
+JUnit Jupiter. Subsequent sections of this chapter will provide further details on all
+available features.
+
+[source,java,indent=0]
+.A first test case
+----
+include::example$java/example/MyFirstJUnitJupiterTests.java[tags=user_guide]
+----

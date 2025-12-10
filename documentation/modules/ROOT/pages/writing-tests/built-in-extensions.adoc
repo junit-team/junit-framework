@@ -1,0 +1,410 @@
+= Built-in Extensions
+
+While the JUnit team encourages reusable extensions to be packaged and maintained in
+separate libraries, JUnit Jupiter includes a few user-facing extension implementations
+that are considered so generally useful that users shouldn't have to add another
+dependency.
+
+[[TempDirectory]]
+== The @TempDir Extension
+
+The built-in `{TempDirectory}` extension is used to create and clean up a temporary
+directory for an individual test or all tests in a test class. It is registered by
+default. To use it, annotate a non-final, unassigned field of type `java.nio.file.Path` or
+`java.io.File` with `{TempDir}` or add a parameter of type `java.nio.file.Path` or
+`java.io.File` annotated with `@TempDir` to a test class constructor, lifecycle method, or
+test method.
+
+For example, the following test declares a parameter annotated with `@TempDir` for a
+single test method, creates and writes to a file in the temporary directory, and checks
+its content.
+
+[source,java,indent=0]
+.A test method that requires a temporary directory
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_parameter_injection]
+----
+
+You can inject multiple temporary directories by specifying multiple annotated parameters.
+
+[source,java,indent=0]
+.A test method that requires multiple temporary directories
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_multiple_directories]
+----
+
+The following example stores a _shared_ temporary directory in a `static` field. This
+allows the same `sharedTempDir` to be used in all lifecycle methods and test methods of
+the test class. For better isolation, you should use an instance field or constructor
+injection so that each test method uses a separate directory.
+
+[source,java,indent=0]
+.A test class that shares a temporary directory across test methods
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_field_injection]
+----
+
+The `@TempDir` annotation has an optional `cleanup` attribute that can be set to either
+`NEVER`, `ON_SUCCESS`, or `ALWAYS`. If the cleanup mode is set to `NEVER`, the temporary
+directory will not be deleted after the test completes. If it is set to `ON_SUCCESS`, the
+temporary directory will only be deleted after the test if the test completed successfully.
+
+The default cleanup mode is `ALWAYS`. You can use the
+`junit.jupiter.tempdir.cleanup.mode.default`
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to override this default.
+
+[source,java,indent=0]
+.A test class with a temporary directory that doesn't get cleaned up
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_cleanup_mode]
+----
+
+`@TempDir` supports the programmatic creation of temporary directories via the optional
+`factory` attribute. This is typically used to gain control over the temporary directory
+creation, like defining the parent directory or the file system that should be used.
+
+Factories can be created by implementing `TempDirFactory`. Implementations must provide a
+no-args constructor and should not make any assumptions regarding when and how many times
+they are instantiated, but they can assume that their `createTempDirectory(...)` and
+`close()` methods will both be called once per instance, in this order, and from the same
+thread.
+
+The default implementation available in Jupiter delegates directory creation to
+`java.nio.file.Files::createTempDirectory` which uses the default file system and the
+system's temporary directory as the parent directory. It passes `junit-` as the prefix
+string of the generated directory name to help identify it as a created by JUnit.
+
+The following example defines a factory that uses the test name as the directory name
+prefix instead of the `junit` constant value.
+
+[source,java,indent=0]
+.A test class with a temporary directory having the test name as the directory name prefix
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_name_prefix]
+----
+
+It is also possible to use an in-memory file system like `{Jimfs}` for the creation of the
+temporary directory. The following example demonstrates how to achieve that.
+
+[source,java,indent=0]
+.A test class with a temporary directory created with the Jimfs in-memory file system
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_jimfs]
+----
+
+`@TempDir` can also be used as a xref:writing-tests/annotations.adoc#annotations[meta-annotation] to
+reduce repetition. The following code listing shows how to create a custom `@JimfsTempDir`
+annotation that can be used as a drop-in replacement for
+`@TempDir(factory = JimfsTempDirFactory.class)`.
+
+[source,java,indent=0]
+.A custom annotation meta-annotated with `@TempDir`
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation]
+----
+
+The following example demonstrates how to use the custom `@JimfsTempDir` annotation.
+
+[source,java,indent=0]
+.A test class using the custom annotation
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation_usage]
+----
+
+Meta-annotations or additional annotations on the field or parameter the `TempDir`
+annotation is declared on might expose additional attributes to configure the factory.
+Such annotations and related attributes can be accessed via the `AnnotatedElementContext`
+parameter of the `createTempDirectory(...)` method.
+
+You can use the `junit.jupiter.tempdir.factory.default` xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the fully qualified class name of the
+`TempDirFactory` you would like to use by default. Just like for factories configured via
+the `factory` attribute of the `@TempDir` annotation, the supplied class has to implement
+the `TempDirFactory` interface. The default factory will be used for all `@TempDir`
+annotations unless the `factory` attribute of the annotation specifies a different factory.
+
+In summary, the factory for a temporary directory is determined according to the following
+precedence rules:
+
+1. The `factory` attribute of the `@TempDir` annotation, if present
+2. The default `TempDirFactory` configured via the configuration
+parameter, if present
+3. Otherwise, `org.junit.jupiter.api.io.TempDirFactory$Standard` will be used.
+
+[[AutoClose]]
+== The @AutoClose Extension
+
+The built-in `{AutoCloseExtension}` automatically closes resources associated with fields.
+It is registered by default. To use it, annotate a field in a test class with
+`{AutoClose}`.
+
+`@AutoClose` fields may be either `static` or non-static. If the value of an `@AutoClose`
+field is `null` when it is evaluated the field will be ignored, but a warning message will
+be logged to inform you.
+
+By default, `@AutoClose` expects the value of the annotated field to implement a `close()`
+method that will be invoked to close the resource. However, developers can customize the
+name of the close method via the `value` attribute. For example, `@AutoClose("shutdown")`
+instructs JUnit to look for a `shutdown()` method to close the resource.
+
+`@AutoClose` fields are inherited from superclasses. Furthermore, `@AutoClose` fields from
+subclasses will be closed before `@AutoClose` fields in superclasses.
+
+When multiple `@AutoClose` fields exist within a given test class, the order in which the
+resources are closed depends on an algorithm that is deterministic but intentionally
+nonobvious. This ensures that subsequent runs of a test suite close resources in the same
+order, thereby allowing for repeatable builds.
+
+The `AutoCloseExtension` implements the `AfterAllCallback` and
+`TestInstancePreDestroyCallback` extension APIs. Consequently, a `static` `@AutoClose`
+field will be closed after all tests in the current test class have completed, effectively
+after `@AfterAll` methods have executed for the test class. A non-static `@AutoClose`
+field will be closed before the current test class instance is destroyed. Specifically, if
+the test class is configured with `@TestInstance(Lifecycle.PER_METHOD)` semantics, a
+non-static `@AutoClose` field will be closed after the execution of each test method, test
+factory method, or test template method. However, if the test class is configured with
+`@TestInstance(Lifecycle.PER_CLASS)` semantics, a non-static `@AutoClose` field will not
+be closed until the current test class instance is no longer needed, which means after
+`@AfterAll` methods and after all `static` `@AutoClose` fields have been closed.
+
+The following example demonstrates how to annotate an instance field with `@AutoClose` so
+that the resource is automatically closed after test execution. In this example, we assume
+that the default `@TestInstance(Lifecycle.PER_METHOD)` semantics apply.
+
+[source,java,indent=0]
+.A test class using `@AutoClose` to close a resource
+----
+include::example$java/example/AutoCloseDemo.java[tags=user_guide_example]
+----
+<1> Annotate an instance field with `@AutoClose`.
+<2> `WebClient` implements `java.lang.AutoCloseable` which defines a `close()` method that
+    will be invoked after each `@Test` method.
+
+[[DefaultLocaleAndTimeZone]]
+== The @DefaultLocale and @DefaultTimeZone Extensions
+
+The `{DefaultLocale}` and `{DefaultTimeZone}` annotations can be used to change the values
+returned from `Locale.getDefault()` and `TimeZone.getDefault()`, respectively, which are
+often used implicitly when no specific locale or time zone is chosen. Both annotations
+work on the test class level and on the test method level, and are inherited from
+higher-level containers. After the annotated element has been executed, the initial
+default value is restored.
+
+[[DefaultLocale]]
+=== @DefaultLocale
+
+The default `Locale` can be specified using an
+{jdk-javadoc-base-url}/java.base/java/util/Locale.html#forLanguageTag-java.lang.String-[IETF BCP 47 language tag string].
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tags=default_locale_language]
+----
+
+Alternatively, the default `Locale` can be created using the following attributes from
+which a {jdk-javadoc-base-url}/java.base/java/util/Locale.Builder.html[`Locale.Builder`]
+can create an instance:
+
+* `language` or
+* `language` and `country` or
+* `language`, `country`, and `variant`
+
+NOTE: The variant needs to be a string which follows the
+https://www.rfc-editor.org/rfc/rfc5646.html[IETF BCP 47 / RFC 5646] syntax
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_language_alternatives]
+----
+
+Mixing language tag configuration (via the annotation's `value` attributed) and
+attributed-based configuration will cause an exception to be thrown. Furthermore, a
+`variant` can only be specified if `country` is also specified. Otherwise, an exception
+will be thrown.
+
+Any method-level `@DefaultLocale` configurations will override class-level configurations.
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_class_level]
+----
+
+NOTE: A class-level configuration means that the specified locale is set before and reset
+after each individual test in the annotated class.
+
+If your use case is not covered, you can implement the `{LocaleProvider}` interface.
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_with_provider]
+----
+
+NOTE: The provider implementation must have a no-args (or the default) constructor.
+
+[[DefaultTimeZone]]
+=== @DefaultTimeZone
+
+The default `TimeZone` is specified according to the
+{jdk-javadoc-base-url}/java.base/java/util/TimeZone.html#getTimeZone(java.lang.String)[TimeZone.getTimeZone(String)]
+method.
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_zone]
+----
+
+Any method level `@DefaultTimeZone` configurations will override class level configurations:
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_class_level]
+----
+
+NOTE: A class-level configuration means that the specified time zone is set before and
+reset after each individual test in the annotated class.
+
+If your use case is not covered, you can implement the `{TimeZoneProvider}` interface.
+
+[source,java,indent=0]
+----
+include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_time_zone_with_provider]
+----
+
+NOTE: The provider implementation must have a no-args (or the default) constructor.
+
+=== Thread Safety
+
+Since the default locale and time zone are global state, reading and writing them during
+xref:writing-tests/parallel-execution.adoc[parallel test execution] can lead to unpredictable
+results and flaky tests. The `@DefaultLocale` and `@DefaultTimeZone` extensions are
+prepared for that and tests annotated with them will never execute in parallel (thanks to
+`{ResourceLock}`) to guarantee correct test results.
+
+However, this does not cover all possible cases. Tested code that reads or writes default
+locale and time zone _independently_ of the extensions can still run in parallel to them
+and may thus behave erratically when, for example, it unexpectedly reads a locale set by
+the extension in another thread. Tests that cover code that reads or writes the default
+locale or time zone need to be annotated with the respective annotation:
+
+* `{ReadsDefaultLocale}`
+* `{ReadsDefaultTimeZone}`
+* `{WritesDefaultLocale}`
+* `{WritesDefaultTimeZone}`
+
+Tests annotated in this way will never execute in parallel with tests annotated with
+`@DefaultLocale` or `@DefaultTimeZone`.
+
+[[writing-tests-built-in-extensions-SystemProperty]]
+==== `@ClearSystemProperty` and `@SetSystemProperty`
+
+The `@ClearSystemProperty` and `@SetSystemProperty` annotations can be used to clear and set, respectively, the values of system properties for a test execution.
+Both annotations work on the test method and class level, are repeatable, combinable, and inherited from higher-level containers.
+After the annotated method has been executed, the properties mentioned in the annotation will be restored to their original value or the value of the higher-level container, or will be cleared if they didn't have one before.
+Other system properties that are changed during the test, are *not* restored (unless the `@RestoreSystemProperties` is used).
+
+For example, clearing a system property for a test execution can be done as follows:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_clear_simple]
+----
+
+And setting a system property for a test execution:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_set_simple]
+----
+
+As mentioned before, both annotations are repeatable, and they can also be combined:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_set_and_clear]
+
+----
+
+Note that class-level configurations are overwritten by method-level configurations:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_at_class_level]
+----
+
+[NOTE]
+====
+Method-level configurations are visible in both `@BeforeEach` setup methods and `@AfterEach` teardown methods (see <<extensions-execution-order-overview, user code and extension code execution order>>).
+
+A class-level configuration means that the specified system properties are cleared/set before and reset after each individual test in the annotated class.
+====
+
+== `@RestoreSystemProperties`
+
+`@RestoreSystemProperties` can be used to restore changes to system properties made directly in code.
+While `@ClearSystemProperty` and `@SetSystemProperty` set or clear specific properties and values, they don't allow property values to be calculated or parameterized, thus there are times you may want to directly set properties in your test code.
+`@RestoreSystemProperties` can be placed on test methods or test classes and will completely restore all system properties to their original state after a test or test class is complete.
+
+In this example, `@RestoreSystemProperties` is used on a test method, ensuring any changes made in that method are restored:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_restore_test]
+----
+
+When `@RestoreSystemProperties` is used on a test class, any system properties changes made during the entire lifecycle of the test class, including test methods, `@BeforeAll`, `@BeforeEach` and 'after' methods, are restored after the test class' lifecycle is complete.
+In addition, the annotation is inherited by each test method just as if each one was annotated with `@RestoreSystemProperties`.
+
+In the following example, both test methods see the system property changes made in `@BeforeAll` and `@BeforeEach`, however, the test methods are isolated from each other (`isolatedTest2` does not 'see' changes made in `isolatedTest1`).
+As shown in the second example below, the class-level `@RestoreSystemProperties` ensures that system property changes made within the annotated class are completely restored after the class's lifecycle, ensuring that changes are not visible to `SomeOtherTestClass`.
+Note that `SomeOtherTestClass` uses the `@ReadsSystemProperty` annotation: This ensures that JUnit does not schedule the class to run during any test known to modify system properties (see <<Thread-Safety>>).
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_setup]
+----
+
+Some other test class, running later:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
+----
+
+== Using `@ClearSystemProperty`, `@SetSystemProperty`, and `@RestoreSystemProperties` together
+
+All three annotations can be combined, which could be used when some system properties are parameterized (i.e. need to be set in code) and others are not.
+For instance, imagine testing an image generation utility that takes configuration from system properties.
+Basic configuration can be specified using `Set` and `Clear` and the image size parameterized:
+
+[source,java,indent=0]
+----
+include::{testDir}/example/SystemPropertyExtensionDemo.java[tag=systemproperty_method_combine_all_test]
+----
+
+[NOTE]
+====
+Using `@RestoreSystemProperties` is not necessary to restore system properties modified via `@ClearSystemProperty` or `@SetSystemProperty` - they each automatically restore the referenced properties.
+'Restore', is only needed if system properties are modified in some way _other than_ Clear and Set during a test.
+====
+
+=== `@RestoreSystemProperties` Limitations
+
+The system `Properties` object is normally just a hashmap of strings, however, it is technically possible to store non-string values and create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values].
+`@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
+However, for use during the test _within_ the test scope it provides a cloned `Properties` object with these limitations:
+
+- Properties with non-string values are removed
+- Nested `Properties` are flattened into a non-nested instance that has the same effective values, but not necessarily the same structure
+
+== Thread-Safety
+
+Since system properties are global state, reading and writing them during <<writing-tests-parallel-execution, parallel test execution>>  can lead to unpredictable results and flaky tests.
+The system property extension is prepared for that and tests annotated with `@ClearSystemProperty`, `@SetSystemProperty`, or `@RestoreSystemProperties` will never execute in parallel (thanks to https://docs.junit.org/current/api[resource locks]) to guarantee correct test results.
+
+However, this does not cover all possible cases.
+Tested code that reads or writes system properties _independently_ of the extension can still run in parallel to it and may thus behave erratically when, for example, it unexpectedly reads a property set by the extension in another thread.
+Tests that cover code that reads or writes system properties need to be annotated with the respective annotation:
+
+* `@ReadsSystemProperty`
+* `@WritesSystemProperty` (though consider using `@RestoreSystemProperties` instead)
+
+Tests annotated in this way will never execute in parallel with tests annotated with `@ClearSystemProperty`, `@SetSystemProperty`, or `@RestoreSystemProperties`.

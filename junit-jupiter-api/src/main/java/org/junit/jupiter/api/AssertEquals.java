@@ -198,6 +198,7 @@ class AssertEquals {
 				.message(messageOrSupplier) //
 				.expected(expected) //
 				.actual(actual) //
+				.trimStacktrace(Assertions.class) //
 				.buildAndThrow();
 	}
 }

@@ -73,6 +73,7 @@ class AssertTimeoutPreemptively {
 				.message(messageSupplier) //
 				.reason("execution timed out after " + timeout.toMillis() + " ms") //
 				.cause(cause) //
+				.trimStacktrace(Assertions.class) //
 				.build();
 	}
 

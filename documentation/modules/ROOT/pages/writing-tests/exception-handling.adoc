@@ -1,0 +1,119 @@
+= Exception Handling
+
+JUnit Jupiter provides robust support for handling test exceptions. This includes the
+built-in mechanisms for managing test failures due to exceptions, the role of exceptions
+in implementing assertions and assumptions, and how to specifically assert non-throwing
+conditions in code.
+
+[[uncaught]]
+== Uncaught Exceptions
+
+In JUnit Jupiter, if an exception is thrown from a test method, a lifecycle method, or an
+extension and not caught within that test method, lifecycle method, or extension, the
+framework will mark the test or test class as failed.
+
+[TIP]
+====
+Failed assumptions deviate from this general rule.
+
+In contrast to failed assertions, failed assumptions do not result in a test failure;
+rather, a failed assumption results in a test being aborted.
+
+See xref:writing-tests/assumptions.adoc[] for further details and examples.
+====
+
+In the following example, the `failsDueToUncaughtException()` method throws an
+`ArithmeticException`. Since the exception is not caught within the test method, JUnit
+Jupiter will mark the test as failed.
+
+[source,java,indent=0]
+----
+include::example$java/example/exception/UncaughtExceptionHandlingDemo.java[tags=user_guide]
+----
+
+NOTE: It's important to note that specifying a `throws` clause in the test method has
+no effect on the outcome of the test. JUnit Jupiter does not interpret a `throws` clause
+as an expectation or assertion about what exceptions the test method should throw. A test
+fails only if an exception is thrown unexpectedly or if an assertion fails.
+
+[[failed-assertions]]
+== Failed Assertions
+
+Assertions in JUnit Jupiter are implemented using exceptions. The framework provides a set
+of assertion methods in the `org.junit.jupiter.api.Assertions` class, which throw
+`AssertionError` when an assertion fails. This mechanism is a core aspect of how JUnit
+handles assertion failures as exceptions. See the xref:writing-tests/assertions.adoc[] section for
+further information about JUnit Jupiter's assertion support.
+
+NOTE: Third-party assertion libraries may choose to throw an `AssertionError` to signal a
+failed assertion; however, they may also choose to throw different types of exceptions to
+signal failures. See also: xref:writing-tests/assertions.adoc#third-party[Third-party Assertion Libraries].
+
+TIP: JUnit Jupiter itself does not differentiate between failed assertions
+(`AssertionError`) and other types of exceptions. All uncaught exceptions lead to a test
+failure. However, Integrated Development Environments (IDEs) and other tools may
+distinguish between these two types of failures by checking whether the thrown exception
+is an instance of `AssertionError`.
+
+In the following example, the `failsDueToUncaughtAssertionError()` method throws an
+`AssertionError`. Since the exception is not caught within the test method, JUnit Jupiter
+will mark the test as failed.
+
+[source,java,indent=0]
+----
+include::example$java/example/exception/FailedAssertionDemo.java[tags=user_guide]
+----
+
+[[expected]]
+== Asserting Expected Exceptions
+
+JUnit Jupiter offers specialized assertions for testing that specific exceptions are
+thrown under expected conditions. The `assertThrows()` and `assertThrowsExactly()`
+assertions are critical tools for validating that your code responds correctly to error
+conditions by throwing the appropriate exceptions.
+
+[[expected-assertThrows]]
+=== Using `assertThrows()`
+
+The `assertThrows()` method is used to verify that a particular type of exception is
+thrown during the execution of a provided executable block. It not only checks for the
+type of the thrown exception but also its subclasses, making it suitable for more
+generalized exception handling tests. The `assertThrows()` assertion method returns the
+thrown exception object to allow performing additional assertions on it.
+
+[source,java,indent=0]
+----
+include::example$java/example/exception/ExceptionAssertionDemo.java[tags=user_guide]
+----
+
+[[expected-assertThrowsExactly]]
+=== Using `assertThrowsExactly()`
+
+The `assertThrowsExactly()` method is used when you need to assert that the exception
+thrown is exactly of a specific type, not allowing for subclasses of the expected
+exception type. This is useful when precise exception handling behavior needs to be
+validated. Similar to `assertThrows()`, the `assertThrowsExactly()` assertion method also
+returns the thrown exception object to allow performing additional assertions on it.
+
+[source,java,indent=0]
+----
+include::example$java/example/exception/ExceptionAssertionExactDemo.java[tags=user_guide]
+----
+
+[[not-expected]]
+== Asserting That no Exception is Expected
+
+Although any exception thrown from a test method will cause the test to fail, there are
+certain use cases where it can be beneficial to explicitly assert that an exception is
+_not_ thrown for a given code block within a test method. The `assertDoesNotThrow()`
+assertion can be used when you want to verify that a particular piece of code does not
+throw any exceptions.
+
+[source,java,indent=0]
+----
+include::example$java/example/exception/AssertDoesNotThrowExceptionDemo.java[tags=user_guide]
+----
+
+NOTE: Third-party assertion libraries often provide similar support. For example, AssertJ
+has `assertThatNoException().isThrownBy(() -> ...)`. See also:
+xref:writing-tests/assertions.adoc#third-party[Third-party Assertion Libraries].

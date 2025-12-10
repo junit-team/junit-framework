@@ -75,7 +75,7 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
-				\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
+				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 				>>>>
 				\\Qorg.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:\\E.+
 				>>>>
@@ -92,7 +92,6 @@ class StackTracePruningTests {
 		List<StackTraceElement> stackTrace = extractStackTrace(results);
 
 		assertStackTraceMatch(stackTrace, """
-				>>>>
 				\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 				>>>>
 				""");
@@ -115,7 +114,7 @@ class StackTracePruningTests {
 	}
 
 	@Test
-	void shouldKeepExactlyEverythingAfterTestCall() {
+	void shouldKeepExactlyEverythingBetweenTestCallAndFirstAssertionCall() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter("junit.platform.stacktrace.pruning.enabled", "true") //
 				.selectors(selectMethod(FailingTestTestCase.class, "failingAssertion")) //
@@ -125,7 +124,6 @@ class StackTracePruningTests {
 
 		assertStackTraceMatch(stackTrace,
 			"""
-					\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
 					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingTestTestCase.failingAssertion(StackTracePruningTests.java:\\E.+
 					""");
@@ -145,7 +143,6 @@ class StackTracePruningTests {
 
 		assertStackTraceMatch(stackTrace,
 			"""
-					\\Qorg.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:\\E.+
 					\\Qorg.junit.jupiter.api.Assertions.fail(Assertions.java:\\E.+
 					\\Qorg.junit.platform.StackTracePruningTests$FailingBeforeEachTestCase.setUp(StackTracePruningTests.java:\\E.+
 					""");
