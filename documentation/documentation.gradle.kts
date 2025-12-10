@@ -5,16 +5,11 @@ import junitbuild.exec.RunConsoleLauncher
 import junitbuild.extensions.isSnapshot
 import junitbuild.extensions.javaModuleName
 import junitbuild.javadoc.ModuleSpecificJavadocFileOption
-import org.asciidoctor.gradle.base.AsciidoctorAttributeProvider
-import org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
-import org.ysb33r.grolifant.api.core.jvm.ExecutionMode.JAVA_EXEC
 
 plugins {
-	alias(libs.plugins.asciidoctorConvert)
-	alias(libs.plugins.asciidoctorPdf)
-	alias(libs.plugins.gitPublish)
 	alias(libs.plugins.plantuml)
+	id("junitbuild.antora-conventions")
 	id("junitbuild.build-parameters")
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.testing-conventions")
@@ -84,14 +79,6 @@ dependencies {
 	standaloneConsoleLauncher(projects.junitPlatformConsoleStandalone)
 }
 
-asciidoctorj {
-	setJrubyVersion(libs.versions.jruby)
-	modules {
-		pdf.version(libs.versions.asciidoctorj.pdf)
-	}
-	requires(file("src/docs/asciidoc/resources/themes/rouge_junit.rb"))
-}
-
 val buildRevision: String by rootProject.extra
 val snapshot = version.isSnapshot()
 val docsVersion = if (snapshot) "snapshot" else version
@@ -102,30 +89,6 @@ val uploadPdfs = !snapshot
 val userGuidePdfFileName = "junit-user-guide-${version}.pdf"
 val ota4jDocVersion = libs.versions.opentest4j.map { if (it.isSnapshot()) "snapshot" else it }.get()
 val apiGuardianDocVersion = libs.versions.apiguardian.map { if (it.isSnapshot()) "snapshot" else it }.get()
-
-gitPublish {
-	repoUri = "https://github.com/junit-team/docs.junit.org.git"
-
-	branch = "main"
-	sign = false
-	fetchDepth = 1
-
-	username = providers.environmentVariable("GIT_USERNAME")
-	password = providers.environmentVariable("GIT_PASSWORD")
-
-	contents {
-		from(docsDir)
-		into(".")
-	}
-
-	preserve {
-		include("**/*")
-		exclude("$docsVersion/**")
-		if (replaceCurrentDocs) {
-			exclude("current/**")
-		}
-	}
-}
 
 val generatedAsciiDocPath = layout.buildDirectory.dir("generated/asciidoc")
 val consoleLauncherOptionsFile = generatedAsciiDocPath.map { it.file("console-launcher-options.txt") }
@@ -270,8 +233,8 @@ tasks {
 
 	val plantUmlOutputDirectory = plantUml.flatMap { it.outputDirectory }
 
-	withType<AbstractAsciidoctorTask>().configureEach {
-		inputs.files(
+	val generateAsciidocInputs by registering {
+		dependsOn(
 			generateConsoleLauncherOptions,
 			generateConsoleLauncherDiscoverOptions,
 			generateConsoleLauncherExecuteOptions,
@@ -280,100 +243,6 @@ tasks {
 			generateStandaloneConsoleLauncherShadowedArtifactsFile,
 			plantUmlOutputDirectory
 		)
-
-		resources {
-			from(sourceDir) {
-				include("**/images/**/*.png")
-				include("**/images/**/*.svg")
-			}
-			from(plantUmlOutputDirectory) {
-				into("user-guide/images")
-			}
-		}
-
-		// Temporary workaround for https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/599
-		inputs.dir(sourceDir).withPropertyName("sourceDir").withPathSensitivity(RELATIVE)
-
-		attributeProviders += AsciidoctorAttributeProvider {
-			mapOf(
-				"version" to version,
-				"junit4-version" to libs.versions.junit4.get(),
-				"apiguardian-version" to libs.versions.apiguardian.get(),
-				"ota4j-version" to libs.versions.opentest4j.get(),
-				"surefire-version" to libs.versions.surefire.get(),
-				"release-branch" to releaseBranch,
-				"docs-version" to docsVersion,
-				"revnumber" to version,
-				"consoleLauncherOptionsFile" to consoleLauncherOptionsFile.get(),
-				"consoleLauncherDiscoverOptionsFile" to consoleLauncherDiscoverOptionsFile.get(),
-				"consoleLauncherExecuteOptionsFile" to consoleLauncherExecuteOptionsFile.get(),
-				"consoleLauncherEnginesOptionsFile" to consoleLauncherEnginesOptionsFile.get(),
-				"experimentalApisTableFile" to experimentalApisTableFile.get(),
-				"deprecatedApisTableFile" to deprecatedApisTableFile.get(),
-				"standaloneConsoleLauncherShadowedArtifactsFile" to standaloneConsoleLauncherShadowedArtifactsFile.get(),
-				"outdir" to outputDir.absolutePath,
-				"source-highlighter" to "rouge",
-				"rouge-style" to "junit",
-				"tabsize" to "4",
-				"toc" to "left",
-				"icons" to "font",
-				"sectanchors" to true,
-				"idprefix" to "",
-				"idseparator" to "-",
-				"jdk-javadoc-base-url" to jdkJavadocBaseUrl
-			)
-		}
-
-		sourceSets["test"].apply {
-			attributes(mapOf(
-					"testDir" to java.srcDirs.first(),
-					"testResourcesDir" to resources.srcDirs.first()
-			))
-			inputs.dir(java.srcDirs.first())
-			inputs.dir(resources.srcDirs.first())
-			attributes(mapOf("kotlinTestDir" to kotlin.srcDirs.first()))
-			inputs.dir(kotlin.srcDirs.first())
-		}
-
-		jvm {
-			// To avoid warning, see https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597
-			jvmArgs(
-				"--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED",
-				"--add-opens", "java.base/java.io=ALL-UNNAMED"
-			)
-		}
-
-		notCompatibleWithConfigurationCache("https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/564")
-	}
-
-	asciidoctor {
-		sources {
-			include("**/index.adoc")
-		}
-		resources {
-			from(sourceDir) {
-				include("tocbot-*/**")
-			}
-		}
-		attributes(mapOf(
-				"linkToPdf" to uploadPdfs,
-				"userGuidePdfFileName" to userGuidePdfFileName,
-				"releaseNotesUrl" to "../release-notes/index.html#release-notes"
-		))
-	}
-
-	asciidoctorPdf {
-		// Avoid classpath conflicts with other Gradle plugins (e.g. JReleaser)
-		// Avoid propagating apparent memory leaks in Asciidoctor/JRuby to Gradle daemon.
-		setExecutionMode(JAVA_EXEC)
-		jvm {
-			maxHeapSize = "512M"
-		}
-		sources {
-			include("user-guide/index.adoc")
-		}
-		copyAllResources()
-		attributes(mapOf("releaseNotesUrl" to "https://docs.junit.org/$docsVersion/release-notes/"))
 	}
 
 	val downloadJavadocElementLists by registering {
@@ -496,58 +365,28 @@ tasks {
 		into(layout.buildDirectory.dir("docs/fixedJavadoc"))
 	}
 
-	val prepareDocsForUploadToGhPages by registering(Copy::class) {
-		dependsOn(fixJavadoc, asciidoctor, asciidoctorPdf)
-		outputs.dir(docsDir)
-
-		from(asciidoctor.map { it.outputDir }) {
-			include("user-guide/**")
-			include("release-notes/**")
-			include("tocbot-*/**")
-		}
-		if (uploadPdfs) {
-			from(asciidoctorPdf.map { it.outputDir }) {
-				include("**/*.pdf")
-				rename { userGuidePdfFileName }
-			}
-		}
-		from(fixJavadoc.map { it.destinationDir }) {
-			into("api")
-		}
-		into(docsDir.map { it.dir(docsVersion.toString()) })
-		includeEmptyDirs = false
-	}
-
-	val createCurrentDocsFolder by registering(Copy::class) {
-		dependsOn(prepareDocsForUploadToGhPages)
-		onlyIf { replaceCurrentDocs }
-
-		from(docsDir.map { it.dir(docsVersion.toString()) })
-		into(docsDir.map { it.dir("current") })
-	}
-
-	val configureGitAuthor by registering {
-		dependsOn(gitPublishReset)
-		doFirst {
-			File(gitPublish.repoDir.get().asFile, ".git/config").appendText("""
-				[user]
-					name = JUnit Team
-					email = team@junit.org
-			""".trimIndent())
-		}
-	}
-
-	gitPublishCopy {
-		dependsOn(prepareDocsForUploadToGhPages, createCurrentDocsFolder)
-	}
-
-	gitPublishCommit {
-		dependsOn(configureGitAuthor)
-	}
-
 	val prepareGitHubAttestation by registering(Sync::class) {
 		from(attestationClasspath)
 		into(layout.buildDirectory.dir("attestation"))
 		rename("(.*)-SNAPSHOT.jar", "$1-SNAPSHOT+${buildRevision.substring(0, 7)}.jar")
+	}
+
+	generateAntoraYml {
+		asciidocAttributes.putAll(provider {
+			mapOf(
+				"version" to project.version,
+				"junit4-version" to libs.versions.junit4.get(),
+				"apiguardian-version" to libs.versions.apiguardian.get(),
+				"ota4j-version" to libs.versions.opentest4j.get(),
+				"surefire-version" to libs.versions.surefire.get(),
+				"release-branch" to releaseBranch,
+				"docs-version" to docsVersion,
+				"jdk-javadoc-base-url" to jdkJavadocBaseUrl
+			)
+		})
+	}
+
+	generateAntoraResources {
+		dependsOn(generateAsciidocInputs, fixJavadoc)
 	}
 }

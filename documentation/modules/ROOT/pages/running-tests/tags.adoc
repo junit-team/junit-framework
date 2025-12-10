@@ -1,0 +1,73 @@
+= Tags
+
+Tags are a JUnit Platform concept for marking and filtering tests. The programming model
+for adding tags to containers and tests is defined by the testing framework. For example,
+in JUnit Jupiter based tests, the `@Tag` annotation (see
+xref:writing-tests/tagging-and-filtering.adoc[]) should be used. For JUnit 4 based tests, the
+Vintage engine maps `@Category` annotations to tags (see
+xref:migrating-from-junit4.adoc#categories-support[Categories Support]). Other testing frameworks may define their
+own annotation or other means for users to specify tags.
+
+[[syntax-rules]]
+== Syntax Rules for Tags
+
+Regardless how a tag is specified, the JUnit Platform enforces the following rules:
+
+* A tag must not be `null` or _blank_.
+* A _stripped_ tag must not contain whitespace.
+* A _stripped_ tag must not contain ISO control characters.
+* A _stripped_ tag must not contain any of the following _reserved characters_.
+- `,`: _comma_
+- `(`: _left parenthesis_
+- `)`: _right parenthesis_
+- `&`: _ampersand_
+- `|`: _vertical bar_
+- `!`: _exclamation point_
+
+NOTE: In the above context, "stripped" means that leading and trailing whitespace
+characters have been removed using `java.lang.String.strip()`.
+
+[[expressions]]
+== Tag Expressions
+
+Tag expressions are boolean expressions with the operators `!`, `&` and `|`. In addition,
+`(` and `)` can be used to adjust for operator precedence.
+
+Two special expressions are supported, `any()` and `none()`, which select all tests _with_
+any tags at all, and all tests _without_ any tags, respectively.
+These special expressions may be combined with other expressions just like normal tags.
+
+.Operators (in descending order of precedence)
+|===
+| Operator | Meaning | Associativity
+
+| `!`      | not     | right
+| `&`      | and     | left
+| `\|`     | or      | left
+|===
+
+If you are tagging your tests across multiple dimensions, tag expressions help you to
+select which tests to execute. When tagging by test type (e.g., _micro_, _integration_,
+_end-to-end_) and feature (e.g., *product*, *catalog*, *shipping*), the following tag
+expressions can be useful.
+
+[%header,cols="40,60"]
+|===
+| Tag Expression
+| Selection
+
+| `+++product+++`
+| all tests for *product*
+
+| `+++catalog \| shipping+++`
+| all tests for *catalog* plus all tests for *shipping*
+
+| `+++catalog &amp; shipping+++`
+| all tests for the intersection between *catalog* and *shipping*
+
+| `+++product &amp; !end-to-end+++`
+| all tests for *product*, but not the _end-to-end_ tests
+
+| `+++(micro \| integration) &amp; (product \| shipping)+++`
+| all _micro_ or _integration_ tests for *product* or *shipping*
+|===

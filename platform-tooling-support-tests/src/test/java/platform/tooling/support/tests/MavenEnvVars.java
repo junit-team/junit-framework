@@ -30,11 +30,14 @@ final class MavenEnvVars {
 		var list = new ArrayList<String>();
 		if (jre.compareTo(JRE.JAVA_24) >= 0)
 			list.addAll(FOR_JDK24_AND_LATER);
-		if (jre.compareTo(JRE.JAVA_26) >= 0) {
+		if (jre == JRE.JAVA_26) {
 			// exclude "leyden" and "valhalla" builds
 			if (Runtime.version().build().orElse(0) >= 25) {
 				list.addAll(FOR_JDK26_AND_LATER);
 			}
+		}
+		if (jre.compareTo(JRE.JAVA_27) >= 0) {
+			list.addAll(FOR_JDK26_AND_LATER);
 		}
 		return list.isEmpty() ? Map.of() : Map.of("MAVEN_OPTS", String.join(" ", list));
 	}

@@ -1,0 +1,32 @@
+= Test Instance Factories
+
+`{TestInstanceFactory}` defines the API for `Extensions` that wish to _create_ test class
+instances.
+
+Common use cases include acquiring the test instance from a dependency injection
+framework or invoking a static factory method to create the test class instance.
+
+If no `TestInstanceFactory` is registered, the framework will invoke the _sole_
+constructor for the test class to instantiate it, potentially resolving constructor
+arguments via registered `ParameterResolver` extensions.
+
+Extensions that implement `TestInstanceFactory` can be registered on test interfaces,
+top-level test classes, or `@Nested` test classes.
+
+[WARNING]
+====
+Registering multiple extensions that implement `TestInstanceFactory` for any single class
+will result in an exception being thrown for all tests in that class, in any subclass,
+and in any nested class. Note that any `TestInstanceFactory` registered in a superclass
+or _enclosing_ class (i.e., in the case of a `@Nested` test class) is _inherited_. It is
+the user's responsibility to ensure that only a single `TestInstanceFactory` is
+registered for any specific test class.
+====
+
+[NOTE]
+.Accessing the test-scoped `ExtensionContext`
+====
+You may override the `getTestInstantiationExtensionContextScope(...)` method to return
+`TEST_METHOD` to make test-specific data available to your extension implementation or if
+you want to xref:extensions/keeping-state-in-extensions.adoc[keep state] on the test method level.
+====

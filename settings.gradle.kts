@@ -17,7 +17,6 @@ dependencyResolutionManagement {
 	repositories {
 		mavenCentral()
 	}
-	repositoriesMode = FAIL_ON_PROJECT_REPOS
 }
 
 val buildParameters = the<BuildParametersExtension>()

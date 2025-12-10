@@ -1,0 +1,97 @@
+= Assertions
+
+JUnit Jupiter comes with many of the assertion methods that JUnit 4 has and adds a few
+that lend themselves well to being used with Java lambdas. All JUnit Jupiter assertions
+are `static` methods in the `{Assertions}` class.
+
+Assertion methods optionally accept the assertion message as their third parameter, which
+can be either a `String` or a `Supplier<String>`.
+
+When using a `Supplier<String>` (e.g., a lambda expression), the message is evaluated
+lazily. This can provide a performance benefit, especially if message construction is
+complex or time-consuming, as it is only evaluated when the assertion fails.
+
+[source,java,indent=0]
+----
+include::example$java/example/AssertionsDemo.java[tags=user_guide]
+----
+
+[[preemptive-timeouts]]
+[WARNING]
+.Preemptive Timeouts with `assertTimeoutPreemptively()`
+====
+The various `assertTimeoutPreemptively()` methods in the `Assertions` class execute
+the provided `executable` or `supplier` in a different thread than that of the calling
+code. This behavior can lead to undesirable side effects if the code that is executed
+within the `executable` or `supplier` relies on `java.lang.ThreadLocal` storage.
+
+One common example of this is the transactional testing support in the Spring Framework.
+Specifically, Spring's testing support binds transaction state to the current thread (via
+a `ThreadLocal`) before a test method is invoked. Consequently, if an `executable` or
+`supplier` provided to `assertTimeoutPreemptively()` invokes Spring-managed components
+that participate in transactions, any actions taken by those components will not be rolled
+back with the test-managed transaction. On the contrary, such actions will be committed to
+the persistent store (e.g., relational database) even though the test-managed transaction
+is rolled back.
+
+Similar side effects may be encountered with other frameworks that rely on
+`ThreadLocal` storage.
+====
+
+[[kotlin]]
+== Kotlin Assertion Support
+
+JUnit Jupiter also comes with a few assertion methods that lend themselves well to being
+used in https://kotlinlang.org/[Kotlin]. All JUnit Jupiter Kotlin assertions are top-level
+functions in the `org.junit.jupiter.api` package.
+
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/KotlinAssertionsDemo.kt[tags=user_guide]
+----
+
+[[third-party]]
+== Third-party Assertion Libraries
+
+Even though the assertion facilities provided by JUnit Jupiter are sufficient for many
+testing scenarios, there are times when more power and additional functionality are
+desired or required. In such cases, the JUnit team recommends the use of third-party
+assertion libraries such as {AssertJ}, {Hamcrest}, {Truth}, etc. Developers are therefore
+free to use the assertion library of their choice.
+
+For example, the following demonstrates how to use the `assertThat()` support from AssertJ
+in a JUnit Jupiter test. As long as the AssertJ library has been added to the classpath,
+you can statically import methods such as `assertThat()`, `assertThatException()`, etc.
+from `org.assertj.core.api.Assertions` and then use them in tests like in the
+`assertWithAssertJ()` method below.
+
+[source,java,indent=0]
+----
+include::example$java/example/AssertJAssertionsDemo.java[tags=user_guide]
+----
+
+[TIP]
+.Excluding Jupiter’s Assertions From a Project’s Classpath
+====
+If you would like to enforce that all your tests use a certain third-party assertion
+library instead of Jupiter's, you can set up a rule using {Checkstyle} or another static
+analysis tool that fails the build if Jupiter's `Assertions` class is used.
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+	<property name="severity" value="error" />
+	<module name="TreeWalker">
+    <module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="jupiterAssertions"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="org\.junit\.jupiter\.api\.(Assertions|Assumptions)\."/>
+			<property name="message" value="Jupiter Assertions/Assumptions should not be used in this project. Please use ... instead."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+	</module>
+</module>
+----
+====

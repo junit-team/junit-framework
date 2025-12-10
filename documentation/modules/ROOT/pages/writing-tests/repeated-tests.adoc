@@ -1,0 +1,174 @@
+= Repeated Tests
+
+JUnit Jupiter provides the ability to repeat a test a specified number of times by
+annotating a method with `@RepeatedTest` and specifying the total number of repetitions
+desired. Each invocation of a repeated test behaves like the execution of a regular
+`@Test` method with full support for the same lifecycle callbacks and extensions.
+
+The following example demonstrates how to declare a test named `repeatedTest()` that
+will be automatically repeated 10 times.
+
+[source,java]
+----
+@RepeatedTest(10)
+void repeatedTest() {
+	// ...
+}
+----
+
+`@RepeatedTest` can be configured with a failure threshold which signifies the number of
+failures after which remaining repetitions will be automatically skipped. Set the
+`failureThreshold` attribute to a positive number less than the total number of
+repetitions in order to skip the invocations of remaining repetitions after the specified
+number of failures has been encountered.
+
+For example, if you are using `@RepeatedTest` to repeatedly invoke a test that you suspect
+to be _flaky_, a single failure is sufficient to demonstrate that the test is flaky, and
+there is no need to invoke the remaining repetitions. To support that specific use case,
+set `failureThreshold = 1`. You can alternatively set the threshold to a number greater
+than 1 depending on your use case.
+
+By default, the `failureThreshold` attribute is set to `Integer.MAX_VALUE`, signaling that
+no failure threshold will be applied, which effectively means that the specified number of
+repetitions will be invoked regardless of whether any repetitions fail.
+
+WARNING: If the repetitions of a `@RepeatedTest` method are executed in parallel, no
+guarantees can be made regarding the failure threshold. It is therefore recommended that a
+`@RepeatedTest` method be annotated with `@Execution(SAME_THREAD)` when parallel execution
+is configured. See xref:writing-tests/parallel-execution.adoc[] for further details.
+
+In addition to specifying the number of repetitions and failure threshold, a custom
+display name can be configured for each repetition via the `name` attribute of the
+`@RepeatedTest` annotation. Furthermore, the display name can be a pattern composed of a
+combination of static text and dynamic placeholders. The following placeholders are
+currently supported.
+
+- `+{displayName}+`: display name of the `@RepeatedTest` method
+- `+{currentRepetition}+`: the current repetition count
+- `+{totalRepetitions}+`: the total number of repetitions
+
+The default display name for a given repetition is generated based on the following
+pattern: `"repetition +{currentRepetition}+ of +{totalRepetitions}+"`.Thus, the display
+names for individual repetitions of the previous `repeatedTest()` example would be:
+`repetition 1 of 10`, `repetition 2 of 10`, etc.If you would like the display name of
+the `@RepeatedTest` method included in the name of each repetition, you can define your
+own custom pattern or use the predefined `RepeatedTest.LONG_DISPLAY_NAME` pattern.The
+latter is equal to `"+{displayName}+ :: repetition +{currentRepetition}+ of
++{totalRepetitions}+"` which results in display names for individual repetitions like
+`repeatedTest() :: repetition 1 of 10`, `repeatedTest() :: repetition 2 of 10`, etc.
+
+In order to retrieve information about the current repetition, the total number of
+repetitions, the number of repetitions that have failed, and the failure threshold, a
+developer can choose to have an instance of `{RepetitionInfo}` injected into a
+`@RepeatedTest`, `@BeforeEach`, or `@AfterEach` method.
+
+[[examples]]
+== Repeated Test Examples
+
+The `RepeatedTestsDemo` class at the end of this section demonstrates several examples of
+repeated tests.
+
+The `repeatedTest()` method is identical to the example from the previous section; whereas,
+`repeatedTestWithRepetitionInfo()` demonstrates how to have an instance of
+`RepetitionInfo` injected into a test to access the total number of repetitions for the
+current repeated test.
+
+`repeatedTestWithFailureThreshold()` demonstrates how to set a failure threshold and
+simulates an unexpected failure for every second repetition.The resulting behavior can be
+viewed in the `ConsoleLauncher` output at the end of this section.
+
+The next two methods demonstrate how to include a custom `@DisplayName` for the
+`@RepeatedTest` method in the display name of each repetition. `customDisplayName()`
+combines a custom display name with a custom pattern and then uses `TestInfo` to verify
+the format of the generated display name. `Repeat!` is the `+{displayName}+` which comes
+from the `@DisplayName` declaration, and `1/1` comes from
+`+{currentRepetition}+/+{totalRepetitions}+`.In contrast,
+`customDisplayNameWithLongPattern()` uses the aforementioned predefined
+`RepeatedTest.LONG_DISPLAY_NAME` pattern.
+
+`repeatedTestInGerman()` demonstrates the ability to translate display names of repeated
+tests into foreign languages -- in this case German, resulting in names for individual
+repetitions such as: `Wiederholung 1 von 5`, `Wiederholung 2 von 5`, etc.
+
+Since the `beforeEach()` method is annotated with `@BeforeEach` it will get executed
+before each repetition of each repeated test. By having the `TestInfo` and
+`RepetitionInfo` injected into the method, we see that it's possible to obtain
+information about the currently executing repeated test. Executing `RepeatedTestsDemo`
+with the `INFO` log level enabled results in the following output.
+
+....
+INFO: About to execute repetition 1 of 10 for repeatedTest
+INFO: About to execute repetition 2 of 10 for repeatedTest
+INFO: About to execute repetition 3 of 10 for repeatedTest
+INFO: About to execute repetition 4 of 10 for repeatedTest
+INFO: About to execute repetition 5 of 10 for repeatedTest
+INFO: About to execute repetition 6 of 10 for repeatedTest
+INFO: About to execute repetition 7 of 10 for repeatedTest
+INFO: About to execute repetition 8 of 10 for repeatedTest
+INFO: About to execute repetition 9 of 10 for repeatedTest
+INFO: About to execute repetition 10 of 10 for repeatedTest
+INFO: About to execute repetition 1 of 5 for repeatedTestWithRepetitionInfo
+INFO: About to execute repetition 2 of 5 for repeatedTestWithRepetitionInfo
+INFO: About to execute repetition 3 of 5 for repeatedTestWithRepetitionInfo
+INFO: About to execute repetition 4 of 5 for repeatedTestWithRepetitionInfo
+INFO: About to execute repetition 5 of 5 for repeatedTestWithRepetitionInfo
+INFO: About to execute repetition 1 of 8 for repeatedTestWithFailureThreshold
+INFO: About to execute repetition 2 of 8 for repeatedTestWithFailureThreshold
+INFO: About to execute repetition 3 of 8 for repeatedTestWithFailureThreshold
+INFO: About to execute repetition 4 of 8 for repeatedTestWithFailureThreshold
+INFO: About to execute repetition 1 of 1 for customDisplayName
+INFO: About to execute repetition 1 of 1 for customDisplayNameWithLongPattern
+INFO: About to execute repetition 1 of 5 for repeatedTestInGerman
+INFO: About to execute repetition 2 of 5 for repeatedTestInGerman
+INFO: About to execute repetition 3 of 5 for repeatedTestInGerman
+INFO: About to execute repetition 4 of 5 for repeatedTestInGerman
+INFO: About to execute repetition 5 of 5 for repeatedTestInGerman
+....
+
+[source,java]
+----
+include::example$java/example/RepeatedTestsDemo.java[tags=user_guide]
+----
+
+When using the `ConsoleLauncher` with the unicode theme enabled, execution of
+`RepeatedTestsDemo` results in the following output to the console.
+
+....
+├─ RepeatedTestsDemo ✔
+│  ├─ repeatedTest() ✔
+│  │  ├─ repetition 1 of 10 ✔
+│  │  ├─ repetition 2 of 10 ✔
+│  │  ├─ repetition 3 of 10 ✔
+│  │  ├─ repetition 4 of 10 ✔
+│  │  ├─ repetition 5 of 10 ✔
+│  │  ├─ repetition 6 of 10 ✔
+│  │  ├─ repetition 7 of 10 ✔
+│  │  ├─ repetition 8 of 10 ✔
+│  │  ├─ repetition 9 of 10 ✔
+│  │  └─ repetition 10 of 10 ✔
+│  ├─ repeatedTestWithRepetitionInfo(RepetitionInfo) ✔
+│  │  ├─ repetition 1 of 5 ✔
+│  │  ├─ repetition 2 of 5 ✔
+│  │  ├─ repetition 3 of 5 ✔
+│  │  ├─ repetition 4 of 5 ✔
+│  │  └─ repetition 5 of 5 ✔
+│  ├─ repeatedTestWithFailureThreshold(RepetitionInfo) ✔
+│  │  ├─ repetition 1 of 8 ✔
+│  │  ├─ repetition 2 of 8 ✘ Boom!
+│  │  ├─ repetition 3 of 8 ✔
+│  │  ├─ repetition 4 of 8 ✘ Boom!
+│  │  ├─ repetition 5 of 8 ↷ Failure threshold [2] exceeded
+│  │  ├─ repetition 6 of 8 ↷ Failure threshold [2] exceeded
+│  │  ├─ repetition 7 of 8 ↷ Failure threshold [2] exceeded
+│  │  └─ repetition 8 of 8 ↷ Failure threshold [2] exceeded
+│  ├─ Repeat! ✔
+│  │  └─ Repeat! 1/1 ✔
+│  ├─ Details... ✔
+│  │  └─ Details... :: repetition 1 of 1 ✔
+│  └─ repeatedTestInGerman() ✔
+│     ├─ Wiederholung 1 von 5 ✔
+│     ├─ Wiederholung 2 von 5 ✔
+│     ├─ Wiederholung 3 von 5 ✔
+│     ├─ Wiederholung 4 von 5 ✔
+│     └─ Wiederholung 5 von 5 ✔
+....
