@@ -1,0 +1,101 @@
+= IDE Support
+
+[[intellij-idea]]
+== IntelliJ IDEA
+
+IntelliJ IDEA supports running tests on the JUnit Platform since version 2016.2. For more
+information, please consult this https://jb.gg/junit-idea/[IntelliJ IDEA resource]. Note,
+however, that it is recommended to use IDEA 2017.3 or newer since more recent versions of
+IDEA download the following JARs automatically based on the API version used in the
+project: `junit-platform-launcher`, `junit-jupiter-engine`, and `junit-vintage-engine`.
+
+In order to use a different JUnit version (e.g., {version}), you may need to
+include the corresponding versions of the `junit-platform-launcher`,
+`junit-jupiter-engine`, and `junit-vintage-engine` JARs in the classpath.
+
+.Additional Gradle Dependencies
+[source,groovy]
+[subs=attributes+]
+----
+testImplementation(platform("org.junit:junit-bom:{version}"))
+testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+----
+
+.Additional Maven Dependencies
+[source,xml]
+[subs=attributes+]
+----
+<!-- ... -->
+<dependencies>
+	<dependency>
+		<groupId>org.junit.platform</groupId>
+		<artifactId>junit-platform-launcher</artifactId>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.junit.jupiter</groupId>
+		<artifactId>junit-jupiter-engine</artifactId>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.junit.vintage</groupId>
+		<artifactId>junit-vintage-engine</artifactId>
+		<scope>test</scope>
+	</dependency>
+</dependencies>
+<dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.junit</groupId>
+			<artifactId>junit-bom</artifactId>
+			<version>{version}</version>
+			<type>pom</type>
+			<scope>import</scope>
+		</dependency>
+	</dependencies>
+</dependencyManagement>
+----
+
+[[eclipse]]
+== Eclipse
+
+Eclipse IDE offers support for the JUnit Platform since the Eclipse Oxygen.1a (4.7.1a)
+release.
+
+For more information on using JUnit Platform in Eclipse consult the official _Eclipse
+support for JUnit 5_ section of the
+https://www.eclipse.org/eclipse/news/4.7.1a/#junit-5-support[Eclipse Project Oxygen.1a
+(4.7.1a) - New and Noteworthy] documentation.
+
+[[netbeans]]
+== NetBeans
+
+NetBeans offers support for JUnit Jupiter and the JUnit Platform since the
+https://netbeans.apache.org/download/nb100/nb100.html[Apache NetBeans 10.0 release].
+
+For more information consult the JUnit 5 section of the
+https://netbeans.apache.org/download/nb100/index.html#_junit_5[Apache NetBeans 10.0
+release notes].
+
+[[vscode]]
+== Visual Studio Code
+
+https://code.visualstudio.com/[Visual Studio Code] supports JUnit Jupiter and the JUnit
+Platform via the
+https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test[Java Test
+Runner] extension which is installed by default as part of the
+https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack[Java
+Extension Pack].
+
+For more information consult the _Testing_ section of the
+https://code.visualstudio.com/docs/languages/java#_testing[Java in Visual Studio Code]
+documentation.
+
+[[other]]
+== Other IDEs
+
+If you are using an editor or IDE other than one of those listed in the previous sections,
+and it doesn't support running tests on the JUnit Platform, you can use the
+xref:running-tests/console-launcher.adoc[] to run them from the command line.

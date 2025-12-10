@@ -6,6 +6,7 @@ exports org.junit.jupiter.api.extension.support
 exports org.junit.jupiter.api.function
 exports org.junit.jupiter.api.io
 exports org.junit.jupiter.api.parallel
+exports org.junit.jupiter.api.util
 requires java.base mandated
 requires kotlin.stdlib static
 requires org.apiguardian.api static transitive
@@ -14,3 +15,4 @@ requires org.junit.platform.commons transitive
 requires org.opentest4j transitive
 qualified exports org.junit.jupiter.api.timeout to org.junit.jupiter.engine
 qualified opens org.junit.jupiter.api.condition to org.junit.platform.commons
+qualified opens org.junit.jupiter.api.util to org.junit.platform.commons

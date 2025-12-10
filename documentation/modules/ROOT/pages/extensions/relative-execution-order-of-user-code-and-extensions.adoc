@@ -1,0 +1,238 @@
+= Relative Execution Order of User Code and Extensions
+
+When executing a test class that contains one or more test methods, a number of extension
+callbacks are called in addition to the user-supplied test and lifecycle methods.
+
+NOTE: See also: xref:writing-tests/test-execution-order.adoc[]
+
+[[overview]]
+== User and Extension Code
+
+The following diagram illustrates the relative order of user-supplied code and extension
+code. User-supplied test and lifecycle methods are shown in orange, with callback code
+implemented by extensions shown in blue. The grey box denotes the execution of a single
+test method and will be repeated for every test method in the test class.
+
+[[diagram]]
+.User code and extension code
+image::extensions_lifecycle.png[]
+
+The following table further explains the sixteen steps in the
+<<diagram>> diagram.
+
+. *interface* `*org.junit.jupiter.api.extension.BeforeAllCallback*` +
+extension code executed before all tests of the container are executed
+. *annotation* `*org.junit.jupiter.api.BeforeAll*` +
+user code executed before all tests of the container are executed
+. *interface* `*org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler
+#handleBeforeAllMethodExecutionException*` +
+extension code for handling exceptions thrown from `@BeforeAll` methods
+. *interface* `*org.junit.jupiter.api.extension.BeforeClassTemplateInvocationCallback*` +
+extension code executed before each class template invocation is executed (only applicable
+if the test class is a xref:writing-tests/class-templates.adoc[class template])
+. *interface* `*org.junit.jupiter.api.extension.BeforeEachCallback*` +
+extension code executed before each test is executed
+. *annotation* `*org.junit.jupiter.api.BeforeEach*` +
+user code executed before each test is executed
+. *interface* `*org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler
+#handleBeforeEachMethodExecutionException*` +
+extension code for handling exceptions thrown from `@BeforeEach` methods
+. *interface* `*org.junit.jupiter.api.extension.BeforeTestExecutionCallback*` +
+extension code executed immediately before a test is executed
+. *annotation* `*org.junit.jupiter.api.Test*` +
+user code of the actual test method
+. *interface* `*org.junit.jupiter.api.extension.TestExecutionExceptionHandler*` +
+extension code for handling exceptions thrown during a test
+. *interface* `*org.junit.jupiter.api.extension.AfterTestExecutionCallback*` +
+extension code executed immediately after test execution and its corresponding exception handlers
+. *annotation* `*org.junit.jupiter.api.AfterEach*` +
+user code executed after each test is executed
+. *interface* `*org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler
+#handleAfterEachMethodExecutionException*` +
+extension code for handling exceptions thrown from `@AfterEach` methods
+. *interface* `*org.junit.jupiter.api.extension.AfterEachCallback*` +
+extension code executed after each test is executed
+. *interface* `*org.junit.jupiter.api.extension.AfterClassTemplateInvocationCallback*` +
+extension code executed after each class template invocation is executed (only applicable
+if the test class is a xref:writing-tests/class-templates.adoc[class template])
+. *annotation* `*org.junit.jupiter.api.AfterAll*` +
+user code executed after all tests of the container are executed
+. *interface* `*org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler
+#handleAfterAllMethodExecutionException*` +
+extension code for handling exceptions thrown from `@AfterAll` methods
+. *interface* `*org.junit.jupiter.api.extension.AfterAllCallback*` +
+extension code executed after all tests of the container are executed
+
+In the simplest case only the actual test method will be executed (step 9); all other
+steps are optional depending on the presence of user code or extension support for the
+corresponding lifecycle callback. For further details on the various lifecycle callbacks
+please consult the respective Javadoc for each annotation and extension.
+
+All invocations of user code methods in the above table can additionally be intercepted
+by implementing xref:extensions/intercepting-invocations.adoc[`InvocationInterceptor`].
+
+[[wrapping-behavior]]
+== Wrapping Behavior of Callbacks
+
+JUnit Jupiter always guarantees _wrapping_ behavior for multiple registered extensions
+that implement lifecycle callbacks such as `BeforeAllCallback`, `AfterAllCallback`,
+`BeforeClassTemplateInvocationCallback`, `AfterClassTemplateInvocationCallback`,
+`BeforeEachCallback`, `AfterEachCallback`, `BeforeTestExecutionCallback`, and
+`AfterTestExecutionCallback`.
+
+That means that, given two extensions `Extension1` and `Extension2` with `Extension1`
+registered before `Extension2`, any "before" callbacks implemented by `Extension1` are
+guaranteed to execute **before** any "before" callbacks implemented by `Extension2`.
+Similarly, given the two same two extensions registered in the same order, any "after"
+callbacks implemented by `Extension1` are guaranteed to execute **after** any "after"
+callbacks implemented by `Extension2`. `Extension1` is therefore said to _wrap_
+`Extension2`.
+
+JUnit Jupiter also guarantees _wrapping_ behavior within class and interface hierarchies
+for user-supplied _lifecycle methods_ (see xref:writing-tests/definitions.adoc[]).
+
+* `@BeforeAll` methods are inherited from superclasses as long as they are not
+  _overridden_. Furthermore, `@BeforeAll` methods from superclasses will be executed
+  **before** `@BeforeAll` methods in subclasses.
+** Similarly, `@BeforeAll` methods declared in an interface are inherited as long as they
+   are not _overridden_, and `@BeforeAll` methods from an interface will be executed
+   **before** `@BeforeAll` methods in the class that implements the interface.
+* `@AfterAll` methods are inherited from superclasses as long as they are not
+  _overridden_. Furthermore, `@AfterAll` methods from superclasses will be executed
+  **after** `@AfterAll` methods in subclasses.
+** Similarly, `@AfterAll` methods declared in an interface are inherited as long as they
+   are not _overridden_, and `@AfterAll` methods from an interface will be executed
+   **after** `@AfterAll` methods in the class that implements the interface.
+* `@BeforeEach` methods are inherited from superclasses as long as they are not
+  _overridden_. Furthermore, `@BeforeEach` methods from superclasses will be executed
+  **before** `@BeforeEach` methods in subclasses.
+** Similarly, `@BeforeEach` methods declared as interface default methods are inherited as
+   long as they are not _overridden_, and `@BeforeEach` default methods will be executed
+   **before** `@BeforeEach` methods in the class that implements the interface.
+* `@AfterEach` methods are inherited from superclasses as long as they are not
+  _overridden_. Furthermore, `@AfterEach` methods from superclasses will be executed
+  **after** `@AfterEach` methods in subclasses.
+** Similarly, `@AfterEach` methods declared as interface default methods are inherited as
+   long as they are not _overridden_, and `@AfterEach` default methods will be executed
+   **after** `@AfterEach` methods in the class that implements the interface.
+
+The following examples demonstrate this behavior. Please note that the examples do not
+actually do anything realistic. Instead, they mimic common scenarios for testing
+interactions with the database. All methods imported statically from the `Logger` class
+log contextual information in order to help us better understand the execution order of
+user-supplied callback methods and callback methods in extensions.
+
+[source,java,indent=0]
+.Extension1
+----
+include::example$java/example/callbacks/Extension1.java[tags=user_guide]
+----
+
+[source,java,indent=0]
+.Extension2
+----
+include::example$java/example/callbacks/Extension2.java[tags=user_guide]
+----
+
+[source,java,indent=0]
+.AbstractDatabaseTests
+----
+include::example$java/example/callbacks/AbstractDatabaseTests.java[tags=user_guide]
+----
+
+[source,java,indent=0]
+.DatabaseTestsDemo
+----
+include::example$java/example/callbacks/DatabaseTestsDemo.java[tags=user_guide]
+----
+
+When the `DatabaseTestsDemo` test class is executed, the following is logged.
+
+----
+@BeforeAll AbstractDatabaseTests.createDatabase()
+@BeforeAll DatabaseTestsDemo.beforeAll()
+  Extension1.beforeEach()
+  Extension2.beforeEach()
+    @BeforeEach AbstractDatabaseTests.connectToDatabase()
+    @BeforeEach DatabaseTestsDemo.insertTestDataIntoDatabase()
+      @Test DatabaseTestsDemo.testDatabaseFunctionality()
+    @AfterEach DatabaseTestsDemo.deleteTestDataFromDatabase()
+    @AfterEach AbstractDatabaseTests.disconnectFromDatabase()
+  Extension2.afterEach()
+  Extension1.afterEach()
+@BeforeAll DatabaseTestsDemo.afterAll()
+@AfterAll AbstractDatabaseTests.destroyDatabase()
+----
+
+The following sequence diagram helps to shed further light on what actually goes on within
+the `JupiterTestEngine` when the `DatabaseTestsDemo` test class is executed.
+
+////
+PNG generated using ZenUML: https://app.zenuml.com
+
+See corresponding *.txt file in images folder for the source.
+////
+image::extensions_DatabaseTestsDemo.png[caption='',title='DatabaseTestsDemo']
+
+JUnit Jupiter does **not** guarantee the execution order of multiple lifecycle methods
+that are declared within a _single_ test class or test interface. It may at times appear
+that JUnit Jupiter invokes such methods in alphabetical order. However, that is not
+precisely true. The ordering is analogous to the ordering for `@Test` methods within a
+single test class.
+
+[NOTE]
+====
+Lifecycle methods that are declared within a _single_ test class or test interface will be
+ordered using an algorithm that is deterministic but intentionally non-obvious. This
+ensures that subsequent runs of a test suite execute lifecycle methods in the same order,
+thereby allowing for repeatable builds.
+====
+
+In addition, JUnit Jupiter does **not** support _wrapping_ behavior for multiple lifecycle
+methods declared within a single test class or test interface.
+
+The following example demonstrates this behavior. Specifically, the lifecycle method
+configuration is _broken_ due to the order in which the locally declared lifecycle methods
+are executed.
+
+* Test data is inserted _before_ the database connection has been opened, which results in
+  a failure to connect to the database.
+* The database connection is closed _before_ deleting the test data, which results in a
+  failure to connect to the database.
+
+[source,java,indent=0]
+.BrokenLifecycleMethodConfigDemo
+----
+include::example$java/example/callbacks/BrokenLifecycleMethodConfigDemo.java[tags=user_guide]
+----
+
+When the `BrokenLifecycleMethodConfigDemo` test class is executed, the following is logged.
+
+----
+Extension1.beforeEach()
+Extension2.beforeEach()
+  @BeforeEach BrokenLifecycleMethodConfigDemo.insertTestDataIntoDatabase()
+  @BeforeEach BrokenLifecycleMethodConfigDemo.connectToDatabase()
+    @Test BrokenLifecycleMethodConfigDemo.testDatabaseFunctionality()
+  @AfterEach BrokenLifecycleMethodConfigDemo.disconnectFromDatabase()
+  @AfterEach BrokenLifecycleMethodConfigDemo.deleteTestDataFromDatabase()
+Extension2.afterEach()
+Extension1.afterEach()
+----
+
+The following sequence diagram helps to shed further light on what actually goes on within
+the `JupiterTestEngine` when the `BrokenLifecycleMethodConfigDemo` test class is executed.
+
+////
+PNG generated using ZenUML: https://app.zenuml.com
+
+See corresponding *.txt file in images folder for the source.
+////
+image::extensions_BrokenLifecycleMethodConfigDemo.png[caption='',title='BrokenLifecycleMethodConfigDemo']
+
+[TIP]
+====
+Due to the aforementioned behavior, the JUnit Team recommends that developers declare at
+most one of each type of _lifecycle method_ (see xref:writing-tests/definitions.adoc[]) per test
+class or test interface unless there are no dependencies between such lifecycle methods.
+====

@@ -1,0 +1,181 @@
+= Console Launcher
+
+The `{ConsoleLauncher}` is a command-line Java application that lets you launch the JUnit
+Platform from the console. For example, it can be used to run JUnit Vintage and JUnit
+Jupiter tests and print test execution results to the console.
+
+An executable _Fat JAR_ (`junit-platform-console-standalone-{version}.jar`) that
+contains the contents of all of its dependencies is published in the {Maven_Central}
+repository under the
+https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone[junit-platform-console-standalone]
+directory. It contains the contents of the following artifacts:
+
+include::partial$console-launcher-standalone-shadowed-artifacts.adoc[]
+
+[NOTE]
+====
+Since the `junit-platform-console-standalone` JAR contains the contents of all of its
+dependencies, its Maven POM does not declare any dependencies.
+
+Furthermore, it is not very likely that you would need to include a dependency on the
+`junit-platform-console-standalone` artifact in your project's Maven POM or Gradle build
+script. On the contrary, the executable `junit-platform-console-standalone` JAR is
+typically invoked directly from the command line or a shell script without a build script.
+
+If you need to declare dependencies in your build script on some of the artifacts
+contained in the `junit-platform-console-standalone` artifact, you should declare
+dependencies only on the JUnit artifacts that are used in your project. To simplify
+dependency management of JUnit artifacts in your build, you may wish to use the
+`junit-jupiter` aggregator artifact or `junit-bom`. See xref:appendix.adoc#dependency-metadata[Dependency Metadata] for
+details.
+====
+
+You can https://docs.oracle.com/javase/tutorial/deployment/jar/run.html[run] the
+standalone `ConsoleLauncher` as shown below.
+
+[source,console,subs=attributes+]
+----
+$ java -jar junit-platform-console-standalone-{version}.jar execute <OPTIONS>
+
+├─ JUnit Vintage
+│  └─ example.JUnit4Tests
+│     └─ standardJUnit4Test ✔
+└─ JUnit Jupiter
+   ├─ StandardTests
+   │  ├─ succeedingTest() ✔
+   │  └─ skippedTest() ↷ for demonstration purposes
+   └─ A special test case
+      ├─ Custom test name containing spaces ✔
+      ├─ ╯°□°)╯ ✔
+      └─ 😱 ✔
+
+Test run finished after 64 ms
+[         5 containers found      ]
+[         0 containers skipped    ]
+[         5 containers started    ]
+[         0 containers aborted    ]
+[         5 containers successful ]
+[         0 containers failed     ]
+[         6 tests found           ]
+[         1 tests skipped         ]
+[         5 tests started         ]
+[         0 tests aborted         ]
+[         5 tests successful      ]
+[         0 tests failed          ]
+----
+
+You can also run the standalone `ConsoleLauncher` as shown below (for example, to include
+all jars in a directory):
+
+[source,console,subs=attributes+]
+----
+$ java -cp classes:testlib/* org.junit.platform.console.ConsoleLauncher <OPTIONS>
+----
+
+[[options]]
+== Subcommands and Options
+
+The `{ConsoleLauncher}` provides the following subcommands:
+
+----
+include::partial$console-launcher-options.txt[]
+----
+
+[[options-discovering-tests]]
+=== Discovering tests
+
+----
+include::partial$console-launcher-discover-options.txt[]
+----
+
+[[options-executing-tests]]
+=== Executing tests
+
+.Exit Code
+NOTE: On successful runs, the `{ConsoleLauncher}` exits with a status code of `0`.
+All non-zero codes indicate an error of some sort. For example, status code `1`
+is returned if any containers or tests failed. If no tests are discovered and the
+`--fail-if-no-tests` command-line option is supplied, the `ConsoleLauncher` exits
+with a status code of `2`. Unexpected or invalid user input yields a status code
+of `3`. An exit code of `-1` indicates an unspecified error condition.
+
+----
+include::partial$console-launcher-execute-options.txt[]
+----
+
+[[options-listing-test-engines]]
+=== Listing test engines
+
+----
+include::partial$console-launcher-engines-options.txt[]
+----
+
+[[argument-files]]
+== Argument Files (@-files)
+
+On some platforms you may run into system limitations on the length of a command line when
+creating a command line with lots of options or with long arguments.
+
+The `ConsoleLauncher` supports _argument files_, also known as _@-files_. Argument files
+are files that themselves contain arguments to be passed to the command. When the
+underlying https://github.com/remkop/picocli[picocli] command line parser encounters an
+argument beginning with the character `@`, it expands the contents of that file into the
+argument list.
+
+The arguments within a file can be separated by spaces or newlines. If an argument
+contains embedded whitespace, the whole argument should be wrapped in double or single
+quotes -- for example, `"-f=My Files/Stuff.java"`.
+
+If the argument file does not exist or cannot be read, the argument will be treated
+literally and will not be removed. This will likely result in an "unmatched argument"
+error message. You can troubleshoot such errors by executing the command with the
+`picocli.trace` system property set to `DEBUG`.
+
+Multiple _@-files_ may be specified on the command line. The specified path may be
+relative to the current directory or absolute.
+
+You can pass a real parameter with an initial `@` character by escaping it with an
+additional `@` symbol. For example, `@@somearg` will become `@somearg` and will not be
+subject to expansion.
+
+[[redirecting-stdout-and-stderr]]
+== Redirecting Standard Output/Error to Files
+
+You can redirect the `System.out` (stdout) and `System.err` (stderr) output streams to
+files using the `--redirect-stdout` and `--redirect-stderr` options:
+
+[source,console,subs=attributes+]
+----
+$ java -jar junit-platform-console-standalone-{version}.jar <OPTIONS> \
+  --redirect-stdout=stdout.txt \
+  --redirect-stderr=stderr.txt
+----
+
+[NOTE]
+====
+If the `--redirect-stdout` and `--redirect-stderr` arguments point to the same file, both
+output streams will be redirected to that file.
+
+The default charset is used for writing to the files.
+====
+
+[[color-customization]]
+== Color Customization
+
+The colors used in the output of the `{ConsoleLauncher}` can be customized.
+The option `--single-color` will apply a built-in monochrome style, while
+`--color-palette` will accept a properties file to override the
+https://en.wikipedia.org/wiki/ANSI_escape_code#Colors[ANSI SGR] color styling.
+The properties file below demonstrates the default style:
+
+[source,properties,indent=0]
+----
+SUCCESSFUL = 32
+ABORTED = 33
+FAILED = 31
+SKIPPED = 35
+CONTAINER = 35
+TEST = 34
+DYNAMIC = 35
+REPORTED = 37
+----

@@ -1,0 +1,22 @@
+= Intercepting Invocations
+
+`{InvocationInterceptor}` defines the API for `Extensions` that wish to intercept calls to
+test code.
+
+The following example shows an extension that executes all test methods in Swing's Event
+Dispatch Thread.
+
+[source,java,indent=0]
+.An extension that executes tests in a user-defined thread
+----
+include::example$java/example/interceptor/SwingEdtInterceptor.java[tags=user_guide]
+----
+
+[NOTE]
+.Accessing the test-scoped `ExtensionContext`
+====
+You may override the `getTestInstantiationExtensionContextScope(...)` method to return
+`TEST_METHOD` to make test-specific data available to your extension implementation of
+`interceptTestClassConstructor` or if you want to xref:extensions/keeping-state-in-extensions.adoc[keep state]
+on the test method level.
+====

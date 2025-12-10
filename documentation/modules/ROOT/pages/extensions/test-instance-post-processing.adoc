@@ -1,0 +1,18 @@
+= Test Instance Post-processing
+
+`{TestInstancePostProcessor}` defines the API for `Extensions` that wish to _post
+process_ test instances.
+
+Common use cases include injecting dependencies into the test instance, invoking custom
+initialization methods on the test instance, etc.
+
+For a concrete example, consult the source code for the `{MockitoExtension}` and the
+`{SpringExtension}`.
+
+[NOTE]
+.Accessing the test-scoped `ExtensionContext`
+====
+You may override the `getTestInstantiationExtensionContextScope(...)` method to return
+`TEST_METHOD` to make test-specific data available to your extension implementation or if
+you want to xref:extensions/keeping-state-in-extensions.adoc[keep state] on the test method level.
+====

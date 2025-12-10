@@ -1,0 +1,46 @@
+= Exception Handling
+
+Exceptions thrown during the test execution may be intercepted and handled accordingly
+before propagating further, so that certain actions like error logging or resource releasing
+may be defined in specialized `Extensions`. JUnit Jupiter offers API for `Extensions` that
+wish to handle exceptions thrown during `@Test` methods via `{TestExecutionExceptionHandler}`
+and for those thrown during one of test lifecycle methods (`@BeforeAll`, `@BeforeEach`,
+`@AfterEach` and `@AfterAll`) via `{LifecycleMethodExecutionExceptionHandler}`.
+
+The following example shows an extension which will swallow all instances of `IOException`
+but rethrow any other type of exception.
+
+[source,java,indent=0]
+.An exception handling extension that filters IOExceptions in test execution
+----
+include::example$java/example/exception/IgnoreIOExceptionExtension.java[tags=user_guide]
+----
+
+Another example shows how to record the state of an application under test exactly at
+the point of unexpected exception being thrown during setup and cleanup. Note that unlike
+relying on lifecycle callbacks, which may or may not be executed depending on the test
+status, this solution guarantees execution immediately after failing `@BeforeAll`,
+`@BeforeEach`, `@AfterEach` or `@AfterAll`.
+
+[source,java,indent=0]
+.An exception handling extension that records application state on error
+----
+include::example$java/example/exception/RecordStateOnErrorExtension.java[tags=user_guide]
+----
+
+Multiple execution exception handlers may be invoked for the same lifecycle method in
+order of declaration. If one of the handlers swallows the handled exception, subsequent
+ones will not be executed, and no failure will be propagated to JUnit engine, as if the
+exception was never thrown. Handlers may also choose to rethrow the exception or throw
+a different one, potentially wrapping the original.
+
+Extensions implementing `{LifecycleMethodExecutionExceptionHandler}` that wish to handle
+exceptions thrown during `@BeforeAll` or `@AfterAll` need to be registered on a class level,
+while handlers for `BeforeEach` and `AfterEach` may be also registered for individual
+test methods.
+
+[source,java,indent=0]
+.Registering multiple exception handling extensions
+----
+include::example$java/example/exception/MultipleHandlersTestCase.java[tags=user_guide]
+----

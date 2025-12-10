@@ -1,0 +1,77 @@
+= Test Interfaces and Default Methods
+
+JUnit Jupiter allows `@Test`, `@RepeatedTest`, `@ParameterizedTest`, `@TestFactory`,
+`@TestTemplate`, `@BeforeEach`, and `@AfterEach` to be declared on interface `default`
+methods. `@BeforeAll` and `@AfterAll` can either be declared on `static` methods in a
+test interface or on interface `default` methods _if_ the test interface or test class is
+annotated with `@TestInstance(Lifecycle.PER_CLASS)` (see
+xref:writing-tests/test-instance-lifecycle.adoc[]). Here are some examples.
+
+[source,java]
+----
+include::example$java/example/testinterface/TestLifecycleLogger.java[tags=user_guide]
+----
+
+[source,java]
+----
+include::example$java/example/testinterface/TestInterfaceDynamicTestsDemo.java[tags=user_guide]
+----
+
+`@ExtendWith` and `@Tag` can be declared on a test interface so that classes that
+implement the interface automatically inherit its tags and extensions. See
+xref:extensions/test-lifecycle-callbacks.adoc#before-after-execution[Before and After Test Execution Callbacks] for the source code of the
+xref:extensions/test-lifecycle-callbacks.adoc#timing-extension[TimingExtension].
+
+[source,java]
+----
+include::example$java/example/testinterface/TimeExecutionLogger.java[tags=user_guide]
+----
+
+In your test class you can then implement these test interfaces to have them applied.
+
+[source,java]
+----
+include::example$java/example/testinterface/TestInterfaceDemo.java[tags=user_guide]
+----
+
+Running the `TestInterfaceDemo` results in output similar to the following:
+
+....
+INFO  example.TestLifecycleLogger - Before all tests
+INFO  example.TestLifecycleLogger - About to execute [dynamicTestsForPalindromes()]
+INFO  example.TimingExtension - Method [dynamicTestsForPalindromes] took 19 ms.
+INFO  example.TestLifecycleLogger - Finished executing [dynamicTestsForPalindromes()]
+INFO  example.TestLifecycleLogger - About to execute [isEqualValue()]
+INFO  example.TimingExtension - Method [isEqualValue] took 1 ms.
+INFO  example.TestLifecycleLogger - Finished executing [isEqualValue()]
+INFO  example.TestLifecycleLogger - After all tests
+....
+
+Another possible application of this feature is to write tests for interface contracts.
+For example, you can write tests for how implementations of `Object.equals` or
+`Comparable.compareTo` should behave as follows.
+
+[source,java]
+----
+include::example$java/example/defaultmethods/Testable.java[tags=user_guide]
+----
+
+[source,java]
+----
+include::example$java/example/defaultmethods/EqualsContract.java[tags=user_guide]
+----
+
+[source,java]
+----
+include::example$java/example/defaultmethods/ComparableContract.java[tags=user_guide]
+----
+
+In your test class you can then implement both contract interfaces thereby inheriting the
+corresponding tests. Of course you'll have to implement the abstract methods.
+
+[source,java]
+----
+include::example$java/example/defaultmethods/StringTests.java[tags=user_guide]
+----
+
+NOTE: The above tests are merely meant as examples and therefore not complete.

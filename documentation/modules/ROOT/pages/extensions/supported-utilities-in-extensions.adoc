@@ -1,0 +1,69 @@
+= Supported Utilities in Extensions
+
+The `junit-platform-commons` artifact provides _maintained_ utilities for working with
+annotations, classes, reflection, classpath scanning, and conversion tasks. These
+utilities can be found in the `{junit-platform-support-package}` and its subpackages.
+`TestEngine` and `Extension` authors are encouraged to use these supported utilities in
+order to align with the behavior of the JUnit Platform and JUnit Jupiter.
+
+[[annotations]]
+== Annotation Support
+
+`AnnotationSupport` provides static utility methods that operate on annotated elements
+(e.g., packages, annotations, classes, interfaces, constructors, methods, and fields).
+These include methods to check whether an element is annotated or meta-annotated with a
+particular annotation, to search for specific annotations, and to find annotated methods
+and fields in a class or interface. Some of these methods search on implemented
+interfaces and within class hierarchies to find annotations. Consult the Javadoc for
+`{AnnotationSupport}` for further details.
+
+NOTE: The `isAnnotated()` methods do not find repeatable annotations. To check for repeatable annotations,
+use one of the `findRepeatableAnnotations()` methods and verify that the returned list is not empty.
+
+NOTE: See also: <<search-semantics>>
+
+[[classes]]
+== Class Support
+
+`ClassSupport` provides static utility methods for working with classes (i.e., instances
+of `java.lang.Class`). Consult the Javadoc for `{ClassSupport}` for further details.
+
+[[reflection]]
+== Reflection Support
+
+`ReflectionSupport` provides static utility methods that augment the standard JDK
+reflection and class-loading mechanisms. These include methods to scan the classpath in
+search of classes matching specified predicates, to load and create new instances of a
+class, and to find and invoke methods. Some of these methods traverse class hierarchies
+to locate matching methods. Consult the Javadoc for `{ReflectionSupport}` for further
+details.
+
+NOTE: See also: <<search-semantics>>
+
+[[modifier]]
+== Modifier Support
+
+`ModifierSupport` provides static utility methods for working with member and class
+modifiers -- for example, to determine if a member is declared as `public`, `private`,
+`abstract`, `static`, etc. Consult the Javadoc for `{ModifierSupport}` for further
+details.
+
+[[conversion]]
+== Conversion Support
+
+`ConversionSupport` (in the `org.junit.platform.commons.support.conversion` package)
+provides support for converting from strings to primitive types and their corresponding
+wrapper types, date and time types from the `java.time package`, and some additional
+common Java types such as `File`, `BigDecimal`, `BigInteger`, `Currency`, `Locale`, `URI`,
+`URL`, `UUID`, etc. Consult the Javadoc for `{ConversionSupport}` for further details.
+
+[[search-semantics]]
+== Field and Method Search Semantics
+
+Various methods in `AnnotationSupport` and `ReflectionSupport` use search algorithms that
+traverse type hierarchies to locate matching fields and methods – for example,
+`AnnotationSupport.findAnnotatedFields(...)`, `ReflectionSupport.findMethods(...)`, etc.
+
+The field and method search algorithms adhere to standard Java semantics regarding whether
+a given field or method is visible or overridden according to the rules of the Java
+language.
