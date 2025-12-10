@@ -97,6 +97,8 @@ class FallbackStringToObjectConverterTests {
 				.accepts(bookWithDeprecatedMethod("factory", CharSequence.class));
 		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factory", CharSequence.class));
+		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
+				.rejects(bookWithDeprecatedMethod("factory", StringBuilder.class));
 
 		assertThat(new IsFactoryMethod(Book2.class, String.class, INCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factoryDeprecated", String.class));
@@ -105,6 +107,8 @@ class FallbackStringToObjectConverterTests {
 
 		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, INCLUDE_DEPRECATED))//
 				.accepts(bookWithDeprecatedMethod("factoryDeprecated", CharSequence.class));
+		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
+				.rejects(bookWithDeprecatedMethod("factoryDeprecated", CharSequence.class));
 		assertThat(new IsFactoryMethod(Book2.class, CharSequence.class, EXCLUDE_DEPRECATED))//
 				.rejects(bookWithDeprecatedMethod("factoryDeprecated", CharSequence.class));
 	}
@@ -120,6 +124,8 @@ class FallbackStringToObjectConverterTests {
 				.rejects(getDeclaredConstructor(Record1.class));
 		assertThat(new IsFactoryConstructor(Record2.class, String.class))//
 				.rejects(getDeclaredConstructor(Record2.class));
+		assertThat(new IsFactoryConstructor(Record3.class, String.class))//
+				.rejects(getDeclaredConstructor(Record3.class));
 	}
 
 	@Test
@@ -183,6 +189,12 @@ class FallbackStringToObjectConverterTests {
 	void convertsToNewspaperPreferOnlyCharSequenceToNonDeprecatedString() throws Exception {
 		// when two String and one CharSequence factories: parse(CharSequence) > parse(String)/@Deprecated from(String)
 		assertConverts("enigma", Newspaper3.class, new Newspaper3("parse(CharSequence): enigma"));
+	}
+
+	@Test
+	void convertsToNewspaperPreferOnlyCharSequenceToDeprecatedString() throws Exception {
+		// when two String and two CharSequence factories: parse(CharSequence) > @Deprecated parse(String)/@Deprecated from(String)/@Deprecated from(CharSequence)
+		assertConverts("enigma", Newspaper4.class, new Newspaper4("parse(CharSequence): enigma"));
 	}
 
 	@Test
@@ -418,6 +430,13 @@ class FallbackStringToObjectConverterTests {
 		}
 	}
 
+	record Record3(StringBuilder title) {
+
+		static Record2 from(StringBuilder title) {
+			return new Record2("Record2(StringBuilder): " + title);
+		}
+	}
+
 	static class Diary {
 	}
 
@@ -610,6 +629,52 @@ class FallbackStringToObjectConverterTests {
 		@Override
 		public String toString() {
 			return "Newspaper3 [title=" + this.title + "]";
+		}
+	}
+
+	static class Newspaper4 {
+
+		private final String title;
+
+		private Newspaper4(String title) {
+			// constructor must be private for factory/deprecated logic to kick in
+			this.title = title;
+		}
+
+		@Deprecated
+		static Newspaper4 from(String title) {
+			return new Newspaper4("from(String): " + title);
+		}
+
+		@Deprecated
+		static Newspaper4 parse(String title) {
+			return new Newspaper4("parse(String): " + title);
+		}
+
+		@Deprecated
+		static Newspaper4 from(CharSequence title) {
+			return new Newspaper4("from(CharSequence): " + title);
+		}
+
+		// CharSequence factory with deprecated alternative has precedence
+		// over deprecated String factory
+		static Newspaper4 parse(CharSequence title) {
+			return new Newspaper4("parse(CharSequence): " + title);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return (this == obj) || (obj instanceof Newspaper4 that && Objects.equals(this.title, that.title));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(title);
+		}
+
+		@Override
+		public String toString() {
+			return "Newspaper4 [title=" + this.title + "]";
 		}
 	}
 
