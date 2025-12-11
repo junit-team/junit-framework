@@ -130,6 +130,11 @@ public class KotlinReflectionUtils {
 				&& clazz.getDeclaredAnnotation(kotlinMetadata) != null;
 	}
 
+	@API(status = INTERNAL, since = "6.1")
+	public static boolean isKotlinReflectPresent() {
+		return kotlinReflectPresent;
+	}
+
 	public static Class<?> getKotlinSuspendingFunctionReturnType(Method method) {
 		requireKotlinReflect(method);
 		return KotlinFunctionUtils.getReturnType(method);
