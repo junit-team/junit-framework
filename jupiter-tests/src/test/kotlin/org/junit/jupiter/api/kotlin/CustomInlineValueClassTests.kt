@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource
  * @see <a href="https://github.com/junit-team/junit-framework/issues/5081">Issue #5081</a>
  */
 @Disabled("POC only supports kotlin.Result, not custom inline value classes")
-class CustomInlineValueClassTest {
+class CustomInlineValueClassTests {
 
     @MethodSource("userIdProvider")
     @ParameterizedTest
