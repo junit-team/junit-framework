@@ -10,13 +10,16 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.jupiter.api.AssertionUtils.getCanonicalName;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.StringUtils;
 import org.opentest4j.AssertionFailedError;
 
@@ -32,6 +35,8 @@ import org.opentest4j.AssertionFailedError;
 @API(status = STABLE, since = "5.9")
 public class AssertionFailureBuilder {
 
+	private static final int DEFAULT_RETAIN_STACKTRACE_ELEMENTS = 1;
+
 	private @Nullable Object message;
 
 	private @Nullable Throwable cause;
@@ -45,6 +50,10 @@ public class AssertionFailureBuilder {
 	private @Nullable String reason;
 
 	private boolean includeValuesInMessage = true;
+
+	private @Nullable Class<?> trimStackTraceTarget;
+
+	private int retainStackTraceElements = DEFAULT_RETAIN_STACKTRACE_ELEMENTS;
 
 	/**
 	 * Create a new {@code AssertionFailureBuilder}.
@@ -131,6 +140,42 @@ public class AssertionFailureBuilder {
 	}
 
 	/**
+	 * Set target to trim the stacktrace to.
+	 *
+	 * <p>Unless {@link #retainStackTraceElements(int)} is set all stacktrace
+	 * elements before the last element from {@code target} are trimmed.
+	 *
+	 * @param target class to trim from the stacktrace
+	 * @return this builder for method chaining
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public AssertionFailureBuilder trimStacktrace(@Nullable Class<?> target) {
+		this.trimStackTraceTarget = target;
+		return this;
+	}
+
+	/**
+	 * Set depth to trim the stacktrace to. Defaults to
+	 * {@value #DEFAULT_RETAIN_STACKTRACE_ELEMENTS}.
+	 *
+	 * <p>If {@link #trimStacktrace(Class)} was set, all but
+	 * {@code retainStackTraceElements - 1} stacktrace elements before the last
+	 * element from {@code target} are removed. If
+	 * {@code retainStackTraceElements} is zero, all elements including those
+	 * from {@code target} are trimmed.
+	 *
+	 * @param retainStackTraceElements depth of trimming, must be non-negative
+	 * @return this builder for method chaining
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public AssertionFailureBuilder retainStackTraceElements(int retainStackTraceElements) {
+		Preconditions.condition(retainStackTraceElements >= 0,
+			"retainStackTraceElements must have a non-negative value");
+		this.retainStackTraceElements = retainStackTraceElements;
+		return this;
+	}
+
+	/**
 	 * Build the {@link AssertionFailedError AssertionFailedError} and throw it.
 	 *
 	 * @throws AssertionFailedError always
@@ -154,9 +199,41 @@ public class AssertionFailureBuilder {
 		if (reason != null) {
 			message = buildPrefix(message) + reason;
 		}
-		return mismatch //
+
+		var assertionFailedError = mismatch //
 				? new AssertionFailedError(message, expected, actual, cause) //
 				: new AssertionFailedError(message, cause);
+
+		maybeTrimStackTrace(assertionFailedError);
+		return assertionFailedError;
+	}
+
+	private void maybeTrimStackTrace(Throwable throwable) {
+		if (trimStackTraceTarget == null) {
+			return;
+		}
+
+		var pruneTargetClassName = trimStackTraceTarget.getName();
+		var stackTrace = throwable.getStackTrace();
+
+		int lastIndexOf = -1;
+		for (int i = 0; i < stackTrace.length; i++) {
+			var element = stackTrace[i];
+			var className = element.getClassName();
+			if (className.equals(pruneTargetClassName)) {
+				lastIndexOf = i;
+			}
+		}
+
+		if (lastIndexOf != -1) {
+			int from = clamp0(lastIndexOf + 1 - retainStackTraceElements, stackTrace.length);
+			var trimmed = Arrays.copyOfRange(stackTrace, from, stackTrace.length);
+			throwable.setStackTrace(trimmed);
+		}
+	}
+
+	private static int clamp0(int value, int max) {
+		return Math.max(0, Math.min(value, max));
 	}
 
 	private static @Nullable String nullSafeGet(@Nullable Object messageOrSupplier) {

@@ -125,7 +125,7 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
-        node-version-file: documentation/.tool-versions
+        node-version-file: .tool-versions
     - name: Build Documentation
       uses: ./.github/actions/run-gradle
       with:

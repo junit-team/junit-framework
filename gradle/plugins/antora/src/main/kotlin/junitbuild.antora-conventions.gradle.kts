@@ -20,10 +20,12 @@ val generateAntoraPlaybook by tasks.registering(Copy::class) {
 	val gitRepoRoot = providers.exec {
 		commandLine("git", "worktree", "list", "--porcelain", "-z")
 	}.standardOutput.asText.map { it.substringBefore('\u0000').substringAfter(' ') }
+	inputs.property("gitRepoRoot", gitRepoRoot)
 
 	val gitBranchName = providers.exec {
 		commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
 	}.standardOutput.asText.map { it.trim() }
+	inputs.property("gitBranchName", gitBranchName)
 
 	from(layout.projectDirectory.file("antora-playbook.yml").asFile)
 	filter { line ->
@@ -41,8 +43,10 @@ val generateAntoraPlaybook by tasks.registering(Copy::class) {
 
 node {
 	download = buildParameters.antora.downloadNode
-	version = providers.fileContents(layout.projectDirectory.file(".tool-versions")).asText.map {
-		it.substringAfter("nodejs").trim()
+	version = providers.fileContents(layout.settingsDirectory.file(".tool-versions")).asText.map {
+		it.lineSequence()
+			.single { line -> line.startsWith("nodejs") }
+			.substringAfter(" ").trim()
 	}
 }
 
@@ -55,7 +59,7 @@ tasks.register<NpxTask>("antora") {
 	description = "Runs Antora to generate a documentation site described by the playbook file."
 
 	command = "antora"
-	args.addAll("--clean", "--stacktrace", "--fetch")
+	args.addAll("--clean", "--stacktrace", "--fetch", "--log-format=pretty", "--log-level=all")
 
 	args.add("--to-dir")
 	val outputDir = layout.buildDirectory.dir("antora-site")
@@ -68,7 +72,7 @@ tasks.register<NpxTask>("antora") {
 	args.add(playbook.map { it.toRelativeString(layout.projectDirectory.asFile) })
 	inputs.file(playbook)
 
-	doLast {
-		println("Antora site built in ${outputDir.get().asFile.absoluteFile}")
+	execOverrides {
+		environment["IS_TTY"] = true
 	}
 }

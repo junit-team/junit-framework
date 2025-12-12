@@ -11,6 +11,7 @@
 package org.junit.jupiter.api;
 
 import static java.util.stream.Collectors.joining;
+import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 
 import java.util.Deque;
 import java.util.function.Supplier;
@@ -18,7 +19,6 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
-import org.opentest4j.AssertionFailedError;
 
 /**
  * {@code AssertionUtils} is a collection of utility methods that are common to
@@ -34,27 +34,42 @@ class AssertionUtils {
 
 	@Contract(" -> fail")
 	static void fail() {
-		throw new AssertionFailedError();
+		throw assertionFailure() //
+				.trimStacktrace(Assertions.class) //
+				.build();
 	}
 
 	@Contract("_ -> fail")
 	static void fail(@Nullable String message) {
-		throw new AssertionFailedError(message);
+		throw assertionFailure() //
+				.message(message) //
+				.trimStacktrace(Assertions.class) //
+				.build();
 	}
 
 	@Contract("_, _ -> fail")
 	static void fail(@Nullable String message, @Nullable Throwable cause) {
-		throw new AssertionFailedError(message, cause);
+		throw assertionFailure() //
+				.message(message) //
+				.cause(cause) //
+				.trimStacktrace(Assertions.class) //
+				.build();
 	}
 
 	@Contract("_ -> fail")
 	static void fail(@Nullable Throwable cause) {
-		throw new AssertionFailedError(null, cause);
+		throw assertionFailure() //
+				.cause(cause) //
+				.trimStacktrace(Assertions.class) //
+				.build();
 	}
 
 	@Contract("_ -> fail")
 	static void fail(Supplier<@Nullable String> messageSupplier) {
-		throw new AssertionFailedError(nullSafeGet(messageSupplier));
+		throw assertionFailure() //
+				.message(nullSafeGet(messageSupplier)) //
+				.trimStacktrace(Assertions.class) //
+				.build();
 	}
 
 	static @Nullable String nullSafeGet(@Nullable Supplier<@Nullable String> messageSupplier) {

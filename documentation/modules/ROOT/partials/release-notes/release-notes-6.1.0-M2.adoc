@@ -54,6 +54,10 @@ easier to dynamically build arguments from collections when using
 ** `Arguments.argumentsFrom(Iterable<?>)` (alias)
 ** `Arguments.argumentSetFrom(String, Iterable<?>)`
 ** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
+* Trim internal stack frames from `AssertionFailedError` stack traces.
+* Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
+  methods for `AssertionFailureBuilder`. These allow user defined assertions to
+  trim their stacktrace.
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage
