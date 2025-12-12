@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@antora/collector-extension": "1.0.2",
-    "@antora/lunr-extension": "1.0.0-alpha.10",
+    "@antora/lunr-extension": "1.0.0-alpha.12",
     "@springio/antora-extensions": "1.14.7",
     "highlight.js": "11.11.1"
   }
