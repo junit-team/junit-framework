@@ -1,4 +1,4 @@
-[[release-notes-5.13.3]]
+[[v5.13.3]]
 == 5.13.3
 
 *Date of Release:* July 4, 2025
@@ -10,26 +10,26 @@ link:{junit-framework-repo}+/milestone/100?closed=1+[5.13.3] milestone page in t
 repository on GitHub.
 
 
-[[release-notes-5.13.3-overall-improvements]]
+[[v5.13.3-overall-improvements]]
 === Overall Changes
 
-[[release-notes-5.13.3-overall-new-features-and-improvements]]
+[[v5.13.3-overall-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * All _experimental_ APIs have been promoted to _maintained_ to indicate that they won't
   be removed in any future 5.x release.
 
 
-[[release-notes-5.13.3-junit-platform]]
+[[v5.13.3-junit-platform]]
 === JUnit Platform
 
 No changes.
 
 
-[[release-notes-5.13.3-junit-jupiter]]
+[[v5.13.3-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-5.13.3-junit-jupiter-bug-fixes]]
+[[v5.13.3-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * Fix regression that caused top-level and static member classes annotated with `@Nested`
@@ -43,7 +43,7 @@ No changes.
   `"my&nbsp;custom&nbsp;reason"` instead of
   `"null&nbsp;++==>++&nbsp;my&nbsp;custom&nbsp;reason"`.
 
-[[release-notes-5.13.3-junit-jupiter-new-features-and-improvements]]
+[[v5.13.3-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * A _blank_ reason supplied to a `ConditionEvaluationResult` factory method is now treated
@@ -56,7 +56,7 @@ No changes.
 * Improve message of discovery issues reported for ineffective `@Order` annotations.
 
 
-[[release-notes-5.13.3-junit-vintage]]
+[[v5.13.3-junit-vintage]]
 === JUnit Vintage
 
 No changes.

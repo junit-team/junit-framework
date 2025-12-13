@@ -1,4 +1,4 @@
-[[release-notes-5.14.0]]
+[[v5.14.0]]
 == 5.14.0
 
 *Date of Release:* September 30, 2025
@@ -22,17 +22,17 @@ guidance on upgrading to JUnit 5.14.
 ====
 
 
-[[release-notes-5.14.0-junit-platform]]
+[[v5.14.0-junit-platform]]
 === JUnit Platform
 
-[[release-notes-5.14.0-junit-platform-bug-fixes]]
+[[v5.14.0-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
 * The `Launcher` (specifically `LauncherDiscoveryResult`) now retains the original
   `TestEngine` registration order after pruning test engines without tests, thereby
   ensuring reliable test execution order of multiple test engines.
 
-[[release-notes-5.14.0-junit-platform-deprecations-and-breaking-changes]]
+[[v5.14.0-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * Deprecate `OutputDirectoryProvider` interface in favor of the new
@@ -68,7 +68,7 @@ guidance on upgrading to JUnit 5.14.
   - `scanForResourcesInPackage(String, Predicate)`
   - `scanForResourcesInClasspathRoot(URI, Predicate)`
 
-[[release-notes-5.14.0-junit-platform-new-features-and-improvements]]
+[[v5.14.0-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Emit discovery warning when `@SuiteDisplayName` is used with a blank string.
@@ -88,10 +88,10 @@ guidance on upgrading to JUnit 5.14.
   methods in the new `org.junit.platform.commons.support.ResourceSupport` class.
 
 
-[[release-notes-5.14.0-junit-jupiter]]
+[[v5.14.0-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-5.14.0-junit-jupiter-deprecations-and-breaking-changes]]
+[[v5.14.0-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * `MediaType.APPLICATION_JSON_UTF_8` is now deprecated in favor of using
@@ -108,7 +108,7 @@ guidance on upgrading to JUnit 5.14.
 * `org.junit.jupiter.params.support.ParameterInfo` is now deprecated in favor of the new
   `org.junit.jupiter.params.ParameterInfo`.
 
-[[release-notes-5.14.0-junit-jupiter-new-features-and-improvements]]
+[[v5.14.0-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * `MediaType` now trims leading and trailing whitespace from a supplied `value`, `type`,
@@ -116,7 +116,7 @@ guidance on upgrading to JUnit 5.14.
 * `MediaType` now eagerly rejects a _blank_ `value`, `type`, or `subtype`.
 
 
-[[release-notes-5.14.0-junit-vintage]]
+[[v5.14.0-junit-vintage]]
 === JUnit Vintage
 
 No changes.

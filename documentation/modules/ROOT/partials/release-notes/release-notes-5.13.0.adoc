@@ -1,4 +1,4 @@
-[[release-notes-5.13.0]]
+[[v5.13.0]]
 == 5.13.0
 
 *Date of Release:* May 30, 2025

@@ -1,6 +1,6 @@
 = Build Support
 
-[[running-tests-build-gradle]]
+[[gradle]]
 == Gradle
 
 Starting with https://docs.gradle.org/4.6/release-notes.html[version 4.6], Gradle provides
@@ -16,8 +16,8 @@ test {
 }
 ----
 
-Filtering by <<running-tests-tags, tags>>,
-<<running-tests-tag-expressions, tag expressions>>, or engines is also supported:
+Filtering by xref:running-tests/tags.adoc[tags],
+xref:running-tests/tags.adoc#expressions[tag expressions], or engines is also supported:
 
 [source,groovy,indent=0]
 [subs=attributes+]
@@ -36,14 +36,14 @@ Please refer to the
 https://docs.gradle.org/current/userguide/java_testing.html[official Gradle documentation]
 for a comprehensive list of options.
 
-[[running-tests-build-gradle-bom]]
+[[gradle-bom]]
 === Aligning dependency versions
 
-TIP: See <<running-tests-build-spring-boot>> for details on how to override the version
+TIP: See <<spring-boot>> for details on how to override the version
 of JUnit used in your Spring Boot application.
 
 Unless you're using Spring Boot which defines its own way of managing dependencies, it is
-recommended to use the JUnit Platform <<dependency-metadata-junit-bom>> to align the
+recommended to use the JUnit Platform xref:appendix.adoc#dependency-metadata-junit-bom[Bill of Materials (BOM)] to align the
 versions of all JUnit 5 artifacts.
 
 [source,groovy,indent=0]
@@ -87,11 +87,11 @@ dependency on `junit-platform-launcher`, it is recommended to do so to ensure th
 of JUnit artifacts on the test runtime classpath are aligned.
 
 Moreover, doing so is recommended and in some cases even required when importing the
-project into an IDE like <<running-tests-ide-eclipse>> or
-<<running-tests-ide-intellij-idea>>.
+project into an IDE like xref:running-tests/ide-support.adoc#eclipse[Eclipse] or
+xref:running-tests/ide-support.adoc#intellij-idea[IntelliJ IDEA].
 ====
 
-[[running-tests-build-gradle-engines-configure]]
+[[gradle-engines-configure]]
 === Configuring Test Engines
 
 In order to run any tests at all, a `TestEngine` implementation must be on the classpath.
@@ -152,11 +152,11 @@ dependencies {
 }
 ----
 
-[[running-tests-build-gradle-config-params]]
+[[gradle-config-params]]
 === Configuration Parameters
 
 The standard Gradle `test` task currently does not provide a dedicated DSL to set JUnit
-Platform <<running-tests-config-params, configuration parameters>> to influence test
+Platform xref:running-tests/configuration-parameters.adoc[configuration parameters] to influence test
 discovery and execution. However, you can provide configuration parameters within the
 build script via system properties (as shown below) or via the
 `junit-platform.properties` file.
@@ -172,7 +172,7 @@ test {
 }
 ----
 
-[[running-tests-build-gradle-logging]]
+[[gradle-logging]]
 === Configuring Logging (optional)
 
 JUnit uses the Java Logging APIs in the `java.util.logging` package (a.k.a. _JUL_) to
@@ -201,7 +201,7 @@ Other logging frameworks provide different means to redirect messages logged usi
 https://www.slf4j.org/legacy.html#jul-to-slf4j[JUL to SLF4J Bridge] by adding it as a
 dependency to the test runtime classpath.
 
-[[running-tests-build-maven]]
+[[maven]]
 == Maven
 
 Maven Surefire and Maven Failsafe provide
@@ -234,11 +234,11 @@ Maven build as follows.
 ----
 ====
 
-[[running-tests-build-maven-bom]]
+[[maven-bom]]
 === Aligning dependency versions
 
 Unless you're using Spring Boot which defines its own way of managing dependencies, it is
-recommended to use the JUnit Platform <<dependency-metadata-junit-bom>> to align the
+recommended to use the JUnit Platform xref:appendix.adoc#dependency-metadata-junit-bom[Bill of Materials (BOM)] to align the
 versions of all JUnit 5 artifacts.
 
 [source,xml,indent=0]
@@ -260,10 +260,10 @@ versions of all JUnit 5 artifacts.
 Using the BOM allows you to omit the version when declaring dependencies on all artifacts
 with the `org.junit.platform`, `org.junit.jupiter`, and `org.junit.vintage` group IDs.
 
-TIP: See <<running-tests-build-spring-boot>> for details on how to override the version
+TIP: See <<spring-boot>> for details on how to override the version
 of JUnit used in your Spring Boot application.
 
-[[running-tests-build-maven-engines-configure]]
+[[maven-engines-configure]]
 === Configuring Test Engines
 
 In order to have Maven Surefire or Maven Failsafe run any tests at all, at least one
@@ -342,7 +342,7 @@ long as you configure `test` scoped dependencies on JUnit 4 and the JUnit Vintag
 	<!-- ... -->
 ----
 
-[[running-tests-build-maven-filter-test-class-names]]
+[[maven-filter-test-class-names]]
 === Filtering by Test Class Names
 
 The Maven Surefire Plugin will scan for test classes whose fully qualified names match
@@ -384,11 +384,11 @@ Please see the
 https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html[Inclusions and Exclusions of Tests]
 documentation for Maven Surefire for details.
 
-[[running-tests-build-maven-filter-tags]]
+[[maven-filter-tags]]
 === Filtering by Tags
 
-You can filter tests by <<running-tests-tags, tags>> or
-<<running-tests-tag-expressions, tag expressions>> using the following configuration
+You can filter tests by xref:running-tests/tags.adoc[tags] or
+xref:running-tests/tags.adoc#expressions[tag expressions] using the following configuration
 properties.
 
 - to include _tags_ or _tag expressions_, use `groups`.
@@ -413,10 +413,10 @@ properties.
 	<!-- ... -->
 ----
 
-[[running-tests-build-maven-config-params]]
+[[maven-config-params]]
 === Configuration Parameters
 
-You can set JUnit Platform <<running-tests-config-params, configuration parameters>> to
+You can set JUnit Platform xref:running-tests/configuration-parameters.adoc[configuration parameters] to
 influence test discovery and execution by declaring the `configurationParameters`
 property and providing key-value pairs using the Java `Properties` file syntax (as shown
 below) or via the `junit-platform.properties` file.
@@ -445,7 +445,7 @@ below) or via the `junit-platform.properties` file.
 	<!-- ... -->
 ----
 
-[[running-tests-build-ant]]
+[[ant]]
 == Ant
 
 Starting with version `1.10.3`, link:https://ant.apache.org/[Ant] has a
@@ -522,7 +522,7 @@ For further details on usage and configuration options please refer to the offic
 documentation for the
 link:https://ant.apache.org/manual/Tasks/junitlauncher.html[`junitlauncher` task].
 
-[[running-tests-build-spring-boot]]
+[[spring-boot]]
 == Spring Boot
 
 link:https://spring.io/projects/spring-boot[Spring Boot] provides automatic support for
@@ -531,7 +531,7 @@ managing the version of JUnit used in your project. In addition, the
 Jupiter, AssertJ, Mockito, etc.
 
 If your build relies on dependency management support from Spring Boot, you should not
-import JUnit's <<dependency-metadata-junit-bom>> in your build script since that would
+import JUnit's xref:appendix.adoc#dependency-metadata-junit-bom[Bill of Materials (BOM)] in your build script since that would
 result in duplicate (and potentially conflicting) management of JUnit dependencies.
 
 If you need to override the version of a dependency used in your Spring Boot application,

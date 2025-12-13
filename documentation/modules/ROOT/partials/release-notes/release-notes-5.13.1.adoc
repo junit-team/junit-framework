@@ -1,4 +1,4 @@
-[[release-notes-5.13.1]]
+[[v5.13.1]]
 == 5.13.1
 
 *Date of Release:* June 7, 2025
@@ -10,16 +10,16 @@ link:{junit-framework-repo}+/milestone/97?closed=1+[5.13.1] milestone page in th
 repository on GitHub.
 
 
-[[release-notes-5.13.1-junit-platform]]
+[[v5.13.1-junit-platform]]
 === JUnit Platform
 
 No changes.
 
 
-[[release-notes-5.13.1-junit-jupiter]]
+[[v5.13.1-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-5.13.1-junit-jupiter-bug-fixes]]
+[[v5.13.1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * The 5.13.0 release introduced a regression regarding the execution order in test classes
@@ -33,7 +33,7 @@ No changes.
   deprecated `provideArguments(ExtensionContext, Annotation)` method.
 
 
-[[release-notes-5.13.1-junit-vintage]]
+[[v5.13.1-junit-vintage]]
 === JUnit Vintage
 
 No changes

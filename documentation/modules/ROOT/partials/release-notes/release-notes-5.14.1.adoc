@@ -1,4 +1,4 @@
-[[release-notes-5.14.1]]
+[[v5.14.1]]
 == 5.14.1
 
 *Date of Release:* October 31, 2025
@@ -10,29 +10,29 @@ link:{junit-framework-repo}+/milestone/111?closed=1+[5.14.1] milestone page in t
 repository on GitHub.
 
 
-[[release-notes-5.14.1-junit-platform]]
+[[v5.14.1-junit-platform]]
 === JUnit Platform
 
 No changes.
 
 
-[[release-notes-5.14.1-junit-jupiter]]
+[[v5.14.1-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-5.14.1-junit-jupiter-bug-fixes]]
+[[v5.14.1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * Fix support for test methods with the same signature as a package-private methods
   declared in super classes in different packages.
 
-[[release-notes-5.14.1-junit-jupiter-new-features-and-improvements]]
+[[v5.14.1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Improve error message when using `@ParameterizedClass` with field injection and not
   providing enough arguments.
 
 
-[[release-notes-5.14.1-junit-vintage]]
+[[v5.14.1-junit-vintage]]
 === JUnit Vintage
 
 No changes.

@@ -1,6 +1,6 @@
 = IDE Support
 
-[[running-tests-ide-intellij-idea]]
+[[intellij-idea]]
 == IntelliJ IDEA
 
 IntelliJ IDEA supports running tests on the JUnit Platform since version 2016.2. For more
@@ -58,7 +58,7 @@ testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 </dependencyManagement>
 ----
 
-[[running-tests-ide-eclipse]]
+[[eclipse]]
 == Eclipse
 
 Eclipse IDE offers support for the JUnit Platform since the Eclipse Oxygen.1a (4.7.1a)
@@ -69,7 +69,7 @@ for JUnit 5_ section of the
 https://www.eclipse.org/eclipse/news/4.7.1a/#junit-5-support[Eclipse Project Oxygen.1a
 (4.7.1a) - New and Noteworthy] documentation.
 
-[[running-tests-ide-netbeans]]
+[[netbeans]]
 == NetBeans
 
 NetBeans offers support for JUnit Jupiter and the JUnit Platform since the
@@ -79,7 +79,7 @@ For more information consult the JUnit 5 section of the
 https://netbeans.apache.org/download/nb100/index.html#_junit_5[Apache NetBeans 10.0
 release notes].
 
-[[running-tests-ide-vscode]]
+[[vscode]]
 == Visual Studio Code
 
 https://code.visualstudio.com/[Visual Studio Code] supports JUnit Jupiter and the JUnit
@@ -93,11 +93,11 @@ For more information consult the _Testing_ section of the
 https://code.visualstudio.com/docs/languages/java#_testing[Java in Visual Studio Code]
 documentation.
 
-[[running-tests-ide-other]]
+[[other]]
 == Other IDEs
 
 If you are using an editor or IDE other than one of those listed in the previous sections,
 the JUnit team provides two alternative solutions to assist you in using JUnit 5. You can
-use the <<running-tests-console-launcher>> manually -- for example, from the command line
--- or execute tests with a <<running-tests-junit-platform-runner,JUnit 4 based Runner>> if
+use the xref:running-tests/console-launcher.adoc[] manually -- for example, from the command line
+-- or execute tests with a xref:running-tests/using-junit-4-to-run-the-junit-platform.adoc[JUnit 4 based Runner] if
 your IDE has built-in support for JUnit 4.

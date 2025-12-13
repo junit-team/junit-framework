@@ -37,5 +37,5 @@ methods in a test class albeit in different contexts — for example, with diffe
 parameters, by preparing the test class instance differently, or multiple times without
 modifying the context.
 Please refer to the implementations of
-<<writing-tests-parameterized-tests, Parameterized Classes>> which uses this extension
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Classes] which uses this extension
 point to provide its functionality.

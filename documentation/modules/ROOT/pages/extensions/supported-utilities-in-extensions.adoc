@@ -6,7 +6,7 @@ utilities can be found in the `{junit-platform-support-package}` and its subpack
 `TestEngine` and `Extension` authors are encouraged to use these supported utilities in
 order to align with the behavior of the JUnit Platform and JUnit Jupiter.
 
-[[extensions-supported-utilities-annotations]]
+[[annotations]]
 == Annotation Support
 
 `AnnotationSupport` provides static utility methods that operate on annotated elements
@@ -20,15 +20,15 @@ interfaces and within class hierarchies to find annotations. Consult the Javadoc
 NOTE: The `isAnnotated()` methods do not find repeatable annotations. To check for repeatable annotations,
 use one of the `findRepeatableAnnotations()` methods and verify that the returned list is not empty.
 
-NOTE: See also: <<extensions-supported-utilities-search-semantics>>
+NOTE: See also: <<search-semantics>>
 
-[[extensions-supported-utilities-classes]]
+[[classes]]
 == Class Support
 
 `ClassSupport` provides static utility methods for working with classes (i.e., instances
 of `java.lang.Class`). Consult the Javadoc for `{ClassSupport}` for further details.
 
-[[extensions-supported-utilities-reflection]]
+[[reflection]]
 == Reflection Support
 
 `ReflectionSupport` provides static utility methods that augment the standard JDK
@@ -38,9 +38,9 @@ class, and to find and invoke methods. Some of these methods traverse class hier
 to locate matching methods. Consult the Javadoc for `{ReflectionSupport}` for further
 details.
 
-NOTE: See also: <<extensions-supported-utilities-search-semantics>>
+NOTE: See also: <<search-semantics>>
 
-[[extensions-supported-utilities-modifier]]
+[[modifier]]
 == Modifier Support
 
 `ModifierSupport` provides static utility methods for working with member and class
@@ -48,7 +48,7 @@ modifiers -- for example, to determine if a member is declared as `public`, `pri
 `abstract`, `static`, etc. Consult the Javadoc for `{ModifierSupport}` for further
 details.
 
-[[extensions-supported-utilities-conversion]]
+[[conversion]]
 == Conversion Support
 
 `ConversionSupport` (in the `org.junit.platform.commons.support.conversion` package)
@@ -57,7 +57,7 @@ wrapper types, date and time types from the `java.time package`, and some additi
 common Java types such as `File`, `BigDecimal`, `BigInteger`, `Currency`, `Locale`, `URI`,
 `URL`, `UUID`, etc. Consult the Javadoc for `{ConversionSupport}` for further details.
 
-[[extensions-supported-utilities-search-semantics]]
+[[search-semantics]]
 == Field and Method Search Semantics
 
 Various methods in `AnnotationSupport` and `ReflectionSupport` use search algorithms that
@@ -86,5 +86,5 @@ JVM with the following system property.
 
 NOTE: Due to the low-level nature of the feature, the
 `junit.platform.reflection.search.useLegacySemantics` flag can only be set via a JVM
-system property. It cannot be set via a <<running-tests-config-params, configuration
-parameter>>.
+system property. It cannot be set via a xref:running-tests/configuration-parameters.adoc[configuration
+parameter].

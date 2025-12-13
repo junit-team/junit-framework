@@ -8,14 +8,14 @@ configuration that's necessary from the outside.
 JUnit 5 introduces the concept of a `Launcher` that can be used to discover, filter, and
 execute tests. Moreover, third party test libraries – like Spock, Cucumber, and FitNesse
 – can plug into the JUnit Platform's launching infrastructure by providing a custom
-<<test-engines,TestEngine>>.
+xref:advanced-topics/engines.adoc[TestEngine].
 
 The launcher API is in the `{junit-platform-launcher}` module.
 
 An example consumer of the launcher API is the `{ConsoleLauncher}` in the
 `{junit-platform-console}` project.
 
-[[launcher-api-discovery]]
+[[discovery]]
 == Discovering Tests
 
 Having _test discovery_ as a dedicated feature of the platform itself frees IDEs and build
@@ -49,10 +49,10 @@ Clients can register one or more `{LauncherDiscoveryListener}` implementations v
 discovery. By default, the builder registers an "abort on failure" listener that aborts
 test discovery after the first discovery failure is encountered. The default
 `LauncherDiscoveryListener` can be changed via the
-`junit.platform.discovery.listener.default` <<running-tests-config-params, configuration
-parameter>>.
+`junit.platform.discovery.listener.default` xref:running-tests/configuration-parameters.adoc[configuration
+parameter].
 
-[[launcher-api-execution]]
+[[execution]]
 == Executing Tests
 
 To execute tests, clients can use the same `LauncherDiscoveryRequest` as in the discovery
@@ -75,13 +75,13 @@ events are called in registration order while methods for finish events are call
 reverse order.
 Test case execution won't start before all `executionStarted` calls have returned.
 
-[[launcher-api-engines-custom]]
+[[engines-custom]]
 == Registering a TestEngine
 
-See the dedicated section on <<test-engines-registration, TestEngine registration>> for
+See the dedicated section on xref:advanced-topics/engines.adoc#registration[TestEngine registration] for
 details.
 
-[[launcher-api-post-discovery-filters-custom]]
+[[post-discovery-filters-custom]]
 == Registering a PostDiscoveryFilter
 
 In addition to specifying post-discovery filters as part of a `{LauncherDiscoveryRequest}`
@@ -93,7 +93,7 @@ For example, an `example.CustomTagFilter` class implementing `PostDiscoveryFilte
 declared within the `/META-INF/services/org.junit.platform.launcher.PostDiscoveryFilter`
 file is loaded and applied automatically.
 
-[[launcher-api-launcher-session-listeners-custom]]
+[[launcher-session-listeners-custom]]
 == Registering a LauncherSessionListener
 
 Registered implementations of `{LauncherSessionListener}` are notified when a
@@ -103,7 +103,7 @@ programmatically via the `{LauncherConfig}` that is passed to the `{LauncherFact
 they can be discovered at runtime via Java's `{ServiceLoader}` mechanism and automatically
 registered with `LauncherSession` (unless automatic registration is disabled.)
 
-[[launcher-api-launcher-session-listeners-tool-support]]
+[[launcher-session-listeners-tool-support]]
 === Tool Support
 
 The following build tools and IDEs are known to provide full support for `LauncherSession`:
@@ -114,7 +114,7 @@ The following build tools and IDEs are known to provide full support for `Launch
 
 Other tools might also work but have not been tested explicitly.
 
-[[launcher-api-launcher-session-listeners-tool-example-usage]]
+[[launcher-session-listeners-tool-example-usage]]
 === Example Usage
 
 A `LauncherSessionListener` is well suited for implementing once-per-JVM setup/teardown
@@ -175,22 +175,21 @@ include::example$java/example/session/HttpTests.java[tags=user_guide]
 <4> Send a request to the server
 <5> Check the status code of the response
 
-[[launcher-api-launcher-interceptors-custom]]
+[[launcher-interceptors-custom]]
 == Registering a LauncherInterceptor
 
 In order to intercept the creation of instances of `{Launcher}` and
 `{LauncherSessionListener}` and calls to the `discover` and `execute` methods of the
 former, clients can register custom implementations of `{LauncherInterceptor}` via Java's
 `{ServiceLoader}` mechanism by setting the
-`junit.platform.launcher.interceptors.enabled` <<running-tests-config-params,
-configuration parameter>> to `true`.
+`junit.platform.launcher.interceptors.enabled` xref:running-tests/configuration-parameters.adoc[configuration parameter] to `true`.
 
 [NOTE]
 ====
 Since interceptors are registered before the test run starts, the
 `junit.platform.launcher.interceptors.enabled` _configuration parameter_ can only be
 supplied as a JVM system property or via the JUnit Platform configuration file (see
-<<running-tests-config-params>> for details). This _configuration parameter_ cannot be
+xref:running-tests/configuration-parameters.adoc[] for details). This _configuration parameter_ cannot be
 supplied in the `LauncherDiscoveryRequest` that is passed to the `{Launcher}`.
 ====
 
@@ -203,7 +202,7 @@ the JUnit Platform to load test classes and engine implementations.
 include::example$java/example/CustomLauncherInterceptor.java[tags=user_guide]
 ----
 
-[[launcher-api-launcher-discovery-listeners-custom]]
+[[launcher-discovery-listeners-custom]]
 == Registering a LauncherDiscoveryListener
 
 In addition to specifying discovery listeners as part of a `{LauncherDiscoveryRequest}` or
@@ -217,7 +216,7 @@ For example, an `example.CustomLauncherDiscoveryListener` class implementing
 `/META-INF/services/org.junit.platform.launcher.LauncherDiscoveryListener` file is loaded
 and registered automatically.
 
-[[launcher-api-listeners-custom]]
+[[listeners-custom]]
 == Registering a TestExecutionListener
 
 In addition to the public `{Launcher}` API method for registering test execution listeners
@@ -230,21 +229,21 @@ For example, an `example.CustomTestExecutionListener` class implementing
 `/META-INF/services/org.junit.platform.launcher.TestExecutionListener` file is loaded and
 registered automatically.
 
-[[launcher-api-listeners-config]]
+[[listeners-config]]
 == Configuring a TestExecutionListener
 
 When a `{TestExecutionListener}` is registered programmatically via the `{Launcher}` API,
 the listener may provide programmatic ways for it to be configured -- for example, via its
 constructor, setter methods, etc. However, when a `TestExecutionListener` is registered
 automatically via Java's `ServiceLoader` mechanism (see
-<<launcher-api-listeners-custom>>), there is no way for the user to directly configure the
+<<listeners-custom>>), there is no way for the user to directly configure the
 listener. In such cases, the author of a `TestExecutionListener` may choose to make the
-listener configurable via <<running-tests-config-params, configuration parameters>>. The
+listener configurable via xref:running-tests/configuration-parameters.adoc[configuration parameters]. The
 listener can then access the configuration parameters via the `TestPlan` supplied to the
 `testPlanExecutionStarted(TestPlan)` and `testPlanExecutionFinished(TestPlan)` callback
 methods. See the `{UniqueIdTrackingListener}` for an example.
 
-[[launcher-api-listeners-custom-deactivation]]
+[[listeners-custom-deactivation]]
 == Deactivating a TestExecutionListener
 
 Sometimes it can be useful to run a test suite _without_ certain execution listeners being
@@ -265,16 +264,16 @@ deactivated. In other words, any `TestExecutionListener` registered explicitly v
 In addition, since execution listeners are registered before the test run starts, the
 `junit.platform.execution.listeners.deactivate` _configuration parameter_ can only be
 supplied as a JVM system property or via the JUnit Platform configuration file (see
-<<running-tests-config-params>> for details). This _configuration parameter_ cannot be
+xref:running-tests/configuration-parameters.adoc[] for details). This _configuration parameter_ cannot be
 supplied in the `LauncherDiscoveryRequest` that is passed to the `{Launcher}`.
 ====
 
-[[launcher-api-listeners-custom-deactivation-pattern]]
+[[listeners-custom-deactivation-pattern]]
 === Pattern Matching Syntax
 
-Refer to <<running-tests-config-params-deactivation-pattern>> for details.
+Refer to xref:running-tests/configuration-parameters.adoc#pattern[Pattern Matching Syntax] for details.
 
-[[launcher-api-launcher-config]]
+[[launcher-config]]
 == Configuring the Launcher
 
 If you require fine-grained control over automatic detection and registration of test
@@ -287,18 +286,17 @@ built-in fluent _builder_ API, as demonstrated in the following example.
 include::example$java/example/UsingTheLauncherDemo.java[tags=launcherConfig]
 ----
 
-[[launcher-api-dry-run-mode]]
+[[dry-run-mode]]
 == Dry-Run Mode
 
 When running tests via the `{Launcher}` API, you can enable _dry-run mode_ by setting the
-`junit.platform.execution.dryRun.enabled` <<running-tests-config-params,
-configuration parameter>> to `true`. In this mode, the `{Launcher}` will not actually
+`junit.platform.execution.dryRun.enabled` xref:running-tests/configuration-parameters.adoc[configuration parameter] to `true`. In this mode, the `{Launcher}` will not actually
 execute any tests but will notify registered `{TestExecutionListener}` instances as if all
 tests had been skipped and their containers had been successful. This can be useful to
 test changes in the configuration of a build or to verify a listener is called as expected
 without having to wait for all tests to be executed.
 
-[[launcher-api-managing-state-across-test-engines]]
+[[managing-state-across-test-engines]]
 == Managing State Across Test Engines
 
 When running tests on the JUnit Platform, multiple test engines may need to access shared
@@ -348,4 +346,4 @@ way, test engines can coordinate resource creation and sharing without direct de
 between them.
 
 Alternatively, it's possible to inject resources into test engines by
-<<launcher-api-launcher-session-listeners-custom, registering a `LauncherSessionListener`>>.
+<<launcher-session-listeners-custom, registering a `LauncherSessionListener`>>.

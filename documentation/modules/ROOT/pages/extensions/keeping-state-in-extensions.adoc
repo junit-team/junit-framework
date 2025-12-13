@@ -5,7 +5,7 @@ you keep the state from one invocation of an extension to the next? The
 `{ExtensionContext}` API provides a `{ExtensionContext_Store}` exactly for this purpose.
 Extensions may put values into a store for later retrieval.
 
-TIP: See the `<<extensions-lifecycle-callbacks-timing-extension, TimingExtension>>` for an
+TIP: See the `xref:extensions/test-lifecycle-callbacks.adoc#timing-extension[TimingExtension]` for an
 example of using the `Store` with a method-level scope.
 
 .The `ExtensionContext` and `Store` hierarchy
@@ -20,18 +20,18 @@ classes or extension. The `{ExtensionContext_StoreScope}` enum allows to go beyo
 that and access the stores on the level of the current `{LauncherExecutionRequest}` or
 `{LauncherSession}` which can be used to share data across test engines or inject data
 from a registered
-<<launcher-api-launcher-session-listeners-custom, `LauncherSessionListener`>>,
+xref:advanced-topics/launcher-api.adoc#launcher-session-listeners-custom[`LauncherSessionListener`],
 respectively. Please consult the Javadoc of `{ExtensionContext}`,
 `{ExtensionContext_Store}`, and `{ExtensionContext_StoreScope}` for details.
 
-[[extensions-keeping-state-autocloseable-support]]
+[[support]]
 .Resource management via `_AutoCloseable_`
 NOTE: An extension context store is bound to its extension context lifecycle. When an
 extension context lifecycle ends it closes its associated store. As of JUnit 5.13,
 all stored values that are instances of `AutoCloseable` are notified by an invocation of
 their `close()` method in the inverse order they were added in (unless the
 `junit.jupiter.extensions.store.close.autocloseable.enabled`
-<<running-tests-config-params, configuration parameter>> is set to `false`). Older
+xref:running-tests/configuration-parameters.adoc[configuration parameter] is set to `false`). Older
 versions only supported `CloseableResource`, which is deprecated but still available for
 backward compatibility.
 
@@ -62,7 +62,7 @@ include::example$java/example/extensions/HttpServerExtension.java[tags=user_guid
 include::example$java/example/HttpServerDemo.java[tags=user_guide]
 ----
 
-[[extensions-keeping-state-autocloseable-migration]]
+[[migration]]
 [TIP]
 .Migration Note for Resource Cleanup
 ====

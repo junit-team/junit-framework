@@ -6,29 +6,29 @@ configuration parameters that are specific to a particular test engine, listener
 registered extension. For example, the JUnit Jupiter `TestEngine` supports _configuration
 parameters_ for the following use cases.
 
-- <<writing-tests-test-instance-lifecycle-changing-default>>
-- <<extensions-registration-automatic-enabling>>
-- <<extensions-conditions-deactivation>>
-- <<writing-tests-display-name-generator-default>>
+- xref:writing-tests/test-instance-lifecycle.adoc#default[Changing the Default Test Instance Lifecycle]
+- xref:extensions/registering-extensions.adoc#registration-automatic-enabling[Enabling Automatic Extension Detection]
+- xref:extensions/conditional-test-execution.adoc#deactivation[Deactivating Conditions]
+- xref:writing-tests/display-names.adoc#generator-default[Setting the Default Display Name Generator]
 
 _Configuration Parameters_ are text-based key-value pairs that can be supplied to test
 engines running on the JUnit Platform via one of the following mechanisms.
 
 1. The `configurationParameter()` and `configurationParameters()` methods in
    `LauncherDiscoveryRequestBuilder` which
-   is used to build a request supplied to the <<launcher-api, Launcher API>>.
+   is used to build a request supplied to the xref:advanced-topics/launcher-api.adoc[Launcher API].
     +
    When running tests via one of the tools provided by the JUnit Platform you can specify
    configuration parameters as follows:
-   * <<running-tests-console-launcher,Console Launcher>>: use the `--config` command-line
+   * xref:running-tests/console-launcher.adoc[Console Launcher]: use the `--config` command-line
      option.
-   * <<running-tests-build-gradle-config-params,Gradle>>: use the `systemProperty` or
+   * xref:running-tests/build-support.adoc#gradle-config-params[Gradle]: use the `systemProperty` or
      `systemProperties` DSL.
-   * <<running-tests-build-maven-config-params,Maven Surefire provider>>: use the
+   * xref:running-tests/build-support.adoc#maven-config-params[Maven Surefire provider]: use the
      `configurationParameters` property.
 2. The `configurationParametersResources()` method in `LauncherDiscoveryRequestBuilder`.
     +
-   When running tests via the <<running-tests-console-launcher,Console Launcher>> you can
+   When running tests via the xref:running-tests/console-launcher.adoc[Console Launcher] you can
    specify custom configuration files using the `--config-resource` command-line option.
 3. JVM system properties.
 4. The JUnit Platform default configuration file: a file named `junit-platform.properties`
@@ -41,16 +41,16 @@ precedence over those supplied via custom configuration files, system properties
 default configuration file. Similarly, configuration parameters supplied via system
 properties take precedence over those supplied via the default configuration file.
 
-[[running-tests-config-params-deactivation-pattern]]
+[[pattern]]
 == Pattern Matching Syntax
 
 This section describes the pattern matching syntax that is applied to the _configuration
 parameters_ used for the following features.
 
-- <<extensions-conditions-deactivation>>
-- <<launcher-api-listeners-custom-deactivation>>
-- <<stacktrace-pruning>>
-- <<extensions-registration-automatic-filtering>>
+- xref:extensions/conditional-test-execution.adoc#deactivation[Deactivating Conditions]
+- xref:advanced-topics/launcher-api.adoc#listeners-custom-deactivation[Deactivating a TestExecutionListener]
+- xref:running-tests/stack-trace-pruning.adoc[]
+- xref:extensions/registering-extensions.adoc#registration-automatic-filtering[Filtering Auto-detected Extensions]
 
 If the value for the given _configuration parameter_ consists solely of an asterisk
 (`+++*+++`), the pattern will match against all candidate classes. Otherwise, the value

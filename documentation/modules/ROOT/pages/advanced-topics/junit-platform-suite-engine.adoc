@@ -3,14 +3,14 @@
 The JUnit Platform supports the declarative definition and execution of suites of tests
 from _any_ test engine using the JUnit Platform.
 
-[[junit-platform-suite-engine-setup]]
+[[setup]]
 == Setup
 
 In addition to the `junit-platform-suite-api` and `junit-platform-suite-engine` artifacts,
 you need _at least one_ other test engine and its dependencies on the classpath. See
-<<dependency-metadata>> for details regarding group IDs, artifact IDs, and versions.
+xref:appendix.adoc#dependency-metadata[Dependency Metadata] for details regarding group IDs, artifact IDs, and versions.
 
-[[junit-platform-suite-engine-setup-required-dependencies]]
+[[setup-required-dependencies]]
 === Required Dependencies
 
 * `junit-platform-suite-api` in _test_ scope: artifact containing annotations needed to
@@ -22,7 +22,7 @@ NOTE: Both of the required dependencies are aggregated in the `junit-platform-su
 artifact which can be declared in _test_ scope instead of declaring explicit dependencies
 on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 
-[[junit-platform-suite-engine-setup-transitive-dependencies]]
+[[setup-transitive-dependencies]]
 === Transitive Dependencies
 
 * `junit-platform-suite-commons` in _test_ scope
@@ -31,7 +31,7 @@ on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 * `junit-platform-commons` in _test_ scope
 * `opentest4j` in _test_ scope
 
-[[junit-platform-suite-engine-example]]
+[[example]]
 == @Suite Example
 
 By annotating a class with `@Suite` it is marked as a test suite on the JUnit Platform.

@@ -3,11 +3,11 @@
 In order to allow individual test methods to be executed in isolation and to avoid
 unexpected side effects due to mutable test instance state, JUnit creates a new instance
 of each test class before executing each _test method_ (see
-<<writing-tests-definitions>>). This "per-method" test instance lifecycle is the default
+xref:writing-tests/definitions.adoc[]). This "per-method" test instance lifecycle is the default
 behavior in JUnit Jupiter and is analogous to all previous versions of JUnit.
 
 NOTE: Please note that the test class will still be instantiated if a given _test method_
-is _disabled_ via a <<writing-tests-conditional-execution,condition>> (e.g., `@Disabled`,
+is _disabled_ via a xref:writing-tests/conditional-test-execution.adoc[condition] (e.g., `@Disabled`,
 `@DisabledOnOs`, etc.) even when the "per-method" test instance lifecycle mode is active.
 
 If you would prefer that JUnit Jupiter execute all test methods on the same test
@@ -30,7 +30,7 @@ easier to implement non-static `@BeforeAll` and `@AfterAll` lifecycle methods as
 `@MethodSource` factory methods by switching to the "per-class" test instance lifecycle
 mode.
 
-[[writing-tests-test-instance-lifecycle-changing-default]]
+[[default]]
 == Changing the Default Test Instance Lifecycle
 
 If a test class or test interface is not annotated with `@TestInstance`, JUnit Jupiter
@@ -41,7 +41,7 @@ To change the default test instance lifecycle mode, set the
 an enum constant defined in `TestInstance.Lifecycle`, ignoring case. This can be supplied
 as a JVM system property, as a _configuration parameter_ in the
 `LauncherDiscoveryRequest` that is passed to the `Launcher`, or via the JUnit Platform
-configuration file (see <<running-tests-config-params>> for details).
+configuration file (see xref:running-tests/configuration-parameters.adoc[] for details).
 
 For example, to set the default test instance lifecycle mode to `Lifecycle.PER_CLASS`,
 you can start your JVM with the following system property.

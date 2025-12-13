@@ -1,4 +1,4 @@
-[[release-notes-5.13.4]]
+[[v5.13.4]]
 == 5.13.4
 
 *Date of Release:* July 21, 2025
@@ -10,20 +10,20 @@ link:{junit-framework-repo}+/milestone/101?closed=1+[5.13.4] milestone page in t
 repository on GitHub.
 
 
-[[release-notes-5.13.4-overall-improvements]]
+[[v5.13.4-overall-improvements]]
 === Overall Changes
 
-[[release-notes-5.13.4-overall-new-features-and-improvements]]
+[[v5.13.4-overall-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Remove `java.*` packages from `Import-Package` headers in all jar manifests to maximize
   compatibility with older OSGi runtimes.
 
 
-[[release-notes-5.13.4-junit-platform]]
+[[v5.13.4-junit-platform]]
 === JUnit Platform
 
-[[release-notes-5.13.4-junit-platform-bug-fixes]]
+[[v5.13.4-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
 * `ClasspathResourceSelector` no longer allows to be constructed with a resource name that
@@ -32,17 +32,17 @@ repository on GitHub.
   indicate the default package.
 
 
-[[release-notes-5.13.4-junit-jupiter]]
+[[v5.13.4-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-5.13.4-junit-jupiter-new-features-and-improvements]]
+[[v5.13.4-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Log only once per implementation type for `CloseableResource` implementations that do
   not implement `AutoCloseable` to avoid flooding console output with this warning.
 
 
-[[release-notes-5.13.4-junit-vintage]]
+[[v5.13.4-junit-vintage]]
 === JUnit Vintage
 
 No changes.

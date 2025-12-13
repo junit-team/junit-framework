@@ -5,7 +5,7 @@
 
 This document contains the _change log_ for all JUnit 5 releases since 5.13 GA.
 
-Please refer to the <<../user-guide/index.adoc#user-guide,User Guide>> for comprehensive
+Please refer to the xref:overview.adoc[User Guide] for comprehensive
 reference documentation for programmers writing tests, extension authors, and engine
 authors as well as build tool and IDE vendors.
 

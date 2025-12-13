@@ -17,6 +17,6 @@ include::example$java/example/interceptor/SwingEdtInterceptor.java[tags=user_gui
 ====
 You may override the `getTestInstantiationExtensionContextScope(...)` method to return
 `TEST_METHOD` to make test-specific data available to your extension implementation of
-`interceptTestClassConstructor` or if you want to <<extensions-keeping-state, keep state>>
+`interceptTestClassConstructor` or if you want to xref:extensions/keeping-state-in-extensions.adoc[keep state]
 on the test method level.
 ====

@@ -15,7 +15,7 @@ provide maintenance and bug fix releases for the JUnit 4.x baseline, developers 
 plenty of time to migrate to JUnit Jupiter on their own schedule.
 
 
-[[migrating-from-junit4-running]]
+[[running]]
 == Running JUnit 4 Tests on the JUnit Platform
 
 Make sure that the `junit-vintage-engine` artifact is in your test runtime path. In that
@@ -25,23 +25,23 @@ launcher.
 See the example projects in the {junit-examples-repo}[`junit-examples`] repository to
 find out how this is done with Gradle and Maven.
 
-[[migrating-from-junit4-categories-support]]
+[[categories-support]]
 === Categories Support
 
 For test classes or methods that are annotated with `@Category`, the _JUnit Vintage test
-engine_ exposes the category's fully qualified class name as a <<running-tests-tags, tag>>
+engine_ exposes the category's fully qualified class name as a xref:running-tests/tags.adoc[tag]
 for the corresponding test class or test method. For example, if a test method is
 annotated with `@Category(Example.class)`, it will be tagged with `"com.acme.Example"`.
 Similar to the `Categories` runner in JUnit 4, this information can be used to filter the
-discovered tests before executing them (see <<running-tests>> for details).
+discovered tests before executing them (see xref:running-tests/intro.adoc[] for details).
 
-[[migrating-from-junit4-parallel-execution]]
+[[parallel-execution]]
 == Parallel Execution
 
 The JUnit Vintage test engine supports parallel execution of top-level test classes and test methods,
 allowing existing JUnit 3 and JUnit 4 tests to benefit from improved performance through
 concurrent test execution. It can be enabled and configured using the following
-<<running-tests-config-params, configuration parameters>>:
+xref:running-tests/configuration-parameters.adoc[configuration parameters]:
 
 `junit.vintage.execution.parallel.enabled=true|false`::
   Enable/disable parallel execution (defaults to `false`). Requires opt-in for `classes`
@@ -57,7 +57,7 @@ concurrent test execution. It can be enabled and configured using the following
   Specifies the size of the thread pool to be used for parallel execution. By default, the
   number of available processors is used.
 
-[[migrating-from-junit4-parallel-execution-class-level]]
+[[parallel-execution-class-level]]
 === Parallelization at Class Level
 
 Let's assume we have two test classes `FooTest` and `BarTest` with each class containing
@@ -82,7 +82,7 @@ ForkJoinPool-1-worker-1 - BarTest::test3
 ForkJoinPool-1-worker-2 - FooTest::test3
 ----
 
-[[migrating-from-junit4-parallel-execution-method-level]]
+[[parallel-execution-method-level]]
 === Parallelization at Method Level
 
 Alternatively, we can enable parallel test execution at a method level,
@@ -108,7 +108,7 @@ ForkJoinPool-1-worker-2 - FooTest::test2
 ForkJoinPool-1-worker-1 - FooTest::test3
 ----
 
-[[migrating-from-junit4-parallel-execution-class-and-method-level]]
+[[parallel-execution-class-and-method-level]]
 === Full Parallelization
 
 Finally, we can also enable parallelization at both class and method level:
@@ -133,7 +133,7 @@ ForkJoinPool-1-worker-5 - BarTest::test2
 ForkJoinPool-1-worker-4 - BarTest::test1
 ----
 
-[[migrating-from-junit4-parallel-execution-pool-size]]
+[[parallel-execution-pool-size]]
 === Configuring the Pool Size
 
 The default thread pool size is equal to the number of available processors. However, we
@@ -165,7 +165,7 @@ As we can see, even though we set the thread pool size was four, only three thre
 used in this case. This happens because the pool adjusts the number of active threads
 based on workload and system needs.
 
-[[migrating-from-junit4-parallel-execution-disabled]]
+[[parallel-execution-disabled]]
 === Sequential Execution
 
 On the other hand, if we disable parallel execution, the `VintageTestEngine`
@@ -181,7 +181,7 @@ junit.vintage.execution.parallel.methods=true
 Similarly, tests will be executed sequentially if you enable parallel execution in general
 but enable neither class-level nor method-level parallelization.
 
-[[migrating-from-junit4-tips]]
+[[tips]]
 == Migration Tips
 
 The following are topics that you should be aware of when migrating existing JUnit 4
@@ -200,29 +200,29 @@ tests to JUnit Jupiter.
 * `@BeforeClass` and `@AfterClass` no longer exist; use `@BeforeAll` and `@AfterAll`
   instead.
 * `@Ignore` no longer exists: use `@Disabled` or one of the other built-in
-  <<writing-tests-conditional-execution, execution conditions>> instead
-  - See also <<migrating-from-junit4-ignore-annotation-support>>.
+  xref:writing-tests/conditional-test-execution.adoc[execution conditions] instead
+  - See also <<ignore-annotation-support>>.
 * `@Category` no longer exists; use `@Tag` instead.
 * `@RunWith` no longer exists; superseded by `@ExtendWith`.
   - For `@RunWith(Enclosed.class)` use `@Nested`.
-  - For `@RunWith(Parameterized.class)` see <<migrating-from-junit4-tips-parameterized>>.
+  - For `@RunWith(Parameterized.class)` see <<tips-parameterized>>.
 * `@Rule` and `@ClassRule` no longer exist; superseded by `@ExtendWith` and
   `@RegisterExtension`.
-  - See also <<migrating-from-junit4-rule-support>>.
+  - See also <<rule-support>>.
 * `@Test(expected = ...)` and the `ExpectedException` rule no longer exist; use
   `Assertions.assertThrows(...)` instead.
-  - See <<migrating-from-junit4-rule-support>> if you still need to use
+  - See <<rule-support>> if you still need to use
     `ExpectedException`.
 * Assertions and assumptions in JUnit Jupiter accept the failure message as their last
   argument instead of the first one.
-  - See <<migrating-from-junit4-failure-message-arguments>> for details.
+  - See <<failure-message-arguments>> for details.
 
-[[migrating-from-junit4-tips-parameterized]]
+[[tips-parameterized]]
 === Parameterized test classes
 
 Unless `@UseParametersRunnerFactory` is used, a JUnit 4 parameterized test class can be
 converted into a JUnit Jupiter
-<<writing-tests-parameterized-tests, `@ParameterizedClass`>> by following these steps:
+xref:writing-tests/parameterized-classes-and-tests.adoc[`@ParameterizedClass`] by following these steps:
 
 . Replace `@RunWith(Parameterized.class)` with `@ParameterizedClass`.
 . Add a class-level `@MethodSource("methodName")` annotation where `methodName` is the
@@ -250,7 +250,7 @@ include::example$java/example/ParameterizedMigrationDemo.java[tags=after]
 ----
 ====
 
-[[migrating-from-junit4-rule-support]]
+[[rule-support]]
 == Limited JUnit 4 Rule Support
 
 As stated above, JUnit Jupiter does not and will not support JUnit 4 rules natively. The
@@ -278,13 +278,13 @@ This limited form of `Rule` support can be switched on by the class-level annota
 all rule migration support extensions: `VerifierSupport`, `ExternalResourceSupport`, and
 `ExpectedExceptionSupport`. You may alternatively choose to annotate your test class with
 `@EnableJUnit4MigrationSupport` which registers migration support for rules _and_ JUnit
-4's `@Ignore` annotation (see <<migrating-from-junit4-ignore-annotation-support>>).
+4's `@Ignore` annotation (see <<ignore-annotation-support>>).
 
 However, if you intend to develop a new extension for JUnit Jupiter please use the new
 extension model of JUnit Jupiter instead of the rule-based model of JUnit 4.
 
 
-[[migrating-from-junit4-ignore-annotation-support]]
+[[ignore-annotation-support]]
 == JUnit 4 @Ignore Support
 
 In order to provide a smooth migration path from JUnit 4 to JUnit Jupiter, the
@@ -295,7 +295,7 @@ To use `@Ignore` with JUnit Jupiter based tests, configure a _test_ dependency o
 `junit-jupiter-migrationsupport` module in your build and then annotate your test class
 with `@ExtendWith(IgnoreCondition.class)` or `{EnableJUnit4MigrationSupport}` (which
 automatically registers the `IgnoreCondition` along with
-<<migrating-from-junit4-rule-support>>). The `IgnoreCondition` is an
+<<rule-support>>). The `IgnoreCondition` is an
 `{ExecutionCondition}` that disables test classes or test methods that are annotated with
 `@Ignore`.
 
@@ -305,7 +305,7 @@ include::example$java/example/IgnoredTestsDemo.java[tags=user_guide]
 ----
 
 
-[[migrating-from-junit4-failure-message-arguments]]
+[[failure-message-arguments]]
 == Failure Message Arguments
 
 The `Assumptions` and `Assertions` classes in JUnit Jupiter declare arguments in a

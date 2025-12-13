@@ -1,10 +1,10 @@
 = Conditional Test Execution
 
-The <<extensions-conditions, `ExecutionCondition`>> extension API in JUnit Jupiter allows
+The xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`] extension API in JUnit Jupiter allows
 developers to either _enable_ or _disable_ a test class or test method based on certain
 conditions _programmatically_. The simplest example of such a condition is the built-in
 `{DisabledCondition}` which supports the `{Disabled}` annotation (see
-<<writing-tests-disabling>>).
+xref:writing-tests/disabling-tests.adoc[]).
 
 In addition to `@Disabled`, JUnit Jupiter also supports several other annotation-based
 conditions in the `org.junit.jupiter.api.condition` package that allow developers to
@@ -21,7 +21,7 @@ APIs. However, that does not prevent the test class from being instantiated, and
 not prevent the execution of class-level lifecycle callbacks such as `@BeforeAll` methods,
 `@AfterAll` methods, and corresponding extension APIs.
 
-See <<extensions-conditions, `ExecutionCondition`>> and the following sections for
+See xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`] and the following sections for
 details.
 
 [TIP]
@@ -30,7 +30,7 @@ details.
 Note that any of the _conditional_ annotations listed in the following sections may also
 be used as a meta-annotation in order to create a custom _composed annotation_. For
 example, the `@TestOnMac` annotation in the
-<<writing-tests-conditional-execution-os-demo, @EnabledOnOs demo>> shows how you can
+<<os-demo, @EnabledOnOs demo>> shows how you can
 combine `@Test` and `@EnabledOnOs` in a single, reusable annotation.
 ====
 
@@ -52,28 +52,28 @@ conditional annotation may be used in conjunction with other conditional annotat
 the `org.junit.jupiter.api.condition` package.
 ====
 
-[[writing-tests-conditional-execution-os]]
+[[os]]
 == Operating System and Architecture Conditions
 
 A container or test may be enabled or disabled on a particular operating system,
 architecture, or combination of both via the `{EnabledOnOs}` and `{DisabledOnOs}`
 annotations.
 
-[[writing-tests-conditional-execution-os-demo]]
+[[os-demo]]
 [source,java,indent=0]
 .Conditional execution based on operating system
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_os]
 ----
 
-[[writing-tests-conditional-execution-architectures-demo]]
+[[architectures-demo]]
 [source,java,indent=0]
 .Conditional execution based on architecture
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_architecture]
 ----
 
-[[writing-tests-conditional-execution-jre]]
+[[jre]]
 == Java Runtime Environment Conditions
 
 A container or test may be enabled or disabled on particular versions of the Java Runtime
@@ -106,7 +106,7 @@ versions.
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre_arbitrary_versions]
 ----
 
-[[writing-tests-conditional-execution-native]]
+[[native]]
 == Native Image Conditions
 
 A container or test may be enabled or disabled within a
@@ -121,7 +121,7 @@ Build Tools] project.
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_native]
 ----
 
-[[writing-tests-conditional-execution-system-properties]]
+[[system-properties]]
 == System Property Conditions
 
 A container or test may be enabled or disabled based on the value of the `named` JVM
@@ -142,7 +142,7 @@ on a test interface, test class, or test method. Specifically, these annotations
 found if they are directly present, indirectly present, or meta-present on a given element.
 ====
 
-[[writing-tests-conditional-execution-environment-variables]]
+[[environment-variables]]
 == Environment Variable Conditions
 
 A container or test may be enabled or disabled based on the value of the `named`
@@ -164,10 +164,10 @@ method. Specifically, these annotations will be found if they are directly prese
 indirectly present, or meta-present on a given element.
 ====
 
-[[writing-tests-conditional-execution-custom]]
+[[custom]]
 == Custom Conditions
 
-As an alternative to implementing an <<extensions-conditions, `ExecutionCondition`>>, a
+As an alternative to implementing an xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`], a
 container or test may be enabled or disabled based on a _condition method_ configured via
 the `{EnabledIf}` and `{DisabledIf}` annotations. A condition method must have a `boolean`
 return type and may accept either no arguments or a single `ExtensionContext` argument.

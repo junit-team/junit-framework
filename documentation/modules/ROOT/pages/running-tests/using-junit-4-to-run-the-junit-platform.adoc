@@ -11,7 +11,7 @@ tests directly on the JUnit Platform.
 
 In addition, the introduction of `@Suite` support provided by the
 `junit-platform-suite-engine` module makes the `JUnitPlatform` runner obsolete. See
-<<junit-platform-suite-engine>> for details.
+xref:advanced-topics/junit-platform-suite-engine.adoc[] for details.
 
 The `JUnitPlatform` runner and `@UseTechnicalNames` annotation have therefore been
 deprecated in JUnit Platform 1.8 and will be removed in JUnit Platform 2.0.
@@ -28,15 +28,15 @@ build systems that support JUnit 4 but do not yet support the JUnit Platform dir
 
 NOTE: Since the JUnit Platform has features that JUnit 4 does not have, the runner is
 only able to support a subset of the JUnit Platform functionality, especially with regard
-to reporting (see <<running-tests-junit-platform-runner-technical-names>>).
+to reporting (see <<technical-names>>).
 
-[[running-tests-junit-platform-runner-setup]]
+[[setup]]
 == Setup
 
 You need the following artifacts and their dependencies on the classpath. See
-<<dependency-metadata>> for details regarding group IDs, artifact IDs, and versions.
+xref:appendix.adoc#dependency-metadata[Dependency Metadata] for details regarding group IDs, artifact IDs, and versions.
 
-[[running-tests-junit-platform-runner-setup-explicit-dependencies]]
+[[setup-explicit-dependencies]]
 === Explicit Dependencies
 
 * `junit-platform-runner` in _test_ scope: location of the `JUnitPlatform` runner
@@ -46,7 +46,7 @@ You need the following artifacts and their dependencies on the classpath. See
 * `junit-jupiter-engine` in _test runtime_ scope: implementation of the `TestEngine` API
   for JUnit Jupiter
 
-[[running-tests-junit-platform-runner-setup-transitive-dependencies]]
+[[setup-transitive-dependencies]]
 === Transitive Dependencies
 
 * `junit-platform-suite-api` in _test_ scope
@@ -56,7 +56,7 @@ You need the following artifacts and their dependencies on the classpath. See
 * `junit-platform-commons` in _test_ scope
 * `opentest4j` in _test_ scope
 
-[[running-tests-junit-platform-runner-technical-names]]
+[[technical-names]]
 == Display Names vs. Technical Names
 
 To define a custom _display name_ for the class run via `@RunWith(JUnitPlatform.class)`
@@ -73,7 +73,7 @@ characters. To enable technical names for reporting purposes, declare the
 Note that the presence of `@UseTechnicalNames` overrides any custom display name
 configured via `@SuiteDisplayName`.
 
-[[running-tests-junit-platform-runner-single-test]]
+[[single-test]]
 == Single Test Class
 
 One way to use the `JUnitPlatform` runner is to annotate a test class with
@@ -87,7 +87,7 @@ otherwise, some IDEs and build tools might not recognize it as a JUnit 4 test cl
 include::example$java/example/JUnitPlatformClassDemo.java[tags=user_guide]
 ----
 
-[[running-tests-junit-platform-runner-test-suite]]
+[[test-suite]]
 == Test Suite
 
 If you have multiple test classes you can create a test suite as can be seen in the

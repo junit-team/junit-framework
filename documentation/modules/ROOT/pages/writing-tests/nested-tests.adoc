@@ -31,15 +31,15 @@ lifecycle support with one exception: `@BeforeAll` and `@AfterAll` methods do no
 default_. The reason is that Java does not allow `static` members in inner classes prior
 to Java 16. However, this restriction can be circumvented by annotating a `@Nested` test
 class with `@TestInstance(Lifecycle.PER_CLASS)` (see
-<<writing-tests-test-instance-lifecycle>>). If you are using Java 16 or higher,
+xref:writing-tests/test-instance-lifecycle.adoc[]). If you are using Java 16 or higher,
 `@BeforeAll` and `@AfterAll` methods can be declared as `static` in `@Nested` test
 classes, and this restriction no longer applies.
 
-[[writing-tests-nested-interoperability]]
+[[interoperability]]
 == Interoperability
 
 `@Nested` may be combined with
-<<writing-tests-parameterized-tests, `@ParameterizedClass`>> in which case the nested test
+xref:writing-tests/parameterized-classes-and-tests.adoc[`@ParameterizedClass`] in which case the nested test
 class is parameterized.
 
 The following example illustrates how to combine `@Nested` with `@ParameterizedClass` and

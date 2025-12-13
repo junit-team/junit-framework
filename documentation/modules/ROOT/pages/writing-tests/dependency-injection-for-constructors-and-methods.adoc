@@ -8,7 +8,7 @@ constructors and methods.
 
 `{ParameterResolver}` defines the API for test extensions that wish to _dynamically_
 resolve parameters at runtime. If a _test class_ constructor, a _test method_, or a
-_lifecycle method_ (see <<writing-tests-definitions>>) accepts a parameter, the parameter
+_lifecycle method_ (see xref:writing-tests/definitions.adoc[]) accepts a parameter, the parameter
 must be resolved at runtime by a registered `ParameterResolver`.
 
 There are currently three built-in resolvers that are registered automatically.
@@ -36,7 +36,7 @@ include::example$java/example/TestInfoDemo.java[tags=user_guide]
   information about the current repetition, the total number of repetitions, the number of
   repetitions that have failed, and the failure threshold for the corresponding
   `@RepeatedTest`. Note, however, that `RepetitionExtension` is not registered outside the
-  context of a `@RepeatedTest`. See <<writing-tests-repeated-tests-examples>>.
+  context of a `@RepeatedTest`. See xref:writing-tests/repeated-tests.adoc#examples[Repeated Test Examples].
 
 * `{TestReporterParameterResolver}`: if a constructor or method parameter is of type
   `{TestReporter}`, the `TestReporterParameterResolver` will supply an instance of
@@ -56,7 +56,7 @@ include::example$java/example/TestReporterDemo.java[tags=user_guide]
 ----
 
 NOTE: Other parameter resolvers must be explicitly enabled by registering appropriate
-<<extensions,extensions>> via `@ExtendWith`.
+xref:extensions/overview.adoc[extensions] via `@ExtendWith`.
 
 Check out the `{RandomParametersExtension}` for an example of a custom
 `{ParameterResolver}`. While not intended to be production-ready, it demonstrates the

@@ -1,4 +1,4 @@
-[[release-notes-5.13.2]]
+[[v5.13.2]]
 == 5.13.2
 
 *Date of Release:* June 24, 2025
@@ -10,10 +10,10 @@ link:{junit-framework-repo}+/milestone/98?closed=1+[5.13.2] milestone page in th
 repository on GitHub.
 
 
-[[release-notes-5.13.2-junit-platform]]
+[[v5.13.2-junit-platform]]
 === JUnit Platform
 
-[[release-notes-5.13.2-junit-platform-bug-fixes]]
+[[v5.13.2-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
 * If Git information is included in the Open Test Reporting XML format (see below), any
@@ -26,20 +26,20 @@ repository on GitHub.
   as a potential security vulnerability (CVE-2025-53103). Any credentials are now replaced
   with `\***` before writing them to the XML report.
 
-[[release-notes-5.13.2-junit-platform-deprecations-and-breaking-changes]]
+[[v5.13.2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * Including information about the Git repository (such as the commit hash and branch name)
   in the Open Test Reporting XML format is now an opt-in feature that can be enabled via a
   configuration parameter. Please refer to the
-  <<../user-guide/index.adoc#junit-platform-reporting-open-test-reporting, User Guide>>
+  xref:advanced-topics/junit-platform-reporting.adoc#open-test-reporting[User Guide]
   for details.
 
 
-[[release-notes-5.13.2-junit-jupiter]]
+[[v5.13.2-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-5.13.2-junit-jupiter-bug-fixes]]
+[[v5.13.2-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * Stop reporting discovery issues for cyclic inner class hierarchies not annotated with
@@ -50,13 +50,13 @@ repository on GitHub.
   executed, it is a valid pattern to annotate them with `@Test` for documentation purposes
   and override them in subclasses while re-declaring the `@Test` annotation.
 
-[[release-notes-5.13.2-junit-jupiter-new-features-and-improvements]]
+[[v5.13.2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * `JAVA_26` has been added to the `JRE` enum for use with JRE-based execution conditions.
 
 
-[[release-notes-5.13.2-junit-vintage]]
+[[v5.13.2-junit-vintage]]
 === JUnit Vintage
 
 No changes.

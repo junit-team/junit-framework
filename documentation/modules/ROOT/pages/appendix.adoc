@@ -37,12 +37,12 @@ of the above artifacts and their versions.
 ====
 To ensure that all JUnit artifacts are compatible with each other, their versions should
 be aligned.
-If you rely on <<running-tests-build-spring-boot, Spring Boot>> for dependency management,
+If you rely on xref:running-tests/build-support.adoc#spring-boot[Spring Boot] for dependency management,
 please see the corresponding section.
 Otherwise, instead of managing individual versions of the JUnit artifacts, it is
 recommended to apply the <<dependency-metadata-junit-bom, BOM>> to your project.
-Please refer to the corresponding sections for <<running-tests-build-maven-bom, Maven>> or
-<<running-tests-build-gradle-bom, Gradle>>.
+Please refer to the corresponding sections for xref:running-tests/build-support.adoc#maven-bom[Maven] or
+xref:running-tests/build-support.adoc#gradle-bom[Gradle].
 ====
 
 [[dependency-metadata-junit-platform]]
@@ -57,39 +57,39 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
     itself. _Any usage of internal APIs by external parties is not supported!_
   `junit-platform-console`::
     Support for discovering and executing tests on the JUnit Platform from the console.
-    See <<running-tests-console-launcher>> for details.
+    See xref:running-tests/console-launcher.adoc[] for details.
   `junit-platform-console-standalone`::
     An executable _Fat JAR_ that contains all dependencies is provided in Maven Central under the
     https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone[junit-platform-console-standalone]
-    directory. See <<running-tests-console-launcher>> for details.
+    directory. See xref:running-tests/console-launcher.adoc[] for details.
   `junit-platform-engine`::
-    Public API for test engines. See <<launcher-api-engines-custom>> for details.
+    Public API for test engines. See xref:advanced-topics/launcher-api.adoc#engines-custom[Registering a TestEngine] for details.
   `junit-platform-jfr`::
     Provides a `LauncherDiscoveryListener` and `TestExecutionListener` for Java Flight
-	Recorder events on the JUnit Platform. See <<running-tests-listeners-flight-recorder>>
+	Recorder events on the JUnit Platform. See xref:running-tests/using-listeners-and-interceptors.adoc#recorder[Flight Recorder Support]
 	for details.
   `junit-platform-launcher`::
     Public API for configuring and launching test plans -- typically used by IDEs and
-    build tools. See <<launcher-api>> for details.
+    build tools. See xref:advanced-topics/launcher-api.adoc[] for details.
   `junit-platform-reporting`::
     `TestExecutionListener` implementations that generate test reports -- typically used
-    by IDEs and build tools. See <<junit-platform-reporting>> for details.
+    by IDEs and build tools. See xref:advanced-topics/junit-platform-reporting.adoc[] for details.
   `junit-platform-runner`::
     Runner for executing tests and test suites on the JUnit Platform in a JUnit 4
-    environment. See <<running-tests-junit-platform-runner>> for details.
+    environment. See xref:running-tests/using-junit-4-to-run-the-junit-platform.adoc[] for details.
   `junit-platform-suite`::
     JUnit Platform Suite artifact that transitively pulls in dependencies on
     `junit-platform-suite-api` and `junit-platform-suite-engine` for simplified dependency
 	management in build tools such as Gradle and Maven.
   `junit-platform-suite-api`::
     Annotations for configuring test suites on the JUnit Platform. Supported by the
-    <<junit-platform-suite-engine, JUnit Platform Suite Engine>> and the
-    <<running-tests-junit-platform-runner, JUnitPlatform runner>>.
+    xref:advanced-topics/junit-platform-suite-engine.adoc[JUnit Platform Suite Engine] and the
+    xref:running-tests/using-junit-4-to-run-the-junit-platform.adoc[JUnitPlatform runner].
   `junit-platform-suite-commons`::
     Common support utilities for executing test suites on the JUnit Platform.
   `junit-platform-suite-engine`::
     Engine that executes test suites on the JUnit Platform; only required at runtime. See
-    <<junit-platform-suite-engine,JUnit Platform Suite Engine>> for details.
+    xref:advanced-topics/junit-platform-suite-engine.adoc[JUnit Platform Suite Engine] for details.
   `junit-platform-testkit`::
      Provides support for executing a test plan for a given `TestEngine` and then
      accessing the results via a fluent API to verify the expected results.
@@ -105,11 +105,11 @@ Please refer to the corresponding sections for <<running-tests-build-maven-bom, 
     `junit-jupiter-api`, `junit-jupiter-params`, and `junit-jupiter-engine` for
     simplified dependency management in build tools such as Gradle and Maven.
   `junit-jupiter-api`::
-    JUnit Jupiter API for <<writing-tests,writing tests>> and <<extensions,extensions>>.
+    JUnit Jupiter API for xref:writing-tests/intro.adoc#tests[writing tests] and xref:extensions/overview.adoc[extensions].
   `junit-jupiter-engine`::
     JUnit Jupiter test engine implementation; only required at runtime.
   `junit-jupiter-params`::
-    Support for <<writing-tests-parameterized-tests>> in JUnit Jupiter.
+    Support for xref:writing-tests/parameterized-classes-and-tests.adoc[] in JUnit Jupiter.
   `junit-jupiter-migrationsupport`::
     Support for migrating from JUnit 4 to JUnit Jupiter; only required for support for
     JUnit 4's `@Ignore` annotation and for running selected JUnit 4 rules.
