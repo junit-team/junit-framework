@@ -1,5 +1,5 @@
-[[api-evolution]]
-== API Evolution
+= API Evolution
+:page-toclevels: 1
 
 One of the major goals of JUnit 5 is to improve maintainers' capabilities to evolve JUnit
 despite its being used in many projects. With JUnit 4 a lot of stuff that was originally
@@ -10,7 +10,7 @@ That's why JUnit 5 introduces a defined lifecycle for all publicly available int
 classes, and methods.
 
 [[api-evolution-version-and-status]]
-=== API Version and Status
+== API Version and Status
 
 Every published artifact has a version number `<major>.<minor>.<patch>`, and all publicly
 available interfaces, classes, and methods are annotated with {API} from the
@@ -38,7 +38,7 @@ public members of that type as well. A member is allowed to declare a different 
 value of lower stability.
 
 [[api-evolution-experimental-apis]]
-=== Experimental APIs
+== Experimental APIs
 
 The following tables list which APIs are currently designated as _experimental_ via
 `@API(status = EXPERIMENTAL)`. Caution should be taken when relying on such APIs.
@@ -46,7 +46,7 @@ The following tables list which APIs are currently designated as _experimental_ 
 include::{experimentalApisTableFile}[]
 
 [[api-evolution-deprecated-apis]]
-=== Deprecated APIs
+== Deprecated APIs
 
 The following tables list which APIs are currently designated as _deprecated_ via
 `@API(status = DEPRECATED)`. You should avoid using deprecated APIs whenever possible,
@@ -55,7 +55,7 @@ since such APIs will likely be removed in an upcoming release.
 include::{deprecatedApisTableFile}[]
 
 [[api-evolution-tooling]]
-=== @API Tooling Support
+== @API Tooling Support
 
 The {API_Guardian} project plans to provide tooling support for publishers and consumers
 of APIs annotated with {API}. For example, the tooling support will likely provide a
