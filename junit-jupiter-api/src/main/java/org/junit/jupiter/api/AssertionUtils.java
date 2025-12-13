@@ -18,6 +18,8 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.annotation.Contract;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 
 /**
@@ -27,6 +29,8 @@ import org.junit.platform.commons.util.UnrecoverableExceptions;
  * @since 5.0
  */
 class AssertionUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(AssertionUtils.class);
 
 	private AssertionUtils() {
 		/* no-op */
@@ -128,6 +132,10 @@ class AssertionUtils {
 	static boolean objectsAreEqual(@Nullable Object obj1, @Nullable Object obj2) {
 		if (obj1 == null) {
 			return (obj2 == null);
+		}
+		if (obj1.getClass().isArray() && (obj2 != null && obj2.getClass().isArray())) {
+			// TODO Find first method in user's code, i.e. non-framework code.
+			logger.debug(() -> "Should have used `assertArrayEquals()` in method: <TODO>");
 		}
 		return obj1.equals(obj2);
 	}
