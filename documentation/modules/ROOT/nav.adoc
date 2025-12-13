@@ -53,3 +53,9 @@
 ** xref:extensions/keeping-state-in-extensions.adoc[]
 ** xref:extensions/supported-utilities-in-extensions.adoc[]
 ** xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc[]
+* Advanced Topics
+** xref:advanced-topics/junit-platform-reporting.adoc[]
+** xref:advanced-topics/junit-platform-suite-engine.adoc[]
+** xref:advanced-topics/testkit.adoc[]
+** xref:advanced-topics/launcher-api.adoc[]
+** xref:advanced-topics/engines.adoc[]
