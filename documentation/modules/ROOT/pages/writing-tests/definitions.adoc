@@ -1,17 +1,15 @@
-[[writing-tests-definitions]]
-=== Definitions
+= Definitions
 
-.Platform Concepts
-****
+== Platform Concepts
+
 Container::
 a node in the test tree that contains other containers or tests as its children (e.g. a _test class_).
 
 Test::
 a node in the test tree that verifies expected behavior when executed (e.g. a `@Test` method).
-****
 
-.Jupiter Concepts
-****
+== Jupiter Concepts
+
 Lifecycle Method::
 any method that is directly annotated or meta-annotated with
 `@BeforeAll`, `@AfterAll`, `@BeforeEach`, or `@AfterEach`.
@@ -27,5 +25,3 @@ any instance method that is directly annotated or meta-annotated with
 `@Test`, `@RepeatedTest`, `@ParameterizedTest`, `@TestFactory`, or `@TestTemplate`.
 With the exception of `@Test`, these create a _container_ in the test tree that groups
 _tests_ or, potentially (for `@TestFactory`), other _containers_.
-****
-

@@ -1,5 +1,4 @@
-[[writing-tests-classes-and-methods]]
-=== Test Classes and Methods
+= Test Classes and Methods
 
 Test methods and lifecycle methods may be declared locally within the current test class,
 inherited from superclasses, or inherited from interfaces (see
@@ -45,7 +44,7 @@ lifecycle methods. For further information on runtime semantics, see
 [source,java,indent=0]
 .A standard test class
 ----
-include::{testDir}/example/StandardTests.java[tags=user_guide]
+include::example$java/example/StandardTests.java[tags=user_guide]
 ----
 
 It is also possible to use Java `record` classes as test classes as illustrated by the
@@ -54,6 +53,5 @@ following example.
 [source,java,indent=0]
 .A test class written as a Java record
 ----
-include::{testRelease21Dir}/example/MyFirstJUnitJupiterRecordTests.java[tags=user_guide]
+include::example$java21/example/MyFirstJUnitJupiterRecordTests.java[tags=user_guide]
 ----
-

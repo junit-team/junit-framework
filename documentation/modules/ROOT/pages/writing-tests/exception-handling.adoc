@@ -1,5 +1,4 @@
-[[writing-tests-exceptions]]
-=== Exception Handling
+= Exception Handling
 
 JUnit Jupiter provides robust support for handling test exceptions. This includes the
 built-in mechanisms for managing test failures due to exceptions, the role of exceptions
@@ -7,7 +6,7 @@ in implementing assertions and assumptions, and how to specifically assert non-t
 conditions in code.
 
 [[writing-tests-exceptions-uncaught]]
-==== Uncaught Exceptions
+== Uncaught Exceptions
 
 In JUnit Jupiter, if an exception is thrown from a test method, a lifecycle method, or an
 extension and not caught within that test method, lifecycle method, or extension, the
@@ -29,7 +28,7 @@ Jupiter will mark the test as failed.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/exception/UncaughtExceptionHandlingDemo.java[tags=user_guide]
+include::example$java/example/exception/UncaughtExceptionHandlingDemo.java[tags=user_guide]
 ----
 
 NOTE: It's important to note that specifying a `throws` clause in the test method has
@@ -38,7 +37,7 @@ as an expectation or assertion about what exceptions the test method should thro
 fails only if an exception is thrown unexpectedly or if an assertion fails.
 
 [[writing-tests-exceptions-failed-assertions]]
-==== Failed Assertions
+== Failed Assertions
 
 Assertions in JUnit Jupiter are implemented using exceptions. The framework provides a set
 of assertion methods in the `org.junit.jupiter.api.Assertions` class, which throw
@@ -62,11 +61,11 @@ will mark the test as failed.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/exception/FailedAssertionDemo.java[tags=user_guide]
+include::example$java/example/exception/FailedAssertionDemo.java[tags=user_guide]
 ----
 
 [[writing-tests-exceptions-expected]]
-==== Asserting Expected Exceptions
+== Asserting Expected Exceptions
 
 JUnit Jupiter offers specialized assertions for testing that specific exceptions are
 thrown under expected conditions. The `assertThrows()` and `assertThrowsExactly()`
@@ -74,7 +73,7 @@ assertions are critical tools for validating that your code responds correctly t
 conditions by throwing the appropriate exceptions.
 
 [[writing-tests-exceptions-expected-assertThrows]]
-===== Using `assertThrows()`
+=== Using `assertThrows()`
 
 The `assertThrows()` method is used to verify that a particular type of exception is
 thrown during the execution of a provided executable block. It not only checks for the
@@ -84,11 +83,11 @@ thrown exception object to allow performing additional assertions on it.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/exception/ExceptionAssertionDemo.java[tags=user_guide]
+include::example$java/example/exception/ExceptionAssertionDemo.java[tags=user_guide]
 ----
 
 [[writing-tests-exceptions-expected-assertThrowsExactly]]
-===== Using `assertThrowsExactly()`
+=== Using `assertThrowsExactly()`
 
 The `assertThrowsExactly()` method is used when you need to assert that the exception
 thrown is exactly of a specific type, not allowing for subclasses of the expected
@@ -98,11 +97,11 @@ returns the thrown exception object to allow performing additional assertions on
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/exception/ExceptionAssertionExactDemo.java[tags=user_guide]
+include::example$java/example/exception/ExceptionAssertionExactDemo.java[tags=user_guide]
 ----
 
 [[writing-tests-exceptions-not-expected]]
-==== Asserting That no Exception is Expected
+== Asserting That no Exception is Expected
 
 Although any exception thrown from a test method will cause the test to fail, there are
 certain use cases where it can be beneficial to explicitly assert that an exception is
@@ -112,10 +111,9 @@ throw any exceptions.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/exception/AssertDoesNotThrowExceptionDemo.java[tags=user_guide]
+include::example$java/example/exception/AssertDoesNotThrowExceptionDemo.java[tags=user_guide]
 ----
 
 NOTE: Third-party assertion libraries often provide similar support. For example, AssertJ
 has `assertThatNoException().isThrownBy(() -> ...)`. See also:
 <<writing-tests-assertions-third-party>>.
-

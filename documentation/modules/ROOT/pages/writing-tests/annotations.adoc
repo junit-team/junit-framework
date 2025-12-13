@@ -1,5 +1,4 @@
-[[writing-tests-annotations]]
-=== Annotations
+= Annotations
 
 JUnit Jupiter supports the following annotations for configuring tests and extending the
 framework.
@@ -131,7 +130,7 @@ WARNING: Some annotations may currently be _experimental_. Consult the table in
 <<api-evolution-experimental-apis>> for details.
 
 [[writing-tests-meta-annotations]]
-==== Meta-Annotations and Composed Annotations
+== Meta-Annotations and Composed Annotations
 
 JUnit Jupiter annotations can be used as _meta-annotations_. That means that you can
 define your own _composed annotation_ that will automatically _inherit_ the semantics of
@@ -144,7 +143,7 @@ named `@Fast` as follows. `@Fast` can then be used as a drop-in replacement for
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/Fast.java[tags=user_guide]
+include::example$java/example/Fast.java[tags=user_guide]
 ----
 
 The following `@Test` method demonstrates usage of the `@Fast` annotation.
@@ -163,7 +162,7 @@ that can be used as a drop-in replacement for `@Tag("fast")` _and_ `@Test`.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/FastTest.java[tags=user_guide]
+include::example$java/example/FastTest.java[tags=user_guide]
 ----
 
 JUnit automatically recognizes the following as a `@Test` method that is tagged with
@@ -176,4 +175,3 @@ void myFastTest() {
     // ...
 }
 ----
-

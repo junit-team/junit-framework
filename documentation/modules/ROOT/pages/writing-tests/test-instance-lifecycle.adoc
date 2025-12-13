@@ -1,5 +1,4 @@
-[[writing-tests-test-instance-lifecycle]]
-=== Test Instance Lifecycle
+= Test Instance Lifecycle
 
 In order to allow individual test methods to be executed in isolation and to avoid
 unexpected side effects due to mutable test instance state, JUnit creates a new instance
@@ -32,7 +31,7 @@ easier to implement non-static `@BeforeAll` and `@AfterAll` lifecycle methods as
 mode.
 
 [[writing-tests-test-instance-lifecycle-changing-default]]
-==== Changing the Default Test Instance Lifecycle
+== Changing the Default Test Instance Lifecycle
 
 If a test class or test interface is not annotated with `@TestInstance`, JUnit Jupiter
 will use a _default_ lifecycle mode. The standard _default_ mode is `PER_METHOD`;
@@ -66,4 +65,3 @@ configures "per-class" semantics as the default but tests in the IDE are execute
 "per-method" semantics, that can make it difficult to debug errors that occur on the
 build server. It is therefore recommended to change the default in the JUnit Platform
 configuration file instead of via a JVM system property.
-

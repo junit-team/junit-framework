@@ -1,5 +1,4 @@
-[[writing-tests-dependency-injection]]
-=== Dependency Injection for Constructors and Methods
+= Dependency Injection for Constructors and Methods
 
 In all prior JUnit versions, test constructors or methods were not allowed to have
 parameters (at least not with the standard `Runner` implementations). As one of the major
@@ -28,7 +27,7 @@ class constructor, `@BeforeEach` method, and `@Test` method.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/TestInfoDemo.java[tags=user_guide]
+include::example$java/example/TestInfoDemo.java[tags=user_guide]
 ----
 
 * `{RepetitionExtension}`: if a method parameter in a `@RepeatedTest`, `@BeforeEach`, or
@@ -53,7 +52,7 @@ display them in the user interface for test results.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/TestReporterDemo.java[tags=user_guide]
+include::example$java/example/TestReporterDemo.java[tags=user_guide]
 ----
 
 NOTE: Other parameter resolvers must be explicitly enabled by registering appropriate
@@ -90,4 +89,3 @@ When the type of the parameter to inject is the only condition for your
 `{ParameterResolver}`, you can use the generic `{TypeBasedParameterResolver}` base class.
 The `supportsParameters` method is implemented behind the scenes and supports
 parameterized types.
-

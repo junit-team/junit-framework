@@ -1,5 +1,4 @@
-[[writing-tests-repeated-tests]]
-=== Repeated Tests
+= Repeated Tests
 
 JUnit Jupiter provides the ability to repeat a test a specified number of times by
 annotating a method with `@RepeatedTest` and specifying the total number of repetitions
@@ -64,7 +63,7 @@ developer can choose to have an instance of `{RepetitionInfo}` injected into a
 `@RepeatedTest`, `@BeforeEach`, or `@AfterEach` method.
 
 [[writing-tests-repeated-tests-examples]]
-==== Repeated Test Examples
+== Repeated Test Examples
 
 The `RepeatedTestsDemo` class at the end of this section demonstrates several examples of
 repeated tests.
@@ -128,7 +127,7 @@ INFO: About to execute repetition 5 of 5 for repeatedTestInGerman
 
 [source,java]
 ----
-include::{testDir}/example/RepeatedTestsDemo.java[tags=user_guide]
+include::example$java/example/RepeatedTestsDemo.java[tags=user_guide]
 ----
 
 When using the `ConsoleLauncher` with the unicode theme enabled, execution of
@@ -173,5 +172,3 @@ When using the `ConsoleLauncher` with the unicode theme enabled, execution of
 │     ├─ Wiederholung 4 von 5 ✔
 │     └─ Wiederholung 5 von 5 ✔
 ....
-
-

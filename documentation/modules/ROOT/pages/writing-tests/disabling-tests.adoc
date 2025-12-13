@@ -1,5 +1,4 @@
-[[writing-tests-disabling]]
-=== Disabling Tests
+= Disabling Tests
 
 Entire test classes or individual test methods may be _disabled_ via the `{Disabled}`
 annotation, via one of the annotations discussed in
@@ -19,14 +18,14 @@ Here's a `@Disabled` test class.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/DisabledClassDemo.java[tags=user_guide]
+include::example$java/example/DisabledClassDemo.java[tags=user_guide]
 ----
 
 And here's a test class that contains a `@Disabled` test method.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/DisabledTestsDemo.java[tags=user_guide]
+include::example$java/example/DisabledTestsDemo.java[tags=user_guide]
 ----
 
 [TIP]
@@ -44,5 +43,3 @@ traceability, etc.
 `@Disabled` is not `@Inherited`. Consequently, if you wish to disable a class whose
 superclass is `@Disabled`, you must redeclare `@Disabled` on the subclass.
 ====
-
-

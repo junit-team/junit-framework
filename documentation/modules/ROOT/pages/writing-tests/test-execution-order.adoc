@@ -1,5 +1,4 @@
-[[writing-tests-test-execution-order]]
-=== Test Execution Order
+= Test Execution Order
 
 By default, test classes and methods will be ordered using an algorithm that is
 deterministic but intentionally nonobvious. This ensures that subsequent runs of a test
@@ -9,7 +8,7 @@ repeatable builds.
 NOTE: See <<writing-tests-definitions>> for a definition of _test method_ and _test class_.
 
 [[writing-tests-test-execution-order-methods]]
-==== Method Order
+== Method Order
 
 Although true _unit tests_ typically should not rely on the order in which they are
 executed, there are times when it is necessary to enforce a specific test method execution
@@ -42,11 +41,11 @@ order specified via the `@Order` annotation.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/OrderedTestsDemo.java[tags=user_guide]
+include::example$java/example/OrderedTestsDemo.java[tags=user_guide]
 ----
 
 [[writing-tests-test-execution-order-methods-default]]
-===== Setting the Default Method Orderer
+=== Setting the Default Method Orderer
 
 You can use the `junit.jupiter.testmethod.order.default` <<running-tests-config-params,
 configuration parameter>> to specify the fully qualified class name of the
@@ -69,7 +68,7 @@ Similarly, you can specify the fully qualified name of any custom class that imp
 `MethodOrderer`.
 
 [[writing-tests-test-execution-order-classes]]
-==== Class Order
+== Class Order
 
 Although test classes typically should not rely on the order in which they are executed,
 there are times when it is desirable to enforce a specific test class execution order. You
@@ -132,6 +131,5 @@ executed in the order specified via the `@Order` annotation.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/OrderedNestedTestClassesDemo.java[tags=user_guide]
+include::example$java/example/OrderedNestedTestClassesDemo.java[tags=user_guide]
 ----
-
