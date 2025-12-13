@@ -23,3 +23,4 @@
 ** xref:writing-tests/timeouts.adoc[]
 ** xref:writing-tests/parallel-execution.adoc[]
 ** xref:writing-tests/built-in-extensions.adoc[]
+* xref:migrating-from-junit4.adoc[]
