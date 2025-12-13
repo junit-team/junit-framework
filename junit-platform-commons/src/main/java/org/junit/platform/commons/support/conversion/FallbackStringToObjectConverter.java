@@ -15,6 +15,8 @@ import static org.junit.platform.commons.support.ModifierSupport.isNotPrivate;
 import static org.junit.platform.commons.support.ModifierSupport.isNotStatic;
 import static org.junit.platform.commons.support.ReflectionSupport.findMethods;
 import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
+import static org.junit.platform.commons.support.conversion.FallbackStringToObjectConverter.DeprecationStatus.EXCLUDE_DEPRECATED;
+import static org.junit.platform.commons.support.conversion.FallbackStringToObjectConverter.DeprecationStatus.INCLUDE_DEPRECATED;
 import static org.junit.platform.commons.util.ReflectionUtils.findConstructors;
 import static org.junit.platform.commons.util.ReflectionUtils.newInstance;
 
@@ -32,8 +34,8 @@ import org.junit.platform.commons.util.Preconditions;
 /**
  * {@code FallbackStringToObjectConverter} is a {@link StringToObjectConverter}
  * that provides a fallback conversion strategy for converting from a
- * {@link String} to a given target type by invoking a static factory method
- * or factory constructor defined in the target type.
+ * {@link String} or {@link CharSequence} to a given target type by invoking a
+ * static factory method or factory constructor defined in the target type.
  *
  * <h2>Search Algorithm</h2>
  *
@@ -92,12 +94,29 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 	private static Function<String, @Nullable Object> findFactoryExecutable(Class<?> targetType) {
 		return factoryExecutableCache.computeIfAbsent(targetType, type -> {
 			// First, search for exact String argument matches.
-			Function<String, @Nullable Object> factory = findFactoryExecutable(type, String.class);
+			var factory = findFactoryMethodExecutable(type, String.class, INCLUDE_DEPRECATED);
+			if (factory != null) {
+				return factory;
+			}
+			factory = findFactoryConstructorExecutable(type, String.class);
 			if (factory != null) {
 				return factory;
 			}
 			// Second, fall back to CharSequence argument matches.
-			factory = findFactoryExecutable(type, CharSequence.class);
+			factory = findFactoryMethodExecutable(type, CharSequence.class, INCLUDE_DEPRECATED);
+			if (factory != null) {
+				return factory;
+			}
+			factory = findFactoryConstructorExecutable(type, CharSequence.class);
+			if (factory != null) {
+				return factory;
+			}
+			// Third, try factory methods again, but exclude deprecated methods
+			factory = findFactoryMethodExecutable(type, String.class, EXCLUDE_DEPRECATED);
+			if (factory != null) {
+				return factory;
+			}
+			factory = findFactoryMethodExecutable(type, CharSequence.class, EXCLUDE_DEPRECATED);
 			if (factory != null) {
 				return factory;
 			}
@@ -106,13 +125,17 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 		});
 	}
 
-	private static @Nullable Function<String, @Nullable Object> findFactoryExecutable(Class<?> targetType,
-			Class<?> parameterType) {
-
-		Method factoryMethod = findFactoryMethod(targetType, parameterType);
+	private static @Nullable Function<String, @Nullable Object> findFactoryMethodExecutable(Class<?> targetType,
+			Class<?> parameterType, DeprecationStatus deprecationStatus) {
+		Method factoryMethod = findFactoryMethod(targetType, parameterType, deprecationStatus);
 		if (factoryMethod != null) {
 			return source -> invokeMethod(factoryMethod, null, source);
 		}
+		return null;
+	}
+
+	private static @Nullable Function<String, @Nullable Object> findFactoryConstructorExecutable(Class<?> targetType,
+			Class<?> parameterType) {
 		Constructor<?> constructor = findFactoryConstructor(targetType, parameterType);
 		if (constructor != null) {
 			return source -> newInstance(constructor, source);
@@ -120,9 +143,10 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 		return null;
 	}
 
-	private static @Nullable Method findFactoryMethod(Class<?> targetType, Class<?> parameterType) {
-		List<Method> factoryMethods = findMethods(targetType, new IsFactoryMethod(targetType, parameterType),
-			BOTTOM_UP);
+	private static @Nullable Method findFactoryMethod(Class<?> targetType, Class<?> parameterType,
+			DeprecationStatus deprecationStatus) {
+		var isFactoryMethod = new IsFactoryMethod(targetType, parameterType, deprecationStatus);
+		List<Method> factoryMethods = findMethods(targetType, isFactoryMethod, BOTTOM_UP);
 		if (factoryMethods.size() == 1) {
 			return factoryMethods.get(0);
 		}
@@ -138,12 +162,17 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 		return null;
 	}
 
+	enum DeprecationStatus {
+		INCLUDE_DEPRECATED, EXCLUDE_DEPRECATED
+	}
+
 	/**
 	 * {@link Predicate} that determines if the {@link Method} supplied to
 	 * {@link #test(Method)} is a non-private static factory method for the
 	 * supplied {@link #targetType} and {@link #parameterType}.
 	 */
-	record IsFactoryMethod(Class<?> targetType, Class<?> parameterType) implements Predicate<Method> {
+	record IsFactoryMethod(Class<?> targetType, Class<?> parameterType, DeprecationStatus deprecationStatus)
+			implements Predicate<Method> {
 
 		@Override
 		public boolean test(Method method) {
@@ -152,6 +181,10 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 				return false;
 			}
 			if (isNotStatic(method)) {
+				return false;
+			}
+			if (deprecationStatus == DeprecationStatus.EXCLUDE_DEPRECATED
+					&& method.getAnnotation(Deprecated.class) != null) {
 				return false;
 			}
 			return isFactoryCandidate(method, this.parameterType);
