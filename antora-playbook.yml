@@ -1,0 +1,51 @@
+antora:
+  extensions:
+  - '@antora/collector-extension'
+  - '@antora/lunr-extension'
+  - require: '@springio/antora-extensions/root-component-extension'
+    root_component_name: junit
+  - require: '@springio/antora-extensions/root-attachments-extension'
+site:
+  title: JUnit User Guide
+  url: https://docs.junit.org
+  robots: allow
+content:
+  sources:
+  - url: https://github.com/junit-team/junit-framework.git
+    branches:
+    - 'main'
+    - 'r6.*'
+    - '!r6.0.0'
+    - '!r6.0.1'
+    - 'antora/*'
+    - 'releases/5.14.x'
+    - 'releases/6.0.x'
+    start_path: documentation
+    worktrees: true
+asciidoc:
+  attributes:
+    page-pagination: ''
+    idprefix: '@'
+    idseparator: '-@'
+    table-caption: false
+    table-frame: 'none@'
+    table-grid: 'rows@'
+    table-stripes: 'odd@'
+    figure-caption: false
+    example-caption: false
+    listing-caption: false
+    hide-uri-scheme: '@'
+    attribute-missing: warn
+runtime:
+  log:
+    failure_level: warn
+urls:
+  redirect_facility: static
+  latest_version_segment: current
+  latest_prerelease_version_segment: snapshot
+  latest_version_segment_strategy: redirect:from # TODO does not work with `redirect_facility: static`
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  supplemental_files: ./supplemental-ui

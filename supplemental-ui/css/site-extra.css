@@ -1,0 +1,75 @@
+body {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+}
+
+.navbar-brand .title {
+    font-family: "Blinker", sans-serif;
+    font-weight: 600;
+}
+.navbar-brand .logo {
+    height: 1em;
+    padding-right: .5ex;
+}
+.navbar-brand .version {
+    color: rgba(0, 0, 0, 0.33);
+    padding-left: 1em;
+    font-weight: 400;
+}
+
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+    font-family: "Blinker", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    color: #444;
+}
+code,
+kbd,
+pre {
+    font-family: "JetBrains Mono", monospace;
+    font-optical-sizing: auto;
+}
+
+.navbar {
+    background: #25a162;
+}
+.navbar-end .navbar-item.has-dropdown:hover .navbar-link,
+.navbar-end .navbar-link:hover,
+.navbar-end>a.navbar-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.nav-menu {
+    padding-left: 1rem;
+}
+.nav-menu > .title {
+    display: none;
+}
+
+.breadcrumbs li:first-child {
+    display: none;
+}
+
+.toc .toc-menu a.is-active {
+    border-left-color: #25a162;
+}
+
+.doc a {
+    color: #dc524a
+}
+.doc a:hover {
+    color: #b62b23
+}
+
+.doc .dlist dt {
+    font-style: normal;
+}
+
+.version-banner {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    font-size: .88889rem;
+    padding: 1rem 1rem .75rem;
+    margin: 1.5rem 0;
+}
