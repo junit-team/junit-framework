@@ -1,7 +1,5 @@
-[[extensions-overview]]
-=== Overview
+= Extension Model
 
 In contrast to the competing `Runner`, `TestRule`, and `MethodRule` extension points in
 JUnit 4, the JUnit Jupiter extension model consists of a single, coherent concept: the
 `Extension` API. Note, however, that `Extension` itself is just a marker interface.
-

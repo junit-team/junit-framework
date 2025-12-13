@@ -1,9 +1,7 @@
-[[extensions-test-instance-pre-destroy-callback]]
-=== Test Instance Pre-destroy Callback
+= Test Instance Pre-destroy Callback
 
 `{TestInstancePreDestroyCallback}` defines the API for `Extensions` that wish to process
 test instances _after_ they have been used in tests and _before_ they are destroyed.
 
 Common use cases include cleaning dependencies that have been injected into the
 test instance, invoking custom de-initialization methods on the test instance, etc.
-
