@@ -1,4 +1,0 @@
-[[contributors]]
-== Contributors
-
-Browse the {junit-framework-repo}/graphs/contributors[current list of contributors] directly on GitHub.
