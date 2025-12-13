@@ -1,5 +1,4 @@
-[[junit-platform-reporting]]
-=== JUnit Platform Reporting
+= JUnit Platform Reporting
 
 The `junit-platform-reporting` artifact contains `{TestExecutionListener}` implementations
 that generate XML test reports in two flavors:
@@ -10,7 +9,7 @@ NOTE: The module also contains other `TestExecutionListener` implementations tha
 used to build custom reporting. See <<running-tests-listeners>> for details.
 
 [[junit-platform-reporting-output-directory]]
-==== Output Directory
+== Output Directory
 
 The JUnit Platform provides an `{OutputDirectoryCreator}` via `{EngineDiscoveryRequest}`
 and `{TestPlan}` to registered <<test-engines, test engines>> and
@@ -29,7 +28,7 @@ Gradle's or Maven's parallel execution capabilities which create multiple JVM fo
 that run concurrently.
 
 [[junit-platform-reporting-open-test-reporting]]
-==== Open Test Reporting
+== Open Test Reporting
 
 `{OpenTestReportGeneratingListener}` writes an XML report for the entire execution in the
 event-based format specified by {OpenTestReporting} which supports all features of the
@@ -52,7 +51,7 @@ written to `System.out` and `System.err` will be included in the report as well.
 TIP: The {OpenTestReportingCliTool} can be used to convert from the event-based format to
 the hierarchical format which is more human-readable.
 
-===== Gradle
+=== Gradle
 
 For Gradle, writing Open Test Reporting compatible XML reports can be enabled and
 configured via system properties. The following samples configure its output directory to
@@ -96,7 +95,7 @@ tasks.withType<Test>().configureEach {
 }
 ----
 
-===== Maven
+=== Maven
 
 For Maven Surefire/Failsafe, you can enable Open Test Reporting output and configure the
 resulting XML files to be written to the same directory Surefire/Failsafe uses for its own
@@ -135,7 +134,7 @@ XML reports as follows:
 </project>
 ----
 
-===== Console Launcher
+=== Console Launcher
 
 When using the <<running-tests-console-launcher>>, you can enable Open Test Reporting
 output by setting the configuration parameters via `--config`:
@@ -157,7 +156,7 @@ $ java -jar junit-platform-console-standalone-{platform-version}.jar <OPTIONS> \
 ----
 
 [[junit-platform-reporting-legacy-xml]]
-==== Legacy XML format
+== Legacy XML format
 
 `{LegacyXmlReportGeneratingListener}` generates a separate XML report for each root in the
 `{TestPlan}`. Note that the generated XML format is compatible with the de facto standard
