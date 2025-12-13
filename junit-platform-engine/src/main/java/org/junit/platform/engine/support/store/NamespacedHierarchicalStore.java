@@ -214,7 +214,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		StoredValue storedValue = getStoredValue(compositeKey);
 		if (storedValue == null) {
 			storedValue = this.storedValues.computeIfAbsent(compositeKey,
-				__ -> newStoredValue(new MemoizingSupplier(() -> {
+				__ -> newStoredValue(new MemorizingSupplier(() -> {
 					rejectIfClosed();
 					return defaultCreator.apply(key);
 				})));
@@ -240,25 +240,33 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	@API(status = MAINTAINED, since = "6.0")
 	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
-		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
-		StoredValue storedValue = getStoredValue(compositeKey);
+		var compositeKey = new CompositeKey<>(namespace, key);
+		var storedValue = getStoredValue(compositeKey);
 		var result = StoredValue.evaluateIfNotNull(storedValue);
 		if (result == null) {
-			StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				if (StoredValue.evaluateIfNotNull(oldStoredValue) == null) {
-					rejectIfClosed();
-					var computedValue = Preconditions.notNull(defaultCreator.apply(key),
-						"defaultCreator must not return null");
-					return newStoredValue(() -> {
-						rejectIfClosed();
-						return computedValue;
-					});
+			var value = storedValues.compute(compositeKey,
+				(__, currentValue) -> currentValue == null || currentValue.equals(storedValue)
+						? storeNewValue(key, defaultCreator)
+						: currentValue);
+			try {
+				return requireNonNull(value.evaluate());
+			}
+			catch (Throwable t) { // remove failed entry to allow retry.
+				if (value.equals(storedValues.get(compositeKey))) {
+					storedValues.remove(compositeKey, value);
 				}
-				return oldStoredValue;
-			});
-			return requireNonNull(newStoredValue.evaluate());
+				throw t;
+			}
 		}
 		return result;
+	}
+
+	private <K, V> StoredValue storeNewValue(K key, Function<? super K, ? extends V> defaultCreator) {
+		rejectIfClosed();
+		return newStoredValue(new MemorizingSupplier(() -> {
+			rejectIfClosed();
+			return requireNonNull(defaultCreator.apply(key));
+		}));
 	}
 
 	/**
@@ -469,7 +477,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 *
 	 * @see StoredValue
 	 */
-	private static class MemoizingSupplier implements Supplier<@Nullable Object> {
+	private static class MemorizingSupplier implements Supplier<@Nullable Object> {
 
 		private static final Object NO_VALUE_SET = new Object();
 
@@ -478,7 +486,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		@Nullable
 		private volatile Object value = NO_VALUE_SET;
 
-		private MemoizingSupplier(Supplier<@Nullable Object> delegate) {
+		private MemorizingSupplier(Supplier<@Nullable Object> delegate) {
 			this.delegate = delegate;
 		}
 
