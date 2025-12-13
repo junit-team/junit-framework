@@ -1,5 +1,4 @@
-[[extensions-registration]]
-=== Registering Extensions
+= Registering Extensions
 
 Extensions can be registered _declaratively_ via
 <<extensions-registration-declarative,`@ExtendWith`>>, _programmatically_ via
@@ -7,7 +6,7 @@ Extensions can be registered _declaratively_ via
 Java's <<extensions-registration-automatic,`ServiceLoader`>> mechanism.
 
 [[extensions-registration-declarative]]
-==== Declarative Extension Registration
+== Declarative Extension Registration
 
 Developers can register one or more extensions _declaratively_ by annotating a test
 interface, test class, test method, or custom _<<writing-tests-meta-annotations,composed
@@ -97,12 +96,12 @@ transparently as in the following `RandomNumberDemo` example.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/extensions/Random.java[tags=user_guide]
+include::example$java/example/extensions/Random.java[tags=user_guide]
 ----
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/extensions/RandomNumberDemo.java[tags=user_guide]
+include::example$java/example/extensions/RandomNumberDemo.java[tags=user_guide]
 ----
 
 [[extensions-RandomNumberExtension]]
@@ -121,7 +120,7 @@ Specifically, `RandomNumberExtension` implements the following extension APIs:
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/extensions/RandomNumberExtension.java[tags=user_guide]
+include::example$java/example/extensions/RandomNumberExtension.java[tags=user_guide]
 ----
 
 [TIP]
@@ -149,7 +148,7 @@ NOTE: `@ExtendWith` fields may be either `static` or non-static. The documentati
 `@RegisterExtension` fields also applies to `@ExtendWith` fields.
 
 [[extensions-registration-programmatic]]
-==== Programmatic Extension Registration
+== Programmatic Extension Registration
 
 Developers can register extensions _programmatically_ by annotating fields in test classes
 with `{RegisterExtension}`.
@@ -196,7 +195,7 @@ NOTE: `@RegisterExtension` fields must not be `null` (at evaluation time) but ma
 either `static` or non-static.
 
 [[extensions-registration-programmatic-static-fields]]
-===== Static Fields
+=== Static Fields
 
 If a `@RegisterExtension` field is `static`, the extension will be registered after
 extensions that are registered at the class level via `@ExtendWith`. Such _static
@@ -218,11 +217,11 @@ lifecycle methods annotated with `@BeforeAll` or `@AfterAll` as well as `@Before
 [source,java,indent=0]
 .Registering an extension via a static field in Java
 ----
-include::{testDir}/example/registration/WebServerDemo.java[tags=user_guide]
+include::example$java/example/registration/WebServerDemo.java[tags=user_guide]
 ----
 
 [[extensions-registration-programmatic-static-fields-kotlin]]
-====== Static Fields in Kotlin
+==== Static Fields in Kotlin
 
 The Kotlin programming language does not have the concept of a `static` field. However,
 the compiler can be instructed to generate a `private static` field using the `@JvmStatic`
@@ -235,11 +234,11 @@ has been ported to Kotlin.
 [source,kotlin,indent=0]
 .Registering an extension via a static field in Kotlin
 ----
-include::{kotlinTestDir}/example/registration/KotlinWebServerDemo.kt[tags=user_guide]
+include::example$kotlin/example/registration/KotlinWebServerDemo.kt[tags=user_guide]
 ----
 
 [[extensions-registration-programmatic-instance-fields]]
-===== Instance Fields
+=== Instance Fields
 
 If a `@RegisterExtension` field is non-static (i.e., an instance field), the extension
 will be registered after the test class has been instantiated and after each registered
@@ -260,11 +259,11 @@ instance of the extension via the `docs` field if necessary.
 [source,java,indent=0]
 .An extension registered via an instance field
 ----
-include::{testDir}/example/registration/DocumentationDemo.java[tags=user_guide]
+include::example$java/example/registration/DocumentationDemo.java[tags=user_guide]
 ----
 
 [[extensions-registration-automatic]]
-==== Automatic Extension Registration
+== Automatic Extension Registration
 
 In addition to <<extensions-registration-declarative,declarative extension registration>>
 and <<extensions-registration-programmatic,programmatic extension registration>> support
@@ -277,7 +276,7 @@ name in a file named `org.junit.jupiter.api.extension.Extension` within the
 `/META-INF/services` folder in its enclosing JAR file.
 
 [[extensions-registration-automatic-enabling]]
-===== Enabling Automatic Extension Detection
+=== Enabling Automatic Extension Detection
 
 Auto-detection is an advanced feature and is therefore not enabled by default. To enable
 it, set the `junit.jupiter.extensions.autodetection.enabled` _configuration parameter_ to
@@ -295,7 +294,7 @@ will be added to the extension registry after JUnit Jupiter's global extensions 
 support for `TestInfo`, `TestReporter`, etc.).
 
 [[extensions-registration-automatic-filtering]]
-===== Filtering Auto-detected Extensions
+=== Filtering Auto-detected Extensions
 
 The list of auto-detected extensions can be filtered using include and exclude patterns
 via the following <<running-tests-config-params, configuration parameters>>:
@@ -312,7 +311,7 @@ match any exclude pattern will be auto-detected.
 See <<running-tests-config-params-deactivation-pattern>> for details on the pattern syntax.
 
 [[extensions-registration-inheritance]]
-==== Extension Inheritance
+== Extension Inheritance
 
 Registered extensions are inherited within test class hierarchies with top-down semantics.
 Similarly, extensions registered at the class-level are inherited at the method-level.
@@ -331,4 +330,3 @@ Extension Registration Order>> for details).
 NOTE: A specific extension implementation can only be registered once for a given
 extension context and its parent contexts. Consequently, any attempt to register a
 duplicate extension implementation will be ignored.
-

@@ -1,5 +1,4 @@
-[[extensions-test-instance-factories]]
-=== Test Instance Factories
+= Test Instance Factories
 
 `{TestInstanceFactory}` defines the API for `Extensions` that wish to _create_ test class
 instances.
@@ -31,4 +30,3 @@ You may override the `getTestInstantiationExtensionContextScope(...)` method to 
 `TEST_METHOD` to make test-specific data available to your extension implementation or if
 you want to <<extensions-keeping-state, keep state>> on the test method level.
 ====
-

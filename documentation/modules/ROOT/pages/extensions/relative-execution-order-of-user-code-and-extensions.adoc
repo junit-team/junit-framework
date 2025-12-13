@@ -1,5 +1,4 @@
-[[extensions-execution-order]]
-=== Relative Execution Order of User Code and Extensions
+= Relative Execution Order of User Code and Extensions
 
 When executing a test class that contains one or more test methods, a number of extension
 callbacks are called in addition to the user-supplied test and lifecycle methods.
@@ -7,7 +6,7 @@ callbacks are called in addition to the user-supplied test and lifecycle methods
 NOTE: See also: <<writing-tests-test-execution-order>>
 
 [[extensions-execution-order-overview]]
-==== User and Extension Code
+== User and Extension Code
 
 The following diagram illustrates the relative order of user-supplied code and extension
 code. User-supplied test and lifecycle methods are shown in orange, with callback code
@@ -73,7 +72,7 @@ All invocations of user code methods in the above table can additionally be inte
 by implementing <<extensions-intercepting-invocations, `InvocationInterceptor`>>.
 
 [[extensions-execution-order-wrapping-behavior]]
-==== Wrapping Behavior of Callbacks
+== Wrapping Behavior of Callbacks
 
 JUnit Jupiter always guarantees _wrapping_ behavior for multiple registered extensions
 that implement lifecycle callbacks such as `BeforeAllCallback`, `AfterAllCallback`,
@@ -126,25 +125,25 @@ user-supplied callback methods and callback methods in extensions.
 [source,java,indent=0]
 .Extension1
 ----
-include::{testDir}/example/callbacks/Extension1.java[tags=user_guide]
+include::example$java/example/callbacks/Extension1.java[tags=user_guide]
 ----
 
 [source,java,indent=0]
 .Extension2
 ----
-include::{testDir}/example/callbacks/Extension2.java[tags=user_guide]
+include::example$java/example/callbacks/Extension2.java[tags=user_guide]
 ----
 
 [source,java,indent=0]
 .AbstractDatabaseTests
 ----
-include::{testDir}/example/callbacks/AbstractDatabaseTests.java[tags=user_guide]
+include::example$java/example/callbacks/AbstractDatabaseTests.java[tags=user_guide]
 ----
 
 [source,java,indent=0]
 .DatabaseTestsDemo
 ----
-include::{testDir}/example/callbacks/DatabaseTestsDemo.java[tags=user_guide]
+include::example$java/example/callbacks/DatabaseTestsDemo.java[tags=user_guide]
 ----
 
 When the `DatabaseTestsDemo` test class is executed, the following is logged.
@@ -204,7 +203,7 @@ are executed.
 [source,java,indent=0]
 .BrokenLifecycleMethodConfigDemo
 ----
-include::{testDir}/example/callbacks/BrokenLifecycleMethodConfigDemo.java[tags=user_guide]
+include::example$java/example/callbacks/BrokenLifecycleMethodConfigDemo.java[tags=user_guide]
 ----
 
 When the `BrokenLifecycleMethodConfigDemo` test class is executed, the following is logged.
