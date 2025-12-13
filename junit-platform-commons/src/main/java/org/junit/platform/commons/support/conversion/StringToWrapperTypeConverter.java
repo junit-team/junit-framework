@@ -11,45 +11,45 @@
 package org.junit.platform.commons.support.conversion;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * Internal API for converting arguments of type {@link String} to a specified
- * target type.
+ * wrapper type.
  */
-interface StringToObjectConverter {
+abstract class StringToWrapperTypeConverter<T> implements Converter<String, T> {
+
+	@Override
+	public final boolean canConvert(ConversionContext context) {
+		return !context.sourceType().equals(TypeDescriptor.NONE) && canConvert(getTargetType(context));
+	}
 
 	/**
 	 * Determine if this converter can convert from a {@link String} to the
 	 * supplied target type (which is guaranteed to be a wrapper type for
 	 * primitives &mdash; for example, {@link Integer} instead of {@code int}).
 	 */
-	boolean canConvertTo(Class<?> targetType);
+	abstract boolean canConvert(Class<?> targetType);
+
+	@Override
+	public final T convert(@Nullable String source, ConversionContext context) throws ConversionException {
+		Preconditions.notNull(source, "source cannot be null");
+		return convert(source, getTargetType(context));
+	}
 
 	/**
 	 * Convert the supplied {@link String} to the supplied target type (which is
 	 * guaranteed to be a wrapper type for primitives &mdash; for example,
 	 * {@link Integer} instead of {@code int}).
 	 *
-	 * <p>This method will only be invoked if {@link #canConvertTo(Class)}
+	 * <p>This method will only be invoked if {@link #canConvert(Class)}
 	 * returns {@code true} for the same target type.
 	 */
-	@Nullable
-	Object convert(String source, Class<?> targetType) throws Exception;
+	abstract T convert(String source, Class<?> targetType) throws ConversionException;
 
-	/**
-	 * Convert the supplied {@link String} to the supplied target type (which is
-	 * guaranteed to be a wrapper type for primitives &mdash; for example,
-	 * {@link Integer} instead of {@code int}).
-	 *
-	 * <p>This method will only be invoked if {@link #canConvertTo(Class)}
-	 * returns {@code true} for the same target type.
-	 *
-	 * <p>The default implementation simply delegates to {@link #convert(String, Class)}.
-	 * Can be overridden by concrete implementations of this interface that need
-	 * access to the supplied {@link ClassLoader}.
-	 */
-	default @Nullable Object convert(String source, Class<?> targetType, ClassLoader classLoader) throws Exception {
-		return convert(source, targetType);
+	private static Class<?> getTargetType(ConversionContext context) {
+		return context.targetType().getWrapperType() //
+				.orElseGet(() -> context.targetType().getType());
 	}
 
 }
