@@ -6,6 +6,13 @@ on:
       - docs-site
   pull_request:
 
+concurrency:
+  # Cancels in-progress runs only for pull requests
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   build:
     name: Generate site using Antora
