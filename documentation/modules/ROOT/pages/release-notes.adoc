@@ -1,12 +1,6 @@
-[[release-notes]]
-= JUnit Release Notes
-Stefan Bechtold; Sam Brannen; Johannes Link; Matthias Merdes; Marc Philipp; Juliette de Rancourt; Christian Stein
+= Release Notes
+:page-aliases: release-notes/index.adoc
 //
-:basedir: {includedir}/release-notes
-:docinfodir: {includedir}/docinfos
-:docinfo2:
-:numbered!:
-:last-update-label!:
 //
 
 This document contains the change log for all JUnit releases since 5.14 GA.
@@ -15,12 +9,10 @@ Please refer to the <<../user-guide/index.adoc#user-guide,User Guide>> for compr
 reference documentation for programmers writing tests, extension authors, and engine
 authors as well as build tool and IDE vendors.
 
-include::{includedir}/link-attributes.adoc[]
+include::partial$release-notes/release-notes-6.0.1.adoc[]
 
-include::{basedir}/release-notes-6.0.1.adoc[]
+include::partial$release-notes/release-notes-6.0.0.adoc[]
 
-include::{basedir}/release-notes-6.0.0.adoc[]
+include::partial$release-notes/release-notes-5.14.1.adoc[]
 
-include::{basedir}/release-notes-5.14.1.adoc[]
-
-include::{basedir}/release-notes-5.14.0.adoc[]
+include::partial$release-notes/release-notes-5.14.0.adoc[]
