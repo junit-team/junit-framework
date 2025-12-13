@@ -5,7 +5,7 @@ built-in mechanisms for managing test failures due to exceptions, the role of ex
 in implementing assertions and assumptions, and how to specifically assert non-throwing
 conditions in code.
 
-[[writing-tests-exceptions-uncaught]]
+[[uncaught]]
 == Uncaught Exceptions
 
 In JUnit Jupiter, if an exception is thrown from a test method, a lifecycle method, or an
@@ -19,7 +19,7 @@ Failed assumptions deviate from this general rule.
 In contrast to failed assertions, failed assumptions do not result in a test failure;
 rather, a failed assumption results in a test being aborted.
 
-See <<writing-tests-assumptions>> for further details and examples.
+See xref:writing-tests/assumptions.adoc[] for further details and examples.
 ====
 
 In the following example, the `failsDueToUncaughtException()` method throws an
@@ -36,18 +36,18 @@ no effect on the outcome of the test. JUnit Jupiter does not interpret a `throws
 as an expectation or assertion about what exceptions the test method should throw. A test
 fails only if an exception is thrown unexpectedly or if an assertion fails.
 
-[[writing-tests-exceptions-failed-assertions]]
+[[failed-assertions]]
 == Failed Assertions
 
 Assertions in JUnit Jupiter are implemented using exceptions. The framework provides a set
 of assertion methods in the `org.junit.jupiter.api.Assertions` class, which throw
 `AssertionError` when an assertion fails. This mechanism is a core aspect of how JUnit
-handles assertion failures as exceptions. See the <<writing-tests-assertions>> section for
+handles assertion failures as exceptions. See the xref:writing-tests/assertions.adoc[] section for
 further information about JUnit Jupiter's assertion support.
 
 NOTE: Third-party assertion libraries may choose to throw an `AssertionError` to signal a
 failed assertion; however, they may also choose to throw different types of exceptions to
-signal failures. See also: <<writing-tests-assertions-third-party>>.
+signal failures. See also: xref:writing-tests/assertions.adoc#third-party[Third-party Assertion Libraries].
 
 TIP: JUnit Jupiter itself does not differentiate between failed assertions
 (`AssertionError`) and other types of exceptions. All uncaught exceptions lead to a test
@@ -64,7 +64,7 @@ will mark the test as failed.
 include::example$java/example/exception/FailedAssertionDemo.java[tags=user_guide]
 ----
 
-[[writing-tests-exceptions-expected]]
+[[expected]]
 == Asserting Expected Exceptions
 
 JUnit Jupiter offers specialized assertions for testing that specific exceptions are
@@ -72,7 +72,7 @@ thrown under expected conditions. The `assertThrows()` and `assertThrowsExactly(
 assertions are critical tools for validating that your code responds correctly to error
 conditions by throwing the appropriate exceptions.
 
-[[writing-tests-exceptions-expected-assertThrows]]
+[[expected-assertThrows]]
 === Using `assertThrows()`
 
 The `assertThrows()` method is used to verify that a particular type of exception is
@@ -86,7 +86,7 @@ thrown exception object to allow performing additional assertions on it.
 include::example$java/example/exception/ExceptionAssertionDemo.java[tags=user_guide]
 ----
 
-[[writing-tests-exceptions-expected-assertThrowsExactly]]
+[[expected-assertThrowsExactly]]
 === Using `assertThrowsExactly()`
 
 The `assertThrowsExactly()` method is used when you need to assert that the exception
@@ -100,7 +100,7 @@ returns the thrown exception object to allow performing additional assertions on
 include::example$java/example/exception/ExceptionAssertionExactDemo.java[tags=user_guide]
 ----
 
-[[writing-tests-exceptions-not-expected]]
+[[not-expected]]
 == Asserting That no Exception is Expected
 
 Although any exception thrown from a test method will cause the test to fail, there are
@@ -116,4 +116,4 @@ include::example$java/example/exception/AssertDoesNotThrowExceptionDemo.java[tag
 
 NOTE: Third-party assertion libraries often provide similar support. For example, AssertJ
 has `assertThatNoException().isThrownBy(() -> ...)`. See also:
-<<writing-tests-assertions-third-party>>.
+xref:writing-tests/assertions.adoc#third-party[Third-party Assertion Libraries].

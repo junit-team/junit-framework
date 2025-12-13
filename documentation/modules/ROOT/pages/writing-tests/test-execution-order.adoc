@@ -5,9 +5,9 @@ deterministic but intentionally nonobvious. This ensures that subsequent runs of
 suite execute test classes and test methods in the same order, thereby allowing for
 repeatable builds.
 
-NOTE: See <<writing-tests-definitions>> for a definition of _test method_ and _test class_.
+NOTE: See xref:writing-tests/definitions.adoc[] for a definition of _test method_ and _test class_.
 
-[[writing-tests-test-execution-order-methods]]
+[[methods]]
 == Method Order
 
 Although true _unit tests_ typically should not rely on the order in which they are
@@ -22,8 +22,8 @@ implementation. You can implement your own custom `MethodOrderer` or use one of 
 following built-in `MethodOrderer` implementations.
 
 * `{MethodOrderer_DisplayName}`: sorts test methods _alphanumerically_ based on their
-  display names (see <<writing-tests-display-name-generator-precedence-rules, display name
-  generation precedence rules>>)
+  display names (see xref:writing-tests/display-names.adoc#generator-precedence-rules[display name
+  generation precedence rules])
 * `{MethodOrderer_MethodName}`: sorts test methods _alphanumerically_ based on their names
   and formal parameter lists
 * `{MethodOrderer_OrderAnnotation}`: sorts test methods _numerically_ based on values
@@ -36,7 +36,7 @@ it contains, recursively. If you want to avoid that a `@Nested` test class uses 
 `MethodOrderer` as its enclosing class, you can specify `{MethodOrderer_Default}` together
 with `{TestMethodOrder}`.
 
-NOTE: See also: <<extensions-execution-order-wrapping-behavior>>
+NOTE: See also: xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc#wrapping-behavior[Wrapping Behavior of Callbacks]
 
 The following example demonstrates how to guarantee that test methods are executed in the
 order specified via the `@Order` annotation.
@@ -46,11 +46,10 @@ order specified via the `@Order` annotation.
 include::example$java/example/OrderedTestsDemo.java[tags=user_guide]
 ----
 
-[[writing-tests-test-execution-order-methods-default]]
+[[methods-default]]
 === Setting the Default Method Orderer
 
-You can use the `junit.jupiter.testmethod.order.default` <<running-tests-config-params,
-configuration parameter>> to specify the fully qualified class name of the
+You can use the `junit.jupiter.testmethod.order.default` xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the fully qualified class name of the
 `{MethodOrderer}` you would like to use by default. Just like for the orderer configured
 via the `{TestMethodOrder}` annotation, the supplied class has to implement the
 `MethodOrderer` interface. The default orderer will be used for all tests unless the
@@ -69,7 +68,7 @@ junit.jupiter.testmethod.order.default = \
 Similarly, you can specify the fully qualified name of any custom class that implements
 `MethodOrderer`.
 
-[[writing-tests-test-execution-order-classes]]
+[[classes]]
 == Class Order
 
 Although test classes typically should not rely on the order in which they are executed,
@@ -84,8 +83,8 @@ time as outlined in the following scenarios.
 * Various other use cases
 
 To configure test class execution order _globally_ for the entire test suite, use the
-`junit.jupiter.testclass.order.default` <<running-tests-config-params, configuration
-parameter>> to specify the fully qualified class name of the `{ClassOrderer}` you would
+`junit.jupiter.testclass.order.default` xref:running-tests/configuration-parameters.adoc[configuration
+parameter] to specify the fully qualified class name of the `{ClassOrderer}` you would
 like to use. The supplied class must implement the `ClassOrderer` interface.
 
 You can implement your own custom `ClassOrderer` or use one of the following built-in
@@ -94,8 +93,8 @@ You can implement your own custom `ClassOrderer` or use one of the following bui
 * `{ClassOrderer_ClassName}`: sorts test classes _alphanumerically_ based on their fully
   qualified class names
 * `{ClassOrderer_DisplayName}`: sorts test classes _alphanumerically_ based on their
-  display names (see <<writing-tests-display-name-generator-precedence-rules, display name
-  generation precedence rules>>)
+  display names (see xref:writing-tests/display-names.adoc#generator-precedence-rules[display name
+  generation precedence rules])
 * `{ClassOrderer_OrderAnnotation}`: sorts test classes _numerically_ based on values
   specified via the `{Order}` annotation
 * `{ClassOrderer_Random}`: orders test classes _pseudo-randomly_ and supports

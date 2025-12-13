@@ -4,9 +4,9 @@ A `TestEngine` facilitates _discovery_ and _execution_ of tests for a particular
 programming model.
 
 For example, JUnit provides a `TestEngine` that discovers and executes tests written using
-the JUnit Jupiter programming model (see <<writing-tests>> and <<extensions>>).
+the JUnit Jupiter programming model (see xref:writing-tests/intro.adoc[] and xref:extensions/overview.adoc[]).
 
-[[test-engines-junit]]
+[[junit]]
 == JUnit Test Engines
 
 JUnit provides three `TestEngine` implementations.
@@ -17,7 +17,7 @@ JUnit provides three `TestEngine` implementations.
 * `{junit-platform-suite-engine}`: Executes declarative suites of tests with the JUnit
   Platform launcher infrastructure.
 
-[[test-engines-custom]]
+[[custom]]
 == Custom Test Engines
 
 You can contribute your own custom `{TestEngine}` by implementing the interfaces in the
@@ -45,7 +45,7 @@ annotation. For example, the `@Test` and `@TestFactory` annotations in JUnit Jup
 meta-annotated with `@Testable`. Consult the Javadoc for `{Testable}` for further details.
 
 If your custom `TestEngine` needs to be configured, consider allowing users to supply
-configuration via <<running-tests-config-params,configuration parameters>>. Please note,
+configuration via xref:running-tests/configuration-parameters.adoc[configuration parameters]. Please note,
 however, that you are strongly encouraged to use a unique prefix for all configuration
 parameters supported by your test engine. Doing so will ensure that there are no conflicts
 between the names of your configuration parameters and those from other test engines. In
@@ -57,7 +57,7 @@ parameters. Furthermore, as with the warning above regarding the `junit-` prefix
 configuration parameters.
 
 Although there is currently no official guide on how to implement a custom `TestEngine`,
-you can consult the implementation of <<test-engines-junit>> or the implementation of
+you can consult the implementation of <<junit>> or the implementation of
 third-party test engines listed in the
 https://github.com/junit-team/junit-framework/wiki/Third-party-Extensions#junit-platform-test-engines[JUnit wiki].
 You will also find various tutorials and blogs on the Internet that demonstrate how to
@@ -68,7 +68,7 @@ NOTE: `{HierarchicalTestEngine}` is a convenient abstract base implementation of
 provide the logic for test discovery. It implements execution of `TestDescriptors` that
 implement the `Node` interface, including support for parallel execution.
 
-[[test-engines-registration]]
+[[registration]]
 == Registering a TestEngine
 
 `TestEngine` registration is supported via Java's `{ServiceLoader}` mechanism.
@@ -78,14 +78,14 @@ For example, the `junit-jupiter-engine` module registers its
 `org.junit.platform.engine.TestEngine` within the `/META-INF/services` folder in the
 `junit-jupiter-engine` JAR.
 
-[[test-engines-requirements]]
+[[requirements]]
 == Requirements
 
 NOTE: The words "must", "must not", "required", "shall", "shall not", "should", "should
 not", "recommended",  "may", and "optional" in this section are to be interpreted as
 described in https://www.ietf.org/rfc/rfc2119.txt[RFC 2119.]
 
-[[test-engines-requirements-mandatory]]
+[[requirements-mandatory]]
 === Mandatory requirements
 
 For interoperability with build tools and IDEs, `TestEngine` implementations must adhere
@@ -104,7 +104,7 @@ to the following requirements:
   after their children. If a node is reported as skipped, there _must not_ be any events
   reported for its descendants.
 
-[[test-engines-requirements-enhanced-compatibility]]
+[[requirements-enhanced-compatibility]]
 === Enhanced compatibility
 
 Adhering to the following requirements is optional but recommended for enhanced
@@ -117,9 +117,9 @@ compatibility with build tools and IDEs:
 * When resolving `UniqueIdSelectors`, a `TestEngine` _should_ only return `TestDescriptor`
   instances with matching unique IDs including their ancestors but _may_ return additional
   siblings or other nodes that are required for the execution of the selected tests.
-* `TestEngines` _should_ support <<running-tests-tags, tagging>> tests and containers so
+* `TestEngines` _should_ support xref:running-tests/tags.adoc[tagging] tests and containers so
   that tag filters can be applied when discovering tests.
-* [[test-engines-requirements-cancellation]] A `TestEngine` _should_ cancel its execution
+* [[requirements-cancellation]] A `TestEngine` _should_ cancel its execution
   when the `{CancellationToken}` it is passed as part of the `ExecutionRequest` indicates
   that cancellation has been requested. In this case, it _should_ report any remaining
   `TestDescriptors` as skipped but not report any events for their descendants. It _may_
@@ -127,10 +127,10 @@ compatibility with build tools and IDEs:
   completely. If a `TestEngine` supports cancellation, it should clean up any resources
   that it has created just like if execution had finished regularly.
 
-[[test-engines-discovery-issues]]
+[[discovery-issues]]
 == Reporting Discovery Issues
 
-Test engines should report <<running-tests-discovery-issues, discovery issues>> if they
+Test engines should report xref:running-tests/discovery-issues.adoc[discovery issues] if they
 encounter any problems or potential misconfigurations during test discovery. This is
 especially important if the issue could lead to tests not being executed at all or only
 partially.
@@ -141,7 +141,7 @@ In order to report a `{DiscoveryIssue}`, a test engine should call the
 listener around, the `{DiscoveryIssueReporter}` interface should be used. It also provides
 a way to create a `Condition` that reports a discovery issue if its check fails and may
 be used as a `Predicate` or `Consumer`. Please refer to the implementations of the
-<<test-engines-junit, test engines provided by JUnit>> for examples.
+<<junit, test engines provided by JUnit>> for examples.
 
-Moreover, <<testkit-engine-discovery, Engine Test Kit>> provides a way to write tests for
+Moreover, xref:advanced-topics/testkit.adoc#engine-discovery[Engine Test Kit] provides a way to write tests for
 reported discovery issues.

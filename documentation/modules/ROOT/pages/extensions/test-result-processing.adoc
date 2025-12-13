@@ -10,7 +10,7 @@ information for the following events.
 * `testFailed`: invoked after a _test method_ has failed
 
 NOTE: In contrast to the definition of "test method" presented in
-<<writing-tests-definitions>>, in this context _test method_ refers to any `@Test` method
+xref:writing-tests/definitions.adoc[], in this context _test method_ refers to any `@Test` method
 or `@TestTemplate` method (for example, a `@RepeatedTest` or `@ParameterizedTest`).
 
 Extensions implementing this interface can be registered at the class level, instance
@@ -46,6 +46,6 @@ or fail test execution.
 ====
 Any instances of `ExtensionContext.Store.CloseableResource` stored in the `Store` of the
 provided `{ExtensionContext}` will be closed _before_ methods in the `TestWatcher` API are
-invoked (see <<extensions-keeping-state>>). You can use the parent context's `Store` to
+invoked (see xref:extensions/keeping-state-in-extensions.adoc[]). You can use the parent context's `Store` to
 work with such resources.
 ====

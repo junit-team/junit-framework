@@ -12,41 +12,41 @@ operate based on their own dedicated annotations. Such methods are inherited unl
 are overridden.
 
 `*@ParameterizedTest*`:: Denotes that a method is a
-<<writing-tests-parameterized-tests, parameterized test>>. Such methods are inherited
+xref:writing-tests/parameterized-classes-and-tests.adoc[parameterized test]. Such methods are inherited
 unless they are overridden.
 
 `*@RepeatedTest*`:: Denotes that a method is a test template for a
-<<writing-tests-repeated-tests, repeated test>>. Such methods are inherited unless they
+xref:writing-tests/repeated-tests.adoc[repeated test]. Such methods are inherited unless they
 are overridden.
 
 `*@TestFactory*`:: Denotes that a method is a test factory for
-<<writing-tests-dynamic-tests, dynamic tests>>. Such methods are inherited unless they are
+xref:writing-tests/dynamic-tests.adoc[dynamic tests]. Such methods are inherited unless they are
 overridden.
 
 `*@TestTemplate*`:: Denotes that a method is a
-<<writing-tests-test-templates, template for a test case>> designed to be invoked multiple
+xref:writing-tests/test-templates.adoc[template for a test case] designed to be invoked multiple
 times depending on the number of invocation contexts returned by the registered
-<<extensions-test-templates, providers>>. Such methods are inherited unless they are
+xref:extensions/providing-invocation-contexts-for-test-templates.adoc[providers]. Such methods are inherited unless they are
 overridden.
 
 `*@TestClassOrder*`:: Used to configure the
-<<writing-tests-test-execution-order-classes, test class execution order>> for `@Nested`
+xref:writing-tests/test-execution-order.adoc#classes[test class execution order] for `@Nested`
 test classes in the annotated test class. Such annotations are inherited.
 
 `*@TestMethodOrder*`:: Used to configure the
-<<writing-tests-test-execution-order-methods, test method execution order>> for the
+xref:writing-tests/test-execution-order.adoc#methods[test method execution order] for the
 annotated test class; similar to JUnit 4's `@FixMethodOrder`. Such annotations are
 inherited.
 
 `*@TestInstance*`:: Used to configure the
-<<writing-tests-test-instance-lifecycle, test instance lifecycle>> for the annotated test
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] for the annotated test
 class. Such annotations are inherited.
 
-`*@DisplayName*`:: Declares a custom <<writing-tests-display-names,display name>> for the
+`*@DisplayName*`:: Declares a custom xref:writing-tests/display-names.adoc[display name] for the
 test class or test method. Such annotations are not inherited.
 
 `*@DisplayNameGeneration*`:: Declares a custom
-<<writing-tests-display-name-generator, display name generator>> for the test class. Such
+xref:writing-tests/display-names.adoc#generator[display name generator] for the test class. Such
 annotations are inherited.
 
 `*@BeforeEach*`:: Denotes that the annotated method should be executed _before_ *each*
@@ -63,68 +63,68 @@ overridden.
 `@Test`, `@RepeatedTest`, `@ParameterizedTest`, and `@TestFactory` methods in the current
 top-level or `@Nested` test class; analogous to JUnit 4's `@BeforeClass`. Such methods are
 inherited unless they are overridden and must be `static` unless the "per-class"
-<<writing-tests-test-instance-lifecycle, test instance lifecycle>> is used.
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] is used.
 
 `*@AfterAll*`:: Denotes that the annotated method should be executed _after_ *all*
 `@Test`, `@RepeatedTest`, `@ParameterizedTest`, and `@TestFactory` methods in the current
 top-level or `@Nested` test class; analogous to JUnit 4's `@AfterClass`. Such methods are
 inherited unless they are overridden and must be `static` unless the "per-class"
-<<writing-tests-test-instance-lifecycle, test instance lifecycle>> is used.
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] is used.
 
 `*@ParameterizedClass*`:: Denotes that the annotated class is a
-<<writing-tests-parameterized-tests, parameterized class>>. Such annotations are
+xref:writing-tests/parameterized-classes-and-tests.adoc[parameterized class]. Such annotations are
 inherited.
 
 `*@BeforeParameterizedClassInvocation*`:: Denotes that the annotated method should be
 executed once _before_ each invocation of a
-<<writing-tests-parameterized-tests, parameterized class>>. Such methods are inherited
+xref:writing-tests/parameterized-classes-and-tests.adoc[parameterized class]. Such methods are inherited
 unless they are overridden.
 
 `*@AfterParameterizedClassInvocation*`:: Denotes that the annotated method should be
 executed once _after_ each invocation of a
-<<writing-tests-parameterized-tests, parameterized class>>. Such methods are inherited
+xref:writing-tests/parameterized-classes-and-tests.adoc[parameterized class]. Such methods are inherited
 unless they are overridden.
 
 `*@ClassTemplate*`:: Denotes that the annotated class is a
-<<writing-tests-class-templates, template for a test class>> designed to be executed
+xref:writing-tests/class-templates.adoc[template for a test class] designed to be executed
 multiple times depending on the number of invocation contexts returned by the registered
-<<extensions-class-templates, providers>>. Such annotations are inherited.
+xref:extensions/providing-invocation-contexts-for-class-templates.adoc[providers]. Such annotations are inherited.
 
 `*@Nested*`:: Denotes that the annotated class is a non-static
-<<writing-tests-nested, nested test class>>. Such annotations are not inherited.
+xref:writing-tests/nested-tests.adoc[nested test class]. Such annotations are not inherited.
 
 `*@Tag*`:: Used to declare
-<<writing-tests-tagging-and-filtering, tags for filtering tests>>, either at the class or
+xref:writing-tests/tagging-and-filtering.adoc[tags for filtering tests], either at the class or
 method level; analogous to test groups in TestNG or Categories in JUnit 4. Such
 annotations are inherited at the class level but not at the method level.
 
-`*@Disabled*`:: Used to <<writing-tests-disabling, disable>> a test class or test method;
+`*@Disabled*`:: Used to xref:writing-tests/disabling-tests.adoc[disable] a test class or test method;
 analogous to JUnit 4's `@Ignore`. Such annotations are not inherited.
 
 `*@AutoClose*`:: Denotes that the annotated field represents a resource that will be
-<<writing-tests-built-in-extensions-AutoClose, automatically closed>> after test
+xref:writing-tests/built-in-extensions.adoc#AutoClose[automatically closed] after test
 execution. Such fields are inherited.
 
 `*@Timeout*`:: Used to fail a test, test factory, test template, or lifecycle method if
 its execution exceeds a given duration. Such annotations are inherited.
 
 `*@TempDir*`:: Used to supply a
-<<writing-tests-built-in-extensions-TempDirectory, temporary directory>> via field
+xref:writing-tests/built-in-extensions.adoc#TempDirectory[temporary directory] via field
 injection or parameter injection in a test class constructor, lifecycle method, or test
 method; located in the `org.junit.jupiter.api.io` package. Such fields are inherited.
 
 `*@ExtendWith*`:: Used to
-<<extensions-registration-declarative, register extensions declaratively>>. Such
+xref:extensions/registering-extensions.adoc#registration-declarative[register extensions declaratively]. Such
 annotations are inherited.
 
 `*@RegisterExtension*`:: Used to
-<<extensions-registration-programmatic, register extensions programmatically>> via fields.
+xref:extensions/registering-extensions.adoc#registration-programmatic[register extensions programmatically] via fields.
 Such fields are inherited.
 
 WARNING: Some annotations may currently be _experimental_. Consult the table in
-<<api-evolution-experimental-apis>> for details.
+xref:api-evolution.adoc#experimental-apis[Experimental APIs] for details.
 
-[[writing-tests-meta-annotations]]
+[[annotations]]
 == Meta-Annotations and Composed Annotations
 
 JUnit Jupiter annotations can be used as _meta-annotations_. That means that you can
@@ -132,7 +132,7 @@ define your own _composed annotation_ that will automatically _inherit_ the sema
 its meta-annotations.
 
 For example, instead of copying and pasting `@Tag("fast")` throughout your code base (see
-<<writing-tests-tagging-and-filtering>>), you can create a custom _composed annotation_
+xref:writing-tests/tagging-and-filtering.adoc[]), you can create a custom _composed annotation_
 named `@Fast` as follows. `@Fast` can then be used as a drop-in replacement for
 `@Tag("fast")`.
 

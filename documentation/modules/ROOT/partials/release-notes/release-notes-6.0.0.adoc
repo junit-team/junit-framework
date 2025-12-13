@@ -1,4 +1,4 @@
-[[release-notes-6.0.0]]
+[[v6.0.0]]
 == 6.0.0
 
 *Date of Release:* September 30, 2025
@@ -38,27 +38,27 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
 ====
 
 
-[[release-notes-6.0.0-overall-improvements]]
+[[v6.0.0-overall-improvements]]
 === Overall Improvements
 
-[[release-notes-6.0.0-overall-deprecations-and-breaking-changes]]
+[[v6.0.0-overall-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * Minimum required Java version is now 17.
 * Minimum required Kotlin version is now 2.2.
 * Platform artifacts now use the same version number as Jupiter and Vintage artifacts.
 
-[[release-notes-6.0.0-overall-new-features-and-improvements]]
+[[v6.0.0-overall-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * All JUnit modules now use https://jspecify.dev/[JSpecify] nullability annotations to
   indicate which method parameters, return types, etc. can be `null`.
 
 
-[[release-notes-6.0.0-junit-platform]]
+[[v6.0.0-junit-platform]]
 === JUnit Platform
 
-[[release-notes-6.0.0-junit-platform-deprecations-and-breaking-changes]]
+[[v6.0.0-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * Support for running the `ConsoleLauncher` without specifying a subcommand has been
@@ -118,7 +118,7 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
 * Serialization support for `TestIdentifier` has been changed in a backwards-incompatible
   way in order to simplify the implementation.
 
-[[release-notes-6.0.0-junit-platform-new-features-and-improvements]]
+[[v6.0.0-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * New `Launcher.execute({LauncherExecutionRequest})` API with corresponding
@@ -139,7 +139,7 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
 * New support for cancelling a running test execution via a `{CancellationToken}` passed
   to the `{Launcher}` as part of a `{LauncherExecutionRequest}` and from there to all
   registered test engines. Please refer to the
-  <<../user-guide/index.adoc#launcher-api-launcher-cancellation, User Guide>> for details
+  xref:advanced-topics/launcher-api.adoc#launcher-cancellation[User Guide] for details
   and a usage example.
 * Passing the `--fail-fast` option to the `execute` subcommand of the `ConsoleLauncher`
   now causes test execution to be cancelled after the first failed test.
@@ -157,14 +157,14 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   representations. For example, `\n` is replaced with `<LF>`. This applies to all display
   names in JUnit Jupiter, `@SuiteDisplayName`, and any other test engines that subclass
   `AbstractTestDescriptor`. Please refer to the
-  <<../user-guide/index.adoc#writing-tests-display-names, User Guide>> for details.
+  xref:writing-tests/display-names.adoc[User Guide] for details.
 * Stack traces are now pruned up to the test method or lifecycle method.
 
 
-[[release-notes-6.0.0-junit-jupiter]]
+[[v6.0.0-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-6.0.0-junit-jupiter-bug-fixes]]
+[[v6.0.0-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * CSV headers are now properly supported with the default display name pattern and the
@@ -173,7 +173,7 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   Specifically, the parameter name is no longer duplicated in the display name when a CSV
   header is desired instead.
 
-[[release-notes-6.0.0-junit-jupiter-deprecations-and-breaking-changes]]
+[[v6.0.0-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * The following deprecated APIs have been removed:
@@ -238,12 +238,12 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   have been changed from `callsInPlace(executable, EXACTLY_ONCE)` to
   `callsInPlace(executable, AT_MOST_ONCE)` which might result in compilation errors.
 
-[[release-notes-6.0.0-junit-jupiter-new-features-and-improvements]]
+[[v6.0.0-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Non-printable control characters in display names are now replaced with alternative
   representations. Please refer to the
-  <<../user-guide/index.adoc#writing-tests-display-names, User Guide>> for details.
+  xref:writing-tests/display-names.adoc[User Guide] for details.
 * For consistency with `@TestClassOrder`, `@TestMethodOrder` annotations specified on a
   test class are now inherited by its `@Nested` inner classes, recursively.
 * New `MethodOrderer.Default` and `ClassOrderer.Default` types for reverting back to
@@ -260,10 +260,8 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   `fruit{nbsp}={nbsp}apple` instead of `fruit=apple`.
 * Text-based arguments in display names for parameterized tests are now quoted by default.
   In addition, special characters are escaped within quoted text. Please refer to the
-  <<../user-guide/index.adoc#writing-tests-parameterized-tests-display-names-quoted-text,
-  User Guide>> for details.
-* <<../user-guide/index.adoc#writing-tests-parameterized-tests-argument-conversion-implicit-fallback,
-  Fallback String-to-Object Conversion>> for parameterized tests now supports factory
+  xref:writing-tests/parameterized-classes-and-tests.adoc#tests-display-names-quoted-text[User Guide] for details.
+* xref:writing-tests/parameterized-classes-and-tests.adoc#tests-argument-conversion-implicit-fallback[Fallback String-to-Object Conversion] for parameterized tests now supports factory
   methods and factory constructors that accept a single `CharSequence` argument in
   addition to the existing support for factories that accept a single `String` argument.
 * The `Arguments` interface for parameterized tests is now officially a
@@ -275,10 +273,10 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   as `@Nullable`.
 
 
-[[release-notes-6.0.0-junit-vintage]]
+[[v6.0.0-junit-vintage]]
 === JUnit Vintage
 
-[[release-notes-6.0.0-junit-vintage-deprecations-and-breaking-changes]]
+[[v6.0.0-junit-vintage-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * The JUnit Vintage test engine is now deprecated and will report an INFO level discovery
@@ -286,7 +284,7 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   to clarify the purpose of the engine: it should only be used temporarily while migrating
   tests to JUnit Jupiter or another testing framework with native JUnit Platform support.
 
-[[release-notes-6.0.0-junit-vintage-new-features-and-improvements]]
+[[v6.0.0-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Cancellation support for the Vintage test engine.

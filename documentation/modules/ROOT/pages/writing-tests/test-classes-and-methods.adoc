@@ -2,7 +2,7 @@
 
 Test methods and lifecycle methods may be declared locally within the current test class,
 inherited from superclasses, or inherited from interfaces (see
-<<writing-tests-test-interfaces-and-default-methods>>). In addition, test methods and
+xref:writing-tests/test-interfaces-and-default-methods.adoc[]). In addition, test methods and
 lifecycle methods must not be `abstract` and must not return a value (except `@TestFactory`
 methods which are required to return a value).
 
@@ -33,13 +33,13 @@ a different package than the subclass, that `@Test` method will always be applie
 subclass since the subclass cannot override a package-private method from a superclass in
 a different package.
 
-See also: <<extensions-supported-utilities-search-semantics>>
+See also: xref:extensions/supported-utilities-in-extensions.adoc#search-semantics[Field and Method Search Semantics]
 ====
 
 The following test class demonstrates the use of `@Test` methods and all supported
 lifecycle methods. For further information on runtime semantics, see
-<<writing-tests-test-execution-order>> and
-<<extensions-execution-order-wrapping-behavior>>.
+xref:writing-tests/test-execution-order.adoc[] and
+xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc#wrapping-behavior[Wrapping Behavior of Callbacks].
 
 [source,java,indent=0]
 .A standard Java test class

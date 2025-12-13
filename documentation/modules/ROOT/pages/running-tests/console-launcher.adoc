@@ -10,7 +10,7 @@ repository under the
 https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone[junit-platform-console-standalone]
 directory. It contains the contents of the following artifacts:
 
-include::{standaloneConsoleLauncherShadowedArtifactsFile}[]
+include::partial$console-launcher-standalone-shadowed-artifacts.adoc[]
 
 [NOTE]
 ====
@@ -26,7 +26,7 @@ If you need to declare dependencies in your build script on some of the artifact
 contained in the `junit-platform-console-standalone` artifact, you should declare
 dependencies only on the JUnit artifacts that are used in your project. To simplify
 dependency management of JUnit artifacts in your build, you may wish to use the
-`junit-jupiter` aggregator artifact or `junit-bom`. See <<dependency-metadata>> for
+`junit-jupiter` aggregator artifact or `junit-bom`. See xref:appendix.adoc#dependency-metadata[Dependency Metadata] for
 details.
 ====
 
@@ -72,23 +72,23 @@ all jars in a directory):
 $ java -cp classes:testlib/* org.junit.platform.console.ConsoleLauncher <OPTIONS>
 ----
 
-[[running-tests-console-launcher-options]]
+[[options]]
 == Subcommands and Options
 
 The `{ConsoleLauncher}` provides the following subcommands:
 
 ----
-include::{consoleLauncherOptionsFile}[]
+include::partial$console-launcher-options.txt[]
 ----
 
-[[running-tests-console-launcher-options-discovering-tests]]
+[[options-discovering-tests]]
 === Discovering tests
 
 ----
-include::{consoleLauncherDiscoverOptionsFile}[]
+include::partial$console-launcher-discover-options.txt[]
 ----
 
-[[running-tests-console-launcher-options-executing-tests]]
+[[options-executing-tests]]
 === Executing tests
 
 .Exit Code
@@ -100,17 +100,17 @@ with a status code of `2`. Unexpected or invalid user input yields a status code
 of `3`. An exit code of `-1` indicates an unspecified error condition.
 
 ----
-include::{consoleLauncherExecuteOptionsFile}[]
+include::partial$console-launcher-execute-options.txt[]
 ----
 
-[[running-tests-console-launcher-options-listing-test-engines]]
+[[options-listing-test-engines]]
 === Listing test engines
 
 ----
-include::{consoleLauncherEnginesOptionsFile}[]
+include::partial$console-launcher-engines-options.txt[]
 ----
 
-[[running-tests-console-launcher-argument-files]]
+[[argument-files]]
 == Argument Files (@-files)
 
 On some platforms you may run into system limitations on the length of a command line when
@@ -138,7 +138,7 @@ You can pass a real parameter with an initial `@` character by escaping it with 
 additional `@` symbol. For example, `@@somearg` will become `@somearg` and will not be
 subject to expansion.
 
-[[running-tests-console-launcher-redirecting-stdout-and-stderr]]
+[[redirecting-stdout-and-stderr]]
 == Redirecting Standard Output/Error to Files
 
 You can redirect the `System.out` (stdout) and `System.err` (stderr) output streams to
@@ -159,7 +159,7 @@ output streams will be redirected to that file.
 The default charset is used for writing to the files.
 ====
 
-[[running-tests-console-launcher-color-customization]]
+[[color-customization]]
 == Color Customization
 
 The colors used in the output of the `{ConsoleLauncher}` can be customized.

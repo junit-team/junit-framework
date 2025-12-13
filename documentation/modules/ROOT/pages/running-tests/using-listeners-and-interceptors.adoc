@@ -23,28 +23,28 @@ for you automatically. You can also implement and register your own listeners.
 For details on registering and configuring listeners, see the following sections of this
 guide.
 
-* <<launcher-api-launcher-session-listeners-custom>>
-* <<launcher-api-launcher-interceptors-custom>>
-* <<launcher-api-launcher-discovery-listeners-custom>>
-* <<launcher-api-listeners-custom>>
-* <<launcher-api-listeners-config>>
-* <<launcher-api-listeners-custom-deactivation>>
+* xref:advanced-topics/launcher-api.adoc#launcher-session-listeners-custom[Registering a LauncherSessionListener]
+* xref:advanced-topics/launcher-api.adoc#launcher-interceptors-custom[Registering a LauncherInterceptor]
+* xref:advanced-topics/launcher-api.adoc#launcher-discovery-listeners-custom[Registering a LauncherDiscoveryListener]
+* xref:advanced-topics/launcher-api.adoc#listeners-custom[Registering a TestExecutionListener]
+* xref:advanced-topics/launcher-api.adoc#listeners-config[Configuring a TestExecutionListener]
+* xref:advanced-topics/launcher-api.adoc#listeners-custom-deactivation[Deactivating a TestExecutionListener]
 
 The JUnit Platform provides the following listeners which you may wish to use with your
 test suite.
 
-<<junit-platform-reporting>> ::
+xref:advanced-topics/junit-platform-reporting.adoc[] ::
   `{LegacyXmlReportGeneratingListener}` can be used via the
-  <<running-tests-console-launcher>> or registered manually to generate XML reports
+  xref:running-tests/console-launcher.adoc[] or registered manually to generate XML reports
   compatible with the de facto standard for JUnit 4 based test reports.
 +
 `{OpenTestReportGeneratingListener}` generates an XML report in the event-based format
 specified by {OpenTestReporting}. It is auto-registered and can be enabled and
-configured via <<running-tests-config-params>>.
+configured via xref:running-tests/configuration-parameters.adoc[].
 +
-See <<junit-platform-reporting>> for details.
+See xref:advanced-topics/junit-platform-reporting.adoc[] for details.
 
-<<running-tests-listeners-flight-recorder>> ::
+<<recorder>> ::
   `FlightRecordingExecutionListener` and `FlightRecordingDiscoveryListener` that generate
   Java Flight Recorder events during test discovery and execution.
 
@@ -61,7 +61,7 @@ See <<junit-platform-reporting>> for details.
   or executed during the execution of the `TestPlan` and generates a file containing the
   unique IDs once execution of the `TestPlan` has finished.
 
-[[running-tests-listeners-flight-recorder]]
+[[recorder]]
 == Flight Recorder Support
 
 The JUnit Platform provides opt-in support for generating Flight Recorder events.

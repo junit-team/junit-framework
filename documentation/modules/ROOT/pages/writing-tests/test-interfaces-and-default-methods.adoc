@@ -5,7 +5,7 @@ JUnit Jupiter allows `@Test`, `@RepeatedTest`, `@ParameterizedTest`, `@TestFacto
 methods. `@BeforeAll` and `@AfterAll` can either be declared on `static` methods in a
 test interface or on interface `default` methods _if_ the test interface or test class is
 annotated with `@TestInstance(Lifecycle.PER_CLASS)` (see
-<<writing-tests-test-instance-lifecycle>>). Here are some examples.
+xref:writing-tests/test-instance-lifecycle.adoc[]). Here are some examples.
 
 [source,java]
 ----
@@ -19,8 +19,8 @@ include::example$java/example/testinterface/TestInterfaceDynamicTestsDemo.java[t
 
 `@ExtendWith` and `@Tag` can be declared on a test interface so that classes that
 implement the interface automatically inherit its tags and extensions. See
-<<extensions-lifecycle-callbacks-before-after-execution>> for the source code of the
-<<extensions-lifecycle-callbacks-timing-extension, TimingExtension>>.
+xref:extensions/test-lifecycle-callbacks.adoc#before-after-execution[Before and After Test Execution Callbacks] for the source code of the
+xref:extensions/test-lifecycle-callbacks.adoc#timing-extension[TimingExtension].
 
 [source,java]
 ----

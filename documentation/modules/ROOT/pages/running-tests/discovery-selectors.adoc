@@ -5,7 +5,7 @@ which tests should be discovered or executed.
 
 Discovery selectors can be created programmatically using the factory methods in the
 `{DiscoverySelectors}` class, specified declaratively via annotations when using the
-<<junit-platform-suite-engine>>, via options of the <<running-tests-console-launcher>>, or
+xref:advanced-topics/junit-platform-suite-engine.adoc[], via options of the xref:running-tests/console-launcher.adoc[], or
 generically as strings via their identifiers.
 
 The following discovery selectors are provided out of the box:

@@ -26,7 +26,7 @@ within the specified duration but does not verify the execution time of each ind
 If `@Timeout` is present on a `@TestTemplate` method — for example, a `@RepeatedTest` or
 `@ParameterizedTest` — each invocation will have the given timeout applied to it.
 
-[[writing-tests-declarative-timeouts-thread-mode]]
+[[thread-mode]]
 == Thread mode
 
 The timeout can be applied using one of the following three thread modes: `SAME_THREAD`,
@@ -40,17 +40,17 @@ example, `ThreadLocal` transaction management.
 
 On the contrary when `SEPARATE_THREAD` is used, like the `assertTimeoutPreemptively()`
 assertion, the execution of the annotated method proceeds in a separate thread, this
-can lead to undesirable side effects, see <<writing-tests-assertions-preemptive-timeouts>>.
+can lead to undesirable side effects, see xref:writing-tests/assertions.adoc#preemptive-timeouts[Preemptive Timeouts with `assertTimeoutPreemptively()`].
 
 When `INFERRED` (default) thread mode is used, the thread mode is resolved via the
 `junit.jupiter.execution.timeout.thread.mode.default` configuration parameter. If the
 provided configuration parameter is invalid or not present then `SAME_THREAD` is used as
 fallback.
 
-[[writing-tests-declarative-timeouts-default-timeouts]]
+[[default-timeouts]]
 == Default Timeouts
 
-The following <<running-tests-config-params, configuration parameters>> can be used to
+The following xref:running-tests/configuration-parameters.adoc[configuration parameters] can be used to
 specify default timeouts for all methods of a certain category unless they or an enclosing
 test class is annotated with `@Timeout`:
 
@@ -100,7 +100,7 @@ omitted. Specifying no unit is equivalent to using seconds.
 |===
 
 
-[[writing-tests-declarative-timeouts-polling]]
+[[polling]]
 == Using @Timeout for Polling Tests
 
 When dealing with asynchronous code, it is common to write tests that poll while waiting
@@ -127,25 +127,25 @@ asynchronous tests, consider using a dedicated library such as
 link:https://github.com/awaitility/awaitility[Awaitility].
 
 
-[[writing-tests-declarative-timeouts-debugging]]
+[[debugging]]
 == Debugging Timeouts
 
-Registered <<extensions-preinterrupt-callback>> extensions are called prior to invoking
+Registered xref:extensions/pre-interrupt-callback.adoc[] extensions are called prior to invoking
 `Thread.interrupt()` on the thread that is executing the timed out method. This allows to
 inspect the application state and output additional information that might be helpful for
 diagnosing the cause of a timeout.
 
 
-[[writing-tests-declarative-timeouts-debugging-thread-dump]]
+[[debugging-thread-dump]]
 === Thread Dump on Timeout
 
-JUnit registers a default implementation of the <<extensions-preinterrupt-callback>>
+JUnit registers a default implementation of the xref:extensions/pre-interrupt-callback.adoc[]
 extension point that dumps the stacks of all threads to `System.out` if enabled by setting
 the `junit.jupiter.execution.timeout.threaddump.enabled`
-<<running-tests-config-params, configuration parameter>> to `true`.
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to `true`.
 
 
-[[writing-tests-declarative-timeouts-mode]]
+[[mode]]
 == Disable @Timeout Globally
 
 When stepping through your code in a debug session, a fixed timeout limit may influence

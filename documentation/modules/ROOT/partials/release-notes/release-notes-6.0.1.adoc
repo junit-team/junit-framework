@@ -1,4 +1,4 @@
-[[release-notes-6.0.1]]
+[[v6.0.1]]
 == 6.0.1
 
 *Date of Release:* October 31, 2025
@@ -10,25 +10,25 @@ link:{junit-framework-repo}+/milestone/110?closed=1+[6.0.1] milestone page in th
 repository on GitHub.
 
 
-[[release-notes-6.0.1-junit-platform]]
+[[v6.0.1-junit-platform]]
 === JUnit Platform
 
-[[release-notes-6.0.1-junit-platform-bug-fixes]]
+[[v6.0.1-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
 * The `jdk.jfr` package is now an optional import when using the `junit-platform-launcher`
   as an OSGi bundle.
 
-[[release-notes-6.0.1-junit-platform-new-features-and-improvements]]
+[[v6.0.1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Legacy documentation regarding Java 8 compatibility has been removed from the User Guide.
 
 
-[[release-notes-6.0.1-junit-jupiter]]
+[[v6.0.1-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-6.0.1-junit-jupiter-bug-fixes]]
+[[v6.0.1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * A regression introduced in version 6.0.0 caused an exception when using `@CsvSource` or
@@ -44,13 +44,13 @@ repository on GitHub.
 * Fix support for test methods with the same signature as package-private methods declared
   in super classes in different packages.
 
-[[release-notes-6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
+[[v6.0.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * The `org.junit.jupiter.migrationsupport` module descriptor has been marked as deprecated
   for removal.
 
-[[release-notes-6.0.1-junit-jupiter-new-features-and-improvements]]
+[[v6.0.1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * The `@CsvSource` and `@CsvFileSource` annotations now allow specifying a custom comment
@@ -61,10 +61,10 @@ repository on GitHub.
   without having to cast class literals to `Class<@Nullable T>`.
 
 
-[[release-notes-6.0.1-junit-vintage]]
+[[v6.0.1-junit-vintage]]
 === JUnit Vintage
 
-[[release-notes-6.0.1-junit-vintage-new-features-and-improvements]]
+[[v6.0.1-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * Allow disabling the reporting of discovery issues by the JUnit Vintage engine (including
