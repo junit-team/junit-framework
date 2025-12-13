@@ -1,8 +1,7 @@
-[[running-tests-build]]
-=== Build Support
+= Build Support
 
 [[running-tests-build-gradle]]
-==== Gradle
+== Gradle
 
 Starting with https://docs.gradle.org/4.6/release-notes.html[version 4.6], Gradle provides
 https://docs.gradle.org/current/userguide/java_testing.html#using_junit5[native support]
@@ -38,7 +37,7 @@ https://docs.gradle.org/current/userguide/java_testing.html[official Gradle docu
 for a comprehensive list of options.
 
 [[running-tests-build-gradle-bom]]
-===== Aligning dependency versions
+=== Aligning dependency versions
 
 TIP: See <<running-tests-build-spring-boot>> for details on how to override the version
 of JUnit used in your Spring Boot application.
@@ -93,7 +92,7 @@ project into an IDE like <<running-tests-ide-eclipse>> or
 ====
 
 [[running-tests-build-gradle-engines-configure]]
-===== Configuring Test Engines
+=== Configuring Test Engines
 
 In order to run any tests at all, a `TestEngine` implementation must be on the classpath.
 
@@ -154,7 +153,7 @@ dependencies {
 ----
 
 [[running-tests-build-gradle-config-params]]
-===== Configuration Parameters
+=== Configuration Parameters
 
 The standard Gradle `test` task currently does not provide a dedicated DSL to set JUnit
 Platform <<running-tests-config-params, configuration parameters>> to influence test
@@ -174,7 +173,7 @@ test {
 ----
 
 [[running-tests-build-gradle-logging]]
-===== Configuring Logging (optional)
+=== Configuring Logging (optional)
 
 JUnit uses the Java Logging APIs in the `java.util.logging` package (a.k.a. _JUL_) to
 emit warnings and debug information. Please refer to the official documentation of
@@ -203,7 +202,7 @@ https://www.slf4j.org/legacy.html#jul-to-slf4j[JUL to SLF4J Bridge] by adding it
 dependency to the test runtime classpath.
 
 [[running-tests-build-maven]]
-==== Maven
+== Maven
 
 Maven Surefire and Maven Failsafe provide
 https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html[native support]
@@ -218,7 +217,7 @@ As of JUnit 6.0, the minimum required version of Maven Surefire/Failsafe is 3.0.
 ====
 
 [[running-tests-build-maven-bom]]
-===== Aligning dependency versions
+=== Aligning dependency versions
 
 Unless you're using Spring Boot which defines its own way of managing dependencies, it is
 recommended to use the JUnit Platform <<dependency-metadata-junit-bom>> to align the
@@ -247,7 +246,7 @@ TIP: See <<running-tests-build-spring-boot>> for details on how to override the 
 of JUnit used in your Spring Boot application.
 
 [[running-tests-build-maven-engines-configure]]
-===== Configuring Test Engines
+=== Configuring Test Engines
 
 In order to have Maven Surefire or Maven Failsafe run any tests at all, at least one
 `TestEngine` implementation must be added to the test classpath.
@@ -326,7 +325,7 @@ long as you configure `test` scoped dependencies on JUnit 4 and the JUnit Vintag
 ----
 
 [[running-tests-build-maven-filter-test-class-names]]
-===== Filtering by Test Class Names
+=== Filtering by Test Class Names
 
 The Maven Surefire Plugin will scan for test classes whose fully qualified names match
 the following patterns.
@@ -368,7 +367,7 @@ https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclu
 documentation for Maven Surefire for details.
 
 [[running-tests-build-maven-filter-tags]]
-===== Filtering by Tags
+=== Filtering by Tags
 
 You can filter tests by <<running-tests-tags, tags>> or
 <<running-tests-tag-expressions, tag expressions>> using the following configuration
@@ -397,7 +396,7 @@ properties.
 ----
 
 [[running-tests-build-maven-config-params]]
-===== Configuration Parameters
+=== Configuration Parameters
 
 You can set JUnit Platform <<running-tests-config-params, configuration parameters>> to
 influence test discovery and execution by declaring the `configurationParameters`
@@ -429,7 +428,7 @@ below) or via the `junit-platform.properties` file.
 ----
 
 [[running-tests-build-ant]]
-==== Ant
+== Ant
 
 Starting with version `1.10.3`, link:https://ant.apache.org/[Ant] has a
 link:https://ant.apache.org/manual/Tasks/junitlauncher.html[`junitlauncher`] task that
@@ -450,7 +449,7 @@ link:https://ant.apache.org/manual/Tasks/junitlauncher.html#fork[forking the tes
 The `build.xml` file in the `{junit-jupiter-starter-ant}` project demonstrates how to use
 the task and can serve as a starting point.
 
-===== Basic Usage
+=== Basic Usage
 
 The following example demonstrates how to configure the `junitlauncher` task to select a
 single test class (i.e., `com.example.project.CalculatorTests`).
@@ -506,7 +505,7 @@ documentation for the
 link:https://ant.apache.org/manual/Tasks/junitlauncher.html[`junitlauncher` task].
 
 [[running-tests-build-spring-boot]]
-==== Spring Boot
+== Spring Boot
 
 link:https://spring.io/projects/spring-boot[Spring Boot] provides automatic support for
 managing the version of JUnit used in your project. In addition, the
@@ -546,4 +545,3 @@ With Maven you can override the JUnit Jupiter version by including the following
 		<junit-jupiter.version>{version}</junit-jupiter.version>
 	</properties>
 ----
-

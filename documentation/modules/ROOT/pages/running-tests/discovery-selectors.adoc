@@ -1,5 +1,4 @@
-[[running-tests-discovery-selectors]]
-=== Discovery Selectors
+= Discovery Selectors
 
 The JUnit Platform provides a rich set of discovery selectors that can be used to specify
 which tests should be discovered or executed.
@@ -28,5 +27,3 @@ The following discovery selectors are provided out of the box:
 | `{UniqueIdSelector}`          | `{DiscoverySelectors_selectUniqueId}`          | `{Select}("<identifier>")`  | `--select-unique-id <identifier>`                | `uid:[engine:Foo]/[segment:Bar]`
 | `{UriSelector}`               | `{DiscoverySelectors_selectUri}`               | `{SelectUris}`              | `--select-uri \file:///foo.txt`                  | `uri:file:///foo.txt`
 |===
-
-
