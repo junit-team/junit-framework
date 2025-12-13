@@ -1,5 +1,4 @@
-[[writing-tests-assumptions]]
-=== Assumptions
+= Assumptions
 
 Assumptions are typically used whenever it does not make sense to continue execution of a
 given test — for example, if the test depends on something that does not exist in the
@@ -19,10 +18,9 @@ All JUnit Jupiter assumptions are static methods in the `{Assumptions}` class.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/AssumptionsDemo.java[tags=user_guide]
+include::example$java/example/AssumptionsDemo.java[tags=user_guide]
 ----
 
 NOTE: It is also possible to use methods from JUnit 4's `org.junit.Assume` class for
 assumptions. Specifically, JUnit Jupiter supports JUnit 4's `AssumptionViolatedException`
 to signal that a test should be aborted instead of marked as a failure.
-

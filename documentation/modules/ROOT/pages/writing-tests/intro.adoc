@@ -1,9 +1,4 @@
-:testDir: ../../../../src/test/java
-:testResourcesDir: ../../../../src/test/resources
-:kotlinTestDir: ../../../../src/test/kotlin
-
-[[writing-tests]]
-== Writing Tests
+= Writing Tests
 
 The following example provides a glimpse at the minimum requirements for writing a test in
 JUnit Jupiter. Subsequent sections of this chapter will provide further details on all
@@ -12,6 +7,5 @@ available features.
 [source,java,indent=0]
 .A first test case
 ----
-include::{testDir}/example/MyFirstJUnitJupiterTests.java[tags=user_guide]
+include::example$java/example/MyFirstJUnitJupiterTests.java[tags=user_guide]
 ----
-

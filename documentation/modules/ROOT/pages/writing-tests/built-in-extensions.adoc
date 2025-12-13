@@ -1,5 +1,4 @@
-[[writing-tests-built-in-extensions]]
-=== Built-in Extensions
+= Built-in Extensions
 
 While the JUnit team encourages reusable extensions to be packaged and maintained in
 separate libraries, JUnit Jupiter includes a few user-facing extension implementations
@@ -7,7 +6,7 @@ that are considered so generally useful that users shouldn't have to add another
 dependency.
 
 [[writing-tests-built-in-extensions-TempDirectory]]
-==== The @TempDir Extension
+== The @TempDir Extension
 
 The built-in `{TempDirectory}` extension is used to create and clean up a temporary
 directory for an individual test or all tests in a test class. It is registered by
@@ -23,7 +22,7 @@ its content.
 [source,java,indent=0]
 .A test method that requires a temporary directory
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_parameter_injection]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_parameter_injection]
 ----
 
 You can inject multiple temporary directories by specifying multiple annotated parameters.
@@ -31,7 +30,7 @@ You can inject multiple temporary directories by specifying multiple annotated p
 [source,java,indent=0]
 .A test method that requires multiple temporary directories
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_multiple_directories]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_multiple_directories]
 ----
 
 The following example stores a _shared_ temporary directory in a `static` field. This
@@ -42,7 +41,7 @@ injection so that each test method uses a separate directory.
 [source,java,indent=0]
 .A test class that shares a temporary directory across test methods
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_field_injection]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_field_injection]
 ----
 
 The `@TempDir` annotation has an optional `cleanup` attribute that can be set to either
@@ -57,7 +56,7 @@ The default cleanup mode is `ALWAYS`. You can use the
 [source,java,indent=0]
 .A test class with a temporary directory that doesn't get cleaned up
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_cleanup_mode]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_cleanup_mode]
 ----
 
 `@TempDir` supports the programmatic creation of temporary directories via the optional
@@ -81,7 +80,7 @@ prefix instead of the `junit` constant value.
 [source,java,indent=0]
 .A test class with a temporary directory having the test name as the directory name prefix
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_factory_name_prefix]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_name_prefix]
 ----
 
 It is also possible to use an in-memory file system like `{Jimfs}` for the creation of the
@@ -90,7 +89,7 @@ temporary directory. The following example demonstrates how to achieve that.
 [source,java,indent=0]
 .A test class with a temporary directory created with the Jimfs in-memory file system
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_factory_jimfs]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_jimfs]
 ----
 
 `@TempDir` can also be used as a <<writing-tests-meta-annotations, meta-annotation>> to
@@ -101,7 +100,7 @@ annotation that can be used as a drop-in replacement for
 [source,java,indent=0]
 .A custom annotation meta-annotated with `@TempDir`
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation]
 ----
 
 The following example demonstrates how to use the custom `@JimfsTempDir` annotation.
@@ -109,7 +108,7 @@ The following example demonstrates how to use the custom `@JimfsTempDir` annotat
 [source,java,indent=0]
 .A test class using the custom annotation
 ----
-include::{testDir}/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation_usage]
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation_usage]
 ----
 
 Meta-annotations or additional annotations on the field or parameter the `TempDir`
@@ -133,7 +132,7 @@ parameter, if present
 3. Otherwise, `org.junit.jupiter.api.io.TempDirFactory$Standard` will be used.
 
 [[writing-tests-built-in-extensions-AutoClose]]
-==== The @AutoClose Extension
+== The @AutoClose Extension
 
 The built-in `{AutoCloseExtension}` automatically closes resources associated with fields.
 It is registered by default. To use it, annotate a field in a test class with
@@ -175,7 +174,7 @@ that the default `@TestInstance(Lifecycle.PER_METHOD)` semantics apply.
 [source,java,indent=0]
 .A test class using `@AutoClose` to close a resource
 ----
-include::{testDir}/example/AutoCloseDemo.java[tags=user_guide_example]
+include::example$java/example/AutoCloseDemo.java[tags=user_guide_example]
 ----
 <1> Annotate an instance field with `@AutoClose`.
 <2> `WebClient` implements `java.lang.AutoCloseable` which defines a `close()` method that
