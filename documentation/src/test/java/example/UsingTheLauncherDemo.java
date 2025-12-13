@@ -139,8 +139,8 @@ class UsingTheLauncherDemo {
 		LauncherExecutionRequest executionRequest = LauncherDiscoveryRequestBuilder.request()
 				.selectors(selectClass(MyTestClass.class))
 				.forExecution()
-		// end::cancellation-direct[]
-		// @formatter:on
+				// end::cancellation-direct[]
+				// @formatter:on
 				// tag::cancellation-direct[]
 				.cancellationToken(cancellationToken) // <3>
 				.listeners(failFastListener) // <4>
