@@ -1,5 +1,4 @@
-[[stacktrace-pruning]]
-=== Stack Trace Pruning
+= Stack Trace Pruning
 
 The JUnit Platform provides built-in support for pruning stack traces produced by failing
 tests. This feature is enabled by default but can be disabled by setting the
@@ -12,4 +11,3 @@ never be excluded.
 
 In addition, all elements prior to and including the first call from the JUnit Platform
 `Launcher` will be removed.
-
