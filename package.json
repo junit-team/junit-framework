@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "npx antora antora-playbook.yml --log-level=info --clean"
+    "build": "npx antora antora-playbook.yml --log-level=all --clean --stacktrace"
   },
   "devDependencies": {
     "@antora/cli": "3.1.14",
