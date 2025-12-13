@@ -3,5 +3,5 @@
 	<suppress checks="JavadocPackage"
 		files="junit-jupiter-api[\\/]build[\\/]generated[\\/]sources[\\/]jte[\\/]main[\\/]org[\\/]junit[\\/]jupiter[\\/]api[\\/]condition[\\/]*"/>
 	<suppress checks="NoHttp"
-		files="documentation[\\/]src[\\/]docs[\\/]asciidoc[\\/]user-guide[\\/]images[\\/]extensions_StoreHierarchy.svg"/>
+		files="documentation[\\/]modules[\\/]ROOT[\\/]images[\\/]extensions_StoreHierarchy.svg"/>
 </suppressions>
