@@ -73,8 +73,8 @@ abstract class AbstractEntryBasedExtension<K, V, C extends Annotation, S extends
 	}
 
 	private void applyForAllContexts(ExtensionContext originalContext) {
-		AnnotatedElement element = originalContext.getElement().orElse(null);
-		boolean fullRestore = AnnotationSupport.findAnnotation(element, getRestoreAnnotationType()).isPresent();
+		boolean fullRestore = AnnotationSupport.findAnnotation(originalContext.getElement(),
+			getRestoreAnnotationType()).isPresent();
 
 		if (fullRestore) {
 			Properties bulk = this.prepareToEnterRestorableContext();
