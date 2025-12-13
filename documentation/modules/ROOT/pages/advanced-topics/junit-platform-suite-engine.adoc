@@ -1,18 +1,17 @@
-[[junit-platform-suite-engine]]
-=== JUnit Platform Suite Engine
+= JUnit Platform Suite Engine
 
 The JUnit Platform supports the declarative definition and execution of suites of tests
 from _any_ test engine using the JUnit Platform.
 
 [[junit-platform-suite-engine-setup]]
-==== Setup
+== Setup
 
 In addition to the `junit-platform-suite-api` and `junit-platform-suite-engine` artifacts,
 you need _at least one_ other test engine and its dependencies on the classpath. See
 <<dependency-metadata>> for details regarding group IDs, artifact IDs, and versions.
 
 [[junit-platform-suite-engine-setup-required-dependencies]]
-===== Required Dependencies
+=== Required Dependencies
 
 * `junit-platform-suite-api` in _test_ scope: artifact containing annotations needed to
   configure a test suite
@@ -24,7 +23,7 @@ artifact which can be declared in _test_ scope instead of declaring explicit dep
 on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 
 [[junit-platform-suite-engine-setup-transitive-dependencies]]
-===== Transitive Dependencies
+=== Transitive Dependencies
 
 * `junit-platform-suite-commons` in _test_ scope
 * `junit-platform-launcher` in _test_ scope
@@ -33,7 +32,7 @@ on `junit-platform-suite-api` and `junit-platform-suite-engine`.
 * `opentest4j` in _test_ scope
 
 [[junit-platform-suite-engine-example]]
-==== @Suite Example
+== @Suite Example
 
 By annotating a class with `@Suite` it is marked as a test suite on the JUnit Platform.
 As seen in the following example, selector and filter annotations can then be used to
@@ -41,7 +40,7 @@ control the contents of the suite.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/SuiteDemo.java[tags=user_guide]
+include::example$java/example/SuiteDemo.java[tags=user_guide]
 ----
 
 .Additional Configuration Options
@@ -49,7 +48,7 @@ NOTE: There are numerous configuration options for discovering and filtering tes
 test suite. Please consult the Javadoc of the `{suite-api-package}` package for a full
 list of supported annotations and further details.
 
-==== @BeforeSuite and @AfterSuite
+== @BeforeSuite and @AfterSuite
 
 `@BeforeSuite` and `@AfterSuite` annotations can be used on methods inside a
 `@Suite`-annotated class. They will be executed respectively before and after
@@ -57,5 +56,5 @@ all tests of the test suite.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/BeforeAndAfterSuiteDemo.java[tags=user_guide]
+include::example$java/example/BeforeAndAfterSuiteDemo.java[tags=user_guide]
 ----
