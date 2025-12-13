@@ -237,6 +237,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * closed
 	 * @since 6.0
 	 */
+	@SuppressWarnings("ReferenceEquality")
 	@API(status = MAINTAINED, since = "6.0")
 	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
@@ -244,19 +245,22 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		StoredValue storedValue = getStoredValue(compositeKey);
 		var result = StoredValue.evaluateIfNotNull(storedValue);
 		if (result == null) {
-			StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				if (StoredValue.evaluateIfNotNull(oldStoredValue) == null) {
-					rejectIfClosed();
-					var computedValue = Preconditions.notNull(defaultCreator.apply(key),
-						"defaultCreator must not return null");
-					return newStoredValue(() -> {
+			StoredValue newStoredValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+				if (oldStoredValue == null || oldStoredValue == storedValue) {
+					return newStoredValue(new MemoizingSupplier(() -> {
 						rejectIfClosed();
-						return computedValue;
-					});
+						return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
+					}));
 				}
 				return oldStoredValue;
 			});
-			return requireNonNull(newStoredValue.evaluate());
+			try {
+				return requireNonNull(newStoredValue.evaluate());
+			}
+			catch (Throwable t) {
+				storedValues.remove(compositeKey, newStoredValue);
+				throw t;
+			}
 		}
 		return result;
 	}

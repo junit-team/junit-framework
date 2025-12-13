@@ -26,6 +26,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -416,6 +419,115 @@ public class NamespacedHierarchicalStoreTests {
 			assertEquals(1, counter.get());
 			assertThat(values).hasSize(threads).containsOnly(1);
 		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void getOrComputeIfAbsentDoesNotDeadlockWithCollidingKeys() throws Exception {
+			try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
+				var firstComputationStarted = new CountDownLatch(1);
+				var secondComputationAllowedToFinish = new CountDownLatch(1);
+				var firstThreadTimedOut = new AtomicBoolean(false);
+
+				Thread first = new Thread(
+					() -> localStore.getOrComputeIfAbsent(namespace, new CollidingKey("k1"), __ -> {
+						firstComputationStarted.countDown();
+						try {
+							if (!secondComputationAllowedToFinish.await(200, TimeUnit.MILLISECONDS)) {
+								firstThreadTimedOut.set(true);
+							}
+						}
+						catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
+						return "value1";
+					}));
+
+				Thread second = new Thread(() -> {
+					try {
+						firstComputationStarted.await();
+					}
+					catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+					localStore.getOrComputeIfAbsent(namespace, new CollidingKey("k2"), __ -> {
+						secondComputationAllowedToFinish.countDown();
+						return "value2";
+					});
+				});
+
+				first.start();
+				second.start();
+
+				first.join(1000);
+				second.join(1000);
+
+				assertThat(firstThreadTimedOut).as(
+					"getOrComputeIfAbsent should not block subsequent computations on colliding keys").isFalse();
+			}
+		}
+
+		@Test
+		void computeIfAbsentCanDeadlockWithCollidingKeys() throws Exception {
+			try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
+				var firstComputationStarted = new CountDownLatch(1);
+				var secondComputationAllowedToFinish = new CountDownLatch(1);
+				var firstThreadTimedOut = new AtomicBoolean(false);
+
+				Thread first = new Thread(() -> localStore.computeIfAbsent(namespace, new CollidingKey("k1"), __ -> {
+					firstComputationStarted.countDown();
+					try {
+						if (!secondComputationAllowedToFinish.await(200, TimeUnit.MILLISECONDS)) {
+							firstThreadTimedOut.set(true);
+						}
+					}
+					catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+					return "value1";
+				}));
+
+				Thread second = new Thread(() -> {
+					try {
+						firstComputationStarted.await();
+					}
+					catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+					localStore.computeIfAbsent(namespace, new CollidingKey("k2"), __ -> {
+						secondComputationAllowedToFinish.countDown();
+						return "value2";
+					});
+				});
+
+				first.start();
+				second.start();
+
+				first.join(1000);
+				second.join(1000);
+
+				assertThat(firstThreadTimedOut).as(
+					"computeIfAbsent should not block subsequent computations on colliding keys").isFalse();
+			}
+		}
+
+		@Test
+		void computeIfAbsentOverridesParentNullValue() {
+			// computeIfAbsent must treat a null value from the parent store as logically absent,
+			// so the child store can install and keep its own non-null value for the same key.
+			try (var parent = new NamespacedHierarchicalStore<String>(null);
+					var child = new NamespacedHierarchicalStore<String>(parent)) {
+
+				parent.put(namespace, key, null);
+
+				assertNull(parent.get(namespace, key));
+				assertNull(child.get(namespace, key));
+
+				Object childValue = child.computeIfAbsent(namespace, key, __ -> "value");
+
+				assertEquals("value", childValue);
+				assertEquals("value", child.get(namespace, key));
+			}
+		}
 	}
 
 	@Nested
@@ -661,6 +773,36 @@ public class NamespacedHierarchicalStoreTests {
 			assertThat(store.isClosed()).as("closed").isTrue();
 		}
 
+	}
+
+	private static final class CollidingKey {
+
+		private final String value;
+
+		private CollidingKey(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public int hashCode() {
+			return 42;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof CollidingKey other)) {
+				return false;
+			}
+			return this.value.equals(other.value);
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
 	}
 
 	private static Object createObject(String display) {
