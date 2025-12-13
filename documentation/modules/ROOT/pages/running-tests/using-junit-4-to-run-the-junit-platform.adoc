@@ -1,5 +1,4 @@
-[[running-tests-junit-platform-runner]]
-=== Using JUnit 4 to run the JUnit Platform
+= Using JUnit 4 to run the JUnit Platform
 
 [WARNING]
 .The `JUnitPlatform` runner has been deprecated
@@ -32,13 +31,13 @@ only able to support a subset of the JUnit Platform functionality, especially wi
 to reporting (see <<running-tests-junit-platform-runner-technical-names>>).
 
 [[running-tests-junit-platform-runner-setup]]
-==== Setup
+== Setup
 
 You need the following artifacts and their dependencies on the classpath. See
 <<dependency-metadata>> for details regarding group IDs, artifact IDs, and versions.
 
 [[running-tests-junit-platform-runner-setup-explicit-dependencies]]
-===== Explicit Dependencies
+=== Explicit Dependencies
 
 * `junit-platform-runner` in _test_ scope: location of the `JUnitPlatform` runner
 * `junit-{junit4-version}.jar` in _test_ scope: to run tests using JUnit 4
@@ -48,7 +47,7 @@ You need the following artifacts and their dependencies on the classpath. See
   for JUnit Jupiter
 
 [[running-tests-junit-platform-runner-setup-transitive-dependencies]]
-===== Transitive Dependencies
+=== Transitive Dependencies
 
 * `junit-platform-suite-api` in _test_ scope
 * `junit-platform-suite-commons` in _test_ scope
@@ -58,7 +57,7 @@ You need the following artifacts and their dependencies on the classpath. See
 * `opentest4j` in _test_ scope
 
 [[running-tests-junit-platform-runner-technical-names]]
-==== Display Names vs. Technical Names
+== Display Names vs. Technical Names
 
 To define a custom _display name_ for the class run via `@RunWith(JUnitPlatform.class)`
 annotate the class with `@SuiteDisplayName` and provide a custom value.
@@ -75,7 +74,7 @@ Note that the presence of `@UseTechnicalNames` overrides any custom display name
 configured via `@SuiteDisplayName`.
 
 [[running-tests-junit-platform-runner-single-test]]
-==== Single Test Class
+== Single Test Class
 
 One way to use the `JUnitPlatform` runner is to annotate a test class with
 `@RunWith(JUnitPlatform.class)` directly. Please note that the test methods in the
@@ -85,18 +84,18 @@ otherwise, some IDEs and build tools might not recognize it as a JUnit 4 test cl
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/JUnitPlatformClassDemo.java[tags=user_guide]
+include::example$java/example/JUnitPlatformClassDemo.java[tags=user_guide]
 ----
 
 [[running-tests-junit-platform-runner-test-suite]]
-==== Test Suite
+== Test Suite
 
 If you have multiple test classes you can create a test suite as can be seen in the
 following example.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/JUnitPlatformSuiteDemo.java[tags=user_guide]
+include::example$java/example/JUnitPlatformSuiteDemo.java[tags=user_guide]
 ----
 
 The `JUnitPlatformSuiteDemo` will discover and run all tests in the `example` package and
@@ -112,4 +111,3 @@ WARNING: Test classes and suites annotated with `@RunWith(JUnitPlatform.class)`
 **cannot** be executed directly on the JUnit Platform (or as a "JUnit 5" test as
 documented in some IDEs). Such classes and suites can only be executed using JUnit 4
 infrastructure.
-

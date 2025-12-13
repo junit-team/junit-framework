@@ -1,5 +1,4 @@
-[[running-tests-capturing-output]]
-=== Capturing Standard Output/Error
+= Capturing Standard Output/Error
 
 Since version 1.3, the JUnit Platform provides opt-in support for capturing output
 printed to `System.out` and `System.err`. To enable it, set the
@@ -18,4 +17,3 @@ was used to execute a container or test. Any output by other threads will be omi
 because particularly when
 <<writing-tests-parallel-execution, executing tests in parallel>> it would be impossible
 to attribute it to a specific test or container.
-

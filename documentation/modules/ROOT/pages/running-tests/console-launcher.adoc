@@ -1,5 +1,4 @@
-[[running-tests-console-launcher]]
-=== Console Launcher
+= Console Launcher
 
 The `{ConsoleLauncher}` is a command-line Java application that lets you launch the JUnit
 Platform from the console. For example, it can be used to run JUnit Vintage and JUnit
@@ -80,7 +79,7 @@ supplied, the `ConsoleLauncher` exits with a status code of `2`. Otherwise, the 
 is `0`.
 
 [[running-tests-console-launcher-options]]
-==== Subcommands and Options
+== Subcommands and Options
 
 The `{ConsoleLauncher}` provides the following subcommands:
 
@@ -89,28 +88,28 @@ include::{consoleLauncherOptionsFile}[]
 ----
 
 [[running-tests-console-launcher-options-discovering-tests]]
-===== Discovering tests
+=== Discovering tests
 
 ----
 include::{consoleLauncherDiscoverOptionsFile}[]
 ----
 
 [[running-tests-console-launcher-options-executing-tests]]
-===== Executing tests
+=== Executing tests
 
 ----
 include::{consoleLauncherExecuteOptionsFile}[]
 ----
 
 [[running-tests-console-launcher-options-listing-test-engines]]
-===== Listing test engines
+=== Listing test engines
 
 ----
 include::{consoleLauncherEnginesOptionsFile}[]
 ----
 
 [[running-tests-console-launcher-argument-files]]
-==== Argument Files (@-files)
+== Argument Files (@-files)
 
 On some platforms you may run into system limitations on the length of a command line when
 creating a command line with lots of options or with long arguments.
@@ -138,7 +137,7 @@ additional `@` symbol. For example, `@@somearg` will become `@somearg` and will 
 subject to expansion.
 
 [[running-tests-console-launcher-redirecting-stdout-and-stderr]]
-==== Redirecting Standard Output/Error to Files
+== Redirecting Standard Output/Error to Files
 
 You can redirect the `System.out` (stdout) and `System.err` (stderr) output streams to
 files using the `--redirect-stdout` and `--redirect-stderr` options:
@@ -159,7 +158,7 @@ The default charset is used for writing to the files.
 ====
 
 [[running-tests-console-launcher-color-customization]]
-==== Color Customization
+== Color Customization
 
 The colors used in the output of the `{ConsoleLauncher}` can be customized.
 The option `--single-color` will apply a built-in monochrome style, while
@@ -178,5 +177,3 @@ TEST = 34
 DYNAMIC = 35
 REPORTED = 37
 ----
-
-

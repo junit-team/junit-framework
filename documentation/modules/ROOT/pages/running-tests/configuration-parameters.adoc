@@ -1,5 +1,4 @@
-[[running-tests-config-params]]
-=== Configuration Parameters
+= Configuration Parameters
 
 In addition to instructing the platform which test classes and test engines to include,
 which packages to scan, etc., it is sometimes necessary to provide additional custom
@@ -43,7 +42,7 @@ default configuration file. Similarly, configuration parameters supplied via sys
 properties take precedence over those supplied via the default configuration file.
 
 [[running-tests-config-params-deactivation-pattern]]
-==== Pattern Matching Syntax
+== Pattern Matching Syntax
 
 This section describes the pattern matching syntax that is applied to the _configuration
 parameters_ used for the following features.
@@ -75,4 +74,3 @@ Examples:
   `org.example.MyCustomImpl`.
 - `org.example.MyCustomImpl, org.example.TheirCustomImpl`: matches candidate classes whose
   FQCN is exactly `org.example.MyCustomImpl` or `org.example.TheirCustomImpl`.
-

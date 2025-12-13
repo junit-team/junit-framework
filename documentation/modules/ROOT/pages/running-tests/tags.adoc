@@ -1,5 +1,4 @@
-[[running-tests-tags]]
-=== Tags
+= Tags
 
 Tags are a JUnit Platform concept for marking and filtering tests. The programming model
 for adding tags to containers and tests is defined by the testing framework. For example,
@@ -10,7 +9,7 @@ Vintage engine maps `@Category` annotations to tags (see
 own annotation or other means for users to specify tags.
 
 [[running-tests-tag-syntax-rules]]
-==== Syntax Rules for Tags
+== Syntax Rules for Tags
 
 Regardless how a tag is specified, the JUnit Platform enforces the following rules:
 
@@ -29,7 +28,7 @@ NOTE: In the above context, "trimmed" means that leading and trailing whitespace
 characters have been removed.
 
 [[running-tests-tag-expressions]]
-==== Tag Expressions
+== Tag Expressions
 
 Tag expressions are boolean expressions with the operators `!`, `&` and `|`. In addition,
 `(` and `)` can be used to adjust for operator precedence.
@@ -72,4 +71,3 @@ expressions can be useful.
 | `+++(micro \| integration) & (product \| shipping)+++`
 | all _micro_ or _integration_ tests for *product* or *shipping*
 |===
-

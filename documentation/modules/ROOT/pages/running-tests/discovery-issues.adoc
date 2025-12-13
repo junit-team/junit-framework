@@ -1,5 +1,4 @@
-[[running-tests-discovery-issues]]
-=== Discovery Issues
+= Discovery Issues
 
 Test engines may encounter issues during test discovery. For example, the declaration of a
 test class or method may be invalid. To avoid such issues from going unnoticed, the JUnit
