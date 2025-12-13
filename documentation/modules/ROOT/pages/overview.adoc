@@ -1,5 +1,5 @@
-[[overview]]
-== Overview
+= Overview
+:page-aliases: user-guide/index.adoc
 
 The goal of this document is to provide comprehensive reference documentation for
 programmers writing tests, extension authors, and engine authors as well as build tool
@@ -12,7 +12,7 @@ endif::linkToPdf[]
 endif::backend-html5[]
 
 [[overview-what-is-junit-5]]
-=== What is JUnit 5?
+== What is JUnit 5?
 
 Unlike previous versions of JUnit, JUnit 5 is composed of several different modules from
 three different sub-projects.
@@ -39,28 +39,28 @@ the platform. It requires JUnit 4.12 or later to be present on the class path or
 path.
 
 [[overview-java-versions]]
-=== Supported Java Versions
+== Supported Java Versions
 
 JUnit 5 requires Java 8 (or higher) at runtime. However, you can still test code that
 has been compiled with previous versions of the JDK.
 
 [[overview-getting-help]]
-=== Getting Help
+== Getting Help
 
 Ask JUnit 5 related questions on {StackOverflow} or use the {DiscussionsQA}.
 
 [[overview-getting-started]]
-=== Getting Started
+== Getting Started
 
 [[overview-getting-started-junit-artifacts]]
-==== Downloading JUnit Artifacts
+=== Downloading JUnit Artifacts
 
 To find out what artifacts are available for download and inclusion in your project, refer
 to <<dependency-metadata>>. To set up dependency management for your build, refer to
 <<running-tests-build>> and the <<overview-getting-started-example-projects>>.
 
 [[overview-getting-started-features]]
-==== JUnit 5 Features
+=== JUnit 5 Features
 
 To find out what features are available in JUnit 5 and how to use them, read the
 corresponding sections of this User Guide, organized by topic.
@@ -74,7 +74,7 @@ corresponding sections of this User Guide, organized by topic.
   - <<testkit>>
 
 [[overview-getting-started-example-projects]]
-==== Example Projects
+=== Example Projects
 
 To see complete, working examples of projects that you can copy and experiment with, the
 {junit-examples-repo}[`junit-examples`] repository is a good place to start. The
