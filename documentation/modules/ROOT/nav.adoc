@@ -61,3 +61,4 @@
 ** xref:advanced-topics/launcher-api.adoc[]
 ** xref:advanced-topics/engines.adoc[]
 * xref:api-evolution.adoc[]
+* xref:release-notes.adoc[]
