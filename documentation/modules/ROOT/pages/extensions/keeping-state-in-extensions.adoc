@@ -17,7 +17,7 @@ stores of the context's ancestors will be queried for a value with the same key 
 `Namespace` used to create this store. The root `ExtensionContext` represents the engine
 level so its `Store` may be used to store or cache values that are used by multiple test
 classes or extension. The `{ExtensionContext_StoreScope}` enum allows to go beyond even
-that and access the stores on the level of the current `{LauncherExecutionRequest}` or
+that and access the stores on the level of the current `ExecutionRequest` or
 `{LauncherSession}` which can be used to share data across test engines or inject data
 from a registered
 xref:advanced-topics/launcher-api.adoc#launcher-session-listeners-custom[`LauncherSessionListener`],
