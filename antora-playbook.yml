@@ -40,9 +40,10 @@ runtime:
   log:
     failure_level: warn
 urls:
+  redirect_facility: static
   latest_version_segment: current
   latest_prerelease_version_segment: snapshot
-  latest_version_segment_strategy: redirect:to
+  latest_version_segment_strategy: redirect:from # TODO does not work with `redirect_facility: static`
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
