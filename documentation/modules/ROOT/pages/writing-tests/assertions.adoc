@@ -16,7 +16,7 @@ complex or time-consuming, as it is only evaluated when the assertion fails.
 include::example$java/example/AssertionsDemo.java[tags=user_guide]
 ----
 
-[[writing-tests-assertions-preemptive-timeouts]]
+[[preemptive-timeouts]]
 [WARNING]
 .Preemptive Timeouts with `assertTimeoutPreemptively()`
 ====
@@ -38,7 +38,7 @@ Similar side effects may be encountered with other frameworks that rely on
 `ThreadLocal` storage.
 ====
 
-[[writing-tests-assertions-kotlin]]
+[[kotlin]]
 == Kotlin Assertion Support
 
 JUnit Jupiter also comes with a few assertion methods that lend themselves well to being
@@ -50,7 +50,7 @@ functions in the `org.junit.jupiter.api` package.
 include::example$kotlin/example/KotlinAssertionsDemo.kt[tags=user_guide]
 ----
 
-[[writing-tests-assertions-third-party]]
+[[third-party]]
 == Third-party Assertion Libraries
 
 Even though the assertion facilities provided by JUnit Jupiter are sufficient for many

@@ -2,19 +2,19 @@
 
 The `junit-platform-reporting` artifact contains `{TestExecutionListener}` implementations
 that generate XML test reports in two flavors:
-<<junit-platform-reporting-open-test-reporting, Open Test Reporting>> and
-<<junit-platform-reporting-legacy-xml, legacy>>.
+<<open-test-reporting, Open Test Reporting>> and
+<<legacy-xml, legacy>>.
 
 NOTE: The module also contains other `TestExecutionListener` implementations that can be
-used to build custom reporting. See <<running-tests-listeners>> for details.
+used to build custom reporting. See xref:running-tests/using-listeners-and-interceptors.adoc[] for details.
 
-[[junit-platform-reporting-output-directory]]
+[[output-directory]]
 == Output Directory
 
 The JUnit Platform provides an `{OutputDirectoryCreator}` via `{EngineDiscoveryRequest}`
-and `{TestPlan}` to registered <<test-engines, test engines>> and
-<<running-tests-listeners, listeners>>, respectively. Its root directory can be configured
-via the following <<running-tests-config-params, configuration parameter>>:
+and `{TestPlan}` to registered xref:advanced-topics/engines.adoc[test engines] and
+xref:running-tests/using-listeners-and-interceptors.adoc[listeners], respectively. Its root directory can be configured
+via the following xref:running-tests/configuration-parameters.adoc[configuration parameter]:
 
 `junit.platform.reporting.output.dir=<path>`::
   Configure the output directory for reporting. By default, `build` is used if a Gradle
@@ -27,7 +27,7 @@ directories like `reports/junit-8803697269315188212`. This can be useful when us
 Gradle's or Maven's parallel execution capabilities which create multiple JVM forks
 that run concurrently.
 
-[[junit-platform-reporting-open-test-reporting]]
+[[open-test-reporting]]
 == Open Test Reporting
 
 `{OpenTestReportGeneratingListener}` writes an XML report for the entire execution in the
@@ -35,7 +35,7 @@ event-based format specified by {OpenTestReporting} which supports all features 
 JUnit Platform such as hierarchical test structures, display names, tags, etc.
 
 The listener is auto-registered and can be configured via the following
-<<running-tests-config-params, configuration parameters>>:
+xref:running-tests/configuration-parameters.adoc[configuration parameters]:
 
 `junit.platform.reporting.open.xml.enabled=true|false`::
   Enable/disable writing the report; defaults to `false`.
@@ -43,9 +43,9 @@ The listener is auto-registered and can be configured via the following
   Enable/disable including information about the Git repository (see https://github.com/ota4j-team/open-test-reporting#git[Git extension schema] of open-test-reporting); defaults to `false`.
 
 If enabled, the listener creates an XML report file named `open-test-report.xml` in the
-configured <<junit-platform-reporting-output-directory, output directory>>.
+configured <<output-directory, output directory>>.
 
-If <<running-tests-capturing-output, output capturing>> is enabled, the captured output
+If xref:running-tests/capturing-standard-output-error.adoc[output capturing] is enabled, the captured output
 written to `System.out` and `System.err` will be included in the report as well.
 
 TIP: The {OpenTestReportingCliTool} can be used to convert from the event-based format to
@@ -136,7 +136,7 @@ XML reports as follows:
 
 === Console Launcher
 
-When using the <<running-tests-console-launcher>>, you can enable Open Test Reporting
+When using the xref:running-tests/console-launcher.adoc[], you can enable Open Test Reporting
 output by setting the configuration parameters via `--config`:
 
 [source,console,subs=attributes+]
@@ -155,12 +155,12 @@ $ java -jar junit-platform-console-standalone-{version}.jar <OPTIONS> \
   --config-resource=configuration.properties
 ----
 
-[[junit-platform-reporting-legacy-xml]]
+[[legacy-xml]]
 == Legacy XML format
 
 `{LegacyXmlReportGeneratingListener}` generates a separate XML report for each root in the
 `{TestPlan}`. Note that the generated XML format is compatible with the de facto standard
 for JUnit 4 based test reports that was made popular by the Ant build system.
 
-The `LegacyXmlReportGeneratingListener` is used by the <<running-tests-console-launcher>>
+The `LegacyXmlReportGeneratingListener` is used by the xref:running-tests/console-launcher.adoc[]
 as well.

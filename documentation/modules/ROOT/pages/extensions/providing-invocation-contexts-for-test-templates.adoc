@@ -30,6 +30,6 @@ The `{TestTemplateInvocationContextProvider}` extension API is primarily intende
 implementing different kinds of tests that rely on repetitive invocation of a test-like
 method albeit in different contexts — for example, with different parameters, by preparing
 the test class instance differently, or multiple times without modifying the context.
-Please refer to the implementations of <<writing-tests-repeated-tests>> or
-<<writing-tests-parameterized-tests, Parameterized Tests>> which use this extension point
+Please refer to the implementations of xref:writing-tests/repeated-tests.adoc[] or
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] which use this extension point
 to provide their functionality.

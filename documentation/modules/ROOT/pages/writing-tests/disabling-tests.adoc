@@ -2,8 +2,7 @@
 
 Entire test classes or individual test methods may be _disabled_ via the `{Disabled}`
 annotation, via one of the annotations discussed in
-<<writing-tests-conditional-execution>>, or via a custom <<extensions-conditions,
-`ExecutionCondition`>>.
+xref:writing-tests/conditional-test-execution.adoc[], or via a custom xref:extensions/conditional-test-execution.adoc[`ExecutionCondition`].
 
 When `@Disabled` is applied at the class level, all test methods within that class are
 automatically disabled as well.

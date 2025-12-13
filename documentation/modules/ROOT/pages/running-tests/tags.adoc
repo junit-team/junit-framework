@@ -3,12 +3,12 @@
 Tags are a JUnit Platform concept for marking and filtering tests. The programming model
 for adding tags to containers and tests is defined by the testing framework. For example,
 in JUnit Jupiter based tests, the `@Tag` annotation (see
-<<writing-tests-tagging-and-filtering>>) should be used. For JUnit 4 based tests, the
+xref:writing-tests/tagging-and-filtering.adoc[]) should be used. For JUnit 4 based tests, the
 Vintage engine maps `@Category` annotations to tags (see
-<<migrating-from-junit4-categories-support>>). Other testing frameworks may define their
+xref:migrating-from-junit4.adoc#categories-support[Categories Support]). Other testing frameworks may define their
 own annotation or other means for users to specify tags.
 
-[[running-tests-tag-syntax-rules]]
+[[syntax-rules]]
 == Syntax Rules for Tags
 
 Regardless how a tag is specified, the JUnit Platform enforces the following rules:
@@ -27,7 +27,7 @@ Regardless how a tag is specified, the JUnit Platform enforces the following rul
 NOTE: In the above context, "stripped" means that leading and trailing whitespace
 characters have been removed using `java.lang.String.strip()`.
 
-[[running-tests-tag-expressions]]
+[[expressions]]
 == Tag Expressions
 
 Tag expressions are boolean expressions with the operators `!`, `&` and `|`. In addition,
