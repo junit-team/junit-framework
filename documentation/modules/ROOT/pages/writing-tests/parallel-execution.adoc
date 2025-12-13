@@ -1,5 +1,4 @@
-[[writing-tests-parallel-execution]]
-=== Parallel Execution
+= Parallel Execution
 
 By default, JUnit Jupiter tests are run sequentially in a single thread; however, running
 tests in parallel -- for example, to speed up execution -- is available as an opt-in
@@ -46,7 +45,7 @@ test class or method:
 
 [source,java]
 ----
-include::{testDir}/example/ExplicitExecutionModeDemo.java[tags=user_guide]
+include::example$java/example/ExplicitExecutionModeDemo.java[tags=user_guide]
 ----
 
 This allows test classes or methods to opt in or out of concurrent execution regardless of
@@ -139,7 +138,7 @@ not explicitly set, the value for `junit.jupiter.execution.parallel.mode.default
 used instead.
 
 [[writing-tests-parallel-execution-config]]
-==== Configuration
+== Configuration
 
 Properties such as the desired parallelism and the maximum pool size can be configured
 using a `{ParallelExecutionConfigurationStrategy}`. The JUnit Platform provides two
@@ -182,7 +181,7 @@ threads by controlling the maximum pool size of the `dynamic`, `fixed` and `cust
 strategies.
 
 [[writing-tests-parallel-execution-config-properties]]
-===== Relevant properties
+=== Relevant properties
 
 The following table lists relevant properties for configuring parallel execution. See
 <<running-tests-config-params>> for details on how to set such properties.
@@ -269,7 +268,7 @@ strategy
 |===
 
 [[writing-tests-parallel-execution-synchronization]]
-==== Synchronization
+== Synchronization
 
 In addition to controlling the execution mode using the `{Execution}` annotation, JUnit
 Jupiter provides another annotation-based declarative synchronization mechanism. The
@@ -314,13 +313,13 @@ to the same shared resource is running.
 [source,java]
 .Declaring shared resources "statically" with `{ResourceLock}` annotation
 ----
-include::{testDir}/example/sharedresources/StaticSharedResourcesDemo.java[tags=user_guide]
+include::example$java/example/sharedresources/StaticSharedResourcesDemo.java[tags=user_guide]
 ----
 
 [source,java]
 .Adding shared resources "dynamically" with `{ResourceLocksProvider}` implementation
 ----
-include::{testDir}/example/sharedresources/DynamicSharedResourcesDemo.java[tags=user_guide]
+include::example$java/example/sharedresources/DynamicSharedResourcesDemo.java[tags=user_guide]
 ----
 
 Also, "static" shared resources can be declared for _direct_ child nodes via the `target`
@@ -342,7 +341,5 @@ which would force the `SAME_THREAD` execution mode for all the test methods.
 [source,java]
 .Declaring shared resources for child nodes with `target` attribute
 ----
-include::{testDir}/example/sharedresources/ChildrenSharedResourcesDemo.java[tags=user_guide]
+include::example$java/example/sharedresources/ChildrenSharedResourcesDemo.java[tags=user_guide]
 ----
-
-

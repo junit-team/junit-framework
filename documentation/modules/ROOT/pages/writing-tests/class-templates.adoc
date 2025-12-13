@@ -1,5 +1,4 @@
-[[writing-tests-class-templates]]
-=== Class Templates
+= Class Templates
 
 A `{ClassTemplate}` is not a regular test class but rather a template for the contained
 test cases. As such, it is designed to be invoked multiple times depending on invocation
@@ -11,4 +10,3 @@ with full support for the same lifecycle callbacks and extensions. Please refer 
 
 NOTE: <<writing-tests-parameterized-tests, Parameterized Classes>> are a built-in
 specialization of class templates.
-
