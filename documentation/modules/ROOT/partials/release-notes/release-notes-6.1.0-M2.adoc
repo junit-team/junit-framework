@@ -48,6 +48,13 @@ repository on GitHub.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
   `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
+* Support the creation of `Arguments` from iterables. These additions make it
+easier to dynamically build arguments from collections when using
+`@ParameterizedTest`:
+** `Arguments.of(Iterable<?>)`
+** `Arguments.argumentsFrom(Iterable<?>)` (alias)
+** `Arguments.argumentSetFrom(String, Iterable<?>)`
+** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
 * Trim internal stack frames from `AssertionFailedError` stack traces.
 * Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
   methods for `AssertionFailureBuilder`. These allow user defined assertions to
