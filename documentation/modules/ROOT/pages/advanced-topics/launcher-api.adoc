@@ -1,8 +1,4 @@
-:testDir: ../../../../../src/test/java
-:testResourcesDir: ../../../../../src/test/resources
-
-[[launcher-api]]
-=== JUnit Platform Launcher API
+= JUnit Platform Launcher API
 
 One of the prominent goals of JUnit 5 is to make the interface between JUnit and its
 programmatic clients – build tools and IDEs – more powerful and stable. The purpose is to
@@ -20,7 +16,7 @@ An example consumer of the launcher API is the `{ConsoleLauncher}` in the
 `{junit-platform-console}` project.
 
 [[launcher-api-discovery]]
-==== Discovering Tests
+== Discovering Tests
 
 Having _test discovery_ as a dedicated feature of the platform itself frees IDEs and build
 tools from most of the difficulties they had to go through to identify test classes and
@@ -30,12 +26,12 @@ Usage Example:
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/UsingTheLauncherDemo.java[tags=imports]
+include::example$java/example/UsingTheLauncherDemo.java[tags=imports]
 ----
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/UsingTheLauncherDemo.java[tags=discovery]
+include::example$java/example/UsingTheLauncherDemo.java[tags=discovery]
 ----
 
 You can select classes, methods, and all classes in a package or even search for all tests
@@ -57,7 +53,7 @@ test discovery after the first discovery failure is encountered. The default
 parameter>>.
 
 [[launcher-api-execution]]
-==== Executing Tests
+== Executing Tests
 
 To execute tests, clients can use the same `LauncherDiscoveryRequest` as in the discovery
 phase or create a new request. Test progress and reporting can be achieved by registering
@@ -66,7 +62,7 @@ following example.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/UsingTheLauncherDemo.java[tags=execution]
+include::example$java/example/UsingTheLauncherDemo.java[tags=execution]
 ----
 
 There is no return value for the `execute()` method, but you can use a
@@ -80,13 +76,13 @@ reverse order.
 Test case execution won't start before all `executionStarted` calls have returned.
 
 [[launcher-api-engines-custom]]
-==== Registering a TestEngine
+== Registering a TestEngine
 
 See the dedicated section on <<test-engines-registration, TestEngine registration>> for
 details.
 
 [[launcher-api-post-discovery-filters-custom]]
-==== Registering a PostDiscoveryFilter
+== Registering a PostDiscoveryFilter
 
 In addition to specifying post-discovery filters as part of a `{LauncherDiscoveryRequest}`
 passed to the `{Launcher}` API, `{PostDiscoveryFilter}` implementations will be discovered
@@ -98,7 +94,7 @@ declared within the `/META-INF/services/org.junit.platform.launcher.PostDiscover
 file is loaded and applied automatically.
 
 [[launcher-api-launcher-session-listeners-custom]]
-==== Registering a LauncherSessionListener
+== Registering a LauncherSessionListener
 
 Registered implementations of `{LauncherSessionListener}` are notified when a
 `{LauncherSession}` is opened (before a `{Launcher}` first discovers and executes tests)
@@ -108,7 +104,7 @@ they can be discovered at runtime via Java's `{ServiceLoader}` mechanism and aut
 registered with `LauncherSession` (unless automatic registration is disabled.)
 
 [[launcher-api-launcher-session-listeners-tool-support]]
-===== Tool Support
+=== Tool Support
 
 The following build tools and IDEs are known to provide full support for `LauncherSession`:
 
@@ -119,7 +115,7 @@ The following build tools and IDEs are known to provide full support for `Launch
 Other tools might also work but have not been tested explicitly.
 
 [[launcher-api-launcher-session-listeners-tool-example-usage]]
-===== Example Usage
+=== Example Usage
 
 A `LauncherSessionListener` is well suited for implementing once-per-JVM setup/teardown
 behavior since it's called before the first and after the last test in a launcher session,
@@ -133,7 +129,7 @@ executed, could look like this:
 ----
 package example.session;
 
-include::{testDir}/example/session/GlobalSetupTeardownListener.java[tags=user_guide]
+include::example$java/example/session/GlobalSetupTeardownListener.java[tags=user_guide]
 ----
 <1> Get the store from the launcher session
 <2> Lazily create the HTTP server and put it into the store
@@ -147,7 +143,7 @@ closed:
 ----
 package example.session;
 
-include::{testDir}/example/session/CloseableHttpServer.java[tags=user_guide]
+include::example$java/example/session/CloseableHttpServer.java[tags=user_guide]
 ----
 <1> The `close()` method is called when the launcher session is closed
 <2> Stop the HTTP server
@@ -161,7 +157,7 @@ by adding the file to `src/test/resources`):
 [source]
 .src/test/resources/META-INF/services/org.junit.platform.launcher.LauncherSessionListener
 ----
-include::{testResourcesDir}/META-INF/services/org.junit.platform.launcher.LauncherSessionListener[]
+include::example$resources/META-INF/services/org.junit.platform.launcher.LauncherSessionListener[]
 ----
 
 You can now use the resource from your test:
@@ -171,7 +167,7 @@ You can now use the resource from your test:
 ----
 package example.session;
 
-include::{testDir}/example/session/HttpTests.java[tags=user_guide]
+include::example$java/example/session/HttpTests.java[tags=user_guide]
 ----
 <1> Retrieve the HTTP server instance from the store
 <2> Get the host string directly from the injected HTTP server instance
@@ -180,7 +176,7 @@ include::{testDir}/example/session/HttpTests.java[tags=user_guide]
 <5> Check the status code of the response
 
 [[launcher-api-launcher-interceptors-custom]]
-==== Registering a LauncherInterceptor
+== Registering a LauncherInterceptor
 
 In order to intercept the creation of instances of `{Launcher}` and
 `{LauncherSessionListener}` and calls to the `discover` and `execute` methods of the
@@ -204,11 +200,11 @@ the JUnit Platform to load test classes and engine implementations.
 
 [source,java]
 ----
-include::{testDir}/example/CustomLauncherInterceptor.java[tags=user_guide]
+include::example$java/example/CustomLauncherInterceptor.java[tags=user_guide]
 ----
 
 [[launcher-api-launcher-discovery-listeners-custom]]
-==== Registering a LauncherDiscoveryListener
+== Registering a LauncherDiscoveryListener
 
 In addition to specifying discovery listeners as part of a `{LauncherDiscoveryRequest}` or
 registering them programmatically via the `{Launcher}` API, custom
@@ -222,7 +218,7 @@ For example, an `example.CustomLauncherDiscoveryListener` class implementing
 and registered automatically.
 
 [[launcher-api-listeners-custom]]
-==== Registering a TestExecutionListener
+== Registering a TestExecutionListener
 
 In addition to the public `{Launcher}` API method for registering test execution listeners
 programmatically, custom `{TestExecutionListener}` implementations will be discovered at
@@ -235,7 +231,7 @@ For example, an `example.CustomTestExecutionListener` class implementing
 registered automatically.
 
 [[launcher-api-listeners-config]]
-==== Configuring a TestExecutionListener
+== Configuring a TestExecutionListener
 
 When a `{TestExecutionListener}` is registered programmatically via the `{Launcher}` API,
 the listener may provide programmatic ways for it to be configured -- for example, via its
@@ -249,7 +245,7 @@ listener can then access the configuration parameters via the `TestPlan` supplie
 methods. See the `{UniqueIdTrackingListener}` for an example.
 
 [[launcher-api-listeners-custom-deactivation]]
-==== Deactivating a TestExecutionListener
+== Deactivating a TestExecutionListener
 
 Sometimes it can be useful to run a test suite _without_ certain execution listeners being
 active. For example, you might have custom a `{TestExecutionListener}` that sends the test
@@ -274,12 +270,12 @@ supplied in the `LauncherDiscoveryRequest` that is passed to the `{Launcher}`.
 ====
 
 [[launcher-api-listeners-custom-deactivation-pattern]]
-===== Pattern Matching Syntax
+=== Pattern Matching Syntax
 
 Refer to <<running-tests-config-params-deactivation-pattern>> for details.
 
 [[launcher-api-launcher-config]]
-==== Configuring the Launcher
+== Configuring the Launcher
 
 If you require fine-grained control over automatic detection and registration of test
 engines and listeners, you may create an instance of `{LauncherConfig}` and supply that to
@@ -288,11 +284,11 @@ built-in fluent _builder_ API, as demonstrated in the following example.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/UsingTheLauncherDemo.java[tags=launcherConfig]
+include::example$java/example/UsingTheLauncherDemo.java[tags=launcherConfig]
 ----
 
 [[launcher-api-dry-run-mode]]
-==== Dry-Run Mode
+== Dry-Run Mode
 
 When running tests via the `{Launcher}` API, you can enable _dry-run mode_ by setting the
 `junit.platform.execution.dryRun.enabled` <<running-tests-config-params,
@@ -303,7 +299,7 @@ test changes in the configuration of a build or to verify a listener is called a
 without having to wait for all tests to be executed.
 
 [[launcher-api-managing-state-across-test-engines]]
-==== Managing State Across Test Engines
+== Managing State Across Test Engines
 
 When running tests on the JUnit Platform, multiple test engines may need to access shared
 resources. Rather than initializing these resources multiple times, JUnit Platform
@@ -322,7 +318,7 @@ global store or creates a new one if it doesn't exist:
 
 [source,java]
 ----
-include::{testDir}/example/FirstCustomEngine.java[tags=user_guide]
+include::example$java/example/FirstCustomEngine.java[tags=user_guide]
 ----
 
 `SecondCustomEngine` follows the same pattern, ensuring that regardless whether it runs
@@ -330,7 +326,7 @@ before or after `FirstCustomEngine`, it will use the same socket instance:
 
 [source,java]
 ----
-include::{testDir}/example/SecondCustomEngine.java[tags=user_guide]
+include::example$java/example/SecondCustomEngine.java[tags=user_guide]
 ----
 
 TIP: In this case, the `ServerSocket` can be stored directly in the global store while
@@ -344,7 +340,7 @@ For illustration, the following test verifies that both engines are sharing the 
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/sharedresources/SharedResourceDemo.java[tags=user_guide]
+include::example$java/example/sharedresources/SharedResourceDemo.java[tags=user_guide]
 ----
 
 By using the Platform's `{NamespacedHierarchicalStore}` API with shared namespaces in this
