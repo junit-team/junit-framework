@@ -1,5 +1,4 @@
-[[extensions-test-instance-pre-construct-callback]]
-=== Test Instance Pre-construct Callback
+= Test Instance Pre-construct Callback
 
 `{TestInstancePreConstructCallback}` defines the API for `Extensions` that wish to be invoked
 _prior_ to test instances being constructed (by a constructor call or via
@@ -16,4 +15,3 @@ You may override the `getTestInstantiationExtensionContextScope(...)` method to 
 `TEST_METHOD` to make test-specific data available to your extension implementation or if
 you want to <<extensions-keeping-state, keep state>> on the test method level.
 ====
-

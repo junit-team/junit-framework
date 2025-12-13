@@ -1,5 +1,4 @@
-[[extensions-test-result-processing]]
-=== Test Result Processing
+= Test Result Processing
 
 `{TestWatcher}` defines the API for extensions that wish to process the results of _test
 method_ executions. Specifically, a `TestWatcher` will be invoked with contextual
@@ -50,4 +49,3 @@ provided `{ExtensionContext}` will be closed _before_ methods in the `TestWatche
 invoked (see <<extensions-keeping-state>>). You can use the parent context's `Store` to
 work with such resources.
 ====
-

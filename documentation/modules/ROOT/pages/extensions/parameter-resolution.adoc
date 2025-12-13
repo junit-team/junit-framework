@@ -1,5 +1,4 @@
-[[extensions-parameter-resolution]]
-=== Parameter Resolution
+= Parameter Resolution
 
 `{ParameterResolver}` defines the `Extension` API for dynamically resolving parameters at
 runtime.
@@ -54,7 +53,7 @@ constructor invocations, using the `{ExecutableInvoker}` available via the
 ====
 
 [[extensions-parameter-resolution-conflicts]]
-==== Parameter Conflicts
+== Parameter Conflicts
 
 If multiple implementations of `ParameterResolver` that support the same type are
 registered for a test, a `ParameterResolutionException` will be thrown, with a
@@ -64,7 +63,7 @@ example:
 [source,java,indent=0]
 .Conflicting parameter resolution due to multiple resolvers claiming support for integers
 ----
-include::{testDir}/example/extensions/ParameterResolverConflictDemo.java[tags=user_guide]
+include::example$java/example/extensions/ParameterResolverConflictDemo.java[tags=user_guide]
 ----
 
 If the conflicting `ParameterResolver` implementations are applied to different test
@@ -73,7 +72,7 @@ methods as shown in the following example, no conflict occurs.
 [source,java,indent=0]
 .Fine-grained registration to avoid conflict
 ----
-include::{testDir}/example/extensions/ParameterResolverNoConflictDemo.java[tags=user_guide]
+include::example$java/example/extensions/ParameterResolverNoConflictDemo.java[tags=user_guide]
 ----
 
 If the conflicting `ParameterResolver` implementations need to be applied to the same test
@@ -83,7 +82,7 @@ method, you can implement a custom type or custom annotation as illustrated by
 [source,java,indent=0]
 .Custom type to resolve duplicate types
 ----
-include::{testDir}/example/extensions/ParameterResolverCustomTypeDemo.java[tags=user_guide]
+include::example$java/example/extensions/ParameterResolverCustomTypeDemo.java[tags=user_guide]
 ----
 
 A custom annotation makes the duplicate type distinguishable from its counterpart:
@@ -91,7 +90,7 @@ A custom annotation makes the duplicate type distinguishable from its counterpar
 [source,java,indent=0]
 .Custom annotation to resolve duplicate types
 ----
-include::{testDir}/example/extensions/ParameterResolverCustomAnnotationDemo.java[tags=user_guide]
+include::example$java/example/extensions/ParameterResolverCustomAnnotationDemo.java[tags=user_guide]
 ----
 
 JUnit includes some built-in parameter resolvers that can cause conflicts if a resolver
@@ -103,4 +102,3 @@ to resolve any conflicts.
 Parameterized tests are another potential source of conflict. Ensure that tests annotated
 with `@ParameterizedTest` are not also annotated with `@Test` and see
 <<writing-tests-parameterized-tests-consuming-arguments>> for more details.
-

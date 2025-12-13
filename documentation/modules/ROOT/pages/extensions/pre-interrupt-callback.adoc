@@ -1,9 +1,6 @@
-[[extensions-preinterrupt-callback]]
-=== Pre-Interrupt Callback
+= Pre-Interrupt Callback
 
 `{PreInterruptCallback}` defines the API for `Extensions` that wish to react on
 timeouts before the `Thread.interrupt()` is called.
 
 Please refer to <<writing-tests-declarative-timeouts-debugging>> for additional information.
-
-

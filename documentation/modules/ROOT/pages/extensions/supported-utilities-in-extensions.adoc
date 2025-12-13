@@ -1,5 +1,4 @@
-[[extensions-supported-utilities]]
-=== Supported Utilities in Extensions
+= Supported Utilities in Extensions
 
 The `junit-platform-commons` artifact provides _maintained_ utilities for working with
 annotations, classes, reflection, classpath scanning, and conversion tasks. These
@@ -8,7 +7,7 @@ utilities can be found in the `{junit-platform-support-package}` and its subpack
 order to align with the behavior of the JUnit Platform and JUnit Jupiter.
 
 [[extensions-supported-utilities-annotations]]
-==== Annotation Support
+== Annotation Support
 
 `AnnotationSupport` provides static utility methods that operate on annotated elements
 (e.g., packages, annotations, classes, interfaces, constructors, methods, and fields).
@@ -24,13 +23,13 @@ use one of the `findRepeatableAnnotations()` methods and verify that the returne
 NOTE: See also: <<extensions-supported-utilities-search-semantics>>
 
 [[extensions-supported-utilities-classes]]
-==== Class Support
+== Class Support
 
 `ClassSupport` provides static utility methods for working with classes (i.e., instances
 of `java.lang.Class`). Consult the Javadoc for `{ClassSupport}` for further details.
 
 [[extensions-supported-utilities-reflection]]
-==== Reflection Support
+== Reflection Support
 
 `ReflectionSupport` provides static utility methods that augment the standard JDK
 reflection and class-loading mechanisms. These include methods to scan the classpath in
@@ -42,7 +41,7 @@ details.
 NOTE: See also: <<extensions-supported-utilities-search-semantics>>
 
 [[extensions-supported-utilities-modifier]]
-==== Modifier Support
+== Modifier Support
 
 `ModifierSupport` provides static utility methods for working with member and class
 modifiers -- for example, to determine if a member is declared as `public`, `private`,
@@ -50,7 +49,7 @@ modifiers -- for example, to determine if a member is declared as `public`, `pri
 details.
 
 [[extensions-supported-utilities-conversion]]
-==== Conversion Support
+== Conversion Support
 
 `ConversionSupport` (in the `org.junit.platform.commons.support.conversion` package)
 provides support for converting from strings to primitive types and their corresponding
@@ -59,7 +58,7 @@ common Java types such as `File`, `BigDecimal`, `BigInteger`, `Currency`, `Local
 `URL`, `UUID`, etc. Consult the Javadoc for `{ConversionSupport}` for further details.
 
 [[extensions-supported-utilities-search-semantics]]
-==== Field and Method Search Semantics
+== Field and Method Search Semantics
 
 Various methods in `AnnotationSupport` and `ReflectionSupport` use search algorithms that
 traverse type hierarchies to locate matching fields and methods – for example,
@@ -89,4 +88,3 @@ NOTE: Due to the low-level nature of the feature, the
 `junit.platform.reflection.search.useLegacySemantics` flag can only be set via a JVM
 system property. It cannot be set via a <<running-tests-config-params, configuration
 parameter>>.
-
