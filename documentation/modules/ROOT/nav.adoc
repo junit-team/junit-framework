@@ -62,3 +62,4 @@
 ** xref:advanced-topics/engines.adoc[]
 * xref:api-evolution.adoc[]
 * xref:release-notes.adoc[]
+* xref:appendix.adoc[]
