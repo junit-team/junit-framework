@@ -25,7 +25,8 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* The `UniqueId.uniqueIdFormat` field has been removed, reducing the size of `UniqueId`
+  objects.
 
 [[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
@@ -55,6 +56,7 @@ repository on GitHub.
 in `@ParameterizedTest` methods when `kotlin-reflect` is on the classpath.
 Note: Primitive-wrapper inline value classes (e.g., `UInt`, custom value classes wrapping
 primitives) are not yet supported. See {junit-team-issue}5081[#5081].
+
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage

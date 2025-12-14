@@ -36,6 +36,7 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.core.LauncherExecutionRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
@@ -119,8 +120,8 @@ class UsingTheLauncherDemo {
 
 	@Test
 	@SuppressWarnings("unused")
-	void cancellation() {
-		// tag::cancellation[]
+	void cancellationDirect() {
+		// tag::cancellation-direct[]
 		CancellationToken cancellationToken = CancellationToken.create(); // <1>
 
 		TestExecutionListener failFastListener = new TestExecutionListener() {
@@ -132,24 +133,92 @@ class UsingTheLauncherDemo {
 			}
 		};
 
-		// end::cancellation[]
+		// end::cancellation-direct[]
 		// @formatter:off
-		// tag::cancellation[]
+		// tag::cancellation-direct[]
 		LauncherExecutionRequest executionRequest = LauncherDiscoveryRequestBuilder.request()
 				.selectors(selectClass(MyTestClass.class))
 				.forExecution()
+				// end::cancellation-direct[]
+				// @formatter:on
+				// tag::cancellation-direct[]
 				.cancellationToken(cancellationToken) // <3>
 				.listeners(failFastListener) // <4>
 				.build();
-		// end::cancellation[]
-		// @formatter:off
-		// tag::cancellation[]
 
 		try (LauncherSession session = LauncherFactory.openSession()) {
 			session.getLauncher().execute(executionRequest); // <5>
 		}
-		// end::cancellation[]
+		// end::cancellation-direct[]
+	}
+
+	@Test
+	@SuppressWarnings("unused")
+	void cancellationFromDiscoveryRequest() {
+		CancellationToken cancellationToken = CancellationToken.create();
+
+		TestExecutionListener failFastListener = new TestExecutionListener() {
+			@Override
+			public void executionFinished(TestIdentifier identifier, TestExecutionResult result) {
+				if (result.getStatus() == FAILED) {
+					cancellationToken.cancel();
+				}
+			}
+		};
+
+		// @formatter:off
+		// tag::cancellation-discovery-request[]
+		LauncherDiscoveryRequest discoveryRequest = LauncherDiscoveryRequestBuilder.request()
+				.selectors(selectClass(MyTestClass.class))
+				.build(); // <1>
+		// end::cancellation-discovery-request[]
 		// @formatter:on
+		// tag::cancellation-discovery-request[]
+
+		LauncherExecutionRequest executionRequest = LauncherExecutionRequestBuilder.request(discoveryRequest) // <2>
+				.cancellationToken(cancellationToken) // <3>
+				.listeners(failFastListener) // <4>
+				.build();
+
+		try (LauncherSession session = LauncherFactory.openSession()) {
+			session.getLauncher().execute(executionRequest); // <5>
+		}
+		// end::cancellation-discovery-request[]
+	}
+
+	@Test
+	@SuppressWarnings("unused")
+	void cancellationFromTestPlan() {
+		CancellationToken cancellationToken = CancellationToken.create();
+
+		TestExecutionListener failFastListener = new TestExecutionListener() {
+			@Override
+			public void executionFinished(TestIdentifier identifier, TestExecutionResult result) {
+				if (result.getStatus() == FAILED) {
+					cancellationToken.cancel();
+				}
+			}
+		};
+
+		// @formatter:off
+		// tag::cancellation-test-plan[]
+		LauncherDiscoveryRequest discoveryRequest = LauncherDiscoveryRequestBuilder.request()
+				.selectors(selectClass(MyTestClass.class))
+				.build(); // <1>
+		// end::cancellation-test-plan[]
+		// @formatter:on
+		// tag::cancellation-test-plan[]
+
+		try (LauncherSession session = LauncherFactory.openSession()) {
+			var launcher = session.getLauncher();
+			TestPlan testPlan = launcher.discover(discoveryRequest); // <2>
+			LauncherExecutionRequest executionRequest = LauncherExecutionRequestBuilder.request(testPlan) // <3>
+					.cancellationToken(cancellationToken) // <4>
+					.listeners(failFastListener) // <5>
+					.build();
+			launcher.execute(executionRequest); // <6>
+		}
+		// end::cancellation-test-plan[]
 	}
 
 }

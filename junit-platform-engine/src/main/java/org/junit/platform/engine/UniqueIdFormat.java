@@ -88,7 +88,7 @@ class UniqueIdFormat implements Serializable {
 	UniqueId parse(String source) throws JUnitException {
 		String[] parts = source.split(String.valueOf(this.segmentDelimiter));
 		List<Segment> segments = Arrays.stream(parts).map(this::createSegment).toList();
-		return new UniqueId(this, segments);
+		return new UniqueId(segments);
 	}
 
 	private Segment createSegment(String segmentString) throws JUnitException {

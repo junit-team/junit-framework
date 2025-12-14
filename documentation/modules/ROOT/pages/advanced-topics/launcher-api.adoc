@@ -363,7 +363,7 @@ failed can be achieved as follows.
 
 [source,java,indent=0]
 ----
-include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation]
+include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-direct]
 ----
 <1> Create a `{CancellationToken}`
 <2> Implement a `{TestExecutionListener}` that calls `cancel()` when a test fails
@@ -387,3 +387,37 @@ At the time of writing, the following test engines support cancellation:
 * `{junit-platform-suite-engine}`
 * Any `{TestEngine}` extending `{HierarchicalTestEngine}` such as Spock and Cucumber
 ====
+
+[[launcher-cancellation-execution-request-from-discovery-request]]
+=== Building a LauncherExecutionRequest from a LauncherDiscoveryRequest
+
+Rather than building a `{LauncherExecutionRequest}` by starting with a
+`{LauncherDiscoveryRequestBuilder}` and calling `forExecution()`, you can create a
+`{LauncherExecutionRequestBuilder}` from a previously built `{LauncherDiscoveryRequest}`.
+
+[source,java,indent=0]
+----
+include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-discovery-request]
+----
+<1> Build a `{LauncherDiscoveryRequest}`
+<2> Create a `{LauncherExecutionRequestBuilder}` with it
+<3> Register the cancellation token
+<4> Register the listener
+<5> Pass the `{LauncherExecutionRequest}` to `Launcher.execute`
+
+[[launcher-cancellation-execution-request-from-test-plan]]
+=== Building a LauncherExecutionRequest from a TestPlan
+
+Alternatively, a `{LauncherExecutionRequestBuilder}` can be created from a previously
+discovered `{TestPlan}`.
+
+[source,java,indent=0]
+----
+include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-test-plan]
+----
+<1> Build a `{LauncherDiscoveryRequest}`
+<2> Discover a `{TestPlan}` via `Launcher.discover`
+<3> Create a `{LauncherExecutionRequestBuilder}` with it
+<4> Register the cancellation token
+<5> Register the listener
+<6> Pass the `{LauncherExecutionRequest}` to `Launcher.execute`

@@ -1,5 +1,5 @@
 = Overview
-:page-aliases: user-guide/index.adoc
+:page-aliases: index.adoc, user-guide/index.adoc
 
 The goal of this document is to provide comprehensive reference documentation for
 programmers writing tests, extension authors, and engine authors as well as build tool
