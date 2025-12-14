@@ -15,16 +15,17 @@ content:
   sources:
   - url: https://github.com/junit-team/junit-framework.git
     branches:
-    - 'main'
-    - 'r5.14.*'
-    - '!r5.14.0'
-    - '!r5.14.1'
-    - 'r6.*'
-    - '!r6.0.0'
-    - '!r6.0.1'
-    - 'antora/*'
-    - 'releases/5.14.x'
-    - 'releases/6.0.x'
+#    - 'main'
+#    - 'r5.14.*'
+#    - '!r5.14.0'
+#    - '!r5.14.1'
+#    - 'r6.*'
+#    - '!r6.0.0'
+#    - '!r6.0.1'
+    - 'antora/6.0.1'
+#    - 'antora/*'
+#    - 'releases/5.14.x'
+#    - 'releases/6.0.x'
     start_path: documentation
     worktrees: true
 asciidoc:
