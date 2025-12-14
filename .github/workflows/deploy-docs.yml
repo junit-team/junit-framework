@@ -46,6 +46,7 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          cache-read-only: ${{ github.ref != 'refs/heads/docs-site' }}
       - name: Download dependencies
         run: npm ci
       - name: Run Antora
