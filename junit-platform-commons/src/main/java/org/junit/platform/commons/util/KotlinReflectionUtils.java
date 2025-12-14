@@ -125,6 +125,7 @@ public class KotlinReflectionUtils {
 		return result;
 	}
 
+	@API(status = INTERNAL, since = "6.1")
 	public static boolean isKotlinType(Class<?> clazz) {
 		return kotlinMetadata != null //
 				&& clazz.getDeclaredAnnotation(kotlinMetadata) != null;
@@ -162,12 +163,14 @@ public class KotlinReflectionUtils {
 		return KotlinFunctionUtils.invokeKotlinSuspendingFunction(method, target, args);
 	}
 
+	@API(status = INTERNAL, since = "6.1")
 	public static boolean isInstanceOfInlineType(@Nullable Object value) {
-		return jvmInline != null //
-				&& value != null //
+		return jvmInline != null
+				&& value != null
 				&& value.getClass().getDeclaredAnnotation(jvmInline) != null;
 	}
 
+	@API(status = INTERNAL, since = "6.1")
 	public static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target,
 			@Nullable Object... args) {
 		requireKotlinReflect(method);
