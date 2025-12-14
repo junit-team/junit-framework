@@ -5,6 +5,7 @@ on:
     branches:
       - docs-site
   pull_request:
+  repository_dispatch:
 
 concurrency:
   # Cancels in-progress runs only for pull requests
