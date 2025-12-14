@@ -63,13 +63,16 @@ jobs:
         id: antora_copy
         if: env.DEPLOY == 'true'
         run: |
-          rsync --recursive --delete --checksum --archive --safe-links --human-readable --prune-empty-dirs \
+          rsync --recursive --delete --checksum --archive --safe-links --human-readable --prune-empty-dirs --verbose \
             --exclude='*.pdf' \
             --exclude='_/font/roboto-*' \
             build/site/* \
             docs-repo
           cd docs-repo
-          echo "git_changes=$(test -z "$(git status --porcelain)")" >> "$GITHUB_OUTPUT"
+          git status
+          git_changes=$(test -z "$(git status --porcelain)")
+          echo "git_changes=$git_changes"
+          echo "git_changes=$git_changes" >> "$GITHUB_OUTPUT"
       - name: Push to docs.junit.org repo
         if: env.DEPLOY == 'true' && steps.antora_copy.git_changes == '1'
         working-directory: docs-repo
