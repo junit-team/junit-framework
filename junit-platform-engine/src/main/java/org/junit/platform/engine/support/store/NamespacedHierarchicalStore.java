@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -237,32 +239,82 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * closed
 	 * @since 6.0
 	 */
-	@SuppressWarnings("ReferenceEquality")
 	@API(status = MAINTAINED, since = "6.0")
 	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
 		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
-		StoredValue storedValue = getStoredValue(compositeKey);
-		var result = StoredValue.evaluateIfNotNull(storedValue);
-		if (result == null) {
-			StoredValue newStoredValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				if (oldStoredValue == null || oldStoredValue == storedValue) {
-					return newStoredValue(new MemoizingSupplier(() -> {
-						rejectIfClosed();
-						return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
-					}, true));
+
+		// CAS-retry loop: retry if another thread concurrently modifies the entry
+		for (;;) {
+			StoredValue localStoredValue = this.storedValues.get(compositeKey);
+			if (localStoredValue != null) {
+				Object localValue = evaluateForComputeIfAbsent(compositeKey, localStoredValue);
+				if (localValue != null) {
+					return localValue;
 				}
-				return oldStoredValue;
-			});
+
+				Object computed = computeAndInstall(compositeKey, localStoredValue, key, defaultCreator);
+				if (computed != null) {
+					return computed;
+				}
+				continue;
+			}
+
+			// No local mapping: consult parent first.
+			if (this.parentStore != null) {
+				StoredValue parentStoredValue = this.parentStore.getStoredValue(compositeKey);
+				Object parentValue = StoredValue.evaluateIfNotNull(parentStoredValue);
+				if (parentValue != null) {
+					return parentValue;
+				}
+			}
+
+			Object computed = computeAndInstall(compositeKey, null, key, defaultCreator);
+			if (computed != null) {
+				return computed;
+			}
+		}
+	}
+
+	private @Nullable Object evaluateForComputeIfAbsent(CompositeKey<N> compositeKey, StoredValue storedValue) {
+		Supplier<@Nullable Object> supplier = storedValue.supplier();
+		if (supplier instanceof DeferredSupplier deferred) {
+			deferred.run();
 			try {
-				return requireNonNull(newStoredValue.evaluate());
+				return deferred.getOrThrow();
 			}
 			catch (Throwable t) {
-				storedValues.remove(compositeKey, newStoredValue);
+				this.storedValues.remove(compositeKey, storedValue);
 				throw t;
 			}
 		}
-		return result;
+		return storedValue.evaluate();
+	}
+
+	private <K, V> @Nullable Object computeAndInstall(CompositeKey<N> compositeKey, @Nullable StoredValue expectedOld,
+			K key, Function<? super K, ? extends V> defaultCreator) {
+
+		var deferred = new DeferredSupplier(() -> {
+			rejectIfClosed();
+			return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
+		});
+		StoredValue newStoredValue = newStoredValue(deferred);
+
+		boolean installed = (expectedOld == null ? this.storedValues.putIfAbsent(compositeKey, newStoredValue) == null
+				: this.storedValues.replace(compositeKey, expectedOld, newStoredValue));
+
+		if (!installed) {
+			return null;
+		}
+
+		deferred.run();
+		try {
+			return requireNonNull(deferred.getOrThrow());
+		}
+		catch (Throwable t) {
+			this.storedValues.remove(compositeKey, newStoredValue);
+			throw t;
+		}
 	}
 
 	/**
@@ -445,15 +497,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			return this.supplier.get();
 		}
 
-		private @Nullable Object evaluateOrNullOnFailure() {
-			if (this.supplier instanceof MemoizingSupplier memoizing) {
-				return memoizing.getOrNullOnFailure();
-			}
-			return this.supplier.get();
-		}
-
 		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
-			return value != null ? value.evaluateOrNullOnFailure() : null;
+			return value != null ? value.evaluate() : null;
 		}
 
 	}
@@ -472,6 +517,66 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	}
 
 	/**
+	 * Deferred computation that can be installed into the store without executing
+	 * user code while holding internal map locks.
+	 *
+	 * <p>For {@link #get(Object, Object)}, failures are treated as logically absent
+	 * (returning {@code null}) so exceptions are not observable via {@code get()}.
+	 *
+	 * <p>For {@link #computeIfAbsent(Object, Object, Function)},
+	 * {@link #getOrThrow()} rethrows the original failure.
+	 */
+	private static final class DeferredSupplier implements Supplier<@Nullable Object> {
+
+		private final FutureTask<@Nullable Object> task;
+
+		private DeferredSupplier(Supplier<@Nullable Object> delegate) {
+			this.task = new FutureTask<>(delegate::get);
+		}
+
+		private void run() {
+			this.task.run();
+		}
+
+		@Override
+		public @Nullable Object get() {
+			try {
+				return this.task.get();
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw throwAsUncheckedException(e);
+			}
+			catch (ExecutionException e) {
+				Throwable t = e.getCause();
+				if (t == null) {
+					t = e;
+				}
+				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+				return null;
+			}
+		}
+
+		private @Nullable Object getOrThrow() {
+			try {
+				return this.task.get();
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw throwAsUncheckedException(e);
+			}
+			catch (ExecutionException e) {
+				Throwable t = e.getCause();
+				if (t == null) {
+					t = e;
+				}
+				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+				throw throwAsUncheckedException(t);
+			}
+		}
+	}
+
+	/**
 	 * Thread-safe {@link Supplier} that memoizes the result of calling its
 	 * delegate and ensures it is called at most once.
 	 *
@@ -485,18 +590,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		private static final Object NO_VALUE_SET = new Object();
 
 		private final Supplier<@Nullable Object> delegate;
-		private final boolean transientFailures;
 
 		@Nullable
 		private volatile Object value = NO_VALUE_SET;
 
 		private MemoizingSupplier(Supplier<@Nullable Object> delegate) {
-			this(delegate, false);
-		}
-
-		private MemoizingSupplier(Supplier<@Nullable Object> delegate, boolean transientFailures) {
 			this.delegate = delegate;
-			this.transientFailures = transientFailures;
 		}
 
 		@Override
@@ -505,19 +604,6 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				computeValue();
 			}
 			if (this.value instanceof Failure failure) {
-				throw throwAsUncheckedException(failure.throwable);
-			}
-			return this.value;
-		}
-
-		private @Nullable Object getOrNullOnFailure() {
-			if (this.value == NO_VALUE_SET) {
-				computeValue();
-			}
-			if (this.value instanceof Failure failure) {
-				if (this.transientFailures) {
-					return null;
-				}
 				throw throwAsUncheckedException(failure.throwable);
 			}
 			return this.value;
