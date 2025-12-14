@@ -1,3 +1,12 @@
+/*
+ * Copyright 2015-2025 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
 package org.junit.jupiter.api.kotlin
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,7 +19,6 @@ import org.junit.jupiter.params.provider.MethodSource
  * These work because they compile to Object in JVM, bypassing strict type validation.
  */
 class GenericInlineValueClassTests {
-
     @MethodSource("resultProvider")
     @ParameterizedTest
     fun testResult(result: Result<String>) {
@@ -41,29 +49,35 @@ class GenericInlineValueClassTests {
 
     companion object {
         @JvmStatic
-        fun resultProvider() = listOf(
-            Arguments.of(Result.success("success"))
-        )
-
-        @JvmStatic
-        fun multipleResultsProvider() = listOf(
-            Arguments.of(
-                Result.success("data"),
-                Result.success(42)
+        fun resultProvider() =
+            listOf(
+                Arguments.of(Result.success("success"))
             )
-        )
 
         @JvmStatic
-        fun nullableResultProvider() = listOf(
-            Arguments.of(Result.success("test"))
-        )
+        fun multipleResultsProvider() =
+            listOf(
+                Arguments.of(
+                    Result.success("data"),
+                    Result.success(42)
+                )
+            )
 
         @JvmStatic
-        fun customGenericProvider() = listOf(
-            Arguments.of(Container("content"))
-        )
+        fun nullableResultProvider() =
+            listOf(
+                Arguments.of(Result.success("test"))
+            )
+
+        @JvmStatic
+        fun customGenericProvider() =
+            listOf(
+                Arguments.of(Container("content"))
+            )
     }
 }
 
 @JvmInline
-value class Container<T>(val value: T)
+value class Container<T>(
+    val value: T
+)

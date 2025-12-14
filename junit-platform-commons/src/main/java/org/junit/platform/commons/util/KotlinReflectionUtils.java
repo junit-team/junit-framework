@@ -165,9 +165,7 @@ public class KotlinReflectionUtils {
 
 	@API(status = INTERNAL, since = "6.1")
 	public static boolean isInstanceOfInlineType(@Nullable Object value) {
-		return jvmInline != null
-				&& value != null
-				&& value.getClass().getDeclaredAnnotation(jvmInline) != null;
+		return jvmInline != null && value != null && value.getClass().getDeclaredAnnotation(jvmInline) != null;
 	}
 
 	@API(status = INTERNAL, since = "6.1")

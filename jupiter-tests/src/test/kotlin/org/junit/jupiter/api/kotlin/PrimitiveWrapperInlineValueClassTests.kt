@@ -1,3 +1,12 @@
+/*
+ * Copyright 2015-2025 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
 package org.junit.jupiter.api.kotlin
 
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource
  */
 @Disabled("Primitive-wrapper inline value classes are not yet supported")
 class PrimitiveWrapperInlineValueClassTests {
-
     @MethodSource("uintProvider")
     @ParameterizedTest
     fun testUInt(value: UInt) {
@@ -51,7 +59,11 @@ class PrimitiveWrapperInlineValueClassTests {
 }
 
 @JvmInline
-value class UserId(val value: Long)
+value class UserId(
+    val value: Long
+)
 
 @JvmInline
-value class Email(val value: String)
+value class Email(
+    val value: String
+)

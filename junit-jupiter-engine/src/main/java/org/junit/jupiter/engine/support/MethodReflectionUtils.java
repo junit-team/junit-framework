@@ -46,8 +46,7 @@ public class MethodReflectionUtils {
 		if (isKotlinSuspendingFunction(method)) {
 			return invokeKotlinSuspendingFunction(method, target, arguments);
 		}
-		if (isKotlinType(method.getDeclaringClass())
-				&& KotlinReflectionUtils.isKotlinReflectPresent()
+		if (isKotlinType(method.getDeclaringClass()) && KotlinReflectionUtils.isKotlinReflectPresent()
 				&& hasInlineTypeArgument(arguments)) {
 			return invokeKotlinFunction(method, target, arguments);
 		}
@@ -59,8 +58,7 @@ public class MethodReflectionUtils {
 			return false;
 		}
 
-		return arguments.length > 0
-				&& Arrays.stream(arguments).anyMatch(KotlinReflectionUtils::isInstanceOfInlineType);
+		return arguments.length > 0 && Arrays.stream(arguments).anyMatch(KotlinReflectionUtils::isInstanceOfInlineType);
 	}
 
 	private MethodReflectionUtils() {
