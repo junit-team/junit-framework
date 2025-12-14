@@ -1,0 +1,80 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - docs-site
+  pull_request:
+
+concurrency:
+  # Cancels in-progress runs only for pull requests
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  DEPLOY: ${{ github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/docs-site' }}
+
+jobs:
+  generate_and_deploy:
+    name: Generate and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes graphviz
+      - name: Install Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: .tool-versions
+      - name: Install JDKs
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Download dependencies
+        run: npm ci
+      - name: Run Antora
+        run: npm run build
+      - name: Check out docs.junit.org repo
+        if: env.DEPLOY == 'true'
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          repository: junit-team/docs.junit.org
+          path: docs-repo
+          fetch-depth: 1
+          token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_DOCS_REPO }}
+          persist-credentials: true
+      - name: Copy Antora site to docs.junit.org repo
+        id: antora_copy
+        if: env.DEPLOY == 'true'
+        run: |
+          rsync --recursive --delete --checksum --archive --safe-links --human-readable --prune-empty-dirs \
+            --exclude='*.pdf' \
+            --exclude='_/font/roboto-*' \
+            build/site/* \
+            docs-repo
+          cd docs-repo
+          echo "git_changes=$(test -z "$(git status --porcelain)")" >> "$GITHUB_OUTPUT"
+      - name: Push to docs.junit.org repo
+        if: env.DEPLOY == 'true' && steps.antora_copy.git_changes == '1'
+        working-directory: docs-repo
+        run: |
+          git config --global user.name "JUnit Team"
+          git config --global user.email "team@junit.org"
+          git add .
+          git commit -m "Deploy latest Antora site"
+          git push
