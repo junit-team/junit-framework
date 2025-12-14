@@ -14,6 +14,9 @@ content:
   - url: https://github.com/junit-team/junit-framework.git
     branches:
     - 'main'
+    - 'r5.14.*'
+    - '!r5.14.0'
+    - '!r5.14.1'
     - 'r6.*'
     - '!r6.0.0'
     - '!r6.0.1'
@@ -43,7 +46,7 @@ urls:
   redirect_facility: static
   latest_version_segment: current
   latest_prerelease_version_segment: snapshot
-  latest_version_segment_strategy: redirect:from # TODO does not work with `redirect_facility: static`
+  latest_version_segment_strategy: replace # redirect:from # TODO does not work with `redirect_facility: static`
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
