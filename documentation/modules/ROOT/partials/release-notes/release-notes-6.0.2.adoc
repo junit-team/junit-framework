@@ -17,13 +17,14 @@ repository on GitHub.
 ==== Bug Fixes
 
 * Make `ConsoleLauncher` compatible with JDK 26 by avoiding final field mutations.
-* Fix a concurrency bug in `NamespacedHierarchicalStore.computeIfAbsent` where
-  the `defaultCreator` function was executed while holding the store's internal
-  map lock. Under parallel execution, this could cause threads using the store to
-  block each other and temporarily see a missing or incorrectly initialized state
-  for values created via `computeIfAbsent`. The method now evaluates
-  `defaultCreator` outside the critical section using a memoizing supplier,
-  aligning its behavior with the deprecated `getOrComputeIfAbsent`.
+* Fix a concurrency issue in `NamespacedHierarchicalStore.computeIfAbsent` where
+`defaultCreator` was executed while holding the internal map's bucket lock,
+causing threads accessing different keys in the same hash bucket to block each
+other during parallel test execution
+(see link:{junit-framework-repo}+/issues/5171+[issue #5171] and
+link:https://github.com/assertj/assertj/issues/1996[assertj/assertj#1996]).
+* `NamespacedHierarchicalStore.computeIfAbsent` no longer deadlocks when
+`defaultCreator` accesses other keys that collide in the same hash bucket.
 
 [[v6.0.2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -43,7 +44,7 @@ repository on GitHub.
 ==== Bug Fixes
 
 * Allow using `@ResourceLock` on classes annotated with `@ClassTemplate` (or
-  `@ParameterizedClass`).
+`@ParameterizedClass`).
 
 [[v6.0.2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

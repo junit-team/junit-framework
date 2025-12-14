@@ -30,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -420,6 +421,109 @@ public class NamespacedHierarchicalStoreTests {
 			assertThat(values).hasSize(threads).containsOnly(1);
 		}
 
+		@Test
+		void simulateRaceConditionInComputeIfAbsentWithCollidingKeys() throws Exception {
+			// 20 threads: 10 will access key1, 10 will access key2
+			int threads = 20;
+			int threadsPerKey = threads / 2;
+
+			// Both keys have the same hashCode, forcing them into the same bucket
+			var key1 = new CollidingKey("k1");
+			var key2 = new CollidingKey("k2");
+			var chooser = new AtomicInteger();
+
+			// Track how many times each key's defaultCreator is invoked
+			var creatorCallsForKey1 = new AtomicInteger();
+			var creatorCallsForKey2 = new AtomicInteger();
+
+			try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
+				executeConcurrently(threads, () -> {
+					// Alternate between key1 and key2
+					CollidingKey key = (chooser.getAndIncrement() % 2 == 0 ? key1 : key2);
+
+					// Each key's value is an AtomicInteger counter
+					AtomicInteger counter = (AtomicInteger) localStore.computeIfAbsent(namespace, key, __ -> {
+						if (key.equals(key1)) {
+							creatorCallsForKey1.incrementAndGet();
+						}
+						else {
+							creatorCallsForKey2.incrementAndGet();
+						}
+						return new AtomicInteger();
+					});
+
+					// Each thread increments the shared counter for its key
+					counter.incrementAndGet();
+					return 1;
+				});
+
+				assertThat(creatorCallsForKey1.get()).as(
+					"defaultCreator for key1 should be called exactly once").isEqualTo(1);
+				assertThat(creatorCallsForKey2.get()).as(
+					"defaultCreator for key2 should be called exactly once").isEqualTo(1);
+
+				AtomicInteger counter1 = (AtomicInteger) requireNonNull(localStore.get(namespace, key1));
+				AtomicInteger counter2 = (AtomicInteger) requireNonNull(localStore.get(namespace, key2));
+				assertThat(counter1.get()).as("all %d threads for key1 should have incremented the same counter",
+					threadsPerKey).isEqualTo(threadsPerKey);
+				assertThat(counter2.get()).as("all %d threads for key2 should have incremented the same counter",
+					threadsPerKey).isEqualTo(threadsPerKey);
+			}
+		}
+
+		@Test
+		void computeIfAbsentWithCollidingKeysDoesNotBlockConcurrentAccess() throws Exception {
+			try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
+				var key1ComputationStarted = new CountDownLatch(1);
+				var key2ComputationStarted = new CountDownLatch(1);
+				var key1Result = new AtomicReference<Object>();
+				var key2Result = new AtomicReference<Object>();
+				var key2WasBlocked = new AtomicBoolean(false);
+
+				Thread thread1 = new Thread(() -> {
+					Object result = localStore.computeIfAbsent(namespace, new CollidingKey("key1"), __ -> {
+						key1ComputationStarted.countDown();
+						try {
+							// Wait to ensure thread2 has a chance to start its computation
+							if (!key2ComputationStarted.await(500, TimeUnit.MILLISECONDS)) {
+								key2WasBlocked.set(true);
+							}
+						}
+						catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
+						return "value1";
+					});
+					key1Result.set(result);
+				});
+
+				Thread thread2 = new Thread(() -> {
+					try {
+						key1ComputationStarted.await(1, TimeUnit.SECONDS);
+					}
+					catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						return;
+					}
+					Object result = localStore.computeIfAbsent(namespace, new CollidingKey("key2"), __ -> {
+						key2ComputationStarted.countDown();
+						return "value2";
+					});
+					key2Result.set(result);
+				});
+
+				thread1.start();
+				thread2.start();
+				thread1.join(2000);
+				thread2.join(2000);
+
+				assertThat(key1Result.get()).as("key1 result").isEqualTo("value1");
+				assertThat(key2Result.get()).as("key2 result").isEqualTo("value2");
+				assertThat(key2WasBlocked).as(
+					"computeIfAbsent for key2 should not be blocked by key1's defaultCreator").isFalse();
+			}
+		}
+
 		@SuppressWarnings("deprecation")
 		@Test
 		void getOrComputeIfAbsentDoesNotDeadlockWithCollidingKeys() throws Exception {
@@ -467,7 +571,7 @@ public class NamespacedHierarchicalStoreTests {
 		}
 
 		@Test
-		void computeIfAbsentCanDeadlockWithCollidingKeys() throws Exception {
+		void computeIfAbsentDoesNotDeadlockWithCollidingKeys() throws Exception {
 			try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
 				var firstComputationStarted = new CountDownLatch(1);
 				var secondComputationAllowedToFinish = new CountDownLatch(1);
@@ -507,6 +611,119 @@ public class NamespacedHierarchicalStoreTests {
 
 				assertThat(firstThreadTimedOut).as(
 					"computeIfAbsent should not block subsequent computations on colliding keys").isFalse();
+			}
+		}
+
+		@Test
+		void getDoesNotSeeTransientExceptionFromComputeIfAbsent() throws Exception {
+			try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
+				var computeStarted = new CountDownLatch(1);
+				var getCanProceed = new CountDownLatch(1);
+				var computeCanThrow = new CountDownLatch(1);
+				var exceptionSeenByGet = new AtomicBoolean(false);
+				var getReturnedNull = new AtomicBoolean(false);
+
+				Thread computeThread = new Thread(() -> {
+					try {
+						localStore.computeIfAbsent(namespace, key, __ -> {
+							computeStarted.countDown();
+							try {
+								// Wait for the get thread to be ready
+								computeCanThrow.await(1, TimeUnit.SECONDS);
+							}
+							catch (InterruptedException e) {
+								Thread.currentThread().interrupt();
+							}
+							throw new RuntimeException("boom");
+						});
+					}
+					catch (RuntimeException expected) {
+						// Expected - the exception should propagate back to this thread
+					}
+					finally {
+						getCanProceed.countDown();
+					}
+				});
+
+				Thread getThread = new Thread(() -> {
+					try {
+						computeStarted.await(1, TimeUnit.SECONDS);
+						// Signal compute thread to throw
+						computeCanThrow.countDown();
+						// Wait a brief moment for compute to throw and remove the entry
+						getCanProceed.await(1, TimeUnit.SECONDS);
+						// Now try to get the value
+						Object result = localStore.get(namespace, key);
+						if (result == null) {
+							getReturnedNull.set(true);
+						}
+					}
+					catch (RuntimeException e) {
+						// If we see the exception, that's the bug we're testing for
+						exceptionSeenByGet.set(true);
+					}
+					catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				});
+
+				computeThread.start();
+				getThread.start();
+
+				computeThread.join(2000);
+				getThread.join(2000);
+
+				assertThat(exceptionSeenByGet).as(
+					"get() should not see transient exception from failed computeIfAbsent").isFalse();
+				assertThat(getReturnedNull).as(
+					"get() should return null after computeIfAbsent fails and removes entry").isTrue();
+			}
+		}
+
+		@Test
+		void getConcurrentWithFailingComputeIfAbsentDoesNotSeeException() throws Exception {
+			int iterations = 100;
+			for (int i = 0; i < iterations; i++) {
+				try (var localStore = new NamespacedHierarchicalStore<String>(null)) {
+					var computeStarted = new CountDownLatch(1);
+					var exceptionSeenByGet = new AtomicBoolean(false);
+
+					Thread computeThread = new Thread(() -> {
+						try {
+							localStore.computeIfAbsent(namespace, key, __ -> {
+								computeStarted.countDown();
+								throw new RuntimeException("boom");
+							});
+						}
+						catch (RuntimeException expected) {
+							// Expected
+						}
+					});
+
+					Thread getThread = new Thread(() -> {
+						try {
+							computeStarted.await(100, TimeUnit.MILLISECONDS);
+							// Try to observe the transient state
+							localStore.get(namespace, key);
+						}
+						catch (RuntimeException e) {
+							exceptionSeenByGet.set(true);
+						}
+						catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
+					});
+
+					computeThread.start();
+					getThread.start();
+
+					computeThread.join(500);
+					getThread.join(500);
+
+					assertThat(exceptionSeenByGet).as(
+						"get() should not see transient exception from failed computeIfAbsent (iteration %d)",
+						i).isFalse();
+				}
 			}
 		}
 
