@@ -5,7 +5,7 @@ on:
     branches:
       - docs-site
   pull_request:
-  repository_dispatch:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}
@@ -14,7 +14,7 @@ concurrency:
 permissions: {}
 
 env:
-  DEPLOY: ${{ github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/docs-site' }}
+  DEPLOY: ${{ github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/docs-site' }}
 
 jobs:
   generate_and_deploy:
