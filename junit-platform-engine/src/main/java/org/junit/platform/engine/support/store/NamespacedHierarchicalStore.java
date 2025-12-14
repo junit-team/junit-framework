@@ -250,7 +250,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 					return newStoredValue(new MemoizingSupplier(() -> {
 						rejectIfClosed();
 						return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
-					}));
+					}, true));
 				}
 				return oldStoredValue;
 			});
@@ -445,8 +445,15 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			return this.supplier.get();
 		}
 
+		private @Nullable Object evaluateOrNullOnFailure() {
+			if (this.supplier instanceof MemoizingSupplier memoizing) {
+				return memoizing.getOrNullOnFailure();
+			}
+			return this.supplier.get();
+		}
+
 		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
-			return value != null ? value.evaluate() : null;
+			return value != null ? value.evaluateOrNullOnFailure() : null;
 		}
 
 	}
@@ -478,12 +485,18 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		private static final Object NO_VALUE_SET = new Object();
 
 		private final Supplier<@Nullable Object> delegate;
+		private final boolean transientFailures;
 
 		@Nullable
 		private volatile Object value = NO_VALUE_SET;
 
 		private MemoizingSupplier(Supplier<@Nullable Object> delegate) {
+			this(delegate, false);
+		}
+
+		private MemoizingSupplier(Supplier<@Nullable Object> delegate, boolean transientFailures) {
 			this.delegate = delegate;
+			this.transientFailures = transientFailures;
 		}
 
 		@Override
@@ -492,6 +505,19 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				computeValue();
 			}
 			if (this.value instanceof Failure failure) {
+				throw throwAsUncheckedException(failure.throwable);
+			}
+			return this.value;
+		}
+
+		private @Nullable Object getOrNullOnFailure() {
+			if (this.value == NO_VALUE_SET) {
+				computeValue();
+			}
+			if (this.value instanceof Failure failure) {
+				if (this.transientFailures) {
+					return null;
+				}
 				throw throwAsUncheckedException(failure.throwable);
 			}
 			return this.value;
