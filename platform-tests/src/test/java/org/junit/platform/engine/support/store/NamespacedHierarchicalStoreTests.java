@@ -755,6 +755,28 @@ public class NamespacedHierarchicalStoreTests {
 		}
 
 		@Test
+		void getThrowsIfUnrecoverable() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				throw new OutOfMemoryError("boom");
+			});
+			supplier.run();
+			assertThrows(OutOfMemoryError.class, () -> {
+				supplier.get();
+			});
+		}
+
+		@Test
+		void getOrThrowThrowsIfUnrecoverable() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				throw new OutOfMemoryError("boom");
+			});
+			supplier.run();
+			assertThrows(OutOfMemoryError.class, () -> {
+				supplier.getOrThrow();
+			});
+		}
+
+		@Test
 		void getOrThrowCanBeInterrupted() {
 			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
 				try {
