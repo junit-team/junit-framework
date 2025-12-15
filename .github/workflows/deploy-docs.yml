@@ -71,10 +71,11 @@ jobs:
             docs-repo
           cd docs-repo
           git status
-          git_changes=$(if [[ -n "$(git status --porcelain)" ]]; then echo '1'; else echo '0'; fi)
+          git_changes=$(git status --porcelain | grep --invert-match --regexp=' sitemap.xml$' --regexp=' search-index.js$' | wc -l)
+          echo "Detected $git_changes change(s)"
           echo "git_changes=$git_changes" >> "$GITHUB_OUTPUT"
       - name: Push to docs.junit.org repo
-        if: env.DEPLOY == 'true' && steps.antora_copy.outputs.git_changes == '1'
+        if: env.DEPLOY == 'true' && steps.antora_copy.outputs.git_changes > 0
         working-directory: docs-repo
         run: |
           git config --global user.name "JUnit Team"
