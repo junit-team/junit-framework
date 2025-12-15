@@ -478,10 +478,22 @@ public class NamespacedHierarchicalStoreTests {
 	@Nested
 	class InheritedValuesTests {
 
+		@SuppressWarnings("deprecation")
 		@Test
-		void valueFromParentIsVisible() {
+		void presentValueFromParentIsPresent() {
 			parentStore.put(namespace, key, value);
 			assertEquals(value, store.get(namespace, key));
+			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, __ -> "enigma"));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> "enigma"));
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void absentValueFromParentIsOverriddenByComputeIfAbsent() {
+			parentStore.put(namespace, key, null);
+			assertNull(store.get(namespace, key));
+			assertNull(store.getOrComputeIfAbsent(namespace, key, __ -> value));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> value));
 		}
 
 		@Test
