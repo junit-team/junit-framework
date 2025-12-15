@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.ConcurrencyTestingUtils.executeConcurrently;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -732,6 +733,46 @@ public class NamespacedHierarchicalStoreTests {
 
 	}
 
+	@Nested
+	class DeferredSupplierTests {
+
+		@Test
+		void getCanBeInterrupted() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				try {
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+					throw new ComputeException(e);
+				}
+				return value;
+			});
+			Thread.currentThread().interrupt();
+			assertThrows(InterruptedException.class, () -> {
+				supplier.get();
+			});
+			assertTrue(Thread.interrupted());
+		}
+
+		@Test
+		void getOrThrowCanBeInterrupted() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				try {
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+					throw new ComputeException(e);
+				}
+				return value;
+			});
+			Thread.currentThread().interrupt();
+			assertThrows(InterruptedException.class, () -> {
+				supplier.getOrThrow();
+			});
+			assertTrue(Thread.interrupted());
+		}
+	}
+
 	private static Object createObject(String display) {
 		return new Object() {
 
@@ -752,6 +793,10 @@ public class NamespacedHierarchicalStoreTests {
 
 		ComputeException(String msg) {
 			super(msg);
+		}
+
+		ComputeException(InterruptedException e) {
+			super(e);
 		}
 	}
 }

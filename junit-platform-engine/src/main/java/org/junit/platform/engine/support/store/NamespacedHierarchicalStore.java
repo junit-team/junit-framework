@@ -565,7 +565,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * {@link ConcurrentHashMap#compute(Object, BiFunction)} calls and
 	 * prevents recursive updates.
 	 */
-	private static final class DeferredSupplier implements Supplier<@Nullable Object> {
+	static final class DeferredSupplier implements Supplier<@Nullable Object> {
 
 		private final FutureTask<@Nullable Object> task;
 		private final @Nullable Object ownerToken;
