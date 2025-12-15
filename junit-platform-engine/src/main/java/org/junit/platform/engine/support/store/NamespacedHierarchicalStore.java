@@ -219,6 +219,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		if (storedValue != null) {
 			return storedValue.evaluate();
 		}
+		var candidateStoredValue = newStoredSuppliedNullableValue(() -> {
+			rejectIfClosed();
+			return defaultCreator.apply(key);
+		});
 		var newStoredValue = this.storedValues.compute(compositeKey, //
 			(__, oldStoredValue) -> {
 				// guard against race conditions, repeated from getStoredValue
@@ -227,15 +231,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 					return oldStoredValue;
 				}
 				rejectIfClosed();
-				return newStoredSuppliedNullableValue(new DeferredSupplier(() -> {
-					rejectIfClosed();
-					return defaultCreator.apply(key);
-				}));
+				return candidateStoredValue;
 			});
 
-		if (newStoredValue instanceof StoredValue.DeferredValue value) {
-			// Any caller that won the race may run the DeferredSupplier
-			value.delegate().run();
+		// Only the caller that created the candidateStoredValue may run it
+		if (candidateStoredValue.equals(newStoredValue)) {
+			candidateStoredValue.run();
 		}
 		return requireNonNull(newStoredValue.evaluate());
 	}
@@ -264,31 +265,28 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		if (result != null) {
 			return result;
 		}
-		Object ownerToken = new Object();
-		StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+		var candidateStoredValue = newStoredSuppliedValue(() -> {
+			rejectIfClosed();
+			return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
+		});
+		var newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
 			// guard against race conditions
 			// computeIfAbsent replaces both null and absent values
 			if (StoredValue.evaluateIfNotNull(oldStoredValue) != null) {
 				return oldStoredValue;
 			}
 			rejectIfClosed();
-			return newStoredSuppliedValue(new DeferredSupplier(ownerToken, () -> {
-				rejectIfClosed();
-				return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
-			}));
+			return candidateStoredValue;
 		});
 
-		if (newStoredValue instanceof StoredValue.DeferredOptionalValue value) {
-			var delegate = value.delegate();
-			if (ownerToken.equals(delegate.ownerToken())) {
-				// Only the caller that created the DeferredSupplier may run it
-				// and see the exception.
-				delegate.run();
-				return requireNonNull(delegate.getOrThrow());
-			}
+		// Only the caller that created the candidateStoredValue may run it
+		// and see the exception.
+		if (candidateStoredValue.equals(newStoredValue)) {
+			candidateStoredValue.run();
+			return candidateStoredValue.getOrThrow();
 		}
-		// Either put, getOrComputeIfAbsent, or another computeIfAbsent call
-		// put the value in the store
+		// In a race condition either put, getOrComputeIfAbsent, or another
+		// computeIfAbsent call put the value in the store
 		return requireNonNull(newStoredValue.evaluate());
 	}
 
@@ -408,12 +406,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		return new StoredValue.Value(sequenceNumber, value);
 	}
 
-	private StoredValue.DeferredValue newStoredSuppliedNullableValue(DeferredSupplier supplier) {
+	private StoredValue.DeferredValue newStoredSuppliedNullableValue(Supplier<@Nullable Object> supplier) {
 		var sequenceNumber = insertOrderSequence.getAndIncrement();
 		return new StoredValue.DeferredValue(sequenceNumber, supplier);
 	}
 
-	private StoredValue.DeferredOptionalValue newStoredSuppliedValue(DeferredSupplier supplier) {
+	private StoredValue.DeferredOptionalValue newStoredSuppliedValue(Supplier<Object> supplier) {
 		var sequenceNumber = insertOrderSequence.getAndIncrement();
 		return new StoredValue.DeferredOptionalValue(sequenceNumber, supplier);
 	}
@@ -487,7 +485,14 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		/**
 		 * May contain {@code null} or a value, never an exception.
 		 */
-		record Value(int order, @Nullable Object value) implements StoredValue {
+		final class Value implements StoredValue {
+			private final int order;
+			private final @Nullable Object value;
+
+			Value(int order, @Nullable Object value) {
+				this.order = order;
+				this.value = value;
+			}
 
 			@Override
 			public @Nullable Object evaluate() {
@@ -498,12 +503,24 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			public boolean isPresent() {
 				return true;
 			}
+
+			@Override
+			public int order() {
+				return order;
+			}
 		}
 
 		/**
 		 * May eventually contain {@code null} or a value or an exception.
 		 */
-		record DeferredValue(int order, DeferredSupplier delegate) implements StoredValue {
+		final class DeferredValue implements StoredValue {
+			private final int order;
+			private final DeferredSupplier delegate;
+
+			DeferredValue(int order, Supplier<@Nullable Object> delegate) {
+				this.order = order;
+				this.delegate = new DeferredSupplier(delegate);
+			}
 
 			@Override
 			public @Nullable Object evaluate() {
@@ -514,12 +531,28 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			public boolean isPresent() {
 				return true;
 			}
+
+			void run() {
+				delegate.run();
+			}
+
+			@Override
+			public int order() {
+				return order;
+			}
 		}
 
 		/**
 		 * May eventually contain a value or an exception, never {@code null}.
 		 */
-		record DeferredOptionalValue(int order, DeferredSupplier delegate) implements StoredValue {
+		final class DeferredOptionalValue implements StoredValue {
+			private final int order;
+			private final DeferredSupplier delegate;
+
+			DeferredOptionalValue(int order, Supplier<Object> delegate) {
+				this.order = order;
+				this.delegate = new DeferredSupplier(delegate);
+			}
 
 			@Override
 			public @Nullable Object evaluate() {
@@ -529,6 +562,20 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			@Override
 			public boolean isPresent() {
 				return evaluate() != null;
+			}
+
+			void run() {
+				delegate.run();
+			}
+
+			Object getOrThrow() {
+				// Delegate does not produce null
+				return requireNonNull(delegate.getOrThrow());
+			}
+
+			@Override
+			public int order() {
+				return order;
 			}
 		}
 	}
@@ -565,33 +612,22 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 * {@link ConcurrentHashMap#compute(Object, BiFunction)} calls and
 	 * prevents recursive updates.
 	 */
-	static final class DeferredSupplier implements Supplier<@Nullable Object> {
+	static final class DeferredSupplier {
 
 		private final FutureTask<@Nullable Object> task;
-		private final @Nullable Object ownerToken;
 
-		DeferredSupplier(Supplier<@Nullable Object> delegate) {
-			this(null, delegate);
-		}
-
-		DeferredSupplier(@Nullable Object ownerToken, Supplier<@Nullable Object> delegate) {
-			this.ownerToken = ownerToken;
+		DeferredSupplier(Supplier<?> delegate) {
 			this.task = new FutureTask<>(delegate::get);
 		}
 
-		@Nullable
-		Object ownerToken() {
-			return ownerToken;
-		}
-
 		void run() {
-			this.task.run();
+			task.run();
 		}
 
-		@Override
-		public @Nullable Object get() {
+		@Nullable
+		Object get() {
 			try {
-				return this.task.get();
+				return task.get();
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
@@ -608,7 +644,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		@Nullable
 		Object getOrThrow() {
 			try {
-				return this.task.get();
+				return task.get();
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
