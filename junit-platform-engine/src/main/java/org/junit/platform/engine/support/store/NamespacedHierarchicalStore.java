@@ -234,7 +234,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			});
 
 		if (newStoredValue instanceof StoredValue.DeferredValue value) {
-			// Any thread that won the race may run the DeferredSupplier
+			// Any caller that won the race may run the DeferredSupplier
 			value.delegate().run();
 		}
 		return requireNonNull(newStoredValue.evaluate());
@@ -281,14 +281,14 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		if (newStoredValue instanceof StoredValue.DeferredOptionalValue value) {
 			var delegate = value.delegate();
 			if (ownerToken.equals(delegate.ownerToken())) {
-				// Only the thread that created the DeferredSupplier may run it
+				// Only the caller that created the DeferredSupplier may run it
+				// and see the exception.
 				delegate.run();
-				// Only the thread that caused the exception may see it
 				return requireNonNull(delegate.getOrThrow());
 			}
 		}
 		// Either put, getOrComputeIfAbsent, or another computeIfAbsent call
-		// won the race
+		// put the value in the store
 		return requireNonNull(newStoredValue.evaluate());
 	}
 
