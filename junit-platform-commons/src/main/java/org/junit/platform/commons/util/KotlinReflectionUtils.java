@@ -185,7 +185,7 @@ public class KotlinReflectionUtils {
 
 	private static void requireDependency(Method method, boolean condition, String dependencyNotation) {
 		Preconditions.condition(condition,
-			() -> ("Kotlin function [%s] requires %s to be on the classpath or module path. "
+			() -> ("Kotlin suspending function [%s] requires %s to be on the classpath or module path. "
 					+ "Please add a corresponding dependency.").formatted(method.toGenericString(),
 						dependencyNotation));
 	}
