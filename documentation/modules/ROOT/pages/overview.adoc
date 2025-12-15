@@ -16,6 +16,7 @@ endif::backend-html5[]
 
 JUnit is composed of several different modules from three different sub-projects.
 
+[.text-center]
 **JUnit {version} = _JUnit Platform_ + _JUnit Jupiter_ + _JUnit Vintage_**
 
 The **JUnit Platform** serves as a foundation for xref:advanced-topics/launcher-api.adoc[launching testing
