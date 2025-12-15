@@ -223,7 +223,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			(__, oldStoredValue) -> {
 				// guard against race conditions, repeated from getStoredValue
 				// this filters out failures inserted by computeIfAbsent
-				if (isStoredValuePresent(oldStoredValue)) {
+				if (StoredValue.isNonNullAndPresent(oldStoredValue)) {
 					return oldStoredValue;
 				}
 				rejectIfClosed();
@@ -420,17 +420,13 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 	private @Nullable StoredValue getStoredValue(CompositeKey<N> compositeKey) {
 		StoredValue storedValue = this.storedValues.get(compositeKey);
-		if (isStoredValuePresent(storedValue)) {
+		if (StoredValue.isNonNullAndPresent(storedValue)) {
 			return storedValue;
 		}
 		if (this.parentStore != null) {
 			return this.parentStore.getStoredValue(compositeKey);
 		}
 		return null;
-	}
-
-	private static boolean isStoredValuePresent(@Nullable StoredValue value) {
-		return value != null && value.isPresent();
 	}
 
 	private <T> @Nullable T castToRequiredType(Object key, @Nullable Object value, Class<T> requiredType) {
@@ -482,6 +478,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
 			return value != null ? value.evaluate() : null;
+		}
+
+		static boolean isNonNullAndPresent(@Nullable StoredValue value) {
+			return value != null && value.isPresent();
 		}
 
 		/**
