@@ -216,25 +216,25 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
 		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
 		StoredValue storedValue = getStoredValue(compositeKey);
-		if (storedValue == null) {
-			var newStoredValue = this.storedValues.compute(compositeKey, //
-				(__, oldStoredValue) -> {
-					if (isPresent(oldStoredValue)) {
-						return oldStoredValue;
-					}
-					rejectIfClosed();
-					return newStoredSuppliedNullableValue(new DeferredSupplier(() -> {
-						rejectIfClosed();
-						return defaultCreator.apply(key);
-					}));
-				});
-
-			if (newStoredValue instanceof StoredValue.DeferredValue value) {
-				value.delegate().run();
-			}
-			return requireNonNull(newStoredValue.evaluate());
+		if (storedValue != null) {
+			return storedValue.evaluate();
 		}
-		return storedValue.evaluate();
+		var newStoredValue = this.storedValues.compute(compositeKey, //
+			(__, oldStoredValue) -> {
+				if (isPresent(oldStoredValue)) {
+					return oldStoredValue;
+				}
+				rejectIfClosed();
+				return newStoredSuppliedNullableValue(new DeferredSupplier(() -> {
+					rejectIfClosed();
+					return defaultCreator.apply(key);
+				}));
+			});
+
+		if (newStoredValue instanceof StoredValue.DeferredValue value) {
+			value.delegate().run();
+		}
+		return requireNonNull(newStoredValue.evaluate());
 	}
 
 	/**
@@ -258,27 +258,27 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
 		StoredValue storedValue = getStoredValue(compositeKey);
 		var result = StoredValue.evaluateIfNotNull(storedValue);
-		if (result == null) {
-			StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				if (StoredValue.evaluateIfNotNull(oldStoredValue) == null) {
-					rejectIfClosed();
-					return newStoredSuppliedValue(new DeferredSupplier(() -> {
-						rejectIfClosed();
-						return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
-					}));
-				}
-				return oldStoredValue;
-			});
-
-			if (newStoredValue instanceof StoredValue.DeferredOptionalValue value) {
-				var delegate = value.delegate();
-				delegate.run();
-				return requireNonNull(delegate.getOrThrow());
-			}
-			// put or getOrComputeIfAbsent won the race
-			return requireNonNull(newStoredValue.evaluate());
+		if (result != null) {
+			return result;
 		}
-		return result;
+		StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+			if (StoredValue.evaluateIfNotNull(oldStoredValue) != null) {
+				return oldStoredValue;
+			}
+			rejectIfClosed();
+			return newStoredSuppliedValue(new DeferredSupplier(() -> {
+				rejectIfClosed();
+				return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
+			}));
+		});
+
+		if (newStoredValue instanceof StoredValue.DeferredOptionalValue value) {
+			var delegate = value.delegate();
+			delegate.run();
+			return requireNonNull(delegate.getOrThrow());
+		}
+		// put or getOrComputeIfAbsent won the race
+		return requireNonNull(newStoredValue.evaluate());
 	}
 
 	/**
