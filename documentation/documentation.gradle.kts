@@ -283,6 +283,27 @@ tasks {
 			jFlags("-Xmx1g")
 
 			this as StandardJavadocDocletOptions
+			addStringsOption("-since", ",").value = listOf(
+					    "6.2",
+                        "6.1",
+                        "6.0",
+                        "5.14",
+                        "5.13",
+                        "5.12",
+                        "5.11",
+                        "5.10",
+                        "5.9",
+                        "5.8",
+                        "5.7",
+                        "5.6",
+                        "5.5",
+                        "5.4",
+                        "5.3",
+                        "5.2",
+                        "5.1",
+                        "5.0",
+            )
+
 			splitIndex(true)
 			addBooleanOption("Xdoclint:all,-missing", true)
 			addBooleanOption("Werror", true)
