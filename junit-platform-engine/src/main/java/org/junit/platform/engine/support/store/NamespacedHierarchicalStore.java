@@ -567,11 +567,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				throw throwAsUncheckedException(e);
 			}
 			catch (ExecutionException e) {
-				Throwable t = e.getCause();
-				if (t == null) {
-					t = e;
-				}
-				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+				// non-null guaranteed by FutureTask
+				var cause = requireNonNull(e.getCause());
+				UnrecoverableExceptions.rethrowIfUnrecoverable(cause);
 				return null;
 			}
 		}
@@ -586,12 +584,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				throw throwAsUncheckedException(e);
 			}
 			catch (ExecutionException e) {
-				Throwable t = e.getCause();
-				if (t == null) {
-					t = e;
-				}
-				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
-				throw throwAsUncheckedException(t);
+				// non-null guaranteed by FutureTask
+				var cause = requireNonNull(e.getCause());
+				UnrecoverableExceptions.rethrowIfUnrecoverable(cause);
+				throw throwAsUncheckedException(cause);
 			}
 		}
 	}
