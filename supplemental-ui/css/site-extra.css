@@ -12,9 +12,15 @@ body {
     padding-right: .5ex;
 }
 .navbar-brand .version {
-    color: rgba(0, 0, 0, 0.33);
-    padding-left: 1em;
-    font-weight: 400;
+    display: none;
+}
+@media screen and (min-width: 1024px) {
+    .navbar-brand .version {
+        color: rgba(0, 0, 0, 0.33);
+        padding-left: 1em;
+        font-weight: 400;
+        display: inline;
+    }
 }
 
 .doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
