@@ -126,14 +126,7 @@ public interface Arguments {
 	@API(status = EXPERIMENTAL, since = "6.1")
 	static Arguments from(Iterable<?> arguments) {
 		Preconditions.notNull(arguments, "arguments must not be null");
-
-		if (arguments instanceof Collection<?> collection) {
-			return of(collection.toArray());
-		}
-
-		var collection = new ArrayList<>();
-		arguments.forEach(collection::add);
-		return of(collection.toArray());
+		return of(toArray(arguments));
 	}
 
 	/**
@@ -242,14 +235,16 @@ public interface Arguments {
 	static ArgumentSet argumentSetFrom(String name, Iterable<?> arguments) {
 		Preconditions.notBlank(name, "name must not be null or blank");
 		Preconditions.notNull(arguments, "arguments list must not be null");
+		return argumentSet(name, toArray(arguments));
+	}
 
+	private static Object[] toArray(Iterable<?> arguments) {
 		if (arguments instanceof Collection<?> collection) {
-			return argumentSet(name, collection.toArray());
+			return collection.toArray();
 		}
-
 		var collection = new ArrayList<>();
 		arguments.forEach(collection::add);
-		return argumentSet(name, collection.toArray());
+		return collection.toArray();
 	}
 
 	/**
