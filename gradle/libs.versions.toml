@@ -3,8 +3,8 @@ ant = "1.10.15"
 apiguardian = "1.1.2"
 assertj = "3.27.6"
 bnd = "7.1.0"
-checkstyle = "12.2.0"
-eclipse = "4.37.0"
+checkstyle = "12.3.0"
+eclipse = "4.38.0"
 jackson = "2.20.1"
 jacoco = "0.8.14"
 jmh = "1.37"
@@ -53,7 +53,7 @@ log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4
 maven = { module = "org.apache.maven:apache-maven", version = "3.9.11" }
 mavenSurefirePlugin = { module = "org.apache.maven.plugins:maven-surefire-plugin", version.ref = "surefire" }
 memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version = "2.8.2" }
-mockito-bom = { module = "org.mockito:mockito-bom", version = "5.20.0" }
+mockito-bom = { module = "org.mockito:mockito-bom", version = "5.21.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
@@ -91,7 +91,7 @@ xmlunit = ["xmlunit-assertj", "xmlunit-placeholders", "xmlunit-jakarta-jaxb-impl
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.4" }
 commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.4.0" }
-develocity = { id = "com.gradle.develocity", version = "4.2.2" }
+develocity = { id = "com.gradle.develocity", version = "4.3" }
 download = { id = "de.undercouch.download", version = "5.6.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "4.3.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }

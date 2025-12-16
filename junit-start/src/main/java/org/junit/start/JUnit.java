@@ -38,12 +38,14 @@ public final class JUnit {
 	}
 
 	/// Run all tests defined in the given test class.
+	///
 	/// @param testClass the class to discover and execute tests in
 	public static void run(Class<?> testClass) {
 		run(selectClass(testClass));
 	}
 
 	/// Run all tests defined in the given module.
+	///
 	/// @param testModule the module to discover and execute tests in
 	public static void run(Module testModule) {
 		run(selectModule(testModule));

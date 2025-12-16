@@ -6,7 +6,12 @@ coverage:
       default:
         threshold: "1"
         informational: true
-    patch: off
+    patch:
+      default:
+        target: auto
+        # Do not allow coverage to decrease 
+        threshold: 0
+        only_pulls: true
 
 codecov:
   max_report_age: off

@@ -1,7 +1,8 @@
 name: Copy labels from linked issues to PR
 
 on:
-  pull_request_target: # zizmor: ignore[dangerous-triggers]
+  pull_request_target:
+    types: [opened, reopened] # zizmor: ignore[dangerous-triggers]
 
 permissions: {}
 

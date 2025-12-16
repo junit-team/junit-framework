@@ -18,6 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Base64;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Nested;
@@ -288,6 +294,89 @@ class UniqueIdTests {
 
 			var newUniqueId = uniqueId.append("type", "bar").removeLastSegment();
 			assertEquals(uniqueId, newUniqueId);
+		}
+
+	}
+
+	@Nested
+	class Serialization {
+
+		final UniqueId uniqueId = UniqueId.root("engine", "junit-jupiter");
+
+		@Test
+		void roundTrip() throws IOException, ClassNotFoundException {
+			var bytesOut = new ByteArrayOutputStream();
+			var out = new ObjectOutputStream(bytesOut);
+			out.writeObject(uniqueId);
+
+			var bytesIn = new ByteArrayInputStream(bytesOut.toByteArray());
+			var in = new ObjectInputStream(bytesIn);
+			var actual = in.readObject();
+
+			assertEquals(uniqueId, actual);
+			assertEquals(uniqueId.toString(), actual.toString());
+		}
+
+		@Test
+		void deserializeFromJunit60() throws IOException, ClassNotFoundException {
+			/*
+			 Serialized representation of:
+			 	new UniqueId(
+			 		new UniqueIdFormat('[', ':', ']', '/'),
+			 		List.of(new Segment("engine", "junit-jupiter"))
+			 );
+			 */
+			var uniqueIdFromJunit60 = Base64.getMimeDecoder().decode("""
+					rO0ABXNyACJvcmcuanVuaXQucGxhdGZvcm0uZW5naW5lLlVuaXF1ZUlkAAAAAAAAAAECAAJMAAhzZWdtZW50c3QAEExqYXZhL3V0
+					aWwvTGlzdDtMAA51bmlxdWVJZEZvcm1hdHQAKkxvcmcvanVuaXQvcGxhdGZvcm0vZW5naW5lL1VuaXF1ZUlkRm9ybWF0O3hwc3IA
+					EWphdmEudXRpbC5Db2xsU2VyV46rtjobqBEDAAFJAAN0YWd4cAAAAAF3BAAAAAFzcgAqb3JnLmp1bml0LnBsYXRmb3JtLmVuZ2lu
+					ZS5VbmlxdWVJZCRTZWdtZW50AAAAAAAAAAECAAJMAAR0eXBldAASTGphdmEvbGFuZy9TdHJpbmc7TAAFdmFsdWVxAH4AB3hwdAAG
+					ZW5naW5ldAANanVuaXQtanVwaXRlcnhzcgAob3JnLmp1bml0LnBsYXRmb3JtLmVuZ2luZS5VbmlxdWVJZEZvcm1hdAAAAAAAAAAB
+					AgAGQwAMY2xvc2VTZWdtZW50QwALb3BlblNlZ21lbnRDABBzZWdtZW50RGVsaW1pdGVyQwASdHlwZVZhbHVlU2VwYXJhdG9yTAAT
+					ZW5jb2RlZENoYXJhY3Rlck1hcHQAE0xqYXZhL3V0aWwvSGFzaE1hcDtMAA5zZWdtZW50UGF0dGVybnQAGUxqYXZhL3V0aWwvcmVn
+					ZXgvUGF0dGVybjt4cABdAFsALwA6c3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNo
+					b2xkeHA/QAAAAAAADHcIAAAAEAAAAAZzcgATamF2YS5sYW5nLkNoYXJhY3RlcjSLR9lrGiZ4AgABQwAFdmFsdWV4cAAldAADJTI1
+					c3EAfgARADp0AAMlM0FzcQB+ABEAW3QAAyU1QnNxAH4AEQArdAADJTJCc3EAfgARAF10AAMlNURzcQB+ABEAL3QAAyUyRnhzcgAX
+					amF2YS51dGlsLnJlZ2V4LlBhdHRlcm5GZ9VrbkkCDQIAAkkABWZsYWdzTAAHcGF0dGVybnEAfgAHeHAAAAAgdAAXXFFbXEUoLisp
+					XFE6XEUoLispXFFdXEU=""");
+
+			var bytesIn = new ByteArrayInputStream(uniqueIdFromJunit60);
+			var in = new ObjectInputStream(bytesIn);
+			var actual = in.readObject();
+
+			assertEquals(uniqueId, actual);
+			assertEquals(uniqueId.toString(), actual.toString());
+		}
+
+		@Test
+		void deserializeFromJunit60IgnoresCustomFormat() throws IOException, ClassNotFoundException {
+			/*
+			  Serialized representation of:
+				new UniqueId(
+					new UniqueIdFormat('{', '=', '}', ','),
+					List.of(new Segment("engine", "junit-jupiter"))
+			 );
+			 */
+			var uniqueIdWithCustomFormatFromJunit60 = Base64.getMimeDecoder().decode("""
+					rO0ABXNyACJvcmcuanVuaXQucGxhdGZvcm0uZW5naW5lLlVuaXF1ZUlkAAAAAAAAAAECAAJMAAhzZWdtZW50c3QAEExqYXZhL3V0
+					aWwvTGlzdDtMAA51bmlxdWVJZEZvcm1hdHQAKkxvcmcvanVuaXQvcGxhdGZvcm0vZW5naW5lL1VuaXF1ZUlkRm9ybWF0O3hwc3IA
+					EWphdmEudXRpbC5Db2xsU2VyV46rtjobqBEDAAFJAAN0YWd4cAAAAAF3BAAAAAFzcgAqb3JnLmp1bml0LnBsYXRmb3JtLmVuZ2lu
+					ZS5VbmlxdWVJZCRTZWdtZW50AAAAAAAAAAECAAJMAAR0eXBldAASTGphdmEvbGFuZy9TdHJpbmc7TAAFdmFsdWVxAH4AB3hwdAAG
+					ZW5naW5ldAANanVuaXQtanVwaXRlcnhzcgAob3JnLmp1bml0LnBsYXRmb3JtLmVuZ2luZS5VbmlxdWVJZEZvcm1hdAAAAAAAAAAB
+					AgAGQwAMY2xvc2VTZWdtZW50QwALb3BlblNlZ21lbnRDABBzZWdtZW50RGVsaW1pdGVyQwASdHlwZVZhbHVlU2VwYXJhdG9yTAAT
+					ZW5jb2RlZENoYXJhY3Rlck1hcHQAE0xqYXZhL3V0aWwvSGFzaE1hcDtMAA5zZWdtZW50UGF0dGVybnQAGUxqYXZhL3V0aWwvcmVn
+					ZXgvUGF0dGVybjt4cAB9AHsALAA9c3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNo
+					b2xkeHA/QAAAAAAADHcIAAAAEAAAAAZzcgATamF2YS5sYW5nLkNoYXJhY3RlcjSLR9lrGiZ4AgABQwAFdmFsdWV4cAAldAADJTI1
+					c3EAfgARAHt0AAMlN0JzcQB+ABEAK3QAAyUyQnNxAH4AEQAsdAADJTJDc3EAfgARAH10AAMlN0RzcQB+ABEAPXQAAyUzRHhzcgAX
+					amF2YS51dGlsLnJlZ2V4LlBhdHRlcm5GZ9VrbkkCDQIAAkkABWZsYWdzTAAHcGF0dGVybnEAfgAHeHAAAAAgdAAXXFF7XEUoLisp
+					XFE9XEUoLispXFF9XEU=""");
+
+			var bytesIn = new ByteArrayInputStream(uniqueIdWithCustomFormatFromJunit60);
+			var in = new ObjectInputStream(bytesIn);
+			var actual = in.readObject();
+
+			assertEquals(uniqueId, actual);
+			assertEquals(uniqueId.toString(), actual.toString());
 		}
 
 	}

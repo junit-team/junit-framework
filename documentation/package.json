@@ -1,11 +1,11 @@
 {
   "devDependencies": {
-    "@antora/cli": "3.1.14",
-    "@antora/site-generator": "3.1.14"
+    "@antora/cli": "3.2.0-alpha.11",
+    "@antora/site-generator": "3.2.0-alpha.11"
   },
   "dependencies": {
     "@antora/collector-extension": "1.0.2",
-    "@antora/lunr-extension": "1.0.0-alpha.10",
+    "@antora/lunr-extension": "1.0.0-alpha.12",
     "@springio/antora-extensions": "1.14.7",
     "highlight.js": "11.11.1"
   }

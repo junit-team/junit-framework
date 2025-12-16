@@ -1,7 +1,9 @@
 antora:
   extensions:
   - '@antora/collector-extension'
-  - '@antora/lunr-extension'
+  - require: '@antora/lunr-extension'
+    index_latest_only: true
+    index_by_heading: true
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: junit
   - require: '@springio/antora-extensions/root-attachments-extension'

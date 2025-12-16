@@ -74,7 +74,7 @@ jobs:
             -Dscan.tag.JDK_${{ matrix.jdk.version }} \
             build \
             --no-configuration-cache #Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ always() }}
         with:
           name: Open Test Reports (${{ github.job }} ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }}))
@@ -117,7 +117,7 @@ jobs:
             -Dscan.tag.OpenJ9 \
             build \
             --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ always() }}
         with:
           name: Open Test Reports (${{ github.job }})

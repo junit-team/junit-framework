@@ -363,6 +363,9 @@ inline fun <R> assertDoesNotThrow(executable: () -> R): R {
         throw assertionFailure()
             .reason("Unexpected exception thrown: ${t.javaClass.getName()}$suffix")
             .cause(t)
+            .trimStacktrace(AssertionFailureBuilder::class.java)
+            // we don't want to retain any stacktrace elements from the AssertionFailureBuilder
+            .retainStackTraceElements(0)
             .build()
     }
 }
@@ -420,6 +423,9 @@ inline fun <R> assertDoesNotThrow(
             .message(message())
             .reason("Unexpected exception thrown: ${t.javaClass.getName()}$suffix")
             .cause(t)
+            .trimStacktrace(AssertionFailureBuilder::class.java)
+            // we don't want to retain any stacktrace elements from the AssertionFailureBuilder
+            .retainStackTraceElements(0)
             .build()
     }
 }
