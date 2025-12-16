@@ -214,16 +214,16 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	public <K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(N namespace, K key,
 			Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
-		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
-		StoredValue storedValue = getStoredValue(compositeKey);
-		if (storedValue != null) {
-			return storedValue.evaluate();
+		var compositeKey = new CompositeKey<>(namespace, key);
+		var currentStoredValue = getStoredValue(compositeKey);
+		if (currentStoredValue != null) {
+			return currentStoredValue.evaluate();
 		}
 		var candidateStoredValue = newStoredSuppliedNullableValue(() -> {
 			rejectIfClosed();
 			return defaultCreator.apply(key);
 		});
-		var newStoredValue = this.storedValues.compute(compositeKey, //
+		var storedValue = this.storedValues.compute(compositeKey, //
 			(__, oldStoredValue) -> {
 				// guard against race conditions, repeated from getStoredValue
 				// this filters out failures inserted by computeIfAbsent
@@ -235,10 +235,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			});
 
 		// Only the caller that created the candidateStoredValue may run it
-		if (candidateStoredValue.equals(newStoredValue)) {
-			candidateStoredValue.run();
+		if (candidateStoredValue.equals(storedValue)) {
+			return candidateStoredValue.execute();
 		}
-		return requireNonNull(newStoredValue.evaluate());
+		return storedValue.evaluate();
 	}
 
 	/**
@@ -259,9 +259,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	@API(status = MAINTAINED, since = "6.0")
 	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
-		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
-		StoredValue storedValue = getStoredValue(compositeKey);
-		var result = StoredValue.evaluateIfNotNull(storedValue);
+		var compositeKey = new CompositeKey<>(namespace, key);
+		var currentStoredValue = getStoredValue(compositeKey);
+		var result = StoredValue.evaluateIfNotNull(currentStoredValue);
 		if (result != null) {
 			return result;
 		}
@@ -269,7 +269,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			rejectIfClosed();
 			return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
 		});
-		var newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+		var storedValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
 			// guard against race conditions
 			// computeIfAbsent replaces both null and absent values
 			if (StoredValue.evaluateIfNotNull(oldStoredValue) != null) {
@@ -281,13 +281,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		// Only the caller that created the candidateStoredValue may run it
 		// and see the exception.
-		if (candidateStoredValue.equals(newStoredValue)) {
-			candidateStoredValue.run();
-			return candidateStoredValue.getOrThrow();
+		if (candidateStoredValue.equals(storedValue)) {
+			return candidateStoredValue.execute();
 		}
 		// In a race condition either put, getOrComputeIfAbsent, or another
-		// computeIfAbsent call put the value in the store
-		return requireNonNull(newStoredValue.evaluate());
+		// computeIfAbsent call put a non-null value in the store
+		return requireNonNull(storedValue.evaluate());
 	}
 
 	/**
@@ -532,8 +531,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				return true;
 			}
 
-			void run() {
+			@Nullable
+			Object execute() {
 				delegate.run();
+				return delegate.getOrThrow();
 			}
 
 			@Override
@@ -564,11 +565,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				return evaluate() != null;
 			}
 
-			void run() {
+			Object execute() {
 				delegate.run();
-			}
-
-			Object getOrThrow() {
 				// Delegate does not produce null
 				return requireNonNull(delegate.getOrThrow());
 			}
