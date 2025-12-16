@@ -936,8 +936,6 @@ methods have been removed from the set of methods being considered.
 6. A single _factory method_ accepting a `CharSequence` argument once all `@Deprecated` factory
 methods have been removed from the set of methods being considered.
 
-NOTE: If multiple _factory methods_ are discovered, no match occurs.
-
 For example, in the following `@ParameterizedTest` method, the `Book` argument will be
 created by invoking the `Book.fromTitle(String)` factory method and passing `"42 Cats"`
 as the title of the book.
