@@ -47,6 +47,9 @@ repository on GitHub.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
   `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
+* Exclude competing `@Deprecated` factory methods in
+  xref:writing-tests/parameterized-classes-and-tests.adoc#tests-argument-conversion-implicit-fallback[fallback String-to-Object]
+  converter.
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage
