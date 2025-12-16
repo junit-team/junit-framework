@@ -1,5 +1,5 @@
 name: junit
-version: null
+version: true
 title: JUnit
 nav:
   - modules/ROOT/nav.adoc

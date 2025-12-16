@@ -76,6 +76,7 @@ abstract class RoseauDiff : DefaultTask() {
                 "--diff",
                 "--fail-on-bc",
                 "--config", effectiveConfigFile.absolutePath,
+                "-vv",
             )
             if (acceptedChangesCsvFile.isPresent) {
                 args("--ignored", acceptedChangesCsvFile.get().asFile.absolutePath)
@@ -87,14 +88,6 @@ abstract class RoseauDiff : DefaultTask() {
         if (result.exitValue != 0) {
             System.out.write(output.toByteArray())
             System.out.flush()
-            reports.filter { it.file.exists() }.let { writtenReports ->
-                if (writtenReports.isNotEmpty()) {
-                    println("Reports:")
-                    writtenReports.forEach {
-                        println("- ${it.format.name}: ${it.file.toURI()}")
-                    }
-                }
-            }
             if (result.exitValue == 1) {
                 throw GradleException("Breaking API changes detected")
             }

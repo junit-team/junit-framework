@@ -913,8 +913,8 @@ integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
 
 In addition to implicit conversion from strings to the target types listed in the above
 table, JUnit Jupiter also provides a fallback mechanism for automatic conversion from a
-`String` to a given target type if the target type declares exactly one suitable _factory
-method_ or a _factory constructor_ as defined below.
+`String` to a given target type if the target type declares a suitable _factory method_
+or _factory constructor_ as defined below.
 
 - __factory method__: a non-private, `static` method declared in the target type that
   accepts either a single `String` argument or a single `CharSequence` argument and
@@ -924,9 +924,17 @@ method_ or a _factory constructor_ as defined below.
   either a single `String` argument or a single `CharSequence` argument. Note that the
   target type must be declared as either a top-level class or as a `static` nested class.
 
-NOTE: If multiple _factory methods_ are discovered, they will be ignored. If a _factory
-method_ and a _factory constructor_ are discovered, the factory method will be used
-instead of the constructor.
+If there are multiple _factory methods_ or _factory constructors_, matching proceeds in the
+following order:
+
+1. A single _factory method_ accepting a `String` argument.
+2. A single _factory constructor_ accepting a `String` argument.
+3. A single _factory method_ accepting a `CharSequence` argument.
+4. A single _factory constructor_ accepting a `CharSequence` argument.
+5. A single _factory method_ accepting a `String` argument once all `@Deprecated` factory
+methods have been removed from the set of methods being considered.
+6. A single _factory method_ accepting a `CharSequence` argument once all `@Deprecated` factory
+methods have been removed from the set of methods being considered.
 
 For example, in the following `@ParameterizedTest` method, the `Book` argument will be
 created by invoking the `Book.fromTitle(String)` factory method and passing `"42 Cats"`

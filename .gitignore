@@ -31,6 +31,7 @@ gradle-app.setting
 coverage.db*
 .metadata
 /.sdkmanrc
+/.tool-versions
 
 checksums*
 

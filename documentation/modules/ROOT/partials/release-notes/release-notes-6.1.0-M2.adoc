@@ -25,7 +25,8 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* The `UniqueId.uniqueIdFormat` field has been removed, reducing the size of `UniqueId`
+  objects.
 
 [[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
@@ -54,10 +55,14 @@ easier to dynamically build arguments from collections when using
 ** `Arguments.argumentsFrom(Iterable<?>)` (alias)
 ** `Arguments.argumentSetFrom(String, Iterable<?>)`
 ** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
+* Exclude competing `@Deprecated` factory methods in
+  xref:writing-tests/parameterized-classes-and-tests.adoc#tests-argument-conversion-implicit-fallback[fallback String-to-Object]
+  converter.
 * Trim internal stack frames from `AssertionFailedError` stack traces.
 * Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
   methods for `AssertionFailureBuilder`. These allow user defined assertions to
   trim their stacktrace.
+
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage
