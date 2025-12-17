@@ -17,9 +17,8 @@ import java.util.Deque;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.annotation.Contract;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 
 /**
@@ -29,9 +28,6 @@ import org.junit.platform.commons.util.UnrecoverableExceptions;
  * @since 5.0
  */
 class AssertionUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(AssertionUtils.class);
-
 	private AssertionUtils() {
 		/* no-op */
 	}
@@ -133,9 +129,14 @@ class AssertionUtils {
 		if (obj1 == null) {
 			return (obj2 == null);
 		}
-		if (obj1.getClass().isArray() && (obj2 != null && obj2.getClass().isArray())) {
-			// TODO Find first method in user's code, i.e. non-framework code.
-			logger.debug(() -> "Should have used `assertArrayEquals()` in method: <TODO>");
+		if (obj2 == null) {
+			return false;
+		}
+		if (Boolean.getBoolean("junit.jupiter.disallow.arrays.in.equals.checks")) {
+			if (obj1.getClass().isArray() && obj2.getClass().isArray()) {
+				throw new JUnitException(
+					"Detected array arguments:" + " " + obj1.getClass() + " and " + obj2.getClass());
+			}
 		}
 		return obj1.equals(obj2);
 	}
