@@ -223,7 +223,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			rejectIfClosed();
 			return defaultCreator.apply(key);
 		});
-		var storedValue = this.storedValues.compute(compositeKey, //
+		var storedValue = storedValues.compute(compositeKey, //
 			(__, oldStoredValue) -> {
 				// guard against race conditions, repeated from getStoredValue
 				// this filters out failures inserted by computeIfAbsent
@@ -279,14 +279,29 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			return candidateStoredValue;
 		});
 
-		// Only the caller that created the candidateStoredValue may run it
-		// and see the exception.
-		if (candidateStoredValue.equals(storedValue)) {
-			return candidateStoredValue.execute();
-		}
 		// In a race condition either put, getOrComputeIfAbsent, or another
 		// computeIfAbsent call put a non-null value in the store
-		return requireNonNull(storedValue.evaluate());
+		if (!candidateStoredValue.equals(storedValue)) {
+			return requireNonNull(storedValue.evaluate());
+		}
+		// Only the caller that created the candidateStoredValue may run it
+		// and see the exception.
+		Object newResult = candidateStoredValue.execute();
+		// DeferredOptionalValue is quite heavy, replace with lighter container
+		if (candidateStoredValue.isPresent()) {
+			storedValues.computeIfPresent(compositeKey, compareAndPut(storedValue, newStoredValue(newResult)));
+		}
+		return newResult;
+	}
+
+	private static <N> BiFunction<CompositeKey<N>, StoredValue, StoredValue> compareAndPut(StoredValue expectedValue,
+			StoredValue newValue) {
+		return (__, storedValue) -> {
+			if (!expectedValue.equals(storedValue)) {
+				return storedValue;
+			}
+			return newValue;
+		};
 	}
 
 	/**
