@@ -1,12 +1,12 @@
 antora:
   extensions:
-  - '@antora/collector-extension'
-  - require: '@antora/lunr-extension'
-    index_latest_only: true
-    index_by_heading: true
-  - require: '@springio/antora-extensions/root-component-extension'
-    root_component_name: junit
-  - require: '@springio/antora-extensions/root-attachments-extension'
+    - '@antora/collector-extension'
+    - require: '@antora/lunr-extension'
+      index_latest_only: true
+      index_by_heading: true
+    - require: '@springio/antora-extensions/root-component-extension'
+      root_component_name: junit
+    - require: '@springio/antora-extensions/root-attachments-extension'
 site:
   title: JUnit User Guide
   url: https://docs.junit.org
@@ -14,20 +14,24 @@ site:
   start_page: junit::overview.adoc
 content:
   sources:
-  - url: https://github.com/junit-team/junit-framework.git
-    branches:
-    - 'main'
-    - 'r5.14.*'
-    - '!r5.14.0'
-    - '!r5.14.1'
-    - 'r6.*'
-    - '!r6.0.0'
-    - '!r6.0.1'
-    - 'antora/*'
-    - 'releases/5.14.x'
-    - 'releases/6.0.x'
-    start_path: documentation
-    worktrees: true
+    - url: https://github.com/junit-team/junit-framework.git
+      branches:
+        - 'main'
+        - 'antora/*'
+        - 'releases/5.14.x'
+        - 'releases/6.0.x'
+      tags:
+        - 'r5.14.*'
+        - '!r5.14.0*'
+        - '!r5.14.1'
+        - '!r5.14.1-*'
+        - 'r6.*'
+        - '!r6.0.0*'
+        - '!r6.0.1'
+        - '!r6.0.1-*'
+        - '!r6.1.0-M1'
+      start_path: documentation
+      worktrees: true
 asciidoc:
   attributes:
     page-pagination: ''
