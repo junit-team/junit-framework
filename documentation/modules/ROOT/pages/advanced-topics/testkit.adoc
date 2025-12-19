@@ -1,14 +1,11 @@
-:testDir: ../../../../../src/test/java
-
-[[testkit]]
-=== JUnit Platform Test Kit
+= JUnit Platform Test Kit
 
 The `junit-platform-testkit` artifact provides support for executing a test plan on the
 JUnit Platform and then verifying the expected results. This support is currently limited
 to the execution of a single `TestEngine` (see <<testkit-engine>>).
 
 [[testkit-engine]]
-==== Engine Test Kit
+== Engine Test Kit
 
 The `{testkit-engine-package}` package provides support for discovering and executing a
 `{TestPlan}` for a given `{TestEngine}` running on the JUnit Platform and then accessing
@@ -27,7 +24,7 @@ The following test class written using JUnit Jupiter will be used in subsequent 
 [[testkit-engine-ExampleTestCase]]
 [source,java,indent=0]
 ----
-include::{testDir}/example/ExampleTestCase.java[tags=user_guide]
+include::example$java/example/ExampleTestCase.java[tags=user_guide]
 ----
 
 For the sake of brevity, the following sections demonstrate how to test JUnit's own
@@ -37,14 +34,14 @@ may test your own `TestEngine` by supplying an instance of it to the
 `EngineTestKit.engine(TestEngine)` static factory method.
 
 [[testkit-engine-discovery]]
-==== Verifying Test Discovery
+== Verifying Test Discovery
 
 The following test demonstrates how to verify that a `TestPlan` was discovered as expected
 by the JUnit Jupiter `TestEngine`.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/testkit/EngineTestKitDiscoveryDemo.java[tags=user_guide]
+include::example$java/example/testkit/EngineTestKitDiscoveryDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
@@ -53,7 +50,7 @@ include::{testDir}/example/testkit/EngineTestKitDiscoveryDemo.java[tags=user_gui
 <5> Assert no discovery issues were encountered.
 
 [[testkit-engine-statistics]]
-==== Asserting Execution Statistics
+== Asserting Execution Statistics
 
 One of the most common features of the Test Kit is the ability to assert statistics
 against events fired during the execution of a `TestPlan`. The following tests demonstrate
@@ -62,7 +59,7 @@ For details on what statistics are available, consult the Javadoc for `{EventSta
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/testkit/EngineTestKitStatisticsDemo.java[tags=user_guide]
+include::example$java/example/testkit/EngineTestKitStatisticsDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
@@ -77,7 +74,7 @@ NOTE: In the `verifyJupiterContainerStats()` test method, the counts for the `st
 <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> class are both considered containers.
 
 [[testkit-engine-events]]
-==== Asserting Events
+== Asserting Events
 
 If you find that <<testkit-engine-statistics, asserting statistics>> alone is insufficient
 for verifying the expected behavior of test execution, you can work directly with the
@@ -99,7 +96,7 @@ events, consult the Javadoc for `{EventConditions}`.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/testkit/EngineTestKitSkippedMethodDemo.java[tags=user_guide]
+include::example$java/example/testkit/EngineTestKitSkippedMethodDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the `skippedTest()` method in the <<testkit-engine-ExampleTestCase,
@@ -123,7 +120,7 @@ events and execution results, consult the Javadoc for `{EventConditions}` and
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/testkit/EngineTestKitFailedMethodDemo.java[tags=user_guide]
+include::example$java/example/testkit/EngineTestKitFailedMethodDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
@@ -153,7 +150,7 @@ respectively.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/testkit/EngineTestKitAllEventsDemo.java[tags=user_guide]
+include::example$java/example/testkit/EngineTestKitAllEventsDemo.java[tags=user_guide]
 ----
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<testkit-engine-ExampleTestCase, `ExampleTestCase`>> test class.
