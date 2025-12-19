@@ -1,5 +1,4 @@
-[[test-engines]]
-=== Test Engines
+= Test Engines
 
 A `TestEngine` facilitates _discovery_ and _execution_ of tests for a particular
 programming model.
@@ -8,7 +7,7 @@ For example, JUnit provides a `TestEngine` that discovers and executes tests wri
 the JUnit Jupiter programming model (see <<writing-tests>> and <<extensions>>).
 
 [[test-engines-junit]]
-==== JUnit Test Engines
+== JUnit Test Engines
 
 JUnit provides three `TestEngine` implementations.
 
@@ -19,7 +18,7 @@ JUnit provides three `TestEngine` implementations.
   Platform launcher infrastructure.
 
 [[test-engines-custom]]
-==== Custom Test Engines
+== Custom Test Engines
 
 You can contribute your own custom `{TestEngine}` by implementing the interfaces in the
 {junit-platform-engine} module and _registering_ your engine.
@@ -70,7 +69,7 @@ provide the logic for test discovery. It implements execution of `TestDescriptor
 implement the `Node` interface, including support for parallel execution.
 
 [[test-engines-registration]]
-==== Registering a TestEngine
+== Registering a TestEngine
 
 `TestEngine` registration is supported via Java's `{ServiceLoader}` mechanism.
 
@@ -80,14 +79,14 @@ For example, the `junit-jupiter-engine` module registers its
 `junit-jupiter-engine` JAR.
 
 [[test-engines-requirements]]
-==== Requirements
+== Requirements
 
 NOTE: The words "must", "must not", "required", "shall", "shall not", "should", "should
 not", "recommended",  "may", and "optional" in this section are to be interpreted as
 described in https://www.ietf.org/rfc/rfc2119.txt[RFC 2119.]
 
 [[test-engines-requirements-mandatory]]
-===== Mandatory requirements
+=== Mandatory requirements
 
 For interoperability with build tools and IDEs, `TestEngine` implementations must adhere
 to the following requirements:
@@ -106,7 +105,7 @@ to the following requirements:
   reported for its descendants.
 
 [[test-engines-requirements-enhanced-compatibility]]
-===== Enhanced compatibility
+=== Enhanced compatibility
 
 Adhering to the following requirements is optional but recommended for enhanced
 compatibility with build tools and IDEs:
@@ -129,7 +128,7 @@ compatibility with build tools and IDEs:
   that it has created just like if execution had finished regularly.
 
 [[test-engines-discovery-issues]]
-==== Reporting Discovery Issues
+== Reporting Discovery Issues
 
 Test engines should report <<running-tests-discovery-issues, discovery issues>> if they
 encounter any problems or potential misconfigurations during test discovery. This is
