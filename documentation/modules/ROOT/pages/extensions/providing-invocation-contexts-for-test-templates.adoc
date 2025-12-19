@@ -1,5 +1,4 @@
-[[extensions-test-templates]]
-=== Providing Invocation Contexts for Test Templates
+= Providing Invocation Contexts for Test Templates
 
 A `{TestTemplate}` method can only be executed when at least one
 `{TestTemplateInvocationContextProvider}` is registered. Each such provider is responsible
@@ -13,7 +12,7 @@ implement a `{TestTemplateInvocationContextProvider}`.
 [source,java,indent=0]
 .A test template with accompanying extension
 ----
-include::{testDir}/example/TestTemplateDemo.java[tags=user_guide]
+include::example$java/example/TestTemplateDemo.java[tags=user_guide]
 ----
 
 In this example, the test template will be invoked twice. The display names of the
@@ -34,4 +33,3 @@ the test class instance differently, or multiple times without modifying the con
 Please refer to the implementations of <<writing-tests-repeated-tests>> or
 <<writing-tests-parameterized-tests, Parameterized Tests>> which use this extension point
 to provide their functionality.
-

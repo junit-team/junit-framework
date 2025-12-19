@@ -1,5 +1,4 @@
-[[extensions-conditions]]
-=== Conditional Test Execution
+= Conditional Test Execution
 
 `{ExecutionCondition}` defines the `Extension` API for programmatic, _conditional test
 execution_.
@@ -19,7 +18,7 @@ short-circuiting boolean OR operator.
 See the source code of `{DisabledCondition}` and `{Disabled}` for concrete examples.
 
 [[extensions-conditions-deactivation]]
-==== Deactivating Conditions
+== Deactivating Conditions
 
 Sometimes it can be useful to run a test suite _without_ certain conditions being active.
 For example, you may wish to run tests even if they are annotated with `@Disabled` in
@@ -36,7 +35,6 @@ following system property.
 `-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition`
 
 [[extensions-conditions-deactivation-patterns]]
-===== Pattern Matching Syntax
+=== Pattern Matching Syntax
 
 Refer to <<running-tests-config-params-deactivation-pattern>> for details.
-

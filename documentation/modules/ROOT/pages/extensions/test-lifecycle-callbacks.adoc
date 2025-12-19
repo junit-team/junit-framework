@@ -1,5 +1,4 @@
-[[extensions-lifecycle-callbacks]]
-=== Test Lifecycle Callbacks
+= Test Lifecycle Callbacks
 
 The following interfaces define the APIs for extending tests at various points in the
 test execution lifecycle. Consult the following sections for examples and the Javadoc for
@@ -22,7 +21,7 @@ within a single extension. Consult the source code of the `{SpringExtension}` fo
 concrete example.
 
 [[extensions-lifecycle-callbacks-before-after-execution]]
-==== Before and After Test Execution Callbacks
+== Before and After Test Execution Callbacks
 
 `{BeforeTestExecutionCallback}` and `{AfterTestExecutionCallback}` define the APIs for
 `Extensions` that wish to add behavior that will be executed _immediately before_ and
@@ -39,7 +38,7 @@ and `AfterTestExecutionCallback` in order to time and log the test execution.
 [source,java,indent=0]
 .An extension that times and logs the execution of test methods
 ----
-include::{testDir}/example/timing/TimingExtension.java[tags=user_guide]
+include::example$java/example/timing/TimingExtension.java[tags=user_guide]
 ----
 
 Since the `TimingExtensionTests` class registers the `TimingExtension` via `@ExtendWith`,
@@ -48,7 +47,7 @@ its tests will have this timing applied when they execute.
 [source,java,indent=0]
 .A test class that uses the example TimingExtension
 ----
-include::{testDir}/example/timing/TimingExtensionTests.java[tags=user_guide]
+include::example$java/example/timing/TimingExtensionTests.java[tags=user_guide]
 ----
 
 The following is an example of the logging produced when `TimingExtensionTests` is run.
@@ -57,4 +56,3 @@ The following is an example of the logging produced when `TimingExtensionTests` 
 INFO: Method [sleep20ms] took 24 ms.
 INFO: Method [sleep50ms] took 53 ms.
 ....
-

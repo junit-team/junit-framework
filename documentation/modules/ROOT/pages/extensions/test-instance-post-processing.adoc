@@ -1,5 +1,4 @@
-[[extensions-test-instance-post-processing]]
-=== Test Instance Post-processing
+= Test Instance Post-processing
 
 `{TestInstancePostProcessor}` defines the API for `Extensions` that wish to _post
 process_ test instances.
@@ -17,4 +16,3 @@ You may override the `getTestInstantiationExtensionContextScope(...)` method to 
 `TEST_METHOD` to make test-specific data available to your extension implementation or if
 you want to <<extensions-keeping-state, keep state>> on the test method level.
 ====
-
