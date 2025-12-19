@@ -1,5 +1,4 @@
-[[writing-tests-conditional-execution]]
-=== Conditional Test Execution
+= Conditional Test Execution
 
 The <<extensions-conditions, `ExecutionCondition`>> extension API in JUnit Jupiter allows
 developers to either _enable_ or _disable_ a test class or test method based on certain
@@ -54,7 +53,7 @@ the `org.junit.jupiter.api.condition` package.
 ====
 
 [[writing-tests-conditional-execution-os]]
-==== Operating System and Architecture Conditions
+== Operating System and Architecture Conditions
 
 A container or test may be enabled or disabled on a particular operating system,
 architecture, or combination of both via the `{EnabledOnOs}` and `{DisabledOnOs}`
@@ -64,18 +63,18 @@ annotations.
 [source,java,indent=0]
 .Conditional execution based on operating system
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_os]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_os]
 ----
 
 [[writing-tests-conditional-execution-architectures-demo]]
 [source,java,indent=0]
 .Conditional execution based on architecture
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_architecture]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_architecture]
 ----
 
 [[writing-tests-conditional-execution-jre]]
-==== Java Runtime Environment Conditions
+== Java Runtime Environment Conditions
 
 A container or test may be enabled or disabled on particular versions of the Java Runtime
 Environment (JRE) via the `{EnabledOnJre}` and `{DisabledOnJre}` annotations or on a
@@ -88,7 +87,7 @@ constants.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre]
 ----
 
 Since the enum constants defined in {JRE} are static for any given JUnit release, you
@@ -105,11 +104,11 @@ versions.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre_arbitrary_versions]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre_arbitrary_versions]
 ----
 
 [[writing-tests-conditional-execution-native]]
-==== Native Image Conditions
+== Native Image Conditions
 
 A container or test may be enabled or disabled within a
 https://www.graalvm.org/reference-manual/native-image/[GraalVM native image] via the
@@ -120,11 +119,11 @@ Build Tools] project.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_native]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_native]
 ----
 
 [[writing-tests-conditional-execution-system-properties]]
-==== System Property Conditions
+== System Property Conditions
 
 A container or test may be enabled or disabled based on the value of the `named` JVM
 system property via the `{EnabledIfSystemProperty}` and `{DisabledIfSystemProperty}`
@@ -133,7 +132,7 @@ regular expression.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_system_property]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_system_property]
 ----
 
 [TIP]
@@ -145,7 +144,7 @@ present, indirectly present, or meta-present on a given element.
 ====
 
 [[writing-tests-conditional-execution-environment-variables]]
-==== Environment Variable Conditions
+== Environment Variable Conditions
 
 A container or test may be enabled or disabled based on the value of the `named`
 environment variable from the underlying operating system via the
@@ -154,7 +153,7 @@ value supplied via the `matches` attribute will be interpreted as a regular expr
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_environment_variable]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_environment_variable]
 ----
 
 [TIP]
@@ -166,7 +165,7 @@ they are directly present, indirectly present, or meta-present on a given elemen
 ====
 
 [[writing-tests-conditional-execution-custom]]
-==== Custom Conditions
+== Custom Conditions
 
 As an alternative to implementing an <<extensions-conditions, `ExecutionCondition`>>, a
 container or test may be enabled or disabled based on a _condition method_ configured via
@@ -178,7 +177,7 @@ The following test class demonstrates how to configure a local method named
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ConditionalTestExecutionDemo.java[tags=user_guide_custom]
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_custom]
 ----
 
 Alternatively, the condition method can be located outside the test class. In this case,
@@ -189,7 +188,7 @@ example.
 ----
 package example;
 
-include::{testDir}/example/ExternalCustomConditionDemo.java[tags=user_guide_external_custom_condition]
+include::example$java/example/ExternalCustomConditionDemo.java[tags=user_guide_external_custom_condition]
 ----
 
 [NOTE]
@@ -221,4 +220,3 @@ disable it when such support is unavailable as follows.
 	disabledReason = "headless environment")
 ----
 ====
-

@@ -1,5 +1,4 @@
-[[writing-tests-nested]]
-=== Nested Tests
+= Nested Tests
 
 `@Nested` tests give the test writer more capabilities to express the relationship among
 several groups of tests. Such nested tests make use of Java's nested classes and
@@ -9,7 +8,7 @@ both as source code and as a screenshot of the execution within an IDE.
 [source,java,indent=0]
 .Nested test suite for testing a stack
 ----
-include::{testDir}/example/TestingAStackDemo.java[tags=user_guide]
+include::example$java/example/TestingAStackDemo.java[tags=user_guide]
 ----
 
 When executing this example in an IDE, the test execution tree in the GUI will look
@@ -31,7 +30,7 @@ classes. Nesting can be arbitrarily deep, and those inner classes are subject to
 lifecycle support, including `@BeforeAll` and `@AfterAll` methods on each level.
 
 [[writing-tests-nested-interoperability]]
-==== Interoperability
+== Interoperability
 
 `@Nested` may be combined with
 <<writing-tests-parameterized-tests, `@ParameterizedClass`>> in which case the nested test
@@ -42,7 +41,7 @@ The following example illustrates how to combine `@Nested` with `@ParameterizedC
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/ParameterizedClassDemo.java[tags=nested]
+include::example$java/example/ParameterizedClassDemo.java[tags=nested]
 ----
 
 Executing the above test class yields the following output:
@@ -70,4 +69,3 @@ FruitTests ✔
             ├─ [1] duration = "PT1H" ✔
             └─ [2] duration = "PT2H" ✔
 ....
-

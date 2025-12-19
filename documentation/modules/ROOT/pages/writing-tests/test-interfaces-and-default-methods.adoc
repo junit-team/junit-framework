@@ -1,5 +1,4 @@
-[[writing-tests-test-interfaces-and-default-methods]]
-=== Test Interfaces and Default Methods
+= Test Interfaces and Default Methods
 
 JUnit Jupiter allows `@Test`, `@RepeatedTest`, `@ParameterizedTest`, `@TestFactory`,
 `@TestTemplate`, `@BeforeEach`, and `@AfterEach` to be declared on interface `default`
@@ -10,12 +9,12 @@ annotated with `@TestInstance(Lifecycle.PER_CLASS)` (see
 
 [source,java]
 ----
-include::{testDir}/example/testinterface/TestLifecycleLogger.java[tags=user_guide]
+include::example$java/example/testinterface/TestLifecycleLogger.java[tags=user_guide]
 ----
 
 [source,java]
 ----
-include::{testDir}/example/testinterface/TestInterfaceDynamicTestsDemo.java[tags=user_guide]
+include::example$java/example/testinterface/TestInterfaceDynamicTestsDemo.java[tags=user_guide]
 ----
 
 `@ExtendWith` and `@Tag` can be declared on a test interface so that classes that
@@ -25,14 +24,14 @@ implement the interface automatically inherit its tags and extensions. See
 
 [source,java]
 ----
-include::{testDir}/example/testinterface/TimeExecutionLogger.java[tags=user_guide]
+include::example$java/example/testinterface/TimeExecutionLogger.java[tags=user_guide]
 ----
 
 In your test class you can then implement these test interfaces to have them applied.
 
 [source,java]
 ----
-include::{testDir}/example/testinterface/TestInterfaceDemo.java[tags=user_guide]
+include::example$java/example/testinterface/TestInterfaceDemo.java[tags=user_guide]
 ----
 
 Running the `TestInterfaceDemo` results in output similar to the following:
@@ -54,17 +53,17 @@ For example, you can write tests for how implementations of `Object.equals` or
 
 [source,java]
 ----
-include::{testDir}/example/defaultmethods/Testable.java[tags=user_guide]
+include::example$java/example/defaultmethods/Testable.java[tags=user_guide]
 ----
 
 [source,java]
 ----
-include::{testDir}/example/defaultmethods/EqualsContract.java[tags=user_guide]
+include::example$java/example/defaultmethods/EqualsContract.java[tags=user_guide]
 ----
 
 [source,java]
 ----
-include::{testDir}/example/defaultmethods/ComparableContract.java[tags=user_guide]
+include::example$java/example/defaultmethods/ComparableContract.java[tags=user_guide]
 ----
 
 In your test class you can then implement both contract interfaces thereby inheriting the
@@ -72,9 +71,7 @@ corresponding tests. Of course you'll have to implement the abstract methods.
 
 [source,java]
 ----
-include::{testDir}/example/defaultmethods/StringTests.java[tags=user_guide]
+include::example$java/example/defaultmethods/StringTests.java[tags=user_guide]
 ----
 
 NOTE: The above tests are merely meant as examples and therefore not complete.
-
-

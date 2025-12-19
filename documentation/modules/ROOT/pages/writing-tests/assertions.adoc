@@ -1,5 +1,4 @@
-[[writing-tests-assertions]]
-=== Assertions
+= Assertions
 
 JUnit Jupiter comes with many of the assertion methods that JUnit 4 has and adds a few
 that lend themselves well to being used with Java lambdas. All JUnit Jupiter assertions
@@ -14,7 +13,7 @@ complex or time-consuming, as it is only evaluated when the assertion fails.
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/AssertionsDemo.java[tags=user_guide]
+include::example$java/example/AssertionsDemo.java[tags=user_guide]
 ----
 
 [[writing-tests-assertions-preemptive-timeouts]]
@@ -40,7 +39,7 @@ Similar side effects may be encountered with other frameworks that rely on
 ====
 
 [[writing-tests-assertions-kotlin]]
-==== Kotlin Assertion Support
+== Kotlin Assertion Support
 
 JUnit Jupiter also comes with a few assertion methods that lend themselves well to being
 used in https://kotlinlang.org/[Kotlin]. All JUnit Jupiter Kotlin assertions are top-level
@@ -48,11 +47,11 @@ functions in the `org.junit.jupiter.api` package.
 
 [source,kotlin,indent=0]
 ----
-include::{kotlinTestDir}/example/KotlinAssertionsDemo.kt[tags=user_guide]
+include::example$kotlin/example/KotlinAssertionsDemo.kt[tags=user_guide]
 ----
 
 [[writing-tests-assertions-third-party]]
-==== Third-party Assertion Libraries
+== Third-party Assertion Libraries
 
 Even though the assertion facilities provided by JUnit Jupiter are sufficient for many
 testing scenarios, there are times when more power and additional functionality are
@@ -68,7 +67,7 @@ from `org.assertj.core.api.Assertions` and then use them in tests like in the
 
 [source,java,indent=0]
 ----
-include::{testDir}/example/AssertJAssertionsDemo.java[tags=user_guide]
+include::example$java/example/AssertJAssertionsDemo.java[tags=user_guide]
 ----
 
 [TIP]
@@ -96,4 +95,3 @@ analysis tool that fails the build if Jupiter's `Assertions` class is used.
 </module>
 ----
 ====
-
