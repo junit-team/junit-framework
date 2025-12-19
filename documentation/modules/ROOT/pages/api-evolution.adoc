@@ -10,7 +10,7 @@ sometimes impossible.
 That's why JUnit now uses a defined lifecycle for all publicly available interfaces,
 classes, and methods.
 
-[[api-evolution-version-and-status]]
+[[version-and-status]]
 == API Version and Status
 
 Every published artifact has a version number `<major>.<minor>.<patch>`, and all publicly
@@ -38,24 +38,24 @@ If the `@API` annotation is present on a type, it is considered to be applicable
 public members of that type as well. A member is allowed to declare a different `status`
 value of lower stability.
 
-[[api-evolution-experimental-apis]]
+[[experimental-apis]]
 == Experimental APIs
 
 The following tables list which APIs are currently designated as _experimental_ via
 `@API(status = EXPERIMENTAL)`. Caution should be taken when relying on such APIs.
 
-include::{experimentalApisTableFile}[]
+include::partial$experimental-apis-table.adoc[]
 
-[[api-evolution-deprecated-apis]]
+[[deprecated-apis]]
 == Deprecated APIs
 
 The following tables list which APIs are currently designated as _deprecated_ via
 `@API(status = DEPRECATED)`. You should avoid using deprecated APIs whenever possible,
 since such APIs will likely be removed in an upcoming release.
 
-include::{deprecatedApisTableFile}[]
+include::partial$deprecated-apis-table.adoc[]
 
-[[api-evolution-tooling]]
+[[tooling]]
 == @API Tooling Support
 
 The {API_Guardian} project plans to provide tooling support for publishers and consumers

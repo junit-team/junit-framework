@@ -35,7 +35,7 @@ repetitions will be invoked regardless of whether any repetitions fail.
 WARNING: If the repetitions of a `@RepeatedTest` method are executed in parallel, no
 guarantees can be made regarding the failure threshold. It is therefore recommended that a
 `@RepeatedTest` method be annotated with `@Execution(SAME_THREAD)` when parallel execution
-is configured. See <<writing-tests-parallel-execution>> for further details.
+is configured. See xref:writing-tests/parallel-execution.adoc[] for further details.
 
 In addition to specifying the number of repetitions and failure threshold, a custom
 display name can be configured for each repetition via the `name` attribute of the
@@ -62,7 +62,7 @@ repetitions, the number of repetitions that have failed, and the failure thresho
 developer can choose to have an instance of `{RepetitionInfo}` injected into a
 `@RepeatedTest`, `@BeforeEach`, or `@AfterEach` method.
 
-[[writing-tests-repeated-tests-examples]]
+[[examples]]
 == Repeated Test Examples
 
 The `RepeatedTestsDemo` class at the end of this section demonstrates several examples of

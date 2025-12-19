@@ -13,7 +13,7 @@
 // 5) 'include:' this new file in ../../pages/release-notes.adoc.
 // 6) Delete this entire comment block.
 //
-[[release-notes-VERSION]]
+[[vVERSION]]
 == VERSION
 
 *Date of Release:* ❓
@@ -25,58 +25,58 @@ link:{junit-framework-repo}+/milestone/MILESTONE_NUMBER?closed=1+[VERSION] miles
 repository on GitHub.
 
 
-[[release-notes-VERSION-junit-platform]]
+[[vVERSION-junit-platform]]
 === JUnit Platform
 
-[[release-notes-VERSION-junit-platform-bug-fixes]]
+[[vVERSION-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
 * ❓
 
-[[release-notes-VERSION-junit-platform-deprecations-and-breaking-changes]]
+[[vVERSION-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * ❓
 
-[[release-notes-VERSION-junit-platform-new-features-and-improvements]]
+[[vVERSION-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * ❓
 
 
-[[release-notes-VERSION-junit-jupiter]]
+[[vVERSION-junit-jupiter]]
 === JUnit Jupiter
 
-[[release-notes-VERSION-junit-jupiter-bug-fixes]]
+[[vVERSION-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
 * ❓
 
-[[release-notes-VERSION-junit-jupiter-deprecations-and-breaking-changes]]
+[[vVERSION-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * ❓
 
-[[release-notes-VERSION-junit-jupiter-new-features-and-improvements]]
+[[vVERSION-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * ❓
 
 
-[[release-notes-VERSION-junit-vintage]]
+[[vVERSION-junit-vintage]]
 === JUnit Vintage
 
-[[release-notes-VERSION-junit-vintage-bug-fixes]]
+[[vVERSION-junit-vintage-bug-fixes]]
 ==== Bug Fixes
 
 * ❓
 
-[[release-notes-VERSION-junit-vintage-deprecations-and-breaking-changes]]
+[[vVERSION-junit-vintage-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
 * ❓
 
-[[release-notes-VERSION-junit-vintage-new-features-and-improvements]]
+[[vVERSION-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * ❓

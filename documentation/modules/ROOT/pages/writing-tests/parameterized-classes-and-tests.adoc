@@ -5,18 +5,18 @@ arguments. They are declared just like regular `@Test` methods but use the
 `{ParameterizedTest}` annotation instead.
 
 _Parameterized classes_ make it possible to run _all_ tests in a test class, including
-<<writing-tests-nested>>, multiple times with different arguments. They are declared just
+xref:writing-tests/nested-tests.adoc[], multiple times with different arguments. They are declared just
 like regular test classes and may contain any supported test method type (including
 `@ParameterizedTest`) but annotated with the `{ParameterizedClass}` annotation.
 
 WARNING: _Parameterized classes_ are currently an _experimental_ feature. You're invited
 to give it a try and provide feedback to the JUnit team so they can improve and eventually
-<<api-evolution, promote>> this feature.
+xref:api-evolution.adoc[promote] this feature.
 
 Regardless of whether you are parameterizing a test method or a test class, you must
-declare at least one <<writing-tests-parameterized-tests-sources, source>> that will
+declare at least one <<tests-sources, source>> that will
 provide the arguments for each invocation and then
-<<writing-tests-parameterized-tests-consuming-arguments, consume>> the arguments in the
+<<tests-consuming-arguments, consume>> the arguments in the
 parameterized method or class, respectively.
 
 The following example demonstrates a parameterized test that uses the `@ValueSource`
@@ -63,24 +63,24 @@ PalindromeTests ✔
    └─ reversePalindrome() ✔
 ....
 
-[[writing-tests-parameterized-tests-setup]]
+[[tests-setup]]
 == Required Setup
 
 In order to use parameterized classes or tests you need to add a dependency on the
-`junit-jupiter-params` artifact. Please refer to <<dependency-metadata>> for details.
+`junit-jupiter-params` artifact. Please refer to xref:appendix.adoc#dependency-metadata[Dependency Metadata] for details.
 
-[[writing-tests-parameterized-tests-consuming-arguments]]
+[[tests-consuming-arguments]]
 == Consuming Arguments
 
-[[writing-tests-parameterized-tests-consuming-arguments-methods]]
+[[tests-consuming-arguments-methods]]
 === Parameterized Tests
 
 Parameterized test methods _consume_ arguments directly from the configured source (see
-<<writing-tests-parameterized-tests-sources>>) following a one-to-one correlation between
+<<tests-sources>>) following a one-to-one correlation between
 argument source index and method parameter index (see examples in
-<<writing-tests-parameterized-tests-sources-CsvSource>>). However, a parameterized test
+<<tests-sources-CsvSource>>). However, a parameterized test
 method may also choose to _aggregate_ arguments from the source into a single object
-passed to the method (see <<writing-tests-parameterized-tests-argument-aggregation>>).
+passed to the method (see <<tests-argument-aggregation>>).
 Additional arguments may also be provided by a `ParameterResolver` (e.g., to obtain an
 instance of `TestInfo`, `TestReporter`, etc.). Specifically, a parameterized test method
 must declare formal parameters according to the following rules.
@@ -95,25 +95,25 @@ parameterized method at the same index in the method's formal parameter list. An
 _aggregator_ is any parameter of type `{ArgumentsAccessor}` or any parameter annotated
 with `{AggregateWith}`.
 
-[[writing-tests-parameterized-tests-consuming-arguments-classes]]
+[[tests-consuming-arguments-classes]]
 === Parameterized Classes
 
 Parameterized classes _consume_ arguments directly from the configured source (see
-<<writing-tests-parameterized-tests-sources>>); either via their unique constructor or via
+<<tests-sources>>); either via their unique constructor or via
 field injection. If a `{Parameter}`-annotated field is declared in the parameterized class
 or one of its superclasses, field injection will be used. Otherwise, constructor injection
 will be used.
 
-[[writing-tests-parameterized-tests-consuming-arguments-constructor-injection]]
+[[tests-consuming-arguments-constructor-injection]]
 ==== Constructor Injection
 
 WARNING: Constructor injection can only be used with the (default) `PER_METHOD`
-<<writing-tests-test-instance-lifecycle, test instance lifecycle>> mode. Please use
-<<writing-tests-parameterized-tests-consuming-arguments-field-injection, field injection>>
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] mode. Please use
+<<tests-consuming-arguments-field-injection, field injection>>
 with the `PER_CLASS` mode instead.
 
 For constructor injection, the same rules apply as defined for
-<<writing-tests-parameterized-tests-consuming-arguments-methods, parameterized tests>>
+<<tests-consuming-arguments-methods, parameterized tests>>
 above. In the following example, two arguments are injected into the constructor of the
 test class.
 
@@ -130,7 +130,7 @@ of declaring a test class constructor.
 include::example$java/example/ParameterizedRecordDemo.java[tags=example]
 ----
 
-[[writing-tests-parameterized-tests-consuming-arguments-field-injection]]
+[[tests-consuming-arguments-field-injection]]
 ==== Field Injection
 
 For field injection, the following rules apply for fields annotated with `@Parameter`.
@@ -158,20 +158,20 @@ include::example$java/example/ParameterizedClassDemo.java[tags=field_injection]
 ----
 
 If field injection is used, no constructor parameters will be resolved with arguments from
-the source. Other <<writing-tests-dependency-injection, `ParameterResolver` extensions>>
+the source. Other xref:writing-tests/dependency-injection-for-constructors-and-methods.adoc[`ParameterResolver` extensions]
 may resolve constructor parameters as usual, though.
 
-[[writing-tests-parameterized-tests-consuming-arguments-lifecycle-method]]
+[[tests-consuming-arguments-lifecycle-method]]
 ==== Lifecycle Methods
 
 `{BeforeParameterizedClassInvocation}` and `{AfterParameterizedClassInvocation}` can also
 be used to consume arguments if their `injectArguments` attribute is set to `true` (the
 default). If so, their method signatures must follow the same rules apply as defined for
-<<writing-tests-parameterized-tests-consuming-arguments-methods, parameterized tests>> and
+<<tests-consuming-arguments-methods, parameterized tests>> and
 additionally use the same parameter types as the _indexed parameters_ of the parameterized
 test class. Please refer to the Javadoc of `{BeforeParameterizedClassInvocation}` and
 `{AfterParameterizedClassInvocation}` for details and to the
-<<writing-tests-parameterized-tests-lifecycle-interop-classes, Lifecycle>> section for an
+<<tests-lifecycle-interop-classes, Lifecycle>> section for an
 example.
 
 [NOTE]
@@ -189,14 +189,14 @@ method, you must specify the `autoCloseArguments = false` on the `{Parameterized
 invocations.
 ====
 
-[[writing-tests-parameterized-tests-consuming-arguments-other-extensions]]
+[[tests-consuming-arguments-other-extensions]]
 === Other Extensions
 
 Other extensions can access the parameters and resolved arguments of a parameterized test
 or class by retrieving a `{ParameterInfo}` object from the `{ExtensionContext_Store}`.
 Please refer to the Javadoc of `{ParameterInfo}` for details.
 
-[[writing-tests-parameterized-tests-sources]]
+[[tests-sources]]
 == Sources of Arguments
 
 Out of the box, JUnit Jupiter provides quite a few _source_ annotations. Each of the
@@ -208,7 +208,7 @@ TIP: All source annotations in this section are applicable to both `{Parameteriz
 and `{ParameterizedTest}`. For the sake of brevity, the examples in this section will only
 show how to use them with `{ParameterizedTest}` methods.
 
-[[writing-tests-parameterized-tests-sources-ValueSource]]
+[[tests-sources-ValueSource]]
 === @ValueSource
 
 `@ValueSource` is one of the simplest possible sources. It lets you specify a single
@@ -236,7 +236,7 @@ the values `1`, `2`, and `3` respectively.
 include::example$java/example/ParameterizedTestDemo.java[tags=ValueSource_example]
 ----
 
-[[writing-tests-parameterized-tests-sources-null-and-empty]]
+[[tests-sources-null-and-empty]]
 === Null and Empty Sources
 
 In order to check corner cases and verify proper behavior of our software when it is
@@ -259,7 +259,7 @@ for parameterized tests that accept a single argument.
 
 If you need to supply multiple varying types of _blank_ strings to a parameterized
 class or test, you can achieve that using
-<<writing-tests-parameterized-tests-sources-ValueSource>> -- for example,
+<<tests-sources-ValueSource>> -- for example,
 `@ValueSource(strings = {"{nbsp}", "{nbsp}{nbsp}{nbsp}", "\t", "\n"})`.
 
 You can also combine `@NullSource`, `@EmptySource`, and `@ValueSource` to test a wider
@@ -283,7 +283,7 @@ NOTE: Both variants of the `nullEmptyAndBlankStrings(String)` parameterized test
 result in six invocations: 1 for `null`, 1 for the empty string, and 4 for the explicit
 blank strings supplied via `@ValueSource`.
 
-[[writing-tests-parameterized-tests-sources-EnumSource]]
+[[tests-sources-EnumSource]]
 === @EnumSource
 
 `@EnumSource` provides a convenient way to use `Enum` constants.
@@ -351,7 +351,7 @@ range of constants while excluding specific values from that range as shown belo
 include::example$java/example/ParameterizedTestDemo.java[tags=EnumSource_range_exclude_example]
 ----
 
-[[writing-tests-parameterized-tests-sources-MethodSource]]
+[[tests-sources-MethodSource]]
 === @MethodSource
 
 `{MethodSource}` allows you to refer to one or more _factory_ methods of the test class
@@ -439,7 +439,7 @@ can be referenced by its fully qualified method name, e.g.
 include::example$java/example/MethodSourceParameterResolutionDemo.java[tags=parameter_resolution_MethodSource_example]
 ----
 
-[[writing-tests-parameterized-tests-sources-FieldSource]]
+[[tests-sources-FieldSource]]
 === @FieldSource
 
 `{FieldSource}` allows you to refer to one or more fields of the test class or external
@@ -466,7 +466,7 @@ a single argument.
 [WARNING]
 ====
 In contrast to the supported return types for
-<<writing-tests-parameterized-tests-sources-MethodSource, `@MethodSource`>> factory
+<<tests-sources-MethodSource, `@MethodSource`>> factory
 methods, the value of a `@FieldSource` field cannot be an instance of `Stream`,
 `DoubleStream`, `LongStream`, `IntStream`, or `Iterator`, since the values of such types
 are _consumed_ the first time they are processed. However, if you wish to use one of
@@ -560,7 +560,7 @@ _fully qualified field name_ as demonstrated in the following example.
 include::example$java/example/ExternalFieldSourceDemo.java[tags=external_field_FieldSource_example]
 ----
 
-[[writing-tests-parameterized-tests-sources-CsvSource]]
+[[tests-sources-CsvSource]]
 === @CsvSource
 
 `@CsvSource` allows you to express argument lists as comma-separated values (i.e., CSV
@@ -683,7 +683,7 @@ within quoted strings, you will need to ensure that there is no leading whitespa
 your text block.
 ====
 
-[[writing-tests-parameterized-tests-sources-CsvFileSource]]
+[[tests-sources-CsvFileSource]]
 === @CsvFileSource
 
 `@CsvFileSource` lets you use comma-separated value (CSV) files from the classpath or the
@@ -750,7 +750,7 @@ Except within a quoted string, leading and trailing whitespace in a CSV column i
 by default. This behavior can be changed by setting the
 `ignoreLeadingAndTrailingWhitespace` attribute to `true`.
 
-[[writing-tests-parameterized-tests-sources-ArgumentsSource]]
+[[tests-sources-ArgumentsSource]]
 === @ArgumentsSource
 
 `@ArgumentsSource` can be used to specify a custom, reusable `ArgumentsProvider`. Note
@@ -780,7 +780,7 @@ following example.
 include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsProviderWithConstructorInjection_example]
 ----
 
-[[writing-tests-parameterized-repeatable-sources]]
+[[repeatable-sources]]
 === Multiple sources using repeatable annotations
 
 Repeatable annotations provide a convenient way to specify multiple sources from
@@ -808,7 +808,7 @@ The following annotations are repeatable:
 * `@CsvFileSource`
 * `@ArgumentsSource`
 
-[[writing-tests-parameterized-tests-argument-count-validation]]
+[[tests-argument-count-validation]]
 == Argument Count Validation
 
 By default, when an arguments source provides more arguments than the test method needs,
@@ -821,7 +821,7 @@ Then, any additional arguments will cause an error instead.
 
 To change this behavior for all tests, set the
 `junit.jupiter.params.argumentCountValidation`
-<<running-tests-config-params, configuration parameter>> to `strict`.
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to `strict`.
 To change this behavior for a single parameterized class or test method,
 use the `argumentCountValidation` attribute of the `@ParameterizedClass` or
 `@ParameterizedTest` annotation:
@@ -831,10 +831,10 @@ use the `argumentCountValidation` attribute of the `@ParameterizedClass` or
 include::example$java/example/ParameterizedTestDemo.java[tags=argument_count_validation]
 ----
 
-[[writing-tests-parameterized-tests-argument-conversion]]
+[[tests-argument-conversion]]
 == Argument Conversion
 
-[[writing-tests-parameterized-tests-argument-conversion-widening]]
+[[tests-argument-conversion-widening]]
 === Widening Conversion
 
 JUnit Jupiter supports
@@ -844,7 +844,7 @@ For example, a parameterized class or test method annotated with
 `@ValueSource(ints = { 1, 2, 3 })` can be declared to accept not only an argument of type
 `int` but also an argument of type `long`, `float`, or `double`.
 
-[[writing-tests-parameterized-tests-argument-conversion-implicit]]
+[[tests-argument-conversion-implicit]]
 === Implicit Conversion
 
 To support use cases like `@CsvSource`, JUnit Jupiter provides a number of built-in
@@ -865,7 +865,7 @@ include::example$java/example/ParameterizedTestDemo.java[tags=implicit_conversio
 NOTE: Decimal, hexadecimal, and octal `String` literals will be converted to their
 integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
 
-[[writing-tests-parameterized-tests-argument-conversion-implicit-table]]
+[[tests-argument-conversion-implicit-table]]
 [cols="10,90"]
 |===
 | Target Type | Example
@@ -908,7 +908,7 @@ integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
 | `java.util.UUID`           | `"d043e930-7b3b-48e3-bdbe-5a3ccfb833db"` -> `UUID.fromString("d043e930-7b3b-48e3-bdbe-5a3ccfb833db")`
 |===
 
-[[writing-tests-parameterized-tests-argument-conversion-implicit-fallback]]
+[[tests-argument-conversion-implicit-fallback]]
 ==== Fallback String-to-Object Conversion
 
 In addition to implicit conversion from strings to the target types listed in the above
@@ -942,7 +942,7 @@ include::example$java/example/ParameterizedTestDemo.java[tags=implicit_fallback_
 include::example$java/example/ParameterizedTestDemo.java[tags=implicit_fallback_conversion_example_Book]
 ----
 
-[[writing-tests-parameterized-tests-argument-conversion-explicit]]
+[[tests-argument-conversion-explicit]]
 === Explicit Conversion
 
 Instead of relying on implicit argument conversion, you may explicitly specify an
@@ -982,7 +982,7 @@ If you wish to implement a custom `ArgumentConverter` that also consumes an anno
 (like `JavaTimeArgumentConverter`), you have the possibility to extend the
 `{AnnotationBasedArgumentConverter}` class.
 
-[[writing-tests-parameterized-tests-argument-aggregation]]
+[[tests-argument-aggregation]]
 == Argument Aggregation
 
 By default, each _argument_ provided to a `@ParameterizedClass` or `@ParameterizedTest`
@@ -993,7 +993,7 @@ signatures, respectively.
 In such cases, an `{ArgumentsAccessor}` can be used instead of multiple parameters. Using
 this API, you can access the provided arguments through a single argument passed to your
 test method. In addition, type conversion is supported as discussed in
-<<writing-tests-parameterized-tests-argument-conversion-implicit>>.
+<<tests-argument-conversion-implicit>>.
 
 Besides, you can retrieve the current test invocation index with
 `ArgumentsAccessor.getInvocationIndex()`.
@@ -1006,7 +1006,7 @@ include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAccessor_
 _An instance of `ArgumentsAccessor` is automatically injected into any parameter of type
 `ArgumentsAccessor`._
 
-[[writing-tests-parameterized-tests-argument-aggregation-custom]]
+[[tests-argument-aggregation-custom]]
 === Custom Aggregators
 
 Apart from direct access to the arguments of a `@ParameterizedClass` or
@@ -1047,7 +1047,7 @@ include::example$java/example/ParameterizedTestDemo.java[tags=ArgumentsAggregato
 ----
 
 
-[[writing-tests-parameterized-tests-display-names]]
+[[tests-display-names]]
 == Customizing Display Names
 
 By default, the display name of a parameterized class or test invocation contains the
@@ -1167,7 +1167,7 @@ Note that `argumentSet(String, Object...)` is a static factory method defined in
 `org.junit.jupiter.params.provider.Arguments` interface.
 ====
 
-[[writing-tests-parameterized-tests-display-names-quoted-text]]
+[[tests-display-names-quoted-text]]
 === Quoted Text-based Arguments
 
 As of JUnit Jupiter 6.0, text-based arguments in display names for parameterized tests are
@@ -1193,7 +1193,7 @@ in the display name would be `"'\\t'"` which is printed as `'\t'`.
 
 For a concrete example, if you run the first `nullEmptyAndBlankStrings(String text)`
 parameterized test method from the
-<<writing-tests-parameterized-tests-sources-null-and-empty>> section above, the following
+<<tests-sources-null-and-empty>> section above, the following
 display names are generated.
 
 ----
@@ -1206,7 +1206,7 @@ display names are generated.
 ----
 
 If you run the first `testWithCsvSource(String fruit, int rank)` parameterized test method
-from the <<writing-tests-parameterized-tests-sources-CsvSource>> section above, the
+from the <<tests-sources-CsvSource>> section above, the
 following display names are generated.
 
 ----
@@ -1227,20 +1227,20 @@ instead of `3.14`. You can see the effect of this with the `rank` values in the 
 example.
 ====
 
-[[writing-tests-parameterized-tests-display-names-default-pattern]]
+[[tests-display-names-default-pattern]]
 === Default Display Name Pattern
 
 If you'd like to set a default name pattern for all parameterized classes and tests in
 your project, you can declare the `junit.jupiter.params.displayname.default` configuration
 parameter in the `junit-platform.properties` file as demonstrated in the following example (see
-<<running-tests-config-params>> for other options).
+xref:running-tests/configuration-parameters.adoc[] for other options).
 
 [source,properties,indent=0]
 ----
 junit.jupiter.params.displayname.default = {index}
 ----
 
-[[writing-tests-parameterized-tests-display-names-precedence-rules]]
+[[tests-display-names-precedence-rules]]
 === Precedence Rules
 
 The display name for a parameterized class or test is determined according to the
@@ -1251,15 +1251,15 @@ following precedence rules:
 3. `DEFAULT_DISPLAY_NAME` constant defined in
    `org.junit.jupiter.params.ParameterizedInvocationConstants`
 
-[[writing-tests-parameterized-tests-lifecycle-interop]]
+[[tests-lifecycle-interop]]
 == Lifecycle and Interoperability
 
-[[writing-tests-parameterized-tests-lifecycle-interop-methods]]
+[[tests-lifecycle-interop-methods]]
 === Parameterized Tests
 
 Each invocation of a parameterized test has the same lifecycle as a regular `@Test`
 method. For example, `@BeforeEach` methods will be executed before each invocation.
-Similar to <<writing-tests-dynamic-tests>>, invocations will appear one by one in the
+Similar to xref:writing-tests/dynamic-tests.adoc[], invocations will appear one by one in the
 test tree of an IDE. You may at will mix regular `@Test` methods and `@ParameterizedTest`
 methods within the same test class.
 
@@ -1274,13 +1274,13 @@ lifecycle methods (e.g. `@BeforeEach`) and test class constructors.
 include::example$java/example/ParameterizedTestDemo.java[tags=ParameterResolver_example]
 ----
 
-[[writing-tests-parameterized-tests-lifecycle-interop-classes]]
+[[tests-lifecycle-interop-classes]]
 === Parameterized Classes
 
 Each invocation of a parameterized class has the same lifecycle as a regular test class.
 For example, `@BeforeAll` methods will be executed _once_ before all invocations and
 `@BeforeEach` methods will be executed before each _test method_ invocation. Similar to
-<<writing-tests-dynamic-tests>>, invocations will appear one by one in the test tree of an
+xref:writing-tests/dynamic-tests.adoc[], invocations will appear one by one in the test tree of an
 IDE.
 
 You may use `ParameterResolver` extensions with `@ParameterizedClass` constructors.
@@ -1292,7 +1292,7 @@ In addition to regular lifecycle methods, parameterized classes may declare
 `{BeforeParameterizedClassInvocation}` and `{AfterParameterizedClassInvocation}` lifecycle
 methods that are called once before/after each invocation of the parameterized class.
 These methods must be `static` unless the parameterized class is configured to use
-`@TestInstance(Lifecycle.PER_CLASS)` (see <<writing-tests-test-instance-lifecycle>>).
+`@TestInstance(Lifecycle.PER_CLASS)` (see xref:writing-tests/test-instance-lifecycle.adoc[]).
 
 These lifecycle methods may optionally declare parameters that are resolved depending on
 the setting of the `injectArguments` annotation attribute. If it is set to `false`, the

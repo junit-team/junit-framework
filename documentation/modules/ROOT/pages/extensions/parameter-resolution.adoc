@@ -4,9 +4,9 @@
 runtime.
 
 If a _test class_ constructor, _test method_, or _lifecycle method_ (see
-<<writing-tests-definitions>>) declares a parameter, the parameter must be _resolved_ at
+xref:writing-tests/definitions.adoc[]) declares a parameter, the parameter must be _resolved_ at
 runtime by a `ParameterResolver`. A `ParameterResolver` can either be built-in (see
-`{TestInfoParameterResolver}`) or <<extensions-registration,registered by the user>>.
+`{TestInfoParameterResolver}`) or xref:extensions/registering-extensions.adoc[registered by the user].
 Generally speaking, parameters may be resolved by _name_, _type_, _annotation_, or any
 combination thereof.
 
@@ -41,7 +41,7 @@ You may override the `getTestInstantiationExtensionContextScope(...)` method to 
 `TEST_METHOD` to support injecting test specific data into constructor parameters of the
 test class instance. Doing so causes a test-specific `{ExtensionContext}` to be used while
 resolving constructor parameters, unless the
-<<writing-tests-test-instance-lifecycle, test instance lifecycle>> is set to `PER_CLASS`.
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] is set to `PER_CLASS`.
 ====
 
 [TIP]
@@ -52,7 +52,7 @@ constructor invocations, using the `{ExecutableInvoker}` available via the
 `getExecutableInvoker()` method in the `ExtensionContext`.
 ====
 
-[[extensions-parameter-resolution-conflicts]]
+[[conflicts]]
 == Parameter Conflicts
 
 If multiple implementations of `ParameterResolver` that support the same type are
@@ -95,10 +95,10 @@ include::example$java/example/extensions/ParameterResolverCustomAnnotationDemo.j
 
 JUnit includes some built-in parameter resolvers that can cause conflicts if a resolver
 attempts to claim their supported types. For example, `{TestInfo}` provides metadata about
-tests. See <<writing-tests-dependency-injection>> for details. Third-party frameworks such
+tests. See xref:writing-tests/dependency-injection-for-constructors-and-methods.adoc[] for details. Third-party frameworks such
 as Spring may also define parameter resolvers. Apply one of the techniques in this section
 to resolve any conflicts.
 
 Parameterized tests are another potential source of conflict. Ensure that tests annotated
 with `@ParameterizedTest` are not also annotated with `@Test` and see
-<<writing-tests-parameterized-tests-consuming-arguments>> for more details.
+xref:writing-tests/parameterized-classes-and-tests.adoc#tests-consuming-arguments[Consuming Arguments] for more details.

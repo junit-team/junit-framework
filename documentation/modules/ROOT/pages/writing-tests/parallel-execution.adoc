@@ -4,7 +4,7 @@ By default, JUnit Jupiter tests are run sequentially in a single thread; however
 tests in parallel -- for example, to speed up execution -- is available as an opt-in
 feature. To enable parallel execution, set the `junit.jupiter.execution.parallel.enabled`
 configuration parameter to `true` -- for example, in `junit-platform.properties` (see
-<<running-tests-config-params>> for other options).
+xref:running-tests/configuration-parameters.adoc[] for other options).
 
 Please note that enabling this property is only the first step required to execute tests
 in parallel. If enabled, test classes and methods will still be executed sequentially by
@@ -52,16 +52,16 @@ This allows test classes or methods to opt in or out of concurrent execution reg
 the globally configured default.
 
 When parallel execution is enabled and a default `{ClassOrderer}` is registered (see
-<<writing-tests-test-execution-order-classes>> for details), top-level test classes will
+xref:writing-tests/test-execution-order.adoc#classes[Class Order] for details), top-level test classes will
 initially be sorted accordingly and scheduled in that order. However, they are not
 guaranteed to be started in exactly that order since the threads they are executed on are
 not controlled directly by JUnit.
 
 All nodes of the test tree that are configured with the `CONCURRENT` execution mode will
 be executed fully in parallel according to the provided
-<<writing-tests-parallel-execution-config, configuration>> while observing the
-declarative <<writing-tests-parallel-execution-synchronization, synchronization>>
-mechanism. Please note that <<running-tests-capturing-output>> needs to be enabled
+<<config, configuration>> while observing the
+declarative <<synchronization, synchronization>>
+mechanism. Please note that xref:running-tests/capturing-standard-output-error.adoc[] needs to be enabled
 separately.
 
 In addition, you can configure the default execution mode for top-level classes by setting
@@ -137,10 +137,10 @@ If the `junit.jupiter.execution.parallel.mode.classes.default` configuration par
 not explicitly set, the value for `junit.jupiter.execution.parallel.mode.default` will be
 used instead.
 
-[[writing-tests-parallel-execution-config]]
+[[config]]
 == Configuration
 
-[[writing-tests-parallel-execution-config-executor-service]]
+[[config-executor-service]]
 === Executor Service
 
 If parallel execution is enabled, a thread pool is used behind the scenes to execute tests
@@ -162,9 +162,9 @@ API in the JDK.
 
 WARNING: Using `worker_thread_pool` is currently an _experimental_ feature. You're invited
 to give it a try and provide feedback to the JUnit team so they can improve and eventually
-<<api-evolution, promote>> this feature.
+xref:api-evolution.adoc[promote] this feature.
 
-[[writing-tests-parallel-execution-config-strategies]]
+[[config-strategies]]
 === Strategies
 
 Properties such as the desired parallelism and the maximum pool size can be configured
@@ -206,11 +206,11 @@ parallelism. If you require such guarantees, it is possible to limit the maximum
 threads by configuring the maximum pool size of the `dynamic`, `fixed` and `custom`
 strategies.
 
-[[writing-tests-parallel-execution-config-properties]]
+[[config-properties]]
 === Relevant properties
 
 The following table lists relevant properties for configuring parallel execution. See
-<<running-tests-config-params>> for details on how to set such properties.
+xref:running-tests/configuration-parameters.adoc[] for details on how to set such properties.
 
 ==== General
 
@@ -273,7 +273,7 @@ The following table lists relevant properties for configuring parallel execution
   Fully qualified class name of the `ParallelExecutionConfigurationStrategy` to be used
   for the ```custom``` configuration strategy (no default value).
 
-[[writing-tests-parallel-execution-synchronization]]
+[[synchronization]]
 == Synchronization
 
 In addition to controlling the execution mode using the `{Execution}` annotation, JUnit

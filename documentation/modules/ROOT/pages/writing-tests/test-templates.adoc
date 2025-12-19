@@ -6,8 +6,8 @@ invocation contexts returned by the registered providers. Thus, it must be used 
 conjunction with a registered `{TestTemplateInvocationContextProvider}` extension. Each
 invocation of a test template method behaves like the execution of a regular `@Test`
 method with full support for the same lifecycle callbacks and extensions. Please refer to
-<<extensions-test-templates>> for usage examples.
+xref:extensions/providing-invocation-contexts-for-test-templates.adoc[] for usage examples.
 
-NOTE: <<writing-tests-repeated-tests>> and
-<<writing-tests-parameterized-tests, Parameterized Tests>> are built-in specializations of
+NOTE: xref:writing-tests/repeated-tests.adoc[] and
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] are built-in specializations of
 test templates.

@@ -2,8 +2,8 @@
 
 The JUnit Platform provides opt-in support for capturing output printed to `System.out`
 and `System.err`. To enable it, set the `junit.platform.output.capture.stdout` and/or
-`junit.platform.output.capture.stderr` <<running-tests-config-params, configuration
-parameter>> to `true`. In addition, you may configure the maximum number of buffered bytes
+`junit.platform.output.capture.stderr` xref:running-tests/configuration-parameters.adoc[configuration
+parameter] to `true`. In addition, you may configure the maximum number of buffered bytes
 to be used per executed test or container using `junit.platform.output.capture.maxBuffer`.
 
 If enabled, the JUnit Platform captures the corresponding output and publishes it as a
@@ -14,5 +14,5 @@ finished.
 Please note that the captured output will only contain output emitted by the thread that
 was used to execute a container or test. Any output by other threads will be omitted
 because particularly when
-<<writing-tests-parallel-execution, executing tests in parallel>> it would be impossible
+xref:writing-tests/parallel-execution.adoc[executing tests in parallel] it would be impossible
 to attribute it to a specific test or container.
