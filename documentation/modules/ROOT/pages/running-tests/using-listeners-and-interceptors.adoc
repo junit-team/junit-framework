@@ -1,5 +1,4 @@
-[[running-tests-listeners]]
-=== Using Listeners and Interceptors
+= Using Listeners and Interceptors
 
 The JUnit Platform provides the following listener APIs that allow JUnit, third parties,
 and custom user code to react to events fired at various points during the discovery and
@@ -63,7 +62,7 @@ See <<junit-platform-reporting>> for details.
   unique IDs once execution of the `TestPlan` has finished.
 
 [[running-tests-listeners-flight-recorder]]
-==== Flight Recorder Support
+== Flight Recorder Support
 
 The JUnit Platform provides opt-in support for generating Flight Recorder events.
 https://openjdk.java.net/jeps/328[JEP 328] describes the Java Flight Recorder (JFR) as
@@ -86,4 +85,3 @@ To analyze the recorded events, use the
 https://docs.oracle.com/en/java/javase/17/docs/specs/man/jfr.html[jfr]
 command line tool shipped with recent JDKs or open the recording file with
 https://jdk.java.net/jmc/[JDK Mission Control].
-

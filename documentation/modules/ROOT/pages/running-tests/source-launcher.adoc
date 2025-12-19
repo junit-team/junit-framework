@@ -1,5 +1,4 @@
-[[running-tests-source-launcher]]
-=== Source Launcher
+= Source Launcher
 
 Starting with Java 25 it is possible to write minimal source code test programs
 using the `org.junit.start` module. For example, like in a `HelloTests.java`
@@ -30,4 +29,3 @@ java --module-path lib --add-modules org.junit.start HelloTests.java
 ```
 
 Find JUnit's class API documentation here: {JUnit}
-
