@@ -10,7 +10,7 @@
 //    which you can determine via https://github.com/junit-team/junit-framework/milestones/.
 //    If a GitHub milestone does not yet exist for the given VERSION, you will need to
 //    create a new GitHub milestone or ask a member of the JUnit team to create it for you.
-// 5) 'include:' this new file in index.adoc.
+// 5) 'include:' this new file in ../../pages/release-notes.adoc.
 // 6) Delete this entire comment block.
 //
 [[release-notes-VERSION]]
