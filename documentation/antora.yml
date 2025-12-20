@@ -267,7 +267,7 @@ asciidoc:
     API_Guardian: 'https://github.com/apiguardian-team/apiguardian[@API Guardian]'
     AssertJ: 'https://assertj.github.io/doc/[AssertJ]'
     Checkstyle: 'https://checkstyle.sourceforge.io[Checkstyle]'
-    DiscussionsQA: 'https://github.com/junit-team/junit-framework/discussions/categories/q-a[Q&A category on GitHub Discussions]'
+    DiscussionsQA: 'https://github.com/junit-team/junit-framework/discussions/categories/q-a'
     Hamcrest: 'https://hamcrest.org/JavaHamcrest/[Hamcrest]'
     Jimfs: 'https://google.github.io/jimfs/[Jimfs]'
     Log4j: 'https://logging.apache.org/log4j/2.x/[Log4j]'
