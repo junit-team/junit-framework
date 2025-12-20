@@ -77,7 +77,7 @@ jobs:
             docs-repo
           cd docs-repo
           git status
-          git_changes=$(git status --porcelain | grep --invert-match --regexp=' sitemap.xml$' --regexp=' search-index.js$' | wc -l)
+          git_changes=$(git status --porcelain | grep --invert-match --regexp=' sitemap\.xml$' --regexp=' search-index\.js$' --regexp=' .+\.pdf$' | wc -l)
           echo "Detected $git_changes change(s)"
           echo "git_changes=$git_changes" >> "$GITHUB_OUTPUT"
       - name: Push to docs.junit.org repo
