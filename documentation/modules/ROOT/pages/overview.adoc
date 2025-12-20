@@ -42,7 +42,7 @@ has been compiled with previous versions of the JDK.
 [[getting-help]]
 == Getting Help
 
-Ask JUnit-related questions on {StackOverflow} or use the {DiscussionsQA}.
+Ask JUnit-related questions on {StackOverflow} or use the {DiscussionsQA}[Q&A category on GitHub Discussions].
 
 [[getting-started]]
 == Getting Started
