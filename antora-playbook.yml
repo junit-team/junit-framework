@@ -22,8 +22,6 @@ content:
       branches:
         - 'main'
         - 'antora/*'
-        - 'releases/5.14.x'
-        - 'releases/6.0.x'
       tags:
         - 'r5.14.*'
         - '!r5.14.0*'
