@@ -81,11 +81,5 @@ pre {
 }
 
 .pdf-link {
-    display: none;
-    padding-right: .7rem
-}
-@media screen and (min-width:1024px) {
-    .pdf-link {
-        display:block
-    }
+    margin: .625rem;
 }
