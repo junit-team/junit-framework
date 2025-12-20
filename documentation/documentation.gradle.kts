@@ -82,12 +82,8 @@ dependencies {
 
 val buildRevision: String by rootProject.extra
 val snapshot = version.isSnapshot()
-val docsVersion = if (snapshot) "snapshot" else version
 val releaseBranch = if (snapshot) "HEAD" else "r${version}"
-val docsDir = layout.buildDirectory.dir("ghpages-docs")
 val replaceCurrentDocs = buildParameters.documentation.replaceCurrentDocs
-val uploadPdfs = !snapshot
-val userGuidePdfFileName = "junit-user-guide-${version}.pdf"
 val ota4jDocVersion = libs.versions.opentest4j.map { if (it.isSnapshot()) "snapshot" else it }.get()
 val apiGuardianDocVersion = libs.versions.apiguardian.map { if (it.isSnapshot()) "snapshot" else it }.get()
 
@@ -381,7 +377,6 @@ tasks {
 				"ota4j-version" to libs.versions.opentest4j.get(),
 				"surefire-version" to libs.versions.surefire.get(),
 				"release-branch" to releaseBranch,
-				"docs-version" to docsVersion,
 				"jdk-javadoc-base-url" to jdkJavadocBaseUrl
 			)
 		})
