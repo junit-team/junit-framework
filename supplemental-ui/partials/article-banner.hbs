@@ -1,8 +1,16 @@
 {{#if (and page.latest (ne page.url page.latest.url))}}
 <div class="version-banner">
 <strong>
-{{#if page.componentVersion.prerelease}}This version is still in development and is not considered stable yet.
-{{else}}There is a newer version available.{{/if}}</strong><br/>
-For the latest stable version, please use <a href="{{{relativize ./page.latest.url}}}">{{page.component.title}} {{page.latest.displayVersion}}</a>!
+{{#if page.componentVersion.prerelease}}
+    {{#if (eq page.componentVersion.prerelease '-SNAPSHOT')}}
+        This version is still in development and not considered stable yet.
+    {{else}}
+        This is a preview version that is not considered stable.
+    {{/if}}
+{{else}}
+    There is a newer version available.
+{{/if}}
+</strong><br/>
+For the latest stable release, please see <a href="{{{relativize ./page.latest.url}}}">{{page.component.title}} {{page.latest.displayVersion}}</a>!
 </div>
 {{/if}}
