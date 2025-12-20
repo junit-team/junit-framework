@@ -1,0 +1,8 @@
+component_version_filter:
+  names: '**'
+asciidoc:
+  attributes:
+    source-highlighter: rouge
+    toc: ''
+build:
+  stderr: ignore

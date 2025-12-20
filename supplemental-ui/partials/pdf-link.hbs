@@ -1,0 +1,9 @@
+{{#unless (eq page.componentVersion.prerelease '-SNAPSHOT')}}
+    {{#with (resolvePage page.relativeSrcPath model=false)}}
+        {{#with ./assembler.pdf}}
+            <div class="pdf-link">
+                <a href="{{{relativize ./file.pub.url}}}{{{./fragment}}}">PDF</a>
+            </div>
+        {{/with}}
+    {{/with}}
+{{/unless}}

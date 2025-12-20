@@ -79,3 +79,13 @@ pre {
     padding: 1rem 1rem .75rem;
     margin: 1.5rem 0;
 }
+
+.pdf-link {
+    display: none;
+    padding-right: .7rem
+}
+@media screen and (min-width:1024px) {
+    .pdf-link {
+        display:block
+    }
+}

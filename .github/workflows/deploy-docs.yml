@@ -36,6 +36,10 @@ jobs:
           node-version-file: .tool-versions
           cache: npm
           cache-dependency-path: package-lock.json
+      - name: Install Ruby
+        uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228 # v1.274.0
+        with:
+          bundler-cache: true
       - name: Install JDKs
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
         with:
@@ -67,7 +71,6 @@ jobs:
         if: env.DEPLOY == 'true'
         run: |
           rsync --recursive --delete --checksum --archive --safe-links --human-readable --prune-empty-dirs --stats \
-            --exclude='*.pdf' \
             --exclude='_/font/roboto-*' \
             build/site/* \
             docs-repo

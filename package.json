@@ -9,6 +9,7 @@
   "dependencies": {
     "@antora/collector-extension": "1.0.2",
     "@antora/lunr-extension": "1.0.0-alpha.12",
+    "@antora/pdf-extension": "^1.0.0-beta.15",
     "@springio/antora-extensions": "1.14.7",
     "highlight.js": "11.11.1"
   }
