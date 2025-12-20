@@ -13,7 +13,6 @@ antora:
       file_name: junit-user-guide
 site:
   title: JUnit User Guide
-  url: https://docs.junit.org
   robots: allow
   start_page: junit::overview.adoc
 content:
