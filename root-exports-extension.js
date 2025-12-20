@@ -10,7 +10,7 @@ module.exports.register = function ({ config }) {
         if (version.prerelease === '-SNAPSHOT') {
           contentCatalog.removeFile(file)
         } else {
-          removeRootComponentNameFromFile(file, fileName)
+          removeRootComponentNameFromFile(file, `${fileName}-${version}`)
         }
       }
     })
