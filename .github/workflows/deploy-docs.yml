@@ -72,7 +72,8 @@ jobs:
         run: |
           rsync --recursive --delete --checksum --archive --safe-links --human-readable --prune-empty-dirs --stats \
             --exclude='_/font/roboto-*' \
-            build/site/* \
+            --exclude-from=rsync-excludes \
+            build/site/ \
             docs-repo
           cd docs-repo
           git status
