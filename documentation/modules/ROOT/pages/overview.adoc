@@ -13,16 +13,23 @@ JUnit is composed of several different modules from three different sub-projects
 [.text-center]
 **JUnit {version} = _JUnit Platform_ + _JUnit Jupiter_ + _JUnit Vintage_**
 
-The **JUnit Platform** serves as a foundation for xref:advanced-topics/launcher-api.adoc[launching testing
-frameworks] on the JVM. It also defines the `{TestEngine}` API for developing a testing
-framework that runs on the platform. Furthermore, the platform provides a
+The **JUnit Platform** serves as a foundation for
+xref:advanced-topics/launcher-api.adoc[launching testing frameworks] on the JVM. It also
+defines the `{TestEngine}` API for developing a testing framework that runs on the
+platform. Furthermore, the platform provides a
 xref:running-tests/console-launcher.adoc[Console Launcher] to launch the platform from the
-command line and the xref:advanced-topics/junit-platform-suite-engine.adoc[] for running a custom test suite using
-one or more test engines on the platform. First-class support for the JUnit Platform also
-exists in popular IDEs (see xref:running-tests/ide-support.adoc#intellij-idea[IntelliJ IDEA],
-xref:running-tests/ide-support.adoc#eclipse[Eclipse], xref:running-tests/ide-support.adoc#netbeans[NetBeans], and
-xref:running-tests/ide-support.adoc#vscode[Visual Studio Code]) and build tools (see xref:running-tests/build-support.adoc#gradle[Gradle],
-xref:running-tests/build-support.adoc#maven[Maven], and xref:running-tests/build-support.adoc#ant[Ant]).
+command line and the xref:advanced-topics/junit-platform-suite-engine.adoc[] for running a
+custom test suite using one or more test engines on the platform. First-class support for
+the JUnit Platform also exists in popular IDEs (see
+xref:running-tests/ide-support.adoc#intellij-idea[IntelliJ IDEA],
+xref:running-tests/ide-support.adoc#eclipse[Eclipse],
+xref:running-tests/ide-support.adoc#netbeans[NetBeans], and
+xref:running-tests/ide-support.adoc#vscode[Visual Studio Code]) and build tools (see
+xref:running-tests/build-support.adoc#gradle[Gradle],
+xref:running-tests/build-support.adoc#maven[Maven],
+xref:running-tests/build-support.adoc#ant[Ant],
+xref:running-tests/build-support.adoc#bazel[Bazel], and
+xref:running-tests/build-support.adoc#sbt[sbt]).
 
 **JUnit Jupiter** is the combination of the xref:writing-tests/intro.adoc[programming model] and
 xref:extensions/overview.adoc[extension model] for writing JUnit tests and extensions. The Jupiter
@@ -84,3 +91,5 @@ of the combinations you can choose from.
 * For Gradle and Groovy, check out the `{junit-jupiter-starter-gradle-groovy}` project.
 * For Maven, check out the `{junit-jupiter-starter-maven}` project.
 * For Ant, check out the `{junit-jupiter-starter-ant}` project.
+* For Bazel, check out the `{junit-jupiter-starter-bazel}` project.
+* For sbt, check out the `{junit-jupiter-starter-sbt}` project.
