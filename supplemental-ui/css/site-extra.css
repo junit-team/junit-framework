@@ -83,3 +83,7 @@ pre {
 .pdf-link {
     margin: .625rem;
 }
+
+.version, .version-menu-toggle {
+    font-feature-settings: 'tnum';
+}
