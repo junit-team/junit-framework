@@ -75,7 +75,7 @@ jobs:
             --exclude-from=rsync-excludes \
             build/site/ \
             docs-repo
-          git -C docs-repo status --porcelain | tee /dev/tty | java RestoreUnchangedPdfs.java docs-repo | sh
+          git -C docs-repo status --porcelain | tee /dev/stdout | java RestoreUnchangedPdfs.java docs-repo | sh
           git_changes=$(git -C docs-repo status --porcelain | grep --invert-match --regexp=' sitemap\.xml$' --regexp=' search-index\.js$' | wc -l)
           echo "Detected $git_changes change(s)"
           echo "git_changes=$git_changes" >> "$GITHUB_OUTPUT"
