@@ -55,7 +55,7 @@ repository on GitHub.
 * Generic inline value classes (such as `kotlin.Result<T>`) can now be used as parameters
   in `@ParameterizedTest` methods when `kotlin-reflect` is on the classpath.
   Note: Primitive-wrapper inline value classes (e.g., `UInt`, custom value classes wrapping
-  primitives) are not yet supported. See https://github.com/junit-team/junit-framework/issues/5081[#5081].
+  primitives) are not yet supported.
 
 
 [[v6.1.0-M2-junit-vintage]]
