@@ -297,10 +297,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	private static <N> BiFunction<CompositeKey<N>, StoredValue, StoredValue> compareAndPut(StoredValue expectedValue,
 			StoredValue newValue) {
 		return (__, storedValue) -> {
-			if (!expectedValue.equals(storedValue)) {
-				return storedValue;
+			if (expectedValue.equals(storedValue)) {
+				return newValue;
 			}
-			return newValue;
+			return storedValue;
 		};
 	}
 
