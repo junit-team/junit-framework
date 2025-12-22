@@ -17,6 +17,7 @@ repository on GitHub.
 ==== Bug Fixes
 
 * Make `ConsoleLauncher` compatible with JDK 26 by avoiding final field mutations.
+* Recheck done condition before rejecting extraneous worker in `WorkerThreadPoolHierarchicalTestExecutorService`
 
 [[v6.0.2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
