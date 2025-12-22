@@ -9,6 +9,8 @@ Please refer to the xref:overview.adoc[User Guide] for comprehensive
 reference documentation for programmers writing tests, extension authors, and engine
 authors as well as build tool and IDE vendors.
 
+include::partial$release-notes/release-notes-5.14.2.adoc[]
+
 include::partial$release-notes/release-notes-5.14.1.adoc[]
 
 include::partial$release-notes/release-notes-5.14.0.adoc[]

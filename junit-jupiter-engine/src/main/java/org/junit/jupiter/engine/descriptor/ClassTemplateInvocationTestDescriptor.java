@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import static java.util.Collections.emptySet;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.jupiter.engine.descriptor.CallbackSupport.invokeAfterCallbacks;
 import static org.junit.jupiter.engine.descriptor.CallbackSupport.invokeBeforeCallbacks;
@@ -34,6 +35,7 @@ import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.support.hierarchical.ExclusiveResource;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 
 /**
@@ -107,6 +109,12 @@ public class ClassTemplateInvocationTestDescriptor extends JupiterTestDescriptor
 	}
 
 	// --- Node ----------------------------------------------------------------
+
+	@Override
+	public Set<ExclusiveResource> getExclusiveResources() {
+		// Resources are already collected and returned by the enclosing ClassTemplateTestDescriptor
+		return emptySet();
+	}
 
 	@Override
 	public JupiterEngineExecutionContext prepare(JupiterEngineExecutionContext context) {
