@@ -158,50 +158,19 @@ jobs:
     name: Publish documentation
     needs: publish_deployment
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
-      - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          fetch-depth: 1
-          ref: "refs/tags/${{ env.RELEASE_TAG }}"
-          persist-credentials: false
-      - name: Install Graphviz and Poppler
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes graphviz poppler-utils
-      - name: Configure Git
-        run: |
-          git config --global user.name "JUnit Team"
-          git config --global user.email "team@junit.org"
-      - name: Build documentation
-        uses: ./.github/actions/run-gradle
-        with:
-          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: |
-            --no-build-cache \
-            --no-configuration-cache \
-            clean \
-            gitPublishCopy \
-            -Pdocumentation.replaceCurrentDocs=${{ contains(inputs.releaseVersion, '-') && 'false' || 'true' }}
-      - name: Publish documentation
-        if: ${{ inputs.dryRun == false }}
-        uses: ./.github/actions/run-gradle
+      - name: Trigger deployment
         env:
-          GIT_USERNAME: git
-          GIT_PASSWORD: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_DOCS_REPO }}
-        with:
-          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: |
-            --no-build-cache \
-            --no-configuration-cache \
-            gitPublishPush \
-            -Pdocumentation.replaceCurrentDocs=${{ contains(inputs.releaseVersion, '-') && 'false' || 'true' }}
-      - name: Wait for deployment to GitHub Pages
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-docs.yml --repo junit-team/junit-framework --ref docs-site
+      - name: Wait for deployment
         if: ${{ inputs.dryRun == false }}
         id: pagesDeployment
-        timeout-minutes: 20
+        timeout-minutes: 30
         run: |
-          URL="https://docs.junit.org/${RELEASE_VERSION}/user-guide/junit-user-guide-${RELEASE_VERSION}.pdf"
+          URL="https://docs.junit.org/${RELEASE_VERSION}/_exports/junit-user-guide-${RELEASE_VERSION}.pdf"
           ./.github/scripts/waitForUrl.sh "$URL"
           echo "pdfUrl=$URL" >> "$GITHUB_OUTPUT"
       - name: Verify integrity of PDF version of User Guide

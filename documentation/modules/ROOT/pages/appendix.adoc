@@ -119,8 +119,8 @@ xref:running-tests/build-support.adoc#gradle-bom[Gradle].
 
 The _Bill of Materials_ POM provided under the following Maven coordinates can be used to
 ease dependency management when referencing multiple of the above artifacts using
-https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies[Maven]
-or https://docs.gradle.org/current/userguide/platforms.html#sub:bom_import[Gradle].
+xref:running-tests/build-support.adoc#maven-bom[Maven] or
+xref:running-tests/build-support.adoc#gradle-bom[Gradle].
 
 * *Group ID*: `org.junit`
 * *Artifact ID*: `junit-bom`
