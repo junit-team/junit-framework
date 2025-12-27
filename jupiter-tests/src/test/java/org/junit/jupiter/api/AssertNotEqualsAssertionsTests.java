@@ -14,9 +14,16 @@ import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEndsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith;
 import static org.junit.jupiter.api.AssertionTestUtils.expectAssertionFailedError;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+
+import org.junit.platform.commons.JUnitException;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -622,6 +629,30 @@ class AssertNotEqualsAssertionsTests {
 			assertThrows(NumberFormatException.class, () -> assertNotEquals(obj, obj));
 		}
 
+	}
+
+	@Nested
+	class AssertNotEqualsArrays {
+		@Test
+		void objects() {
+			Object object = new Object();
+			Object array1 = new Object[] { object };
+			Object array2 = new Object[] { object };
+			assertThrows(AssertionFailedError.class, () -> assertSame(array1, array2));
+			assertThrows(AssertionFailedError.class, () -> assertEquals(array1, array2));
+			assertNotEquals(array1, array2); // succeeds
+			assertTrue(Arrays.deepEquals((Object[]) array1, (Object[]) array2));
+			assertArrayEquals((Object[]) array1, (Object[]) array2);
+			try {
+				System.setProperty("junit.jupiter.disallow.arrays.in.equals.checks", "true");
+				var exception = assertThrows(JUnitException.class, () -> assertNotEquals(array1, array2));
+				assertEquals("Detected array arguments: class [Ljava.lang.Object; and class [Ljava.lang.Object;",
+					exception.getMessage());
+			}
+			finally {
+				System.clearProperty("junit.jupiter.disallow.arrays.in.equals.checks");
+			}
+		}
 	}
 
 	// -------------------------------------------------------------------------
