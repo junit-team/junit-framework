@@ -61,7 +61,7 @@ class MainCommand implements Callable<Object>, IExitCodeGenerator {
 	AnsiColorOptionMixin ansiColorOption;
 
 	@Unmatched
-	private final List<String> allParameters = new ArrayList<>();
+	private List<String> allParameters = new ArrayList<>();
 
 	@Spec
 	CommandSpec commandSpec;
