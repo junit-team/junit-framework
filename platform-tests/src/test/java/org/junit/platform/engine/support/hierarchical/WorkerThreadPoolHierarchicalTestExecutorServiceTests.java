@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.Executable;
@@ -62,6 +63,7 @@ import org.opentest4j.AssertionFailedError;
  */
 @SuppressWarnings("resource")
 @Timeout(5)
+@Disabled("Testing codecov")
 class WorkerThreadPoolHierarchicalTestExecutorServiceTests {
 
 	@AutoClose

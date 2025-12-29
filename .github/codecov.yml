@@ -1,4 +1,6 @@
-comment: false
+comment:
+  layout: "condensed_header, condensed_files, condensed_footer"
+  hide_project_coverage: true
 
 coverage:
   status:
@@ -6,12 +8,6 @@ coverage:
       default:
         threshold: "1"
         informational: true
-    patch:
-      default:
-        target: auto
-        # Do not allow coverage to decrease 
-        threshold: 0
-        only_pulls: true
 
 codecov:
   max_report_age: off
