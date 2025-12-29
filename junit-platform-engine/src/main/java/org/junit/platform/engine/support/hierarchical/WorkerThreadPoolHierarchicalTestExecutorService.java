@@ -301,66 +301,6 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			}
 		}
 
-		private void processQueueEntries() {
-			var entriesRequiringResourceLocks = new ArrayList<WorkQueue.Entry>();
-
-			for (var entry : workQueue) {
-				var result = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
-				if (result == WorkStealResult.EXECUTED_BY_THIS_WORKER) {
-					// After executing a test a significant amount of time has passed.
-					// Process the queue from the beginning
-					return;
-				}
-				if (result == WorkStealResult.RESOURCE_LOCK_UNAVAILABLE) {
-					entriesRequiringResourceLocks.add(entry);
-				}
-			}
-
-			for (var entry : entriesRequiringResourceLocks) {
-				var result = tryToStealWork(entry, BlockingMode.BLOCKING);
-				if (result == WorkStealResult.EXECUTED_BY_THIS_WORKER) {
-					return;
-				}
-			}
-		}
-
-		<T> T runBlocking(BooleanSupplier doneCondition, BlockingAction<T> blockingAction) throws InterruptedException {
-			var workerLease = requireNonNull(this.workerLease);
-			workerLease.release(doneCondition);
-			try {
-				return blockingAction.run();
-			}
-			finally {
-				try {
-					workerLease.reacquire();
-				}
-				catch (InterruptedException e) {
-					interrupt();
-				}
-			}
-		}
-
-		void invokeAll(List<? extends TestTask> testTasks) {
-
-			if (testTasks.isEmpty()) {
-				return;
-			}
-
-			if (testTasks.size() == 1) {
-				executeTask(testTasks.get(0));
-				return;
-			}
-
-			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
-			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
-			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
-			executeAll(sameThreadTasks);
-			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
-			tryToStealWorkWithBlocking(queueEntriesByResult);
-			waitFor(queueEntriesByResult);
-			executeAll(isolatedTasks);
-		}
-
 		private List<WorkQueue.Entry> forkConcurrentChildren(List<? extends TestTask> children,
 				Consumer<TestTask> isolatedTaskCollector, List<TestTask> sameThreadTasks) {
 
@@ -590,6 +530,66 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				}
 			}
 			currentState.clearIfEmpty();
+		}
+
+		private void processQueueEntries() {
+			var entriesRequiringResourceLocks = new ArrayList<WorkQueue.Entry>();
+
+			for (var entry : workQueue) {
+				var result = tryToStealWork(entry, BlockingMode.NON_BLOCKING);
+				if (result == WorkStealResult.EXECUTED_BY_THIS_WORKER) {
+					// After executing a test a significant amount of time has passed.
+					// Process the queue from the beginning
+					return;
+				}
+				if (result == WorkStealResult.RESOURCE_LOCK_UNAVAILABLE) {
+					entriesRequiringResourceLocks.add(entry);
+				}
+			}
+
+			for (var entry : entriesRequiringResourceLocks) {
+				var result = tryToStealWork(entry, BlockingMode.BLOCKING);
+				if (result == WorkStealResult.EXECUTED_BY_THIS_WORKER) {
+					return;
+				}
+			}
+		}
+
+		<T> T runBlocking(BooleanSupplier doneCondition, BlockingAction<T> blockingAction) throws InterruptedException {
+			var workerLease = requireNonNull(this.workerLease);
+			workerLease.release(doneCondition);
+			try {
+				return blockingAction.run();
+			}
+			finally {
+				try {
+					workerLease.reacquire();
+				}
+				catch (InterruptedException e) {
+					interrupt();
+				}
+			}
+		}
+
+		void invokeAll(List<? extends TestTask> testTasks) {
+
+			if (testTasks.isEmpty()) {
+				return;
+			}
+
+			if (testTasks.size() == 1) {
+				executeTask(testTasks.get(0));
+				return;
+			}
+
+			List<TestTask> isolatedTasks = new ArrayList<>(testTasks.size());
+			List<TestTask> sameThreadTasks = new ArrayList<>(testTasks.size());
+			var queueEntries = forkConcurrentChildren(testTasks, isolatedTasks::add, sameThreadTasks);
+			executeAll(sameThreadTasks);
+			var queueEntriesByResult = tryToStealWorkWithoutBlocking(queueEntries);
+			tryToStealWorkWithBlocking(queueEntriesByResult);
+			waitFor(queueEntriesByResult);
+			executeAll(isolatedTasks);
 		}
 
 		private static class State {
