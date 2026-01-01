@@ -47,7 +47,7 @@ GEM
       prawn (~> 2.2)
     public_suffix (7.0.0)
     rexml (3.4.4)
-    rouge (4.6.1)
+    rouge (4.7.0)
     ruby-rc4 (0.1.5)
     treetop (1.6.18)
       polyglot (~> 0.3)
