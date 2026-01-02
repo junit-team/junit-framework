@@ -10,20 +10,16 @@
 
 package org.junit.jupiter.api.util;
 
-import java.lang.reflect.Field;
 import java.util.Properties;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.support.HierarchyTraversalMode;
-import org.junit.platform.commons.support.ReflectionSupport;
 
 /**
  * Allows comparison of {@link Properties} with optional awareness of their structure,
  * rather than just treating them as Maps. Object values, which are marginally supported
  * by {@code Properties}, are supported in assertions as much as possible.
  */
-public class PropertiesAssertions extends AbstractAssert<PropertiesAssertions, Properties> {
+final class PropertiesAssertions extends AbstractAssert<PropertiesAssertions, Properties> {
 
 	/**
 	 * Make an assertion on a {@link Properties} instance.
@@ -31,7 +27,7 @@ public class PropertiesAssertions extends AbstractAssert<PropertiesAssertions, P
 	 * @param actual The {@link Properties} instance the assertion is made with respect to
 	 * @return Assertion instance
 	 */
-	public static PropertiesAssertions assertThat(Properties actual) {
+	static PropertiesAssertions assertThat(Properties actual) {
 		return new PropertiesAssertions(actual);
 	}
 
@@ -55,7 +51,7 @@ public class PropertiesAssertions extends AbstractAssert<PropertiesAssertions, P
 	 * @param expected The actual is expected to be effectively the same as this Properties
 	 * @return Assertion instance
 	 */
-	public PropertiesAssertions isEffectivelyEqualsTo(Properties expected) {
+	PropertiesAssertions isEffectivelyEqualsTo(Properties expected) {
 
 		// Compare values present in actual
 		actual.propertyNames().asIterator().forEachRemaining(k -> {
@@ -102,109 +98,6 @@ public class PropertiesAssertions extends AbstractAssert<PropertiesAssertions, P
 		});
 
 		return this;
-	}
-
-	/**
-	 * The converse of isEffectivelyEqualTo.
-	 *
-	 * @param expected The actual is expected to NOT be effectively equal to this Properties
-	 * @return Assertion instance
-	 */
-	public PropertiesAssertions isNotEffectivelyEqualTo(Properties expected) {
-		try {
-			isEffectivelyEqualsTo(expected);
-		}
-		catch (AssertionError ae) {
-			return this; // Expected
-		}
-
-		throw failure("The actual Properties should not be effectively equal to the expected one.");
-	}
-
-	/**
-	 * Compare values directly present in Properties and recursively into default Properties.
-	 *
-	 * @param expected The actual is expected to be strictly equal to this Properties
-	 * @return Assertion instance
-	 */
-	public PropertiesAssertions isStrictlyEqualTo(Properties expected) {
-
-		// Compare values present in actual
-		actual.keySet().forEach(k -> {
-
-			// not null check only added, because "compileTestJava"-goal does not recognize that they can't be null
-			if (null != actual.get(k) && null != expected.get(k)) {
-				if (!actual.get(k).equals(expected.get(k))) {
-					throw failure("For the property <%s> the actual value was <%s> but <%s> was expected", k,
-						actual.get(k), expected.get(k));
-				}
-			}
-		});
-
-		// Compare values present in expected - Anything not matching must not have been present in actual
-		expected.keySet().forEach(k -> {
-			// not null check only added, because "compileTestJava"-goal does not recognize that they can't be null
-			if (null != actual.get(k) && null != expected.get(k)) {
-				if (!expected.get(k).equals(actual.get(k))) {
-					throw failure("The property <%s> was expected to be <%s>, but was missing", k, expected.get(k));
-				}
-			}
-		});
-
-		// Dig down into the nested defaults
-		Properties actualDefault = getDefaultFieldValue(actual);
-		Properties expectedDefault = getDefaultFieldValue(expected);
-
-		if (actualDefault != null && expectedDefault != null) {
-			return new PropertiesAssertions(actualDefault).isStrictlyEqualTo(expectedDefault);
-		}
-		else if (actualDefault != null) {
-			throw failure("The actual Properties had non-null defaults, but none were expected");
-		}
-		else if (expectedDefault != null) {
-			throw failure("The expected Properties had non-null defaults, but none were in actual");
-		}
-
-		return this;
-	}
-
-	/**
-	 * Simple converse of isStrictlyEqualTo.
-	 *
-	 * @param expected The actual is expected to NOT be strictly equal to this Properties
-	 * @return Assertion instance
-	 */
-	public PropertiesAssertions isNotStrictlyEqualTo(Properties expected) {
-		try {
-			isStrictlyEqualTo(expected);
-		}
-		catch (AssertionError ae) {
-			return this; // Expected
-		}
-
-		throw failure("The actual Properties should not be strictly the same as the expected one.");
-	}
-
-	/**
-	 * Use reflection to grab the {@code defaults} field from a java.utils.Properties instance.
-	 *
-	 * @param parent The Properties to fetch default values from
-	 * @return The Properties instance that was stored as defaults in the parent.
-	 */
-	protected @Nullable Properties getDefaultFieldValue(Properties parent) {
-		Field field = ReflectionSupport.findFields(Properties.class, f -> f.getName().equals("defaults"),
-			HierarchyTraversalMode.BOTTOM_UP).stream().findFirst().get();
-
-		field.setAccessible(true);
-
-		try {
-			return (Properties) ReflectionSupport.tryToReadFieldValue(field, parent).get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException("Unable to access the java.util.Properties.defaults field by reflection. "
-					+ "Please adjust your local environment to allow this.",
-				e);
-		}
 	}
 
 }
