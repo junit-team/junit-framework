@@ -42,7 +42,7 @@ import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 class ExtensionRegistryTests {
 
 	private static final int NUM_CORE_EXTENSIONS = 7;
-	private static final int NUM_AUTO_REGISTERED_EXTENSIONS_IN_THIS_PROJECT = 1; // OpenTestReportGenerationSystemPropertyOverride
+	private static final int NUM_AUTO_REGISTERED_EXTENSIONS_IN_THIS_PROJECT = 0;
 	private static final int NUM_DEFAULT_EXTENSIONS = NUM_CORE_EXTENSIONS
 			+ NUM_AUTO_REGISTERED_EXTENSIONS_IN_THIS_PROJECT;
 
@@ -83,7 +83,7 @@ class ExtensionRegistryTests {
 
 		List<Extension> extensions = registry.getExtensions(Extension.class);
 
-		assertEquals(NUM_DEFAULT_EXTENSIONS, extensions.size());
+		assertEquals(NUM_DEFAULT_EXTENSIONS + 1, extensions.size());
 		assertDefaultGlobalExtensionsAreRegistered(3);
 
 		assertExtensionRegistered(registry, ServiceLoaderExtension.class);
