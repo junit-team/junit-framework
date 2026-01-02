@@ -408,13 +408,14 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 					spe.prepareToExitRestorableContext(initialState);
 					Properties postPrepareToExitSysProps = System.getProperties();
 
-					assertThat(returnedFromPrepareToEnter).withFailMessage(
-						"prepareToEnterRestorableContext should return actual original or deep copy").isSameAs(
-							initialState);
+					assertThat(returnedFromPrepareToEnter) //
+							.withFailMessage(
+								"prepareToEnterRestorableContext should return actual original or deep copy") //
+							.isSameAs(initialState);
 
-					assertThat(returnedFromPrepareToEnter).withFailMessage(
-						"prepareToEnterRestorableContext should replace the actual Sys Props").isNotSameAs(
-							postPrepareToEnterSysProps);
+					assertThat(returnedFromPrepareToEnter) //
+							.withFailMessage("prepareToEnterRestorableContext should replace the actual Sys Props") //
+							.isNotSameAs(postPrepareToEnterSysProps);
 
 					assertThat(postPrepareToEnterSysProps).isEffectivelyEqualsTo(initialState);
 
@@ -657,7 +658,10 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 		void restoreShouldHaveRevertedDirectModification() {
 			assertThat(System.getProperty("Restore")).isNull();
 			assertThat(System.getProperties().get("XYZ")).isNull();
-			assertThat(System.getProperties()).isSameAs(initialState);
+			assertThat(System.getProperties()) //
+					.withFailMessage("Restore should swap out the Sys Properties instance") //
+					.isNotSameAs(initialState);
+			assertThat(System.getProperties()).isEffectivelyEqualsTo(initialState);
 		}
 
 		@Nested
