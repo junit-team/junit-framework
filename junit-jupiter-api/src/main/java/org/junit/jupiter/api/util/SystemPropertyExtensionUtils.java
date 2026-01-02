@@ -19,7 +19,7 @@ import java.util.stream.Collector;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
- * Utility methods for the SystemPropertiesExtension.
+ *  @since 6.1
  */
 final class SystemPropertyExtensionUtils {
 

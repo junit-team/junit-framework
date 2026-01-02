@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.STABLE;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
@@ -49,7 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Repeatable(ClearSystemProperty.ClearSystemProperties.class)
 @WritesSystemProperty
 @ExtendWith(SystemPropertyExtension.class)
-@API(status = API.Status.STABLE, since = "6.1")
+@API(status = STABLE, since = "6.1")
 @SuppressWarnings("exports")
 public @interface ClearSystemProperty {
 
@@ -65,7 +67,7 @@ public @interface ClearSystemProperty {
 	@Target({ ElementType.METHOD, ElementType.TYPE })
 	@Inherited
 	@WritesSystemProperty
-	@API(status = API.Status.STABLE, since = "6.1")
+	@API(status = STABLE, since = "6.1")
 	@interface ClearSystemProperties {
 
 		ClearSystemProperty[] value();

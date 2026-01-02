@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.STABLE;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -38,6 +40,6 @@ import org.junit.jupiter.api.parallel.Resources;
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })
 @Inherited
 @ResourceLock(value = Resources.SYSTEM_PROPERTIES, mode = ResourceAccessMode.READ)
-@API(status = API.Status.STABLE, since = "6.1")
+@API(status = STABLE, since = "6.1")
 public @interface ReadsSystemProperty {
 }
