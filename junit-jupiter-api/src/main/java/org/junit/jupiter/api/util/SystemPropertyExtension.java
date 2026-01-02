@@ -121,20 +121,16 @@ final class SystemPropertyExtension
 	}
 
 	private void applyForAllContexts(ExtensionContext originalContext) {
-		if (isRestoreAnnotationPresent(originalContext)) {
+		boolean doCompleteBackup = isRestoreAnnotationPresent(originalContext);
+		if (doCompleteBackup) {
 			var properties = this.prepareToEnterRestorableContext();
 			storeCompleteBackup(originalContext, properties);
 		}
 
-		/*
-		 * We cannot use PioneerAnnotationUtils#findAllEnclosingRepeatableAnnotations(ExtensionContext, Class) or the
-		 * like as clearing and setting might interfere. Therefore, we have to apply the extension from the outermost
-		 * to the innermost ExtensionContext.
-		 */
+		// we have to apply the annotations from the outermost to the innermost ExtensionContext.
 		List<ExtensionContext> contexts = findAllContexts(originalContext);
 		Collections.reverse(contexts);
-		contexts.forEach(currentContext -> clearAndSetEntries(currentContext, originalContext,
-			!isRestoreAnnotationPresent(originalContext)));
+		contexts.forEach(currentContext -> clearAndSetEntries(currentContext, originalContext, !doCompleteBackup));
 	}
 
 	private boolean isRestoreAnnotationPresent(ExtensionContext originalContext) {
