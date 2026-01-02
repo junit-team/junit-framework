@@ -279,7 +279,7 @@ final class SystemPropertyExtension
 		COMPLETE
 	}
 
-	private final static class EntriesBackup {
+	private static final class EntriesBackup {
 
 		private final Set<String> entriesToClear = new HashSet<>();
 		private final Map<String, String> entriesToSet = new HashMap<>();
