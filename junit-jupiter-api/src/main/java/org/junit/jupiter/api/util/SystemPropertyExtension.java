@@ -42,15 +42,6 @@ final class SystemPropertyExtension
 		implements BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
 
 	/**
-	 * Key to indicate storage is for an incremental backup object.
-	 */
-	private static final String INCREMENTAL_KEY = "inc";
-	/**
-	 * Key to indicate storage is for a complete backup object.
-	 */
-	private static final String COMPLETE_KEY = "full";
-
-	/**
 	 * Prepare for entering a context that must be restorable.
 	 *
 	 * <p>Since {@link Properties} allows a wrapped default instance and Object values,
@@ -205,11 +196,12 @@ final class SystemPropertyExtension
 
 	private void storeOriginalIncrementalEntries(ExtensionContext context, Collection<String> entriesToClear,
 			Collection<String> entriesToSet) {
-		getStore(context).put(getStoreKey(context, INCREMENTAL_KEY), new EntriesBackup(entriesToClear, entriesToSet));
+		getStore(context).put(getStoreKey(context, BackupType.INCREMENTAL),
+			new EntriesBackup(entriesToClear, entriesToSet));
 	}
 
 	private void storeOriginalCompleteEntries(ExtensionContext context, Properties originalEntries) {
-		getStore(context).put(getStoreKey(context, COMPLETE_KEY), originalEntries);
+		getStore(context).put(getStoreKey(context, BackupType.COMPLETE), originalEntries);
 	}
 
 	/**
@@ -220,7 +212,8 @@ final class SystemPropertyExtension
 	 * @return true if a complete backup exists and was used to restore, false if not.
 	 */
 	private boolean restoreOriginalCompleteEntries(ExtensionContext context) {
-		Properties bulk = getStore(context).get(getStoreKey(context, COMPLETE_KEY), Properties.class);
+		var key = getStoreKey(context, BackupType.COMPLETE);
+		Properties bulk = getStore(context).get(key, Properties.class);
 
 		if (bulk == null) {
 			// No complete backup - false will let the caller know to continue w/ an incremental restore
@@ -250,24 +243,42 @@ final class SystemPropertyExtension
 	}
 
 	private void restoreOriginalIncrementalEntries(ExtensionContext originalContext) {
-		getStore(originalContext).getOrDefault(getStoreKey(originalContext, INCREMENTAL_KEY), EntriesBackup.class,
-			new EntriesBackup()).restoreBackup();
+		var key = getStoreKey(originalContext, BackupType.INCREMENTAL);
+		getStore(originalContext) //
+				.getOrDefault(key, EntriesBackup.class, EntriesBackup.EMPTY) //
+				.restoreBackup();
 	}
 
 	private ExtensionContext.Store getStore(ExtensionContext context) {
 		return context.getStore(ExtensionContext.Namespace.create(getClass()));
 	}
 
-	private String getStoreKey(ExtensionContext context, String discriminator) {
-		return context.getUniqueId() + "-" + this.getClass().getSimpleName() + "-" + discriminator;
+	private StoreKey getStoreKey(ExtensionContext context, BackupType type) {
+		return new StoreKey(context.getUniqueId(), type);
+	}
+
+	private record StoreKey(String uniqueId, BackupType type) {
+	}
+
+	private enum BackupType {
+		/**
+		 * Store entry is for an incremental backup object.
+		 */
+		INCREMENTAL,
+		/**
+		 * Store entry is for a complete backup object.
+		 */
+		COMPLETE
 	}
 
 	private final static class EntriesBackup {
 
+		private static final EntriesBackup EMPTY = new EntriesBackup();
+
 		private final Set<String> entriesToClear = new HashSet<>();
 		private final Map<String, String> entriesToSet = new HashMap<>();
 
-		EntriesBackup() {
+		private EntriesBackup() {
 			// empty backup
 		}
 
