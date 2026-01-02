@@ -24,14 +24,14 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 final class SystemPropertyExtensionUtils {
 
 	private SystemPropertyExtensionUtils() {
-		// private constructor to prevent instantiation of utility class
+		/* no-op */
 	}
 
 	/**
 	 * A {@link java.util.stream.Collectors#toSet() toSet} collector that throws an {@link IllegalStateException}
 	 * on duplicate elements (according to {@link Object#equals(Object) equals}).
 	 */
-	public static <T> Collector<T, Set<T>, Set<T>> distinctToSet() {
+	static <T> Collector<T, Set<T>, Set<T>> distinctToSet() {
 		return Collector.of(HashSet::new, SystemPropertyExtensionUtils::addButThrowIfDuplicate, (left, right) -> {
 			right.forEach(element -> addButThrowIfDuplicate(left, element));
 			return left;
@@ -52,7 +52,7 @@ final class SystemPropertyExtensionUtils {
 	 * @return a list of all contexts, "outwards" in the {@link ExtensionContext#getParent() getParent}-order,
 	 *         beginning with the given context; never {@code null} or empty
 	 */
-	public static List<ExtensionContext> findAllContexts(ExtensionContext context) {
+	static List<ExtensionContext> findAllContexts(ExtensionContext context) {
 		List<ExtensionContext> allContexts = new ArrayList<>();
 		for (var c = context; c != null; c = c.getParent().orElse(null)) {
 			allContexts.add(c);
