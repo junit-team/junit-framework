@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -121,8 +122,8 @@ final class SystemPropertyExtension
 
 	private void applyForAllContexts(ExtensionContext originalContext) {
 		if (isRestoreAnnotationPresent(originalContext)) {
-			Properties bulk = this.prepareToEnterRestorableContext();
-			storeOriginalCompleteEntries(originalContext, bulk);
+			var properties = this.prepareToEnterRestorableContext();
+			storeCompleteBackup(originalContext, properties);
 		}
 
 		/*
@@ -163,7 +164,7 @@ final class SystemPropertyExtension
 
 			// Only backup original values if we didn't already do bulk storage of the original state
 			if (doIncrementalBackup) {
-				storeOriginalIncrementalEntries(originalContext, entriesToClear, entriesToSet.keySet());
+				storeIncrementalBackup(originalContext, entriesToClear, entriesToSet.keySet());
 			}
 
 			entriesToClear.forEach(System::clearProperty);
@@ -194,14 +195,14 @@ final class SystemPropertyExtension
 				"Cannot clear and set the following entries at the same time: " + duplicateEntries);
 	}
 
-	private void storeOriginalIncrementalEntries(ExtensionContext context, Collection<String> entriesToClear,
+	private void storeIncrementalBackup(ExtensionContext context, Collection<String> entriesToClear,
 			Collection<String> entriesToSet) {
-		getStore(context).put(getStoreKey(context, BackupType.INCREMENTAL),
-			new EntriesBackup(entriesToClear, entriesToSet));
+		var backup = new EntriesBackup(entriesToClear, entriesToSet);
+		getStore(context).put(getStoreKey(context, BackupType.INCREMENTAL), backup);
 	}
 
-	private void storeOriginalCompleteEntries(ExtensionContext context, Properties originalEntries) {
-		getStore(context).put(getStoreKey(context, BackupType.COMPLETE), originalEntries);
+	private void storeCompleteBackup(ExtensionContext context, Properties backup) {
+		getStore(context).put(getStoreKey(context, BackupType.COMPLETE), backup);
 	}
 
 	/**
@@ -211,17 +212,19 @@ final class SystemPropertyExtension
 	 * @param context The {@code ExtensionContext} which may have a bulk backup stored.
 	 * @return true if a complete backup exists and was used to restore, false if not.
 	 */
-	private boolean restoreOriginalCompleteEntries(ExtensionContext context) {
-		var key = getStoreKey(context, BackupType.COMPLETE);
-		Properties bulk = getStore(context).get(key, Properties.class);
-
-		if (bulk == null) {
-			// No complete backup - false will let the caller know to continue w/ an incremental restore
-			return false;
+	private boolean restoreOriginalCompleteBackup(ExtensionContext context) {
+		var backup = getCompleteBackup(context);
+		if (backup != null) {
+			prepareToExitRestorableContext(backup);
+			return true;
 		}
+		// No complete backup - false will let the caller know to continue w/ an incremental restore
+		return false;
+	}
 
-		prepareToExitRestorableContext(bulk);
-		return true;
+	private @Nullable Properties getCompleteBackup(ExtensionContext context) {
+		var key = getStoreKey(context, BackupType.COMPLETE);
+		return getStore(context).get(key, Properties.class);
 	}
 
 	@Override
@@ -236,17 +239,22 @@ final class SystemPropertyExtension
 
 	private void restoreForAllContexts(ExtensionContext originalContext) {
 		// Try a complete restore first
-		if (!restoreOriginalCompleteEntries(originalContext)) {
+		if (!restoreOriginalCompleteBackup(originalContext)) {
 			// A complete backup is not available, so restore incrementally from innermost to outermost
-			findAllContexts(originalContext).forEach(__ -> restoreOriginalIncrementalEntries(originalContext));
+			findAllContexts(originalContext).forEach(__ -> restoreOriginalIncrementalBackup(originalContext));
 		}
 	}
 
-	private void restoreOriginalIncrementalEntries(ExtensionContext originalContext) {
+	private void restoreOriginalIncrementalBackup(ExtensionContext originalContext) {
+		var backup = getIncrementalBackup(originalContext);
+		if (backup != null) {
+			backup.restoreBackup();
+		}
+	}
+
+	private @Nullable EntriesBackup getIncrementalBackup(ExtensionContext originalContext) {
 		var key = getStoreKey(originalContext, BackupType.INCREMENTAL);
-		getStore(originalContext) //
-				.getOrDefault(key, EntriesBackup.class, EntriesBackup.EMPTY) //
-				.restoreBackup();
+		return getStore(originalContext).get(key, EntriesBackup.class);
 	}
 
 	private ExtensionContext.Store getStore(ExtensionContext context) {
@@ -273,14 +281,8 @@ final class SystemPropertyExtension
 
 	private final static class EntriesBackup {
 
-		private static final EntriesBackup EMPTY = new EntriesBackup();
-
 		private final Set<String> entriesToClear = new HashSet<>();
 		private final Map<String, String> entriesToSet = new HashMap<>();
-
-		private EntriesBackup() {
-			// empty backup
-		}
 
 		EntriesBackup(Collection<String> entriesToClear, Collection<String> entriesToSet) {
 			Stream.concat(entriesToClear.stream(), entriesToSet.stream()).forEach(entry -> {
