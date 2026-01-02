@@ -45,7 +45,6 @@ class TempDirectoryMetaAnnotationTests extends AbstractJupiterTestEngineTests {
 				.assertStatistics(stats -> stats.started(1).succeeded(1));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@NullUnmarked
 	static class AnnotationOnFieldTestCase {
 
@@ -59,7 +58,6 @@ class TempDirectoryMetaAnnotationTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class AnnotationOnParameterTestCase {
 
 		@Test

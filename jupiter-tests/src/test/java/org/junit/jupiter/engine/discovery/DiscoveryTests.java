@@ -423,7 +423,6 @@ class DiscoveryTests extends AbstractJupiterTestEngineTests {
 		abstract void abstractTest();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class LocalTestCase {
 
 		@Test
@@ -522,7 +521,6 @@ class DiscoveryTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class UnrelatedRecursiveHierarchyTestCase {
 
 		@Test
@@ -536,7 +534,6 @@ class DiscoveryTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class RecursiveHierarchyWithoutNestedTestCase {
 
 		@Test
@@ -555,7 +552,6 @@ class DiscoveryTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Tag("")
 	static class InvalidTagsTestCase {
 		@Test
@@ -564,7 +560,6 @@ class DiscoveryTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("")
 	static class BlankDisplayNamesTestCase {
 		@Test

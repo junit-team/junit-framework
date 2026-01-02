@@ -49,7 +49,6 @@ class StaticNestedBeforeAllAndAfterAllMethodsTests extends AbstractJupiterTestEn
 		);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase {
 
 		@BeforeAll

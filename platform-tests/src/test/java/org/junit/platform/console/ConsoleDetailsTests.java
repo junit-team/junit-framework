@@ -109,7 +109,6 @@ class ConsoleDetailsTests {
 		return nodes;
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("Basic")
 	static class BasicTestCase {
 
@@ -124,7 +123,6 @@ class ConsoleDetailsTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("Skip")
 	static class SkipTestCase {
 
@@ -140,7 +138,6 @@ class ConsoleDetailsTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("Fail")
 	static class FailTestCase {
 
@@ -156,7 +153,6 @@ class ConsoleDetailsTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("Report")
 	static class ReportTestCase {
 

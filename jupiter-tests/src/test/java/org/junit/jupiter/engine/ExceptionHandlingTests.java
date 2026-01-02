@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.engine;
 
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.abort;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
@@ -28,6 +28,7 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.su
 import java.io.IOException;
 import java.util.Optional;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -248,7 +249,7 @@ class ExceptionHandlingTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	static class FailureTestCase {
 
 		static Optional<Throwable> exceptionToThrowInBeforeAll = Optional.empty();
@@ -305,12 +306,11 @@ class ExceptionHandlingTests extends AbstractJupiterTestEngineTests {
 
 		@Test
 		void abortedTest() {
-			assumeFalse(true, "abortedTest");
+			abort("abortedTest");
 		}
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestInstance(PER_METHOD)
 	@ExtendWith(ThrowingAfterAllCallback.class)
 	static class TestCaseWithInvalidConstructorAndThrowingAfterAllCallbackAndPerMethodLifecycle {
@@ -324,7 +324,6 @@ class ExceptionHandlingTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestInstance(PER_CLASS)
 	@ExtendWith(ThrowingAfterAllCallback.class)
 	static class TestCaseWithInvalidConstructorAndThrowingAfterAllCallbackAndPerClassLifecycle {
@@ -337,7 +336,6 @@ class ExceptionHandlingTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(ThrowingBeforeAllCallback.class)
 	@ExtendWith(ThrowingAfterAllCallback.class)
 	static class TestCaseWithThrowingBeforeAllAndAfterAllCallbacks {
@@ -346,6 +344,7 @@ class ExceptionHandlingTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@NullMarked
 	static class ThrowingBeforeAllCallback implements BeforeAllCallback {
 		@Override
 		public void beforeAll(ExtensionContext context) {
@@ -353,6 +352,7 @@ class ExceptionHandlingTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@NullMarked
 	static class ThrowingAfterAllCallback implements AfterAllCallback {
 		@Override
 		public void afterAll(ExtensionContext context) {

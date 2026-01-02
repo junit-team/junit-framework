@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
  *
  * @since 1.0
  */
+@NullMarked
 class LauncherConfigurationParametersTests {
 
 	private static final String CONFIG_FILE_NAME = "test-junit-platform.properties";
@@ -271,7 +273,7 @@ class LauncherConfigurationParametersTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	@ExtendWith(Mutator.class)
 	static class Something {
 

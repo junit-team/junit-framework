@@ -101,4 +101,4 @@ to resolve any conflicts.
 
 Parameterized tests are another potential source of conflict. Ensure that tests annotated
 with `@ParameterizedTest` are not also annotated with `@Test` and see
-xref:writing-tests/parameterized-classes-and-tests.adoc#tests-consuming-arguments[Consuming Arguments] for more details.
+xref:writing-tests/parameterized-classes-and-tests.adoc#consuming-arguments[Consuming Arguments] for more details.

@@ -38,7 +38,7 @@ import org.mockito.ArgumentMatchers;
 import org.opentest4j.AssertionFailedError;
 import org.opentest4j.TestAbortedException;
 
-public class LoggingListenerTests {
+class LoggingListenerTests {
 
 	@Test
 	void logsExecutionEvents() {
@@ -99,7 +99,6 @@ public class LoggingListenerTests {
 				.execute(request);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 	static class TestCase {
 		@TestFactory

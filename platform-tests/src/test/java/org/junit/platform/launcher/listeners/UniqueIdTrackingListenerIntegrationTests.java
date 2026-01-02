@@ -14,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.platform.commons.util.FunctionUtils.where;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -279,7 +279,6 @@ class UniqueIdTrackingListenerIntegrationTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase1 {
 
 		@Test
@@ -291,10 +290,9 @@ class UniqueIdTrackingListenerIntegrationTests {
 		void skippedTest() {
 		}
 
-		@SuppressWarnings("DataFlowIssue")
 		@Test
 		void abortedTest() {
-			assumeTrue(false);
+			abort();
 		}
 
 		@Test
@@ -308,7 +306,6 @@ class UniqueIdTrackingListenerIntegrationTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase2 {
 
 		@Test
@@ -320,7 +317,6 @@ class UniqueIdTrackingListenerIntegrationTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase3 {
 
 		@Test
@@ -332,7 +328,6 @@ class UniqueIdTrackingListenerIntegrationTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase4 {
 
 		@Test

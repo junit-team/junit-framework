@@ -111,7 +111,6 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
-@SuppressWarnings("JUnitMalformedDeclaration")
 public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	@ParameterizedTest
@@ -839,7 +838,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 				.orElseThrow();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClassWithNegativeAndPositiveValue
 	static class ConstructorInjectionTestCase {
 
@@ -866,7 +864,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClassWithNegativeAndPositiveValue
 	record RecordTestCase(int value, TestInfo testInfo) {
 
@@ -898,7 +895,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@ValueSource(ints = { -1, 1 })
 	static class FieldInjectionTestCase {
@@ -919,7 +915,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass(quoteTextArguments = false)
 	@CsvSource({ "-1", "1" })
 	record RecordWithBuiltInConverterTestCase(int value) {
@@ -935,7 +930,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@ValueSource(ints = { -1, 1 })
 	record RecordWithRegisteredConversionTestCase(@ConvertWith(CustomIntegerToStringConverter.class) String value) {
@@ -951,7 +945,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@ValueSource(ints = { -1, 1 })
 	static class FieldInjectionWithRegisteredConversionTestCase {
@@ -1026,7 +1019,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@ValueSource(ints = { -1, 1 })
 	record RecordWithCustomAggregatorTestCase(@AggregateWith(TimesTwoAggregator.class) int value) {
@@ -1043,7 +1035,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@ValueSource(ints = { -1, 1 })
 	static class FieldInjectionWithCustomAggregatorTestCase {
@@ -1070,6 +1061,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	@interface ParameterizedClassWithNegativeAndPositiveValue {
 	}
 
+	@NullMarked
 	private static class TimesTwoAggregator extends SimpleArgumentsAggregator {
 
 		@Override
@@ -1081,7 +1073,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@NullAndEmptySource
 	record NullAndEmptySourceConstructorInjectionTestCase(String value) {
@@ -1091,7 +1082,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@NullAndEmptySource
 	static class NullAndEmptySourceConstructorFieldInjectionTestCase {
@@ -1217,6 +1207,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@MethodSource
 	record MethodSourceWithoutMethodNameTestCase(String value) {
@@ -1286,6 +1277,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	@NullMarked
 	static class CustomArgumentsProvider implements ArgumentsProvider {
 
 		@Override
@@ -1334,6 +1326,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	@NullMarked
 	private static class AutoCloseableArgumentProvider implements ArgumentsProvider {
 
 		@Override
@@ -1402,6 +1395,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		return Stream.empty();
 	}
 
+	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	record NoArgumentSourceTestCase(String value) {
 		@Test
@@ -1466,6 +1460,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class LifecycleCallbacks {
 
 		@BeforeAll
@@ -1579,7 +1574,6 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	@interface TimesTwo {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@MethodSource("methodSource")
 	@FieldSource("fieldSource")
@@ -1659,6 +1653,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	@ValueSource(ints = 1)
 	static class InvalidFinalFieldTestCase {
 
+		@SuppressWarnings("unused")
 		@Parameter
 		final int i = -1;
 
@@ -1668,10 +1663,12 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ParameterizedClass
 	@ValueSource(ints = 1)
 	static class InvalidAggregatorFieldWithIndexTestCase {
 
+		@SuppressWarnings("unused")
 		@Parameter(0)
 		ArgumentsAccessor accessor;
 
@@ -1685,6 +1682,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	@ValueSource(ints = 1)
 	static class InvalidParameterIndexTestCase {
 
+		@SuppressWarnings("unused")
 		@Parameter(-42)
 		int i;
 
@@ -1698,9 +1696,11 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	@ValueSource(ints = 1)
 	static class InvalidDuplicateParameterDeclarationTestCase {
 
+		@SuppressWarnings("unused")
 		@Parameter(0)
 		int i;
 
+		@SuppressWarnings("unused")
 		@Parameter(0)
 		long l;
 
@@ -1714,9 +1714,11 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	@ValueSource(ints = 1)
 	static class NotEnoughArgumentsForFieldsTestCase {
 
+		@SuppressWarnings("unused")
 		@Parameter(0)
 		int i;
 
+		@SuppressWarnings("unused")
 		@Parameter(1)
 		String s;
 
@@ -1817,6 +1819,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	}
 
 	record Wrapper(int value) {
+		@NullMarked
 		static class Converter extends SimpleArgumentConverter {
 			@Override
 			protected Object convert(@Nullable Object source, Class<?> targetType) {
@@ -2009,6 +2012,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 		}
 	}
 
+	@NullMarked
 	static class AtomicIntegerConverter extends SimpleArgumentConverter {
 		@Override
 		protected Object convert(@Nullable Object source, Class<?> targetType) {
@@ -2223,6 +2227,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 			return List.of("method");
 		}
 
+		@SuppressWarnings("unused")
 		@Parameter
 		@ConvertWith(ToStringConverter.class) // For @EnumSource
 		String value;
@@ -2240,6 +2245,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 			}
 		}
 
+		@NullMarked
 		static class ToStringConverter extends SimpleArgumentConverter {
 			@Override
 			protected @Nullable Object convert(@Nullable Object source, Class<?> targetType)

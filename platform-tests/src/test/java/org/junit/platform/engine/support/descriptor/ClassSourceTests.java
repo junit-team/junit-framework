@@ -16,7 +16,6 @@ import static org.junit.platform.commons.test.PreconditionAssertions.assertPreco
 
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -96,7 +95,7 @@ class ClassSourceTests extends AbstractTestSourceTests {
 	}
 
 	@Test
-	void classSourceFromUri() throws URISyntaxException {
+	void classSourceFromUri() throws Exception {
 		var source = ClassSource.from(new URI("class:java.lang.Object"));
 
 		assertThat(source.getJavaClass()).isEqualTo(Object.class);
@@ -104,7 +103,7 @@ class ClassSourceTests extends AbstractTestSourceTests {
 	}
 
 	@Test
-	void classSourceFromUriWithLineNumber() throws URISyntaxException {
+	void classSourceFromUriWithLineNumber() throws Exception {
 		var position = FilePosition.from(42);
 		var source = ClassSource.from(new URI("class:java.lang.Object?line=42"));
 
@@ -113,7 +112,7 @@ class ClassSourceTests extends AbstractTestSourceTests {
 	}
 
 	@Test
-	void classSourceFromUriWithLineAndColumnNumbers() throws URISyntaxException {
+	void classSourceFromUriWithLineAndColumnNumbers() throws Exception {
 		var position = FilePosition.from(42, 23);
 		var source = ClassSource.from(new URI("class:java.lang.Object?line=42&foo=bar&column=23"));
 
@@ -122,7 +121,7 @@ class ClassSourceTests extends AbstractTestSourceTests {
 	}
 
 	@Test
-	void classSourceFromUriWithEmptyQuery() throws URISyntaxException {
+	void classSourceFromUriWithEmptyQuery() throws Exception {
 		var source = ClassSource.from(new URI("class:java.lang.Object?"));
 
 		assertThat(source.getJavaClass()).isEqualTo(Object.class);
@@ -130,7 +129,7 @@ class ClassSourceTests extends AbstractTestSourceTests {
 	}
 
 	@Test
-	void classSourceFromUriWithUnsupportedParametersInQuery() throws URISyntaxException {
+	void classSourceFromUriWithUnsupportedParametersInQuery() throws Exception {
 		var source = ClassSource.from(new URI("class:java.lang.Object?foo=42&bar"));
 
 		assertThat(source.getJavaClass()).isEqualTo(Object.class);

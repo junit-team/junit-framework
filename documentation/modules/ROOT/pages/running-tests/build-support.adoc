@@ -504,6 +504,112 @@ For further details on usage and configuration options please refer to the offic
 documentation for the
 link:https://ant.apache.org/manual/Tasks/junitlauncher.html[`junitlauncher` task].
 
+[[bazel]]
+== Bazel
+
+For Bazel, add dependencies on
+https://github.com/bazel-contrib/rules_jvm_external[rules_jvm_external] and
+https://github.com/bazel-contrib/rules_jvm[contrib_rules_jvm] to your module's manifest
+and install JUnit's artifacts.
+
+[source,skylark]
+[subs=attributes+]
+.MODULE.bazel
+----
+bazel_dep(name = "rules_jvm_external", version = "6.9")
+bazel_dep(name = "contrib_rules_jvm", version = "0.31.1")
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+
+maven.install(
+    artifacts = [
+        "org.junit.jupiter:junit-jupiter-api:{version}",
+        "org.junit.jupiter:junit-jupiter-params:{version}",
+        "org.junit.jupiter:junit-jupiter-engine:{version}",
+        "org.junit.platform:junit-platform-launcher:{version}",
+        "org.junit.platform:junit-platform-reporting:{version}",
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+
+use_repo(maven, "maven")
+----
+
+Next, in your `BUILD` file, define a `java_test_suite` for your tests.
+
+[source,skylark]
+[subs=attributes+]
+.BUILD
+----
+load("@rules_jvm_external//:defs.bzl", "artifact")
+load("@contrib_rules_jvm//java:defs.bzl", "java_test_suite")
+
+java_library(
+    name = "your-library-name",
+    srcs = glob(["src/main/java/**/*.java"]),
+)
+
+java_test_suite(
+    name = "your-library-name-tests",
+    size = "small",
+    srcs = glob(["src/test/java/**/*.java"]),
+    runner = "junit5",
+    test_suffixes = ["Test.java", "Tests.java"],
+    runtime_deps = runtime_deps = [
+        artifact("org.junit.jupiter:junit-jupiter-engine"),
+        artifact("org.junit.platform:junit-platform-launcher"),
+        artifact("org.junit.platform:junit-platform-reporting"),
+    ],
+    deps = [
+        ":your-library-name",
+        artifact("org.junit.jupiter:junit-jupiter-api"),
+        artifact("org.junit.jupiter:junit-jupiter-params"),
+    ],
+)
+----
+
+To execute your tests, run `bazel test //...`. For a full example, please check out the
+`{junit-jupiter-starter-bazel}` example project.
+
+[[sbt]]
+== sbt
+
+For sbt, you first need to declare a dependency on the
+https://github.com/sbt/sbt-jupiter-interface[sbt-jupiter-interface] plugin. Despite its
+name, it supports running any class-based JUnit Platform test engine.
+
+[source,scala]
+.project/plugins.sbt
+----
+addSbtPlugin("com.github.sbt.junit" % "sbt-jupiter-interface" % "0.17.0")
+----
+
+In your build definition, add dependencies on the corresponding `jupiter-interface` along
+JUnit's artifacts. Moreover, you should configure the `jupiterTestFramework` and its
+https://github.com/sbt/sbt-jupiter-interface#framework-options[options].
+
+[source,scala]
+[subs=attributes+]
+.build.sbt
+----
+lazy val root = project
+  .in(file("."))
+  .settings(
+    name := "junit-jupiter-starter-sbt",
+    libraryDependencies ++= Seq(
+      "com.github.sbt.junit" % "jupiter-interface" % JupiterKeys.jupiterVersion.value % Test,
+      "org.junit.jupiter" % "junit-jupiter" % "{version}" % Test,
+      "org.junit.platform" % "junit-platform-launcher" % "{version}" % Test,
+    ),
+    testOptions += Tests.Argument(jupiterTestFramework, "--display-mode=tree")
+  )
+----
+
+Finally, execute your tests by running `sbt test`. For a full example, please check out
+the `{junit-jupiter-starter-sbt}` example project.
+
 [[spring-boot]]
 == Spring Boot
 

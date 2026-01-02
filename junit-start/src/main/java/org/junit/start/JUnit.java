@@ -29,6 +29,8 @@ import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
 /// This class provides simple helpers to discover and execute tests.
+///
+/// @since 6.1
 @API(status = EXPERIMENTAL, since = "6.1")
 public final class JUnit {
 	/// Run all tests defined in the caller class.
@@ -38,12 +40,14 @@ public final class JUnit {
 	}
 
 	/// Run all tests defined in the given test class.
+	///
 	/// @param testClass the class to discover and execute tests in
 	public static void run(Class<?> testClass) {
 		run(selectClass(testClass));
 	}
 
 	/// Run all tests defined in the given module.
+	///
 	/// @param testModule the module to discover and execute tests in
 	public static void run(Module testModule) {
 		run(selectModule(testModule));

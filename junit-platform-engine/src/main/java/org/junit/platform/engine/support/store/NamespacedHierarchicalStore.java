@@ -22,10 +22,14 @@ import static org.junit.platform.commons.util.ReflectionUtils.isAssignableTo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -134,8 +138,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				if (this.closeAction != null) {
 					List<Throwable> failures = new ArrayList<>();
 					this.storedValues.entrySet().stream() //
-							.map(e -> e.getValue().evaluateSafely(e.getKey())) //
-							.filter(it -> it != null && it.value != null) //
+							.map(e -> EvaluatedValue.createSafely(e.getKey(), e.getValue())) //
+							.filter(Objects::nonNull) //
 							.sorted(EvaluatedValue.REVERSE_INSERT_ORDER) //
 							.forEach(it -> {
 								try {
@@ -210,14 +214,29 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	public <K, V extends @Nullable Object> @Nullable Object getOrComputeIfAbsent(N namespace, K key,
 			Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
-		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
-		StoredValue storedValue = getStoredValue(compositeKey);
-		if (storedValue == null) {
-			storedValue = this.storedValues.computeIfAbsent(compositeKey,
-				__ -> newStoredValue(new MemoizingSupplier(() -> {
-					rejectIfClosed();
-					return defaultCreator.apply(key);
-				})));
+		var compositeKey = new CompositeKey<>(namespace, key);
+		var currentStoredValue = getStoredValue(compositeKey);
+		if (currentStoredValue != null) {
+			return currentStoredValue.evaluate();
+		}
+		var candidateStoredValue = newStoredSuppliedNullableValue(() -> {
+			rejectIfClosed();
+			return defaultCreator.apply(key);
+		});
+		var storedValue = storedValues.compute(compositeKey, //
+			(__, oldStoredValue) -> {
+				// guard against race conditions, repeated from getStoredValue
+				// this filters out failures inserted by computeIfAbsent
+				if (StoredValue.isNonNullAndPresent(oldStoredValue)) {
+					return oldStoredValue;
+				}
+				rejectIfClosed();
+				return candidateStoredValue;
+			});
+
+		// Only the caller that created the candidateStoredValue may run it
+		if (candidateStoredValue.equals(storedValue)) {
+			return candidateStoredValue.execute();
 		}
 		return storedValue.evaluate();
 	}
@@ -240,25 +259,49 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	@API(status = MAINTAINED, since = "6.0")
 	public <K, V> Object computeIfAbsent(N namespace, K key, Function<? super K, ? extends V> defaultCreator) {
 		Preconditions.notNull(defaultCreator, "defaultCreator must not be null");
-		CompositeKey<N> compositeKey = new CompositeKey<>(namespace, key);
-		StoredValue storedValue = getStoredValue(compositeKey);
-		var result = StoredValue.evaluateIfNotNull(storedValue);
-		if (result == null) {
-			StoredValue newStoredValue = this.storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				if (StoredValue.evaluateIfNotNull(oldStoredValue) == null) {
-					rejectIfClosed();
-					var computedValue = Preconditions.notNull(defaultCreator.apply(key),
-						"defaultCreator must not return null");
-					return newStoredValue(() -> {
-						rejectIfClosed();
-						return computedValue;
-					});
-				}
-				return oldStoredValue;
-			});
-			return requireNonNull(newStoredValue.evaluate());
+		var compositeKey = new CompositeKey<>(namespace, key);
+		var currentStoredValue = getStoredValue(compositeKey);
+		var result = StoredValue.evaluateIfNotNull(currentStoredValue);
+		if (result != null) {
+			return result;
 		}
-		return result;
+		var candidateStoredValue = newStoredSuppliedValue(() -> {
+			rejectIfClosed();
+			return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
+		});
+		var storedValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+			// guard against race conditions
+			// computeIfAbsent replaces both null and absent values
+			if (StoredValue.evaluateIfNotNull(oldStoredValue) != null) {
+				return oldStoredValue;
+			}
+			rejectIfClosed();
+			return candidateStoredValue;
+		});
+
+		// In a race condition either put, getOrComputeIfAbsent, or another
+		// computeIfAbsent call put a non-null value in the store
+		if (!candidateStoredValue.equals(storedValue)) {
+			return requireNonNull(storedValue.evaluate());
+		}
+		// Only the caller that created the candidateStoredValue may run it
+		// and see the exception.
+		Object newResult = candidateStoredValue.execute();
+		// DeferredOptionalValue is quite heavy, replace with lighter container
+		if (candidateStoredValue.isPresent()) {
+			storedValues.computeIfPresent(compositeKey, compareAndPut(storedValue, newStoredValue(newResult)));
+		}
+		return newResult;
+	}
+
+	private static <N> BiFunction<CompositeKey<N>, StoredValue, StoredValue> compareAndPut(StoredValue expectedValue,
+			StoredValue newValue) {
+		return (__, storedValue) -> {
+			if (expectedValue.equals(storedValue)) {
+				return newValue;
+			}
+			return storedValue;
+		};
 	}
 
 	/**
@@ -328,7 +371,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	public @Nullable Object put(N namespace, Object key, @Nullable Object value)
 			throws NamespacedHierarchicalStoreException {
 		rejectIfClosed();
-		StoredValue oldValue = this.storedValues.put(new CompositeKey<>(namespace, key), newStoredValue(() -> value));
+		StoredValue oldValue = this.storedValues.put(new CompositeKey<>(namespace, key), newStoredValue(value));
 		return StoredValue.evaluateIfNotNull(oldValue);
 	}
 
@@ -372,13 +415,24 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		return castToRequiredType(key, value, requiredType);
 	}
 
-	private StoredValue newStoredValue(Supplier<@Nullable Object> value) {
-		return new StoredValue(this.insertOrderSequence.getAndIncrement(), value);
+	private StoredValue.Value newStoredValue(@Nullable Object value) {
+		var sequenceNumber = insertOrderSequence.getAndIncrement();
+		return new StoredValue.Value(sequenceNumber, value);
+	}
+
+	private StoredValue.DeferredValue newStoredSuppliedNullableValue(Supplier<@Nullable Object> supplier) {
+		var sequenceNumber = insertOrderSequence.getAndIncrement();
+		return new StoredValue.DeferredValue(sequenceNumber, supplier);
+	}
+
+	private StoredValue.DeferredOptionalValue newStoredSuppliedValue(Supplier<Object> supplier) {
+		var sequenceNumber = insertOrderSequence.getAndIncrement();
+		return new StoredValue.DeferredOptionalValue(sequenceNumber, supplier);
 	}
 
 	private @Nullable StoredValue getStoredValue(CompositeKey<N> compositeKey) {
 		StoredValue storedValue = this.storedValues.get(compositeKey);
-		if (storedValue != null) {
+		if (StoredValue.isNonNullAndPresent(storedValue)) {
 			return storedValue;
 		}
 		if (this.parentStore != null) {
@@ -425,11 +479,129 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 	}
 
-	private record StoredValue(int order, Supplier<@Nullable Object> supplier) {
+	private interface StoredValue {
 
-		private <N> @Nullable EvaluatedValue<N> evaluateSafely(CompositeKey<N> compositeKey) {
+		int order();
+
+		@Nullable
+		Object evaluate();
+
+		boolean isPresent();
+
+		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
+			return value != null ? value.evaluate() : null;
+		}
+
+		static boolean isNonNullAndPresent(@Nullable StoredValue value) {
+			return value != null && value.isPresent();
+		}
+
+		/**
+		 * May contain {@code null} or a value, never an exception.
+		 */
+		final class Value implements StoredValue {
+			private final int order;
+			private final @Nullable Object value;
+
+			Value(int order, @Nullable Object value) {
+				this.order = order;
+				this.value = value;
+			}
+
+			@Override
+			public @Nullable Object evaluate() {
+				return value;
+			}
+
+			@Override
+			public boolean isPresent() {
+				return true;
+			}
+
+			@Override
+			public int order() {
+				return order;
+			}
+		}
+
+		/**
+		 * May eventually contain {@code null} or a value or an exception.
+		 */
+		final class DeferredValue implements StoredValue {
+			private final int order;
+			private final DeferredSupplier delegate;
+
+			DeferredValue(int order, Supplier<@Nullable Object> delegate) {
+				this.order = order;
+				this.delegate = new DeferredSupplier(delegate);
+			}
+
+			@Override
+			public @Nullable Object evaluate() {
+				return delegate.getOrThrow();
+			}
+
+			@Override
+			public boolean isPresent() {
+				return true;
+			}
+
+			@Nullable
+			Object execute() {
+				delegate.run();
+				return delegate.getOrThrow();
+			}
+
+			@Override
+			public int order() {
+				return order;
+			}
+		}
+
+		/**
+		 * May eventually contain a value or an exception, never {@code null}.
+		 */
+		final class DeferredOptionalValue implements StoredValue {
+			private final int order;
+			private final DeferredSupplier delegate;
+
+			DeferredOptionalValue(int order, Supplier<Object> delegate) {
+				this.order = order;
+				this.delegate = new DeferredSupplier(delegate);
+			}
+
+			@Override
+			public @Nullable Object evaluate() {
+				return delegate.get();
+			}
+
+			@Override
+			public boolean isPresent() {
+				return evaluate() != null;
+			}
+
+			Object execute() {
+				delegate.run();
+				// Delegate does not produce null
+				return requireNonNull(delegate.getOrThrow());
+			}
+
+			@Override
+			public int order() {
+				return order;
+			}
+		}
+	}
+
+	private record EvaluatedValue<N>(CompositeKey<N> compositeKey, int order, Object value) {
+
+		private static <N> @Nullable EvaluatedValue<N> createSafely(CompositeKey<N> compositeKey, StoredValue value) {
 			try {
-				return new EvaluatedValue<>(compositeKey, this.order, evaluate());
+				var evaluatedValue = value.evaluate();
+				if (evaluatedValue == null) {
+					return null;
+				}
+				return new EvaluatedValue<>(compositeKey, value.order(), evaluatedValue);
 			}
 			catch (Throwable t) {
 				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
@@ -437,77 +609,67 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			}
 		}
 
-		private @Nullable Object evaluate() {
-			return this.supplier.get();
-		}
-
-		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
-			return value != null ? value.evaluate() : null;
-		}
-
-	}
-
-	private record EvaluatedValue<N>(CompositeKey<N> compositeKey, int order, @Nullable Object value) {
-
 		private static final Comparator<EvaluatedValue<?>> REVERSE_INSERT_ORDER = comparing(
 			(EvaluatedValue<?> it) -> it.order).reversed();
 
 		private void close(CloseAction<N> closeAction) throws Throwable {
-			if (this.value != null) {
-				closeAction.close(this.compositeKey.namespace, this.compositeKey.key, this.value);
-			}
+			closeAction.close(this.compositeKey.namespace, this.compositeKey.key, this.value);
 		}
 
 	}
 
 	/**
-	 * Thread-safe {@link Supplier} that memoizes the result of calling its
-	 * delegate and ensures it is called at most once.
-	 *
-	 * <p>If the delegate throws an exception, it is stored and rethrown every
-	 * time {@link #get()} is called.
-	 *
-	 * @see StoredValue
+	 * Deferred computation that can be added to the store.
+	 * <p>
+	 * This allows values to be computed outside the
+	 * {@link ConcurrentHashMap#compute(Object, BiFunction)} calls and
+	 * prevents recursive updates.
 	 */
-	private static class MemoizingSupplier implements Supplier<@Nullable Object> {
+	static final class DeferredSupplier {
 
-		private static final Object NO_VALUE_SET = new Object();
+		private final FutureTask<@Nullable Object> task;
 
-		private final Supplier<@Nullable Object> delegate;
+		DeferredSupplier(Supplier<?> delegate) {
+			this.task = new FutureTask<>(delegate::get);
+		}
+
+		void run() {
+			task.run();
+		}
 
 		@Nullable
-		private volatile Object value = NO_VALUE_SET;
-
-		private MemoizingSupplier(Supplier<@Nullable Object> delegate) {
-			this.delegate = delegate;
-		}
-
-		@Override
-		public @Nullable Object get() {
-			if (this.value == NO_VALUE_SET) {
-				computeValue();
-			}
-			if (this.value instanceof Failure failure) {
-				throw throwAsUncheckedException(failure.throwable);
-			}
-			return this.value;
-		}
-
-		private synchronized void computeValue() {
+		Object get() {
 			try {
-				if (this.value == NO_VALUE_SET) {
-					this.value = this.delegate.get();
-				}
+				return task.get();
 			}
-			catch (Throwable t) {
-				this.value = new Failure(t);
-				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw throwAsUncheckedException(e);
+			}
+			catch (ExecutionException e) {
+				// non-null guaranteed by FutureTask
+				var cause = requireNonNull(e.getCause());
+				UnrecoverableExceptions.rethrowIfUnrecoverable(cause);
+				return null;
 			}
 		}
 
-		private record Failure(Throwable throwable) {
+		@Nullable
+		Object getOrThrow() {
+			try {
+				return task.get();
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw throwAsUncheckedException(e);
+			}
+			catch (ExecutionException e) {
+				// non-null guaranteed by FutureTask
+				var cause = requireNonNull(e.getCause());
+				UnrecoverableExceptions.rethrowIfUnrecoverable(cause);
+				throw throwAsUncheckedException(cause);
+			}
 		}
-
 	}
 
 	/**

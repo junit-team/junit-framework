@@ -52,6 +52,8 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -93,6 +95,7 @@ import org.mockito.InOrder;
 /**
  * @since 1.0
  */
+@NullMarked
 class DefaultLauncherTests {
 
 	private static final String FOO = DefaultLauncherTests.class.getSimpleName() + ".foo";
@@ -671,6 +674,7 @@ class DefaultLauncherTests {
 
 			@Override
 			public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
+				//noinspection CodeBlock2Expr
 				discoveryRequest.getSelectorsByType(DiscoverySelector.class).forEach(selector -> {
 					discoveryRequest.getDiscoveryListener().selectorProcessed(uniqueId, selector, unresolved());
 				});
@@ -1046,13 +1050,13 @@ class DefaultLauncherTests {
 			UnaryOperator<LauncherExecutionRequestBuilder> executionConfigurer) {
 		var executionListener = mock(TestExecutionListener.class);
 
-		AtomicReference<Instant> startTime = new AtomicReference<>();
+		AtomicReference<@Nullable Instant> startTime = new AtomicReference<>();
 		doAnswer(invocation -> {
 			startTime.set(Instant.now());
 			return null;
 		}).when(executionListener).executionStarted(any());
 
-		AtomicReference<Instant> finishTime = new AtomicReference<>();
+		AtomicReference<@Nullable Instant> finishTime = new AtomicReference<>();
 		doAnswer(invocation -> {
 			finishTime.set(Instant.now());
 			return null;

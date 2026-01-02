@@ -210,6 +210,9 @@ dependencies {
 
 	openTestReportingCli(dependencyFromLibs("openTestReporting-cli"))
 	openTestReportingCli(project(":junit-platform-reporting"))
+	openTestReportingCli(platform(dependencyFromLibs("log4j-bom"))) {
+		because("Workaround for CVE-2025-68161")
+	}
 
 	javaAgent(platform(dependencyFromLibs("mockito-bom")))
 	javaAgent(dependencyFromLibs("mockito-core")) {

@@ -375,7 +375,6 @@ public class TestClassPredicatesTests {
 
 		// -------------------------------------------------------------------------
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
 		static class StaticTestCase {
 
 			@Test
@@ -383,7 +382,6 @@ public class TestClassPredicatesTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
 		private static class PrivateStaticTestCase {
 
 			@Test

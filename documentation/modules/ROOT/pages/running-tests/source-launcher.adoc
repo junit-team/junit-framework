@@ -1,10 +1,12 @@
 = Source Launcher
 
 Starting with Java 25 it is possible to write minimal source code test programs
-using the `org.junit.start` module. For example, like in a `HelloTests.java`
-file reading:
+using the `org.junit.start` module.
 
-```java
+For example, create a `HelloTests.java` file with the following content:
+
+[source,java]
+----
 import module org.junit.start;
 
 void main() {
@@ -15,17 +17,19 @@ void main() {
 void stringLength() {
   Assertions.assertEquals(11, "Hello JUnit".length());
 }
-```
+----
+
 With all required modular JAR files available in a local `lib/` directory, the
 following Java 25+ command will discover and execute tests using the JUnit Platform.
 It will also print the result tree to the console.
 
-```shell
+[source,shell]
+----
 java --module-path lib --add-modules org.junit.start HelloTests.java
 ╷
 └─ JUnit Jupiter ✔
    └─ HelloTests ✔
       └─ stringLength() ✔
-```
+----
 
-Find JUnit's class API documentation here: {JUnit}
+For details, please refer to the Javadoc of the `{JUnit}` class.

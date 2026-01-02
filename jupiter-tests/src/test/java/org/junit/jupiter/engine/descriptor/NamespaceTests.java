@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
-public class NamespaceTests {
+class NamespaceTests {
 
 	@Test
 	void namespacesEqualForSamePartsSequence() {

@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.stream.IntStream;
 
@@ -63,7 +62,7 @@ class StreamInterceptorTests {
 	}
 
 	@Test
-	void writeForwardsOperationsToOriginalStream() throws IOException {
+	void writeForwardsOperationsToOriginalStream() throws Exception {
 		var originalStream = targetStream;
 
 		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream,
@@ -112,9 +111,7 @@ class StreamInterceptorTests {
 			100).orElseThrow(RuntimeException::new);
 
 		streamInterceptor.capture();
-		var thread = new Thread(() -> {
-			targetStream.println("from non-test thread");
-		});
+		var thread = new Thread(() -> targetStream.println("from non-test thread"));
 		thread.start();
 		thread.join();
 

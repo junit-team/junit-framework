@@ -94,7 +94,6 @@ class TestInfoParameterResolverTests extends AbstractJupiterTestEngineTests {
 		assertEquals(TestInfoParameterResolverTests.class.getSimpleName(), testInfo.getDisplayName());
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class BlankDisplayNameTestCase {
 
 		@Test

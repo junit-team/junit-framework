@@ -1,10 +1,4 @@
-<h1>
-  <picture width="200">
-    <source media="(prefers-color-scheme: dark)" srcset="https://junit.org/assets/img/junit-logo-inverted-darker.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://junit.org/assets/img/junit-logo.svg">
-    <img alt="JUnit" src="https://junit.org/assets/img/junit-logo.svg" width="200">
-  </picture>
-</h1>
+# <img alt="JUnit" src="https://junit.org/assets/img/junit-logo-adaptive.svg" width="200">
 
 This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
@@ -100,14 +94,14 @@ of the JUnit Platform, JUnit Jupiter, and JUnit Vintage.
 
 [Codecov]: https://codecov.io/gh/junit-team/junit-framework
 [CONTRIBUTING.md]: https://github.com/junit-team/junit-framework/blob/HEAD/CONTRIBUTING.md
-[Dependency Metadata]: https://docs.junit.org/current/user-guide/#dependency-metadata
+[Dependency Metadata]: https://docs.junit.org/current/appendix.html#dependency-metadata
 [GitHub Discussions]: https://github.com/junit-team/junit-framework/discussions/categories/q-a
 [Gradle toolchains]: https://docs.gradle.org/current/userguide/toolchains.html
 [Gradle Wrapper]: https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:using_wrapper
 [JaCoCo]: https://www.eclemma.org/jacoco/
-[Javadoc]: https://docs.junit.org/current/api/
+[Javadoc]: https://api.junit.org
 [JDK 25]: https://javaalmanac.io/jdk/25/
-[Release Notes]: https://docs.junit.org/current/release-notes/
+[Release Notes]: https://docs.junit.org/current/release-notes.html
 [Examples]: https://github.com/junit-team/junit-examples
 [StackOverflow]: https://stackoverflow.com/questions/tagged/junit5
-[User Guide]: https://docs.junit.org/current/user-guide/
+[User Guide]: https://docs.junit.org

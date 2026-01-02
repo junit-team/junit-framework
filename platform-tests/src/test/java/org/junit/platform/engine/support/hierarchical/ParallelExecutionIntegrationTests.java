@@ -92,7 +92,6 @@ import org.junit.platform.testkit.engine.Events;
 /**
  * @since 1.3
  */
-@SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
 @ParameterizedClass
 @EnumSource(ParallelExecutorServiceType.class)
 record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorServiceType) {
@@ -502,6 +501,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		}
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class IndependentClasses {
 		static AtomicInteger sharedResource = new AtomicInteger();
 		static CountDownLatch countDownLatch = new CountDownLatch(4);
@@ -957,21 +957,27 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class ParallelClassesTestCaseA extends ParallelClassesTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class ParallelClassesTestCaseB extends ParallelClassesTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class ParallelClassesTestCaseC extends ParallelClassesTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class ParallelMethodsTestCaseA extends ParallelMethodsTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class ParallelMethodsTestCaseB extends ParallelMethodsTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class ParallelMethodsTestCaseC extends ParallelMethodsTestCase {
 	}
 

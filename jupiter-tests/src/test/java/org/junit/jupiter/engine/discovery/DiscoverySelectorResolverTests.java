@@ -904,7 +904,7 @@ class HerTestClass extends MyTestClass {
 
 class OtherTestClass {
 
-	@SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
+	@SuppressWarnings("NewClassNamingConvention")
 	static class NestedTestClass {
 
 		@Test

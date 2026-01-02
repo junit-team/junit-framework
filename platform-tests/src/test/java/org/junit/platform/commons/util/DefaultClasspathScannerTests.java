@@ -134,7 +134,7 @@ class DefaultClasspathScannerTests {
 	}
 
 	@Test
-	void scanForResourcesInClasspathRootWhenGenericRuntimeExceptionOccurs(LogRecordListener listener) throws Exception {
+	void scanForResourcesInClasspathRootWhenGenericRuntimeExceptionOccurs(LogRecordListener listener) {
 		Predicate<Resource> runtimeExceptionSimulationFilter = resource -> {
 			if (resource.getName().equals("org/junit/platform/commons/other-example.resource")) {
 				throw new RuntimeException("a generic exception");
@@ -186,7 +186,7 @@ class DefaultClasspathScannerTests {
 	}
 
 	private void scanForClassesInClasspathRootWithinJarFile(String resourceName) throws Exception {
-		var jarfile = getClass().getResource(resourceName);
+		var jarfile = requireNonNull(getClass().getResource(resourceName));
 
 		try (var classLoader = new URLClassLoader(new URL[] { jarfile }, null)) {
 			var classpathScanner = new DefaultClasspathScanner(() -> classLoader, ReflectionUtils::tryToLoadClass);
@@ -210,7 +210,7 @@ class DefaultClasspathScannerTests {
 	}
 
 	private void scanForResourcesInClasspathRootWithinJarFile(String resourceName) throws Exception {
-		var jarfile = getClass().getResource(resourceName);
+		var jarfile = requireNonNull(getClass().getResource(resourceName));
 
 		try (var classLoader = new URLClassLoader(new URL[] { jarfile }, null)) {
 			var classpathScanner = new DefaultClasspathScanner(() -> classLoader, ReflectionUtils::tryToLoadClass);
@@ -226,8 +226,8 @@ class DefaultClasspathScannerTests {
 
 	@Test
 	void scanForResourcesInShadowedClassPathRoot() throws Exception {
-		var jarFile = getClass().getResource("/jartest.jar");
-		var shadowedJarFile = getClass().getResource("/jartest-shadowed.jar");
+		var jarFile = requireNonNull(getClass().getResource("/jartest.jar"));
+		var shadowedJarFile = requireNonNull(getClass().getResource("/jartest-shadowed.jar"));
 
 		try (var classLoader = new URLClassLoader(new URL[] { jarFile, shadowedJarFile }, null)) {
 			var classpathScanner = new DefaultClasspathScanner(() -> classLoader, ReflectionUtils::tryToLoadClass);
@@ -254,8 +254,8 @@ class DefaultClasspathScannerTests {
 
 	@Test
 	void scanForResourcesInPackageWithDuplicateResources() throws Exception {
-		var jarFile = getClass().getResource("/jartest.jar");
-		var shadowedJarFile = getClass().getResource("/jartest-shadowed.jar");
+		var jarFile = requireNonNull(getClass().getResource("/jartest.jar"));
+		var shadowedJarFile = requireNonNull(getClass().getResource("/jartest-shadowed.jar"));
 
 		try (var classLoader = new URLClassLoader(new URL[] { jarFile, shadowedJarFile }, null)) {
 			var classpathScanner = new DefaultClasspathScanner(() -> classLoader, ReflectionUtils::tryToLoadClass);
@@ -304,7 +304,7 @@ class DefaultClasspathScannerTests {
 	@Test // #2500
 	@DisabledInEclipse
 	void scanForClassesInPackageWithinModulesSharingNamePrefix(@TempDir Path temp) throws Exception {
-		var moduleSourcePath = Path.of(getClass().getResource("/modules-2500/").toURI()).toString();
+		var moduleSourcePath = Path.of(requireNonNull(getClass().getResource("/modules-2500/")).toURI()).toString();
 		run("javac", "--module", "foo,foo.bar", "--module-source-path", moduleSourcePath, "-d", temp.toString());
 
 		checkModules2500(ModuleFinder.of(temp)); // exploded modules
@@ -319,8 +319,8 @@ class DefaultClasspathScannerTests {
 		System.gc(); // required on Windows in order to release JAR file handles
 	}
 
-	private static int run(String tool, String... args) {
-		return ToolProvider.findFirst(tool).orElseThrow().run(System.out, System.err, args);
+	private static void run(String tool, String... args) {
+		ToolProvider.findFirst(tool).orElseThrow().run(System.out, System.err, args);
 	}
 
 	private void checkModules2500(ModuleFinder finder) {
@@ -428,7 +428,7 @@ class DefaultClasspathScannerTests {
 	}
 
 	@Test
-	void resourcesCanBeRead() throws IOException {
+	void resourcesCanBeRead() throws Exception {
 		var thisResourceOnly = ResourceFilter.of(
 			resource -> "org/junit/platform/commons/example.resource".equals(resource.getName()));
 		var resources = classpathScanner.scanForResourcesInPackage("org.junit.platform.commons", thisResourceOnly);
@@ -532,7 +532,7 @@ class DefaultClasspathScannerTests {
 	private boolean inDefaultPackage(Class<?> clazz) {
 		// OpenJDK returns NULL for the default package.
 		var pkg = clazz.getPackage();
-		return pkg == null || "".equals(clazz.getPackage().getName());
+		return pkg == null || clazz.getPackage().getName().isEmpty();
 	}
 
 	private boolean inDefaultPackage(Resource resource) {
@@ -596,10 +596,11 @@ class DefaultClasspathScannerTests {
 	private URI getTestClasspathResourceRoot() {
 		// Gradle puts classes and resources in different roots.
 		var defaultPackageResource = "/default-package.resource";
-		var resourceUri = getClass().getResource(defaultPackageResource).toString();
+		var resourceUri = requireNonNull(getClass().getResource(defaultPackageResource)).toString();
 		return URI.create(resourceUri.substring(0, resourceUri.length() - defaultPackageResource.length()));
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	class MemberClassToBeFound {
 	}
 

@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 @MockitoSettings
-public class HierarchicalOutputDirectoryCreatorTests {
+class HierarchicalOutputDirectoryCreatorTests {
 
 	@TempDir
 	Path tempDir;

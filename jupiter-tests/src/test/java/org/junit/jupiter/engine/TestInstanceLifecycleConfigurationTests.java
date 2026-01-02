@@ -143,7 +143,6 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestInstance(PER_METHOD)
 	static class ExplicitInstancePerTestMethodTestCase {
 
@@ -169,7 +168,6 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 	 * {@code @AfterAll} methods are static, even though there is no explicit
 	 * {@code @TestInstance} declaration.
 	 */
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class AssumedInstancePerTestMethodTestCase {
 
 		@BeforeAll
@@ -189,7 +187,6 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestInstance(PER_CLASS)
 	static class ExplicitInstancePerClassTestCase {
 
@@ -215,7 +212,6 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 	 * {@code @AfterAll} methods are non-static, even though there is no
 	 * explicit {@code @TestInstance} declaration.
 	 */
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class AssumedInstancePerClassTestCase {
 
 		@SuppressWarnings("JUnitMalformedDeclaration")

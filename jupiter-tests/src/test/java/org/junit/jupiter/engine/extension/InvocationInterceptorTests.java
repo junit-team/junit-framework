@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -67,7 +68,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 				message(it -> it.startsWith("Chain of InvocationInterceptors never called invocation")))));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@NullMarked
 	static class InvocationIgnoringInterceptorTestCase {
 		@RegisterExtension
 		Extension interceptor = new InvocationInterceptor() {
@@ -91,7 +92,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		results.testEvents().assertStatistics(stats -> stats.failed(0).succeeded(1));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@NullMarked
 	static class InvocationSkippedTestCase {
 		@RegisterExtension
 		Extension interceptor = new InvocationInterceptor() {
@@ -118,7 +119,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 				"Chain of InvocationInterceptors called invocation multiple times instead of just once")))));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@NullMarked
 	static class DoubleInvocationInterceptorTestCase {
 		@RegisterExtension
 		Extension interceptor = new InvocationInterceptor() {
@@ -240,9 +241,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		@TestFactory
 		DynamicTest testFactory(TestReporter reporter) {
 			publish(reporter, InvocationType.TEST_FACTORY_METHOD);
-			return dynamicTest("dynamicTest", () -> {
-				publish(reporter, InvocationType.DYNAMIC_TEST);
-			});
+			return dynamicTest("dynamicTest", () -> publish(reporter, InvocationType.DYNAMIC_TEST));
 		}
 
 		@AfterEach
@@ -274,6 +273,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		AFTER_ALL
 	}
 
+	@NullMarked
 	abstract static class ReportingInvocationInterceptor implements InvocationInterceptor {
 		private final Class<TestCaseWithThreeInterceptors> testClass = TestCaseWithThreeInterceptors.class;
 		private final String name;
@@ -403,12 +403,14 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@NullMarked
 	static class FooInvocationInterceptor extends ReportingInvocationInterceptor {
 		FooInvocationInterceptor() {
 			super("foo");
 		}
 	}
 
+	@NullMarked
 	static class BarInvocationInterceptor extends ReportingInvocationInterceptor {
 		BarInvocationInterceptor() {
 			super("bar");
@@ -421,6 +423,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@NullMarked
 	static class BazInvocationInterceptor extends ReportingInvocationInterceptor {
 		BazInvocationInterceptor() {
 			super("baz");

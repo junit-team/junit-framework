@@ -25,7 +25,8 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* The `UniqueId.uniqueIdFormat` field has been removed, reducing the size of `UniqueId`
+  objects.
 
 [[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
@@ -33,7 +34,8 @@ repository on GitHub.
 [[v6.1.0-M2-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* Enable recursive updates when using `ExtensionContext.Store.computeIfAbsent(K, Function, Class)`.
+  This provides parity with the deprecated `ExtensionContext.Store.getOrComputeIfAbsent(K, Function, Class)`
 
 [[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -47,10 +49,25 @@ repository on GitHub.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
   `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
+* Support the creation of `Arguments` from iterables. These additions make it
+easier to dynamically build arguments from collections when using
+`@ParameterizedTest`:
+** `Arguments.of(Iterable<?>)`
+** `Arguments.argumentsFrom(Iterable<?>)` (alias)
+** `Arguments.argumentSetFrom(String, Iterable<?>)`
+** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
+* Exclude competing `@Deprecated` factory methods in
+  xref:writing-tests/parameterized-classes-and-tests.adoc#argument-conversion-implicit-fallback[fallback String-to-Object]
+  converter.
 * Trim internal stack frames from `AssertionFailedError` stack traces.
 * Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
   methods for `AssertionFailureBuilder`. These allow user defined assertions to
   trim their stacktrace.
+* Generic inline value classes (such as `kotlin.Result<T>`) can now be used as parameters
+  in `@ParameterizedTest` methods when `kotlin-reflect` is on the classpath.
+  Note: Primitive-wrapper inline value classes (e.g., `UInt`, custom value classes wrapping
+  primitives) are not yet supported.
+
 
 [[v6.1.0-M2-junit-vintage]]
 === JUnit Vintage

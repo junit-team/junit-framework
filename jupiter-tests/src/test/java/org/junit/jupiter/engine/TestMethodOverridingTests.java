@@ -94,7 +94,6 @@ class TestMethodOverridingTests extends AbstractJupiterTestEngineTests {
 				.map(ReportEntry::getKeyValuePairs);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class DuplicateTestMethodDueToPackagePrivateVisibilityTestCase
 			extends SuperClassWithPackagePrivateLifecycleMethodInDifferentPackageTestCase {
 

@@ -297,7 +297,6 @@ class LifecycleMethodExecutionExceptionHandlerTests extends AbstractJupiterTestE
 
 	// ------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class BaseTestCase {
 		@BeforeAll
 		static void throwBeforeAll() {
@@ -349,7 +348,6 @@ class LifecycleMethodExecutionExceptionHandlerTests extends AbstractJupiterTestE
 	static class UnrecoverableExceptionTestCase extends BaseTestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(ShouldNotBeCalledHandler.class)
 	@ExtendWith(SwallowExceptionHandler.class)
 	@ExtendWith(RethrowExceptionHandler.class)

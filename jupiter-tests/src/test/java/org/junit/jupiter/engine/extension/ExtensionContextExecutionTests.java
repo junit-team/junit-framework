@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +54,7 @@ class ExtensionContextExecutionTests extends AbstractJupiterTestEngineTests {
 		assertThat(Parent.counter).hasValue(1);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	@ExtendWith(OnlyIncrementCounterOnce.class)
 	static class Parent {
 		static final AtomicInteger counter = new AtomicInteger(0);
@@ -63,12 +64,15 @@ class ExtensionContextExecutionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class A extends Parent {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class B extends Parent {
 	}
 
+	@NullMarked
 	static class OnlyIncrementCounterOnce implements BeforeAllCallback {
 		@Override
 		public void beforeAll(ExtensionContext context) {

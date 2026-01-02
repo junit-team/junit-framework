@@ -107,7 +107,6 @@ class IgnoreConditionTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(IgnoreCondition.class)
 	@Ignore
 	static class IgnoredClassWithDefaultMessageTestCase {
@@ -118,7 +117,6 @@ class IgnoreConditionTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(IgnoreCondition.class)
 	@Ignore("Ignored Class")
 	static class IgnoredClassWithCustomMessageTestCase {
@@ -129,7 +127,7 @@ class IgnoreConditionTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("JUnitMixedFramework")
 	@ExtendWith(IgnoreCondition.class)
 	static class IgnoredMethodsTestCase {
 

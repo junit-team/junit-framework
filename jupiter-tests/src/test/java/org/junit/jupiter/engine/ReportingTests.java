@@ -82,7 +82,6 @@ class ReportingTests extends AbstractJupiterTestEngineTests {
 				.haveExactly(2, fileEntry(nameAndContent("afterEach", MediaType.TEXT_PLAIN_UTF_8)));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MyReportingTestCase {
 
 		MyReportingTestCase(TestReporter reporter) {

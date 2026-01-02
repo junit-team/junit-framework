@@ -321,7 +321,7 @@ class JupiterTestDescriptorTests {
 	@Tag("classTag1")
 	@Tag("classTag2")
 	@DisplayName("custom class name")
-	@SuppressWarnings({ "unused", "JUnitMalformedDeclaration" })
+	@SuppressWarnings("unused")
 	private static class TestCase extends AbstractTestCase {
 
 		void test() {

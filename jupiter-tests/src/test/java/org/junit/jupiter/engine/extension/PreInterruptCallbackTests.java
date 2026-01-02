@@ -206,7 +206,6 @@ class PreInterruptCallbackTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class DefaultPreInterruptCallbackTimeoutOnMethodTestCase {
 		@Test
 		void test() throws InterruptedException {
@@ -221,7 +220,6 @@ class PreInterruptCallbackTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(TestPreInterruptCallback.class)
 	static class DefaultPreInterruptCallbackWithExplicitCallbackTestCase {
 		@Test
@@ -238,7 +236,6 @@ class PreInterruptCallbackTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(TestPreInterruptCallback.class)
 	static class DefaultPreInterruptCallbackWithExplicitCallbackWithSeparateThreadTestCase {
 		@Test

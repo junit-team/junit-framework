@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 
-public class DiscoveryIssueTests {
+class DiscoveryIssueTests {
 
 	@Test
 	void create() {

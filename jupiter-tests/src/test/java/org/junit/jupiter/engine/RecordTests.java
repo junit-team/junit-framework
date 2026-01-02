@@ -23,7 +23,6 @@ class RecordTests extends AbstractJupiterTestEngineTests {
 				.assertStatistics(stats -> stats.finished(2).succeeded(1).failed(1));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	record TestCase() {
 
 		@Test

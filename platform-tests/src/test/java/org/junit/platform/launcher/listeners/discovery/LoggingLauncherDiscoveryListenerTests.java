@@ -32,7 +32,7 @@ import org.junit.platform.engine.UniqueId;
 import org.junit.platform.fakes.TestEngineStub;
 
 @TrackLogRecords
-public class LoggingLauncherDiscoveryListenerTests {
+class LoggingLauncherDiscoveryListenerTests {
 
 	@Test
 	void logsWarningOnUnresolvedUniqueIdSelectorWithEnginePrefix(LogRecordListener log) {

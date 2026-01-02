@@ -17,7 +17,7 @@ import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.io.Resource;
 
-public class ResourceInteroperabilityTests {
+class ResourceInteroperabilityTests {
 
 	@Test
 	void newAndOldResourcesAreLogicallyEquivalent() {

@@ -13,10 +13,11 @@ package org.junit.platform.engine;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndHashCode;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
  *
  * @since 1.0
  */
+@NullMarked
 class TestTagTests {
 
 	@SuppressWarnings("DataFlowIssue")
@@ -64,7 +66,7 @@ class TestTagTests {
 		assertEquals("foo-tag", TestTag.create("\t  foo-tag  \n").getName());
 	}
 
-	@SuppressWarnings("DataFlowIssue")
+	@SuppressWarnings({ "DataFlowIssue", "UnnecessaryUnicodeEscape" })
 	@Test
 	void factoryPreconditions() {
 		assertSyntaxViolation(null);
@@ -77,10 +79,7 @@ class TestTagTests {
 
 	@Test
 	void tagEqualsOtherTagWithSameName() {
-		assertEquals(TestTag.create("fast"), TestTag.create("fast"));
-		assertEquals(TestTag.create("fast").hashCode(), TestTag.create("fast").hashCode());
-		assertNotEquals(null, TestTag.create("fast"));
-		assertNotEquals(TestTag.create("fast"), null);
+		assertEqualsAndHashCode(TestTag.create("fast"), TestTag.create("fast"), TestTag.create("slow"));
 	}
 
 	@Test

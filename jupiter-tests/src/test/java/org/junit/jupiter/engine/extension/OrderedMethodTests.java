@@ -416,7 +416,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class BaseTestCase {
 
 		@Test
@@ -429,7 +428,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	}
 
-	@SuppressWarnings({ "unused", "JUnitMalformedDeclaration" })
+	@SuppressWarnings("unused")
 	@TestMethodOrder(MethodName.class)
 	static class AMethodNameTestCase extends BaseTestCase {
 
@@ -482,7 +481,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(MethodOrderer.DisplayName.class)
 	static class DisplayNameTestCase {
 
@@ -555,7 +553,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(OrderAnnotation.class)
 	static class OrderAnnotationTestCase {
 
@@ -627,7 +624,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(Random.class)
 	static class RandomTestCase {
 
@@ -660,7 +656,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(MisbehavingByAdding.class)
 	static class MisbehavingByAddingTestCase {
 
@@ -678,7 +673,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(MisbehavingByImpersonating.class)
 	static class MisbehavingByImpersonatingTestCase {
 
@@ -696,7 +690,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(MisbehavingByRemoving.class)
 	static class MisbehavingByRemovingTestCase {
 
@@ -827,7 +820,6 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class WithoutTestMethodOrderTestCase {
 
 		@BeforeEach

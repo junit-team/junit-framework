@@ -200,7 +200,6 @@ class OrderedProgrammaticExtensionRegistrationTests extends AbstractJupiterTestE
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	private static class AbstractTestCase {
 
 		@Test

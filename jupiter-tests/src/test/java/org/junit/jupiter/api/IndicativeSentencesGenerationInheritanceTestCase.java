@@ -26,7 +26,6 @@ class IndicativeSentencesGenerationInheritanceTestCase {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class StaticNestedTestCase {
 
 		@Test

@@ -20,10 +20,12 @@ val generateAntoraPlaybook by tasks.registering(Copy::class) {
 	val gitRepoRoot = providers.exec {
 		commandLine("git", "worktree", "list", "--porcelain", "-z")
 	}.standardOutput.asText.map { it.substringBefore('\u0000').substringAfter(' ') }
+	inputs.property("gitRepoRoot", gitRepoRoot)
 
 	val gitBranchName = providers.exec {
 		commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
 	}.standardOutput.asText.map { it.trim() }
+	inputs.property("gitBranchName", gitBranchName)
 
 	from(layout.projectDirectory.file("antora-playbook.yml").asFile)
 	filter { line ->

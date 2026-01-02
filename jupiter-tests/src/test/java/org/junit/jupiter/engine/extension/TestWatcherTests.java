@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.lang.reflect.Method;
@@ -30,8 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
@@ -216,7 +218,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 		@Test
 		public void abortedTest() {
-			assumeTrue(false);
+			abort();
 		}
 
 		@Test
@@ -240,7 +242,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 			@Test
 			public void abortedTest() {
-				assumeTrue(false);
+				abort();
 			}
 
 			@Test
@@ -272,7 +274,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 		@RepeatedTest(2)
 		void abortedTest() {
-			assumeTrue(false);
+			abort();
 		}
 
 		@RepeatedTest(2)
@@ -283,6 +285,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 	}
 
+	@NullMarked
 	@ExtendWith(TrackingTestWatcher.class)
 	static class TrackingTestWatcherTestFactoryMethodsTestCase {
 
@@ -299,7 +302,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 		@TestFactory
 		Stream<DynamicTest> abortedTest() {
-			return Stream.of("A", "B").map(text -> dynamicTest(text, () -> assumeTrue(false)));
+			return Stream.of("A", "B").map(text -> dynamicTest(text, Assumptions::abort));
 
 		}
 
@@ -357,7 +360,6 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 		TestWatcher watcher = new TrackingTestWatcher();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MethodLevelTestWatcherTestCase extends AbstractDisabledMethodsTestCase {
 
 		@Override
@@ -377,6 +379,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
+	@NullMarked
 	private static class TrackingTestWatcher implements TestWatcher {
 
 		private static final Map<String, List<String>> results = new HashMap<>();
@@ -408,6 +411,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 
 	}
 
+	@NullMarked
 	private static class ExceptionThrowingTestWatcher implements TestWatcher {
 
 		@Override
@@ -436,6 +440,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 	 * {@link TestWatcher} that retrieves data from the {@link ExtensionContext.Store}.
 	 * @see <a href="https://github.com/junit-team/junit-framework/issues/3944">#3944</a>
 	 */
+	@NullMarked
 	static class DataRetrievingTestWatcher implements BeforeTestExecutionCallback, TestWatcher {
 
 		private static final Namespace NAMESPACE = Namespace.create(DataRetrievingTestWatcher.class);
@@ -459,7 +464,6 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(DataRetrievingTestWatcher.class)
 	static class DataRetrievingTestWatcherTestCase {
 

@@ -91,7 +91,7 @@ class VintageDiscovererTests {
 
 		doesNotResolve(selectUniqueId(uniqueId), result -> {
 			assertThat(result.getStatus()).isEqualTo(FAILED);
-			assertThat(result.getThrowable().get()).hasMessageContaining("Unknown class");
+			assertThat(result.getThrowable().orElseThrow()).hasMessageContaining("Unknown class");
 		});
 	}
 
@@ -125,7 +125,7 @@ class VintageDiscovererTests {
 		return new VintageDiscoverer().discover(request, engineId());
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	public static class Foo {
 
 		@org.junit.Test
@@ -134,7 +134,7 @@ class VintageDiscovererTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	public static class Bar {
 
 		@org.junit.Test

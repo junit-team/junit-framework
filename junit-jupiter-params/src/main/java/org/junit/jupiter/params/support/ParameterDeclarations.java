@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.params.support;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
@@ -40,7 +40,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest
  */
-@API(status = EXPERIMENTAL, since = "6.0")
+@API(status = MAINTAINED, since = "6.0.2")
 public interface ParameterDeclarations {
 
 	/**

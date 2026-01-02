@@ -86,7 +86,6 @@ class TempDirectoryPreconditionTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ParameterTypeTestCase {
 
 		@Test
@@ -98,7 +97,6 @@ class TempDirectoryPreconditionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class FinalStaticFieldTestCase {
 
 		static final @TempDir Path path = Path.of(".");
@@ -108,7 +106,6 @@ class TempDirectoryPreconditionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class FinalInstanceFieldTestCase {
 
 		final @TempDir Path path = Path.of(".");

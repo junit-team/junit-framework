@@ -40,14 +40,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * default {@code TimeZone}.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution">parallel test execution</a>,
+ * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
  * all tests annotated with {@link DefaultTimeZone @DefaultTimeZone},
  * {@link ReadsDefaultTimeZone @ReadsDefaultTimeZone}, and
  * {@link WritesDefaultTimeZone @WritesDefaultTimeZone} are scheduled in a way that
  * guarantees correctness under mutation of shared global state.
  *
  * <p>For more details and examples, see the
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-DefaultTimeZone">User Guide</a>.
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#DefaultTimeZone">User Guide</a>.
  *
  * @since 6.1
  * @see TimeZone#getDefault()

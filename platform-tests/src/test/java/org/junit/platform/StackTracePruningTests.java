@@ -181,7 +181,8 @@ class StackTracePruningTests {
 		assertLinesMatch(expectedLines.lines().toList(), stackStraceAsLines);
 	}
 
-	private static void assertStackTraceDoesNotContain(List<StackTraceElement> stackTrace, String element) {
+	private static void assertStackTraceDoesNotContain(List<StackTraceElement> stackTrace,
+			@SuppressWarnings("SameParameterValue") String element) {
 		String stackStraceAsString = stackTrace.stream() //
 				.map(StackTraceElement::toString) //
 				.collect(Collectors.joining());
@@ -190,7 +191,6 @@ class StackTracePruningTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class FailingTestTestCase {
 
 		@Test
@@ -212,7 +212,6 @@ class StackTracePruningTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class FailingBeforeEachTestCase {
 
 		@BeforeEach

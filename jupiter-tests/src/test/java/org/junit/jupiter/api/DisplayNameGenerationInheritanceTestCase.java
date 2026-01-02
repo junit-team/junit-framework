@@ -26,7 +26,6 @@ class DisplayNameGenerationInheritanceTestCase {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class StaticNestedTestCase {
 
 		@Test

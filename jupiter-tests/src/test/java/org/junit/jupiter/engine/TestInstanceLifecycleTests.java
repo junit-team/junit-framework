@@ -728,7 +728,6 @@ class TestInstanceLifecycleTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstanceTrackingExtension.class)
 	// The following is commented out b/c it's the default.
 	// @TestInstance(Lifecycle.PER_METHOD)
@@ -804,7 +803,6 @@ class TestInstanceLifecycleTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstanceTrackingExtension.class)
 	// The following is commented out b/c it's the default.
 	// @TestInstance(Lifecycle.PER_METHOD)
@@ -874,7 +872,6 @@ class TestInstanceLifecycleTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstanceTrackingExtension.class)
 	@TestInstance(Lifecycle.PER_CLASS)
 	static class InstancePerClassOuterTestCase {
@@ -954,7 +951,6 @@ class TestInstanceLifecycleTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstanceTrackingExtension.class)
 	// The following is commented out b/c it's the default.
 	// @TestInstance(Lifecycle.PER_METHOD)
@@ -1132,7 +1128,6 @@ class TestInstanceLifecycleTests extends AbstractJupiterTestEngineTests {
 	@interface SingletonTest {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(Twice.class)
 	@ExtendWith(InstanceTrackingExtension.class)

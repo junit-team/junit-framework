@@ -21,7 +21,6 @@ import org.junit.runners.Parameterized;
 
 public class ParameterizedMigrationDemo {
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	// tag::before[]
 	@RunWith(Parameterized.class)
 	// end::before[]
@@ -61,7 +60,6 @@ public class ParameterizedMigrationDemo {
 	}
 	// end::before[]
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	// tag::after[]
 	@ParameterizedClass
 	@MethodSource("data")

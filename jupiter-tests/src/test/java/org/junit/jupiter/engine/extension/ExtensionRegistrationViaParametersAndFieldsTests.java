@@ -40,6 +40,7 @@ import java.util.logging.LogRecord;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
@@ -89,7 +90,6 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
  *
  * @since 5.8
  */
-@SuppressWarnings("JUnitMalformedDeclaration")
 class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTestEngineTests {
 
 	@Test
@@ -526,6 +526,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 	@ExtendWith(LongParameterResolver.class)
 	static class TestFactoryMethodParameterTestCase {
 
+		@SuppressWarnings("ConstantValue")
 		@TestFactory
 		Stream<DynamicTest> testFactory(TestInfo testInfo, @MagicParameter("method") String text) {
 			assertThat(testInfo).isNotNull();
@@ -566,6 +567,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 
 	}
 
+	@NullMarked
 	private static class TwoInvocationsContextProvider implements TestTemplateInvocationContextProvider {
 
 		@Override
@@ -599,6 +601,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 		@RegisterExtension
 		DummyExtension dummy = new DummyExtension();
 
+		@SuppressWarnings("JUnitMalformedDeclaration")
 		@Test
 		void test(Long number) {
 			assertThat(number).isEqualTo(42L);
@@ -613,6 +616,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 		@ExtendWith(DummyExtension.class)
 		Object field;
 
+		@SuppressWarnings("JUnitMalformedDeclaration")
 		@Test
 		void test(Long number) {
 			assertThat(number).isEqualTo(42L);
@@ -703,6 +707,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 	}
 
 	@NullUnmarked
+	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestInstance(Lifecycle.PER_METHOD)
 	static class AllInOneWithTestInstancePerMethodTestCase {
 
@@ -716,7 +721,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 		static String staticField2;
 
 		@RegisterExtension
-		private static Extension classLevelExtension1 = new ClassLevelExtension1();
+		private static final Extension classLevelExtension1 = new ClassLevelExtension1();
 
 		@RegisterExtension
 		@Order(1)
@@ -732,7 +737,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 
 		@RegisterExtension
 		@Order(1)
-		private InstanceLevelExtension1 instanceLevelExtension1 = new InstanceLevelExtension1();
+		private final InstanceLevelExtension1 instanceLevelExtension1 = new InstanceLevelExtension1();
 
 		@RegisterExtension
 		@Order(3)
@@ -827,6 +832,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 
 		}
 
+		@NullMarked
 		private record InstanceParameterResolver<T>(T instance) implements ParameterResolver {
 
 			@Override
@@ -852,6 +858,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 
 	String value();
 
+	@NullMarked
 	class Extension implements ParameterResolver {
 
 		@Override
@@ -874,6 +881,7 @@ class ExtensionRegistrationViaParametersAndFieldsTests extends AbstractJupiterTe
 }
 
 @SuppressWarnings("unused")
+@NullMarked
 class BaseParameterExtension<T extends Annotation> implements ParameterResolver {
 
 	private final Class<T> annotationType;
@@ -948,6 +956,7 @@ class BaseParameterExtension<T extends Annotation> implements ParameterResolver 
 class DummyExtension implements Extension {
 }
 
+@NullMarked
 class BaseFieldExtension<T extends Annotation> implements BeforeAllCallback, TestInstancePostProcessor {
 
 	private final Class<T> annotationType;

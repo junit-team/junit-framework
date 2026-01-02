@@ -11,7 +11,7 @@
 package org.junit.jupiter.params.provider;
 
 import static org.apiguardian.api.API.Status.DEPRECATED;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.stream.Stream;
@@ -72,7 +72,7 @@ public interface ArgumentsProvider {
 	 * @return a stream of arguments; never {@code null}
 	 * @since 5.13
 	 */
-	@API(status = EXPERIMENTAL, since = "6.0")
+	@API(status = MAINTAINED, since = "6.0.2")
 	default Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context)
 			throws Exception {
 		try {

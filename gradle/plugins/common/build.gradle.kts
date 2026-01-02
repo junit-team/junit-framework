@@ -1,3 +1,4 @@
+import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.markerCoordinates
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
 
@@ -19,6 +20,9 @@ dependencies {
 	implementation(libs.plugins.nullaway.markerCoordinates)
 	implementation(libs.plugins.shadow.markerCoordinates)
 	implementation(libs.plugins.spotless.markerCoordinates)
+	implementation(platform(dependencyFromLibs("log4j-bom"))) {
+		because("Workaround for CVE-2025-68161")
+	}
 }
 
 tasks.compileJava {

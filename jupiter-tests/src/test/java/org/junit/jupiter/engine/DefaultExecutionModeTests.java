@@ -127,7 +127,6 @@ class DefaultExecutionModeTests extends AbstractJupiterTestEngineTests {
 				.orElseGet(() -> fail("No child of type " + testDescriptorClass + " found"));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase {
 
 		@Test
@@ -157,7 +156,6 @@ class DefaultExecutionModeTests extends AbstractJupiterTestEngineTests {
 	static class SameThreadTestCase extends TestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class OuterTestCase {
 		@Nested
 		class LevelOne {

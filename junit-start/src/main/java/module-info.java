@@ -23,6 +23,7 @@
 ///   Assertions.assertEquals(2, 1 + 1, "Addition error detected!");
 /// }
 /// ```
+/// @since 6.1
 module org.junit.start {
 	requires static transitive org.apiguardian.api;
 	requires static transitive org.jspecify;

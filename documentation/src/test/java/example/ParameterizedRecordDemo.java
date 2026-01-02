@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 public class ParameterizedRecordDemo {
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	// tag::example[]
 	@ParameterizedClass
 	@CsvSource({ "apple, 23", "banana, 42" })

@@ -30,7 +30,7 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.opentest4j.TestAbortedException;
 
-public class TestFeedPrintingListenerTests {
+class TestFeedPrintingListenerTests {
 
 	TestPlan testPlan;
 	TestIdentifier testIdentifier;

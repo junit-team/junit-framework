@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 public class ClassWithStaticInnerTestCases {
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	public static class ShouldBeDiscovered {
 
 		@Test
@@ -25,7 +25,7 @@ public class ClassWithStaticInnerTestCases {
 		}
 	}
 
-	@SuppressWarnings({ "unused", "JUnitMalformedDeclaration" })
+	@SuppressWarnings("unused")
 	private static class ShouldNotBeDiscovered {
 
 		@Test

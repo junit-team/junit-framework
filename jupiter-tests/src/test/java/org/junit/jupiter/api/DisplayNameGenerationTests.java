@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.DisplayNameGenerator.IndicativeSentences.SentenceFragment;
 import org.junit.jupiter.api.extension.ClassTemplateInvocationContext;
 import org.junit.jupiter.api.extension.ClassTemplateInvocationContextProvider;
@@ -313,6 +314,7 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
+	@NullMarked
 	static class NoNameGenerator implements DisplayNameGenerator {
 
 		@Override
@@ -392,7 +394,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("A stack")
 	@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 	static class StackTestCase {
@@ -459,7 +460,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("A stack")
 	@IndicativeSentencesGeneration(generator = DisplayNameGenerator.ReplaceUnderscores.class)
 	static class IndicativeGeneratorTestCase {
@@ -504,7 +504,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@DisplayName("A stack")
 	@IndicativeSentencesGeneration(separator = " >> ", generator = DisplayNameGenerator.ReplaceUnderscores.class)
 	static class IndicativeGeneratorWithCustomSeparatorTestCase {
@@ -549,7 +548,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@SentenceFragment("A stack")
 	@IndicativeSentencesGeneration
 	static class IndicativeGeneratorWithCustomSentenceFragmentsTestCase {
@@ -599,7 +597,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(ClassTemplateTestCase.Once.class)
 	@DisplayName("Class template")
@@ -628,6 +625,7 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
+		@NullMarked
 		private static class Once implements ClassTemplateInvocationContextProvider {
 
 			@Override
@@ -649,7 +647,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@IndicativeSentencesGeneration
 	@SentenceFragment("")
 	static class BlankSentenceFragmentOnClassTestCase {
@@ -658,7 +655,6 @@ class DisplayNameGenerationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@IndicativeSentencesGeneration
 	static class BlankSentenceFragmentOnMethodTestCase {
 		@SentenceFragment("\t")

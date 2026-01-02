@@ -111,7 +111,6 @@ class ExecutionCancellationTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(OrderAnnotation.class)
 	static class RegularTestCase extends TestCase {
 

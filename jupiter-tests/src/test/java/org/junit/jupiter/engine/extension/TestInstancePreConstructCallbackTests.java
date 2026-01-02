@@ -246,7 +246,6 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstancePreConstructCallbackRecordingFoo.class)
 	static class InstancePreConstructTestCase extends CallSequenceRecordingTestCase {
 
@@ -285,7 +284,6 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstancePreConstructCallbackRecordingFoo.class)
 	static class FactoryPreConstructTestCase extends CallSequenceRecordingTestCase {
 
@@ -330,7 +328,6 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstancePreConstructCallbackRecordingFoo.class)
 	static class PreConstructInNestedTestCase extends CallSequenceRecordingTestCase {
 
@@ -408,7 +405,7 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	static class PreConstructOnMethod extends CallSequenceRecordingTestCase {
 		PreConstructOnMethod() {
 			record("constructor");
@@ -436,7 +433,7 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
+	@SuppressWarnings("NewClassNamingConvention")
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@ExtendWith(InstancePreConstructCallbackRecordingFoo.class)
 	@ExtendWith(InstancePreConstructCallbackRecordingBar.class)
@@ -461,7 +458,6 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(InstancePreConstructCallbackRecordingFoo.class)
 	@ExtendWith(InstancePreConstructCallbackRecordingLegacy.class)
 	static class LegacyPreConstructTestCase extends CallSequenceRecordingTestCase {

@@ -20,7 +20,7 @@ import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
 import org.mockito.InOrder;
 
-public class CompositeLauncherSessionListenerTests {
+class CompositeLauncherSessionListenerTests {
 
 	@Test
 	void callsListenersInReverseOrderForClosedEvents() {

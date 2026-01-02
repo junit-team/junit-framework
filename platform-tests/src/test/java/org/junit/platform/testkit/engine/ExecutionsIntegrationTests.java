@@ -12,7 +12,7 @@ package org.junit.platform.testkit.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 import org.junit.jupiter.api.Disabled;
@@ -94,7 +94,6 @@ class ExecutionsIntegrationTests {
 				.assertStatistics(stats -> stats.skipped(1).started(3).succeeded(1).aborted(1).failed(1));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ExampleTestCase {
 
 		@Test
@@ -108,7 +107,7 @@ class ExecutionsIntegrationTests {
 
 		@Test
 		void abortedTest() {
-			assumeTrue(false);
+			abort();
 		}
 
 		@Test

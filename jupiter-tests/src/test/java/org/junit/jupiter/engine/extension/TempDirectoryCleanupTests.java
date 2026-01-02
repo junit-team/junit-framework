@@ -210,7 +210,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 
 		// -------------------------------------------------------------------
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class DefaultFieldCase {
 
 			@TempDir
@@ -222,7 +222,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class NeverFieldCase {
 
 			@TempDir(cleanup = NEVER)
@@ -234,7 +234,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class AlwaysFieldCase {
 
 			@TempDir(cleanup = ALWAYS)
@@ -246,7 +246,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class OnSuccessPassingFieldCase {
 
 			@TempDir(cleanup = ON_SUCCESS)
@@ -258,7 +258,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class OnSuccessFailingFieldCase {
 
 			@TempDir(cleanup = ON_SUCCESS)
@@ -271,7 +271,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 		static class OnSuccessFailingStaticFieldCase {
 
@@ -291,6 +291,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
+		@SuppressWarnings("NewClassNamingConvention")
 		static class OnSuccessFailingStaticFieldWithNestingCase {
 
 			@TempDir(cleanup = ON_SUCCESS)
@@ -439,7 +440,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 
 		// -------------------------------------------------------------------
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class DefaultParameterCase {
 
 			@Test
@@ -448,7 +449,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class NeverParameterCase {
 
 			@Test
@@ -457,7 +458,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class AlwaysParameterCase {
 
 			@Test
@@ -466,7 +467,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class OnSuccessPassingParameterCase {
 
 			@Test
@@ -475,7 +476,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
+		@SuppressWarnings("NewClassNamingConvention")
 		static class OnSuccessFailingParameterCase {
 
 			@Test
@@ -485,7 +486,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			}
 		}
 
-		@SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
+		@SuppressWarnings("NewClassNamingConvention")
 		@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 		static class OnSuccessFailingThenPassingParameterCase {
 
@@ -542,7 +543,6 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 						"Deleting link from location inside of temp dir \\(.+\\) to location outside of temp dir \\(.+\\) but not the target file/directory"));
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
 		@NullUnmarked
 		static class JunctionTestCase {
 			public static Path target;

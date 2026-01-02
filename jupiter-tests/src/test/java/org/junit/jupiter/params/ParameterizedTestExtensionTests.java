@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
@@ -212,6 +213,7 @@ class ParameterizedTestExtensionTests {
 		return getExtensionContextReturningSingleMethod(testCase, ignored -> Optional.empty());
 	}
 
+	@NullMarked
 	private ExtensionContext getExtensionContextReturningSingleMethod(Object testCase,
 			Function<String, Optional<String>> configurationSupplier) {
 
@@ -382,6 +384,7 @@ class ParameterizedTestExtensionTests {
 		}
 	}
 
+	@NullMarked
 	static class ZeroArgumentsProvider implements ArgumentsProvider {
 
 		@Override
@@ -399,6 +402,7 @@ class ParameterizedTestExtensionTests {
 		}
 	}
 
+	@NullMarked
 	static class ArgumentsProviderWithCloseHandler implements ArgumentsProvider {
 
 		@Override
@@ -417,6 +421,8 @@ class ParameterizedTestExtensionTests {
 		}
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
+	@NullMarked
 	class NonStaticArgumentsProvider implements ArgumentsProvider {
 
 		@Override
@@ -450,11 +456,14 @@ class ParameterizedTestExtensionTests {
 		}
 	}
 
+	@NullMarked
 	static class AmbiguousConstructorArgumentsProvider implements ArgumentsProvider {
 
+		@SuppressWarnings("unused")
 		AmbiguousConstructorArgumentsProvider(String parameter) {
 		}
 
+		@SuppressWarnings("unused")
 		AmbiguousConstructorArgumentsProvider(int parameter) {
 		}
 

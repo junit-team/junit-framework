@@ -301,7 +301,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 		assertEquals("Outlook good", wisdom, useCase);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class InstanceLevelExtensionRegistrationTestCase {
 
 		@RegisterExtension
@@ -324,7 +323,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(ExtensionInjector.class)
 	@NullUnmarked
 	static class InstanceLevelExtensionRegistrationWithInjectedExtensionTestCase {
@@ -349,7 +347,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestInstance(PER_CLASS)
 	static class InstanceLevelExtensionRegistrationWithTestInstancePerClassLifecycleTestCase {
 
@@ -383,7 +380,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ClassLevelExtensionRegistrationTestCase {
 
 		@RegisterExtension
@@ -416,7 +412,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class SubClassLevelExtensionRegistrationTestCase extends ClassLevelExtensionRegistrationTestCase {
 
 		@SuppressWarnings("JUnitMalformedDeclaration")
@@ -455,7 +450,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ExtensionRegistrationFromInterfaceTestCase implements ClassLevelExtensionRegistrationInterface {
 
 		@SuppressWarnings("JUnitMalformedDeclaration")
@@ -480,7 +474,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ClassLevelExtensionRegistrationParentTestCase {
 
 		@RegisterExtension
@@ -506,7 +499,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class InstanceLevelExtensionRegistrationParentTestCase {
 
 		@RegisterExtension
@@ -571,7 +563,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class InstanceLevelCustomExtensionApiTestCase {
 
 		@SuppressWarnings("JUnitMalformedDeclaration")
@@ -585,7 +576,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ClassLevelCustomExtensionApiTestCase {
 
 		@SuppressWarnings("JUnitMalformedDeclaration")
@@ -599,7 +589,6 @@ class ProgrammaticExtensionRegistrationTests extends AbstractJupiterTestEngineTe
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class AbstractTestCase {
 
 		@Test

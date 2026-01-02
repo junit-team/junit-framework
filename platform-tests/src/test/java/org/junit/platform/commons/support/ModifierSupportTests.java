@@ -46,7 +46,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isPublic(clazz), ModifierSupport.isPublic(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isPublicDelegates(Method method) {
 		assertEquals(ReflectionUtils.isPublic(method), ModifierSupport.isPublic(method));
@@ -64,7 +63,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isPrivate(clazz), ModifierSupport.isPrivate(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isPrivateDelegates(Method method) {
 		assertEquals(ReflectionUtils.isPrivate(method), ModifierSupport.isPrivate(method));
@@ -82,7 +80,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotPrivate(clazz), ModifierSupport.isNotPrivate(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isNotPrivateDelegates(Method method) {
 		assertEquals(ReflectionUtils.isNotPrivate(method), ModifierSupport.isNotPrivate(method));
@@ -100,7 +97,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isAbstract(clazz), ModifierSupport.isAbstract(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isAbstractDelegates(Method method) {
 		assertEquals(ReflectionUtils.isAbstract(method), ModifierSupport.isAbstract(method));
@@ -118,7 +114,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotAbstract(clazz), ModifierSupport.isNotAbstract(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isNotAbstractDelegates(Method method) {
 		assertEquals(ReflectionUtils.isNotAbstract(method), ModifierSupport.isNotAbstract(method));
@@ -136,7 +131,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isStatic(clazz), ModifierSupport.isStatic(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isStaticDelegates(Method method) {
 		assertEquals(ReflectionUtils.isStatic(method), ModifierSupport.isStatic(method));
@@ -154,7 +148,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotStatic(clazz), ModifierSupport.isNotStatic(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isNotStaticDelegates(Method method) {
 		assertEquals(ReflectionUtils.isNotStatic(method), ModifierSupport.isNotStatic(method));
@@ -172,7 +165,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isFinal(clazz), ModifierSupport.isFinal(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isFinalDelegates(Method method) {
 		assertEquals(ReflectionUtils.isFinal(method), ModifierSupport.isFinal(method));
@@ -190,7 +182,6 @@ class ModifierSupportTests {
 		assertEquals(ReflectionUtils.isNotFinal(clazz), ModifierSupport.isNotFinal(clazz));
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Methods
 	void isNotFinalDelegates(Method method) {
 		assertEquals(ReflectionUtils.isNotFinal(method), ModifierSupport.isNotFinal(method));
@@ -199,12 +190,14 @@ class ModifierSupportTests {
 	// -------------------------------------------------------------------------
 
 	// Intentionally non-static
+	@SuppressWarnings("InnerClassMayBeStatic")
 	public class PublicClass {
 
 		public void publicMethod() {
 		}
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	private class PrivateClass {
 
 		@SuppressWarnings("unused")
@@ -212,6 +205,7 @@ class ModifierSupportTests {
 		}
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	protected class ProtectedClass {
 
 		@SuppressWarnings("unused")
@@ -219,6 +213,7 @@ class ModifierSupportTests {
 		}
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	class PackageVisibleClass {
 
 		@SuppressWarnings("unused")
@@ -237,6 +232,7 @@ class ModifierSupportTests {
 		}
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	final class FinalClass {
 
 		@SuppressWarnings({ "FinalMethodInFinalClass", "RedundantModifier" })

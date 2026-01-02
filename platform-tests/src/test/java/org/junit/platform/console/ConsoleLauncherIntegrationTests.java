@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -95,7 +94,7 @@ class ConsoleLauncherIntegrationTests {
 	@ParameterizedTest
 	@FieldSource("redirectStreamArguments")
 	void executeWithRedirectedStdStream(String redirectedStream, int outputFileSize, @TempDir Path tempDir)
-			throws IOException {
+			throws Exception {
 
 		var outputFile = tempDir.resolve("output.txt");
 		var line = "execute -e junit-jupiter --select-class %s %s %s".formatted(StdStreamTestCase.class.getName(),
@@ -112,7 +111,7 @@ class ConsoleLauncherIntegrationTests {
 		arguments("--redirect-stderr", StdStreamTestCase.getStderrOutputFileSize()));
 
 	@Test
-	void executeWithRedirectedStdStreamsToSameFile(@TempDir Path tempDir) throws IOException {
+	void executeWithRedirectedStdStreamsToSameFile(@TempDir Path tempDir) throws Exception {
 		var outputFile = tempDir.resolve("output.txt");
 		var line = "execute -e junit-jupiter --select-class %s --redirect-stdout %s --redirect-stderr %s".formatted(
 			StdStreamTestCase.class.getName(), outputFile, outputFile);

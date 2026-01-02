@@ -77,7 +77,6 @@ record ForkJoinDeadLockTests(ParallelExecutorServiceType executorServiceType) {
 	static class BaseTestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Execution(CONCURRENT)
 	public static class NonIsolatedTestCase extends BaseTestCase {
 
@@ -100,7 +99,6 @@ record ForkJoinDeadLockTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Isolated
 	public static class IsolatedTestCase extends BaseTestCase {
 
@@ -113,7 +111,6 @@ record ForkJoinDeadLockTests(ParallelExecutorServiceType executorServiceType) {
 	static class Isolated2TestCase extends IsolatedTestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	public static class SharedResourceTestCase {
 
 		@Test
@@ -132,7 +129,6 @@ record ForkJoinDeadLockTests(ParallelExecutorServiceType executorServiceType) {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock(value = "foo", mode = READ_WRITE)
 	public static class ClassLevelTestCase {
 

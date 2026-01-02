@@ -49,7 +49,7 @@ fun fail(message: () -> String): Nothing {
 /**
  * @see Assertions.fail
  */
-fun fail(message: (() -> String)?): Nothing = Assertions.fail<Nothing>(message)
+fun fail(message: (() -> String)?): Nothing = Assertions.fail<Nothing>(message ?: { null })
 
 /**
  * @see Assertions.fail

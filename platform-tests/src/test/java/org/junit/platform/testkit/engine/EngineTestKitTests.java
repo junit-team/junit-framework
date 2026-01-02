@@ -128,7 +128,6 @@ class EngineTestKitTests {
 				.findFirst();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ExampleTestCase {
 
 		@RegisterExtension

@@ -12,7 +12,7 @@ include::example$java/example/DisplayNameDemo.java[tags=user_guide]
 [NOTE]
 ====
 Control characters in text-based arguments in display names for parameterized tests are
-escaped by default. See xref:writing-tests/parameterized-classes-and-tests.adoc#tests-display-names-quoted-text[Quoted Text-based Arguments]
+escaped by default. See xref:writing-tests/parameterized-classes-and-tests.adoc#display-names-quoted-text[Quoted Text-based Arguments]
 for details.
 
 Any remaining ISO control characters in a display name will be replaced as follows.

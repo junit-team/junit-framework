@@ -15,6 +15,9 @@ val roseauClasspath = configurations.resolvable("roseauClasspath") {
 }
 dependencies {
 	roseauDependencies(dependencyFromLibs("roseau-cli"))
+	roseauDependencies(platform(dependencyFromLibs("log4j-bom"))) {
+		because("Workaround for CVE-2025-68161")
+	}
 	constraints {
 		roseauDependencies("org.apache.commons:commons-lang3") {
 			version {

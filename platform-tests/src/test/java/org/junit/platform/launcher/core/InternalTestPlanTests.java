@@ -27,7 +27,7 @@ import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult.EngineResultInfo;
 
-public class InternalTestPlanTests {
+class InternalTestPlanTests {
 
 	private final ConfigurationParameters configParams = mock();
 

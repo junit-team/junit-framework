@@ -75,7 +75,6 @@ class ResourceLocksProviderTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock(providers = ClassLevelProviderTestCase.Provider.class)
 	static class ClassLevelProviderTestCase {
 
@@ -160,7 +159,6 @@ class ResourceLocksProviderTests extends AbstractJupiterTestEngineTests {
 	static class SubClassLevelProviderTestCase extends ClassLevelProviderTestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class NestedClassLevelProviderTestCase {
 
 		@Test
@@ -216,7 +214,6 @@ class ResourceLocksProviderTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MethodLevelProviderTestCase {
 
 		@Test
@@ -266,7 +263,6 @@ class ResourceLocksProviderTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MethodLevelProviderInNestedClassTestCase {
 
 		@Test

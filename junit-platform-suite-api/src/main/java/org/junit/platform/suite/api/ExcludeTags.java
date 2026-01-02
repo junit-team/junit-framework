@@ -31,7 +31,7 @@ import org.apiguardian.api.API;
  * <p>Tag expressions are boolean expressions with the following allowed
  * operators: {@code !} (not), {@code &} (and) and {@code |} (or). Parentheses
  * can be used to adjust for operator precedence. Please refer to the
- * <a href="https://docs.junit.org/current/user-guide/#running-tests-tag-expressions">JUnit User Guide</a>
+ * <a href="https://docs.junit.org/current/running-tests/tags.html#expressions">JUnit User Guide</a>
  * for usage examples.
  *
  * <h2>Syntax Rules for Tags</h2>

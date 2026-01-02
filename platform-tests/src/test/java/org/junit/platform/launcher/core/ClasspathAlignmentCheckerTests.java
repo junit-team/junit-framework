@@ -52,7 +52,7 @@ class ClasspathAlignmentCheckerTests {
 				.hasMessageStartingWith("The wrapped LinkageError is likely caused by the versions of "
 						+ "JUnit jars on the classpath/module path not being properly aligned.") //
 				.hasMessageContaining("Please ensure consistent versions are used") //
-				.hasMessageFindingMatch("https://docs\\.junit\\.org/.*/user-guide/#dependency-metadata") //
+				.hasMessageFindingMatch("https://docs\\.junit\\.org/.*/appendix.html#dependency-metadata") //
 				.hasMessageContaining("The following conflicting versions were detected:") //
 				.hasMessageContaining("- org.junit.jupiter.api: 1.0.0") //
 				.hasMessageContaining("- org.junit.jupiter.engine: 2.0.0") //

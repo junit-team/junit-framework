@@ -15,6 +15,7 @@ import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -43,6 +44,7 @@ record EngineDiscoveryResultsIntegrationTests(TestKitApi testKit) {
 	}
 
 	@Test
+	@NullMarked
 	void collectsDiscoveryIssues() {
 		var issue = DiscoveryIssue.create(Severity.WARNING, "warning");
 		var testEngine = new TestEngineStub() {
@@ -59,7 +61,6 @@ record EngineDiscoveryResultsIntegrationTests(TestKitApi testKit) {
 		assertThat(results.getDiscoveryIssues()).containsExactly(issue);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase {
 		@Test
 		void test() {

@@ -85,7 +85,6 @@ class TagIntegrationTests {
 				.execute();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TaggedTestCase {
 
 		static boolean tag1WasExecuted = false;

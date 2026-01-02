@@ -290,7 +290,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 	static class ParentTestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(BarMethodLevelCallbacks.class)
 	static class ChildTestCase extends ParentTestCase {
 
@@ -309,7 +308,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(BarMethodLevelCallbacks.class)
 	static class TestInterfaceTestCase implements TestInterface {
 
@@ -319,7 +317,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith({ FooMethodLevelCallbacks.class, BarMethodLevelCallbacks.class })
 	static class OuterTestCase {
 
@@ -359,7 +356,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith({ FooMethodLevelCallbacks.class, ExceptionThrowingBeforeEachCallback.class,
 			BarMethodLevelCallbacks.class })
 	static class ExceptionInBeforeEachCallbackTestCase {
@@ -380,7 +376,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith({ FooMethodLevelCallbacks.class, ExceptionThrowingAfterEachCallback.class,
 			BarMethodLevelCallbacks.class })
 	static class ExceptionInAfterEachCallbackTestCase {
@@ -401,7 +396,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(FooMethodLevelCallbacks.class)
 	static class ExceptionInBeforeEachMethodTestCase {
 
@@ -429,7 +423,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(FooMethodLevelCallbacks.class)
 	static class ExceptionInAfterEachMethodTestCase {
 
@@ -450,7 +443,6 @@ class BeforeAndAfterEachTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(FooMethodLevelCallbacks.class)
 	static class ExceptionInTestMethodTestCase {
 

@@ -26,6 +26,8 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.r
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.LogRecord;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -62,6 +64,7 @@ import org.junit.platform.launcher.listeners.UnusedTestExecutionListener;
 /**
  * @since 1.0
  */
+@NullMarked
 class LauncherFactoryTests {
 
 	@SuppressWarnings("DataFlowIssue")
@@ -319,7 +322,7 @@ class LauncherFactoryTests {
 					.addTestEngines(engine) //
 					.build();
 
-			AtomicReference<TestExecutionResult> result = new AtomicReference<>();
+			AtomicReference<@Nullable TestExecutionResult> result = new AtomicReference<>();
 			var listener = new TestExecutionListener() {
 				@Override
 				public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
@@ -354,7 +357,7 @@ class LauncherFactoryTests {
 
 		try (LauncherSession session = LauncherFactory.openSession(config)) {
 
-			AtomicReference<Throwable> errorRef = new AtomicReference<>();
+			AtomicReference<@Nullable Throwable> errorRef = new AtomicReference<>();
 			var listener = new TestExecutionListener() {
 				@Override
 				public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
@@ -382,7 +385,7 @@ class LauncherFactoryTests {
 
 		try (LauncherSession session = LauncherFactory.openSession(config)) {
 
-			AtomicReference<Throwable> errorRef = new AtomicReference<>();
+			AtomicReference<@Nullable Throwable> errorRef = new AtomicReference<>();
 			var listener = new TestExecutionListener() {
 				@Override
 				public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
@@ -469,7 +472,7 @@ class LauncherFactoryTests {
 		// @formatter:on
 	}
 
-	@SuppressWarnings({ "NewClassNamingConvention", "JUnitMalformedDeclaration" })
+	@SuppressWarnings("NewClassNamingConvention")
 	public static class JUnit4Example {
 
 		@org.junit.Test
@@ -478,7 +481,7 @@ class LauncherFactoryTests {
 
 	}
 
-	@SuppressWarnings({ "NewClassNamingConvention", "JUnitMalformedDeclaration" })
+	@SuppressWarnings("NewClassNamingConvention")
 	static class JUnit5Example {
 
 		@Tag("test-post-discovery")
@@ -487,7 +490,6 @@ class LauncherFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(SessionTrackingExtension.class)
 	static class SessionTrackingTestCase {
 
@@ -497,7 +499,6 @@ class LauncherFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(SessionStoringExtension.class)
 	static class SessionStoringTestCase {
 
@@ -576,7 +577,6 @@ class LauncherFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(SessionResourceStoreUsingExtension.class)
 	static class SessionResourceAutoCloseTestCase {
 
@@ -586,7 +586,6 @@ class LauncherFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(RequestResourceStoreUsingExtension.class)
 	static class RequestResourceAutoCloseTestCase {
 

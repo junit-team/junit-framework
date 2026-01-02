@@ -42,12 +42,11 @@ class FailedAssumptionsTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestAbortedExceptionInBeforeAllTestCase {
 
 		@BeforeAll
 		static void beforeAll() {
-			Assumptions.assumeTrue(false);
+			Assumptions.abort();
 		}
 
 		@Test
@@ -55,9 +54,9 @@ class FailedAssumptionsTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class AssumptionViolatedExceptionInBeforeAllTestCase {
 
+		@SuppressWarnings("DataFlowIssue")
 		@BeforeAll
 		static void beforeAll() {
 			Assume.assumeTrue(false);

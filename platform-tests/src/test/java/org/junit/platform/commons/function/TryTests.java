@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
 
-public class TryTests {
+class TryTests {
 
 	@Test
 	void successfulTriesCanBeTransformed() throws Exception {

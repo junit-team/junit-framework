@@ -77,7 +77,6 @@ class ExpectedExceptionSupportTests {
 		return EngineTestKit.execute("junit-jupiter", request().selectors(selectClass(testClass)).build()).testEvents();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(ExpectedExceptionSupport.class)
 	static class ExpectedExceptionTestCase {
 
@@ -109,7 +108,6 @@ class ExpectedExceptionSupportTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(ExpectedExceptionSupport.class)
 	static class ExpectedExceptionSupportWithoutExpectedExceptionRuleTestCase {
 

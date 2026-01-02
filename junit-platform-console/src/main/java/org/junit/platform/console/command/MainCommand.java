@@ -37,7 +37,7 @@ import picocli.CommandLine.Spec;
 		description = "Launches the JUnit Platform for test discovery and execution.", //
 		footerHeading = "%n", //
 		footer = "For more information, please refer to the JUnit User Guide at%n" //
-				+ "@|underline https://docs.junit.org/${junit.docs.version}/user-guide/|@", //
+				+ "@|underline https://docs.junit.org/${junit.docs.version}/|@", //
 		scope = CommandLine.ScopeType.INHERIT, //
 		exitCodeOnInvalidInput = ExitCode.INVALID_INPUT, //
 		exitCodeOnExecutionException = ExitCode.ANY_ERROR, //

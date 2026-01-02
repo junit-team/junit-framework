@@ -212,13 +212,13 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		if (workerLease == null) {
 			return;
 		}
-		threadPool.execute(new RunLeaseAwareWorker(workerLease,
+		threadPool.execute(new RunLeaseAwareWorker(workerLease, doneCondition,
 			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition),
 			() -> this.maybeStartWorker(doneCondition)));
 	}
 
-	private record RunLeaseAwareWorker(WorkerLease workerLease, Runnable work, Runnable onWorkerFinished)
-			implements Runnable {
+	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition, Runnable work,
+			Runnable onWorkerFinished) implements Runnable {
 
 		@Override
 		public void run() {
@@ -916,7 +916,8 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				return;
 			}
 			worker.workerLease.release(false);
-			if (executor.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()) {
+			if (executor.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()
+					|| worker.parentDoneCondition.getAsBoolean()) {
 				return;
 			}
 			throw new RejectedExecutionException("Task with " + workerLeaseManager + " rejected from " + executor);

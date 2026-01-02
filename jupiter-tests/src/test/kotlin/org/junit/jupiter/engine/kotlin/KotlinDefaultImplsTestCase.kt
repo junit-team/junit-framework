@@ -12,7 +12,6 @@ package org.junit.jupiter.engine.kotlin
 import org.junit.jupiter.api.Test
 
 class KotlinDefaultImplsTestCase {
-    @Suppress("JUnitMalformedDeclaration")
     class DefaultImpls {
         @Test
         fun test() {

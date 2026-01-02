@@ -96,7 +96,6 @@ class TestInstancePostProcessorTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(FooInstancePostProcessor.class)
 	@ExtendWith(LegacyInstancePostProcessor.class)
 	static class OuterTestCase implements Named {
@@ -150,7 +149,6 @@ class TestInstancePostProcessorTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCaseWithTestSpecificTestInstancePostProcessor implements Named {
 
 		private final Map<String, String> names = new HashMap<>();

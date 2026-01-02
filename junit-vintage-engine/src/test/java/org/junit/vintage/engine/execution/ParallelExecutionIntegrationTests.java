@@ -11,6 +11,7 @@
 package org.junit.vintage.engine.execution;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.event;
@@ -91,11 +92,12 @@ class ParallelExecutionIntegrationTests {
 		reporter.publishEntry("startedTimestamps", startedTimestamps.toString());
 		reporter.publishEntry("finishedTimestamps", finishedTimestamps.toString());
 
-		assertThat(startedTimestamps).hasSize(3);
-		assertThat(finishedTimestamps).hasSize(3);
-		assertThat(startedTimestamps).allMatch(startTimestamp -> finishedTimestamps.stream().noneMatch(
-			finishedTimestamp -> finishedTimestamp.isBefore(startTimestamp)));
-		assertThat(threadNames).hasSize(3);
+		assertAll( //
+			() -> assertThat(startedTimestamps).hasSize(3), //
+			() -> assertThat(finishedTimestamps).hasSize(3), //
+			() -> assertThat(startedTimestamps).allMatch(startTimestamp -> finishedTimestamps.stream().noneMatch( //
+				finishedTimestamp -> finishedTimestamp.isBefore(startTimestamp))), //
+			() -> assertThat(threadNames).hasSize(3));
 	}
 
 	@Test

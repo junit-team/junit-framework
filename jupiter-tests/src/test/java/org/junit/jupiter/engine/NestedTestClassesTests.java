@@ -310,7 +310,6 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCaseWithNesting {
 
 		@Test
@@ -331,7 +330,6 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCaseWithDoubleNesting {
 
 		static int beforeTopCount = 0;
@@ -457,7 +455,7 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 	static class AbstractOuterClass {
 	}
 
-	@SuppressWarnings({ "JUnitMalformedDeclaration", "NewClassNamingConvention" })
+	@SuppressWarnings("NewClassNamingConvention")
 	static class OuterClass extends AbstractOuterClass {
 
 		@Test

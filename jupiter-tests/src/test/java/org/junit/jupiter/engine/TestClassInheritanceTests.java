@@ -14,7 +14,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 
 import java.util.ArrayList;
@@ -157,7 +157,6 @@ class TestClassInheritanceTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class LocalTestCase extends AbstractTestCase {
 
 		boolean throwExceptionInAfterMethod = false;
@@ -198,7 +197,7 @@ class TestClassInheritanceTests extends AbstractJupiterTestEngineTests {
 
 		@Test
 		void aborted() {
-			assumeTrue(false);
+			abort();
 		}
 
 		@Test
@@ -253,7 +252,6 @@ class TestClassInheritanceTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase3 extends TestCase2 {
 
 		@BeforeAll

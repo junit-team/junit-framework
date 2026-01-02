@@ -2,13 +2,13 @@
  * CSS customizations for JUnit
  */
 
-@import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,700|Open+Sans:300,300i,400,400i,700,700i');
+@import url('https://fonts.googleapis.com/css2?family=Blinker:wght@100;200;300;400;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 :root {
     /* body, block and code fonts */
-    --body-font-family: 'Open Sans', Arial, Helvetica, sans-serif;
-    --block-font-family: 'Open Sans', Arial, Helvetica, sans-serif;
-    --code-font-family: "Fira Mono", monospace;
+    --body-font-family: Inter, sans-serif;
+    --block-font-family: Inter, sans-serif;
+    --code-font-family: "JetBrains Mono", monospace;
     /* Text colors for body and block elements */
     --body-text-color: #333;
     --block-text-color: #333;
@@ -26,7 +26,7 @@
     --even-row-color: #fff;
     --odd-row-color: #f6f6f6;
     /* Text color for page title */
-    --title-color: #333;
+    --title-color: #444;
     /* Text colors for links */
     --link-color: #dc524a;
     --link-color-active: #b62b23;
@@ -46,14 +46,20 @@
     --button-border-color: #b0b8c8;
 }
 
-.title {
-    font-weight: 300;
-    font-size: 32px;
-    margin-top: 0;
+h1, h2 {
+    font-family: "Blinker", sans-serif;
+    font-style: normal !important;
+    font-weight: 600;
 }
 
-ul.nav-list {
-    padding-left: 10px;
+dl.notes > dt {
+    font-size: var(--body-font-size);
+}
+
+@media screen and (min-width: 1024px) {
+    .title {
+        font-size: 2rem;
+    }
 }
 
 .top-nav a:hover, .bottom-nav a:hover {

@@ -371,7 +371,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class NoSharedResourcesTestCase {
 
 		@Test
@@ -383,7 +382,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock("a1")
 	@ResourceLock(value = "a2", mode = ResourceAccessMode.READ_WRITE)
 	@ResourceLock(value = "a3", mode = ResourceAccessMode.READ_WRITE, target = ResourceLockTarget.CHILDREN)
@@ -406,7 +404,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock(providers = { //
 			SharedResourcesViaAnnotationProvidersTestCase.FirstClassLevelProvider.class, //
 			SharedResourcesViaAnnotationProvidersTestCase.SecondClassLevelProvider.class //
@@ -463,7 +460,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock( //
 			value = "a1", //
 			providers = SharedResourcesViaAnnotationValueAndProvidersTestCase.FirstClassLevelProvider.class //
@@ -517,7 +513,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock( //
 			value = "a1", //
 			target = ResourceLockTarget.CHILDREN, //
@@ -540,7 +535,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock(value = "a1", mode = ResourceAccessMode.READ_WRITE, target = ResourceLockTarget.CHILDREN)
 	static class SharedResourcesHavingTheSameValueButDifferentModeAreNotDeduplicatedTestCase {
 
@@ -550,7 +544,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCanNotDeclareSharedResourcesForChildrenTestCase {
 
 		@Test
@@ -586,7 +579,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ResourceLock
 	static class EmptyAnnotationTestCase {
 
@@ -601,7 +593,6 @@ class ResourceLockAnnotationTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ResourceLock( //
 			value = "a1", //

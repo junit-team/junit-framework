@@ -34,7 +34,6 @@ class ParameterizedClassKotlinIntegrationTests {
         }
     }
 
-    @Suppress("JUnitMalformedDeclaration")
     @ParameterizedClass
     @ValueSource(ints = [-1, 1])
     data class TestCase(

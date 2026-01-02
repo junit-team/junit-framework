@@ -1034,7 +1034,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 				.flatMap(Collection::stream);
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	static class TwoInvocationsTestCase {
@@ -1051,7 +1050,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class NestedClassTemplateWithTwoInvocationsTestCase {
 		@Test
 		void a() {
@@ -1079,7 +1077,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	static class TwoInvocationsWithExtensionTestCase {
@@ -1170,7 +1167,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	@ExtendWith(SeparateExtensionContextTestCase.SomeResourceExtension.class)
@@ -1241,7 +1237,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(InvalidZeroInvocationTestCase.Ext.class)
 	static class InvalidZeroInvocationTestCase {
@@ -1266,7 +1261,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(ValidZeroInvocationTestCase.Ext.class)
 	static class ValidZeroInvocationTestCase {
@@ -1296,7 +1290,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	static class NoProviderRegisteredTestCase {
 
@@ -1306,7 +1299,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(NoSupportingProviderRegisteredTestCase.Ext.class)
 	static class NoSupportingProviderRegisteredTestCase {
@@ -1331,7 +1323,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	@ClassTemplate
 	static class TwoTimesTwoInvocationsWithMultipleMethodsTestCase {
@@ -1409,7 +1400,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith({ PreparingClassTemplateInvocationContextProvider.class, CompanionExtension.class })
 	static class ClassTemplateWithPreparationsTestCase {
@@ -1485,7 +1475,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	@ClassTemplate
 	static class CallbackWrappingBehaviorTestCase {
@@ -1504,7 +1493,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	@ClassTemplate
 	static class CallbackExceptionBehaviorTestCase {
@@ -1567,7 +1555,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class InheritedTwoInvocationsTestCase extends TwoInvocationsTestCase {
 		@Test
 		void c() {
@@ -1587,7 +1574,6 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ClassTemplate
 	@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
 	@ResourceLock("test-resource")

@@ -53,7 +53,6 @@ class LauncherBasedEnableRuleMigrationSupportTests {
 		return EngineTestKit.execute("junit-jupiter", request().selectors(selectClass(testClass)).build()).testEvents();
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@EnableRuleMigrationSupport
 	static class EnableRuleMigrationSupportWithBothRuleTypesTestCase {
 
@@ -71,7 +70,7 @@ class LauncherBasedEnableRuleMigrationSupportTests {
 			}
 		};
 
-		private ExternalResource resource2 = new ExternalResource() {
+		private final ExternalResource resource2 = new ExternalResource() {
 			@Override
 			protected void before() {
 				beforeOfRule2WasExecuted = true;
@@ -95,7 +94,6 @@ class LauncherBasedEnableRuleMigrationSupportTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@ExtendWith(VerifierSupport.class)
 	static class VerifierSupportForErrorCollectorTestCase {
 

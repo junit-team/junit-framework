@@ -46,7 +46,7 @@ jobs:
           jacocoRootReport \
           --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
     - name: Upload to Codecov.io
-      uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -101,15 +101,12 @@ jobs:
           publishAllPublicationsToMavenCentralSnapshotsRepository -x check \
           prepareGitHubAttestation
     - name: Generate build provenance attestations
-      uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+      uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
       with:
         subject-path: documentation/build/attestation/*.jar
 
-  documentation:
+  build_documentation:
     name: Build Documentation
-    concurrency:
-      group: github-pages-${{ github.ref }}
-      cancel-in-progress: true
     needs: macOS
     runs-on: ubuntu-latest
     steps:
@@ -134,3 +131,16 @@ jobs:
           antora \
           -Pantora.downloadNode=false \
           -Dscan.tag.Documentation
+
+  deploy_documentation:
+    name: Deploy Documentation
+    needs: build_documentation
+    if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger documentation site deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-docs.yml --repo junit-team/junit-framework --ref docs-site

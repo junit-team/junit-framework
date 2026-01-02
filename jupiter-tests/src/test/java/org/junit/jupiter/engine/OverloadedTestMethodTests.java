@@ -64,7 +64,6 @@ class OverloadedTestMethodTests extends AbstractJupiterTestEngineTests {
 		assertTrue(first.isPresent());
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCase {
 
 		@Test

@@ -6,7 +6,7 @@ module.exports = async ({ github, context }) => {
         tag_name: `r${releaseVersion}`,
         name: `JUnit ${releaseVersion}`,
         generate_release_notes: true,
-        body: `JUnit ${releaseVersion} = Platform ${releaseVersion} + Jupiter ${releaseVersion} + Vintage ${releaseVersion}\n\nSee [Release Notes](https://docs.junit.org/${releaseVersion}/release-notes/).`,
+        body: `JUnit ${releaseVersion} = Platform ${releaseVersion} + Jupiter ${releaseVersion} + Vintage ${releaseVersion}\n\nSee [Release Notes](https://docs.junit.org/${releaseVersion}/release-notes.html).`,
         prerelease: releaseVersion.includes("-"),
     };
     console.log(requestBody);

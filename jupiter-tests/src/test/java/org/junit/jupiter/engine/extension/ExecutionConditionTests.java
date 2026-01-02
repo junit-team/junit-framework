@@ -151,7 +151,6 @@ class ExecutionConditionTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@SystemProperty(key = FOO, value = BOGUS)
 	@DeactivatedConditions
 	static class TestCaseWithExecutionConditionOnClass {
@@ -168,7 +167,6 @@ class ExecutionConditionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TestCaseWithExecutionConditionOnMethods {
 
 		@Test

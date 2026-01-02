@@ -18,6 +18,7 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.r
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.UniqueId;
@@ -26,7 +27,8 @@ import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 
-public class EngineDiscoveryRequestResolverTests {
+@NullMarked
+class EngineDiscoveryRequestResolverTests {
 
 	@Test
 	void allowsSelectorResolversToReportDiscoveryIssues() {

@@ -9,6 +9,8 @@
  */
 
 /// Contains JUnit Start API for writing and running tests.
+///
+/// @since 6.1
 
 @NullMarked
 package org.junit.start;

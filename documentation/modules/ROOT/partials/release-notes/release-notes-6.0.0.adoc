@@ -20,4 +20,4 @@
 * Removal of various deprecated behaviors and APIs
 
 For complete details consult the
-https://docs.junit.org/6.0.0/release-notes/[6.0.0 Release Notes] online.
+https://docs.junit.org/6.0.0/release-notes.html[6.0.0 Release Notes] online.

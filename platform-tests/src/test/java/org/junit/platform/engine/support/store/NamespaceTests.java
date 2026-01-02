@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.EqualsAndHashCodeAssertions.assertEqualsAndH
 
 import org.junit.jupiter.api.Test;
 
-public class NamespaceTests {
+class NamespaceTests {
 
 	@Test
 	void namespacesEqualForSamePartsSequence() {

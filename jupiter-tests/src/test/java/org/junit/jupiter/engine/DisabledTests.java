@@ -50,7 +50,6 @@ class DisabledTests extends AbstractJupiterTestEngineTests {
 
 	// -------------------------------------------------------------------
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Disabled
 	static class DisabledTestClassTestCase {
 
@@ -60,7 +59,6 @@ class DisabledTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class DisabledTestMethodsTestCase {
 
 		@Test

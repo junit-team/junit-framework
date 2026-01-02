@@ -2421,7 +2421,6 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@interface TwoMethodSources {
 		}
 
-		@SuppressWarnings("JUnitMalformedDeclaration")
 		@ParameterizedTest(quoteTextArguments = false)
 		@TwoMethodSources
 		void testWithRepeatableMethodSourceAsMetaAnnotation(String argument) {

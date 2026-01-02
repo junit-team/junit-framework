@@ -72,7 +72,7 @@ class ClasspathAlignmentChecker {
 					.append(lineBreak) //
 					.append("Please ensure consistent versions are used (see https://docs.junit.org/") //
 					.append(ClasspathAlignmentChecker.class.getPackage().getImplementationVersion()) //
-					.append("/user-guide/#dependency-metadata).") //
+					.append("/appendix.html#dependency-metadata).") //
 					.append(lineBreak) //
 					.append("The following conflicting versions were detected:").append(lineBreak);
 			packagesByVersions.values().stream() //

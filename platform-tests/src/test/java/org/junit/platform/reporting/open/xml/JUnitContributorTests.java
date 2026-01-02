@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.reporting.tooling.core.htmlreport.DefaultHtmlReportWriter;
 
-public class JUnitContributorTests {
+class JUnitContributorTests {
 
 	@Test
 	void contributesJUnitSpecificMetadata(@TempDir Path tempDir) throws Exception {

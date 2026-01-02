@@ -505,7 +505,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutAnnotatedTestMethodTestCase {
 		@Test
 		@Timeout(value = 10, unit = MILLISECONDS)
@@ -527,7 +526,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutAnnotatedBeforeAllMethodTestCase {
 		@BeforeAll
 		@Timeout(value = 10, unit = MILLISECONDS)
@@ -541,7 +539,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutAnnotatedBeforeEachMethodTestCase {
 		@BeforeEach
 		@Timeout(value = 10, unit = MILLISECONDS)
@@ -555,7 +552,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutAnnotatedAfterEachMethodTestCase {
 		@Test
 		void testMethod() {
@@ -569,7 +565,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutAnnotatedAfterAllMethodTestCase {
 		@Test
 		void testMethod() {
@@ -608,7 +603,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 	static class InheritedTimeoutAnnotatedClassTestCase extends TimeoutAnnotatedClassTestCase {
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MethodWithoutInterruptedExceptionTestCase {
 		@Test
 		@Timeout(value = 1, unit = MILLISECONDS)
@@ -617,7 +611,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class PlainTestCase {
 
 		@Nullable
@@ -666,7 +659,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class UnrecoverableExceptionTestCase {
 		@Test
 		@Timeout(value = 1, unit = NANOSECONDS)
@@ -676,7 +668,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Timeout(10)
 	static class NonTimeoutExceedingTestCase {
 		@Test
@@ -717,7 +708,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class IllegalTimeoutDurationTestCase {
 
 		@Test
@@ -727,7 +717,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutExceedingWithInferredThreadModeTestCase {
 		@Test
 		@Timeout(value = 10, unit = MILLISECONDS)
@@ -736,7 +725,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class TimeoutExceedingSeparateThreadTestCase {
 		@Test
 		@Timeout(value = 100, unit = MILLISECONDS, threadMode = SEPARATE_THREAD)
@@ -745,7 +733,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class NonTimeoutExceedingSeparateThreadTestCase {
 		@Test
 		@Timeout(value = 100, unit = MILLISECONDS, threadMode = SEPARATE_THREAD)
@@ -753,7 +740,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class UnrecoverableExceptionInSeparateThreadTestCase {
 		@Test
 		@Timeout(value = 100, unit = SECONDS, threadMode = SEPARATE_THREAD)
@@ -762,7 +748,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class ExceptionInSeparateThreadTestCase {
 		@Test
 		@Timeout(value = 5, unit = SECONDS, threadMode = SEPARATE_THREAD)
@@ -771,7 +756,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class FailedAssertionInSeparateThreadTestCase {
 		@Test
 		@Timeout(value = 5, unit = SECONDS, threadMode = SEPARATE_THREAD)
@@ -786,7 +770,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Timeout(value = 100, unit = MILLISECONDS, threadMode = SEPARATE_THREAD)
 	static class TimeoutExceededOnClassLevelTestCase {
 		@Test
@@ -795,7 +778,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Timeout(value = 100, unit = MILLISECONDS, threadMode = SEPARATE_THREAD)
 	static class NonTimeoutExceededOnClassLevelTestCase {
 		@Test
@@ -803,7 +785,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(OrderAnnotation.class)
 	static class OneTestStuckForeverAndTheOthersNotTestCase {
 
@@ -827,7 +808,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	static class MixedSameThreadAndSeparateThreadTestCase {
 		@Test
 		@Timeout(value = 10, unit = MILLISECONDS, threadMode = SEPARATE_THREAD)
@@ -848,7 +828,6 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@TestMethodOrder(OrderAnnotation.class)
 	static class OneTestStuckForeverAndTheOthersInSameThreadNotTestCase {
 

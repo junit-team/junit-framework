@@ -59,14 +59,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * configurations will override the class level default {@code Locale}.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution">parallel test execution</a>,
+ * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
  * all tests annotated with {@link DefaultLocale @DefaultLocale},
  * {@link ReadsDefaultLocale @ReadsDefaultLocale}, and
  * {@link WritesDefaultLocale} are scheduled in a way that guarantees
  * correctness under mutation of shared global state.
  *
  * <p>For more details and examples, see the
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-DefaultLocale">User Guide</a>.
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#DefaultLocale">User Guide</a>.
  *
  * @since 6.1
  * @see Locale#getDefault()

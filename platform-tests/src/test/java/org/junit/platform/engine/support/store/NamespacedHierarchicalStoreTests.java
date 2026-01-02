@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.ConcurrencyTestingUtils.executeConcurrently;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -78,6 +80,13 @@ public class NamespacedHierarchicalStoreTests {
 		@Test
 		void valueIsComputedIfAbsent() {
 			assertNull(store.get(namespace, key));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> value));
+			assertEquals(value, store.get(namespace, key));
+		}
+
+		@Test
+		void valueIsComputedIfNull() {
+			assertNull(store.put(namespace, key, null));
 			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> value));
 			assertEquals(value, store.get(namespace, key));
 		}
@@ -316,20 +325,40 @@ public class NamespacedHierarchicalStoreTests {
 		@SuppressWarnings("deprecation")
 		@Test
 		void getOrComputeIfAbsentWithExceptionThrowingCreatorFunction() {
-			var e = assertThrows(RuntimeException.class, () -> store.getOrComputeIfAbsent(namespace, key, __ -> {
-				throw new RuntimeException("boom");
+			var e = assertThrows(ComputeException.class, () -> store.getOrComputeIfAbsent(namespace, key, __ -> {
+				throw new ComputeException("boom");
 			}));
-			assertSame(e, assertThrows(RuntimeException.class, () -> store.get(namespace, key)));
-			assertSame(e, assertThrows(RuntimeException.class, () -> store.remove(namespace, key)));
+			assertSame(e, assertThrows(ComputeException.class, () -> store.get(namespace, key)));
+			assertSame(e, assertThrows(ComputeException.class, () -> store.remove(namespace, key)));
 		}
 
 		@Test
 		void computeIfAbsentWithExceptionThrowingCreatorFunction() {
-			assertThrows(RuntimeException.class, () -> store.computeIfAbsent(namespace, key, __ -> {
-				throw new RuntimeException("boom");
+			assertThrows(ComputeException.class, () -> store.computeIfAbsent(namespace, key, __ -> {
+				throw new ComputeException("boom");
 			}));
 			assertNull(store.get(namespace, key));
 			assertNull(store.remove(namespace, key));
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void getOrComputeIfAbsentDoesNotSeeComputeIfAbsentWithExceptionThrowingCreatorFunction() {
+			assertThrows(ComputeException.class, () -> store.computeIfAbsent(namespace, key, __ -> {
+				throw new ComputeException("boom");
+			}));
+			assertNull(store.get(namespace, key));
+			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, __ -> value));
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void computeIfAbsentSeesGetOrComputeIfAbsentWithExceptionThrowingCreatorFunction() {
+			assertThrows(ComputeException.class, () -> store.getOrComputeIfAbsent(namespace, key, __ -> {
+				throw new ComputeException("boom");
+			}));
+			assertThrows(ComputeException.class, () -> store.get(namespace, key));
+			assertThrows(ComputeException.class, () -> store.computeIfAbsent(namespace, key, __ -> value));
 		}
 
 		@Test
@@ -416,15 +445,56 @@ public class NamespacedHierarchicalStoreTests {
 			assertEquals(1, counter.get());
 			assertThat(values).hasSize(threads).containsOnly(1);
 		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void updateRecursivelyGetOrComputeIfAbsent() {
+			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+				var value = localStore.getOrComputeIfAbsent(namespace, new CollidingKey("a"), //
+					a -> requireNonNull(localStore.getOrComputeIfAbsent(namespace, new CollidingKey("b"), //
+						b -> "enigma")));
+				assertEquals("enigma", value);
+			}
+		}
+
+		@Test
+		void updateRecursivelyComputeIfAbsent() {
+			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+				var value = localStore.computeIfAbsent(namespace, new CollidingKey("a"), //
+					a -> localStore.computeIfAbsent(namespace, new CollidingKey("b"), //
+						b -> "enigma"));
+				assertEquals("enigma", value);
+			}
+		}
+
+		private record CollidingKey(String value) {
+
+			@Override
+			public int hashCode() {
+				return 42;
+			}
+		}
 	}
 
 	@Nested
 	class InheritedValuesTests {
 
+		@SuppressWarnings("deprecation")
 		@Test
-		void valueFromParentIsVisible() {
+		void presentValueFromParentIsPresent() {
 			parentStore.put(namespace, key, value);
 			assertEquals(value, store.get(namespace, key));
+			assertEquals(value, store.getOrComputeIfAbsent(namespace, key, __ -> "enigma"));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> "enigma"));
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void absentValueFromParentIsOverriddenByComputeIfAbsent() {
+			parentStore.put(namespace, key, null);
+			assertNull(store.get(namespace, key));
+			assertNull(store.getOrComputeIfAbsent(namespace, key, __ -> value));
+			assertEquals(value, store.computeIfAbsent(namespace, key, __ -> value));
 		}
 
 		@Test
@@ -522,19 +592,19 @@ public class NamespacedHierarchicalStoreTests {
 		@Test
 		void doesNotCallCloseActionForValuesThatThrowExceptionsDuringCleanup() throws Throwable {
 			store.put(namespace, "key1", "value1");
-			assertThrows(RuntimeException.class, () -> store.computeIfAbsent(namespace, "key2", __ -> {
-				throw new RuntimeException("boom");
+			assertThrows(ComputeException.class, () -> store.computeIfAbsent(namespace, "key2", __ -> {
+				throw new ComputeException("boom");
 			}));
-			assertThrows(RuntimeException.class, () -> store.getOrComputeIfAbsent(namespace, "key2", __ -> {
-				throw new RuntimeException("boom");
+			assertThrows(ComputeException.class, () -> store.getOrComputeIfAbsent(namespace, "key3", __ -> {
+				throw new ComputeException("boom");
 			}));
-			store.put(namespace, "key3", "value3");
+			store.put(namespace, "key4", "value4");
 
 			store.close();
 			assertClosed();
 
 			var inOrder = inOrder(closeAction);
-			inOrder.verify(closeAction).close(namespace, "key3", "value3");
+			inOrder.verify(closeAction).close(namespace, "key4", "value4");
 			inOrder.verify(closeAction).close(namespace, "key1", "value1");
 			inOrder.verifyNoMoreInteractions();
 		}
@@ -663,6 +733,68 @@ public class NamespacedHierarchicalStoreTests {
 
 	}
 
+	@Nested
+	class DeferredSupplierTests {
+
+		@Test
+		void getCanBeInterrupted() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				try {
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+					throw new ComputeException(e);
+				}
+				return value;
+			});
+			Thread.currentThread().interrupt();
+			assertThrows(InterruptedException.class, () -> {
+				supplier.get();
+			});
+			assertTrue(Thread.interrupted());
+		}
+
+		@Test
+		void getThrowsIfUnrecoverable() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				throw new OutOfMemoryError("boom");
+			});
+			supplier.run();
+			assertThrows(OutOfMemoryError.class, () -> {
+				supplier.get();
+			});
+		}
+
+		@Test
+		void getOrThrowThrowsIfUnrecoverable() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				throw new OutOfMemoryError("boom");
+			});
+			supplier.run();
+			assertThrows(OutOfMemoryError.class, () -> {
+				supplier.getOrThrow();
+			});
+		}
+
+		@Test
+		void getOrThrowCanBeInterrupted() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+				try {
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+					throw new ComputeException(e);
+				}
+				return value;
+			});
+			Thread.currentThread().interrupt();
+			assertThrows(InterruptedException.class, () -> {
+				supplier.getOrThrow();
+			});
+			assertTrue(Thread.interrupted());
+		}
+	}
+
 	private static Object createObject(String display) {
 		return new Object() {
 
@@ -671,5 +803,22 @@ public class NamespacedHierarchicalStoreTests {
 				return display;
 			}
 		};
+	}
+
+	/**
+	 * To avoid confusion with other Runtime exceptions that can be thrown.
+	 */
+	private static final class ComputeException extends RuntimeException {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		ComputeException(String msg) {
+			super(msg);
+		}
+
+		ComputeException(InterruptedException e) {
+			super(e);
+		}
 	}
 }

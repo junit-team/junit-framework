@@ -44,6 +44,7 @@ class ArgumentsAccessorKotlinTests {
         assertEquals('A', defaultArgumentsAccessor(1, 'A').get(0))
     }
 
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     @Test
     fun `get() with index and class reference`() {
         assertEquals(1, defaultArgumentsAccessor(1, 1).get(0, Integer::class.java))

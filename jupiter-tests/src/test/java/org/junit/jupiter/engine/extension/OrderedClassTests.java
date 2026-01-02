@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -281,19 +282,23 @@ class OrderedClassTests {
 		}
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	@Order(2)
 	@DisplayName("Z")
 	static class A_TestCase extends BaseTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class B_TestCase extends BaseTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	@Order(10)
 	@DisplayName("A")
 	static class C_TestCase extends BaseTestCase {
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	static class OuterWithGlobalConfig {
 
 		@Nested
@@ -332,6 +337,7 @@ class OrderedClassTests {
 		}
 	}
 
+	@SuppressWarnings("NewClassNamingConvention")
 	@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 	static class OuterWithLocalConfig {
 
@@ -390,7 +396,6 @@ class OrderedClassTests {
 		}
 	}
 
-	@SuppressWarnings("JUnitMalformedDeclaration")
 	@Order(1)
 	@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 	@ClassTemplate
@@ -441,6 +446,7 @@ class OrderedClassTests {
 			}
 		}
 
+		@NullMarked
 		private static class Twice implements ClassTemplateInvocationContextProvider {
 
 			@Override
