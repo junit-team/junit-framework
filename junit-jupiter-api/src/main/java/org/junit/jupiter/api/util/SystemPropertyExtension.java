@@ -14,8 +14,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.util.SystemPropertyExtensionUtils.findAllContexts;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
+import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +34,6 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.platform.commons.support.AnnotationSupport;
 
 /**
  * @since 6.1
@@ -169,18 +168,14 @@ final class SystemPropertyExtension
 	}
 
 	private Set<String> findEntriesToClear(AnnotatedElement element) {
-		return findAnnotations(element, ClearSystemProperty.class) //
+		return findRepeatableAnnotations(element, ClearSystemProperty.class).stream() //
 				.map(ClearSystemProperty::key) //
 				.collect(SystemPropertyExtensionUtils.distinctToSet());
 	}
 
 	private Map<String, String> findEntriesToSet(AnnotatedElement element) {
-		return findAnnotations(element, SetSystemProperty.class) //
+		return findRepeatableAnnotations(element, SetSystemProperty.class).stream() //
 				.collect(toMap(SetSystemProperty::key, SetSystemProperty::value));
-	}
-
-	private <A extends Annotation> Stream<A> findAnnotations(AnnotatedElement element, Class<A> clazz) {
-		return AnnotationSupport.findRepeatableAnnotations(element, clazz).stream();
 	}
 
 	private void preventClearAndSetSameEntries(Collection<String> entriesToClear, Collection<String> entriesToSet) {
