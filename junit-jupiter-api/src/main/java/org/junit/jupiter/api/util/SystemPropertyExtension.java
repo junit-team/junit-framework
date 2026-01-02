@@ -15,10 +15,10 @@ import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.util.SystemPropertyExtensionUtils.findAllContexts;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
+import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -128,8 +128,8 @@ final class SystemPropertyExtension
 
 		// we have to apply the annotations from the outermost to the innermost ExtensionContext.
 		List<ExtensionContext> contexts = findAllContexts(originalContext);
-		Collections.reverse(contexts);
-		contexts.forEach(currentContext -> clearAndSetEntries(currentContext, originalContext, !doCompleteBackup));
+		forEachInReverseOrder(contexts,
+			currentContext -> clearAndSetEntries(currentContext, originalContext, !doCompleteBackup));
 	}
 
 	private boolean isRestoreAnnotationPresent(ExtensionContext originalContext) {
