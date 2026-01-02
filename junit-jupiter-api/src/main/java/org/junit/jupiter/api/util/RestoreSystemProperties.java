@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.STABLE;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -17,6 +19,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * {@code @RestoreSystemProperties} is a JUnit Jupiter extension to restore the entire set of
@@ -66,6 +69,8 @@ import org.apiguardian.api.API;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @WritesSystemProperty
-@API(status = API.Status.STABLE, since = "6.1")
+@ExtendWith(SystemPropertyExtension.class)
+@API(status = STABLE, since = "6.1")
+@SuppressWarnings("exports")
 public @interface RestoreSystemProperties {
 }

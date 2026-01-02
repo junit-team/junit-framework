@@ -18,6 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * {@code @SetSystemProperty} is a JUnit Jupiter extension to set the value of a
@@ -50,7 +51,9 @@ import org.apiguardian.api.API;
 @Inherited
 @Repeatable(SetSystemProperty.SetSystemProperties.class)
 @WritesSystemProperty
+@ExtendWith(SystemPropertyExtension.class)
 @API(status = API.Status.STABLE, since = "6.1")
+@SuppressWarnings("exports")
 public @interface SetSystemProperty {
 
 	/**
