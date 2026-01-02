@@ -13,6 +13,8 @@ package org.junit.jupiter.api.util;
 import java.util.Properties;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * @since 6.1
  */
@@ -40,7 +42,7 @@ final class SystemPropertyExtension extends
 	}
 
 	@Override
-	protected String getEntry(String key) {
+	protected @Nullable String getEntry(String key) {
 		return System.getProperty(key);
 	}
 

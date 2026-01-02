@@ -13,6 +13,7 @@ package org.junit.jupiter.api.util;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.util.SystemPropertyExtensionUtils.findAllContexts;
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -73,10 +75,7 @@ abstract class AbstractEntryBasedExtension<K, V, C extends Annotation, S extends
 	}
 
 	private void applyForAllContexts(ExtensionContext originalContext) {
-		boolean fullRestore = AnnotationSupport.findAnnotation(originalContext.getElement(),
-			getRestoreAnnotationType()).isPresent();
-
-		if (fullRestore) {
+		if (isRestoreAnnotationPresent(originalContext)) {
 			Properties bulk = this.prepareToEnterRestorableContext();
 			storeOriginalCompleteEntries(originalContext, bulk);
 		}
@@ -88,7 +87,16 @@ abstract class AbstractEntryBasedExtension<K, V, C extends Annotation, S extends
 		 */
 		List<ExtensionContext> contexts = findAllContexts(originalContext);
 		Collections.reverse(contexts);
-		contexts.forEach(currentContext -> clearAndSetEntries(currentContext, originalContext, !fullRestore));
+		contexts.forEach(currentContext -> clearAndSetEntries(currentContext, originalContext,
+			!isRestoreAnnotationPresent(originalContext)));
+	}
+
+	private boolean isRestoreAnnotationPresent(ExtensionContext originalContext) {
+		Class<R> restoreAnnotationType = getRestoreAnnotationType();
+		// TODO: Can we do this with more grace?
+		return findAnnotation(originalContext.getElement(), restoreAnnotationType).isPresent()
+				|| findAnnotation(originalContext.getRequiredTestClass(), restoreAnnotationType,
+					originalContext.getEnclosingTestClasses()).isPresent();
 	}
 
 	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
@@ -285,7 +293,7 @@ abstract class AbstractEntryBasedExtension<K, V, C extends Annotation, S extends
 	/**
 	 * Gets the entry indicated by the specified key.
 	 */
-	protected abstract V getEntry(K key);
+	protected abstract @Nullable V getEntry(K key);
 
 	/**
 	 * Sets the entry indicated by the specified key.
