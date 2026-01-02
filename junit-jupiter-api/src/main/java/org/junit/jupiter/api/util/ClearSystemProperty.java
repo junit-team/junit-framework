@@ -18,6 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * {@code @ClearSystemProperty} is a JUnit Jupiter extension to clear the value
@@ -47,7 +48,9 @@ import org.apiguardian.api.API;
 @Inherited
 @Repeatable(ClearSystemProperty.ClearSystemProperties.class)
 @WritesSystemProperty
+@ExtendWith(SystemPropertyExtension.class)
 @API(status = API.Status.STABLE, since = "6.1")
+@SuppressWarnings("exports")
 public @interface ClearSystemProperty {
 
 	/**
