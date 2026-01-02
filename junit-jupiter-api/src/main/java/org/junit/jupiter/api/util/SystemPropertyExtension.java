@@ -13,8 +13,8 @@ package org.junit.jupiter.api.util;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.util.SystemPropertyExtensionUtils.findAllContexts;
-import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
+import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
 
 import java.lang.reflect.AnnotatedElement;
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -120,23 +121,23 @@ final class SystemPropertyExtension
 	}
 
 	private void applyForAllContexts(ExtensionContext originalContext) {
-		boolean doCompleteBackup = isRestoreAnnotationPresent(originalContext);
+		var contexts = findAllContexts(originalContext);
+		boolean doCompleteBackup = isRestoreAnnotationPresent(contexts);
 		if (doCompleteBackup) {
 			var properties = this.prepareToEnterRestorableContext();
 			storeCompleteBackup(originalContext, properties);
 		}
 
 		// we have to apply the annotations from the outermost to the innermost ExtensionContext.
-		List<ExtensionContext> contexts = findAllContexts(originalContext);
 		forEachInReverseOrder(contexts,
 			currentContext -> clearAndSetEntries(currentContext, originalContext, !doCompleteBackup));
 	}
 
-	private boolean isRestoreAnnotationPresent(ExtensionContext originalContext) {
-		// TODO: Can we do this with more grace?
-		return findAnnotation(originalContext.getElement(), RestoreSystemProperties.class).isPresent()
-				|| findAnnotation(originalContext.getRequiredTestClass(), RestoreSystemProperties.class,
-					originalContext.getEnclosingTestClasses()).isPresent();
+	private boolean isRestoreAnnotationPresent(List<ExtensionContext> contexts) {
+		return contexts.stream() //
+				.map(ExtensionContext::getElement) //
+				.flatMap(Optional::stream) //
+				.anyMatch(annotatedElement -> isAnnotated(annotatedElement, RestoreSystemProperties.class));
 	}
 
 	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
