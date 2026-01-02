@@ -260,7 +260,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 			@Test
 			@DisplayName("Restore from class should restore direct mods")
 			void restoreShouldHaveRevertedDirectModification() {
-				assertThat(System.getProperties()).isStrictlyEqualTo(initialState);
+				assertThat(System.getProperties()).isSameAs(initialState);
 			}
 
 		}
@@ -311,7 +311,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 			void restoreShouldHaveRevertedDirectModification() {
 				assertThat(System.getProperty("Restore")).isNull();
 				assertThat(System.getProperties().get("XYZ")).isNull();
-				assertThat(System.getProperties()).isStrictlyEqualTo(initialState);
+				assertThat(System.getProperties()).isSameAs(initialState);
 			}
 
 		}
@@ -409,7 +409,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 					Properties postPrepareToExitSysProps = System.getProperties();
 
 					assertThat(returnedFromPrepareToEnter).withFailMessage(
-						"prepareToEnterRestorableContext should return actual original or deep copy").isStrictlyEqualTo(
+						"prepareToEnterRestorableContext should return actual original or deep copy").isSameAs(
 							initialState);
 
 					assertThat(returnedFromPrepareToEnter).withFailMessage(
@@ -418,8 +418,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 
 					assertThat(postPrepareToEnterSysProps).isEffectivelyEqualsTo(initialState);
 
-					// Could assert isSameAs, but a deep copy would also be allowed
-					assertThat(postPrepareToExitSysProps).isStrictlyEqualTo(initialState);
+					assertThat(postPrepareToExitSysProps).isSameAs(initialState);
 
 				}
 				finally {
@@ -658,7 +657,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 		void restoreShouldHaveRevertedDirectModification() {
 			assertThat(System.getProperty("Restore")).isNull();
 			assertThat(System.getProperties().get("XYZ")).isNull();
-			assertThat(System.getProperties()).isStrictlyEqualTo(initialState);
+			assertThat(System.getProperties()).isSameAs(initialState);
 		}
 
 		@Nested
