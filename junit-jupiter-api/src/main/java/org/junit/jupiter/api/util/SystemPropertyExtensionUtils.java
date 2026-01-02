@@ -10,13 +10,9 @@
 
 package org.junit.jupiter.api.util;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collector;
-
-import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
  *  @since 6.1
@@ -45,18 +41,4 @@ final class SystemPropertyExtensionUtils {
 		}
 	}
 
-	/**
-	 * Find all (parent) {@code ExtensionContext}s via {@link ExtensionContext#getParent()}.
-	 *
-	 * @param context the context for which to find all (parent) contexts; never {@code null}
-	 * @return a list of all contexts, "outwards" in the {@link ExtensionContext#getParent() getParent}-order,
-	 *         beginning with the given context; never {@code null} or empty
-	 */
-	static List<ExtensionContext> findAllContexts(ExtensionContext context) {
-		List<ExtensionContext> allContexts = new ArrayList<>();
-		for (var c = context; c != null; c = c.getParent().orElse(null)) {
-			allContexts.add(c);
-		}
-		return allContexts;
-	}
 }

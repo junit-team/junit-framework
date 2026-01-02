@@ -12,12 +12,12 @@ package org.junit.jupiter.api.util;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static org.junit.jupiter.api.util.SystemPropertyExtensionUtils.findAllContexts;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -121,15 +121,16 @@ final class SystemPropertyExtension
 	}
 
 	private void applyForAllContexts(ExtensionContext originalContext) {
-		var contexts = findAllContexts(originalContext);
-		boolean doCompleteBackup = isRestoreAnnotationPresent(contexts);
+		var allContexts = findAllExtensionContexts(originalContext);
+
+		boolean doCompleteBackup = isRestoreAnnotationPresent(allContexts);
 		if (doCompleteBackup) {
 			var properties = this.prepareToEnterRestorableContext();
 			storeCompleteBackup(originalContext, properties);
 		}
 
-		// we have to apply the annotations from the outermost to the innermost ExtensionContext.
-		forEachInReverseOrder(contexts,
+		// we have to apply the annotations from the outermost to the innermost context.
+		forEachInReverseOrder(allContexts,
 			currentContext -> clearAndSetEntries(currentContext, originalContext, !doCompleteBackup));
 	}
 
@@ -233,7 +234,7 @@ final class SystemPropertyExtension
 		// Try a complete restore first
 		if (!restoreOriginalCompleteBackup(originalContext)) {
 			// A complete backup is not available, so restore incrementally from innermost to outermost
-			findAllContexts(originalContext).forEach(__ -> restoreOriginalIncrementalBackup(originalContext));
+			findAllExtensionContexts(originalContext).forEach(__ -> restoreOriginalIncrementalBackup(originalContext));
 		}
 	}
 
@@ -242,6 +243,15 @@ final class SystemPropertyExtension
 		if (backup != null) {
 			backup.restoreBackup();
 		}
+	}
+
+	private static List<ExtensionContext> findAllExtensionContexts(ExtensionContext context) {
+		var contexts = new ArrayList<ExtensionContext>();
+		do {
+			contexts.add(context);
+			context = context.getParent().orElse(null);
+		} while (context != null);
+		return contexts;
 	}
 
 	private @Nullable EntriesBackup getIncrementalBackup(ExtensionContext originalContext) {
