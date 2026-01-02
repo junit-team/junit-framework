@@ -10,52 +10,51 @@
 
 package org.junit.jupiter.api.util;
 
-import java.util.Properties;
-import java.util.function.Function;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+import static org.junit.jupiter.api.util.SystemPropertyExtensionUtils.findAllContexts;
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
-import org.jspecify.annotations.Nullable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionConfigurationException;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.support.AnnotationSupport;
 
 /**
  * @since 6.1
  */
-final class SystemPropertyExtension extends
-		AbstractEntryBasedExtension<String, String, ClearSystemProperty, SetSystemProperty, RestoreSystemProperties> {
-
-	@Override
-	protected Function<ClearSystemProperty, String> clearKeyMapper() {
-		return ClearSystemProperty::key;
-	}
-
-	@Override
-	protected Function<SetSystemProperty, String> setKeyMapper() {
-		return SetSystemProperty::key;
-	}
-
-	@Override
-	protected Function<SetSystemProperty, String> setValueMapper() {
-		return SetSystemProperty::value;
-	}
-
-	@Override
-	protected void clearEntry(String key) {
-		System.clearProperty(key);
-	}
-
-	@Override
-	protected @Nullable String getEntry(String key) {
-		return System.getProperty(key);
-	}
-
-	@Override
-	protected void setEntry(String key, String value) {
-		System.setProperty(key, value);
-	}
+final class SystemPropertyExtension
+		implements BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
 
 	/**
-	 * This implementation uses the "Preemptive swap" strategy.
+	 * Key to indicate storage is for an incremental backup object.
+	 */
+	private static final String INCREMENTAL_KEY = "inc";
+	/**
+	 * Key to indicate storage is for a complete backup object.
+	 */
+	private static final String COMPLETE_KEY = "full";
+
+	/**
+	 * Prepare for entering a context that must be restorable.
 	 *
 	 * <p>Since {@link Properties} allows a wrapped default instance and Object values,
-	 * cloning is difficult:</p>
+	 * cloning is difficult:
 	 *
 	 * <ul>
 	 * <li>It is difficult to tell which values are defaults and which are "top level",
@@ -65,14 +64,11 @@ final class SystemPropertyExtension extends
 	 *
 	 * <p>The "Preemptive swap" strategy ensure that the original Properties are restored, however
 	 * complex they were. Any artifacts resulting from a flattened default structure are limited
-	 * to the context of the test.</p>
-	 *
-	 * <p>See {@link AbstractEntryBasedExtension#prepareToEnterRestorableContext} for more details.</p>
+	 * to the context of the test.
 	 *
 	 * @return The original {@link System#getProperties} object
 	 */
-	@Override
-	protected Properties prepareToEnterRestorableContext() {
+	Properties prepareToEnterRestorableContext() {
 		Properties current = System.getProperties();
 		Properties clone = createEffectiveClone(current);
 
@@ -81,8 +77,16 @@ final class SystemPropertyExtension extends
 		return current;
 	}
 
-	@Override
-	protected void prepareToExitRestorableContext(Properties properties) {
+	/**
+	 * Prepare to exit a restorable context.
+	 *
+	 * <p>The entry environment will be restored to the state passed in as {@code Properties}.
+	 * The {@code Properties} entries must follow the rules for entries of this environment,
+	 * e.g., environment variables contain only Strings while System {@code Properties} may contain Objects.</p>
+	 *
+	 * @param properties a non-null {@code Properties} that contains all entries of the entry environment.
+	 */
+	void prepareToExitRestorableContext(Properties properties) {
 		System.setProperties(properties);
 	}
 
@@ -114,4 +118,173 @@ final class SystemPropertyExtension extends
 		return clone;
 	}
 
+	@Override
+	public void beforeAll(ExtensionContext context) {
+		applyForAllContexts(context);
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext context) {
+		applyForAllContexts(context);
+	}
+
+	private void applyForAllContexts(ExtensionContext originalContext) {
+		if (isRestoreAnnotationPresent(originalContext)) {
+			Properties bulk = this.prepareToEnterRestorableContext();
+			storeOriginalCompleteEntries(originalContext, bulk);
+		}
+
+		/*
+		 * We cannot use PioneerAnnotationUtils#findAllEnclosingRepeatableAnnotations(ExtensionContext, Class) or the
+		 * like as clearing and setting might interfere. Therefore, we have to apply the extension from the outermost
+		 * to the innermost ExtensionContext.
+		 */
+		List<ExtensionContext> contexts = findAllContexts(originalContext);
+		Collections.reverse(contexts);
+		contexts.forEach(currentContext -> clearAndSetEntries(currentContext, originalContext,
+			!isRestoreAnnotationPresent(originalContext)));
+	}
+
+	private boolean isRestoreAnnotationPresent(ExtensionContext originalContext) {
+		// TODO: Can we do this with more grace?
+		return findAnnotation(originalContext.getElement(), RestoreSystemProperties.class).isPresent()
+				|| findAnnotation(originalContext.getRequiredTestClass(), RestoreSystemProperties.class,
+					originalContext.getEnclosingTestClasses()).isPresent();
+	}
+
+	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
+			boolean doIncrementalBackup) {
+		currentContext.getElement().ifPresent(element -> {
+			Set<String> entriesToClear;
+			Map<String, String> entriesToSet;
+
+			try {
+				entriesToClear = findEntriesToClear(element);
+				entriesToSet = findEntriesToSet(element);
+				preventClearAndSetSameEntries(entriesToClear, entriesToSet.keySet());
+			}
+			catch (IllegalStateException ex) {
+				throw new ExtensionConfigurationException("Don't clear/set the same entry more than once.", ex);
+			}
+
+			if (entriesToClear.isEmpty() && entriesToSet.isEmpty())
+				return;
+
+			// Only backup original values if we didn't already do bulk storage of the original state
+			if (doIncrementalBackup) {
+				storeOriginalIncrementalEntries(originalContext, entriesToClear, entriesToSet.keySet());
+			}
+
+			entriesToClear.forEach(System::clearProperty);
+			entriesToSet.forEach(System::setProperty);
+		});
+	}
+
+	private Set<String> findEntriesToClear(AnnotatedElement element) {
+		return findAnnotations(element, ClearSystemProperty.class) //
+				.map(ClearSystemProperty::key) //
+				.collect(SystemPropertyExtensionUtils.distinctToSet());
+	}
+
+	private Map<String, String> findEntriesToSet(AnnotatedElement element) {
+		return findAnnotations(element, SetSystemProperty.class) //
+				.collect(toMap(SetSystemProperty::key, SetSystemProperty::value));
+	}
+
+	private <A extends Annotation> Stream<A> findAnnotations(AnnotatedElement element, Class<A> clazz) {
+		return AnnotationSupport.findRepeatableAnnotations(element, clazz).stream();
+	}
+
+	private void preventClearAndSetSameEntries(Collection<String> entriesToClear, Collection<String> entriesToSet) {
+		String duplicateEntries = entriesToClear.stream().filter(entriesToSet::contains).map(Object::toString).collect(
+			joining(", "));
+		if (!duplicateEntries.isEmpty())
+			throw new IllegalStateException(
+				"Cannot clear and set the following entries at the same time: " + duplicateEntries);
+	}
+
+	private void storeOriginalIncrementalEntries(ExtensionContext context, Collection<String> entriesToClear,
+			Collection<String> entriesToSet) {
+		getStore(context).put(getStoreKey(context, INCREMENTAL_KEY), new EntriesBackup(entriesToClear, entriesToSet));
+	}
+
+	private void storeOriginalCompleteEntries(ExtensionContext context, Properties originalEntries) {
+		getStore(context).put(getStoreKey(context, COMPLETE_KEY), originalEntries);
+	}
+
+	/**
+	 * Restore the complete original state of the entries as they were prior to this {@code ExtensionContext},
+	 * if the complete state was initially stored in a before all/each event.
+	 *
+	 * @param context The {@code ExtensionContext} which may have a bulk backup stored.
+	 * @return true if a complete backup exists and was used to restore, false if not.
+	 */
+	private boolean restoreOriginalCompleteEntries(ExtensionContext context) {
+		Properties bulk = getStore(context).get(getStoreKey(context, COMPLETE_KEY), Properties.class);
+
+		if (bulk == null) {
+			// No complete backup - false will let the caller know to continue w/ an incremental restore
+			return false;
+		}
+
+		prepareToExitRestorableContext(bulk);
+		return true;
+	}
+
+	@Override
+	public void afterEach(ExtensionContext context) {
+		restoreForAllContexts(context);
+	}
+
+	@Override
+	public void afterAll(ExtensionContext context) {
+		restoreForAllContexts(context);
+	}
+
+	private void restoreForAllContexts(ExtensionContext originalContext) {
+		// Try a complete restore first
+		if (!restoreOriginalCompleteEntries(originalContext)) {
+			// A complete backup is not available, so restore incrementally from innermost to outermost
+			findAllContexts(originalContext).forEach(__ -> restoreOriginalIncrementalEntries(originalContext));
+		}
+	}
+
+	private void restoreOriginalIncrementalEntries(ExtensionContext originalContext) {
+		getStore(originalContext).getOrDefault(getStoreKey(originalContext, INCREMENTAL_KEY), EntriesBackup.class,
+			new EntriesBackup()).restoreBackup();
+	}
+
+	private ExtensionContext.Store getStore(ExtensionContext context) {
+		return context.getStore(ExtensionContext.Namespace.create(getClass()));
+	}
+
+	private String getStoreKey(ExtensionContext context, String discriminator) {
+		return context.getUniqueId() + "-" + this.getClass().getSimpleName() + "-" + discriminator;
+	}
+
+	private final static class EntriesBackup {
+
+		private final Set<String> entriesToClear = new HashSet<>();
+		private final Map<String, String> entriesToSet = new HashMap<>();
+
+		EntriesBackup() {
+			// empty backup
+		}
+
+		EntriesBackup(Collection<String> entriesToClear, Collection<String> entriesToSet) {
+			Stream.concat(entriesToClear.stream(), entriesToSet.stream()).forEach(entry -> {
+				String backup = System.getProperty(entry);
+				if (backup == null)
+					this.entriesToClear.add(entry);
+				else
+					this.entriesToSet.put(entry, backup);
+			});
+		}
+
+		void restoreBackup() {
+			entriesToClear.forEach(System::clearProperty);
+			entriesToSet.forEach(System::setProperty);
+		}
+
+	}
 }
