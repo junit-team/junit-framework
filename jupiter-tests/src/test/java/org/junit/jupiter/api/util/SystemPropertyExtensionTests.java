@@ -357,43 +357,6 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Nested
-		@DisplayName("cloneProperties Tests")
-		class ClonePropertiesTests {
-
-			Properties inner;
-			Properties outer; //Created w/ inner as nested defaults
-
-			@BeforeEach
-			void beforeEach() {
-				inner = new Properties();
-				outer = new Properties(inner);
-
-				inner.setProperty("A", "is A");
-				outer.setProperty("B", "is B");
-			}
-
-			@Test
-			@DisplayName("Nested defaults handled")
-			void nestedDefaultsHandled() {
-				Properties cloned = SystemPropertyExtension.createEffectiveClone(outer);
-				assertThat(cloned).isEffectivelyEqualsTo(outer);
-			}
-
-			@Test
-			@DisplayName("Object values are skipped")
-			void objectValuesAreSkipped() {
-				inner.put("inner_obj", new Object());
-				outer.put("outer_obj", new Object());
-				Properties cloned = SystemPropertyExtension.createEffectiveClone(outer);
-
-				assertThat(cloned).isEffectivelyEqualsTo(outer);
-				assertThat(cloned.contains("inner_obj")).isFalse();
-				assertThat(cloned.contains("outer_obj")).isFalse();
-			}
-
-		}
-
-		@Nested
 		@DisplayName("RestorableContext Workflow Tests")
 		class RestorableContextWorkflowTests {
 

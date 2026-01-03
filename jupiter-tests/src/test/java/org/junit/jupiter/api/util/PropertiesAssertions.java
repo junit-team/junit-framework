@@ -52,6 +52,8 @@ final class PropertiesAssertions extends AbstractAssert<PropertiesAssertions, Pr
 	 * @return Assertion instance
 	 */
 	PropertiesAssertions isEffectivelyEqualsTo(Properties expected) {
+		// Compare values as maps
+		objects.assertEqual(info, actual, expected);
 
 		// Compare values present in actual
 		actual.propertyNames().asIterator().forEachRemaining(k -> {

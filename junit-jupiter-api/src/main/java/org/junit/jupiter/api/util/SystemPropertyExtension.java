@@ -62,7 +62,7 @@ final class SystemPropertyExtension
 	 */
 	Properties prepareToEnterRestorableContext() {
 		Properties current = System.getProperties();
-		Properties clone = createEffectiveClone(current);
+		Properties clone = JupiterPropertyUtils.createEffectiveClone(current);
 
 		System.setProperties(clone);
 
@@ -80,34 +80,6 @@ final class SystemPropertyExtension
 	 */
 	void prepareToExitRestorableContext(Properties properties) {
 		System.setProperties(properties);
-	}
-
-	/**
-	 * A clone of the String values of the passed {@code Properties}, including defaults.
-	 *
-	 * <p>The clone will have the same effective values, but may not use the same nested
-	 * structure as the original. Object values, which are technically possible,
-	 * are not included in the clone.</p>
-	 *
-	 * @param original {@code Properties} to be cloned.
-	 * @return A new {@code Properties} instance containing the same effective entries as the original.
-	 */
-	static Properties createEffectiveClone(Properties original) {
-		Properties clone = new Properties();
-
-		// This implementation is used because:
-		// System.getProperties() returns the actual Properties object, not a copy.
-		// Clone doesn't include nested defaults, but propertyNames() does.
-		original.propertyNames().asIterator().forEachRemaining(k -> {
-			String v = original.getProperty(k.toString());
-
-			if (v != null) {
-				// v will be null if the actual value was an object
-				clone.put(k, original.getProperty(k.toString()));
-			}
-		});
-
-		return clone;
 	}
 
 	@Override
