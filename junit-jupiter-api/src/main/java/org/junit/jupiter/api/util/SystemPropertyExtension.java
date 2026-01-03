@@ -132,8 +132,10 @@ final class SystemPropertyExtension
 				storeIncrementalBackup(originalContext, entriesToClear, entriesToSet.keySet());
 			}
 
-			entriesToClear.forEach(System::clearProperty);
-			entriesToSet.forEach(System::setProperty);
+			// For consistency don't use Properties::setProperty or System.setProperty here
+			var properties = System.getProperties();
+			entriesToClear.forEach(properties::remove);
+			properties.putAll(entriesToSet);
 		});
 	}
 
@@ -252,11 +254,14 @@ final class SystemPropertyExtension
 	private static final class EntriesBackup {
 
 		private final Set<String> entriesToClear = new HashSet<>();
-		private final Map<String, String> entriesToSet = new HashMap<>();
+		private final Map<String, Object> entriesToSet = new HashMap<>();
 
 		EntriesBackup(Collection<String> entriesToClear, Collection<String> entriesToSet) {
+			var properties = System.getProperties();
 			Stream.concat(entriesToClear.stream(), entriesToSet.stream()).forEach(entry -> {
-				String backup = System.getProperty(entry);
+				// Do not use Properties::getProperty or System.getProperty here,
+				// this would prevent backing up non-string values.
+				Object backup = properties.get(entry);
 				if (backup == null)
 					this.entriesToClear.add(entry);
 				else
@@ -265,8 +270,11 @@ final class SystemPropertyExtension
 		}
 
 		void restoreBackup() {
-			entriesToClear.forEach(System::clearProperty);
-			entriesToSet.forEach(System::setProperty);
+			// We can't use Properties::setProperty or System.setProperty here,
+			// this would prevent restoring non-string values.
+			var properties = System.getProperties();
+			entriesToClear.forEach(properties::remove);
+			properties.putAll(entriesToSet);
 		}
 
 	}
