@@ -10,57 +10,30 @@
 
 package org.junit.jupiter.api.util;
 
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
-
-import org.jspecify.annotations.Nullable;
 
 final class JupiterPropertyUtils {
 
 	/**
-	 * Create a effective clone of a {@link Properties} object, including
-	 * defaults.
+	 * Create a effective clone of a {@link Properties} object.
 	 *
-	 * <p>The clone will initially have the same observable entries and
-	 * defaults as the {@code original} but may not use the same nested
-	 * structure as the original.
+	 * <p>The clone will have the same observable properties as the
+	 * {@code original} but is constructed without default values. Furthermore
+	 * any non-string values are ignored.
 	 *
-	 * <p>As a consequence, removing a key from the clone that was also presents the
-	 * originals defaults will not result in a default value being used for subsequent
-	 * looks up for that key.
-	 *
-	 * @return a new {@code Properties} instance containing the same
-	 * 	observable entries as the original.
+	 * @return a new instance containing the same observable properties as the original.
 	 */
 	static Properties createEffectiveClone(Properties original) {
-		Properties clone = new Properties(createEffectivelyCloneOfDefaults(original));
-		original.keySet().forEach(key -> clone.put(key, original.get(key)));
+		Properties clone = new Properties();
+		// This implementation is used because
+		// * Properties.defaults is not accessible
+		// * Properties::clone does not include the defaults
+		// * The defaults can be obtained by removing all keys from the
+		//   original and checking the remaining values. This requires
+		//   mutation.
+		original.stringPropertyNames().forEach(
+			propertyName -> clone.put(propertyName, original.getProperty(propertyName)));
+
 		return clone;
-	}
-
-	private static @Nullable Properties createEffectivelyCloneOfDefaults(Properties original) {
-		Set<String> defaultPropertyNames = getEffectiveDefaultPropertyNames(original);
-		if (defaultPropertyNames.isEmpty()) {
-			return null;
-		}
-		Properties defaultsClone = new Properties();
-		for (String defaultPropertyName : defaultPropertyNames) {
-			defaultsClone.setProperty(defaultPropertyName, original.getProperty(defaultPropertyName));
-		}
-		return defaultsClone;
-	}
-
-	private static Set<String> getEffectiveDefaultPropertyNames(Properties original) {
-		var allPropertyNames = original.stringPropertyNames();
-		var defaultPropertyNames = new HashSet<>(allPropertyNames);
-		// The property name came from properties (and not the defaults) if it
-		// was  present in the properties as a string
-		defaultPropertyNames.removeIf(propertyName -> original.get(propertyName) instanceof String);
-		return defaultPropertyNames;
-	}
-
-	private JupiterPropertyUtils() {
-		/* no-op */
 	}
 }

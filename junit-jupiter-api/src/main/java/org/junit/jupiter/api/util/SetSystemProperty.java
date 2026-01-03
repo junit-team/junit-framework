@@ -46,7 +46,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <p>For more details and examples, see
  * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-SystemProperty" target="_top">the documentation on <code>@ClearSystemProperty</code> and <code>@SetSystemProperty</code></a>.</p>
  *
- * @since 6.1.0
+ * @since 6.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })

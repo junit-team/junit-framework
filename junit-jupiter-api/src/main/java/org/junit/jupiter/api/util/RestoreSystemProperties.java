@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *
  * <p>Use this annotation when there is a need programmatically modify system properties in a test
  * method or in {@code @BeforeAll} / {@code @BeforeEach} blocks.
- * To simply set or clear a system property, consider {@link SetSystemProperty @SetSystemProperty} or
+ * To set or clear a system property, consider {@link SetSystemProperty @SetSystemProperty} or
  * {@link ClearSystemProperty @ClearSystemProperty} instead.</p>
  *
  * <p>{@code RestoreSystemProperties} can be used on the method and on the class level.
@@ -56,14 +56,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-SystemProperty" target="_top">the documentation on
  * <code>@ClearSystemProperty</code>, <code>@SetSystemProperty</code>, and <code>@RestoreSystemProperties</code></a>.</p>
  *
- * <p><em>Note:</em> System properties are normally just a hashmap of strings, however, it is
- * technically possible to store non-string values and create nested {@code Properties} with inherited /
- * default values. Within the context of an element annotated with {@link RestoreSystemProperties},
- * non-String values are not preserved and the structure of nested defaults are flattened.
- * After the annotated context is exited, the original Properties object is restored with
- * all its potential (non-standard) richness.</p>
+ * <p><em>Note:</em> The system properties object normally acts like a map of strings. While strongly
+ * discouraged, it is possible to use non-string keys and values. It is also possible to
+ * {@linkplain java.util.Properties create nested propeties with inherited default
+ * values}. {@code @RestoreSystemProperties} restores the original properties object with all of its
+ * potential richness _after_ the annotated scope is complete.
+ * However _during_ the execution of the annotated scope, the system properties are set to
+ * a cloned properties object where properties with non-string values are removed and nested properties
+ * are flattened into a non-nested instance that has the same effective values.
  *
- * @since 6.1.0
+ * @since 6.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })

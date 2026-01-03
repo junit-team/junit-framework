@@ -388,12 +388,11 @@ Using `@RestoreSystemProperties` is not necessary to restore system properties m
 
 === `@RestoreSystemProperties` Limitations
 
-The system `Properties` object is normally just a hashmap of strings, however, it is technically possible to store non-string values and create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values].
-`@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
-However, for use during the test _within_ the test scope it provides a cloned `Properties` object with these limitations:
+The system `Properties` object normally acts like a map of strings. While strongly discouraged, it is possible to use non-string keys and values. It is also possible to create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values]. `@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
+However _during_ the execution of the annotated scope, the system properties are set to a cloned `Properties` object with these limitations:
 
-- Properties with non-string values are removed
-- Nested `Properties` are flattened into a non-nested instance that has the same effective values, but not necessarily the same structure
+- Properties with non-string values are removed.
+- Nested `Properties` are flattened into a non-nested instance that has the same effective values.
 
 == Thread-Safety
 

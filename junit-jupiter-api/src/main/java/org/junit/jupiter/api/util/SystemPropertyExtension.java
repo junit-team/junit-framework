@@ -45,14 +45,10 @@ final class SystemPropertyExtension
 	/**
 	 * Prepare for entering a context that must be restorable.
 	 *
-	 * <p>Since {@link Properties} allows a wrapped default instance and Object values,
-	 * cloning is difficult:
-	 *
-	 * <ul>
-	 * <li>It is difficult to tell which values are defaults and which are "top level",
-	 * thus a clone might contain the same effective values, but be flattened without defaults.</li>
-	 * <li>Object values in a wrapped default instance cannot be accessed without reflection.</li>
-	 * </ul>
+	 * <p>Cloning a properties object is difficult. The default values are not
+	 * accessible without either first removing all values from the object, or
+	 * using reflection. Instead we swap-in a clone with the same apperent
+	 * properties.
 	 *
 	 * <p>The "Preemptive swap" strategy ensure that the original Properties are restored, however
 	 * complex they were. Any artifacts resulting from a flattened default structure are limited

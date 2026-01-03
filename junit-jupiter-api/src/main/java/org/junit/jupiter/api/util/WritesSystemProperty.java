@@ -34,7 +34,7 @@ import org.junit.jupiter.api.parallel.Resources;
  * <p>For more details and examples, see
  * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-SystemProperty" target="_top">the documentation on <code>@ClearSystemProperty</code> and <code>@SetSystemProperty</code></a>.</p>
  *
- * @since 6.1.0
+ * @since 6.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })

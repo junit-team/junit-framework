@@ -25,63 +25,38 @@ class JupiterPropertyUtilTests {
 	void cloneProperties() {
 		var properties = new Properties();
 		properties.setProperty("a", "a");
-		properties.setProperty("a-shadowed", "a");
 		properties.put("a-obj", new Object());
 
 		var clone = createEffectiveClone(properties);
 
-		assertThat(clone.stringPropertyNames()).isEqualTo(properties.stringPropertyNames());
-		assertThat(clone.keySet()).isEqualTo(properties.keySet());
-
-		assertThat(clone.getProperty("a")).isEqualTo("a");
-		assertThat(clone.getProperty("a-obj")).isNull();
-
+		assertThat(clone.stringPropertyNames()).containsExactly("a");
 		assertThat(clone.get("a")).isSameAs(properties.get("a"));
-		assertThat(clone.get("a-obj")).isSameAs(properties.get("a-obj"));
+
+		assertThat(clone.keySet()).containsExactly("a");
+		assertThat(clone.getProperty("a")).isEqualTo("a");
 	}
 
 	@Test
-	void clonePropertiesWithDefaults() {
+	void withDefaults() {
 		var defaults = new Properties();
 		defaults.setProperty("a", "a");
 
 		var properties = new Properties(defaults);
 		properties.setProperty("b", "b");
-		properties.put("b-obj", new Object());
 
 		var clone = createEffectiveClone(properties);
 
-		assertThat(clone.stringPropertyNames()).isEqualTo(properties.stringPropertyNames());
-		assertThat(clone.keySet()).isEqualTo(properties.keySet());
-
+		assertThat(clone.stringPropertyNames()).containsExactly("a", "b");
 		assertThat(clone.getProperty("a")).isEqualTo("a");
 		assertThat(clone.getProperty("b")).isEqualTo("b");
-		assertThat(clone.getProperty("a-obj")).isNull();
 
-		assertThat(clone.get("a")).isNull();
+		assertThat(clone.keySet()).containsExactly("a", "b");
+		assertThat(clone.get("a")).isSameAs(defaults.get("a"));
 		assertThat(clone.get("b")).isSameAs(properties.get("b"));
-		assertThat(clone.get("b-obj")).isSameAs(properties.get("b-obj"));
 	}
 
 	@Test
-	void clonePropertiesWithOverridenDefaults() {
-		var defaults = new Properties();
-		defaults.setProperty("a", "a");
-
-		var properties = new Properties(defaults);
-		properties.put("a", "b");
-
-		var clone = createEffectiveClone(properties);
-
-		assertThat(clone.stringPropertyNames()).isEqualTo(properties.stringPropertyNames());
-		assertThat(clone.keySet()).isEqualTo(properties.keySet());
-
-		assertThat(clone.getProperty("a")).isEqualTo("b");
-		assertThat(clone.get("a")).isSameAs("b");
-	}
-
-	@Test
-	void clonePropertiesWithShadowedDefaults() {
+	void doesNotIncludeShadowedDefaults() {
 		var defaults = new Properties();
 		defaults.setProperty("a", "a");
 
@@ -91,15 +66,15 @@ class JupiterPropertyUtilTests {
 
 		var clone = createEffectiveClone(properties);
 
-		assertThat(clone.stringPropertyNames()).isEqualTo(properties.stringPropertyNames());
-		assertThat(clone.keySet()).isEqualTo(properties.keySet());
-
+		assertThat(clone.stringPropertyNames()).containsExactly("a");
 		assertThat(clone.getProperty("a")).isEqualTo("a");
-		assertThat(clone.get("a")).isSameAs(shadow);
+
+		assertThat(clone.keySet()).containsExactly("a");
+		assertThat(clone.get("a")).isEqualTo("a");
 	}
 
 	@Test
-	void clonePropertiesDoesNotCloneOverridenDefaults() {
+	void doesNotIncludeOverridenDefaultValue() {
 		var defaults = new Properties();
 		defaults.setProperty("a", "a");
 
@@ -108,14 +83,28 @@ class JupiterPropertyUtilTests {
 
 		var clone = createEffectiveClone(properties);
 
-		assertThat(clone.stringPropertyNames()).isEqualTo(properties.stringPropertyNames());
-		assertThat(clone.keySet()).isEqualTo(properties.keySet());
-
 		assertThat(clone.getProperty("a")).isEqualTo("b");
 		clone.remove("a");
 		// properties.getProperty("a") would return the default value "a" here.
 		assertThat(clone.getProperty("a")).isNull();
 		assertThat(clone.get("a")).isNull();
+	}
+
+	@Test
+	void doesIncludeDefaultOverridingValue() {
+		var defaults = new Properties();
+		defaults.setProperty("a", "a");
+
+		var properties = new Properties(defaults);
+		properties.put("a", "b");
+
+		var clone = createEffectiveClone(properties);
+
+		assertThat(clone.stringPropertyNames()).containsExactly("a");
+		assertThat(clone.getProperty("a")).isEqualTo("b");
+
+		assertThat(clone.keySet()).containsExactly("a");
+		assertThat(clone.get("a")).isSameAs("b");
 	}
 
 }
