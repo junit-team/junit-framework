@@ -99,7 +99,7 @@ class JupiterPropertyUtilTests {
 	}
 
 	@Test
-	void cloneOverridenDefaults() {
+	void clonePropertiesDoesNotCloneOverridenDefaults() {
 		var defaults = new Properties();
 		defaults.setProperty("a", "a");
 
@@ -113,7 +113,8 @@ class JupiterPropertyUtilTests {
 
 		assertThat(clone.getProperty("a")).isEqualTo("b");
 		clone.remove("a");
-		assertThat(clone.getProperty("a")).isEqualTo("a");
+		// properties.getProperty("a") would return the default value "a" here.
+		assertThat(clone.getProperty("a")).isNull();
 		assertThat(clone.get("a")).isNull();
 	}
 
