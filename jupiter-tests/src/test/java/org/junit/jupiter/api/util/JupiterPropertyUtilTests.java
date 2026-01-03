@@ -98,4 +98,23 @@ class JupiterPropertyUtilTests {
 		assertThat(clone.get("a")).isSameAs(shadow);
 	}
 
+	@Test
+	void cloneOverridenDefaults() {
+		var defaults = new Properties();
+		defaults.setProperty("a", "a");
+
+		var properties = new Properties(defaults);
+		properties.put("a", "b");
+
+		var clone = createEffectiveClone(properties);
+
+		assertThat(clone.stringPropertyNames()).isEqualTo(properties.stringPropertyNames());
+		assertThat(clone.keySet()).isEqualTo(properties.keySet());
+
+		assertThat(clone.getProperty("a")).isEqualTo("b");
+		clone.remove("a");
+		assertThat(clone.getProperty("a")).isEqualTo("a");
+		assertThat(clone.get("a")).isNull();
+	}
+
 }
