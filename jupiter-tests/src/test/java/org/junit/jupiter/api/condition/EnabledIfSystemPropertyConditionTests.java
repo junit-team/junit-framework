@@ -12,10 +12,9 @@ package org.junit.jupiter.api.condition;
 
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotBlankFor;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExecutionCondition;
+import org.junit.jupiter.api.util.SetSystemProperty;
 
 /**
  * Unit tests for {@link EnabledIfSystemPropertyCondition}.
@@ -25,6 +24,8 @@ import org.junit.jupiter.api.extension.ExecutionCondition;
  *
  * @since 5.1
  */
+@SetSystemProperty(key = EnabledIfSystemPropertyIntegrationTests.KEY1, value = EnabledIfSystemPropertyIntegrationTests.ENIGMA)
+@SetSystemProperty(key = EnabledIfSystemPropertyIntegrationTests.KEY2, value = EnabledIfSystemPropertyIntegrationTests.ENIGMA)
 class EnabledIfSystemPropertyConditionTests extends AbstractExecutionConditionTests {
 
 	@Override
@@ -35,16 +36,6 @@ class EnabledIfSystemPropertyConditionTests extends AbstractExecutionConditionTe
 	@Override
 	protected Class<?> getTestClass() {
 		return EnabledIfSystemPropertyIntegrationTests.class;
-	}
-
-	@BeforeAll
-	static void setSystemProperties() {
-		EnabledIfSystemPropertyIntegrationTests.setSystemProperties();
-	}
-
-	@AfterAll
-	static void clearSystemProperties() {
-		EnabledIfSystemPropertyIntegrationTests.clearSystemProperties();
 	}
 
 	/**

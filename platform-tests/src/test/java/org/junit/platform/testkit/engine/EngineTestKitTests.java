@@ -25,10 +25,10 @@ import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.engine.CancellationToken;
@@ -45,14 +45,10 @@ import org.junit.platform.launcher.core.EngineExecutionOrchestrator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedConstruction;
 
+@SetSystemProperty(key = EngineTestKitTests.KEY, value = "from system property")
 class EngineTestKitTests {
 
-	private static final String KEY = EngineTestKitTests.class.getName();
-
-	@BeforeEach
-	void setSystemProperty() {
-		System.setProperty(KEY, "from system property");
-	}
+	static final String KEY = "org.junit.platform.testkit.engine.EngineTestKitTests";
 
 	@AfterEach
 	void resetSystemProperty() {

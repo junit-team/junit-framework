@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.util.ClearSystemProperty;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
@@ -44,9 +45,10 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
  * @since 5.0
  * @see TestInstanceLifecycleTests
  */
+@ClearSystemProperty(key = TestInstanceLifecycleConfigurationTests.KEY)
 class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineTests {
 
-	private static final String KEY = Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
+	static final String KEY = Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 
 	private static final List<String> methodsInvoked = new ArrayList<>();
 
@@ -54,7 +56,6 @@ class TestInstanceLifecycleConfigurationTests extends AbstractJupiterTestEngineT
 	@AfterEach
 	void reset() {
 		methodsInvoked.clear();
-		System.clearProperty(KEY);
 	}
 
 	@Test

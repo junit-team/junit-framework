@@ -19,34 +19,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.util.SetSystemProperty;
 
 /**
  * Integration tests for {@link DisabledIfSystemProperty}.
  *
  * @since 5.1
  */
+@SetSystemProperty(key = DisabledIfSystemPropertyIntegrationTests.KEY1, value = DisabledIfSystemPropertyIntegrationTests.ENIGMA)
+@SetSystemProperty(key = DisabledIfSystemPropertyIntegrationTests.KEY2, value = DisabledIfSystemPropertyIntegrationTests.ENIGMA)
 class DisabledIfSystemPropertyIntegrationTests {
 
-	private static final String KEY1 = "DisabledIfSystemPropertyTests.key1";
-	private static final String KEY2 = "DisabledIfSystemPropertyTests.key2";
-	private static final String ENIGMA = "enigma";
+	static final String KEY1 = "DisabledIfSystemPropertyTests.key1";
+	static final String KEY2 = "DisabledIfSystemPropertyTests.key2";
+	static final String ENIGMA = "enigma";
 	private static final String BOGUS = "bogus";
-
-	@BeforeAll
-	static void setSystemProperties() {
-		System.setProperty(KEY1, ENIGMA);
-		System.setProperty(KEY2, ENIGMA);
-	}
-
-	@AfterAll
-	static void clearSystemProperties() {
-		System.clearProperty(KEY1);
-		System.clearProperty(KEY2);
-	}
 
 	@Test
 	void enabledBecauseAnnotationIsNotPresent() {

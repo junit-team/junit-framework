@@ -27,14 +27,13 @@ import java.util.logging.LogRecord;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jspecify.annotations.NullMarked;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -50,17 +49,11 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 class LauncherConfigurationParametersTests {
 
 	private static final String CONFIG_FILE_NAME = "test-junit-platform.properties";
-	private static final String KEY = LauncherConfigurationParametersTests.class.getName();
+	private static final String KEY = "org.junit.platform.launcher.core.LauncherConfigurationParametersTests";
 	private static final String INHERITED_PARAM = "parent config param";
 	private static final String CONFIG_PARAM = "explicit config param";
 	private static final String CONFIG_FILE = "from config file";
 	private static final String SYSTEM_PROPERTY = "system property";
-
-	@BeforeEach
-	@AfterEach
-	void reset() {
-		System.clearProperty(KEY);
-	}
 
 	@SuppressWarnings("DataFlowIssue")
 	@Test
@@ -97,8 +90,8 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = KEY, value = SYSTEM_PROPERTY)
 	void systemProperty() {
-		System.setProperty(KEY, SYSTEM_PROPERTY);
 		ConfigurationParameters configParams = fromMap(Map.of());
 		assertThat(configParams.get(KEY)).contains(SYSTEM_PROPERTY);
 		assertThat(configParams.keySet()).contains(KEY);
@@ -124,8 +117,8 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = KEY, value = SYSTEM_PROPERTY)
 	void explicitConfigParamOverridesSystemProperty() {
-		System.setProperty(KEY, SYSTEM_PROPERTY);
 		ConfigurationParameters configParams = fromMap(Map.of(KEY, CONFIG_PARAM));
 		assertThat(configParams.get(KEY)).contains(CONFIG_PARAM);
 		assertThat(configParams.keySet()).contains(KEY);
@@ -141,8 +134,8 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = KEY, value = SYSTEM_PROPERTY)
 	void explicitConfigParamOverridesInheritedProperty() {
-		System.setProperty(KEY, SYSTEM_PROPERTY);
 		ConfigurationParameters configParams = fromMapAndParent( //
 			Map.of(KEY, CONFIG_PARAM), //
 			Map.of(KEY, INHERITED_PARAM));
@@ -152,8 +145,8 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = KEY, value = SYSTEM_PROPERTY)
 	void systemPropertyOverridesConfigFile() {
-		System.setProperty(KEY, SYSTEM_PROPERTY);
 		ConfigurationParameters configParams = fromMapAndFile(Map.of(), CONFIG_FILE_NAME);
 		assertThat(configParams.get(KEY)).contains(SYSTEM_PROPERTY);
 		assertThat(configParams.keySet()).contains(KEY);
@@ -161,8 +154,8 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = KEY, value = SYSTEM_PROPERTY)
 	void inheritedPropertyOverridesSystemProperty() {
-		System.setProperty(KEY, SYSTEM_PROPERTY);
 		ConfigurationParameters configParams = fromMapAndParent(Map.of(), Map.of(KEY, INHERITED_PARAM));
 		assertThat(configParams.get(KEY)).contains(INHERITED_PARAM);
 		assertThat(configParams.keySet()).contains(KEY);
@@ -199,8 +192,8 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = KEY, value = SYSTEM_PROPERTY)
 	void ignoresSystemPropertyAndConfigFileWhenImplicitLookupsAreDisabled() {
-		System.setProperty(KEY, SYSTEM_PROPERTY);
 		ConfigurationParameters configParams = LauncherConfigurationParameters.builder() //
 				.enableImplicitProviders(false) //
 				.build();

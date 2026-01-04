@@ -20,12 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.jupiter.engine.extension.sub.AlwaysDisabledCondition;
@@ -42,22 +41,13 @@ import org.junit.platform.testkit.engine.Events;
  *
  * @since 5.0
  */
+@SetSystemProperty(key = ExecutionConditionTests.FOO, value = ExecutionConditionTests.BAR)
 class ExecutionConditionTests extends AbstractJupiterTestEngineTests {
 
-	private static final String FOO = "DisabledTests.foo";
-	private static final String BAR = "DisabledTests.bar";
+	static final String FOO = "DisabledTests.foo";
+	static final String BAR = "DisabledTests.bar";
 	private static final String BOGUS = "DisabledTests.bogus";
 	private static final String DEACTIVATE = "*AnotherAlwaysDisable*, org.junit.jupiter.engine.extension.sub.AlwaysDisable*";
-
-	@BeforeEach
-	public void setUp() {
-		System.setProperty(FOO, BAR);
-	}
-
-	@AfterEach
-	public void tearDown() {
-		System.clearProperty(FOO);
-	}
 
 	@Test
 	void conditionWorksOnContainer() {

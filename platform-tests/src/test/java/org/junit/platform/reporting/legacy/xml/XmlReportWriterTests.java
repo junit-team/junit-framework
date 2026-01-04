@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import org.joox.Match;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -203,6 +204,7 @@ class XmlReportWriterTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = "foo.bar", value = "\1")
 	void escapesInvalidCharactersInSystemPropertiesAndExceptionMessages() throws Exception {
 		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
 		engineDescriptor.addChild(new TestDescriptorStub(uniqueId, "test"));
@@ -212,14 +214,7 @@ class XmlReportWriterTests {
 		var assertionError = new AssertionError("expected: <A> but was: <B\0>");
 		reportData.markFinished(testPlan.getTestIdentifier(uniqueId), failed(assertionError));
 
-		System.setProperty("foo.bar", "\1");
-		Match testsuite;
-		try {
-			testsuite = writeXmlReport(testPlan, reportData);
-		}
-		finally {
-			System.getProperties().remove("foo.bar");
-		}
+		Match testsuite = writeXmlReport(testPlan, reportData);
 
 		assertValidAccordingToJenkinsSchema(testsuite.document());
 		assertThat(testsuite.find("property").matchAttr("name", "foo\\.bar").attr("value")) //

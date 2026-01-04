@@ -69,6 +69,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.util.ClearSystemProperty;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.io.Resource;
 import org.junit.platform.commons.logging.LogRecordListener;
@@ -231,20 +232,15 @@ class ReflectionUtilsTests {
 		}
 
 		@Test
+		@ClearSystemProperty(key = "java.class.path")
 		void getAllClasspathRootDirectories(@TempDir Path tempDirectory) throws Exception {
 			var root1 = tempDirectory.resolve("root1").toAbsolutePath();
 			var root2 = tempDirectory.resolve("root2").toAbsolutePath();
 			var testClassPath = root1 + File.pathSeparator + root2;
 
-			var originalClassPath = System.setProperty("java.class.path", testClassPath);
-			try {
-				createDirectories(root1, root2);
-
-				assertThat(ReflectionUtils.getAllClasspathRootDirectories()).containsOnly(root1, root2);
-			}
-			finally {
-				System.setProperty("java.class.path", originalClassPath);
-			}
+			System.setProperty("java.class.path", testClassPath);
+			createDirectories(root1, root2);
+			assertThat(ReflectionUtils.getAllClasspathRootDirectories()).containsOnly(root1, root2);
 		}
 
 		private static void createDirectories(Path... paths) throws IOException {

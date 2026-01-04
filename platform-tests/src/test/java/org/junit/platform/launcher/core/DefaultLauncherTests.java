@@ -56,6 +56,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.JUnitException;
@@ -98,8 +99,8 @@ import org.mockito.InOrder;
 @NullMarked
 class DefaultLauncherTests {
 
-	private static final String FOO = DefaultLauncherTests.class.getSimpleName() + ".foo";
-	private static final String BAR = DefaultLauncherTests.class.getSimpleName() + ".bar";
+	static final String FOO = "DefaultLauncherTests.foo";
+	static final String BAR = "DefaultLauncherTests.bar";
 
 	private static final Runnable noOp = () -> {
 	};
@@ -455,23 +456,17 @@ class DefaultLauncherTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = DefaultLauncherTests.FOO, value = DefaultLauncherTests.BAR)
 	void withoutConfigurationParameters_LookupFallsBackToSystemProperty() {
-		System.setProperty(FOO, BAR);
+		var engine = new TestEngineSpy();
 
-		try {
-			var engine = new TestEngineSpy();
+		var launcher = createLauncher(engine);
+		launcher.execute(request().forExecution().build());
 
-			var launcher = createLauncher(engine);
-			launcher.execute(request().forExecution().build());
-
-			var configurationParameters = requireNonNull(engine.requestForExecution).getConfigurationParameters();
-			var optionalFoo = configurationParameters.get(FOO);
-			assertTrue(optionalFoo.isPresent(), "foo should have been picked up via system property");
-			assertEquals(BAR, optionalFoo.get(), "foo property");
-		}
-		finally {
-			System.clearProperty(FOO);
-		}
+		var configurationParameters = requireNonNull(engine.requestForExecution).getConfigurationParameters();
+		var optionalFoo = configurationParameters.get(FOO);
+		assertTrue(optionalFoo.isPresent(), "foo should have been picked up via system property");
+		assertEquals(BAR, optionalFoo.get(), "foo property");
 	}
 
 	@Test
