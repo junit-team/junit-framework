@@ -14,7 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 import static org.junit.jupiter.api.util.PropertiesAssertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
+import static org.junit.platform.testkit.engine.EventConditions.event;
+import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.EventConditions.test;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
@@ -30,7 +33,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Nested;
@@ -528,16 +530,12 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Test
-		@DisplayName("should fail when clear same system property twice")
-		@Disabled("This can't happen at the moment, because Jupiter's annotation tooling "
-				+ "deduplicates identical annotations like the ones required for this test: "
-				+ "https://github.com/junit-team/junit5/issues/2131")
-		void shouldFailWhenClearSameSystemPropertyTwice() {
+		@DisplayName("should not fail when clear same system property twice")
+		void shouldNotFailWhenClearSameSystemPropertyTwice() {
 			EngineExecutionResults results = executeTests(selectMethod(MethodLevelInitializationFailureTestCases.class,
 				"shouldFailWhenClearSameSystemPropertyTwice"));
 
-			results.testEvents().assertThatEvents().haveAtMost(1,
-				finishedWithFailure(instanceOf(ExtensionConfigurationException.class)));
+			results.testEvents().assertThatEvents().haveExactly(1, event(test(), finishedSuccessfully()));
 		}
 
 		@Test

@@ -10,8 +10,6 @@
 
 package org.junit.jupiter.api.util;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
@@ -26,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
@@ -112,17 +111,9 @@ final class SystemPropertyExtension
 	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
 			boolean doIncrementalBackup) {
 		currentContext.getElement().ifPresent(element -> {
-			Set<String> entriesToClear;
-			Map<String, String> entriesToSet;
-
-			try {
-				entriesToClear = findEntriesToClear(element);
-				entriesToSet = findEntriesToSet(element);
-				preventClearAndSetSameEntries(entriesToClear, entriesToSet.keySet());
-			}
-			catch (IllegalStateException ex) {
-				throw new ExtensionConfigurationException("Don't clear/set the same entry more than once.", ex);
-			}
+			var entriesToClear = findEntriesToClear(element);
+			var entriesToSet = findEntriesToSet(element);
+			preventClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
 
 			if (entriesToClear.isEmpty() && entriesToSet.isEmpty())
 				return;
@@ -140,22 +131,44 @@ final class SystemPropertyExtension
 	}
 
 	private Set<String> findEntriesToClear(AnnotatedElement element) {
-		return findRepeatableAnnotations(element, ClearSystemProperty.class).stream() //
-				.map(ClearSystemProperty::key) //
-				.collect(SystemPropertyExtensionUtils.distinctToSet());
+		return findRepeatableAnnotations(element, ClearSystemProperty.class).stream().map(ClearSystemProperty::key) //
+				// already distinct due to findRepeatableAnnotations
+				.collect(Collectors.toSet());
 	}
 
 	private Map<String, String> findEntriesToSet(AnnotatedElement element) {
-		return findRepeatableAnnotations(element, SetSystemProperty.class).stream() //
-				.collect(toMap(SetSystemProperty::key, SetSystemProperty::value));
+		var entries = new HashMap<String, String>();
+		var duplicatePropertyNames = new HashSet<String>();
+
+		findRepeatableAnnotations(element, SetSystemProperty.class) //
+				.forEach(annotation -> {
+					var key = annotation.key();
+					if (entries.put(key, annotation.value()) != null) {
+						duplicatePropertyNames.add(key);
+					}
+				});
+
+		requireUniqueEntries(element, duplicatePropertyNames);
+		return entries;
 	}
 
-	private void preventClearAndSetSameEntries(Collection<String> entriesToClear, Collection<String> entriesToSet) {
-		String duplicateEntries = entriesToClear.stream().filter(entriesToSet::contains).map(Object::toString).collect(
-			joining(", "));
-		if (!duplicateEntries.isEmpty())
-			throw new IllegalStateException(
-				"Cannot clear and set the following entries at the same time: " + duplicateEntries);
+	private void preventClearAndSetSameEntries(AnnotatedElement element, Set<String> entriesToClear,
+			Set<String> entriesToSet) {
+		requireUniqueEntries(element, //
+			entriesToClear.stream().filter(entriesToSet::contains).collect(Collectors.toSet()));
+	}
+
+	private static void requireUniqueEntries(AnnotatedElement annotatedElement, Set<String> duplicatePropertNames) {
+		if (duplicatePropertNames.isEmpty()) {
+			return;
+		}
+		throw new ExtensionConfigurationException(
+			"SystemPropertyExtension was configured to set/clear %s [%s] more than once by [%s]." //
+					.formatted( //
+						duplicatePropertNames.size() == 1 ? "property" : "properties", //
+						String.join(", ", duplicatePropertNames), //
+						annotatedElement //
+					));
 	}
 
 	private void storeIncrementalBackup(ExtensionContext context, Collection<String> entriesToClear,
