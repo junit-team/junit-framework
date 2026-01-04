@@ -36,4 +36,8 @@ final class JupiterPropertyUtils {
 
 		return clone;
 	}
+
+	private JupiterPropertyUtils() {
+		/* no-op */
+	}
 }
