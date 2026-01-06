@@ -12,24 +12,21 @@ package org.junit.platform.commons.support.conversion;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.support.ReflectionSupport;
+import org.junit.platform.commons.util.Preconditions;
 
-class StringToClassConverter implements StringToObjectConverter {
+class StringToClassConverter implements Converter<String, Class<?>> {
 
 	@Override
-	public boolean canConvertTo(Class<?> targetType) {
-		return targetType == Class.class;
+	public boolean canConvert(ConversionContext context) {
+		return !context.sourceType().equals(TypeDescriptor.NONE) && context.targetType().getType() == Class.class;
 	}
 
 	@Override
-	public Object convert(String source, Class<?> targetType) throws Exception {
-		throw new UnsupportedOperationException("Invoke convert(String, Class<?>, ClassLoader) instead");
-	}
-
-	@Override
-	public @Nullable Object convert(String className, Class<?> targetType, ClassLoader classLoader) throws Exception {
+	public Class<?> convert(@Nullable String className, ConversionContext context) {
+		Preconditions.notNull(className, "className cannot be null");
 		// @formatter:off
-		return ReflectionSupport.tryToLoadClass(className, classLoader)
-				.getOrThrow(cause -> new ConversionException(
+		return ReflectionSupport.tryToLoadClass(className, context.classLoader())
+				.getNonNullOrThrow(cause -> new ConversionException(
 						"Failed to convert String \"" + className + "\" to type java.lang.Class", cause));
 		// @formatter:on
 	}

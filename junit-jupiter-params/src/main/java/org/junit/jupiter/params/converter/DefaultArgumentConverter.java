@@ -26,8 +26,10 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.support.FieldContext;
+import org.junit.platform.commons.support.conversion.ConversionContext;
 import org.junit.platform.commons.support.conversion.ConversionException;
 import org.junit.platform.commons.support.conversion.ConversionSupport;
+import org.junit.platform.commons.support.conversion.TypeDescriptor;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 /**
@@ -41,7 +43,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
  * {@link File}, {@link BigDecimal}, {@link BigInteger}, {@link Currency},
  * {@link Locale}, {@link URI}, {@link URL}, {@link UUID}, etc.
  *
- * <p>If the source and target types are identical the source object will not
+ * <p>If the source and target types are identical, the source object will not
  * be modified.
  *
  * @since 5.0
@@ -58,49 +60,42 @@ public class DefaultArgumentConverter implements ArgumentConverter {
 
 	@Override
 	public final @Nullable Object convert(@Nullable Object source, ParameterContext context) {
-		Class<?> targetType = context.getParameter().getType();
 		ClassLoader classLoader = getClassLoader(context.getDeclaringExecutable().getDeclaringClass());
-		return convert(source, targetType, classLoader);
+		return convert(source, TypeDescriptor.forParameter(context.getParameter()), classLoader);
 	}
 
 	@Override
 	public final @Nullable Object convert(@Nullable Object source, FieldContext context)
 			throws ArgumentConversionException {
-
-		Class<?> targetType = context.getField().getType();
 		ClassLoader classLoader = getClassLoader(context.getField().getDeclaringClass());
-		return convert(source, targetType, classLoader);
+		return convert(source, TypeDescriptor.forField(context.getField()), classLoader);
 	}
 
-	public final @Nullable Object convert(@Nullable Object source, Class<?> targetType, ClassLoader classLoader) {
+	public final @Nullable Object convert(@Nullable Object source, TypeDescriptor targetType, ClassLoader classLoader) {
 		if (source == null) {
 			if (targetType.isPrimitive()) {
 				throw new ArgumentConversionException(
-					"Cannot convert null to primitive value of type " + targetType.getTypeName());
+					"Cannot convert null to primitive value of type " + targetType.getType().getTypeName());
 			}
 			return null;
 		}
 
-		if (ReflectionUtils.isAssignableTo(source, targetType)) {
+		if (ReflectionUtils.isAssignableTo(source, targetType.getType())) {
 			return source;
 		}
 
-		if (source instanceof String string) {
-			try {
-				return convert(string, targetType, classLoader);
-			}
-			catch (ConversionException ex) {
-				throw new ArgumentConversionException(ex.getMessage(), ex);
-			}
+		try {
+			ConversionContext context = new ConversionContext(source, targetType, classLoader);
+			return delegateConversion(source, context);
 		}
-
-		throw new ArgumentConversionException("No built-in converter for source type %s and target type %s".formatted(
-			source.getClass().getTypeName(), targetType.getTypeName()));
+		catch (ConversionException ex) {
+			throw new ArgumentConversionException(ex.getMessage(), ex);
+		}
 	}
 
 	@Nullable
-	Object convert(@Nullable String source, Class<?> targetType, ClassLoader classLoader) {
-		return ConversionSupport.convert(source, targetType, classLoader);
+	Object delegateConversion(@Nullable Object source, ConversionContext context) {
+		return ConversionSupport.convert(source, context);
 	}
 
 }
