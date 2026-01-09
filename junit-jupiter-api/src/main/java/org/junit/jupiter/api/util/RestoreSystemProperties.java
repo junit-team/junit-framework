@@ -47,13 +47,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * annotated with {@code RestoreSystemProperties}.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-parallel-execution" target="_top">parallel test execution</a>,
+ * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html" target="_top">parallel test execution</a>,
  * all tests annotated with {@link RestoreSystemProperties}, {@link SetSystemProperty},
  * {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
  * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
  *
  * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/user-guide/#writing-tests-built-in-extensions-SystemProperty" target="_top">the documentation on
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty" target="_top">the documentation on
  * <code>@ClearSystemProperty</code>, <code>@SetSystemProperty</code>, and <code>@RestoreSystemProperties</code></a>.</p>
  *
  * <p><em>Note:</em> The system properties object normally acts like a map of strings. While strongly

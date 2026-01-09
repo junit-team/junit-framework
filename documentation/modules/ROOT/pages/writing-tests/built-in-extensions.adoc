@@ -293,7 +293,7 @@ locale or time zone need to be annotated with the respective annotation:
 Tests annotated in this way will never execute in parallel with tests annotated with
 `@DefaultLocale` or `@DefaultTimeZone`.
 
-[[writing-tests-built-in-extensions-SystemProperty]]
+[[SystemProperty]]
 == @ClearSystemProperty and @SetSystemProperty
 
 The `@ClearSystemProperty` and `@SetSystemProperty` annotations can be used to clear and set, respectively, the values of system properties for a test execution.
@@ -387,7 +387,8 @@ Using `@RestoreSystemProperties` is not necessary to restore system properties m
 'Restore', is only needed if system properties are modified in some way _other than_ Clear and Set during a test.
 ====
 
-=== `@RestoreSystemProperties` Limitations
+[[RestoreSystemProperties-limitations]]
+=== Limitations
 
 The system `Properties` object normally acts like a map of strings. While strongly discouraged, it is possible to use non-string keys and values. It is also possible to create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values]. `@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
 However _during_ the execution of the annotated scope, the system properties are set to a cloned `Properties` object with these limitations:
@@ -395,10 +396,11 @@ However _during_ the execution of the annotated scope, the system properties are
 - Properties with non-string values are removed.
 - Nested `Properties` are flattened into a non-nested instance that has the same effective values.
 
-== Thread-Safety
+[[SystemProperties-thread-safety]]
+=== Thread Safety
 
 Since system properties are global state, reading and writing them during <<writing-tests-parallel-execution, parallel test execution>>  can lead to unpredictable results and flaky tests.
-The system property extension is prepared for that and tests annotated with `@ClearSystemProperty`, `@SetSystemProperty`, or `@RestoreSystemProperties` will never execute in parallel (thanks to https://docs.junit.org/current/api[resource locks]) to guarantee correct test results.
+The system property extension is prepared for that and tests annotated with `@ClearSystemProperty`, `@SetSystemProperty`, or `@RestoreSystemProperties` will never execute in parallel (thanks to xref:writing-tests/parallel-execution.adoc#synchronization[resource locks]) to guarantee correct test results.
 
 However, this does not cover all possible cases.
 Tested code that reads or writes system properties _independently_ of the extension can still run in parallel to it and may thus behave erratically when, for example, it unexpectedly reads a property set by the extension in another thread.
