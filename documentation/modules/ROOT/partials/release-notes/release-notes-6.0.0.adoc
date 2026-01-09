@@ -260,8 +260,8 @@ guidance on upgrading from JUnit 5.x.y to 6.0.0.
   `fruit{nbsp}={nbsp}apple` instead of `fruit=apple`.
 * Text-based arguments in display names for parameterized tests are now quoted by default.
   In addition, special characters are escaped within quoted text. Please refer to the
-  xref:writing-tests/parameterized-classes-and-tests.adoc#tests-display-names-quoted-text[User Guide] for details.
-* xref:writing-tests/parameterized-classes-and-tests.adoc#tests-argument-conversion-implicit-fallback[Fallback String-to-Object Conversion] for parameterized tests now supports factory
+  xref:writing-tests/parameterized-classes-and-tests.adoc#display-names-quoted-text[User Guide] for details.
+* xref:writing-tests/parameterized-classes-and-tests.adoc#argument-conversion-implicit-fallback[Fallback String-to-Object Conversion] for parameterized tests now supports factory
   methods and factory constructors that accept a single `CharSequence` argument in
   addition to the existing support for factories that accept a single `String` argument.
 * The `Arguments` interface for parameterized tests is now officially a
