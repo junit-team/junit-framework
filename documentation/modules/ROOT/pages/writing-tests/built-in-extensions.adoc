@@ -8,7 +8,7 @@ dependency.
 [[TempDirectory]]
 == The @TempDir Extension
 
-The built-in `{TempDirectory}` extension is used to create and clean up a temporary
+The `{TempDirectory}` extension is used to create and clean up a temporary
 directory for an individual test or all tests in a test class. It is registered by
 default. To use it, annotate a non-final, unassigned field of type `java.nio.file.Path` or
 `java.io.File` with `{TempDir}` or add a parameter of type `java.nio.file.Path` or
@@ -133,7 +133,7 @@ parameter, if present
 [[AutoClose]]
 == The @AutoClose Extension
 
-The built-in `{AutoCloseExtension}` automatically closes resources associated with fields.
+The `{AutoCloseExtension}` automatically closes resources associated with fields.
 It is registered by default. To use it, annotate a field in a test class with
 `{AutoClose}`.
 
@@ -294,9 +294,13 @@ Tests annotated in this way will never execute in parallel with tests annotated 
 `@DefaultLocale` or `@DefaultTimeZone`.
 
 [[SystemProperty]]
-== @ClearSystemProperty and @SetSystemProperty
+== The System Properties Extension
 
-The `@ClearSystemProperty` and `@SetSystemProperty` annotations can be used to clear and set, respectively, the values of system properties for a test execution.
+The System Properties extension consists is a set of annotations that work together to read, write and clear system properties.  
+
+=== `@ClearSystemProperty` and `@SetSystemProperty`
+
+The `{ClearSystemProperty}` and `{SetSystemProperty}` extensions can be used to clear and set, respectively, the values of system properties for a test execution.
 Both annotations work on the test method and class level, are repeatable, combinable, and inherited from higher-level containers.
 After the annotated method has been executed, the properties mentioned in the annotation will be restored to their original value or the value of the higher-level container, or will be cleared if they didn't have one before.
 Other system properties that are changed during the test, are *not* restored (unless the `@RestoreSystemProperties` is used).
@@ -337,10 +341,10 @@ Method-level configurations are visible in both `@BeforeEach` setup methods and 
 A class-level configuration means that the specified system properties are cleared/set before and reset after each individual test in the annotated class.
 ====
 
-[[RestoreSystemProperties]]
-== @RestoreSystemProperties
+[[SystemProperty-restore-system-properties]]
+=== @RestoreSystemProperties
 
-`@RestoreSystemProperties` can be used to restore changes to system properties made directly in code.
+The `{RestoreSystemProperties}` Extension can be used to restore changes to system properties made directly in code.
 While `@ClearSystemProperty` and `@SetSystemProperty` set or clear specific properties and values, they don't allow property values to be calculated or parameterized, thus there are times you may want to directly set properties in your test code.
 `@RestoreSystemProperties` can be placed on test methods or test classes and will completely restore all system properties to their original state after a test or test class is complete.
 
@@ -370,7 +374,17 @@ Some other test class, running later:
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
 ----
 
-== Using `@ClearSystemProperty`, `@SetSystemProperty`, and `@RestoreSystemProperties` together
+[[SystemProperty-restore-system-properties-limitations]]
+==== Limitations
+
+The system `Properties` object normally acts like a map of strings. While strongly discouraged, it is possible to use non-string keys and values. It is also possible to create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values]. `@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
+However _during_ the execution of the annotated scope, the system properties are set to a cloned `Properties` object with these limitations:
+
+- Properties with non-string values are removed.
+- Nested `Properties` are flattened into a non-nested instance that has the same effective values.
+
+[[SystemProperty-using-together]]
+=== Using @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties together
 
 All three annotations can be combined, which could be used when some system properties are parameterized (i.e. need to be set in code) and others are not.
 For instance, imagine testing an image generation utility that takes configuration from system properties.
@@ -387,17 +401,10 @@ Using `@RestoreSystemProperties` is not necessary to restore system properties m
 'Restore', is only needed if system properties are modified in some way _other than_ Clear and Set during a test.
 ====
 
-[[RestoreSystemProperties-limitations]]
-=== Limitations
-
-The system `Properties` object normally acts like a map of strings. While strongly discouraged, it is possible to use non-string keys and values. It is also possible to create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values]. `@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
-However _during_ the execution of the annotated scope, the system properties are set to a cloned `Properties` object with these limitations:
-
-- Properties with non-string values are removed.
-- Nested `Properties` are flattened into a non-nested instance that has the same effective values.
-
 [[SystemProperties-thread-safety]]
 === Thread Safety
+
+TODO: Fix links here:
 
 Since system properties are global state, reading and writing them during <<writing-tests-parallel-execution, parallel test execution>>  can lead to unpredictable results and flaky tests.
 The system property extension is prepared for that and tests annotated with `@ClearSystemProperty`, `@SetSystemProperty`, or `@RestoreSystemProperties` will never execute in parallel (thanks to xref:writing-tests/parallel-execution.adoc#synchronization[resource locks]) to guarantee correct test results.
@@ -405,6 +412,8 @@ The system property extension is prepared for that and tests annotated with `@Cl
 However, this does not cover all possible cases.
 Tested code that reads or writes system properties _independently_ of the extension can still run in parallel to it and may thus behave erratically when, for example, it unexpectedly reads a property set by the extension in another thread.
 Tests that cover code that reads or writes system properties need to be annotated with the respective annotation:
+
+TODO: Link first use ot Java doc.
 
 * `@ReadsSystemProperty`
 * `@WritesSystemProperty` (though consider using `@RestoreSystemProperties` instead)

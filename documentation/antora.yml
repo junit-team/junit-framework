@@ -165,6 +165,10 @@ asciidoc:
     ReadsDefaultTimeZone: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/ReadsDefaultTimeZone.html[@ReadsDefaultTimeZone]'
     WritesDefaultLocale: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/WritesDefaultLocale.html[@WritesDefaultLocale]'
     WritesDefaultTimeZone: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/WritesDefaultTimeZone.html[@WritesDefaultTimeZone]'
+    # System Properties Extension
+    ClearSystemProperty: TODO
+    SetSystemProperty: TODO
+    Restoresystemproperties: TODO
     # Jupiter Parallel API
     Execution: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/parallel/Execution.html[@Execution]'
     Isolated: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/parallel/Isolated.html[@Isolated]'
