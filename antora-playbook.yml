@@ -30,6 +30,7 @@ content:
         - '!r6.0.0*'
         - '!r6.0.1'
         - '!r6.0.1-*'
+        - '!r6.0.2'
         - '!r6.1.0-M1'
       start_path: documentation
       worktrees: true
