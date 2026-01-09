@@ -337,7 +337,8 @@ Method-level configurations are visible in both `@BeforeEach` setup methods and 
 A class-level configuration means that the specified system properties are cleared/set before and reset after each individual test in the annotated class.
 ====
 
-== `@RestoreSystemProperties`
+[[RestoreSystemProperties]]
+== @RestoreSystemProperties
 
 `@RestoreSystemProperties` can be used to restore changes to system properties made directly in code.
 While `@ClearSystemProperty` and `@SetSystemProperty` set or clear specific properties and values, they don't allow property values to be calculated or parameterized, thus there are times you may want to directly set properties in your test code.
