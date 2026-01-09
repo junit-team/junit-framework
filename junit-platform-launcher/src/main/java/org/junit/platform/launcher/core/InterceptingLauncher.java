@@ -11,6 +11,7 @@
 package org.junit.platform.launcher.core;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherExecutionRequest;
@@ -32,11 +33,13 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
+		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
 		return interceptor.intercept(() -> super.discover(launcherDiscoveryRequest));
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherDiscoveryRequest, listeners);
 			return null;
@@ -45,6 +48,7 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "TestPlan must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(testPlan, listeners);
 			return null;
@@ -53,6 +57,7 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		Preconditions.notNull(launcherExecutionRequest, "LauncherExecutionRequest must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherExecutionRequest);
 			return null;

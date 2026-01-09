@@ -10,6 +10,7 @@
 
 package org.junit.platform.launcher.core;
 
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -40,21 +41,25 @@ class DelegatingLauncher implements Launcher {
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
+		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
 		return delegate.discover(launcherDiscoveryRequest);
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
 		delegate.execute(launcherDiscoveryRequest, listeners);
 	}
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "TestPlan must not be null");
 		delegate.execute(testPlan, listeners);
 	}
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		Preconditions.notNull(launcherExecutionRequest, "LauncherExecutionRequest must not be null");
 		delegate.execute(launcherExecutionRequest);
 	}
 }

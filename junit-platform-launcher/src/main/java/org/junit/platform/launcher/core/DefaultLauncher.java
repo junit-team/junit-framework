@@ -87,6 +87,7 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(discoveryRequest, "LauncherDiscoveryRequest must not be null");
 		var executionRequest = LauncherExecutionRequestBuilder.request(discoveryRequest) //
 				.listeners(listeners) //
 				.build();
@@ -95,6 +96,7 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "TestPlan must not be null");
 		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan) //
 				.listeners(listeners) //
 				.build();
@@ -103,6 +105,7 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		Preconditions.notNull(launcherExecutionRequest, "LauncherExecutionRequest must not be null");
 		var testPlan = launcherExecutionRequest.getTestPlan().map(it -> {
 			Preconditions.condition(it instanceof InternalTestPlan, "TestPlan was not returned by this Launcher");
 			return ((InternalTestPlan) it);

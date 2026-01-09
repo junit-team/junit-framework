@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.Launcher;
@@ -56,6 +57,7 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
+		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
 		try (LauncherSession session = createSession()) {
 			return session.getLauncher().discover(launcherDiscoveryRequest);
 		}
@@ -63,6 +65,7 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(launcherDiscoveryRequest, listeners);
 		}
@@ -70,6 +73,7 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "TestPlan must not be null");
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(testPlan, listeners);
 		}
@@ -77,6 +81,7 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+		Preconditions.notNull(launcherExecutionRequest, "LauncherExecutionRequest must not be null");
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(launcherExecutionRequest);
 		}
