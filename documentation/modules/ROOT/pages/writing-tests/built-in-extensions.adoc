@@ -294,7 +294,7 @@ Tests annotated in this way will never execute in parallel with tests annotated 
 `@DefaultLocale` or `@DefaultTimeZone`.
 
 [[writing-tests-built-in-extensions-SystemProperty]]
-==== `@ClearSystemProperty` and `@SetSystemProperty`
+== @ClearSystemProperty and @SetSystemProperty
 
 The `@ClearSystemProperty` and `@SetSystemProperty` annotations can be used to clear and set, respectively, the values of system properties for a test execution.
 Both annotations work on the test method and class level, are repeatable, combinable, and inherited from higher-level containers.
