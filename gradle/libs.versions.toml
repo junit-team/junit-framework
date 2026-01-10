@@ -48,6 +48,7 @@ jspecify = { module = "org.jspecify:jspecify", version = "1.0.0" }
 jte = { module = "gg.jte:jte", version = "3.2.1" }
 junit4 = { module = "junit:junit", version = { require = "[4.12,)", prefer = "4.13.2" } }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.2" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.2" }
 log4j-bom = { module = "org.apache.logging.log4j:log4j-bom", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }

@@ -56,7 +56,10 @@ following example.
 include::example$java/example/MyFirstJUnitJupiterRecordTests.java[tags=user_guide]
 ----
 
-Test and lifecycle methods may be written in Kotlin and may optionally use the `suspend`
+[[test-classes-and-methods-kotlin-coroutines]]
+== Kotlin Coroutines
+
+Test methods and lifecycle methods may be written in Kotlin and may optionally use the `suspend`
 keyword for testing code using coroutines.
 
 [source,kotlin]
@@ -71,3 +74,18 @@ https://central.sonatype.com/artifact/org.jetbrains.kotlin/kotlin-reflect[`kotli
 and
 https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core[`kotlinx-coroutines-core`]
 to be present on the classpath or module path.
+
+Traditionally, one would use `runBlocking` to bridge the gap between tests and coroutines. However,
+`runBlocking` does not support skipping calls to `delay`. In addition, it does not support testing
+code that requires control over the execution time or the dispatcher. For such cases, using
+standard test methods and wrapping the test body in `runTest` from
+https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-test[`kotlinx-coroutines-test`]
+is recommended.
+
+[source,kotlin]
+----
+@Test
+fun runTest() = runTest {
+    // ...
+}
+----

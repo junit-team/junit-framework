@@ -12,6 +12,8 @@ package example
 
 // tag::user_guide[]
 import org.junit.jupiter.api.BeforeEach
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 // end::user_guide[]
@@ -36,6 +38,10 @@ class KotlinCoroutinesDemo {
 
     @Test
     suspend fun coroutineTest() {
+    }
+
+    @Test
+    fun runTest() = runTest {
     }
 }
 // end::user_guide[]
