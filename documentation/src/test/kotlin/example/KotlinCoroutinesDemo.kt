@@ -11,7 +11,6 @@
 package example
 
 // tag::user_guide[]
-import org.junit.jupiter.api.BeforeEach
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
