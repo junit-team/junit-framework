@@ -84,7 +84,7 @@ class JupiterPropertyUtilTests {
 		assertThat(clone.getProperty("b")).isEqualTo("b");
 	}
 
-	private static final class CustomProperties extends Properties {
+	static final class CustomProperties extends Properties {
 
 		@Serial
 		private static final long serialVersionUID = 1L;
