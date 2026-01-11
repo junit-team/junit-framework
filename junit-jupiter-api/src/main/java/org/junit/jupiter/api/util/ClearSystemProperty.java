@@ -67,7 +67,7 @@ public @interface ClearSystemProperty {
 	@Target({ ElementType.METHOD, ElementType.TYPE })
 	@Inherited
 	@WritesSystemProperty
-	@API(status = STABLE, since = "6.1")
+	@API(status = EXPERIMENTAL, since = "6.1")
 	@interface ClearSystemProperties {
 
 		ClearSystemProperty[] value();
