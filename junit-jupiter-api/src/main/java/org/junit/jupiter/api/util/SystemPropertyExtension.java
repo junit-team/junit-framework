@@ -68,8 +68,6 @@ final class SystemPropertyExtension
 	 * Prepare to exit a restorable context.
 	 *
 	 * <p>The entry environment will be restored to the state passed in as {@code Properties}.
-	 * The {@code Properties} entries must follow the rules for entries of this environment,
-	 * e.g., environment variables contain only Strings while System {@code Properties} may contain Objects.</p>
 	 *
 	 * @param properties a non-null {@code Properties} that contains all entries of the entry environment.
 	 */
