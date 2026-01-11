@@ -26,3 +26,4 @@ class KotlinCoroutinesRunTestDemo {
     // @formatter:on
     // tag::user_guide[]
 }
+// end::user_guide[]
