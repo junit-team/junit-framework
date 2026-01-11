@@ -12,7 +12,6 @@ package org.junit.jupiter.api.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
-import static org.junit.jupiter.api.util.PropertiesAssertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
@@ -389,7 +388,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 							.withFailMessage("prepareToEnterRestorableContext should replace the actual Sys Props") //
 							.isNotSameAs(postPrepareToEnterSysProps);
 
-					assertThat(postPrepareToEnterSysProps).isEffectivelyEqualsTo(initialState);
+					assertThat(postPrepareToEnterSysProps).isEqualTo(initialState);
 
 					assertThat(postPrepareToExitSysProps).isSameAs(initialState);
 
@@ -629,7 +628,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 			assertThat(System.getProperties()) //
 					.withFailMessage("Restore should swap out the Sys Properties instance") //
 					.isNotSameAs(initialState);
-			assertThat(System.getProperties()).isEffectivelyEqualsTo(initialState);
+			assertThat(System.getProperties()).isEqualTo(initialState);
 		}
 
 		@Nested
