@@ -42,9 +42,7 @@ import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 class ExtensionRegistryTests {
 
 	private static final int NUM_CORE_EXTENSIONS = 7;
-	private static final int NUM_AUTO_REGISTERED_EXTENSIONS_IN_THIS_PROJECT = 0;
-	private static final int NUM_DEFAULT_EXTENSIONS = NUM_CORE_EXTENSIONS
-			+ NUM_AUTO_REGISTERED_EXTENSIONS_IN_THIS_PROJECT;
+	private static final int NUM_DEMO_EXTENSIONS = 2;
 
 	private final JupiterConfiguration configuration = mock();
 
@@ -67,7 +65,7 @@ class ExtensionRegistryTests {
 
 		List<Extension> extensions = registry.getExtensions(Extension.class);
 
-		assertEquals(NUM_DEFAULT_EXTENSIONS + 2, extensions.size());
+		assertEquals(NUM_CORE_EXTENSIONS + NUM_DEMO_EXTENSIONS, extensions.size());
 		assertDefaultGlobalExtensionsAreRegistered(4);
 
 		assertExtensionRegistered(registry, ServiceLoaderExtension.class);
@@ -83,7 +81,8 @@ class ExtensionRegistryTests {
 
 		List<Extension> extensions = registry.getExtensions(Extension.class);
 
-		assertEquals(NUM_DEFAULT_EXTENSIONS + 1, extensions.size());
+		assertEquals(NUM_CORE_EXTENSIONS + NUM_DEMO_EXTENSIONS - 1 /* exlcuded ConfigLoaderExtension */,
+			extensions.size());
 		assertDefaultGlobalExtensionsAreRegistered(3);
 
 		assertExtensionRegistered(registry, ServiceLoaderExtension.class);
@@ -98,7 +97,7 @@ class ExtensionRegistryTests {
 
 		List<Extension> extensions = registry.getExtensions(Extension.class);
 
-		assertEquals(NUM_DEFAULT_EXTENSIONS + 2, extensions.size());
+		assertEquals(NUM_CORE_EXTENSIONS + NUM_DEMO_EXTENSIONS, extensions.size());
 		assertDefaultGlobalExtensionsAreRegistered(4);
 
 		assertExtensionRegistered(registry, ServiceLoaderExtension.class);
