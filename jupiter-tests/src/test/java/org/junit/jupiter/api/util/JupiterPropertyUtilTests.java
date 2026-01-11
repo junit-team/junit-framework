@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -11,29 +11,42 @@
 package org.junit.jupiter.api.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.util.JupiterPropertyUtils.createEffectiveClone;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.util.JupiterPropertyUtils.cloneWithoutDefaults;
+import static org.mockito.Mockito.when;
 
+import java.io.Serial;
+import java.util.Optional;
 import java.util.Properties;
 
-import org.junit.jupiter.api.DisplayName;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionConfigurationException;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
-@DisplayName("cloneProperties Tests")
+@MockitoSettings
 class JupiterPropertyUtilTests {
+
+	@Mock
+	ExtensionContext context;
 
 	@Test
 	void cloneProperties() {
 		var properties = new Properties();
 		properties.setProperty("a", "a");
-		properties.put("a-obj", new Object());
+		var value = new Object();
+		properties.put("a-obj", value);
 
-		var clone = createEffectiveClone(properties);
+		var clone = cloneWithoutDefaults(context, properties);
 
 		assertThat(clone.stringPropertyNames()).containsExactly("a");
 		assertThat(clone.get("a")).isSameAs(properties.get("a"));
 
-		assertThat(clone.keySet()).containsExactly("a");
+		assertThat(clone.keySet()).containsExactly("a", "a-obj");
 		assertThat(clone.getProperty("a")).isEqualTo("a");
+		assertThat(clone.get("a-obj")).isSameAs(value);
 	}
 
 	@Test
@@ -44,67 +57,51 @@ class JupiterPropertyUtilTests {
 		var properties = new Properties(defaults);
 		properties.setProperty("b", "b");
 
-		var clone = createEffectiveClone(properties);
+		when(context.getElement()).thenReturn(Optional.of(JupiterPropertyUtilTests.class));
+
+		var exception = assertThrows(ExtensionConfigurationException.class,
+			() -> cloneWithoutDefaults(context, properties));
+
+		assertThat(exception).hasMessage(
+			("SystemPropertyExtension was configured to restore the system properties by [%s]. " + //
+					"It was not possible to create an accurate snapshot of the system properties using Properties::clone because default properties [a] were present.") //
+							.formatted(JupiterPropertyUtilTests.class));
+
+	}
+
+	@Test
+	void withDefaultsAndSubclass() {
+		var defaults = new CustomProperties();
+		defaults.setProperty("a", "a");
+
+		var properties = new CustomProperties(defaults);
+		properties.setProperty("b", "b");
+
+		var clone = cloneWithoutDefaults(context, properties);
 
 		assertThat(clone.stringPropertyNames()).containsExactly("a", "b");
 		assertThat(clone.getProperty("a")).isEqualTo("a");
 		assertThat(clone.getProperty("b")).isEqualTo("b");
-
-		assertThat(clone.keySet()).containsExactly("a", "b");
-		assertThat(clone.get("a")).isSameAs(defaults.get("a"));
-		assertThat(clone.get("b")).isSameAs(properties.get("b"));
 	}
 
-	@Test
-	void doesNotIncludeShadowedDefaults() {
-		var defaults = new Properties();
-		defaults.setProperty("a", "a");
+	private static final class CustomProperties extends Properties {
 
-		var properties = new Properties(defaults);
-		var shadow = new Object();
-		properties.put("a", shadow);
+		@Serial
+		private static final long serialVersionUID = 1L;
 
-		var clone = createEffectiveClone(properties);
+		public CustomProperties() {
+			this(null);
+		}
 
-		assertThat(clone.stringPropertyNames()).containsExactly("a");
-		assertThat(clone.getProperty("a")).isEqualTo("a");
+		public CustomProperties(@Nullable CustomProperties defaults) {
+			super(defaults);
+		}
 
-		assertThat(clone.keySet()).containsExactly("a");
-		assertThat(clone.get("a")).isEqualTo("a");
+		@Override
+		public synchronized Object clone() {
+			CustomProperties clone = (CustomProperties) super.clone();
+			clone.defaults = this.defaults == null ? null : (Properties) this.defaults.clone();
+			return clone;
+		}
 	}
-
-	@Test
-	void doesNotIncludeOverridenDefaultValue() {
-		var defaults = new Properties();
-		defaults.setProperty("a", "a");
-
-		var properties = new Properties(defaults);
-		properties.put("a", "b");
-
-		var clone = createEffectiveClone(properties);
-
-		assertThat(clone.getProperty("a")).isEqualTo("b");
-		clone.remove("a");
-		// properties.getProperty("a") would return the default value "a" here.
-		assertThat(clone.getProperty("a")).isNull();
-		assertThat(clone.get("a")).isNull();
-	}
-
-	@Test
-	void doesIncludeDefaultOverridingValue() {
-		var defaults = new Properties();
-		defaults.setProperty("a", "a");
-
-		var properties = new Properties(defaults);
-		properties.put("a", "b");
-
-		var clone = createEffectiveClone(properties);
-
-		assertThat(clone.stringPropertyNames()).containsExactly("a");
-		assertThat(clone.getProperty("a")).isEqualTo("b");
-
-		assertThat(clone.keySet()).containsExactly("a");
-		assertThat(clone.get("a")).isSameAs("b");
-	}
-
 }

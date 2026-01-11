@@ -377,11 +377,9 @@ include::example$java/example/SystemPropertyExtensionDemo.java[tag=systempropert
 [[SystemProperty-restore-system-properties-limitations]]
 ==== Limitations
 
-The system `Properties` object normally acts like a map of strings. While strongly discouraged, it is possible to use non-string keys and values. It is also possible to create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values]. `@RestoreSystemProperties` restores the original `Properties` object with all of its potential richness _after_ the annotated scope is complete.
-However _during_ the execution of the annotated scope, the system properties are set to a cloned `Properties` object with these limitations:
-
-- Properties with non-string values are removed.
-- Nested `Properties` are flattened into a non-nested instance that has the same effective values.
+`@RestoreSystemProperties` restores the original `Properties` object _after_ the annotated scope is complete. _During_
+the execution of the annotated scope, the system properties are set to a cloned `Properties` object.
+However it is possible to create a {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values] that are not included in the cloned object. The extension will perform a best effor attempt to  detect and fail if default values are detected. For classes that extend `Properties` it is assumed that `clone()` is implemented with sufficient fidelity.
 
 [[SystemProperty-using-together]]
 === Using @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties together

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -42,9 +42,13 @@ import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.util.SystemPropertyExtensionTests.CombinedClearSetRestoreTests.SetClearRestoreOnClass;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 @DisplayName("SystemProperty extension")
 class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
@@ -360,7 +364,11 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 
 		@Nested
 		@DisplayName("RestorableContext Workflow Tests")
+		@MockitoSettings
 		class RestorableContextWorkflowTests {
+
+			@Mock
+			ExtensionContext context;
 
 			@Test
 			@DisplayName("Workflow of RestorableContext")
@@ -368,7 +376,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 				Properties initialState = System.getProperties(); //This is a live reference
 
 				try {
-					Properties returnedFromPrepareToEnter = spe.prepareToEnterRestorableContext();
+					Properties returnedFromPrepareToEnter = spe.prepareToEnterRestorableContext(context);
 					Properties postPrepareToEnterSysProps = System.getProperties();
 					spe.prepareToExitRestorableContext(initialState);
 					Properties postPrepareToExitSysProps = System.getProperties();

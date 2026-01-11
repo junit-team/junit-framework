@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -10,34 +10,41 @@
 
 package org.junit.jupiter.api.util;
 
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+
+import org.junit.jupiter.api.extension.ExtensionConfigurationException;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 final class JupiterPropertyUtils {
 
-	/**
-	 * Create a effective clone of a {@link Properties} object.
-	 *
-	 * <p>The clone will have the same observable properties as the
-	 * {@code original} but is constructed without default values. Furthermore
-	 * any non-string values are ignored.
-	 *
-	 * @return a new instance containing the same observable properties as the original.
-	 */
-	static Properties createEffectiveClone(Properties original) {
-		Properties clone = new Properties();
-		// This implementation is used because
-		// * Properties.defaults is not accessible
-		// * Properties::clone does not include the defaults
-		// * The defaults can be obtained by removing all keys from the
-		//   original and checking the remaining values. This requires
-		//   mutation.
-		original.stringPropertyNames().forEach(
-			propertyName -> clone.put(propertyName, original.getProperty(propertyName)));
-
-		return clone;
-	}
-
 	private JupiterPropertyUtils() {
 		/* no-op */
+	}
+
+	static Properties cloneWithoutDefaults(ExtensionContext context, Properties properties) {
+		// Custom implemetnations have to implement clone correctly.
+		if (properties.getClass() == Properties.class) {
+			throwIfHasObservableDefaults(context, properties);
+		}
+		return (Properties) properties.clone();
+	}
+
+	private static void throwIfHasObservableDefaults(ExtensionContext context, Properties properties) {
+		Set<Object> keySet = properties.keySet();
+		// A best effort check.
+		List<String> defaultPropertyNames = properties.stringPropertyNames().stream() //
+				.filter(propertyName -> !keySet.contains(propertyName)) //
+				.toList();
+		if (!defaultPropertyNames.isEmpty()) {
+			throw new ExtensionConfigurationException(
+				("SystemPropertyExtension was configured to restore the system properties by [%s]. " //
+						+ "It was not possible to create an accurate snapshot of the system properties using Properties::clone because default properties [%s] were present." //
+				).formatted( //
+					context.getElement().orElseThrow(), //
+					String.join(", ", defaultPropertyNames) //
+				));
+		}
 	}
 }

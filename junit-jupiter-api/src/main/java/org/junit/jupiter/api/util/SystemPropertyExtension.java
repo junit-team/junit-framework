@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -44,23 +44,23 @@ final class SystemPropertyExtension
 	/**
 	 * Prepare for entering a context that must be restorable.
 	 *
-	 * <p>Cloning a properties object is difficult. The default values are not
-	 * accessible without either first removing all values from the object, or
-	 * using reflection. Instead we swap-in a clone with the same apperent
-	 * properties.
+	 * <p>The context is prepared by pre-emptively swapping out the current
+	 * System properties with a snapshot. The original system properties are
+	 * restored after the test.
 	 *
-	 * <p>The "Preemptive swap" strategy ensure that the original Properties are restored, however
-	 * complex they were. Any artifacts resulting from a flattened default structure are limited
-	 * to the context of the test.
+	 * <p><em>Note:</em> The snapshot of the properties object is created using
+	 * {@link Properties#clone()}. This cloned value will not include any
+	 * default values. This extension will make a best effort attempt to fail
+	 * if default values are detected. For classes that extend
+	 * {@code Properties}, it is assumed that clone is implemented with
+	 * sufficient fidelity for testing purposes.
 	 *
 	 * @return The original {@link System#getProperties} object
 	 */
-	Properties prepareToEnterRestorableContext() {
-		Properties current = System.getProperties();
-		Properties clone = JupiterPropertyUtils.createEffectiveClone(current);
-
+	Properties prepareToEnterRestorableContext(ExtensionContext context) {
+		var current = System.getProperties();
+		var clone = JupiterPropertyUtils.cloneWithoutDefaults(context, current);
 		System.setProperties(clone);
-
 		return current;
 	}
 
@@ -90,22 +90,21 @@ final class SystemPropertyExtension
 	private void applyForAllContexts(ExtensionContext originalContext) {
 		var allContexts = findAllExtensionContexts(originalContext);
 
-		boolean doCompleteBackup = isRestoreAnnotationPresent(allContexts);
-		if (doCompleteBackup) {
-			var properties = this.prepareToEnterRestorableContext();
+		var restoreAnnotationContext = findFirstRestoreAnnotationContext(allContexts);
+		restoreAnnotationContext.ifPresent(annotatedElement -> {
+			var properties = this.prepareToEnterRestorableContext(annotatedElement);
 			storeCompleteBackup(originalContext, properties);
-		}
+		});
 
 		// we have to apply the annotations from the outermost to the innermost context.
 		forEachInReverseOrder(allContexts,
-			currentContext -> clearAndSetEntries(currentContext, originalContext, !doCompleteBackup));
+			currentContext -> clearAndSetEntries(currentContext, originalContext, restoreAnnotationContext.isEmpty()));
 	}
 
-	private boolean isRestoreAnnotationPresent(List<ExtensionContext> contexts) {
+	private Optional<ExtensionContext> findFirstRestoreAnnotationContext(List<ExtensionContext> contexts) {
 		return contexts.stream() //
-				.map(ExtensionContext::getElement) //
-				.flatMap(Optional::stream) //
-				.anyMatch(annotatedElement -> isAnnotated(annotatedElement, RestoreSystemProperties.class));
+				.filter(annotatedElement -> isAnnotated(annotatedElement.getElement(),
+					RestoreSystemProperties.class)).findFirst();
 	}
 
 	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,

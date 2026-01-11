@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -17,6 +17,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Properties;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <p>Use this annotation when there is a need programmatically modify system properties in a test
  * method or in {@code @BeforeAll} / {@code @BeforeEach} blocks.
  * To set or clear a system property, consider {@link SetSystemProperty @SetSystemProperty} or
- * {@link ClearSystemProperty @ClearSystemProperty} instead.</p>
+ * {@link ClearSystemProperty @ClearSystemProperty} instead.
  *
  * <p>{@code RestoreSystemProperties} can be used on the method and on the class level.
  * When placed on a test method, a snapshot of system properties is stored prior to that test.
@@ -50,20 +51,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html" target="_top">parallel test execution</a>,
  * all tests annotated with {@link RestoreSystemProperties}, {@link SetSystemProperty},
  * {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
- * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
+ * are scheduled in a way that guarantees correctness under mutation of shared global state.
  *
  * <p>For more details and examples, see
  * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty" target="_top">the documentation on
  * <code>@ClearSystemProperty</code>, <code>@SetSystemProperty</code>, and <code>@RestoreSystemProperties</code></a>.</p>
  *
- * <p><em>Note:</em> The system properties object normally acts like a map of strings. While strongly
- * discouraged, it is possible to use non-string keys and values. It is also possible to
- * {@linkplain java.util.Properties create nested propeties with inherited default
- * values}. {@code @RestoreSystemProperties} restores the original properties object with all of its
- * potential richness _after_ the annotated scope is complete.
- * However _during_ the execution of the annotated scope, the system properties are set to
- * a cloned properties object where properties with non-string values are removed and nested properties
- * are flattened into a non-nested instance that has the same effective values.
+ * <p><em>Note:</em> The snapshot of the properties object is created using {@link Properties#clone()}.
+ * This cloned value will not include any default values. This extension will make a best effort
+ * attempt to fail if default values are detected. For classes that extend {@code Properties}, it
+ * is assumed that {@code clone()} is implemented with sufficient fidelity.
  *
  * @since 6.1
  */
