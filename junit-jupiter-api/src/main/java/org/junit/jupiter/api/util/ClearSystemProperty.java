@@ -30,18 +30,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * After the annotated element has been executed, the original value or the value of the
  * higher-level container is restored.</p>
  *
- * <p>{@code ClearSystemProperty} can be used on the method and on the class level.
+ * <p>{@code @ClearSystemProperty} can be used on the method and on the class level.
  * It is repeatable and inherited from higher-level containers. If a class is
  * annotated, the configured property will be cleared before every test inside that
  * class.</p>
  *
  * <p>During
- * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html" target="_top">parallel test execution</a>,
+ * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
  * all tests annotated with {@link ClearSystemProperty}, {@link SetSystemProperty}, {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
  * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
  *
  * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty" target="_top">the documentation on <code>@ClearSystemProperty and @SetSystemProperty</code></a>.</p>
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty">the documentation on <code>@ClearSystemProperty and @SetSystemProperty</code></a>.</p>
  *
  * @since 6.1
  */

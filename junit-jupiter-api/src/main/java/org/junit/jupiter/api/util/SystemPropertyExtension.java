@@ -50,8 +50,8 @@ final class SystemPropertyExtension
 	 *
 	 * <p><em>Note:</em> The snapshot of the properties object is created using
 	 * {@link Properties#clone()}. This cloned value will not include any
-	 * default values. This extension will make a best effort attempt to fail
-	 * if default values are detected. For classes that extend
+	 * default values. This extension will make a best effort attempt to detect
+	 * default values and fail if any are detected. For classes that extend
 	 * {@code Properties}, it is assumed that clone is implemented with
 	 * sufficient fidelity for testing purposes.
 	 *

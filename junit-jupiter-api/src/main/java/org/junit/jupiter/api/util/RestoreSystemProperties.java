@@ -32,7 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * To set or clear a system property, consider {@link SetSystemProperty @SetSystemProperty} or
  * {@link ClearSystemProperty @ClearSystemProperty} instead.
  *
- * <p>{@code RestoreSystemProperties} can be used on the method and on the class level.
+ * <p>{@code @RestoreSystemProperties} can be used on the method and on the class level.
  * When placed on a test method, a snapshot of system properties is stored prior to that test.
  * The snapshot is created before any {@code @BeforeEach} blocks in scope and before any
  * {@link SetSystemProperty @SetSystemProperty} or {@link ClearSystemProperty @ClearSystemProperty}
@@ -48,19 +48,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * annotated with {@code RestoreSystemProperties}.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html" target="_top">parallel test execution</a>,
+ * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
  * all tests annotated with {@link RestoreSystemProperties}, {@link SetSystemProperty},
  * {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
  * are scheduled in a way that guarantees correctness under mutation of shared global state.
  *
  * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty" target="_top">the documentation on
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty">the documentation on
  * <code>@ClearSystemProperty</code>, <code>@SetSystemProperty</code>, and <code>@RestoreSystemProperties</code></a>.</p>
  *
  * <p><em>Note:</em> The snapshot of the properties object is created using {@link Properties#clone()}.
  * This cloned value will not include any default values. This extension will make a best effort
- * attempt to fail if default values are detected. For classes that extend {@code Properties}, it
- * is assumed that {@code clone()} is implemented with sufficient fidelity.
+ * attempt to detect default values and fail if any are detected. For classes that extend
+ * {@code Properties}, it is assumed that {@code clone()} is implemented with sufficient fidelity.
  *
  * @since 6.1
  */

@@ -349,6 +349,14 @@ The `{RestoreSystemProperties}` Extension can be used to restore changes to syst
 While `@ClearSystemProperty` and `@SetSystemProperty` set or clear specific properties and values, they don't allow property values to be calculated or parameterized, thus there are times you may want to directly set properties in your test code.
 `@RestoreSystemProperties` can be placed on test methods or test classes and will completely restore all system properties to their original state after a test or test class is complete.
 
+[NOTE]
+====
+During the execution of the annotated scope, the system properties are set clone of the original `Properties` object.
+The clone does not include {jdk-javadoc-base-url}/java.base/java/util/Properties.html#defaults[the defaults] from the original.
+The extension will perform a best effor attempt to detect default properties and fail if any were detected.
+For classes that extend `Properties` it is assumed that `clone()` is implemented with sufficient fidelity.
+====
+
 In this example, `@RestoreSystemProperties` is used on a test method, ensuring any changes made in that method are restored:
 
 [source,java,indent=0]
@@ -374,13 +382,6 @@ Some other test class, running later:
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
 ----
-
-[[SystemProperty-restore-system-properties-limitations]]
-==== Limitations
-
-`@RestoreSystemProperties` restores the original `Properties` object _after_ the annotated scope is complete. _During_
-the execution of the annotated scope, the system properties are set clone of hte original `Properties` object.
-It is possible to create {jdk-javadoc-base-url}/java.base/java/util/Properties.html#%3Cinit%3E(java.util.Properties)[nested `Properties` with inherited default values] that are not included in the cloned object. The extension will perform a best effor attempt to fail if default values are present. For classes that extend `Properties` it is assumed that `clone()` is implemented with sufficient fidelity.
 
 [[SystemProperty-using-together]]
 === Using @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties together

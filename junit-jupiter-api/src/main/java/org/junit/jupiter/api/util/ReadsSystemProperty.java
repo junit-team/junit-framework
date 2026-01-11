@@ -27,12 +27,12 @@ import org.junit.jupiter.api.parallel.Resources;
  * Marks tests that read system properties but don't use the system property extension themselves.
  *
  * <p>During
- * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html" target="_top">parallel test execution</a>,
+ * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
  * all tests annotated with {@link ClearSystemProperty}, {@link SetSystemProperty}, {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
  * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
  *
  * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty" target="_top">the documentation on <code>@ClearSystemProperty</code> and <code>@SetSystemProperty</code></a>.</p>
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty">the documentation on <code>@ClearSystemProperty</code> and <code>@SetSystemProperty</code></a>.</p>
  *
  * @since 6.1
  */
