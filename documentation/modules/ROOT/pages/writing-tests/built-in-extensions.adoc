@@ -352,7 +352,7 @@ While `@ClearSystemProperty` and `@SetSystemProperty` set or clear specific prop
 
 [NOTE]
 ====
-During the execution of the annotated scope, the system properties are set clone of the original `Properties` object.
+During the execution of the annotated scope, the system properties are set to a clone of the original `Properties` object.
 The clone does not include {jdk-javadoc-base-url}/java.base/java/util/Properties.html#defaults[the defaults] from the original.
 The extension will perform a best effor attempt to detect default properties and fail if any were detected.
 For classes that extend `Properties` it is assumed that `clone()` is implemented with sufficient fidelity.
