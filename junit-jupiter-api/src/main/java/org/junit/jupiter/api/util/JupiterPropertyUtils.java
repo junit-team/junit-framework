@@ -24,7 +24,7 @@ final class JupiterPropertyUtils {
 	}
 
 	static Properties cloneWithoutDefaults(ExtensionContext context, Properties properties) {
-		// Custom implemetnations have to implement clone correctly.
+		// Custom implementations have to implement clone correctly.
 		if (properties.getClass() == Properties.class) {
 			throwIfHasObservableDefaults(context, properties);
 		}
