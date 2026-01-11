@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -17,7 +17,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 import org.apiguardian.api.API;
-import org.apiguardian.api.API.Status;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
@@ -33,7 +32,7 @@ import org.junit.platform.commons.util.Preconditions;
  * @deprecated Use {@link org.junit.jupiter.api.MediaType} instead.
  */
 @Deprecated(since = "5.14", forRemoval = true)
-@API(status = Status.DEPRECATED, since = "5.14")
+@API(status = DEPRECATED, since = "5.14")
 public final class MediaType extends org.junit.jupiter.api.MediaType {
 
 	/**

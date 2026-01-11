@@ -83,7 +83,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: [ 21 ]
+        jdk: [ 25 ]
     name: "OpenJ9 ${{ matrix.jdk }}"
     runs-on: ubuntu-latest
     steps:

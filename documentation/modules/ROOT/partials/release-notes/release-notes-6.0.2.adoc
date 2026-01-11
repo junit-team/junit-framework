@@ -1,9 +1,9 @@
 [[v6.0.2]]
 == 6.0.2
 
-*Date of Release:* ❓
+*Date of Release:* January 6, 2026
 
-*Scope:* ❓
+*Scope:* Bug fixes and enhancements since 6.0.1
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
 link:{junit-framework-repo}+/milestone/113?closed=1+[6.0.2] milestone page in the JUnit
@@ -17,19 +17,8 @@ repository on GitHub.
 ==== Bug Fixes
 
 * Make `ConsoleLauncher` compatible with JDK 26 by avoiding final field mutations.
-* Recheck done condition before rejecting extraneous worker in `WorkerThreadPoolHierarchicalTestExecutorService`
 * Enable recursive updates when using `NamespacedHierarchicalStore.computeIfAbsent(N, K, Function)`.
   This provides parity with the deprecated `NamespacedHierarchicalStore.getOrComputeIfAbsent(N, K, Function)`
-
-[[v6.0.2-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.0.2-junit-platform-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
 
 
 [[v6.0.2-junit-jupiter]]
@@ -43,31 +32,8 @@ repository on GitHub.
 * Change API status of recommended method in `ArgumentsProvider` as well as
   `ParameterDeclaration(s)` as "maintained" rather than "experimental".
 
-[[v6.0.2-junit-jupiter-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.0.2-junit-jupiter-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
 
 [[v6.0.2-junit-vintage]]
 === JUnit Vintage
 
-[[v6.0.2-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.0.2-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.0.2-junit-vintage-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
+No changes.

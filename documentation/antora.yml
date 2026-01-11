@@ -246,7 +246,7 @@ asciidoc:
     Parameter: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/Parameter.html[@Parameter]'
     ParameterizedClass: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/ParameterizedClass.html[@ParameterizedClass]'
     ParameterizedTest: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/ParameterizedTest.html[@ParameterizedTest]'
-    ParameterInfo: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/support/ParameterInfo.html[ParameterInfo]'
+    ParameterInfo: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/ParameterInfo.html[ParameterInfo]'
     ValueArgumentsProvider: '{junit-framework-repo}/blob/main/junit-jupiter-params/src/main/java/org/junit/jupiter/params/provider/ValueArgumentsProvider.java[ValueArgumentsProvider]'
     # Jupiter Engine
     junit-jupiter-engine: '{javadoc-root}/org.junit.jupiter.engine/org/junit/jupiter/engine/package-summary.html[junit-jupiter-engine]'

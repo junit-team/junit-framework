@@ -93,7 +93,7 @@ jobs:
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@3e125ece5c3e5248e18da9ed8d2cce3d335ec8dd # v1.1.14
+      - uses: sbt/setup-sbt@a627500d27445f8c5021755a439829b6e78e3358 # v1.1.15
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
         working-directory: junit-examples
@@ -106,7 +106,7 @@ jobs:
         run: java src/StagingRepoInjector.java ${STAGING_REPO_URL}
         working-directory: junit-examples
       - name: Build examples
-        run: java src/Builder.java --exclude=junit-jupiter-starter-bazel,junit-jupiter-starter-sbt
+        run: java src/Builder.java --exclude=junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
         working-directory: junit-examples
         env:
           MAVEN_ARGS: --settings ${{ github.workspace }}/junit-examples/src/central-staging-maven-settings.xml --activate-profiles central-staging
@@ -161,10 +161,19 @@ jobs:
     permissions:
       actions: write
     steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
       - name: Trigger deployment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy-docs.yml --repo junit-team/junit-framework --ref docs-site
+      - name: Install Poppler (for pdfinfo)
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils
       - name: Wait for deployment
         if: ${{ inputs.dryRun == false }}
         id: pagesDeployment
@@ -191,14 +200,13 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/junit-examples
           token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_EXAMPLES_REPO }}
-          fetch-depth: 1
           persist-credentials: true
       - name: Set up JDK
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@3e125ece5c3e5248e18da9ed8d2cce3d335ec8dd # v1.1.14
+      - uses: sbt/setup-sbt@a627500d27445f8c5021755a439829b6e78e3358 # v1.1.15
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Build examples

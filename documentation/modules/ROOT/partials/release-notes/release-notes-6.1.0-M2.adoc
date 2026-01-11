@@ -16,6 +16,8 @@ repository on GitHub.
 ==== Bug Fixes
 
 * Clarify `TestDescriptor` implementation requirements.
+* Recheck done condition before rejecting extraneous worker in
+  `WorkerThreadPoolHierarchicalTestExecutorService`
 
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
