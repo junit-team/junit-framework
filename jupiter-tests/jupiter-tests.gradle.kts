@@ -20,7 +20,7 @@ dependencies {
 	testImplementation(kotlin("stdlib"))
 	testImplementation(libs.jimfs)
 	testImplementation(libs.junit4)
-	testImplementation(libs.kotlinx.coroutines)
+	testImplementation(libs.kotlinx.coroutines.core)
 	testImplementation(libs.groovy)
 	testImplementation(libs.memoryfilesystem)
 	testImplementation(testFixtures(projects.junitJupiterApi))

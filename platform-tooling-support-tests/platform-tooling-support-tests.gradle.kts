@@ -80,7 +80,7 @@ dependencies {
 	thirdPartyJars(libs.jspecify)
 	thirdPartyJars(kotlin("stdlib"))
 	thirdPartyJars(kotlin("reflect"))
-	thirdPartyJars(libs.kotlinx.coroutines)
+	thirdPartyJars(libs.kotlinx.coroutines.core)
 	thirdPartyJars(libs.opentest4j)
 	thirdPartyJars(libs.openTestReporting.events)
 	thirdPartyJars(libs.openTestReporting.tooling.spi)

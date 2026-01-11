@@ -77,7 +77,6 @@ dependencies {
 	testImplementation(projects.junitPlatformTestkit)
 	testImplementation(projects.junitVintageEngine)
 	testImplementation(kotlin("stdlib"))
-	testRuntimeOnly(libs.kotlinx.coroutines)
 	testImplementation(libs.kotlinx.coroutines.test)
 	testRuntimeOnly(kotlin("reflect"))
 
