@@ -35,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.StoreScope;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.EngineDiscoveryRequest;
@@ -91,35 +92,33 @@ class LauncherFactoryTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = DEACTIVATE_LISTENERS_PATTERN_PROPERTY_NAME, value = "org.junit.*.launcher.listeners.Unused*,org.junit.*.launcher.listeners.AnotherUnused*")
 	void testExecutionListenersExcludedViaConfigParametersIsNotLoadedViaServiceApi(
 			@TrackLogRecords LogRecordListener listener) {
 		withTestServices(() -> {
-			var value = "org.junit.*.launcher.listeners.Unused*,org.junit.*.launcher.listeners.AnotherUnused*";
-			withSystemProperty(DEACTIVATE_LISTENERS_PATTERN_PROPERTY_NAME, value, () -> {
-				var config = LauncherConfig.builder() //
-						.addTestEngines(new TestEngineSpy()) //
-						.enableTestEngineAutoRegistration(false) //
-						.build();
-				var launcher = LauncherFactory.create(config);
+			var config = LauncherConfig.builder() //
+					.addTestEngines(new TestEngineSpy()) //
+					.enableTestEngineAutoRegistration(false) //
+					.build();
+			var launcher = LauncherFactory.create(config);
 
-				UnusedTestExecutionListener.called = false;
-				AnotherUnusedTestExecutionListener.called = false;
+			UnusedTestExecutionListener.called = false;
+			AnotherUnusedTestExecutionListener.called = false;
 
-				launcher.execute(request().forExecution().build());
+			launcher.execute(request().forExecution().build());
 
-				var logMessage = listener.stream(ServiceLoaderRegistry.class) //
-						.map(LogRecord::getMessage) //
-						.filter(it -> it.startsWith("Loaded TestExecutionListener instances")) //
-						.findAny();
-				assertThat(logMessage).isPresent();
-				assertThat(logMessage.get()) //
-						.contains("NoopTestExecutionListener@") //
-						.endsWith(" (excluded classes: [" + UnusedTestExecutionListener.class.getName() + ", "
-								+ AnotherUnusedTestExecutionListener.class.getName() + "])");
+			var logMessage = listener.stream(ServiceLoaderRegistry.class) //
+					.map(LogRecord::getMessage) //
+					.filter(it -> it.startsWith("Loaded TestExecutionListener instances")) //
+					.findAny();
+			assertThat(logMessage).isPresent();
+			assertThat(logMessage.get()) //
+					.contains("NoopTestExecutionListener@") //
+					.endsWith(" (excluded classes: [" + UnusedTestExecutionListener.class.getName() + ", "
+							+ AnotherUnusedTestExecutionListener.class.getName() + "])");
 
-				assertFalse(UnusedTestExecutionListener.called);
-				assertFalse(AnotherUnusedTestExecutionListener.called);
-			});
+			assertFalse(UnusedTestExecutionListener.called);
+			assertFalse(AnotherUnusedTestExecutionListener.called);
 		});
 	}
 
@@ -261,8 +260,9 @@ class LauncherFactoryTests {
 	}
 
 	@Test
+	@SetSystemProperty(key = ENABLE_LAUNCHER_INTERCEPTORS, value = "true")
 	void createsLauncherInterceptorsBeforeDiscoveringTestEngines() {
-		withTestServices(() -> withSystemProperty(ENABLE_LAUNCHER_INTERCEPTORS, "true", () -> {
+		withTestServices(() -> {
 			var config = LauncherConfig.builder() //
 					.enableTestEngineAutoRegistration(true) //
 					.build();
@@ -277,13 +277,14 @@ class LauncherFactoryTests {
 					.describedAs(
 						"Intercepted test engine is added by class loader created by TestLauncherInterceptor1").contains(
 							InterceptedTestEngine.ID);
-		}));
+		});
 	}
 
 	@Test
+	@SetSystemProperty(key = ENABLE_LAUNCHER_INTERCEPTORS, value = "true")
 	void appliesLauncherInterceptorsToTestDiscovery() {
 		InterceptorInjectedLauncherSessionListener.CALLS = 0;
-		withTestServices(() -> withSystemProperty(ENABLE_LAUNCHER_INTERCEPTORS, "true", () -> {
+		withTestServices(() -> {
 			var engine = new TestEngineSpy() {
 				@Override
 				public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
@@ -304,13 +305,14 @@ class LauncherFactoryTests {
 					.hasStackTraceContaining(TestLauncherInterceptor1.class.getName() + ".intercept(") //
 					.hasStackTraceContaining(TestLauncherInterceptor2.class.getName() + ".intercept(");
 			assertThat(InterceptorInjectedLauncherSessionListener.CALLS).isEqualTo(1);
-		}));
+		});
 	}
 
 	@Test
+	@SetSystemProperty(key = ENABLE_LAUNCHER_INTERCEPTORS, value = "true")
 	void appliesLauncherInterceptorsToTestExecution() {
 		InterceptorInjectedLauncherSessionListener.CALLS = 0;
-		withTestServices(() -> withSystemProperty(ENABLE_LAUNCHER_INTERCEPTORS, "true", () -> {
+		withTestServices(() -> {
 			var engine = new TestEngineSpy() {
 				@Override
 				public void execute(ExecutionRequest request) {
@@ -346,7 +348,7 @@ class LauncherFactoryTests {
 					.hasStackTraceContaining(TestLauncherInterceptor1.class.getName() + ".intercept(") //
 					.hasStackTraceContaining(TestLauncherInterceptor2.class.getName() + ".intercept(");
 			assertThat(InterceptorInjectedLauncherSessionListener.CALLS).isEqualTo(1);
-		}));
+		});
 	}
 
 	@Test
@@ -439,23 +441,6 @@ class LauncherFactoryTests {
 			session.getLauncher().execute(request);
 
 			assertThat(CloseTrackingResource.closed).isTrue();
-		}
-	}
-
-	@SuppressWarnings("SameParameterValue")
-	private static void withSystemProperty(String key, String value, Runnable runnable) {
-		var oldValue = System.getProperty(key);
-		System.setProperty(key, value);
-		try {
-			runnable.run();
-		}
-		finally {
-			if (oldValue == null) {
-				System.clearProperty(key);
-			}
-			else {
-				System.setProperty(key, oldValue);
-			}
 		}
 	}
 
