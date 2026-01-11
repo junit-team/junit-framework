@@ -11,31 +11,18 @@
 package example
 
 // tag::user_guide[]
-import org.junit.jupiter.api.BeforeEach
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 
-// end::user_guide[]
-// @formatter:off
-@Suppress("JUnitMalformedDeclaration")
-// tag::user_guide[]
-class KotlinCoroutinesDemo {
+class KotlinCoroutinesRunTestDemo {
+    // end::user_guide[]
+    // @formatter:off
+    // tag::user_guide[]
+    @Test
+    fun coroutineTestUsingRunTest() = runTest {
+        // ...
+    }
     // end::user_guide[]
     // @formatter:on
     // tag::user_guide[]
-    @BeforeEach
-    fun regularSetUp() {
-    }
-
-    @BeforeEach
-    suspend fun coroutineSetUp() {
-    }
-
-    @Test
-    fun regularTest() {
-    }
-
-    @Test
-    suspend fun coroutineTest() {
-    }
 }
-// end::user_guide[]

@@ -87,8 +87,5 @@ to support skipping delays during tests and gain control over virtual time and d
 
 [source,kotlin]
 ----
-@Test
-fun runTest() = runTest {
-    // ...
-}
+include::example$kotlin/example/KotlinCoroutinesRunTestDemo.kt[tags=user_guide]
 ----
