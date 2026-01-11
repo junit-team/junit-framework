@@ -89,11 +89,11 @@ class JupiterPropertyUtilTests {
 		@Serial
 		private static final long serialVersionUID = 1L;
 
-		public CustomProperties() {
+		CustomProperties() {
 			this(null);
 		}
 
-		public CustomProperties(@Nullable CustomProperties defaults) {
+		CustomProperties(@Nullable CustomProperties defaults) {
 			super(defaults);
 		}
 
