@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api.util;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.ElementType;
@@ -69,7 +70,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Inherited
 @WritesSystemProperty
 @ExtendWith(SystemPropertyExtension.class)
-@API(status = STABLE, since = "6.1")
+@API(status = EXPERIMENTAL, since = "6.1")
 @SuppressWarnings("exports")
 public @interface RestoreSystemProperties {
 }
