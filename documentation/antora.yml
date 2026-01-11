@@ -166,9 +166,11 @@ asciidoc:
     WritesDefaultLocale: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/WritesDefaultLocale.html[@WritesDefaultLocale]'
     WritesDefaultTimeZone: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/WritesDefaultTimeZone.html[@WritesDefaultTimeZone]'
     # System Properties Extension
-    ClearSystemProperty: TODO
-    SetSystemProperty: TODO
-    Restoresystemproperties: TODO
+    ClearSystemProperty: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/ClearSystemProperty.html[@ClearSystemProperty]'
+    SetSystemProperty: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/SetSystemProperty.html[@SetSystemProperty]'
+    RestoreSystemProperties: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/RestoreSystemProperties.html[@RestoreSystemProperties]'
+    ReadsSystemProperty: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/ReadsSystemProperty.html[@ReadsSystemProperty]'
+    WritesSystemProperty: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/WritesSystemProperty.html[@WritesSystemProperty]'
     # Jupiter Parallel API
     Execution: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/parallel/Execution.html[@Execution]'
     Isolated: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/parallel/Isolated.html[@Isolated]'
