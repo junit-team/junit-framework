@@ -11,7 +11,6 @@
 package org.junit.jupiter.api.util;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
-import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

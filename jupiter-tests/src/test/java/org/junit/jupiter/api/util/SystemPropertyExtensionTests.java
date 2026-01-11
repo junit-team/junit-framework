@@ -44,7 +44,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.util.SystemPropertyExtensionTests.CombinedClearSetRestoreTests.SetClearRestoreOnClass;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.mockito.Mock;
