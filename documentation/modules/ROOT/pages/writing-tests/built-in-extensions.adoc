@@ -296,7 +296,7 @@ Tests annotated in this way will never execute in parallel with tests annotated 
 [[SystemProperty]]
 == The System Property Extensions
 
-The System Properties extension consists is a set of annotations that work together to clear, set and restore system properties.
+The System Property extensions consists is a set of annotations that work together to clear, set and restore system properties.
 
 [[SystemProperty-clear-system-properties-and-set-system-properties]]
 === @ClearSystemProperty and @SetSystemProperty
