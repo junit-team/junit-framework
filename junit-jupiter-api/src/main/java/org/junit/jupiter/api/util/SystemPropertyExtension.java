@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api.util;
 
+import static java.util.stream.Collectors.toSet;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
@@ -82,8 +82,8 @@ final class SystemPropertyExtension
 		var allContexts = findAllExtensionContexts(originalContext);
 
 		var restoreAnnotationContext = findFirstRestoreAnnotationContext(allContexts);
-		restoreAnnotationContext.ifPresent(annotatedElement -> {
-			var properties = this.prepareToEnterRestorableContext(annotatedElement);
+		restoreAnnotationContext.ifPresent(annotatedElementContext -> {
+			var properties = this.prepareToEnterRestorableContext(annotatedElementContext);
 			storeCompleteBackup(originalContext, properties);
 		});
 
@@ -94,8 +94,8 @@ final class SystemPropertyExtension
 
 	private Optional<ExtensionContext> findFirstRestoreAnnotationContext(List<ExtensionContext> contexts) {
 		return contexts.stream() //
-				.filter(annotatedElement -> isAnnotated(annotatedElement.getElement(),
-					RestoreSystemProperties.class)).findFirst();
+				.filter(context -> isAnnotated(context.getElement(), RestoreSystemProperties.class)) //
+				.findFirst();
 	}
 
 	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
@@ -121,9 +121,10 @@ final class SystemPropertyExtension
 	}
 
 	private Set<String> findEntriesToClear(AnnotatedElement element) {
-		return findRepeatableAnnotations(element, ClearSystemProperty.class).stream().map(ClearSystemProperty::key) //
+		return findRepeatableAnnotations(element, ClearSystemProperty.class).stream() //
+				.map(ClearSystemProperty::key) //
 				// already distinct due to findRepeatableAnnotations
-				.collect(Collectors.toSet());
+				.collect(toSet());
 	}
 
 	private Map<String, String> findEntriesToSet(AnnotatedElement element) {
@@ -145,7 +146,9 @@ final class SystemPropertyExtension
 	private void preventClearAndSetSameEntries(AnnotatedElement element, Set<String> entriesToClear,
 			Set<String> entriesToSet) {
 		requireUniqueEntries(element, //
-			entriesToClear.stream().filter(entriesToSet::contains).collect(Collectors.toSet()));
+			entriesToClear.stream() //
+					.filter(entriesToSet::contains) //
+					.collect(toSet()));
 	}
 
 	private static void requireUniqueEntries(AnnotatedElement annotatedElement, Set<String> duplicatePropertNames) {

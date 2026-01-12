@@ -51,10 +51,11 @@ repository on GitHub.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
   `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
-* https://www.junit-pioneer.org/[JUnit Pioneer]'s `SystemPropertyExtension` is now part of the JUnit Jupiter.
-  Find examples in the xref:writing-tests/built-in-extensions.adoc#SystemProperty[User Guide].
-  Note: There are some implementation difference between JUnit Pioneer and Jupiter. See details in https://github.com/junit-team/junit-framework/pull/5258[junit-framework/#5258 - Contribute SystemPropertyExtension].
-
+* https://www.junit-pioneer.org/[JUnit Pioneer]'s `SystemPropertyExtension` is now part of
+  JUnit Jupiter. Find examples in the
+  xref:writing-tests/built-in-extensions.adoc#SystemProperty[User Guide]. Note: There are
+  some implementation differences between JUnit Pioneer and Jupiter. For details, see the
+  https://github.com/junit-team/junit-framework/pull/5258[corresponding pull request].
 * Support the creation of `Arguments` from iterables. These additions make it
 easier to dynamically build arguments from collections when using
 `@ParameterizedTest`:
