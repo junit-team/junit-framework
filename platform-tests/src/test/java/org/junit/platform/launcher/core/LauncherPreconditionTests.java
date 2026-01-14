@@ -45,26 +45,26 @@ class LauncherPreconditionTests {
 
 	private static Stream<Arguments> launcherSuppliers() {
 		return Stream.of(
-				Arguments.of("session-per-request launcher",
-						(Supplier<Launcher>) () -> LauncherFactoryForTestingPurposesOnly
-								.createLauncher(new TestEngineStub())),
-				Arguments.of("default launcher",
-						(Supplier<Launcher>) () -> new DefaultLauncher(List.of(new TestEngineStub()), List.of(),
-								new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables()))),
-				Arguments.of("delegating launcher", (Supplier<Launcher>) () -> new DelegatingLauncher(new NoOpLauncher())),
-				Arguments.of("intercepting launcher",
-						(Supplier<Launcher>) () -> new InterceptingLauncher(new NoOpLauncher(),
-								new NoOpLauncherInterceptor())));
+			Arguments.of("session-per-request launcher",
+				(Supplier<Launcher>) () -> LauncherFactoryForTestingPurposesOnly.createLauncher(new TestEngineStub())),
+			Arguments.of("default launcher",
+				(Supplier<Launcher>) () -> new DefaultLauncher(List.of(new TestEngineStub()), List.of(),
+					new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables()))),
+			Arguments.of("delegating launcher", (Supplier<Launcher>) () -> new DelegatingLauncher(new NoOpLauncher())),
+			Arguments.of("intercepting launcher",
+				(Supplier<Launcher>) () -> new InterceptingLauncher(new NoOpLauncher(),
+					new NoOpLauncherInterceptor())));
 	}
 
 	private static void assertRejectsNullRequests(Launcher launcher) {
 		assertPreconditionViolationExactly(() -> launcher.discover(nullValue(LauncherDiscoveryRequest.class)),
-				"LauncherDiscoveryRequest must not be null");
+			"LauncherDiscoveryRequest must not be null");
 		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(LauncherDiscoveryRequest.class)),
-				"LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(TestPlan.class)), "TestPlan must not be null");
+			"LauncherDiscoveryRequest must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(TestPlan.class)),
+			"TestPlan must not be null");
 		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(LauncherExecutionRequest.class)),
-				"LauncherExecutionRequest must not be null");
+			"LauncherExecutionRequest must not be null");
 	}
 
 	private static void assertPreconditionViolationExactly(Runnable action, String expectedMessage) {
