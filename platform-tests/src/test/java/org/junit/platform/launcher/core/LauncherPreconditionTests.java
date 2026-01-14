@@ -10,12 +10,19 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.platform.engine.support.store.NamespacedHierarchicalStore.CloseAction.closeAutoCloseables;
 
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.fakes.TestEngineStub;
@@ -30,70 +37,49 @@ import org.junit.platform.launcher.TestPlan;
 @SuppressWarnings("NullAway")
 class LauncherPreconditionTests {
 
-	private final Launcher launcher = LauncherFactoryForTestingPurposesOnly.createLauncher(new TestEngineStub());
-
-	@Test
-	@SuppressWarnings("DataFlowIssue")
-	void sessionPerRequestLauncherRejectsNullDiscoveryRequest() {
-		assertPreconditionViolationFor(() -> launcher.discover(null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("launcherSuppliers")
+	void launcherRejectsNullRequests(String displayName, Supplier<Launcher> launcherSupplier) {
+		assertRejectsNullRequests(launcherSupplier.get());
 	}
 
-	@Test
-	@SuppressWarnings("DataFlowIssue")
-	void sessionPerRequestLauncherRejectsNullExecutionRequests() {
-		assertPreconditionViolationFor(() -> launcher.execute((LauncherDiscoveryRequest) null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> launcher.execute((TestPlan) null)) //
-				.withMessageContaining("TestPlan must not be null");
-		assertPreconditionViolationFor(() -> launcher.execute((LauncherExecutionRequest) null)) //
-				.withMessageContaining("LauncherExecutionRequest must not be null");
+	private static Stream<Arguments> launcherSuppliers() {
+		return Stream.of(
+				Arguments.of("session-per-request launcher",
+						(Supplier<Launcher>) () -> LauncherFactoryForTestingPurposesOnly
+								.createLauncher(new TestEngineStub())),
+				Arguments.of("default launcher",
+						(Supplier<Launcher>) () -> new DefaultLauncher(List.of(new TestEngineStub()), List.of(),
+								new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables()))),
+				Arguments.of("delegating launcher", (Supplier<Launcher>) () -> new DelegatingLauncher(new NoOpLauncher())),
+				Arguments.of("intercepting launcher",
+						(Supplier<Launcher>) () -> new InterceptingLauncher(new NoOpLauncher(),
+								new NoOpLauncherInterceptor())));
 	}
 
-	@Test
-	@SuppressWarnings("DataFlowIssue")
-	void defaultLauncherRejectsNullRequests() {
-		var defaultLauncher = new DefaultLauncher(List.of(new TestEngineStub()), List.of(),
-				new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables()));
-
-		assertPreconditionViolationFor(() -> defaultLauncher.discover(null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> defaultLauncher.execute((LauncherDiscoveryRequest) null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> defaultLauncher.execute((TestPlan) null)) //
-				.withMessageContaining("TestPlan must not be null");
-		assertPreconditionViolationFor(() -> defaultLauncher.execute((LauncherExecutionRequest) null)) //
-				.withMessageContaining("LauncherExecutionRequest must not be null");
+	private static void assertRejectsNullRequests(Launcher launcher) {
+		assertPreconditionViolationExactly(() -> launcher.discover(nullValue(LauncherDiscoveryRequest.class)),
+				"LauncherDiscoveryRequest must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(LauncherDiscoveryRequest.class)),
+				"LauncherDiscoveryRequest must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(TestPlan.class)), "TestPlan must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(LauncherExecutionRequest.class)),
+				"LauncherExecutionRequest must not be null");
 	}
 
-	@Test
-	@SuppressWarnings("DataFlowIssue")
-	void delegatingLauncherRejectsNullRequests() {
-		var delegatingLauncher = new DelegatingLauncher(new NoOpLauncher());
-
-		assertPreconditionViolationFor(() -> delegatingLauncher.discover(null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> delegatingLauncher.execute((LauncherDiscoveryRequest) null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> delegatingLauncher.execute((TestPlan) null)) //
-				.withMessageContaining("TestPlan must not be null");
-		assertPreconditionViolationFor(() -> delegatingLauncher.execute((LauncherExecutionRequest) null)) //
-				.withMessageContaining("LauncherExecutionRequest must not be null");
+	private static void assertPreconditionViolationExactly(Runnable action, String expectedMessage) {
+		var ex = assertThrows(PreconditionViolationException.class, action::run);
+		assertEquals(PreconditionViolationException.class, ex.getClass());
+		assertEquals(expectedMessage, ex.getMessage());
+		assertNull(ex.getCause());
 	}
 
-	@Test
-	@SuppressWarnings("DataFlowIssue")
-	void interceptingLauncherRejectsNullRequests() {
-		var interceptingLauncher = new InterceptingLauncher(new NoOpLauncher(), new NoOpLauncherInterceptor());
-
-		assertPreconditionViolationFor(() -> interceptingLauncher.discover(null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> interceptingLauncher.execute((LauncherDiscoveryRequest) null)) //
-				.withMessageContaining("LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationFor(() -> interceptingLauncher.execute((TestPlan) null)) //
-				.withMessageContaining("TestPlan must not be null");
-		assertPreconditionViolationFor(() -> interceptingLauncher.execute((LauncherExecutionRequest) null)) //
-				.withMessageContaining("LauncherExecutionRequest must not be null");
+	/**
+	 * Produces a typed {@code null} to avoid overload ambiguity and centralize nullability suppressions.
+	 */
+	@SuppressWarnings({ "DataFlowIssue", "NullAway", "unused" })
+	private static <T> T nullValue(Class<T> type) {
+		return null;
 	}
 
 	private static final class NoOpLauncher implements Launcher {
