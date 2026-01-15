@@ -13,12 +13,14 @@ package org.junit.platform.launcher.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.engine.support.store.NamespacedHierarchicalStore.CloseAction.closeAutoCloseables;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,44 +29,89 @@ import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.fakes.TestEngineStub;
 import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.LauncherInterceptor;
-import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
-@SuppressWarnings("NullAway")
 class LauncherPreconditionTests {
 
-	@ParameterizedTest(name = "{0}")
-	@MethodSource("launcherSuppliers")
-	void launcherRejectsNullRequests(String displayName, Supplier<Launcher> launcherSupplier) {
-		assertRejectsNullRequests(launcherSupplier.get());
+	@ParameterizedTest
+	@MethodSource("launchers")
+	@SuppressWarnings("NullAway")
+	void discoverRejectsNullDiscoveryRequest(Launcher launcher) {
+		assertPreconditionViolationExactly(
+				() -> launcher.discover((LauncherDiscoveryRequest) null),
+				"DiscoveryRequest must not be null");
 	}
 
-	private static Stream<Arguments> launcherSuppliers() {
+	@ParameterizedTest
+	@MethodSource("launchers")
+	@SuppressWarnings("NullAway")
+	void executeRejectsNullDiscoveryRequest(Launcher launcher) {
+		assertPreconditionViolationExactly(
+				() -> launcher.execute((LauncherDiscoveryRequest) null),
+				"DiscoveryRequest must not be null");
+	}
+
+	@ParameterizedTest
+	@MethodSource("launchers")
+	@SuppressWarnings("NullAway")
+	void executeRejectsNullTestPlan(Launcher launcher) {
+		assertPreconditionViolationExactly(
+				() -> launcher.execute((TestPlan) null),
+				"TestPlan must not be null");
+	}
+
+	@ParameterizedTest
+	@MethodSource("launchers")
+	@SuppressWarnings("NullAway")
+	void executeRejectsNullExecutionRequest(Launcher launcher) {
+		assertPreconditionViolationExactly(
+				() -> launcher.execute((LauncherExecutionRequest) null),
+				"ExecutionRequest must not be null");
+	}
+
+	private static Stream<Arguments> launchers() {
+		var engine = new TestEngineStub();
+
 		return Stream.of(
-			Arguments.of("session-per-request launcher",
-				(Supplier<Launcher>) () -> LauncherFactoryForTestingPurposesOnly.createLauncher(new TestEngineStub())),
-			Arguments.of("default launcher",
-				(Supplier<Launcher>) () -> new DefaultLauncher(List.of(new TestEngineStub()), List.of(),
-					new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables()))),
-			Arguments.of("delegating launcher", (Supplier<Launcher>) () -> new DelegatingLauncher(new NoOpLauncher())),
-			Arguments.of("intercepting launcher",
-				(Supplier<Launcher>) () -> new InterceptingLauncher(new NoOpLauncher(),
-					new NoOpLauncherInterceptor())));
+				Arguments.of(Named.of("session-per-request launcher", createSessionPerRequestLauncher(engine))),
+
+				Arguments.of(Named.of("default launcher",
+						new DefaultLauncher(
+								List.of(engine),
+								List.of(),
+								new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables())))),
+
+				Arguments.of(Named.of("delegating launcher",
+						new DelegatingLauncher(mock(Launcher.class)))),
+
+				Arguments.of(Named.of("intercepting launcher",
+						new InterceptingLauncher(
+								mock(Launcher.class),
+								mock(LauncherInterceptor.class))))
+		);
 	}
 
-	private static void assertRejectsNullRequests(Launcher launcher) {
-		assertPreconditionViolationExactly(() -> launcher.discover(nullValue(LauncherDiscoveryRequest.class)),
-			"LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(LauncherDiscoveryRequest.class)),
-			"LauncherDiscoveryRequest must not be null");
-		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(TestPlan.class)),
-			"TestPlan must not be null");
-		assertPreconditionViolationExactly(() -> launcher.execute(nullValue(LauncherExecutionRequest.class)),
-			"LauncherExecutionRequest must not be null");
+	/**
+	 * Creating an equivalent LauncherConfig (service loading disabled) and then
+	 * assert LauncherFactory creates a SessionPerRequestLauncher.
+	 */
+	private static Launcher createSessionPerRequestLauncher(TestEngineStub engine) {
+		LauncherConfig config = LauncherConfig.builder()
+				.enableTestEngineAutoRegistration(false)
+				.enableLauncherDiscoveryListenerAutoRegistration(false)
+				.enableTestExecutionListenerAutoRegistration(false)
+				.enablePostDiscoveryFilterAutoRegistration(false)
+				.enableLauncherSessionListenerAutoRegistration(false)
+				.addTestEngines(engine)
+				.build();
+
+		Launcher launcher = LauncherFactory.create(config);
+		assertTrue(launcher instanceof SessionPerRequestLauncher,
+				"Expected Launcher to create a SessionPerRequestLauncher");
+		return launcher;
 	}
 
 	private static void assertPreconditionViolationExactly(Runnable action, String expectedMessage) {
@@ -72,56 +119,5 @@ class LauncherPreconditionTests {
 		assertEquals(PreconditionViolationException.class, ex.getClass());
 		assertEquals(expectedMessage, ex.getMessage());
 		assertNull(ex.getCause());
-	}
-
-	/**
-	 * Produces a typed {@code null} to avoid overload ambiguity and centralize nullability suppressions.
-	 */
-	@SuppressWarnings({ "DataFlowIssue", "NullAway", "unused" })
-	private static <T> T nullValue(Class<T> type) {
-		return null;
-	}
-
-	private static final class NoOpLauncher implements Launcher {
-
-		@Override
-		public void registerLauncherDiscoveryListeners(LauncherDiscoveryListener... listeners) {
-		}
-
-		@Override
-		public void registerTestExecutionListeners(TestExecutionListener... listeners) {
-		}
-
-		@Override
-		public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-			throw new AssertionError("unexpected call");
-		}
-
-		@Override
-		public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-			throw new AssertionError("unexpected call");
-		}
-
-		@Override
-		public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
-			throw new AssertionError("unexpected call");
-		}
-
-		@Override
-		public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-			throw new AssertionError("unexpected call");
-		}
-	}
-
-	private static final class NoOpLauncherInterceptor implements LauncherInterceptor {
-
-		@Override
-		public <T> T intercept(Invocation<T> invocation) {
-			return invocation.proceed();
-		}
-
-		@Override
-		public void close() {
-		}
 	}
 }
