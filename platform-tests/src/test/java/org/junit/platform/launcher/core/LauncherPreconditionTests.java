@@ -40,58 +40,47 @@ class LauncherPreconditionTests {
 	@MethodSource("launchers")
 	@SuppressWarnings("NullAway")
 	void discoverRejectsNullDiscoveryRequest(Launcher launcher) {
-		assertPreconditionViolationExactly(
-				() -> launcher.discover((LauncherDiscoveryRequest) null),
-				"DiscoveryRequest must not be null");
+		assertPreconditionViolationExactly(() -> launcher.discover((LauncherDiscoveryRequest) null),
+			"DiscoveryRequest must not be null");
 	}
 
 	@ParameterizedTest
 	@MethodSource("launchers")
 	@SuppressWarnings("NullAway")
 	void executeRejectsNullDiscoveryRequest(Launcher launcher) {
-		assertPreconditionViolationExactly(
-				() -> launcher.execute((LauncherDiscoveryRequest) null),
-				"DiscoveryRequest must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute((LauncherDiscoveryRequest) null),
+			"DiscoveryRequest must not be null");
 	}
 
 	@ParameterizedTest
 	@MethodSource("launchers")
 	@SuppressWarnings("NullAway")
 	void executeRejectsNullTestPlan(Launcher launcher) {
-		assertPreconditionViolationExactly(
-				() -> launcher.execute((TestPlan) null),
-				"TestPlan must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute((TestPlan) null), "TestPlan must not be null");
 	}
 
 	@ParameterizedTest
 	@MethodSource("launchers")
 	@SuppressWarnings("NullAway")
 	void executeRejectsNullExecutionRequest(Launcher launcher) {
-		assertPreconditionViolationExactly(
-				() -> launcher.execute((LauncherExecutionRequest) null),
-				"ExecutionRequest must not be null");
+		assertPreconditionViolationExactly(() -> launcher.execute((LauncherExecutionRequest) null),
+			"ExecutionRequest must not be null");
 	}
 
 	private static Stream<Arguments> launchers() {
 		var engine = new TestEngineStub();
 
 		return Stream.of(
-				Arguments.of(Named.of("session-per-request launcher", createSessionPerRequestLauncher(engine))),
+			Arguments.of(Named.of("session-per-request launcher", createSessionPerRequestLauncher(engine))),
 
-				Arguments.of(Named.of("default launcher",
-						new DefaultLauncher(
-								List.of(engine),
-								List.of(),
-								new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables())))),
+			Arguments.of(Named.of("default launcher",
+				new DefaultLauncher(List.of(engine), List.of(),
+					new NamespacedHierarchicalStore<Namespace>(null, closeAutoCloseables())))),
 
-				Arguments.of(Named.of("delegating launcher",
-						new DelegatingLauncher(mock(Launcher.class)))),
+			Arguments.of(Named.of("delegating launcher", new DelegatingLauncher(mock(Launcher.class)))),
 
-				Arguments.of(Named.of("intercepting launcher",
-						new InterceptingLauncher(
-								mock(Launcher.class),
-								mock(LauncherInterceptor.class))))
-		);
+			Arguments.of(Named.of("intercepting launcher",
+				new InterceptingLauncher(mock(Launcher.class), mock(LauncherInterceptor.class)))));
 	}
 
 	/**
@@ -99,18 +88,14 @@ class LauncherPreconditionTests {
 	 * assert LauncherFactory creates a SessionPerRequestLauncher.
 	 */
 	private static Launcher createSessionPerRequestLauncher(TestEngineStub engine) {
-		LauncherConfig config = LauncherConfig.builder()
-				.enableTestEngineAutoRegistration(false)
-				.enableLauncherDiscoveryListenerAutoRegistration(false)
-				.enableTestExecutionListenerAutoRegistration(false)
-				.enablePostDiscoveryFilterAutoRegistration(false)
-				.enableLauncherSessionListenerAutoRegistration(false)
-				.addTestEngines(engine)
-				.build();
+		LauncherConfig config = LauncherConfig.builder().enableTestEngineAutoRegistration(
+			false).enableLauncherDiscoveryListenerAutoRegistration(false).enableTestExecutionListenerAutoRegistration(
+				false).enablePostDiscoveryFilterAutoRegistration(false).enableLauncherSessionListenerAutoRegistration(
+					false).addTestEngines(engine).build();
 
 		Launcher launcher = LauncherFactory.create(config);
 		assertTrue(launcher instanceof SessionPerRequestLauncher,
-				"Expected Launcher to create a SessionPerRequestLauncher");
+			"Expected Launcher to create a SessionPerRequestLauncher");
 		return launcher;
 	}
 
