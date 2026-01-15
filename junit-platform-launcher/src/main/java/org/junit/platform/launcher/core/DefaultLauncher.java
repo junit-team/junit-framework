@@ -81,13 +81,14 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest discoveryRequest) {
-		Preconditions.notNull(discoveryRequest, "LauncherDiscoveryRequest must not be null");
+		Preconditions.notNull(discoveryRequest, "DiscoveryRequest must not be null");
 		return InternalTestPlan.from(discover(discoveryRequest, DISCOVERY));
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(discoveryRequest, "LauncherDiscoveryRequest must not be null");
+		Preconditions.notNull(discoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.containsNoNullElements(listeners, "Listeners array must not contain null elements");
 		var executionRequest = LauncherExecutionRequestBuilder.request(discoveryRequest) //
 				.listeners(listeners) //
 				.build();
@@ -105,13 +106,13 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "LauncherExecutionRequest must not be null");
+		Preconditions.notNull(launcherExecutionRequest, "ExecutionRequest must not be null");
 		var testPlan = launcherExecutionRequest.getTestPlan().map(it -> {
 			Preconditions.condition(it instanceof InternalTestPlan, "TestPlan was not returned by this Launcher");
 			return ((InternalTestPlan) it);
 		}).orElseGet(() -> {
 			Preconditions.condition(launcherExecutionRequest.getDiscoveryRequest().isPresent(),
-				"Either a TestPlan or LauncherDiscoveryRequest must be present in the LauncherExecutionRequest");
+				"Either a TestPlan or DiscoveryRequest must be present in the ExecutionRequest");
 			return InternalTestPlan.from(discover(launcherExecutionRequest.getDiscoveryRequest().get(), EXECUTION));
 		});
 		execute(testPlan, launcherExecutionRequest.getAdditionalTestExecutionListeners(),

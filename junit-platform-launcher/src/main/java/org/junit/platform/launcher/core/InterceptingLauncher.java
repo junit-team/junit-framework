@@ -33,13 +33,13 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
 		return interceptor.intercept(() -> super.discover(launcherDiscoveryRequest));
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(launcherDiscoveryRequest, "LauncherDiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherDiscoveryRequest, listeners);
 			return null;
@@ -57,7 +57,7 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "LauncherExecutionRequest must not be null");
+		Preconditions.notNull(launcherExecutionRequest, "ExecutionRequest must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherExecutionRequest);
 			return null;
