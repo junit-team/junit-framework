@@ -88,10 +88,14 @@ class LauncherPreconditionTests {
 	 * assert LauncherFactory creates a SessionPerRequestLauncher.
 	 */
 	private static Launcher createSessionPerRequestLauncher(TestEngineStub engine) {
-		LauncherConfig config = LauncherConfig.builder().enableTestEngineAutoRegistration(
-			false).enableLauncherDiscoveryListenerAutoRegistration(false).enableTestExecutionListenerAutoRegistration(
-				false).enablePostDiscoveryFilterAutoRegistration(false).enableLauncherSessionListenerAutoRegistration(
-					false).addTestEngines(engine).build();
+		LauncherConfig config = LauncherConfig.builder() //
+			.enableTestEngineAutoRegistration(false) //
+			.enableLauncherDiscoveryListenerAutoRegistration(false) //
+			.enableTestExecutionListenerAutoRegistration(false) //
+			.enablePostDiscoveryFilterAutoRegistration(false) //
+			.enableLauncherSessionListenerAutoRegistration(false) //
+			.addTestEngines(engine) //
+			.build();
 
 		Launcher launcher = LauncherFactory.create(config);
 		assertTrue(launcher instanceof SessionPerRequestLauncher,
