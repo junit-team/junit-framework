@@ -16,6 +16,8 @@ plugins {
 dependencyResolutionManagement {
 	repositories {
 		mavenCentral()
+		// TODO: Remove
+		mavenLocal()
 	}
 }
 
