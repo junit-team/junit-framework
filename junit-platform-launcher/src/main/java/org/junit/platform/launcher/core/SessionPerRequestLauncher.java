@@ -47,17 +47,21 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void registerLauncherDiscoveryListeners(LauncherDiscoveryListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		listenerRegistry.launcherDiscoveryListeners.addAll(listeners);
 	}
 
 	@Override
 	public void registerTestExecutionListeners(TestExecutionListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		listenerRegistry.testExecutionListeners.addAll(listeners);
 	}
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
 		try (LauncherSession session = createSession()) {
 			return session.getLauncher().discover(launcherDiscoveryRequest);
 		}
@@ -65,7 +69,9 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(launcherDiscoveryRequest, listeners);
 		}
@@ -73,7 +79,9 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
-		Preconditions.notNull(testPlan, "TestPlan must not be null");
+		Preconditions.notNull(testPlan, "testPlan must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(testPlan, listeners);
 		}
@@ -81,7 +89,7 @@ class SessionPerRequestLauncher implements Launcher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "ExecutionRequest must not be null");
+		Preconditions.notNull(launcherExecutionRequest, "executionRequest must not be null");
 		try (LauncherSession session = createSession()) {
 			session.getLauncher().execute(launcherExecutionRequest);
 		}
@@ -89,10 +97,10 @@ class SessionPerRequestLauncher implements Launcher {
 
 	private LauncherSession createSession() {
 		LauncherSession session = new DefaultLauncherSession(interceptorFactory.get(), sessionListenerSupplier,
-			this.launcherFactory);
+				this.launcherFactory);
 		Launcher launcher = session.getLauncher();
 		listenerRegistry.launcherDiscoveryListeners.getListeners().forEach(
-			launcher::registerLauncherDiscoveryListeners);
+				launcher::registerLauncherDiscoveryListeners);
 		listenerRegistry.testExecutionListeners.getListeners().forEach(launcher::registerTestExecutionListeners);
 		return session;
 	}

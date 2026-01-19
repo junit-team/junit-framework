@@ -31,35 +31,43 @@ class DelegatingLauncher implements Launcher {
 
 	@Override
 	public void registerLauncherDiscoveryListeners(LauncherDiscoveryListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.registerLauncherDiscoveryListeners(listeners);
 	}
 
 	@Override
 	public void registerTestExecutionListeners(TestExecutionListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.registerTestExecutionListeners(listeners);
 	}
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
 		return delegate.discover(launcherDiscoveryRequest);
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.execute(launcherDiscoveryRequest, listeners);
 	}
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
-		Preconditions.notNull(testPlan, "TestPlan must not be null");
+		Preconditions.notNull(testPlan, "testPlan must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.execute(testPlan, listeners);
 	}
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "ExecutionRequest must not be null");
+		Preconditions.notNull(launcherExecutionRequest, "executionRequest must not be null");
 		delegate.execute(launcherExecutionRequest);
 	}
 }

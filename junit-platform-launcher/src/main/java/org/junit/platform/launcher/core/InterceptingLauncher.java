@@ -33,13 +33,15 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
 		return interceptor.intercept(() -> super.discover(launcherDiscoveryRequest));
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(launcherDiscoveryRequest, "DiscoveryRequest must not be null");
+		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherDiscoveryRequest, listeners);
 			return null;
@@ -48,7 +50,9 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
-		Preconditions.notNull(testPlan, "TestPlan must not be null");
+		Preconditions.notNull(testPlan, "testPlan must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(testPlan, listeners);
 			return null;
@@ -57,7 +61,7 @@ class InterceptingLauncher extends DelegatingLauncher {
 
 	@Override
 	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "ExecutionRequest must not be null");
+		Preconditions.notNull(launcherExecutionRequest, "executionRequest must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(launcherExecutionRequest);
 			return null;
