@@ -193,11 +193,11 @@ public class AssertionFailureBuilder {
 	public AssertionFailedError build() {
 		String reason = nullSafeGet(this.reason);
 		var assertionFailedError = new AssertionFailedError( //
-				formatExceptionMessage(reason),  //
-				formatReason(reason), //
-				expected, // 
-				actual, //
-				cause //
+			formatExceptionMessage(reason), //
+			formatReason(reason), //
+			expected, //
+			actual, //
+			cause //
 		);
 		maybeTrimStackTrace(assertionFailedError);
 		return assertionFailedError;
@@ -205,7 +205,7 @@ public class AssertionFailureBuilder {
 
 	private @Nullable String formatReason(@Nullable String reason) {
 		if (mismatch) {
-			return  (reason == null ? "" : reason + ", ") + "expected did not match actual";
+			return (reason == null ? "" : reason + ", ") + "expected did not match actual";
 		}
 		return reason;
 	}

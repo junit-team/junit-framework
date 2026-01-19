@@ -23,6 +23,7 @@ module org.junit.platform.console {
 	requires org.junit.platform.engine;
 	requires org.junit.platform.launcher;
 	requires org.junit.platform.reporting;
+	requires io.github.javadiffutils;
 
 	exports org.junit.platform.console.output to org.junit.start;
 
