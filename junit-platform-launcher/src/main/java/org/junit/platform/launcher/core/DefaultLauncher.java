@@ -63,7 +63,7 @@ class DefaultLauncher implements Launcher {
 					+ "consider adding an engine implementation JAR to the classpath");
 		Preconditions.notNull(postDiscoveryFilters, "postDiscoveryFilter array must not be null");
 		Preconditions.containsNoNullElements(postDiscoveryFilters,
-				"postDiscoveryFilter array must not contain null elements");
+			"postDiscoveryFilter array must not contain null elements");
 		this.discoveryOrchestrator = new EngineDiscoveryOrchestrator(testEngines,
 			unmodifiableCollection(postDiscoveryFilters), listenerRegistry.launcherDiscoveryListeners);
 		this.sessionLevelStore = sessionLevelStore;

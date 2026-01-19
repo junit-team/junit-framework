@@ -43,7 +43,7 @@ class LauncherPreconditionTests {
 	@SuppressWarnings("NullAway")
 	void discoverRejectsNullDiscoveryRequest(Launcher launcher) {
 		assertPreconditionViolationNotNullFor("discoveryRequest",
-				() -> launcher.discover((LauncherDiscoveryRequest) null));
+			() -> launcher.discover((LauncherDiscoveryRequest) null));
 	}
 
 	@ParameterizedTest
@@ -51,15 +51,14 @@ class LauncherPreconditionTests {
 	@SuppressWarnings("NullAway")
 	void executeRejectsNullDiscoveryRequest(Launcher launcher) {
 		assertPreconditionViolationNotNullFor("discoveryRequest",
-				() -> launcher.execute((LauncherDiscoveryRequest) null));
+			() -> launcher.execute((LauncherDiscoveryRequest) null));
 	}
 
 	@ParameterizedTest
 	@MethodSource("launchers")
 	@SuppressWarnings("NullAway")
 	void executeRejectsNullTestPlan(Launcher launcher) {
-		assertPreconditionViolationNotNullFor("testPlan",
-				() -> launcher.execute((TestPlan) null));
+		assertPreconditionViolationNotNullFor("testPlan", () -> launcher.execute((TestPlan) null));
 	}
 
 	@ParameterizedTest
@@ -67,7 +66,7 @@ class LauncherPreconditionTests {
 	@SuppressWarnings("NullAway")
 	void executeRejectsNullExecutionRequest(Launcher launcher) {
 		assertPreconditionViolationNotNullFor("executionRequest",
-				() -> launcher.execute((LauncherExecutionRequest) null));
+			() -> launcher.execute((LauncherExecutionRequest) null));
 	}
 
 	@ParameterizedTest
@@ -78,20 +77,18 @@ class LauncherPreconditionTests {
 		var testPlan = mock(TestPlan.class);
 
 		assertPreconditionViolationFor(
-				() -> launcher.registerLauncherDiscoveryListeners((LauncherDiscoveryListener[]) null))
-				.withMessage(LISTENERS_MUST_NOT_BE_NULL);
+			() -> launcher.registerLauncherDiscoveryListeners((LauncherDiscoveryListener[]) null)).withMessage(
+				LISTENERS_MUST_NOT_BE_NULL);
 
 		assertPreconditionViolationFor(
-				() -> launcher.registerTestExecutionListeners((TestExecutionListener[]) null))
-				.withMessage(LISTENERS_MUST_NOT_BE_NULL);
+			() -> launcher.registerTestExecutionListeners((TestExecutionListener[]) null)).withMessage(
+				LISTENERS_MUST_NOT_BE_NULL);
 
-		assertPreconditionViolationFor(
-				() -> launcher.execute(request, (TestExecutionListener[]) null))
-				.withMessage(LISTENERS_MUST_NOT_BE_NULL);
+		assertPreconditionViolationFor(() -> launcher.execute(request, (TestExecutionListener[]) null)).withMessage(
+			LISTENERS_MUST_NOT_BE_NULL);
 
-		assertPreconditionViolationFor(
-				() -> launcher.execute(testPlan, (TestExecutionListener[]) null))
-				.withMessage(LISTENERS_MUST_NOT_BE_NULL);
+		assertPreconditionViolationFor(() -> launcher.execute(testPlan, (TestExecutionListener[]) null)).withMessage(
+			LISTENERS_MUST_NOT_BE_NULL);
 	}
 
 	@ParameterizedTest
@@ -104,20 +101,18 @@ class LauncherPreconditionTests {
 		var testPlan = mock(TestPlan.class);
 
 		assertPreconditionViolationFor(
-				() -> launcher.registerLauncherDiscoveryListeners(discoveryListener, null))
-				.withMessage(LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
+			() -> launcher.registerLauncherDiscoveryListeners(discoveryListener, null)).withMessage(
+				LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
 
 		assertPreconditionViolationFor(
-				() -> launcher.registerTestExecutionListeners(executionListener, null))
-				.withMessage(LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
+			() -> launcher.registerTestExecutionListeners(executionListener, null)).withMessage(
+				LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
 
-		assertPreconditionViolationFor(
-				() -> launcher.execute(request, executionListener, null))
-				.withMessage(LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
+		assertPreconditionViolationFor(() -> launcher.execute(request, executionListener, null)).withMessage(
+			LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
 
-		assertPreconditionViolationFor(
-				() -> launcher.execute(testPlan, executionListener, null))
-				.withMessage(LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
+		assertPreconditionViolationFor(() -> launcher.execute(testPlan, executionListener, null)).withMessage(
+			LISTENERS_MUST_NOT_CONTAIN_NULL_ELEMENTS);
 	}
 
 	private static Stream<Arguments> launchers() {
@@ -134,14 +129,14 @@ class LauncherPreconditionTests {
 	}
 
 	private static Launcher createSessionPerRequestLauncher(TestEngineStub engine) {
-		LauncherConfig config = LauncherConfig.builder()
-			.enableTestEngineAutoRegistration(false)
-			.enableLauncherDiscoveryListenerAutoRegistration(false)
-			.enableTestExecutionListenerAutoRegistration(false)
-			.enablePostDiscoveryFilterAutoRegistration(false)
-			.enableLauncherSessionListenerAutoRegistration(false)
-			.addTestEngines(engine)
-			.build();
+		LauncherConfig config = LauncherConfig.builder() //
+				.enableTestEngineAutoRegistration(false) //
+				.enableLauncherDiscoveryListenerAutoRegistration(false) //
+				.enableTestExecutionListenerAutoRegistration(false) //
+				.enablePostDiscoveryFilterAutoRegistration(false) //
+				.enableLauncherSessionListenerAutoRegistration(false) //
+				.addTestEngines(engine) //
+				.build();
 
 		Launcher launcher = LauncherFactory.create(config);
 		assertTrue(launcher instanceof SessionPerRequestLauncher,
