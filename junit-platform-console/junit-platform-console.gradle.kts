@@ -18,6 +18,8 @@ dependencies {
 	compileOnlyApi(libs.jspecify)
 
 	shadowed(libs.picocli)
+	// TODO: Sort out
+	shadowed(libs.javadiffutils)
 
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)

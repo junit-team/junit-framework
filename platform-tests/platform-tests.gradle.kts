@@ -30,6 +30,11 @@ val woodstoxRuntimeClasspath = configurations.resolvable("woodstoxRuntimeClasspa
 }
 
 dependencies {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
 	// --- Things we are testing --------------------------------------------------
 	testImplementation(projects.junitPlatformCommons)
 	testImplementation(projects.junitPlatformConsole)
