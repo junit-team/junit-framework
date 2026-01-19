@@ -10,20 +10,16 @@
 
 package org.junit.platform.console.output;
 
+import java.util.function.Function;
+
 import com.github.difflib.text.DiffRowGenerator;
 
-import org.junit.platform.commons.util.ExceptionUtils;
 import org.opentest4j.AssertionFailedError;
 
 final class RichDiffFormatter {
 	public String format(AssertionFailedError assertionFailed) {
-		if (!(assertionFailed.isActualDefined() && assertionFailed.isExpectedDefined())) {
-			return ExceptionUtils.readStackTrace(assertionFailed);
-		}
-
 		StringBuilder builder = new StringBuilder();
 
-		builder.append(assertionFailed.getClass().getSimpleName());
 		if (assertionFailed.isReasonDefined()) {
 			builder.append(": ");
 			builder.append(assertionFailed.getReason());
@@ -33,12 +29,43 @@ final class RichDiffFormatter {
 		builder.append("+ actual - expected");
 		builder.append(System.lineSeparator());
 
-		var generator = DiffRowGenerator.create().mergeOriginalRevised(true).build();
+		var generator = DiffRowGenerator.create() //
+				.lineNormalizer(Function.identity()) // Don't normalize lines
+				.showInlineDiffs(false) //
+				.build();
 
-		// TODO: But how to render the stacktrace?
+		var diffRows = generator.generateDiffRows( //
+			assertionFailed.getExpected().getStringRepresentation().lines().toList(), //
+			assertionFailed.getActual().getStringRepresentation().lines().toList() //
+		);
 
-		builder.append(generator.generateDiffRows(assertionFailed.getExpected().toString().lines().toList(),
-			assertionFailed.getActual().toString().lines().toList()));
+		diffRows.forEach(diffRow -> {
+			switch (diffRow.getTag()) {
+				case INSERT -> {
+					builder.append("+ ");
+					builder.append(diffRow.getNewLine());
+					builder.append(System.lineSeparator());
+				}
+				case DELETE -> {
+					builder.append("- ");
+					builder.append(diffRow.getOldLine());
+					builder.append(System.lineSeparator());
+				}
+				case CHANGE -> {
+					builder.append("+ ");
+					builder.append(diffRow.getOldLine());
+					builder.append(System.lineSeparator());
+					builder.append("- ");
+					builder.append(diffRow.getNewLine());
+					builder.append(System.lineSeparator());
+				}
+				case EQUAL -> {
+					builder.append("  ");
+					builder.append(diffRow.getNewLine());
+					builder.append(System.lineSeparator());
+				}
+			}
+		});
 
 		return builder.toString();
 	}

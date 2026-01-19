@@ -22,6 +22,7 @@ import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestExecutionResult.Status;
 import org.junit.platform.engine.reporting.FileEntry;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.opentest4j.AssertionFailedError;
 
 /**
  * @since 1.0
@@ -123,11 +124,19 @@ class TreePrinter {
 			return;
 		}
 		Throwable throwable = result.getThrowable().get();
+		String message = formatThrowable(throwable);
+		printMessage(Style.FAILED, indent, message);
+	}
+
+	private static String formatThrowable(Throwable throwable) {
+		if (throwable instanceof AssertionFailedError assertionFailedError) {
+			return new RichDiffFormatter().format(assertionFailedError);
+		}
 		String message = throwable.getMessage();
 		if (StringUtils.isBlank(message)) {
 			message = throwable.toString();
 		}
-		printMessage(Style.FAILED, indent, message);
+		return message;
 	}
 
 	private void printReportEntry(String indent, ReportEntry reportEntry) {

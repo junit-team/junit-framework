@@ -192,9 +192,10 @@ public class AssertionFailureBuilder {
 	 */
 	public AssertionFailedError build() {
 		String reason = nullSafeGet(this.reason);
+		String message = nullSafeGet(this.message);
 		var assertionFailedError = new AssertionFailedError( //
-			formatExceptionMessage(reason), //
-			formatReason(reason), //
+			formatExceptionMessage(reason, message), //
+			formatReason(reason, message), //
 			expected, //
 			actual, //
 			cause //
@@ -203,18 +204,21 @@ public class AssertionFailureBuilder {
 		return assertionFailedError;
 	}
 
-	private @Nullable String formatReason(@Nullable String reason) {
+	private @Nullable String formatReason(@Nullable String reason, @Nullable String message) {
 		if (mismatch) {
-			return (reason == null ? "" : reason + ", ") + "expected did not match actual";
+			// TODO: The suffix is implicit due to mismatch, but how to make explicit?
+			reason = (reason == null ? "" : reason + ", ") + "expected did not match actual";
 		}
-		return reason;
+		if (reason != null) {
+			message = buildPrefix(message) + reason;
+		}
+		return message;
 	}
 
-	private @Nullable String formatExceptionMessage(@Nullable String reason) {
+	private @Nullable String formatExceptionMessage(@Nullable String reason, @Nullable String message) {
 		if (mismatch && includeValuesInMessage) {
 			reason = (reason == null ? "" : reason + ", ") + formatValues(expected, actual);
 		}
-		String message = nullSafeGet(this.message);
 		if (reason != null) {
 			message = buildPrefix(message) + reason;
 		}
