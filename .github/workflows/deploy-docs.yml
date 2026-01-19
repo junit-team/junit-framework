@@ -37,7 +37,7 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install Ruby
-        uses: ruby/setup-ruby@708024e6c902387ab41de36e1669e43b5ee7085e # v1.283.0
+        uses: ruby/setup-ruby@80740b3b13bf9857e28854481ca95a84e78a2bdf # v1.284.0
         with:
           bundler-cache: true
       - name: Install JDKs
