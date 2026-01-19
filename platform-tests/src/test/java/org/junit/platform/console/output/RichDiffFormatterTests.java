@@ -19,30 +19,74 @@ import org.opentest4j.AssertionFailedError;
 class RichDiffFormatterTests {
 
 	@Test
-	void test() {
-		var expected = """
+	void lineAdded() {
+		assertRichDiffEquals("""
+				{
+				  "speaker": "world"
+				}
+				""", """
 				{
 				  "speaker": "world"
 				  "message": "hello"
 				}
-				""";
-		var actuall = """
+				""", """
+				expected did not match actual
+				+ actual - expected
+				  {
+				    "speaker": "world"
+				+   "message": "hello"
+				  }
+				""");
+	}
+
+	@Test
+	void lineRemoved() {
+		assertRichDiffEquals("""
+				{
+				  "speaker": "world"
+				  "message": "hello"
+				}
+				""", """
+				{
+				  "speaker": "world"
+				}
+				""", """
+				expected did not match actual
+				+ actual - expected
+				  {
+				    "speaker": "world"
+				-   "message": "hello"
+				  }
+				""");
+	}
+
+	@Test
+	void lineChanged() {
+		assertRichDiffEquals("""
+				{
+				  "speaker": "world"
+				  "message": "hello"
+				}
+				""", """
 				{
 				  "speaker": "you"
 				  "message": "hello"
 				}
-				""";
+				""", """
+				expected did not match actual
+				+ actual - expected
+				  {
+				+   "speaker": "world"
+				-   "speaker": "you"
+				    "message": "hello"
+				  }
+				""");
+	}
 
-		var assertionFailed = assertThrows(AssertionFailedError.class, () -> assertEquals(expected, actuall));
-
+	private static void assertRichDiffEquals(String expected, String actual, String expectedDiff) {
 		var formatter = new RichDiffFormatter();
-
-		String message = formatter.format(assertionFailed);
-
-		assertEquals("""
-
-				""", message);
-
+		var assertionFailed = assertThrows(AssertionFailedError.class, () -> assertEquals(expected, actual));
+		assertEquals(expectedDiff, formatter.format(assertionFailed));
 	}
 
 }

@@ -18,7 +18,7 @@ dependencies {
 	compileOnlyApi(libs.jspecify)
 
 	shadowed(libs.picocli)
-	// TODO: Sort out
+	// TODO: Sort out relocation, licence, ect
 	shadowed(libs.javadiffutils)
 
 	osgiVerification(projects.junitJupiterEngine)
@@ -31,7 +31,8 @@ tasks {
 		options.compilerArgs.addAll(listOf(
 			"-Xlint:-module", // due to qualified exports
 			"--add-modules", "info.picocli",
-			"--add-reads", "${javaModuleName}=info.picocli"
+			"--add-reads", "${javaModuleName}=info.picocli",
+			"-Xlint:-requires-automatic", // Java diff utils
 		))
 		options.errorprone.nullaway {
 			excludedFieldAnnotations.addAll(
