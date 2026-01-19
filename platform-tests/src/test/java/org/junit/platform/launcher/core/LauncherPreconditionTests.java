@@ -118,8 +118,7 @@ class LauncherPreconditionTests {
 	private static Stream<Arguments> launchers() {
 		var engine = new TestEngineStub();
 
-		return Stream.of(
-			Arguments.of(Named.of("sessionPerRequest launcher", createSessionPerRequestLauncher(engine))),
+		return Stream.of(Arguments.of(Named.of("sessionPerRequest launcher", createSessionPerRequestLauncher(engine))),
 			Arguments.of(Named.of("default launcher",
 				new DefaultLauncher(List.of(engine), List.of(),
 					new NamespacedHierarchicalStore<>(null, closeAutoCloseables())))),
