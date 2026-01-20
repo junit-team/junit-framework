@@ -23,6 +23,8 @@ val codeCoverageClassesJar by tasks.registering(Jar::class) {
 }
 
 configurations.consumable("codeCoverageReportClasses") {
-	attributes.attribute(LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements::class, CLASSES))
+	attributes {
+		attribute(LIBRARY_ELEMENTS_ATTRIBUTE, named(CLASSES))
+	}
 	outgoing.artifact(codeCoverageClassesJar)
 }
