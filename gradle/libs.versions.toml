@@ -5,7 +5,7 @@ assertj = "3.27.6"
 bnd = "7.2.1"
 checkstyle = "13.0.0"
 eclipse = "4.38.0"
-jackson = "2.20.1"
+jackson = "3.0.3"
 jacoco = "0.8.14"
 jmh = "1.37"
 junit4 = "4.13.2"
@@ -35,8 +35,8 @@ fastcsv = { module = "de.siegmar:fastcsv", version = "4.1.0" }
 groovy = { module = "org.apache.groovy:groovy", version = "5.0.3" }
 groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
-jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.4" }
 jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.6" }
 jfrunit = { module = "org.moditect.jfrunit:jfrunit-core", version = "1.0.0.Alpha2" }
