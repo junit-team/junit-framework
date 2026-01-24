@@ -25,10 +25,26 @@ There are currently three built-in resolvers that are registered automatically.
 following demonstrates how to have `TestInfo` injected into a `@BeforeAll` method, test
 class constructor, `@BeforeEach` method, and `@Test` method.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/TestInfoDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/KotlinTestInfoDemo.kt[tags=user_guide]
+----
+--
+====
 
 * `{RepetitionExtension}`: if a method parameter in a `@RepeatedTest`, `@BeforeEach`, or
   `@AfterEach` method is of type `{RepetitionInfo}`, the `RepetitionExtension` will supply
@@ -49,10 +65,26 @@ In JUnit Jupiter you should use `TestReporter` where you used to print informati
 `stdout` or `stderr` in JUnit 4. Some IDEs print report entries to `stdout` or display
 them in the user interface for test results.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/TestReporterDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/KotlinTestReporterDemo.kt[tags=user_guide]
+----
+--
+====
 
 NOTE: Other parameter resolvers must be explicitly enabled by registering appropriate
 xref:extensions/overview.adoc[extensions] via `@ExtendWith`.
@@ -63,6 +95,11 @@ simplicity and expressiveness of both the extension model and the parameter reso
 process. `MyRandomParametersTest` demonstrates how to inject random values into `@Test`
 methods.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @ExtendWith(RandomParametersExtension.class)
@@ -80,6 +117,29 @@ class MyRandomParametersTest {
 
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@ExtendWith(RandomParametersExtension::class)
+class KotlinMyRandomParametersTest {
+
+    @Test
+    fun injectsInteger(@Random i: Int, @Random j: Int) {
+        assertNotEquals(i, j)
+    }
+
+    @Test
+    fun injectsDouble(@Random d: Double) {
+        assertEquals(0.0, d, 1.0)
+    }
+}
+----
+--
+====
 
 For real-world use cases, check out the source code for the `{MockitoExtension}` and the
 `{SpringExtension}`.

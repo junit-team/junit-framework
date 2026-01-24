@@ -17,6 +17,8 @@ content:
     start_path: documentation
     worktrees: true
 asciidoc:
+  extensions:
+  - '@asciidoctor/tabs'
   attributes:
     attribute-missing: warn
 runtime:
@@ -26,3 +28,4 @@ ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
     snapshot: true
+  supplemental_files: @GIT_REPO_ROOT@/documentation/ui
