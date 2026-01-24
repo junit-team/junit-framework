@@ -1,7 +1,7 @@
 [versions]
 ant = "1.10.15"
 apiguardian = "1.1.2"
-assertj = "3.27.6"
+assertj = "3.27.7"
 bnd = "7.2.1"
 checkstyle = "13.0.0"
 eclipse = "4.38.0"
