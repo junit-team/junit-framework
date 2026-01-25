@@ -9,10 +9,12 @@
       <div class="navbar-item search hide-for-print">
         <div id="search-field" class="field">
           <input id="search-input" type="text" placeholder="Search current version"{{#if page.home}} autofocus{{/if}}>
-            <label style="display: none">
-              <!-- restrict search to current version -->
-              <input type="checkbox" data-facet-filter="version:{{page.componentVersion.version}}" checked>
-            </label>
+          {{#if page.componentVersion}}
+          <label style="display: none">
+            <!-- restrict search to current version -->
+            <input type="checkbox" data-facet-filter="version:{{page.componentVersion.version}}" checked>
+          </label>
+          {{/if}}
         </div>
       </div>
       {{/if}}
