@@ -48,6 +48,11 @@ public final class PreconditionAssertions {
 		assertPreconditionViolationFor(throwingCallable).withMessage("%s must not be null or empty", name);
 	}
 
+	public static void assertPreconditionViolationContainsNoNullElementsFor(String name,
+			ThrowingCallable throwingCallable) {
+		assertPreconditionViolationFor(throwingCallable).withMessage("%s array must not contain null elements", name);
+	}
+
 	public static ThrowableAssertAlternative<PreconditionViolationException> assertPreconditionViolationFor(
 			ThrowingCallable throwingCallable) {
 
