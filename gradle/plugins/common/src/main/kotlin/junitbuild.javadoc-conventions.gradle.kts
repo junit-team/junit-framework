@@ -70,7 +70,7 @@ val extractJavadocSinceValues by tasks.registering {
 
 configurations.consumable("javadocSinceValues") {
 	attributes {
-		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named("javadoc-since-values"))
+		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named("javadoc-since-values"))
 	}
 	outgoing {
 		artifact(extractJavadocSinceValues)

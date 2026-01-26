@@ -1,9 +1,5 @@
 package junitbuild.generator
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.output.FileOutput
@@ -20,6 +16,9 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import tools.jackson.core.type.TypeReference
+import tools.jackson.dataformat.yaml.YAMLMapper
+import tools.jackson.module.kotlin.KotlinModule
 
 @CacheableTask
 abstract class GenerateJreRelatedSourceCode : DefaultTask() {
@@ -53,8 +52,9 @@ abstract class GenerateJreRelatedSourceCode : DefaultTask() {
 
         if (templates.isNotEmpty()) {
             val jres = javaClass.getResourceAsStream("/jre.yaml").use { input ->
-                val mapper = ObjectMapper(YAMLFactory())
-                mapper.registerModule(KotlinModule.Builder().build())
+                val mapper = YAMLMapper.builder()
+                    .addModule(KotlinModule.Builder().build())
+                    .build()
                 mapper.readValue(input, object : TypeReference<List<JRE>>() {})
             }
             val minRuntimeVersion = 17

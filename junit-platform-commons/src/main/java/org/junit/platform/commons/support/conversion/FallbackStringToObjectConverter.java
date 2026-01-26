@@ -50,11 +50,18 @@ import org.junit.platform.commons.util.Preconditions;
  * method if present.</li>
  * <li>Search for a single, non-private constructor in the target type that accepts
  * a {@link CharSequence}. Use the constructor if present.</li>
+ * <li>Search for a single, non-private static factory method in the target type
+ * that converts from a {@link String} to the target type, excluding candidates
+ * annotated with {@link Deprecated @Deprecated}. Use the factory method if
+ * present.</li>
+ * <li>Search for a single, non-private static factory method in the target type
+ * that converts from a {@link CharSequence} to the target type, excluding
+ * candidates annotated with {@link Deprecated @Deprecated}. Use the factory
+ * method if present.</li>
  * </ol>
  *
- * <p>If multiple suitable factory methods or constructors are discovered they
- * will be ignored. If neither a single factory method nor a single constructor
- * is found, this converter acts as a no-op.
+ * <p>If a suitable factory method or constructor is not found, this converter
+ * acts as a no-op.
  *
  * @since 1.11
  * @see ConversionSupport
@@ -184,7 +191,7 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 				return false;
 			}
 			if (deprecationStatus == DeprecationStatus.EXCLUDE_DEPRECATED
-					&& method.getAnnotation(Deprecated.class) != null) {
+					&& method.isAnnotationPresent(Deprecated.class)) {
 				return false;
 			}
 			return isFactoryCandidate(method, this.parameterType);

@@ -116,11 +116,13 @@ annotation is declared on might expose additional attributes to configure the fa
 Such annotations and related attributes can be accessed via the `AnnotatedElementContext`
 parameter of the `createTempDirectory(...)` method.
 
-You can use the `junit.jupiter.tempdir.factory.default` xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the fully qualified class name of the
-`TempDirFactory` you would like to use by default. Just like for factories configured via
-the `factory` attribute of the `@TempDir` annotation, the supplied class has to implement
-the `TempDirFactory` interface. The default factory will be used for all `@TempDir`
-annotations unless the `factory` attribute of the annotation specifies a different factory.
+You can use the `junit.jupiter.tempdir.factory.default`
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the
+fully qualified class name of the `TempDirFactory` you would like to use by default. Just
+like for factories configured via the `factory` attribute of the `@TempDir` annotation,
+the supplied class has to implement the `TempDirFactory` interface. The default factory
+will be used for all `@TempDir` annotations unless the `factory` attribute of the
+annotation specifies a different factory.
 
 In summary, the factory for a temporary directory is determined according to the following
 precedence rules:
@@ -204,32 +206,32 @@ Alternatively, the default `Locale` can be created using the following attribute
 which a {jdk-javadoc-base-url}/java.base/java/util/Locale.Builder.html[`Locale.Builder`]
 can create an instance:
 
-* `language` or
-* `language` and `country` or
+* `language`
+* `language` and `country`
 * `language`, `country`, and `variant`
 
 NOTE: The variant needs to be a string which follows the
-https://www.rfc-editor.org/rfc/rfc5646.html[IETF BCP 47 / RFC 5646] syntax
+https://www.rfc-editor.org/rfc/rfc5646.html[IETF BCP 47 / RFC 5646] syntax.
 
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_language_alternatives]
 ----
 
-Mixing language tag configuration (via the annotation's `value` attributed) and
-attributed-based configuration will cause an exception to be thrown. Furthermore, a
+Mixing language tag configuration (via the annotation's `value` attribute) and
+attribute-based configuration will cause an exception to be thrown. Furthermore, a
 `variant` can only be specified if `country` is also specified. Otherwise, an exception
 will be thrown.
 
-Any method-level `@DefaultLocale` configurations will override class-level configurations.
+Method-level `@DefaultLocale` configuration overrides class-level configuration.
 
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_class_level]
 ----
 
-NOTE: A class-level configuration means that the specified locale is set before and reset
-after each individual test in the annotated class.
+NOTE: With class-level configuration, the specified locale is set before and reset after
+each individual test in the annotated class.
 
 If your use case is not covered, you can implement the `{LocaleProvider}` interface.
 
@@ -238,7 +240,7 @@ If your use case is not covered, you can implement the `{LocaleProvider}` interf
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_with_provider]
 ----
 
-NOTE: The provider implementation must have a no-args (or the default) constructor.
+NOTE: The provider implementation must have a no-args (or default) constructor.
 
 [[DefaultTimeZone]]
 === @DefaultTimeZone
@@ -252,15 +254,15 @@ method.
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_zone]
 ----
 
-Any method level `@DefaultTimeZone` configurations will override class level configurations:
+Method-level `@DefaultTimeZone` configuration overrides class-level configuration.
 
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_class_level]
 ----
 
-NOTE: A class-level configuration means that the specified time zone is set before and
-reset after each individual test in the annotated class.
+NOTE: With class-level configuration, the specified time zone is set before and reset
+after each individual test in the annotated class.
 
 If your use case is not covered, you can implement the `{TimeZoneProvider}` interface.
 
@@ -269,7 +271,7 @@ If your use case is not covered, you can implement the `{TimeZoneProvider}` inte
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_time_zone_with_provider]
 ----
 
-NOTE: The provider implementation must have a no-args (or the default) constructor.
+NOTE: The provider implementation must have a no-args (or default) constructor.
 
 === Thread Safety
 
@@ -279,54 +281,54 @@ results and flaky tests. The `@DefaultLocale` and `@DefaultTimeZone` extensions 
 prepared for that and tests annotated with them will never execute in parallel (thanks to
 `{ResourceLock}`) to guarantee correct test results.
 
-However, this does not cover all possible cases. Tested code that reads or writes default
-locale and time zone _independently_ of the extensions can still run in parallel to them
-and may thus behave erratically when, for example, it unexpectedly reads a locale set by
-the extension in another thread. Tests that cover code that reads or writes the default
-locale or time zone need to be annotated with the respective annotation:
+However, this does not cover all possible cases. Tested code that reads or writes the
+default locale or time zone _independently_ of the extensions can still run in parallel
+and may thus behave erratically when, for example, such code unexpectedly reads a locale
+set by the extension in another thread. Consequently, tests that cover code that reads or
+writes the default locale or time zone need to be annotated with one of the following
+respective annotations.
 
 * `{ReadsDefaultLocale}`
 * `{ReadsDefaultTimeZone}`
 * `{WritesDefaultLocale}`
 * `{WritesDefaultTimeZone}`
 
-Tests annotated in this way will never execute in parallel with tests annotated with
-`@DefaultLocale` or `@DefaultTimeZone`.
+Tests annotated with one of the above annotations will never execute in parallel with
+tests annotated with `@DefaultLocale` or `@DefaultTimeZone`.
 
-[[SystemProperty]]
+[[SystemProperties]]
 == The System Property Extensions
 
-The System Property extensions consists is a set of annotations that work together to
-clear, set and restore system properties.
+The system property extensions provide a set of annotations that work together to clear,
+set, and restore system properties.
 
-[[SystemProperty-clear-system-properties-and-set-system-properties]]
+[[SystemProperties-clear-and-set]]
 === @ClearSystemProperty and @SetSystemProperty
 
-The `{ClearSystemProperty}` and `{SetSystemProperty}` extensions can be used to clear and
-set, respectively, the values of system properties for a test execution. Both annotations
-work on the test method and class level, are repeatable, combinable, and inherited from
-higher-level containers. After the annotated method has been executed, the properties
-mentioned in the annotation will be restored to their original value or the value of the
-higher-level container, or will be cleared if they didn't have one before. Other system
-properties that are changed during the test, are _not_ restored (unless
-<<SystemProperty-restore-system-properties, explicitly enabled>> via
-`{RestoreSystemProperties}`).
+The `{ClearSystemProperty}` and `{SetSystemProperty}` annotations can be used to clear
+and set, respectively, the values of system properties for test execution. Both
+annotations work on the test method and class level and are repeatable, combinable, and
+inherited from higher-level containers. After the annotated method has been executed, the
+properties configured in the annotation will be restored to their original value or the
+value of the higher-level container, or will be cleared if they did not previously have a
+value. Other system properties that are changed during the test are _not_ restored
+(unless <<SystemProperties-restore, explicitly enabled>> via `{RestoreSystemProperties}`).
 
-For example, clearing a system property for a test execution can be done as follows:
+For example, clearing a system property for test execution can be done as follows.
 
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_clear_simple]
 ----
 
-And setting a system property for a test execution:
+The following demonstrates how to set a system property for test execution.
 
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_set_simple]
 ----
 
-As mentioned before, both annotations are repeatable, and they can also be combined:
+As mentioned before, both annotations are repeatable, and they can also be combined.
 
 [source,java,indent=0]
 ----
@@ -334,7 +336,7 @@ include::example$java/example/SystemPropertyExtensionDemo.java[tag=systempropert
 
 ----
 
-Note that class-level configurations are overwritten by method-level configurations:
+Note that class-level configuration is overridden by method-level configuration.
 
 [source,java,indent=0]
 ----
@@ -343,57 +345,60 @@ include::example$java/example/SystemPropertyExtensionDemo.java[tag=systempropert
 
 [NOTE]
 ====
-Method-level configurations are visible in both `@BeforeEach` setup methods and
-`@AfterEach` teardown methods (see
+Method-level configuration is visible in both `@BeforeEach` methods and `@AfterEach`
+methods (see
 xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc#overview[user
 code and extension code execution order]).
 
-A class-level configuration means that the specified system properties are cleared/set
-before and reset after each individual test in the annotated class.
+With class-level configuration, the specified system properties are cleared or set before
+and reset after each individual test in the annotated class.
 ====
 
-[[SystemProperty-restore-system-properties]]
+[[SystemProperties-restore]]
 === @RestoreSystemProperties
 
-The `{RestoreSystemProperties}` extension can be used to restore changes to system
-properties made directly in code. While `@ClearSystemProperty` and `@SetSystemProperty`
-set or clear specific properties and values, they don't allow property values to be
-calculated or parameterized, thus there are times you may want to directly set properties
-in your test code. `@RestoreSystemProperties` can be placed on test methods or test
-classes and will completely restore all system properties to their original state after a
-test or test class is complete.
+The `{RestoreSystemProperties}` annotation can be used to restore changes to system
+properties made directly in the test or in the code being tested. Although
+`@ClearSystemProperty` and `@SetSystemProperty` clear or set properties and values that
+are statically declared, they do not allow property values to be calculated dynamically.
+Thus, there are times you may want to directly set properties in your test code.
+`@RestoreSystemProperties` can be placed on test methods or test classes and will
+completely restore all system properties to their original state after the test or test
+class has finished.
 
 [NOTE]
 ====
-During the execution of the annotated scope, the system properties are set to a clone of
-the original `Properties` object. The clone does not include
+During the execution of the annotated scope, the JVM system properties are set to a clone
+of the original `Properties` object. However, the clone does not include
 {jdk-javadoc-base-url}/java.base/java/util/Properties.html#defaults[the defaults] from the
-original. The extension will perform a best effort attempt to detect default properties
+original.
+
+Consequently, the extension will perform a best effort attempt to detect default properties
 and fail if any were detected. For classes that extend `Properties` it is assumed that
 `clone()` is implemented with sufficient fidelity.
 ====
 
-In this example, `@RestoreSystemProperties` is used on a test method, ensuring any changes
-made in that method are restored:
+In the following example, `@RestoreSystemProperties` is used on a test method, ensuring
+any changes made in that method are restored.
 
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_restore_test]
 ----
 
-When `@RestoreSystemProperties` is used on a test class, any system properties changes
-made during the entire lifecycle of the test class, including test methods, `@BeforeAll`,
-`@BeforeEach` and 'after' methods, are restored after the  lifecycle of the test class is
+When `@RestoreSystemProperties` is used on a test class, any changes to system properties
+during the entire lifecycle of the test class, including test methods, `@BeforeAll`,
+`@BeforeEach`, and 'after' methods, are restored after the lifecycle of the test class is
 complete. In addition, the annotation is inherited by each test method just as if each one
-was annotated with `@RestoreSystemProperties`.
+were annotated with `@RestoreSystemProperties`.
 
 In the following example, both test methods see the system property changes made in
-`@BeforeAll` and `@BeforeEach`, however, the test methods are isolated from each other
-(`isolatedTest2` does not 'see' changes made in `isolatedTest1`). As shown in the second
-example below, the class-level `@RestoreSystemProperties` ensures that system property
-changes made within the annotated class are completely restored after the class's
+`@BeforeAll` and `@BeforeEach`; however, the test methods are isolated from each other
+(`isolatedTest2` does not _see_ changes made in `isolatedTest1`). As shown in the second
+example below, the class-level `@RestoreSystemProperties` annotation ensures that system
+property changes made within the annotated class are completely restored after the class's
 lifecycle, ensuring that changes are not visible to `SomeOtherTestClass`. Note that
-`SomeOtherTestClass` uses the `@ReadsSystemProperty` annotation: This ensures that JUnit
+`SomeOtherTestClass` uses the `@ReadsSystemProperty` annotation, which ensures that JUnit
 does not schedule the class to run during any test known to modify system properties (see
 <<SystemProperties-thread-safety>>).
 
@@ -409,13 +414,14 @@ Some other test class, running later:
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
 ----
 
-[[SystemProperty-using-together]]
-=== Using @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties together
+[[SystemProperties-combined-usage]]
+=== Combining @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties
 
-All three annotations can be combined, which could be used when some system properties are
-parameterized (i.e. need to be set in code) and others are not. For instance, imagine
-testing an image generation utility that takes configuration from system properties. Basic
-configuration can be specified using `Set` and `Clear` and the image size parameterized:
+The three system property annotations can be combined, which can be useful when some
+system properties are set dynamically in code and others are not. For instance, imagine
+you need to test an image generation utility that takes configuration from system
+properties. Basic configuration can be specified declaratively using the `Clear` and `Set`
+annotations, and the image size could be set programmatically.
 
 [source,java,indent=0]
 ----
@@ -425,9 +431,9 @@ include::example$java/example/SystemPropertyExtensionDemo.java[tag=systempropert
 [NOTE]
 ====
 Using `@RestoreSystemProperties` is not necessary to restore system properties modified
-via `@ClearSystemProperty` or `@SetSystemProperty` - they each automatically restore the
-referenced properties. `Restore` is only needed if system properties are modified in some
-way _other than_ `Clear` and `Set` during a test.
+via `@ClearSystemProperty` or `@SetSystemProperty` since they both automatically restore
+the referenced properties. `@RestoreSystemProperties` is only needed if system properties
+are modified during a test in some way _other than_ via the `Clear` and `Set` annotations.
 ====
 
 [[SystemProperties-thread-safety]]
