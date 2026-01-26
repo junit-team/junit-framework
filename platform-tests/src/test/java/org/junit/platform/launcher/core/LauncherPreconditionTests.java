@@ -10,7 +10,7 @@
 
 package org.junit.platform.launcher.core;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationContainsNoNullElementsFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.engine.support.store.NamespacedHierarchicalStore.CloseAction.closeAutoCloseables;
@@ -19,7 +19,6 @@ import static org.mockito.Mockito.mock;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,14 +28,13 @@ import org.junit.platform.fakes.TestEngineStub;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.LauncherInterceptor;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestPlan;
 
 @ParameterizedClass
 @MethodSource("launchers")
-@SuppressWarnings("NullAway")
+@SuppressWarnings({ "NullAway", "DataFlowIssue" })
 class LauncherPreconditionTests {
 
 	private final Launcher launcher;
@@ -47,8 +45,7 @@ class LauncherPreconditionTests {
 
 	@Test
 	void discoverRejectsNullDiscoveryRequest() {
-		assertPreconditionViolationNotNullFor("discoveryRequest",
-			() -> launcher.discover((LauncherDiscoveryRequest) null));
+		assertPreconditionViolationNotNullFor("discoveryRequest", () -> launcher.discover(null));
 	}
 
 	@Test
@@ -64,8 +61,7 @@ class LauncherPreconditionTests {
 
 	@Test
 	void executeRejectsNullExecutionRequest() {
-		assertPreconditionViolationNotNullFor("executionRequest",
-			() -> launcher.execute((LauncherExecutionRequest) null));
+		assertPreconditionViolationNotNullFor("executionRequest", () -> launcher.execute(null));
 	}
 
 	@Test
@@ -125,25 +121,38 @@ class LauncherPreconditionTests {
 	}
 
 	static Stream<Arguments> launchers() {
-		var engine = new TestEngineStub();
-		return Stream.of(
-			Arguments.of(Named.of("session-per-request launcher", createSessionPerRequestLauncher(engine))),
-			Arguments.of(Named.of("default launcher",
-				new DefaultLauncher(List.of(engine), List.of(),
-					new NamespacedHierarchicalStore<>(null, closeAutoCloseables())))),
-			Arguments.of(Named.of("delegating launcher", new DelegatingLauncher(mock(Launcher.class)))),
-			Arguments.of(Named.of("intercepting launcher",
-				new InterceptingLauncher(mock(Launcher.class), mock(LauncherInterceptor.class)))));
+		return Stream.of(Arguments.argumentSet("SessionPerRequestLauncher", createSessionPerRequestLauncher()),
+			Arguments.argumentSet("DefaultLauncher", createDefaultLauncher()),
+			Arguments.argumentSet("DelegatingLauncher", createDelegatingLauncher()),
+			Arguments.argumentSet("InterceptingLauncher", createInterceptingLauncher()));
 	}
 
-	private static Launcher createSessionPerRequestLauncher(TestEngineStub engine) {
-		LauncherConfig config = LauncherConfig.builder().enableTestEngineAutoRegistration(
-			false).enableLauncherDiscoveryListenerAutoRegistration(false).enableTestExecutionListenerAutoRegistration(
-				false).enablePostDiscoveryFilterAutoRegistration(false).enableLauncherSessionListenerAutoRegistration(
-					false).addTestEngines(engine).build();
+	private static SessionPerRequestLauncher createSessionPerRequestLauncher() {
+		LauncherConfig config = LauncherConfig.builder() //
+				.enableTestEngineAutoRegistration(false) //
+				.enableLauncherDiscoveryListenerAutoRegistration(false) //
+				.enableTestExecutionListenerAutoRegistration(false) //
+				.enablePostDiscoveryFilterAutoRegistration(false) //
+				.enableLauncherSessionListenerAutoRegistration(false) //
+				.addTestEngines(new TestEngineStub()) //
+				.build(); //
 		Launcher launcher = LauncherFactory.create(config);
-		assertTrue(launcher instanceof SessionPerRequestLauncher,
-			"Expected launcher to be a SessionPerRequestLauncher");
-		return launcher;
+		return assertInstanceOf(SessionPerRequestLauncher.class, launcher);
+	}
+
+	private static DefaultLauncher createDefaultLauncher() {
+		return new DefaultLauncher( //
+			List.of(new TestEngineStub()), //
+			List.of(), //
+			new NamespacedHierarchicalStore<>(null, closeAutoCloseables()) //
+		);
+	}
+
+	private static DelegatingLauncher createDelegatingLauncher() {
+		return new DelegatingLauncher(mock(Launcher.class));
+	}
+
+	private static InterceptingLauncher createInterceptingLauncher() {
+		return new InterceptingLauncher(mock(Launcher.class), mock(LauncherInterceptor.class));
 	}
 }
