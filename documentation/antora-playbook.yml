@@ -21,6 +21,7 @@ asciidoc:
   - '@asciidoctor/tabs'
   attributes:
     attribute-missing: warn
+    tabs-sync-option: ''
 runtime:
   log:
     failure_level: warn
