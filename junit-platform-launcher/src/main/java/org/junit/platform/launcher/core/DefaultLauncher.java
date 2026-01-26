@@ -115,11 +115,12 @@ class DefaultLauncher implements Launcher {
 	public void execute(LauncherExecutionRequest executionRequest) {
 		Preconditions.notNull(executionRequest, "executionRequest must not be null");
 		var testPlan = executionRequest.getTestPlan().map(it -> {
-			Preconditions.condition(it instanceof InternalTestPlan, "testPlan must be an instance of InternalTestPlan");
+			Preconditions.condition(it instanceof InternalTestPlan,
+				"The TestPlan in executionRequest was not created by this Launcher");
 			return ((InternalTestPlan) it);
 		}).orElseGet(() -> {
 			Preconditions.condition(executionRequest.getDiscoveryRequest().isPresent(),
-				"Either a test plan or a discovery request must be present in the execution request");
+				"Either a TestPlan or LauncherDiscoveryRequest must be present in the LauncherExecutionRequest");
 			return InternalTestPlan.from(discover(executionRequest.getDiscoveryRequest().get(), EXECUTION));
 		});
 		execute(testPlan, executionRequest.getAdditionalTestExecutionListeners(),
