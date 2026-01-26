@@ -44,17 +44,17 @@ class DelegatingLauncher implements Launcher {
 	}
 
 	@Override
-	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
-		return delegate.discover(launcherDiscoveryRequest);
+	public TestPlan discover(LauncherDiscoveryRequest discoveryRequest) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
+		return delegate.discover(discoveryRequest);
 	}
 
 	@Override
-	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
+	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
 		Preconditions.notNull(listeners, "listeners must not be null");
 		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
-		delegate.execute(launcherDiscoveryRequest, listeners);
+		delegate.execute(discoveryRequest, listeners);
 	}
 
 	@Override
@@ -66,8 +66,8 @@ class DelegatingLauncher implements Launcher {
 	}
 
 	@Override
-	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "executionRequest must not be null");
-		delegate.execute(launcherExecutionRequest);
+	public void execute(LauncherExecutionRequest executionRequest) {
+		Preconditions.notNull(executionRequest, "executionRequest must not be null");
+		delegate.execute(executionRequest);
 	}
 }

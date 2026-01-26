@@ -112,18 +112,18 @@ class DefaultLauncher implements Launcher {
 	}
 
 	@Override
-	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "executionRequest must not be null");
-		var testPlan = launcherExecutionRequest.getTestPlan().map(it -> {
-			Preconditions.condition(it instanceof InternalTestPlan, "testPlan was not returned by this launcher");
+	public void execute(LauncherExecutionRequest executionRequest) {
+		Preconditions.notNull(executionRequest, "executionRequest must not be null");
+		var testPlan = executionRequest.getTestPlan().map(it -> {
+			Preconditions.condition(it instanceof InternalTestPlan, "testPlan must be an instance of InternalTestPlan");
 			return ((InternalTestPlan) it);
 		}).orElseGet(() -> {
-			Preconditions.condition(launcherExecutionRequest.getDiscoveryRequest().isPresent(),
-				"Either a testPlan or discoveryRequest must be present in the executionRequest");
-			return InternalTestPlan.from(discover(launcherExecutionRequest.getDiscoveryRequest().get(), EXECUTION));
+			Preconditions.condition(executionRequest.getDiscoveryRequest().isPresent(),
+				"Either a test plan or a discovery request must be present in the execution request");
+			return InternalTestPlan.from(discover(executionRequest.getDiscoveryRequest().get(), EXECUTION));
 		});
-		execute(testPlan, launcherExecutionRequest.getAdditionalTestExecutionListeners(),
-			launcherExecutionRequest.getCancellationToken());
+		execute(testPlan, executionRequest.getAdditionalTestExecutionListeners(),
+			executionRequest.getCancellationToken());
 	}
 
 	private LauncherDiscoveryResult discover(LauncherDiscoveryRequest discoveryRequest, LauncherPhase phase) {

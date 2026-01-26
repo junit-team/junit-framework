@@ -60,20 +60,20 @@ class SessionPerRequestLauncher implements Launcher {
 	}
 
 	@Override
-	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
+	public TestPlan discover(LauncherDiscoveryRequest discoveryRequest) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
 		try (LauncherSession session = createSession()) {
-			return session.getLauncher().discover(launcherDiscoveryRequest);
+			return session.getLauncher().discover(discoveryRequest);
 		}
 	}
 
 	@Override
-	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		Preconditions.notNull(launcherDiscoveryRequest, "discoveryRequest must not be null");
+	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
 		Preconditions.notNull(listeners, "listeners must not be null");
 		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		try (LauncherSession session = createSession()) {
-			session.getLauncher().execute(launcherDiscoveryRequest, listeners);
+			session.getLauncher().execute(discoveryRequest, listeners);
 		}
 	}
 
@@ -88,10 +88,10 @@ class SessionPerRequestLauncher implements Launcher {
 	}
 
 	@Override
-	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		Preconditions.notNull(launcherExecutionRequest, "executionRequest must not be null");
+	public void execute(LauncherExecutionRequest executionRequest) {
+		Preconditions.notNull(executionRequest, "executionRequest must not be null");
 		try (LauncherSession session = createSession()) {
-			session.getLauncher().execute(launcherExecutionRequest);
+			session.getLauncher().execute(executionRequest);
 		}
 	}
 
