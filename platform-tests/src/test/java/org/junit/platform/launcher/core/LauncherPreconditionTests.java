@@ -11,6 +11,7 @@
 package org.junit.platform.launcher.core;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationContainsNoNullElementsFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.engine.support.store.NamespacedHierarchicalStore.CloseAction.closeAutoCloseables;
@@ -121,10 +122,12 @@ class LauncherPreconditionTests {
 	}
 
 	static Stream<Arguments> launchers() {
-		return Stream.of(Arguments.argumentSet("SessionPerRequestLauncher", createSessionPerRequestLauncher()),
-			Arguments.argumentSet("DefaultLauncher", createDefaultLauncher()),
-			Arguments.argumentSet("DelegatingLauncher", createDelegatingLauncher()),
-			Arguments.argumentSet("InterceptingLauncher", createInterceptingLauncher()));
+		return Stream.of( //
+			argumentSet("SessionPerRequestLauncher", createSessionPerRequestLauncher()),
+			argumentSet("DefaultLauncher", createDefaultLauncher()),
+			argumentSet("DelegatingLauncher", createDelegatingLauncher()),
+			argumentSet("InterceptingLauncher", createInterceptingLauncher()) //
+		);
 	}
 
 	private static SessionPerRequestLauncher createSessionPerRequestLauncher() {
