@@ -87,3 +87,7 @@ pre {
 .version, .version-menu-toggle {
     font-feature-settings: 'tnum';
 }
+
+.tabpanel {
+    padding: 1em;
+}
