@@ -41,7 +41,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-include::example$kotlin/example/KotlinTestInfoDemo.kt[tags=user_guide]
+include::example$kotlin/example/kotlin/TestInfoDemo.kt[tags=user_guide]
 ----
 --
 ====
@@ -81,7 +81,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-include::example$kotlin/example/KotlinTestReporterDemo.kt[tags=user_guide]
+include::example$kotlin/example/kotlin/TestReporterDemo.kt[tags=user_guide]
 ----
 --
 ====
@@ -124,19 +124,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-@ExtendWith(RandomParametersExtension::class)
-class KotlinMyRandomParametersTest {
-
-    @Test
-    fun injectsInteger(@Random i: Int, @Random j: Int) {
-        assertNotEquals(i, j)
-    }
-
-    @Test
-    fun injectsDouble(@Random d: Double) {
-        assertEquals(0.0, d, 1.0)
-    }
-}
+include::example$kotlin/example/kotlin/MyRandomParametersTest.kt[tags=user_guide]
 ----
 --
 ====
