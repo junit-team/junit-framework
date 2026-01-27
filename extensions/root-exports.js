@@ -5,13 +5,17 @@ module.exports.register = function ({ config }) {
   this.on('navigationBuilt', ({ contentCatalog }) => {
     const { versions } = contentCatalog.getComponent(rootComponentName)
     versions.forEach(version => {
-      const file = contentCatalog.resolveResource(`${version.version}@${rootComponentName}:ROOT:index.pdf`, {}, 'export', ['export'])
-      if (file) {
+      const pdfFile = contentCatalog.resolveResource(`${version.version}@${rootComponentName}:ROOT:index.pdf`, {}, 'export', ['export'])
+      if (pdfFile) {
         if (version.prerelease === '-SNAPSHOT') {
-          contentCatalog.removeFile(file)
+          contentCatalog.removeFile(pdfFile)
         } else {
-          removeRootComponentNameFromFile(file, `${fileName}-${version.version}`)
+          removeRootComponentNameFromFile(pdfFile, `${fileName}-${version.version}`)
         }
+      }
+      const htmlFile = contentCatalog.resolveResource(`${version.version}@${rootComponentName}:ROOT:index.html`, {}, 'export', ['export'])
+      if (htmlFile) {
+        removeRootComponentNameFromFile(htmlFile, `${fileName}-${version.version}`)
       }
     })
   })
