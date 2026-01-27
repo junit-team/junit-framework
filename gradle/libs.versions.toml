@@ -59,7 +59,7 @@ mockito-bom = { module = "org.mockito:mockito-bom", version = "5.21.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
-nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.15" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.13.1" }
 opentest4j = { module = "org.opentest4j:opentest4j", version.ref = "opentest4j" }
 openTestReporting-cli = { module = "org.opentest4j.reporting:open-test-reporting-cli", version.ref = "openTestReporting" }
 openTestReporting-events = { module = "org.opentest4j.reporting:open-test-reporting-events", version.ref = "openTestReporting" }
