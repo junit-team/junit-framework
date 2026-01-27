@@ -7,7 +7,8 @@ antora:
     - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: junit
     - require: '@springio/antora-extensions/root-attachments-extension'
-    - require: './root-exports-extension.js'
+    - require: './extensions/single-html-page.js'
+    - require: './extensions/root-exports.js'
       root_component_name: junit
       file_name: junit-user-guide
 site:
