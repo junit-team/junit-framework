@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package example
+package example.kotlin
 
 // tag::user_guide[]
 
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
 
 @DisplayName("TestInfo Demo")
-class KotlinTestInfoDemo(
+class TestInfoDemo(
     testInfo: TestInfo
 ) {
     init {

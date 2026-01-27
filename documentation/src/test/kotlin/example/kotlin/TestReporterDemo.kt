@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package example
+package example.kotlin
 
 import org.junit.jupiter.api.MediaType
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ import java.nio.file.Path
 
 // tag::user_guide[]
 @Execution(ExecutionMode.SAME_THREAD)
-class KotlinTestReporterDemo {
+class TestReporterDemo {
     @Test
     fun reportSingleValue(testReporter: TestReporter) {
         testReporter.publishEntry("a status message")

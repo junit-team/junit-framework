@@ -21,7 +21,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-include::example$kotlin/example/KotlinMyFirstJUnitJupiterTests.kt[tags=user_guide]
+include::example$kotlin/example/kotlin/MyFirstJUnitJupiterTests.kt[tags=user_guide]
 ----
 --
 ====

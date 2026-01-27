@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package example
+package example.kotlin
 
 // tag::user_guide[]
 
@@ -16,7 +16,7 @@ import example.util.Calculator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class KotlinMyFirstJUnitJupiterTests {
+class MyFirstJUnitJupiterTests {
     private val calculator = Calculator()
 
     @Test
