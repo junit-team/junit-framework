@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -292,6 +293,7 @@ public final class DiscoverySelectors {
 	 * @param classpathResourceName the name of the classpath resource; never
 	 * {@code null} or blank
 	 * @see #selectClasspathResource(String, FilePosition)
+	 * @see #selectClasspathResources(String...)
 	 * @see #selectClasspathResourceByName(Set)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
@@ -322,6 +324,7 @@ public final class DiscoverySelectors {
 	 * {@code null} or blank
 	 * @param position the position inside the classpath resource; may be {@code null}
 	 * @see #selectClasspathResource(String)
+	 * @see #selectClasspathResources(String...)
 	 * @see #selectClasspathResourceByName(Set)
 	 * @see ClasspathResourceSelector
 	 * @see ClassLoader#getResource(String)
@@ -411,6 +414,45 @@ public final class DiscoverySelectors {
 		Preconditions.condition(resourceNames.size() == 1, "all classpath resources must have the same name");
 		Preconditions.notBlank(resourceNames.get(0), "classpath resource names must not be null or blank");
 		return new ClasspathResourceSelector(classpathResources);
+	}
+
+	/**
+	 * Create a {@code ClasspathResourceSelector} for each supplied classpath
+	 * resource name.
+	 *
+	 * @param classpathResourceNames the names of the classpath resource; never
+	 * {@code null} and never containing {@code null} or blank references.
+	 * @since 6.1
+	 * @see #selectClasspathResource(String)
+	 * @see #selectClasspathResources(String...)
+	 * @see ClasspathResourceSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static List<ClasspathResourceSelector> selectClasspathResources(String... classpathResourceNames) {
+		Preconditions.notNull(classpathResourceNames, "classpathResourceNames must not be null");
+		return selectClasspathResources(Arrays.asList(classpathResourceNames));
+	}
+
+	/**
+	 * Create a {@code ClasspathResourceSelector} for each supplied classpath
+	 * resource name.
+	 *
+	 * @param classpathResourceNames the names of the classpath resource; never
+	 * {@code null} and never containing {@code null} or blank references.
+	 * @since 6.1
+	 * @see #selectClasspathResource(String)
+	 * @see #selectClasspathResources(String...)
+	 * @see ClasspathResourceSelector
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static List<ClasspathResourceSelector> selectClasspathResources(List<String> classpathResourceNames) {
+		Preconditions.notNull(classpathResourceNames, "classpathResourceNames must not be null");
+		Preconditions.containsNoBlankElements(classpathResourceNames,
+			"Individual classpathResourceNames must not be null or blank");
+		return classpathResourceNames.stream() //
+				.distinct() //
+				.map(DiscoverySelectors::selectClasspathResource) //
+				.toList();
 	}
 
 	/**
@@ -540,7 +582,8 @@ public final class DiscoverySelectors {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public static List<ClassSelector> selectClasses(Class<?>... classes) {
-		return selectClasses(List.of(classes));
+		Preconditions.notNull(classes, "classes must not be null");
+		return selectClasses(Arrays.asList(classes));
 	}
 
 	/**
@@ -579,7 +622,8 @@ public final class DiscoverySelectors {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public static List<ClassSelector> selectClassesByName(String... classNames) {
-		return selectClassesByName(List.of(classNames));
+		Preconditions.notNull(classNames, "classNames must not be null");
+		return selectClassesByName(Arrays.asList(classNames));
 	}
 
 	/**
@@ -595,6 +639,7 @@ public final class DiscoverySelectors {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public static List<ClassSelector> selectClassesByName(List<String> classNames) {
+		Preconditions.notNull(classNames, "classNames must not be null");
 		return selectClassesByName(null, classNames);
 	}
 
@@ -613,7 +658,8 @@ public final class DiscoverySelectors {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public static List<ClassSelector> selectClassesByName(@Nullable ClassLoader classLoader, String... classNames) {
-		return selectClassesByName(classLoader, List.of(classNames));
+		Preconditions.notNull(classNames, "classNames must not be null");
+		return selectClassesByName(classLoader, Arrays.asList(classNames));
 	}
 
 	/**
@@ -631,7 +677,7 @@ public final class DiscoverySelectors {
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public static List<ClassSelector> selectClassesByName(@Nullable ClassLoader classLoader, List<String> classNames) {
 		Preconditions.notNull(classNames, "classNames must not be null");
-		Preconditions.containsNoNullElements(classNames, "Individual class names must not be null");
+		Preconditions.containsNoBlankElements(classNames, "Individual class names must not be null or blank");
 
 		// @formatter:off
 		return classNames.stream()

@@ -30,6 +30,7 @@ repository on GitHub.
 
 * The `UniqueId.uniqueIdFormat` field has been removed, reducing the size of `UniqueId`
   objects.
+* Add `DiscoverySelectors.selectClasspathResources(String...)` and `DiscoverySelectors.selectClasspathResources(List<String)`
 
 [[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter

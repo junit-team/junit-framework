@@ -11,6 +11,7 @@
 package org.junit.platform.engine.discovery;
 
 import static java.lang.String.join;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.type;
@@ -25,6 +26,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClassesByName;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResource;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResourceByName;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathResources;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathRoots;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectDirectory;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectFile;
@@ -298,7 +300,7 @@ class DiscoverySelectorsTests {
 
 		@SuppressWarnings("DataFlowIssue")
 		@Test
-		void selectClasspathResourcesPreconditions() {
+		void selectClasspathResourcePreconditions() {
 			// @formatter:off
 			assertPreconditionViolationFor(() -> selectClasspathResource((String) null));
 			assertPreconditionViolationFor(() -> selectClasspathResource(""));
@@ -317,7 +319,7 @@ class DiscoverySelectorsTests {
 		}
 
 		@Test
-		void selectIndividualClasspathResources() {
+		void selectIndividualClasspathResource() {
 			// with unnecessary "/" prefix
 			var selector = selectClasspathResource("/foo/bar/spec.xml");
 			assertEquals("foo/bar/spec.xml", selector.getClasspathResourceName());
@@ -328,7 +330,7 @@ class DiscoverySelectorsTests {
 		}
 
 		@Test
-		void getSelectedClasspathResources() {
+		void getSelectedClasspathResource() {
 			var selector = selectClasspathResource("org/junit/platform/commons/example.resource");
 			var classpathResources = selector.getResources();
 			assertAll(() -> assertThat(classpathResources).hasSize(1), //
@@ -339,7 +341,7 @@ class DiscoverySelectorsTests {
 		}
 
 		@Test
-		void getMissingClasspathResources() {
+		void getMissingClasspathResource() {
 			var selector = selectClasspathResource("org/junit/platform/commons/no-such-example.resource");
 			assertPreconditionViolationFor(selector::getResources);
 		}
@@ -414,6 +416,52 @@ class DiscoverySelectorsTests {
 			public URI getUri() {
 				throw new UnsupportedOperationException();
 			}
+		}
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	@Nested
+	class SelectClasspathResourcesTests {
+
+		@SuppressWarnings("DataFlowIssue")
+		@Test
+		void selectClasspathResourcesPreconditions() {
+			assertPreconditionViolationFor(() -> selectClasspathResources((String) null));
+			assertPreconditionViolationFor(() -> selectClasspathResources((String[]) null));
+			assertPreconditionViolationFor(() -> selectClasspathResources(""));
+			assertPreconditionViolationFor(() -> selectClasspathResources(singletonList(null)));
+			assertPreconditionViolationFor(() -> selectClasspathResources(singletonList("")));
+		}
+
+		@Test
+		void selectMultipleClasspathResources() {
+			var selectors = selectClasspathResources( //
+				"org/junit/platform/example-a.resource", //
+				"org/junit/platform/example-b.resource" //
+			);
+			assertThat(selectors).extracting(ClasspathResourceSelector::getClasspathResourceName) //
+					.containsExactly( //
+						"org/junit/platform/example-a.resource", //
+						"org/junit/platform/example-b.resource" //
+					);
+		}
+
+		@Test
+		void selectDistinctClasspathResources() {
+			var selectors = selectClasspathResources( //
+				"org/junit/platform/example-a.resource", //
+				"org/junit/platform/example-b.resource", //
+				"org/junit/platform/example-a.resource", //
+				"org/junit/platform/example-c.resource" //
+			);
+			assertThat(selectors).extracting(ClasspathResourceSelector::getClasspathResourceName) //
+					.containsExactly( //
+						"org/junit/platform/example-a.resource", //
+						"org/junit/platform/example-b.resource", //
+						"org/junit/platform/example-c.resource" //
+					);
 		}
 	}
 
