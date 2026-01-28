@@ -24,7 +24,7 @@ ext:
       into: modules/ROOT/images
 asciidoc:
   attributes:
-    javadoc-root: "xref:attachment$api/"
+    javadoc-root: "xref:attachment$api"
     # Snapshot Repository
     snapshot-repo: 'https://central.sonatype.com/service/rest/repository/browse/maven-snapshots'
     # Base Links
