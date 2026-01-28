@@ -3,6 +3,6 @@ component_version_filter:
 asciidoc:
   attributes:
     source-highlighter: rouge
-    toc: ''
+    toc: left
 build:
   stderr: ignore
