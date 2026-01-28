@@ -11,7 +11,7 @@ val classesView = configurations["aggregateCodeCoverageReportResults"].incoming.
 	withVariantReselection() // Required to ensure the transformed classes are selected
 	componentFilter { it is ProjectComponentIdentifier }
 	attributes {
-		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements::class, LibraryElements.CLASSES))
+		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named(LibraryElements.CLASSES))
 	}
 }
 

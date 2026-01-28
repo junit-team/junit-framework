@@ -25,18 +25,17 @@ import org.junit.platform.commons.util.Preconditions;
 
 /**
  * {@code Arguments} is an abstraction that provides access to an array of
- * objects to be used for invoking a {@code @ParameterizedTest} method.
+ * objects to be used for the invocation of a {@code @ParameterizedClass} or
+ * {@code @ParameterizedTest} method.
  *
  * <p>A {@link java.util.stream.Stream} of such {@code Arguments} will
  * typically be provided by an {@link ArgumentsProvider}.
  *
  * @apiNote <p>This interface is specifically designed as a simple holder of
  * arguments for a parameterized test. Therefore, if you end up
- * {@linkplain java.util.stream.Stream#map(java.util.function.Function) transforming}
- * or
+ * {@linkplain java.util.stream.Stream#map(java.util.function.Function) transforming} or
  * {@linkplain java.util.stream.Stream#filter(java.util.function.Predicate) filtering}
- * the arguments, you should consider using one of the following in
- * intermediate steps:
+ * the arguments, you should consider using one of the following in intermediate steps:
  *
  * <ul>
  *   <li>The standard Java collections</li>
@@ -62,8 +61,8 @@ import org.junit.platform.commons.util.Preconditions;
 public interface Arguments {
 
 	/**
-	 * Get the arguments used for an invocation of the
-	 * {@code @ParameterizedTest} method.
+	 * Get the arguments used for an invocation of the {@code @ParameterizedClass}
+	 * or {@code @ParameterizedTest} method.
 	 *
 	 * @apiNote If you need a type-safe way to access some or all of the
 	 * arguments, please read the {@linkplain Arguments class-level API note}.
@@ -124,7 +123,7 @@ public interface Arguments {
 	 * @see #argumentsFrom(Iterable)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	static Arguments from(Iterable<?> arguments) {
+	static Arguments from(Iterable<? extends @Nullable Object> arguments) {
 		Preconditions.notNull(arguments, "arguments must not be null");
 		return of(toArray(arguments));
 	}
@@ -170,7 +169,7 @@ public interface Arguments {
 	 * @see #argumentSetFrom(String, Iterable)
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	static Arguments argumentsFrom(Iterable<?> arguments) {
+	static Arguments argumentsFrom(Iterable<? extends @Nullable Object> arguments) {
 		return from(arguments);
 	}
 
@@ -179,15 +178,14 @@ public interface Arguments {
 	 * {@code name} and {@code arguments}.
 	 *
 	 * <p>Favor this method over {@link Arguments#of Arguments.of(...)} and
-	 * {@link Arguments#arguments arguments(...)} when you wish to assign a
-	 * name to the entire set of arguments.
+	 * {@link Arguments#arguments arguments(...)} when you wish to assign a name
+	 * to the entire set of arguments.
 	 *
 	 * <p>This method is well suited to be used as a static import &mdash; for
 	 * example, via:
 	 * {@code import static org.junit.jupiter.params.provider.Arguments.argumentSet;}.
 	 *
-	 * @param name the name of the argument set; must not be {@code null} or
-	*  blank
+	 * @param name the name of the argument set; must not be {@code null} or blank
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an {@code ArgumentSet}; never {@code null}
@@ -206,9 +204,9 @@ public interface Arguments {
 	 * Factory method for creating an {@link ArgumentSet} based on the supplied
 	 * {@code name} and {@link Iterable} of {@code arguments}.
 	 *
-	 * <p>Favor this method over {@link Arguments#from(Iterable) Arguments.from(...)} and
-	 * {@link Arguments#argumentsFrom(Iterable) argumentsFrom(...)} when you wish to assign a
-	 * name to the entire set of arguments.
+	 * <p>Favor this method over {@link Arguments#from(Iterable) Arguments.from(...)}
+	 * and {@link Arguments#argumentsFrom(Iterable) argumentsFrom(...)} when you
+	 * wish to assign a name to the entire set of arguments.
 	 *
 	 * <p>This method is well suited to be used as a static import &mdash; for
 	 * example, via:
@@ -220,8 +218,7 @@ public interface Arguments {
 	 * {@link java.util.SequencedCollection} (on Java 21 or higher),
 	 * {@link java.util.List}, or similar.
 	 *
-	 * @param name the name of the argument set; must not be {@code null}
-	 * or blank
+	 * @param name the name of the argument set; must not be {@code null} or blank
 	 * @param arguments the arguments to be used for an invocation of the test
 	 * method; must not be {@code null} but may contain {@code null}
 	 * @return an {@code ArgumentSet}; never {@code null}
@@ -232,19 +229,18 @@ public interface Arguments {
 	 * @see org.junit.jupiter.params.ParameterizedInvocationConstants#ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	static ArgumentSet argumentSetFrom(String name, Iterable<?> arguments) {
-		Preconditions.notBlank(name, "name must not be null or blank");
-		Preconditions.notNull(arguments, "arguments list must not be null");
+	static ArgumentSet argumentSetFrom(String name, Iterable<? extends @Nullable Object> arguments) {
+		Preconditions.notNull(arguments, "arguments must not be null");
 		return argumentSet(name, toArray(arguments));
 	}
 
-	private static Object[] toArray(Iterable<?> arguments) {
+	private static Object[] toArray(Iterable<? extends @Nullable Object> arguments) {
 		if (arguments instanceof Collection<?> collection) {
 			return collection.toArray();
 		}
-		var collection = new ArrayList<>();
-		arguments.forEach(collection::add);
-		return collection.toArray();
+		var list = new ArrayList<>();
+		arguments.forEach(list::add);
+		return list.toArray();
 	}
 
 	/**
@@ -273,8 +269,7 @@ public interface Arguments {
 
 		/**
 		 * Get the name of this {@code ArgumentSet}.
-		 * @return the name of this {@code ArgumentSet}; never {@code null} or
-		 *         blank
+		 * @return the name of this {@code ArgumentSet}; never {@code null} or blank
 		 */
 		public String getName() {
 			return this.name;

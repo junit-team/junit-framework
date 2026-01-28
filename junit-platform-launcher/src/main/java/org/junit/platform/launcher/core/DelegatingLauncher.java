@@ -10,6 +10,7 @@
 
 package org.junit.platform.launcher.core;
 
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -30,31 +31,43 @@ class DelegatingLauncher implements Launcher {
 
 	@Override
 	public void registerLauncherDiscoveryListeners(LauncherDiscoveryListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.registerLauncherDiscoveryListeners(listeners);
 	}
 
 	@Override
 	public void registerTestExecutionListeners(TestExecutionListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.registerTestExecutionListeners(listeners);
 	}
 
 	@Override
-	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		return delegate.discover(launcherDiscoveryRequest);
+	public TestPlan discover(LauncherDiscoveryRequest discoveryRequest) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
+		return delegate.discover(discoveryRequest);
 	}
 
 	@Override
-	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
-		delegate.execute(launcherDiscoveryRequest, listeners);
+	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
+		delegate.execute(discoveryRequest, listeners);
 	}
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "testPlan must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		delegate.execute(testPlan, listeners);
 	}
 
 	@Override
-	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		delegate.execute(launcherExecutionRequest);
+	public void execute(LauncherExecutionRequest executionRequest) {
+		Preconditions.notNull(executionRequest, "executionRequest must not be null");
+		delegate.execute(executionRequest);
 	}
 }

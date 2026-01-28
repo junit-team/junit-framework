@@ -31,7 +31,7 @@ var openTestReportingCliClasspath = configurations.resolvable("openTestReporting
 	extendsFrom(openTestReportingCli.get())
 	attributes {
 		// Avoid using the shadowed variant of junit-platform-reporting
-		attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling::class, Bundling.EXTERNAL))
+		attribute(Bundling.BUNDLING_ATTRIBUTE, named(Bundling.EXTERNAL))
 	}
 }
 

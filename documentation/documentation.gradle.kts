@@ -47,7 +47,7 @@ val allJavadocSinceValues = configurations.dependencyScope("allJavadocSinceValue
 val allJavadocSinceValuesClasspath = configurations.resolvable("allJavadocSinceValuesClasspath") {
 	extendsFrom(allJavadocSinceValues.get())
 	attributes {
-		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named("javadoc-since-values"))
+		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named("javadoc-since-values"))
 	}
 }
 val tools by sourceSets.creating

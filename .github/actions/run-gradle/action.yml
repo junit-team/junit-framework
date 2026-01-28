@@ -11,7 +11,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5.1.0
+    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
       id: setup-gradle-jdk
       with:
         distribution: temurin
@@ -20,7 +20,7 @@ runs:
     - uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
-    - uses: testlens-app/setup-testlens@aa97c5917d05d7cd6aec289d31fc790935924d59 # v1.5.1
+    - uses: testlens-app/setup-testlens@cbf46f117aa1b73f2f101616333e9625b46d4b95 # v1.6.1
     - shell: bash
       env:
         JAVA_HOME: ${{ steps.setup-gradle-jdk.outputs.path }}

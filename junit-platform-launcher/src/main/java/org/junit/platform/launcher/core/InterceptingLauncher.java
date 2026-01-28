@@ -11,6 +11,7 @@
 package org.junit.platform.launcher.core;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherExecutionRequest;
@@ -31,20 +32,27 @@ class InterceptingLauncher extends DelegatingLauncher {
 	}
 
 	@Override
-	public TestPlan discover(LauncherDiscoveryRequest launcherDiscoveryRequest) {
-		return interceptor.intercept(() -> super.discover(launcherDiscoveryRequest));
+	public TestPlan discover(LauncherDiscoveryRequest discoveryRequest) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
+		return interceptor.intercept(() -> super.discover(discoveryRequest));
 	}
 
 	@Override
-	public void execute(LauncherDiscoveryRequest launcherDiscoveryRequest, TestExecutionListener... listeners) {
+	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		interceptor.<@Nullable Object> intercept(() -> {
-			super.execute(launcherDiscoveryRequest, listeners);
+			super.execute(discoveryRequest, listeners);
 			return null;
 		});
 	}
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "testPlan must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		interceptor.<@Nullable Object> intercept(() -> {
 			super.execute(testPlan, listeners);
 			return null;
@@ -52,9 +60,10 @@ class InterceptingLauncher extends DelegatingLauncher {
 	}
 
 	@Override
-	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
+	public void execute(LauncherExecutionRequest executionRequest) {
+		Preconditions.notNull(executionRequest, "executionRequest must not be null");
 		interceptor.<@Nullable Object> intercept(() -> {
-			super.execute(launcherExecutionRequest);
+			super.execute(executionRequest);
 			return null;
 		});
 	}

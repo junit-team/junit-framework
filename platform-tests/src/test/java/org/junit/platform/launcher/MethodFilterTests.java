@@ -12,7 +12,7 @@ package org.junit.platform.launcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationContainsNoNullElementsFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 import static org.junit.platform.launcher.MethodFilter.excludeMethodNamePatterns;
 import static org.junit.platform.launcher.MethodFilter.includeMethodNamePatterns;
@@ -45,8 +45,8 @@ class MethodFilterTests {
 		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
 			() -> includeMethodNamePatterns((String[]) null));
 		assertPreconditionViolationNotNullOrEmptyFor("patterns array", () -> includeMethodNamePatterns(new String[0]));
-		assertPreconditionViolationFor(() -> includeMethodNamePatterns(new String[] { null }))//
-				.withMessage("patterns array must not contain null elements");
+		assertPreconditionViolationContainsNoNullElementsFor("patterns array",
+			() -> includeMethodNamePatterns(new String[] { null }));
 	}
 
 	@Test
@@ -89,8 +89,8 @@ class MethodFilterTests {
 		assertPreconditionViolationNotNullOrEmptyFor("patterns array",
 			() -> excludeMethodNamePatterns((String[]) null));
 		assertPreconditionViolationNotNullOrEmptyFor("patterns array", () -> excludeMethodNamePatterns(new String[0]));
-		assertPreconditionViolationFor(() -> excludeMethodNamePatterns(new String[] { null }))//
-				.withMessage("patterns array must not contain null elements");
+		assertPreconditionViolationContainsNoNullElementsFor("patterns array",
+			() -> excludeMethodNamePatterns(new String[] { null }));
 	}
 
 	@Test

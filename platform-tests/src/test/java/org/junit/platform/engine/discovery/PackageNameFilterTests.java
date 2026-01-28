@@ -13,6 +13,7 @@ package org.junit.platform.engine.discovery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationContainsNoNullElementsFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullOrEmptyFor;
 
@@ -30,8 +31,8 @@ class PackageNameFilterTests {
 			() -> PackageNameFilter.includePackageNames((String[]) null));
 		assertPreconditionViolationNotNullOrEmptyFor("packageNames array",
 			() -> PackageNameFilter.includePackageNames(new String[0]));
-		assertPreconditionViolationFor(() -> PackageNameFilter.includePackageNames(new String[] { null }))//
-				.withMessage("packageNames array must not contain null elements");
+		assertPreconditionViolationContainsNoNullElementsFor("packageNames array",
+			() -> PackageNameFilter.includePackageNames(new String[] { null }));
 	}
 
 	@Test

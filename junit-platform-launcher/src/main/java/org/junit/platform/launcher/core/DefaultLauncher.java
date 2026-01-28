@@ -61,9 +61,9 @@ class DefaultLauncher implements Launcher {
 		Preconditions.condition(testEngines.iterator().hasNext(),
 			() -> "Cannot create Launcher without at least one TestEngine; "
 					+ "consider adding an engine implementation JAR to the classpath");
-		Preconditions.notNull(postDiscoveryFilters, "PostDiscoveryFilter array must not be null");
+		Preconditions.notNull(postDiscoveryFilters, "postDiscoveryFilter array must not be null");
 		Preconditions.containsNoNullElements(postDiscoveryFilters,
-			"PostDiscoveryFilter array must not contain null elements");
+			"postDiscoveryFilter array must not contain null elements");
 		this.discoveryOrchestrator = new EngineDiscoveryOrchestrator(testEngines,
 			unmodifiableCollection(postDiscoveryFilters), listenerRegistry.launcherDiscoveryListeners);
 		this.sessionLevelStore = sessionLevelStore;
@@ -71,22 +71,29 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void registerLauncherDiscoveryListeners(LauncherDiscoveryListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		this.listenerRegistry.launcherDiscoveryListeners.addAll(listeners);
 	}
 
 	@Override
 	public void registerTestExecutionListeners(TestExecutionListener... listeners) {
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		this.listenerRegistry.testExecutionListeners.addAll(listeners);
 	}
 
 	@Override
 	public TestPlan discover(LauncherDiscoveryRequest discoveryRequest) {
-		Preconditions.notNull(discoveryRequest, "LauncherDiscoveryRequest must not be null");
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
 		return InternalTestPlan.from(discover(discoveryRequest, DISCOVERY));
 	}
 
 	@Override
 	public void execute(LauncherDiscoveryRequest discoveryRequest, TestExecutionListener... listeners) {
+		Preconditions.notNull(discoveryRequest, "discoveryRequest must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		var executionRequest = LauncherExecutionRequestBuilder.request(discoveryRequest) //
 				.listeners(listeners) //
 				.build();
@@ -95,6 +102,9 @@ class DefaultLauncher implements Launcher {
 
 	@Override
 	public void execute(TestPlan testPlan, TestExecutionListener... listeners) {
+		Preconditions.notNull(testPlan, "testPlan must not be null");
+		Preconditions.notNull(listeners, "listeners must not be null");
+		Preconditions.containsNoNullElements(listeners, "listener array must not contain null elements");
 		var executionRequest = LauncherExecutionRequestBuilder.request(testPlan) //
 				.listeners(listeners) //
 				.build();
@@ -102,17 +112,19 @@ class DefaultLauncher implements Launcher {
 	}
 
 	@Override
-	public void execute(LauncherExecutionRequest launcherExecutionRequest) {
-		var testPlan = launcherExecutionRequest.getTestPlan().map(it -> {
-			Preconditions.condition(it instanceof InternalTestPlan, "TestPlan was not returned by this Launcher");
+	public void execute(LauncherExecutionRequest executionRequest) {
+		Preconditions.notNull(executionRequest, "executionRequest must not be null");
+		var testPlan = executionRequest.getTestPlan().map(it -> {
+			Preconditions.condition(it instanceof InternalTestPlan,
+				"The TestPlan in executionRequest was not created by this Launcher");
 			return ((InternalTestPlan) it);
 		}).orElseGet(() -> {
-			Preconditions.condition(launcherExecutionRequest.getDiscoveryRequest().isPresent(),
+			Preconditions.condition(executionRequest.getDiscoveryRequest().isPresent(),
 				"Either a TestPlan or LauncherDiscoveryRequest must be present in the LauncherExecutionRequest");
-			return InternalTestPlan.from(discover(launcherExecutionRequest.getDiscoveryRequest().get(), EXECUTION));
+			return InternalTestPlan.from(discover(executionRequest.getDiscoveryRequest().get(), EXECUTION));
 		});
-		execute(testPlan, launcherExecutionRequest.getAdditionalTestExecutionListeners(),
-			launcherExecutionRequest.getCancellationToken());
+		execute(testPlan, executionRequest.getAdditionalTestExecutionListeners(),
+			executionRequest.getCancellationToken());
 	}
 
 	private LauncherDiscoveryResult discover(LauncherDiscoveryRequest discoveryRequest, LauncherPhase phase) {

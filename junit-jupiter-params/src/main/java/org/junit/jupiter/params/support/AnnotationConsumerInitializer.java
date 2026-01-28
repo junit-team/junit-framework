@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.params.support;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
@@ -38,11 +37,15 @@ import org.junit.platform.commons.JUnitException;
 @API(status = INTERNAL, since = "5.0")
 public final class AnnotationConsumerInitializer {
 
-	private static final List<AnnotationConsumingMethodSignature> annotationConsumingMethodSignatures = asList( //
-		new AnnotationConsumingMethodSignature("accept", 1, 0), //
-		new AnnotationConsumingMethodSignature("provideArguments", 3, 2), //
-		new AnnotationConsumingMethodSignature("provideArguments", 2, 1), //
-		new AnnotationConsumingMethodSignature("convert", 3, 2));
+	private static final List<MethodSignature> methodSignatures = List.of( //
+		new MethodSignature("accept", 1, 0), //
+		new MethodSignature("provideArguments", 3, 2), //
+		new MethodSignature("provideArguments", 2, 1), //
+		new MethodSignature("convert", 3, 2));
+
+	private static final Predicate<Method> consumesAnnotation = methodSignatures.stream() //
+			.map(signature -> (Predicate<Method>) signature::matches) //
+			.reduce(method -> false, Predicate::or);
 
 	private AnnotationConsumerInitializer() {
 		/* no-op */
@@ -73,19 +76,16 @@ public final class AnnotationConsumerInitializer {
 	}
 
 	private static <T> Class<? extends Annotation> findConsumedAnnotationType(T annotationConsumerInstance) {
-		Predicate<Method> consumesAnnotation = annotationConsumingMethodSignatures.stream() //
-				.map(signature -> (Predicate<Method>) signature::isMatchingWith) //
-				.reduce(method -> false, Predicate::or);
 		Method method = findMethods(annotationConsumerInstance.getClass(), consumesAnnotation, BOTTOM_UP).get(0);
 		return getAnnotationType(method);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static Class<? extends Annotation> getAnnotationType(Method method) {
-		int annotationIndex = annotationConsumingMethodSignatures.stream() //
-				.filter(signature -> signature.isMatchingWith(method)) //
+		int annotationIndex = methodSignatures.stream() //
+				.filter(signature -> signature.matches(method)) //
 				.findFirst() //
-				.map(AnnotationConsumingMethodSignature::annotationParameterIndex) //
+				.map(MethodSignature::annotationParameterIndex) //
 				.orElse(0);
 
 		return (Class<? extends Annotation>) method.getParameterTypes()[annotationIndex];
@@ -101,15 +101,16 @@ public final class AnnotationConsumerInitializer {
 		}
 	}
 
-	private record AnnotationConsumingMethodSignature(String methodName, int parameterCount,
-			int annotationParameterIndex) {
+	/**
+	 * Annotation-consuming method signature.
+	 */
+	private record MethodSignature(String methodName, int parameterCount, int annotationParameterIndex) {
 
-		boolean isMatchingWith(Method method) {
+		boolean matches(Method method) {
 			return method.getName().equals(methodName) //
 					&& method.getParameterCount() == parameterCount //
 					&& method.getParameterTypes()[annotationParameterIndex].isAnnotation();
 		}
-
 	}
 
 }
