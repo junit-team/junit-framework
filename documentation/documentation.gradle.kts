@@ -390,20 +390,18 @@ tasks {
 						<link rel="icon" type="image/png" href="https://junit.org/assets/img/junit-diamond.png">
 						<link rel="icon" type="image/svg+xml" href="https://junit.org/assets/img/junit-diamond-adaptive.svg" sizes="any">
 						""".trimIndent()
+
+				val version = project.version.toString().replace("-SNAPSHOT", "")
+				val versionedDocsPathOrUrl = if (System.getenv("CI") == "true") "https://docs.junit.org/$version"
+				else layout.buildDirectory.dir("antora-site").get().asFile.toURI().resolve(version).toString()
+
 				filter { line ->
 					var result = if (line.startsWith("<head>")) line.replace("<head>", "<head>$favicon") else line
 					externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
 						result = result.replace("${baseUrl}$moduleName/", baseUrl)
 					}
 
-				val version = project.version.toString().replace("-SNAPSHOT", "")
-				val localAntoraPath = layout.buildDirectory.dir("antora-site").get().asFile.toURI().resolve("$version").toString()
-				val isReleaseBuild = System.getenv("CI") == "true"
-				result = result.replace(
-					"https://docs.junit.org/current",
-					if (isReleaseBuild) "https://docs.junit.org/$version"
-					else localAntoraPath
-				)
+					result = result.replace("https://docs.junit.org/current", versionedDocsPathOrUrl)
 
 					return@filter result
 				}
