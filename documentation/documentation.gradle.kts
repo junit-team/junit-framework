@@ -395,6 +395,16 @@ tasks {
 					externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
 						result = result.replace("${baseUrl}$moduleName/", baseUrl)
 					}
+
+				val version = project.version.toString().replace("-SNAPSHOT", "")
+				val localAntoraPath = layout.buildDirectory.dir("antora-site").get().asFile.toURI().resolve("$version").toString()
+				val isReleaseBuild = System.getenv("CI") == "true"
+				result = result.replace(
+					"https://docs.junit.org/current",
+					if (isReleaseBuild) "https://docs.junit.org/$version"
+					else localAntoraPath
+				)
+
 					return@filter result
 				}
 			}
