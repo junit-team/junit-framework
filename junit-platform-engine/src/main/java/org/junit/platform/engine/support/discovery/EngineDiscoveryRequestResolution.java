@@ -33,7 +33,6 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.DiscoverySelector;
-import org.junit.platform.engine.EngineDiscoveryListener;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
@@ -68,6 +67,7 @@ class EngineDiscoveryRequestResolution {
 	private final Map<UniqueId, Match> resolvedUniqueIds = new LinkedHashMap<>();
 	private final Queue<DiscoverySelector> remainingSelectors = new ArrayDeque<>();
 	private final Map<DiscoverySelector, Context> contextBySelector = new HashMap<>();
+	private final IssueReportingEngineDiscoveryListener discoveryListener;
 
 	EngineDiscoveryRequestResolution(EngineDiscoveryRequest request, TestDescriptor engineDescriptor,
 			List<SelectorResolver> resolvers, List<TestDescriptor.Visitor> visitors) {
@@ -77,6 +77,7 @@ class EngineDiscoveryRequestResolution {
 		this.visitors = visitors;
 		this.defaultContext = new DefaultContext(null);
 		this.resolvedUniqueIds.put(engineDescriptor.getUniqueId(), Match.exact(engineDescriptor));
+		this.discoveryListener = new IssueReportingEngineDiscoveryListener(request.getDiscoveryListener());
 	}
 
 	void run() {
@@ -88,7 +89,6 @@ class EngineDiscoveryRequestResolution {
 	}
 
 	private void resolveCompletely(DiscoverySelector selector) {
-		EngineDiscoveryListener discoveryListener = request.getDiscoveryListener();
 		UniqueId engineId = engineDescriptor.getUniqueId();
 		try {
 			Optional<Resolution> result = resolve(selector);
