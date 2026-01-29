@@ -14,6 +14,8 @@ import static org.junit.platform.commons.util.UnrecoverableExceptions.rethrowIfU
 import static org.junit.platform.engine.SelectorResolutionResult.Status.FAILED;
 import static org.junit.platform.engine.SelectorResolutionResult.Status.UNRESOLVED;
 
+import java.util.Optional;
+
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -41,7 +43,7 @@ import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.descriptor.PackageSource;
 import org.junit.platform.engine.support.descriptor.UriSource;
 
-class IssueReportingEngineDiscoveryListener implements EngineDiscoveryListener {
+class IssueReportingEngineDiscoveryListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(IssueReportingEngineDiscoveryListener.class);
 
@@ -51,23 +53,29 @@ class IssueReportingEngineDiscoveryListener implements EngineDiscoveryListener {
 		this.delegate = delegate;
 	}
 
-	@Override
-	public void selectorProcessed(UniqueId engineId, DiscoverySelector selector, SelectorResolutionResult result) {
+	void selectorProcessed(UniqueId engineId, DiscoverySelector selector, SelectorResolutionResult result) {
 		delegate.selectorProcessed(engineId, selector, result);
+		reportIssue(engineId, selector, result) //
+				.ifPresent(issue -> delegate.issueEncountered(engineId, issue));
+	}
+
+	private Optional<DiscoveryIssue> reportIssue(UniqueId engineId, DiscoverySelector selector,
+			SelectorResolutionResult result) {
 		if (result.getStatus() == FAILED) {
 			DiscoveryIssue issue = DiscoveryIssue.builder(Severity.ERROR, selector + " resolution failed") //
 					.cause(result.getThrowable()) //
 					.source(toSource(selector)) //
 					.build();
-			delegate.issueEncountered(engineId, issue);
+			return Optional.of(issue);
 		}
 		else if (result.getStatus() == UNRESOLVED && selector instanceof UniqueIdSelector uniqueIdSelector) {
 			UniqueId uniqueId = uniqueIdSelector.getUniqueId();
 			if (uniqueId.hasPrefix(engineId)) {
 				DiscoveryIssue issue = DiscoveryIssue.create(Severity.ERROR, selector + " could not be resolved");
-				delegate.issueEncountered(engineId, issue);
+				return Optional.of(issue);
 			}
 		}
+		return Optional.empty();
 	}
 
 	private static @Nullable TestSource toSource(DiscoverySelector selector) {
