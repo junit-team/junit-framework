@@ -10,7 +10,7 @@
 
 package org.junit.platform.console.output;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.junit.jupiter.api.Nested;
@@ -116,72 +117,130 @@ class ColorPaletteTests {
 		}
 	}
 
-	/**
-	 * TODO Actually assert something in these "demo" tests and stop printing to SYSOUT.
-	 */
 	@Nested
 	class DemonstratePalettesTests {
 
+		private static final String ANSI_ESCAPE = "\u001B[";
+		// Default palette ANSI codes
+		private static final String SUCCESSFUL_GREEN = ANSI_ESCAPE + "32m";
+		private static final String FAILED_RED = ANSI_ESCAPE + "31m";
+		private static final String ABORTED_YELLOW = ANSI_ESCAPE + "33m";
+		private static final String SKIPPED_MAGENTA = ANSI_ESCAPE + "35m";
+		private static final String RESET = ANSI_ESCAPE + "0m";
+		// Single color palette ANSI codes
+		private static final String BOLD = ANSI_ESCAPE + "1m";
+		private static final String REVERSE = ANSI_ESCAPE + "7m";
+		private static final String UNDERLINE = ANSI_ESCAPE + "4m";
+		private static final String STRIKETHROUGH = ANSI_ESCAPE + "9m";
+
 		@Test
 		void verbose_default() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new VerboseTreePrintingListener(out, ColorPalette.DEFAULT, 16,
 				Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			assertThat(output).contains(
+					"My Test",
+					SUCCESSFUL_GREEN,
+					FAILED_RED,
+					ABORTED_YELLOW,
+					SKIPPED_MAGENTA,
+					RESET);
 		}
 
 		@Test
 		void verbose_single_color() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new VerboseTreePrintingListener(out, ColorPalette.SINGLE_COLOR, 16,
 				Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			assertThat(output).contains(
+					"My Test",
+					BOLD,
+					REVERSE,
+					UNDERLINE,
+					STRIKETHROUGH,
+					RESET);
 		}
 
 		@Test
 		void simple_default() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new TreePrintingListener(out, ColorPalette.DEFAULT, Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			assertThat(output).contains(
+					"My Test",
+					SUCCESSFUL_GREEN,
+					FAILED_RED,
+					ABORTED_YELLOW,
+					SKIPPED_MAGENTA,
+					RESET);
 		}
 
 		@Test
 		void simple_single_color() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new TreePrintingListener(out, ColorPalette.SINGLE_COLOR, Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			assertThat(output).contains(
+					"My Test",
+					BOLD,
+					REVERSE,
+					UNDERLINE,
+					STRIKETHROUGH,
+					RESET);
 		}
 
 		@Test
 		void flat_default() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new FlatPrintingListener(out, ColorPalette.DEFAULT);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			assertThat(output).contains(
+					"My Test",
+					SUCCESSFUL_GREEN,
+					FAILED_RED,
+					ABORTED_YELLOW,
+					SKIPPED_MAGENTA,
+					RESET);
 		}
 
 		@Test
 		void flat_single_color() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new FlatPrintingListener(out, ColorPalette.SINGLE_COLOR);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			assertThat(output).contains(
+					"My Test",
+					BOLD,
+					REVERSE,
+					UNDERLINE,
+					STRIKETHROUGH,
+					RESET);
 		}
 
 		private void demoTestRun(TestExecutionListener listener) {
