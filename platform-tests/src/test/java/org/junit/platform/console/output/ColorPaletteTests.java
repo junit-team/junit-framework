@@ -120,18 +120,8 @@ class ColorPaletteTests {
 	@Nested
 	class DemonstratePalettesTests {
 
-		private static final String ANSI_ESCAPE = "\u001B[";
-		// Default palette ANSI codes
-		private static final String SUCCESSFUL_GREEN = ANSI_ESCAPE + "32m";
-		private static final String FAILED_RED = ANSI_ESCAPE + "31m";
-		private static final String ABORTED_YELLOW = ANSI_ESCAPE + "33m";
-		private static final String SKIPPED_MAGENTA = ANSI_ESCAPE + "35m";
-		private static final String RESET = ANSI_ESCAPE + "0m";
-		// Single color palette ANSI codes
-		private static final String BOLD = ANSI_ESCAPE + "1m";
-		private static final String REVERSE = ANSI_ESCAPE + "7m";
-		private static final String UNDERLINE = ANSI_ESCAPE + "4m";
-		private static final String STRIKETHROUGH = ANSI_ESCAPE + "9m";
+		private static final String ESC = "\u001B[";
+		private static final String RESET = ESC + "0m";
 
 		@Test
 		void verbose_default() {
@@ -143,13 +133,14 @@ class ColorPaletteTests {
 			demoTestRun(listener);
 
 			String output = stringWriter.toString();
+			// @formatter:off
 			assertThat(output).contains(
-					"My Test",
-					SUCCESSFUL_GREEN,
-					FAILED_RED,
-					ABORTED_YELLOW,
-					SKIPPED_MAGENTA,
-					RESET);
+				withAnsi("{green}[OK] SUCCESSFUL"),
+				withAnsi("{red}[X] FAILED"),
+				withAnsi("{yellow}[A] ABORTED"),
+				withAnsi("{magenta}[S] SKIPPED")
+			);
+			// @formatter:on
 		}
 
 		@Test
@@ -162,13 +153,14 @@ class ColorPaletteTests {
 			demoTestRun(listener);
 
 			String output = stringWriter.toString();
+			// @formatter:off
 			assertThat(output).contains(
-					"My Test",
-					BOLD,
-					REVERSE,
-					UNDERLINE,
-					STRIKETHROUGH,
-					RESET);
+				withAnsi("{bold}[OK] SUCCESSFUL"),
+				withAnsi("{reverse}[X] FAILED"),
+				withAnsi("{underline}[A] ABORTED"),
+				withAnsi("{strikethrough}[S] SKIPPED")
+			);
+			// @formatter:on
 		}
 
 		@Test
@@ -180,13 +172,14 @@ class ColorPaletteTests {
 			demoTestRun(listener);
 
 			String output = stringWriter.toString();
+			// @formatter:off
 			assertThat(output).contains(
-					"My Test",
-					SUCCESSFUL_GREEN,
-					FAILED_RED,
-					ABORTED_YELLOW,
-					SKIPPED_MAGENTA,
-					RESET);
+				withAnsi("{green}[OK]"),
+				withAnsi("{red}[X]"),
+				withAnsi("{yellow}[A]"),
+				withAnsi("{magenta}[S]")
+			);
+			// @formatter:on
 		}
 
 		@Test
@@ -198,13 +191,14 @@ class ColorPaletteTests {
 			demoTestRun(listener);
 
 			String output = stringWriter.toString();
+			// @formatter:off
 			assertThat(output).contains(
-					"My Test",
-					BOLD,
-					REVERSE,
-					UNDERLINE,
-					STRIKETHROUGH,
-					RESET);
+				withAnsi("{bold}[OK]"),
+				withAnsi("{reverse}[X]"),
+				withAnsi("{underline}[A]"),
+				withAnsi("{strikethrough}[S]")
+			);
+			// @formatter:on
 		}
 
 		@Test
@@ -216,13 +210,14 @@ class ColorPaletteTests {
 			demoTestRun(listener);
 
 			String output = stringWriter.toString();
+			// @formatter:off
 			assertThat(output).contains(
-					"My Test",
-					SUCCESSFUL_GREEN,
-					FAILED_RED,
-					ABORTED_YELLOW,
-					SKIPPED_MAGENTA,
-					RESET);
+				withAnsi("{green}Finished:"),
+				withAnsi("{red}Finished:"),
+				withAnsi("{yellow}Finished:"),
+				withAnsi("{magenta}Skipped:")
+			);
+			// @formatter:on
 		}
 
 		@Test
@@ -234,13 +229,29 @@ class ColorPaletteTests {
 			demoTestRun(listener);
 
 			String output = stringWriter.toString();
+			// @formatter:off
 			assertThat(output).contains(
-					"My Test",
-					BOLD,
-					REVERSE,
-					UNDERLINE,
-					STRIKETHROUGH,
-					RESET);
+				withAnsi("{bold}Finished:"),
+				withAnsi("{reverse}Finished:"),
+				withAnsi("{underline}Finished:"),
+				withAnsi("{strikethrough}Skipped:")
+			);
+			// @formatter:on
+		}
+
+		private static String withAnsi(String template) {
+			// @formatter:off
+			return template
+					.replace("{green}", ESC + "32m")
+					.replace("{red}", ESC + "31m")
+					.replace("{yellow}", ESC + "33m")
+					.replace("{magenta}", ESC + "35m")
+					.replace("{bold}", ESC + "1m")
+					.replace("{reverse}", ESC + "7m")
+					.replace("{underline}", ESC + "4m")
+					.replace("{strikethrough}", ESC + "9m")
+					.replace("{reset}", RESET);
+			// @formatter:on
 		}
 
 		private void demoTestRun(TestExecutionListener listener) {
