@@ -59,7 +59,7 @@ tasks.withType<JavaCompile>().configureEach {
 				enable()
 			}
 			onlyNullMarked = true
-			isJSpecifyMode = true
+			jspecifyMode = true
 			checkContracts = true
 			suppressionNameAliases.add("DataFlowIssue")
 		}
