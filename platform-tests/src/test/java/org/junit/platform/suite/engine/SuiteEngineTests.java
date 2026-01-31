@@ -12,6 +12,7 @@ package org.junit.platform.suite.engine;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.TemporaryClasspathExecutor.withAdditionalClasspathRoot;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.TagFilter.excludeTags;
@@ -85,6 +86,7 @@ import org.junit.platform.suite.engine.testsuites.NestedSuite;
 import org.junit.platform.suite.engine.testsuites.SelectByIdentifierSuite;
 import org.junit.platform.suite.engine.testsuites.SelectClassesSuite;
 import org.junit.platform.suite.engine.testsuites.SelectMethodsSuite;
+import org.junit.platform.suite.engine.testsuites.SelectorProcessingErrorTestSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteWithErroneousTestSuite;
@@ -635,6 +637,23 @@ class SuiteEngineTests {
 				.assertThatEvents()
 				.isEmpty();
 		// @formatter:on
+	}
+
+	@Test
+	void selectorProcessingFailuresAreReported() {
+		withAdditionalClasspathRoot("error-engine/", () -> {
+
+			var testKit = EngineTestKit.engine(ENGINE_ID).selectors(
+				selectClass(SelectorProcessingErrorTestSuite.class));
+
+			var discoveryIssues = testKit.discover().getDiscoveryIssues();
+			assertThat(discoveryIssues).hasSize(1);
+
+			var issue = discoveryIssues.getFirst();
+			assertThat(issue.message()) //
+					.startsWith("[selector-error-engine] ErrorSelector[message=simulatedError] resolution failed") //
+					.endsWith(" (via @Suite %s).".formatted(SelectorProcessingErrorTestSuite.class.getName()));
+		});
 	}
 
 	@Test
