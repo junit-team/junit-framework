@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.engine.support.discovery;
+package org.junit.platform.launcher.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -24,13 +24,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.RecordArguments;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.DiscoverySelector;
-import org.junit.platform.engine.EngineDiscoveryListener;
 import org.junit.platform.engine.SelectorResolutionResult;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
@@ -41,14 +41,16 @@ import org.junit.platform.engine.support.descriptor.DirectorySource;
 import org.junit.platform.engine.support.descriptor.FileSource;
 import org.junit.platform.engine.support.descriptor.PackageSource;
 import org.junit.platform.engine.support.descriptor.UriSource;
+import org.junit.platform.launcher.LauncherDiscoveryListener;
 
-class IssueReportingEngineDiscoveryListenerTests {
+@NullMarked
+class DiscoveryIssueReportingDiscoveryListenerTests {
 
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("pairs")
 	void reportsFailedResolutionResultAsDiscoveryIssue(DiscoverySelector selector, TestSource source) {
 		var issues = new ArrayList<>();
-		var collector = new EngineDiscoveryListener() {
+		var collector = new LauncherDiscoveryListener() {
 
 			@Override
 			public void issueEncountered(UniqueId engineId, DiscoveryIssue issue) {
@@ -56,7 +58,7 @@ class IssueReportingEngineDiscoveryListenerTests {
 			}
 		};
 
-		var listener = new IssueReportingEngineDiscoveryListener(collector);
+		var listener = new DiscoveryIssueReportingDiscoveryListener(collector);
 		var failure = SelectorResolutionResult.failed(new RuntimeException("boom"));
 		listener.selectorProcessed(UniqueId.forEngine("dummy"), selector, failure);
 

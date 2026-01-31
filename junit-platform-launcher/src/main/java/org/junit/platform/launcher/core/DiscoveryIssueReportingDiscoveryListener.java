@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.engine.support.discovery;
+package org.junit.platform.launcher.core;
 
 import static org.junit.platform.commons.util.UnrecoverableExceptions.rethrowIfUnrecoverable;
 import static org.junit.platform.engine.SelectorResolutionResult.Status.FAILED;
@@ -22,7 +22,6 @@ import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.DiscoverySelector;
-import org.junit.platform.engine.EngineDiscoveryListener;
 import org.junit.platform.engine.SelectorResolutionResult;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
@@ -42,21 +41,24 @@ import org.junit.platform.engine.support.descriptor.FileSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.descriptor.PackageSource;
 import org.junit.platform.engine.support.descriptor.UriSource;
+import org.junit.platform.launcher.LauncherDiscoveryListener;
 
-class IssueReportingEngineDiscoveryListener {
+/**
+ * @since 6.1
+ */
+class DiscoveryIssueReportingDiscoveryListener extends DelegatingLauncherDiscoveryListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(IssueReportingEngineDiscoveryListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(DiscoveryIssueReportingDiscoveryListener.class);
 
-	private final EngineDiscoveryListener delegate;
-
-	IssueReportingEngineDiscoveryListener(EngineDiscoveryListener delegate) {
-		this.delegate = delegate;
+	DiscoveryIssueReportingDiscoveryListener(LauncherDiscoveryListener delegate) {
+		super(delegate);
 	}
 
-	void selectorProcessed(UniqueId engineId, DiscoverySelector selector, SelectorResolutionResult result) {
-		delegate.selectorProcessed(engineId, selector, result);
+	@Override
+	public void selectorProcessed(UniqueId engineId, DiscoverySelector selector, SelectorResolutionResult result) {
+		super.selectorProcessed(engineId, selector, result);
 		reportIssue(engineId, selector, result) //
-				.ifPresent(issue -> delegate.issueEncountered(engineId, issue));
+				.ifPresent(issue -> issueEncountered(engineId, issue));
 	}
 
 	private Optional<DiscoveryIssue> reportIssue(UniqueId engineId, DiscoverySelector selector,
@@ -89,7 +91,7 @@ class IssueReportingEngineDiscoveryListener {
 		if (selector instanceof ClasspathResourceSelector resourceSelector) {
 			String resourceName = resourceSelector.getClasspathResourceName();
 			return resourceSelector.getPosition() //
-					.map(IssueReportingEngineDiscoveryListener::convert) //
+					.map(DiscoveryIssueReportingDiscoveryListener::convert) //
 					.map(position -> ClasspathResourceSource.from(resourceName, position)) //
 					.orElseGet(() -> ClasspathResourceSource.from(resourceName));
 		}
@@ -102,7 +104,7 @@ class IssueReportingEngineDiscoveryListener {
 			// as well because it may return a FileSource or DirectorySource
 			if (selector instanceof FileSelector fileSelector) {
 				return fileSelector.getPosition() //
-						.map(IssueReportingEngineDiscoveryListener::convert) //
+						.map(DiscoveryIssueReportingDiscoveryListener::convert) //
 						.map(position -> FileSource.from(fileSelector.getFile(), position)) //
 						.orElseGet(() -> FileSource.from(fileSelector.getFile()));
 			}

@@ -36,6 +36,9 @@ val initializeAtBuildTime = mapOf(
 	"5.14.1" to listOf(
 		"org.junit.jupiter.engine.discovery.MethodSegmentResolver"
 	),
+	"6.1" to listOf(
+		"org.junit.platform.launcher.core.DiscoveryIssueReportingDiscoveryListener",
+	),
 )
 
 graalvmNative {
