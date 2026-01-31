@@ -21,7 +21,7 @@ import org.junit.platform.engine.UniqueId;
 class DiscoveryIssueCollectorTests {
 
 	@Test
-	void reportsFailedResolutionResultAsDiscoveryIssue() {
+	void reportsCollectedDiscoveryIssues() {
 		var collector = new DiscoveryIssueCollector(mock());
 		var issue = DiscoveryIssue.create(Severity.ERROR, "hello");
 		collector.issueEncountered(UniqueId.forEngine("dummy"), issue);
