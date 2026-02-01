@@ -271,6 +271,56 @@ public final class Preconditions {
 	}
 
 	/**
+	 * Assert that the supplied collection contains no blank elements.
+	 *
+	 * <p><strong>WARNING</strong>: this method does NOT check if the supplied
+	 * collection is {@code null} or <em>empty</em>.
+	 *
+	 * @param collection the collection to check
+	 * @param message precondition violation message
+	 * @return the supplied collection as a convenience
+	 * @throws PreconditionViolationException if the supplied collection contains
+	 * any blank elements
+	 * @since 6.1
+	 * @see #notBlank(String, String)
+	 */
+	@API(status = INTERNAL, since = "6.1")
+	@Contract("null, _ -> null")
+	public static <T extends Collection<String>> @Nullable T containsNoBlankElements(@Nullable T collection,
+			String message) throws PreconditionViolationException {
+
+		if (collection != null) {
+			collection.forEach(object -> notBlank(object, message));
+		}
+		return collection;
+	}
+
+	/**
+	 * Assert that the supplied collection contains no blank elements.
+	 *
+	 * <p><strong>WARNING</strong>: this method does NOT check if the supplied
+	 * collection is {@code null} or <em>empty</em>.
+	 *
+	 * @param collection the collection to check
+	 * @param messageSupplier precondition violation message supplier
+	 * @return the supplied collection as a convenience
+	 * @throws PreconditionViolationException if the supplied collection contains
+	 * any blank elements
+	 * @since 6.1
+	 * @see #notBlank(String, String)
+	 */
+	@API(status = INTERNAL, since = "6.1")
+	@Contract("null, _ -> null")
+	public static <T extends Collection<String>> @Nullable T containsNoBlankElements(@Nullable T collection,
+			Supplier<String> messageSupplier) throws PreconditionViolationException {
+
+		if (collection != null) {
+			collection.forEach(object -> notBlank(object, messageSupplier));
+		}
+		return collection;
+	}
+
+	/**
 	 * Assert that the supplied {@link String} is not blank.
 	 *
 	 * <p>A {@code String} is <em>blank</em> if it is {@code null} or consists
