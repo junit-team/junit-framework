@@ -19,6 +19,7 @@ repository on GitHub.
 * Recheck done condition before rejecting extraneous worker in
   `WorkerThreadPoolHierarchicalTestExecutorService`
 * Add missing precondition checks to `Launcher` implementations
+* Failures to resolve selectors are now forwarded by Suite Engine
 
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
