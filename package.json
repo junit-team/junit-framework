@@ -12,9 +12,6 @@
     "@antora/lunr-extension": "1.0.0-alpha.12",
     "@antora/pdf-extension": "^1.0.0-beta.15",
     "@asciidoctor/tabs": "^1.0.0-beta.6",
-    "@fontsource-variable/inter": "^5.2.8",
-    "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "@fontsource/blinker": "^5.2.8",
     "@springio/antora-extensions": "1.14.7",
     "highlight.js": "11.11.1"
   }

@@ -1,5 +1,5 @@
 body {
-    font-family: "Inter", sans-serif;
+    font-family: "Inter Variable", sans-serif;
     font-optical-sizing: auto;
 }
 
@@ -32,7 +32,7 @@ body {
 code,
 kbd,
 pre {
-    font-family: "JetBrains Mono", monospace;
+    font-family: "JetBrains Mono Variable", monospace;
     font-optical-sizing: auto;
 }
 
