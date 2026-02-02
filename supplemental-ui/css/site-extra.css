@@ -18,7 +18,6 @@ body {
     .navbar-brand .version {
         color: rgba(0, 0, 0, 0.33);
         padding-left: 1em;
-        font-weight: 400;
         display: inline;
     }
 }
