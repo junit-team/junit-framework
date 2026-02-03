@@ -11,6 +11,7 @@ antora:
     - require: './extensions/root-exports.js'
       root_component_name: junit
       file_name: junit-user-guide
+    - require: '@springio/antora-xref-extension'
 site:
   title: JUnit User Guide
   url: https://docs.junit.org
