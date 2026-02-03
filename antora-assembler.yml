@@ -5,4 +5,5 @@ asciidoc:
     source-highlighter: rouge
     toc: left
 build:
+  keep_source: true
   stderr: ignore

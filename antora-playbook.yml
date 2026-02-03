@@ -36,6 +36,7 @@ content:
       start_path: documentation
       worktrees: true
 asciidoc:
+  sourcemap: true
   extensions:
     - '@asciidoctor/tabs'
   attributes:
