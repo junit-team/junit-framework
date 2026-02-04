@@ -169,17 +169,28 @@ public enum JRE {
 	}
 
 	/**
-	 * {@return {@code true} if the supplied version number is known to be the
-	 * Java Runtime Environment version for the currently executing JVM or if
-	 * the supplied version number is {@code -1} and the current JVM version
-	 * could not be determined}
+	 * Determine if the supplied version number is considered to be the current
+	 * JRE version.
 	 *
+	 * <p>Returns {@code true} if either of the following is {@code true}.
+	 *
+	 * <ul>
+	 * <li>The supplied version number is known to be the Java Runtime Environment
+	 * version for the currently executing JVM.</li>
+	 * <li>The supplied version number is {@link Integer#MAX_VALUE} and the current
+	 * {@code JRE} is {@link JRE#OTHER OTHER}.</li>
+	 * </ul>
+	 *
+	 * @return {@code true} if the supplied version number is considered to be
+	 * the current JRE version
 	 * @since 5.12
 	 * @see Runtime.Version#feature()
+	 * @see #isCurrentVersion()
+	 * @see #currentJre()
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
 	public static boolean isCurrentVersion(int version) {
-		return version == CURRENT_VERSION;
+		return (version == CURRENT_VERSION) || (version == JRE.currentJre().version);
 	}
 
 	static boolean isCurrentVersionWithinRange(int min, int max) {

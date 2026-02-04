@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava21;
 import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava22;
 import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava23;
 import static org.junit.jupiter.api.condition.JavaVersionPredicates.onKnownVersion;
+import static org.junit.jupiter.api.condition.JavaVersionPredicates.onOtherVersion;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -152,7 +153,7 @@ class EnabledForJreRangeIntegrationTests {
 	@Test
 	@EnabledForJreRange(min = JAVA_20)
 	void min20() {
-		assertTrue(onKnownVersion());
+		assertTrue(onKnownVersion() || onOtherVersion());
 		assertTrue(JRE.currentVersionNumber() >= 20);
 		assertTrue(CURRENT_JRE.compareTo(JAVA_20) >= 0);
 		assertTrue(CURRENT_JRE.version() >= 20);
@@ -241,7 +242,7 @@ class EnabledForJreRangeIntegrationTests {
 	@Test
 	@EnabledForJreRange(minVersion = 21, maxVersion = Integer.MAX_VALUE)
 	void minVersion21MaxVersionMaxInteger() {
-		assertTrue(onKnownVersion());
+		assertTrue(onKnownVersion() || onOtherVersion());
 		assertTrue(JRE.currentVersionNumber() >= 21);
 	}
 

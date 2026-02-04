@@ -19,4 +19,9 @@ public class JavaVersionPredicates {
 		return @for(var jre : ForSupport.of(supportedJres))onJava${jre.get().getVersion()}()@if(!jre.isLast()) //
 				|| @endif@endfor;
 	}
+
+	static boolean onOtherVersion() {
+		return JRE.OTHER.isCurrentVersion();
+	}
+
 }
