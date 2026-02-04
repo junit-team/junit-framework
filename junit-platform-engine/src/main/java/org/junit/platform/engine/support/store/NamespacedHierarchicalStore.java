@@ -227,15 +227,17 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		for (;;) {
 			var storedValue = storedValues.compute(compositeKey, //
 				(__, oldStoredValue) -> {
-					// The old stored value remains if a) there is an old stored
-					// value and b) the old stored value is not yet evaluated or c) the old
+					// The old stored value remains if a) there is an old stored value and
+					// b) the old stored value has not yet been evaluated or c) the old
 					// stored value was evaluated to a present value.
 					//
 					// Condition b ensures that we do not evaluate or await the evaluation
-					// inside `compute`, this would lead to recursive updates or deadlocks.
-					// Condition c guards against race conditions (repeated from getStoredValue)
-					// this filters out failures inserted by computeIfAbsent
-					if (oldStoredValue != null && (oldStoredValue.isEvaluating() || oldStoredValue.isPresent())) {
+					// inside `compute`, this would lead to recursive updates or deadlocks
+					// respectively.
+					// Condition c guards against race conditions (repeated from
+					// getStoredValue) this filters out failures inserted by
+					// computeIfAbsent.
+					if (oldStoredValue != null && (oldStoredValue.isDone() || oldStoredValue.isPresent())) {
 						return oldStoredValue;
 					}
 					rejectIfClosed();
@@ -287,14 +289,15 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		for (;;) {
 			var storedValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				// The old stored value remains if a) there is an old stored
-				// value and b) the old stored value is not yet evaluated or c) the old
-				// stored value was evaluated to null.
+				// The old stored value remains if a) there is an old stored value and
+				// b) the old stored value has not yet been evaluated or c) the old
+				// stored value evaluated to null.
 				//
 				// Condition b ensures that we do not evaluate or await the evaluation
-				// inside `compute`, this would lead to recursive updates or deadlocks.
+				// inside `compute`, this would lead to recursive updates or deadlocks
+				// respectively.
 				// Condition c ensures we replace both null and absent values.
-				if (oldStoredValue != null && (oldStoredValue.isEvaluating() || oldStoredValue.evaluate() != null)) {
+				if (oldStoredValue != null && (!oldStoredValue.isDone() || oldStoredValue.evaluate() != null)) {
 					return oldStoredValue;
 				}
 				rejectIfClosed();
@@ -517,7 +520,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		boolean isPresent();
 
-		boolean isEvaluating();
+		boolean isDone();
 
 		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
 			return value != null ? value.evaluate() : null;
@@ -550,8 +553,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			}
 
 			@Override
-			public boolean isEvaluating() {
-				return false;
+			public boolean isDone() {
+				return true;
 			}
 
 			@Override
@@ -583,8 +586,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			}
 
 			@Override
-			public boolean isEvaluating() {
-				return !delegate.isDone();
+			public boolean isDone() {
+				return delegate.isDone();
 			}
 
 			@Nullable
@@ -622,8 +625,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			}
 
 			@Override
-			public boolean isEvaluating() {
-				return !delegate.isDone();
+			public boolean isDone() {
+				return delegate.isDone();
 			}
 
 			Object execute() {
