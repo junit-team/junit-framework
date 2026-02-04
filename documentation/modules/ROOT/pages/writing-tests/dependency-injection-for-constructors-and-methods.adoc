@@ -41,7 +41,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-include::example$kotlin/example/KotlinTestInfoDemo.kt[tags=user_guide]
+include::example$kotlin/example/kotlin/TestInfoDemo.kt[tags=user_guide]
 ----
 --
 ====
@@ -81,7 +81,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-include::example$kotlin/example/KotlinTestReporterDemo.kt[tags=user_guide]
+include::example$kotlin/example/kotlin/TestReporterDemo.kt[tags=user_guide]
 ----
 --
 ====
@@ -89,11 +89,11 @@ include::example$kotlin/example/KotlinTestReporterDemo.kt[tags=user_guide]
 NOTE: Other parameter resolvers must be explicitly enabled by registering appropriate
 xref:extensions/overview.adoc[extensions] via `@ExtendWith`.
 
-Check out the `{RandomParametersExtension}` for an example of a custom
-`{ParameterResolver}`. While not intended to be production-ready, it demonstrates the
-simplicity and expressiveness of both the extension model and the parameter resolution
-process. `MyRandomParametersTest` demonstrates how to inject random values into `@Test`
-methods.
+Check out the xref:extensions/registering-extensions.adoc#RandomNumberExtension[`RandomNumberExtension`]
+for an example of a custom `{ParameterResolver}`. While not intended to be production-ready,
+it demonstrates the simplicity and expressiveness of both the extension model and the
+parameter resolution process. `MyRandomParametersTest` demonstrates how to inject random
+values into a constructor and a `@Test` method.
 
 [tabs]
 ====
@@ -102,20 +102,7 @@ Java::
 --
 [source,java,indent=0]
 ----
-@ExtendWith(RandomParametersExtension.class)
-class MyRandomParametersTest {
-
-	@Test
-	void injectsInteger(@Random int i, @Random int j) {
-		assertNotEquals(i, j);
-	}
-
-	@Test
-	void injectsDouble(@Random double d) {
-		assertEquals(0.0, d, 1.0);
-	}
-
-}
+include::example$java/example/MyRandomParametersTest.java[tags=user_guide]
 ----
 --
 
@@ -124,19 +111,7 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
-@ExtendWith(RandomParametersExtension::class)
-class KotlinMyRandomParametersTest {
-
-    @Test
-    fun injectsInteger(@Random i: Int, @Random j: Int) {
-        assertNotEquals(i, j)
-    }
-
-    @Test
-    fun injectsDouble(@Random d: Double) {
-        assertEquals(0.0, d, 1.0)
-    }
-}
+include::example$kotlin/example/kotlin/MyRandomParametersTest.kt[tags=user_guide]
 ----
 --
 ====
