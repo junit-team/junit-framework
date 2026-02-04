@@ -1,0 +1,33 @@
+[[v5.14.3]]
+== 5.14.3
+
+*Date of Release:* February 15, 2026
+
+*Scope:* Bug fixes and enhancements since 5.14.2
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/117?closed=1+[5.14.3] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v5.14.3-junit-platform]]
+=== JUnit Platform
+
+No changes.
+
+
+[[v5.14.3-junit-jupiter]]
+=== JUnit Jupiter
+
+[[v5.14.3-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* `@EnabledOnJre` and `@DisabledOnJre` once again work reliably when used with `JRE.OTHER`
+  in a test running on a Java runtime whose version is higher than the version of the last
+  `JAVA_*` constant in the `JRE` enum.
+
+
+[[v5.14.3-junit-vintage]]
+=== JUnit Vintage
+
+No changes.
