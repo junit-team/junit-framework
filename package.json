@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@antora/collector-extension": "1.0.2",
-    "@antora/lunr-extension": "1.0.0-alpha.12",
+    "@antora/lunr-extension": "1.0.0-alpha.13",
     "@antora/pdf-extension": "^1.0.0-beta.15",
     "@asciidoctor/tabs": "^1.0.0-beta.6",
     "@springio/antora-extensions": "1.14.7",
