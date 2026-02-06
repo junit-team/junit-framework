@@ -19,8 +19,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode
 import java.nio.file.Files
 import java.nio.file.Path
 
-// tag::user_guide[]
 @Execution(ExecutionMode.SAME_THREAD)
+// tag::user_guide[]
 class TestReporterDemo {
     @Test
     fun reportSingleValue(testReporter: TestReporter) {
