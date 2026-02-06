@@ -37,7 +37,7 @@ groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
 jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
-jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.4" }
+jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.5" }
 jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.6" }
 jfrunit = { module = "org.moditect.jfrunit:jfrunit-core", version = "1.0.0.Alpha2" }
 jimfs = { module = "com.google.jimfs:jimfs", version = "1.3.1" }
