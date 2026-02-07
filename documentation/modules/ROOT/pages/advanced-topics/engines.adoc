@@ -4,7 +4,7 @@ A `TestEngine` facilitates _discovery_ and _execution_ of tests for a particular
 programming model.
 
 For example, JUnit provides a `TestEngine` that discovers and executes tests written using
-the JUnit Jupiter programming model (see xref:writing-tests/intro.adoc#tests[Writing Tests] and xref:extensions/overview.adoc[]).
+the JUnit Jupiter programming model (see xref:writing-tests/intro.adoc[Writing Tests] and xref:extensions/overview.adoc[]).
 
 [[junit]]
 == JUnit Test Engines

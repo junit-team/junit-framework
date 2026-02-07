@@ -105,7 +105,7 @@ xref:running-tests/build-support.adoc#gradle-bom[Gradle].
     `junit-jupiter-api`, `junit-jupiter-params`, and `junit-jupiter-engine` for
     simplified dependency management in build tools such as Gradle and Maven.
   `junit-jupiter-api`::
-    JUnit Jupiter API for xref:writing-tests/intro.adoc#tests[writing tests] and xref:extensions/overview.adoc[extensions].
+    JUnit Jupiter API for xref:writing-tests/intro.adoc[writing tests] and xref:extensions/overview.adoc[extensions].
   `junit-jupiter-engine`::
     JUnit Jupiter test engine implementation; only required at runtime.
   `junit-jupiter-params`::

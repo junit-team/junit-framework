@@ -30,7 +30,7 @@ xref:running-tests/ide-support.adoc#eclipse[Eclipse], xref:running-tests/ide-sup
 xref:running-tests/ide-support.adoc#vscode[Visual Studio Code]) and build tools (see xref:running-tests/build-support.adoc#gradle[Gradle],
 xref:running-tests/build-support.adoc#maven[Maven], and xref:running-tests/build-support.adoc#ant[Ant]).
 
-**JUnit Jupiter** is the combination of the xref:writing-tests/intro.adoc#tests[programming model] and
+**JUnit Jupiter** is the combination of the xref:writing-tests/intro.adoc[programming model] and
 xref:extensions/overview.adoc[extension model] for writing tests and extensions in JUnit 5. The Jupiter
 sub-project provides a `TestEngine` for running Jupiter based tests on the platform.
 
@@ -65,7 +65,7 @@ xref:running-tests/build-support.adoc[] and the <<getting-started-example-projec
 To find out what features are available in JUnit 5 and how to use them, read the
 corresponding sections of this User Guide, organized by topic.
 
-* xref:writing-tests/intro.adoc#tests[Writing Tests in JUnit Jupiter]
+* xref:writing-tests/intro.adoc[Writing Tests in JUnit Jupiter]
 * xref:migrating-from-junit4.adoc[Migrating from JUnit 4 to JUnit Jupiter]
 * xref:running-tests/intro.adoc[]
 * xref:extensions/overview.adoc[Extension Model for JUnit Jupiter]
