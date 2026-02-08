@@ -48,8 +48,8 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
-@DisplayName("SystemProperty extension")
-class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
+@DisplayName("System Properties Extension")
+class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 
 	@BeforeAll
 	static void globalSetUp() {
@@ -74,7 +74,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with ClearSystemProperty")
+	@DisplayName("with @ClearSystemProperty")
 	@ClearSystemProperty(key = "A")
 	class ClearSystemPropertyTests {
 
@@ -108,7 +108,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with SetSystemProperty")
+	@DisplayName("with @SetSystemProperty")
 	@SetSystemProperty(key = "A", value = "new A")
 	class SetSystemPropertyTests {
 
@@ -142,7 +142,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with both ClearSystemProperty and SetSystemProperty")
+	@DisplayName("with both @ClearSystemProperty and @SetSystemProperty")
 	@ClearSystemProperty(key = "A")
 	@SetSystemProperty(key = "clear prop D", value = "new D")
 	class CombinedClearAndSetTests {
@@ -191,7 +191,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with Clear, Set and Restore")
+	@DisplayName("with Set, Clear, and Restore")
 	@WritesSystemProperty // Many of these tests write, many also access
 	@Execution(SAME_THREAD) // Uses instance state
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS) // Uses instance state
@@ -323,15 +323,15 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("RestoreSystemProperties individual methods tests")
+	@DisplayName("@RestoreSystemProperties individual methods tests")
 	@WritesSystemProperty // Many of these tests write, many also access
 	class RestoreSystemPropertiesUnitTests {
 
-		SystemPropertyExtension spe;
+		SystemPropertiesExtension spe;
 
 		@BeforeEach
 		void beforeEach() {
-			spe = new SystemPropertyExtension();
+			spe = new SystemPropertiesExtension();
 		}
 
 		@Nested
@@ -435,7 +435,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 
 		@Nested
 		@SetSystemProperty(key = "B", value = "newer B")
-		@DisplayName("with SetSystemProperty annotation")
+		@DisplayName("with @SetSystemProperty annotation")
 		class AnnotatedNestedClass {
 
 			@Test
@@ -522,7 +522,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with incorrect configuration")
+	@DisplayName("with incorrect configuration")
 	class ConfigurationFailureTests {
 
 		@Test
@@ -579,7 +579,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with inheritance")
+	@DisplayName("Clear and Set with inheritance")
 	class InheritanceClearAndSetTests extends InheritanceClearAndSetBaseTest {
 
 		@Test
@@ -594,7 +594,7 @@ class SystemPropertyExtensionTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Nested
-	@DisplayName("used with inheritance")
+	@DisplayName("Clear, Set, and Restore with inheritance")
 	@TestMethodOrder(OrderAnnotation.class)
 	@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 	@Execution(SAME_THREAD) // Uses instance state

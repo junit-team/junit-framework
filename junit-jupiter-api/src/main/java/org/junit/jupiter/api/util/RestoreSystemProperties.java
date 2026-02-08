@@ -23,52 +23,64 @@ import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * {@code @RestoreSystemProperties} is a JUnit Jupiter extension to restore the entire set of
- * system properties to the original value, or the value of the higher-level container, after the
- * annotated element is complete.
+ * {@code @RestoreSystemProperties} is an annotation that is used to restore the
+ * entire set of JVM system properties to its original state, or the state of the
+ * higher-level container, after execution of the annotated element has completed.
  *
- * <p>Use this annotation when there is a need programmatically modify system properties in a test
- * method or in {@code @BeforeAll} / {@code @BeforeEach} blocks.
- * To set or clear a system property, consider {@link SetSystemProperty @SetSystemProperty} or
+ * <p>Use this annotation when there is a need to programmatically modify system
+ * properties in a test method or in {@code @BeforeAll} / {@code @BeforeEach}
+ * lifecycle methods. To set or clear a system property, consider
+ * {@link SetSystemProperty @SetSystemProperty} or
  * {@link ClearSystemProperty @ClearSystemProperty} instead.
  *
- * <p>{@code @RestoreSystemProperties} can be used on the method and on the class level.
- * When placed on a test method, a snapshot of system properties is stored prior to that test.
- * The snapshot is created before any {@code @BeforeEach} blocks in scope and before any
- * {@link SetSystemProperty @SetSystemProperty} or {@link ClearSystemProperty @ClearSystemProperty}
- * annotations on that method. After the test, system properties are restored from the
- * snapshot after any {@code @AfterEach} have completed.
+ * <p>{@code @RestoreSystemProperties} can be used on the method and on the class
+ * level.
  *
- * <p>When placed on a test class, a snapshot of system properties is stored prior to any
- * {@code @BeforeAll} blocks in scope and before any {@link SetSystemProperty @SetSystemProperty}
- * or {@link ClearSystemProperty @ClearSystemProperty} annotations on that class.
- * After the test class completes, system properties are restored from the snapshot after any
- * {@code @AfterAll} blocks have completed.
- * In addition, a class level annotation is inherited by each test method just as if each one was
+ * <p>When declared on a test method, a snapshot of all JVM system properties is
+ * stored prior to that test. The snapshot is created before any {@code @BeforeEach}
+ * lifecycle methods in scope and before any {@link SetSystemProperty @SetSystemProperty}
+ * or {@link ClearSystemProperty @ClearSystemProperty} annotations on that method.
+ * After the test, system properties are restored from the snapshot after all
+ * {@code @AfterEach} lifecycle methods have completed.
+ *
+ * <p>When placed on a test class, a snapshot of all JVM system properties is stored
+ * prior to any {@code @BeforeAll} lifecycle methods in scope and before any
+ * {@link SetSystemProperty @SetSystemProperty} or
+ * {@link ClearSystemProperty @ClearSystemProperty} annotations on that class.
+ * After the test class completes, system properties are restored from the snapshot
+ * after any {@code @AfterAll} lifecycle methods have completed. In addition, a
+ * class-level annotation is inherited by each test method just as if each one were
  * annotated with {@code RestoreSystemProperties}.
  *
- * <p>During
- * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
- * all tests annotated with {@link RestoreSystemProperties}, {@link SetSystemProperty},
- * {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
- * are scheduled in a way that guarantees correctness under mutation of shared global state.
+ * <p>During <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">
+ * parallel test execution</a>, all tests annotated with
+ * {@link SetSystemProperty @SetSystemProperty},
+ * {@link ClearSystemProperty @ClearSystemProperty},
+ * {@link ReadsSystemProperty @ReadsSystemProperty}, and
+ * {@link WritesSystemProperty @WritesSystemProperty} are scheduled in a way that
+ * guarantees correctness under mutation of shared global state.
  *
- * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty">the documentation on
- * <code>@ClearSystemProperty</code>, <code>@SetSystemProperty</code>, and <code>@RestoreSystemProperties</code></a>.</p>
+ * <p>For further details and examples, see the documentation on all JVM system
+ * property annotations in the
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#system-properties">
+ * User Guide</a>.
  *
- * <p><em>Note:</em> The snapshot of the properties object is created using {@link Properties#clone()}.
- * This cloned value will not include any default values. This extension will make a best effort
- * attempt to detect default values and fail if any are detected. For classes that extend
- * {@code Properties}, it is assumed that {@code clone()} is implemented with sufficient fidelity.
+ * <p><em>Note:</em> The snapshot of the properties object is created using
+ * {@link Properties#clone()}. However, this cloned properties object will not
+ * include any default values from the original properties object. Consequently,
+ * this extension will make a best effort attempt to detect default values and
+ * fail if any are detected. For classes that extend {@code Properties}, it is
+ * assumed that {@code clone()} is implemented with sufficient fidelity.
  *
  * @since 6.1
+ * @see ClearSystemProperty @ClearSystemProperty
+ * @see SetSystemProperty @SetSystemProperty
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @WritesSystemProperty
-@ExtendWith(SystemPropertyExtension.class)
+@ExtendWith(SystemPropertiesExtension.class)
 @API(status = EXPERIMENTAL, since = "6.1")
 @SuppressWarnings("exports")
 public @interface RestoreSystemProperties {

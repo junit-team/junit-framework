@@ -11,7 +11,7 @@
 package org.junit.jupiter.api.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.util.JupiterPropertyUtils.cloneWithoutDefaults;
 import static org.mockito.Mockito.when;
 
@@ -26,8 +26,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+/**
+ * Tests for {@link JupiterPropertyUtils}.
+ */
 @MockitoSettings
-class JupiterPropertyUtilTests {
+class JupiterPropertyUtilsTests {
 
 	@Mock
 	ExtensionContext context;
@@ -55,18 +58,17 @@ class JupiterPropertyUtilTests {
 		defaults.setProperty("a", "a");
 
 		var properties = new Properties(defaults);
-		properties.setProperty("b", "b");
+		properties.setProperty("X", "X");
 
-		when(context.getElement()).thenReturn(Optional.of(JupiterPropertyUtilTests.class));
+		when(context.getElement()).thenReturn(Optional.of(JupiterPropertyUtilsTests.class));
 
-		var exception = assertThrows(ExtensionConfigurationException.class,
-			() -> cloneWithoutDefaults(context, properties));
-
-		assertThat(exception).hasMessage(
-			("SystemPropertyExtension was configured to restore the system properties by [%s]. " + //
-					"It was not possible to create an accurate snapshot of the system properties using Properties::clone because default properties [a] were present.") //
-							.formatted(JupiterPropertyUtilTests.class));
-
+		assertThatExceptionOfType(ExtensionConfigurationException.class) //
+				.isThrownBy(() -> cloneWithoutDefaults(context, properties))//
+				.withMessage("""
+						SystemPropertiesExtension was configured to restore the system properties by [%s]. \
+						However, it was not possible to create an accurate snapshot of the system properties \
+						using Properties::clone, because default properties were present: [a]""",
+					JupiterPropertyUtilsTests.class);
 	}
 
 	@Test
@@ -104,4 +106,5 @@ class JupiterPropertyUtilTests {
 			return clone;
 		}
 	}
+
 }

@@ -8,7 +8,7 @@ This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
 * **Gold Sponsors:** [JetBrains](https://jb.gg/junit-logo), [Netflix](https://www.netflix.com/)
 * **Silver Sponsors:** [Micromata](https://www.micromata.de), [Quo Card](https://quo-digital.jp)
-* **Bronze Sponsors:** [Premium Minds](https://www.premium-minds.com), [codefortynine](https://codefortynine.com), [Info Support](https://www.infosupport.com), [Code Intelligence](https://www.code-intelligence.com), [Route4Me](https://route4me.com/), [Testiny](https://www.testiny.io/), [LambdaTest](https://www.lambdatest.com)
+* **Bronze Sponsors:** [Premium Minds](https://www.premium-minds.com), [codefortynine](https://codefortynine.com), [Info Support](https://www.infosupport.com), [Code Intelligence](https://www.code-intelligence.com), [Route4Me](https://route4me.com/), [Testiny](https://www.testiny.io/), [TestMu AI](https://www.testmuai.com)
 
 ## Latest Releases
 

@@ -10,7 +10,7 @@
 
 package org.junit.platform.console.output;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.junit.jupiter.api.Nested;
@@ -116,72 +117,144 @@ class ColorPaletteTests {
 		}
 	}
 
-	/**
-	 * TODO Actually assert something in these "demo" tests and stop printing to SYSOUT.
-	 */
 	@Nested
 	class DemonstratePalettesTests {
 
+		private static final String ESC = "\u001B[";
+		private static final String RESET = ESC + "0m";
+		private static final String NEW_LINE = System.lineSeparator();
+
 		@Test
 		void verbose_default() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new VerboseTreePrintingListener(out, ColorPalette.DEFAULT, 16,
 				Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			// @formatter:off
+			assertThat(output).contains(
+				withAnsi("{green}[OK] SUCCESSFUL{NL}{reset}"),
+				withAnsi("{red}[X] FAILED{NL}{reset}"),
+				withAnsi("{yellow}[A] ABORTED{NL}{reset}"),
+				withAnsi("{magenta}[S] SKIPPED")
+			);
+			// @formatter:on
 		}
 
 		@Test
 		void verbose_single_color() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new VerboseTreePrintingListener(out, ColorPalette.SINGLE_COLOR, 16,
 				Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			// @formatter:off
+			assertThat(output).contains(
+				withAnsi("{bold}[OK] SUCCESSFUL{NL}{reset}"),
+				withAnsi("{reverse}[X] FAILED{NL}{reset}"),
+				withAnsi("{underline}[A] ABORTED{NL}{reset}"),
+				withAnsi("{strikethrough}[S] SKIPPED")
+			);
+			// @formatter:on
 		}
 
 		@Test
 		void simple_default() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new TreePrintingListener(out, ColorPalette.DEFAULT, Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			// @formatter:off
+			assertThat(output).contains(
+				withAnsi("{blue}My Test{reset} {green}[OK]{reset}"),
+				withAnsi("{red}My Test{reset} {red}[X]{reset}"),
+				withAnsi("{yellow}My Test{reset} {yellow}[A]{reset}"),
+				withAnsi("{magenta}My Test{reset} {magenta}[S]{reset}")
+			);
+			// @formatter:on
 		}
 
 		@Test
 		void simple_single_color() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new TreePrintingListener(out, ColorPalette.SINGLE_COLOR, Theme.ASCII);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			// @formatter:off
+			assertThat(output).contains(
+				withAnsi("{bold}[OK]{reset}"),
+				withAnsi("{reverse}[X]{reset}"),
+				withAnsi("{underline}[A]{reset}"),
+				withAnsi("{strikethrough}[S]{reset}")
+			);
+			// @formatter:on
 		}
 
 		@Test
 		void flat_default() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new FlatPrintingListener(out, ColorPalette.DEFAULT);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			// @formatter:off
+			assertThat(output).contains(
+				withAnsi("{green}Finished:    My Test ([engine:demo-engine]){reset}"),
+				withAnsi("{red}Finished:    My Test ([engine:demo-engine]){reset}"),
+				withAnsi("{yellow}Finished:    My Test ([engine:demo-engine]){reset}"),
+				withAnsi("{magenta}Skipped:     My Test ([engine:demo-engine]){reset}")
+			);
+			// @formatter:on
 		}
 
 		@Test
 		void flat_single_color() {
-			PrintWriter out = new PrintWriter(System.out);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter out = new PrintWriter(stringWriter, true);
 			TestExecutionListener listener = new FlatPrintingListener(out, ColorPalette.SINGLE_COLOR);
 
 			demoTestRun(listener);
 
-			assertDoesNotThrow(out::flush);
+			String output = stringWriter.toString();
+			// @formatter:off
+			assertThat(output).contains(
+				withAnsi("{bold}Finished:    My Test ([engine:demo-engine]){reset}"),
+				withAnsi("{reverse}Finished:    My Test ([engine:demo-engine]){reset}"),
+				withAnsi("{underline}Finished:    My Test ([engine:demo-engine]){reset}"),
+				withAnsi("{strikethrough}Skipped:     My Test ([engine:demo-engine]){reset}")
+			);
+			// @formatter:on
+		}
+
+		private static String withAnsi(String template) {
+			// @formatter:off
+			return template
+					.replace("{blue}", ESC + "34m")
+					.replace("{green}", ESC + "32m")
+					.replace("{red}", ESC + "31m")
+					.replace("{yellow}", ESC + "33m")
+					.replace("{magenta}", ESC + "35m")
+					.replace("{bold}", ESC + "1m")
+					.replace("{reverse}", ESC + "7m")
+					.replace("{underline}", ESC + "4m")
+					.replace("{strikethrough}", ESC + "9m")
+					.replace("{reset}", RESET)
+					.replace("{NL}", NEW_LINE);
+			// @formatter:on
 		}
 
 		private void demoTestRun(TestExecutionListener listener) {

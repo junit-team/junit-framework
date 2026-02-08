@@ -7,6 +7,7 @@ antora:
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: junit
   - require: '@springio/antora-extensions/root-attachments-extension'
+  - require: '@springio/antora-xref-extension'
 site:
   title: JUnit User Guide
   start_page: junit::overview.adoc

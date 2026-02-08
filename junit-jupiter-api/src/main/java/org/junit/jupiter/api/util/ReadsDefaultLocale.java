@@ -42,7 +42,7 @@ import org.junit.jupiter.api.parallel.Resources;
  * @see WritesDefaultLocale
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Inherited
 @ResourceLock(value = Resources.LOCALE, mode = ResourceAccessMode.READ)
 @API(status = STABLE, since = "6.1")

@@ -15,7 +15,11 @@ dependencies {
 
 val license: License by rootProject.extra
 val rootTargetDir = layout.buildDirectory.dir("generated/sources/jte")
-val generateCode by tasks.registering
+
+val generateCode by tasks.registering {
+	group = LifecycleBasePlugin.BUILD_GROUP
+	description = "Generates JRE-related source code."
+}
 
 sourceSets.named { it != templates.name }.configureEach {
 

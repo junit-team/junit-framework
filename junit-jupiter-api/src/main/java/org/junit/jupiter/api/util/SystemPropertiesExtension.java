@@ -36,9 +36,17 @@ import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
+ * {@code Extension} which provides support for the following annotations.
+ *
+ * <ul>
+ * <li>{@link SetSystemProperty @SetSystemProperty}</li>
+ * <li>{@link ClearSystemProperty @ClearSystemProperty}</li>
+ * <li>{@link RestoreSystemProperties @RestoreSystemProperties}</li>
+ * </ul>
+ *
  * @since 6.1
  */
-final class SystemPropertyExtension
+final class SystemPropertiesExtension
 		implements BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
 
 	/**
@@ -48,7 +56,7 @@ final class SystemPropertyExtension
 	 * System properties with a snapshot. The original system properties are
 	 * restored after the test.
 	 *
-	 * @return The original {@link System#getProperties} object
+	 * @return the original {@link System#getProperties} object
 	 */
 	Properties prepareToEnterRestorableContext(ExtensionContext context) {
 		var current = System.getProperties();
@@ -62,7 +70,8 @@ final class SystemPropertyExtension
 	 *
 	 * <p>The entry environment will be restored to the state passed in as {@code Properties}.
 	 *
-	 * @param properties a non-null {@code Properties} that contains all entries of the entry environment.
+	 * @param properties a non-null {@code Properties} that contains all entries
+	 * of the entry environment
 	 */
 	void prepareToExitRestorableContext(Properties properties) {
 		System.setProperties(properties);
@@ -100,13 +109,15 @@ final class SystemPropertyExtension
 
 	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
 			boolean doIncrementalBackup) {
+
 		currentContext.getElement().ifPresent(element -> {
 			var entriesToClear = findEntriesToClear(element);
 			var entriesToSet = findEntriesToSet(element);
 			preventClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
 
-			if (entriesToClear.isEmpty() && entriesToSet.isEmpty())
+			if (entriesToClear.isEmpty() && entriesToSet.isEmpty()) {
 				return;
+			}
 
 			// Only backup original values if we didn't already do bulk storage of the original state
 			if (doIncrementalBackup) {
@@ -175,11 +186,12 @@ final class SystemPropertyExtension
 	}
 
 	/**
-	 * Restore the complete original state of the entries as they were prior to this {@code ExtensionContext},
-	 * if the complete state was initially stored in a before all/each event.
+	 * Restore the complete original state of the entries as they were prior to
+	 * this {@code ExtensionContext}, if the complete state was initially stored
+	 * in a before all/each event.
 	 *
-	 * @param context The {@code ExtensionContext} which may have a bulk backup stored.
-	 * @return true if a complete backup exists and was used to restore, false if not.
+	 * @param context the {@code ExtensionContext} which may have a bulk backup stored
+	 * @return true if a complete backup exists and was used to restore, false if not
 	 */
 	private boolean restoreOriginalCompleteBackup(ExtensionContext context) {
 		var backup = getCompleteBackup(context);
@@ -265,23 +277,25 @@ final class SystemPropertyExtension
 		EntriesBackup(Collection<String> entriesToClear, Collection<String> entriesToSet) {
 			var properties = System.getProperties();
 			Stream.concat(entriesToClear.stream(), entriesToSet.stream()).forEach(entry -> {
-				// Do not use Properties::getProperty or System.getProperty here,
+				// Do not use Properties::getProperty or System.getProperty here, since
 				// this would prevent backing up non-string values.
 				Object backup = properties.get(entry);
-				if (backup == null)
+				if (backup == null) {
 					this.entriesToClear.add(entry);
-				else
+				}
+				else {
 					this.entriesToSet.put(entry, backup);
+				}
 			});
 		}
 
 		void restoreBackup() {
-			// We can't use Properties::setProperty or System.setProperty here,
+			// We can't use Properties::setProperty or System.setProperty here, since
 			// this would prevent restoring non-string values.
 			var properties = System.getProperties();
 			entriesToClear.forEach(properties::remove);
 			properties.putAll(entriesToSet);
 		}
-
 	}
+
 }

@@ -22,6 +22,7 @@ import static org.junit.platform.commons.util.Preconditions.notNull;
 import java.util.Collection;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -74,7 +75,7 @@ class PreconditionsTests {
 
 	@Test
 	void notEmptyPassesForCollectionWithNullElements() {
-		notEmpty(singletonList(null), "message");
+		notEmpty(singletonListOfNull(), "message");
 	}
 
 	@Test
@@ -152,7 +153,8 @@ class PreconditionsTests {
 	void containsNoNullElementsThrowsForCollectionContainingNullElements() {
 		var message = "collection contains null elements";
 
-		assertPreconditionViolationFor(() -> containsNoNullElements(singletonList(null), message)).withMessage(message);
+		assertPreconditionViolationFor(() -> containsNoNullElements(singletonListOfNull(), message)).withMessage(
+			message);
 	}
 
 	@Test
@@ -226,6 +228,10 @@ class PreconditionsTests {
 		var message = "condition does not hold";
 
 		assertPreconditionViolationFor(() -> condition(false, () -> message)).withMessage(message);
+	}
+
+	private static List<@Nullable Object> singletonListOfNull() {
+		return singletonList(null);
 	}
 
 }

@@ -19,6 +19,7 @@ repository on GitHub.
 * Recheck done condition before rejecting extraneous worker in
   `WorkerThreadPoolHierarchicalTestExecutorService`
 * Add missing precondition checks to `Launcher` implementations
+* Failures to resolve selectors are now forwarded by Suite Engine
 
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -54,7 +55,7 @@ repository on GitHub.
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `SystemPropertyExtension` is now part of
   JUnit Jupiter. Find examples in the
-  xref:writing-tests/built-in-extensions.adoc#SystemProperty[User Guide]. Note: There are
+  xref:writing-tests/built-in-extensions.adoc#system-properties[User Guide]. Note: There are
   some implementation differences between JUnit Pioneer and Jupiter. For details, see the
   https://github.com/junit-team/junit-framework/pull/5258[corresponding pull request].
 * Support the creation of `Arguments` from iterables. These additions make it
