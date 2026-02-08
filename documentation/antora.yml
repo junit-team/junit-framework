@@ -280,7 +280,6 @@ asciidoc:
     junit-jupiter-starter-gradle: '{junit-examples-repo}/tree/{release-branch}/junit-jupiter-starter-gradle[junit-jupiter-starter-gradle]'
     junit-jupiter-starter-maven: '{junit-examples-repo}/tree/{release-branch}/junit-jupiter-starter-maven[junit-jupiter-starter-maven]'
     junit-jupiter-starter-sbt: '{junit-examples-repo}/tree/{release-branch}/junit-jupiter-starter-sbt[junit-jupiter-starter-sbt]'
-    RandomParametersExtension: '{junit-examples-repo}/tree/{release-branch}/junit-jupiter-extensions/src/main/java/com/example/random/RandomParametersExtension.java[RandomParametersExtension]'
     # Third-party Links
     API: 'https://apiguardian-team.github.io/apiguardian/docs/current/api/[@API]'
     API_Guardian: 'https://github.com/apiguardian-team/apiguardian[@API Guardian]'
