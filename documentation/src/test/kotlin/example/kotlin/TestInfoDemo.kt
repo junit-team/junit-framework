@@ -25,6 +25,14 @@ import org.junit.jupiter.api.TestInfo
 class TestInfoDemo(
     testInfo: TestInfo
 ) {
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun beforeAll(testInfo: TestInfo) {
+            assertEquals("TestInfo Demo", testInfo.displayName)
+        }
+    }
+
     init {
         assertTrue(testInfo.displayName in listOf("TEST 1", "test2()"))
     }
@@ -44,14 +52,6 @@ class TestInfoDemo(
 
     @Test
     fun test2() {
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun beforeAll(testInfo: TestInfo) {
-            assertEquals("TestInfo Demo", testInfo.displayName)
-        }
     }
 }
 // end::user_guide[]

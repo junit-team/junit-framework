@@ -27,6 +27,5 @@ class MyRandomParametersTest {
 	void injectsInteger(@Random int i, @Random int j) {
 		assertNotEquals(i, j);
 	}
-
 }
 // end::user_guide[]

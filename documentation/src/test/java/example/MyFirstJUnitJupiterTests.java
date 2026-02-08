@@ -25,6 +25,5 @@ class MyFirstJUnitJupiterTests {
 	void addition() {
 		assertEquals(2, calculator.add(1, 1));
 	}
-
 }
 // end::user_guide[]

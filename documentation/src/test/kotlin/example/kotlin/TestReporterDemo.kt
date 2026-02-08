@@ -14,12 +14,9 @@ import org.junit.jupiter.api.MediaType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import org.junit.jupiter.api.io.TempDir
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import java.nio.file.Files
 import java.nio.file.Path
 
-@Execution(ExecutionMode.SAME_THREAD)
 // tag::user_guide[]
 class TestReporterDemo {
     @Test
@@ -47,10 +44,7 @@ class TestReporterDemo {
         testReporter: TestReporter,
         @TempDir tempDir: Path
     ) {
-        testReporter.publishFile(
-            "test1.txt",
-            MediaType.TEXT_PLAIN_UTF_8
-        ) { file ->
+        testReporter.publishFile("test1.txt", MediaType.TEXT_PLAIN_UTF_8) { file ->
             Files.write(file, listOf("Test 1"))
         }
 
