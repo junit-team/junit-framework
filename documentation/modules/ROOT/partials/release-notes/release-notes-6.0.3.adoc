@@ -16,7 +16,8 @@ repository on GitHub.
 [[v6.0.3-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* A deadlock issue in `NamespacedHierarchicalStore.computeIfAbsent(N, K, Function)` has
+  been fixed.
 
 [[v6.0.3-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
