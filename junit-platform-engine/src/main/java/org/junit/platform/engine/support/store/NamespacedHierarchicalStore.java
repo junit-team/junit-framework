@@ -237,7 +237,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 					// Condition c guards against race conditions (repeated from
 					// getStoredValue) this filters out failures inserted by
 					// computeIfAbsent.
-					if (oldStoredValue != null && (oldStoredValue.isDone() || oldStoredValue.isPresent())) {
+					if (oldStoredValue != null && (!oldStoredValue.isDone() || oldStoredValue.isPresent())) {
 						return oldStoredValue;
 					}
 					rejectIfClosed();
