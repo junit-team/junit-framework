@@ -227,9 +227,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		for (;;) {
 			var storedValue = storedValues.compute(compositeKey, //
 				(__, oldStoredValue) -> {
-					// The old store value is remains if a) there is an old stored
+					// The old stored value remains if a) there is an old stored
 					// value and b) the old stored value is not yet evaluated or c) the old
-					// stored value evaluated to a present value.
+					// stored value was evaluated to a present value.
 					//
 					// Condition b ensures that we do not evaluate or await the evaluation
 					// inside `compute`, this would lead to recursive updates or deadlocks.
@@ -287,9 +287,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		for (;;) {
 			var storedValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-				// The old store value is remains if a) there is an old stored
+				// The old stored value remains if a) there is an old stored
 				// value and b) the old stored value is not yet evaluated or c) the old
-				// stored value evaluated to null.
+				// stored value was evaluated to null.
 				//
 				// Condition b ensures that we do not evaluate or await the evaluation
 				// inside `compute`, this would lead to recursive updates or deadlocks.
