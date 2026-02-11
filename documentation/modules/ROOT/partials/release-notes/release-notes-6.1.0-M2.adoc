@@ -20,6 +20,7 @@ repository on GitHub.
   `WorkerThreadPoolHierarchicalTestExecutorService`
 * Add missing precondition checks to `Launcher` implementations
 * Failures to resolve selectors are now forwarded by Suite Engine
+* Fix deadlock in `NamespacedHierarchicalStore.computeIfAbsent(N, K, Function)`
 
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
