@@ -5,6 +5,7 @@ asciidoc:
     source-highlighter: rouge
     toc: left
     nofooter: ''
+    revdate: ''
 build:
   keep_source: true
   stderr: ignore
