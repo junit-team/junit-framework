@@ -27,6 +27,8 @@ import org.junit.platform.commons.util.Preconditions;
 abstract class AbstractJreRangeCondition<A extends Annotation> extends BooleanExecutionCondition<A> {
 
 	private static final JRE DEFAULT_MINIMUM_JRE = JRE.JAVA_17;
+
+	@SuppressWarnings("deprecation")
 	private static final JRE DEFAULT_MAXIMUM_JRE = JRE.OTHER;
 
 	AbstractJreRangeCondition(Class<A> annotationType, Function<A, String> customDisabledReason) {

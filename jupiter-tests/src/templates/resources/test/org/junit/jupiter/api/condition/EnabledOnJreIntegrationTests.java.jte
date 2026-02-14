@@ -49,7 +49,7 @@ class EnabledOnJreIntegrationTests {
 	void version7() {
 	}
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	@Test
 	@EnabledOnJre({ //
 @for(var jre : allJres)<%--
@@ -74,6 +74,7 @@ class EnabledOnJreIntegrationTests {
 	}
 @endfor
 	@Test
+	@SuppressWarnings("deprecation")
 	@EnabledOnJre(value = JRE.OTHER, disabledReason = "Disabled on almost every JRE")
 	void other() {
 		assertFalse(onKnownVersion());

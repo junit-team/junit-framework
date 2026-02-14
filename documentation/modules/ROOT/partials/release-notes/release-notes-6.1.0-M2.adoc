@@ -46,7 +46,10 @@ repository on GitHub.
 [[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* ❓
+* Deprecate `OTHER` constant of `{JRE}` in favor of the `int`/`int[]` annotation
+  attributes of `{EnabledOnJre}`, `{DisabledOnJre}`, `{EnabledForJreRange}`, and
+  `{DisabledForJreRange}` that allow referencing JRE versions later than those supported
+  by the `JRE` enum.
 
 [[v6.1.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements

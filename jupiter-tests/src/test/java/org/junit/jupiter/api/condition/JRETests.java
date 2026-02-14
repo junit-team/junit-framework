@@ -150,6 +150,7 @@ public class JRETests {
 		jre25();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	@EnabledOnJre(OTHER)
 	void jreOther() {

@@ -80,7 +80,23 @@ public enum JRE {
 	 * <p>This constant returns {@link Integer#MAX_VALUE} for its
 	 * {@linkplain #version() version}. To retrieve the actual version number,
 	 * use {@link #currentVersionNumber()}.
+	 *
+	 * @deprecated You should not reference this constant directly. If you need
+	 * to reference a later version than supported by this enum, you should
+	 * instead use an {@code int} with one of the following annotation
+	 * attributes:
+	 *
+	 * <ul>
+	 *     <li>{@link EnabledOnJre#versions()}</li>
+	 *     <li>{@link DisabledOnJre#versions()}</li>
+	 *     <li>{@link EnabledForJreRange#minVersion()}</li>
+	 *     <li>{@link EnabledForJreRange#maxVersion()}</li>
+	 *     <li>{@link DisabledForJreRange#minVersion()}</li>
+	 *     <li>{@link DisabledForJreRange#maxVersion()}</li>
+	 * </ul>
 	 */
+	@API(status = DEPRECATED, since = "6.1") //
+	@Deprecated(since = "6.1")
 	OTHER(Integer.MAX_VALUE);
 
 	static final int UNDEFINED_VERSION = -1;

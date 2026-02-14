@@ -20,6 +20,7 @@ public class JavaVersionPredicates {
 				|| @endif@endfor;
 	}
 
+	@SuppressWarnings("deprecation")
 	static boolean onOtherVersion() {
 		return JRE.OTHER.isCurrentVersion();
 	}

@@ -52,6 +52,7 @@ class EnabledForJreRangeIntegrationTests {
 		fail("should result in a configuration exception");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	@Disabled("Only used in a unit test via reflection")
 	@EnabledForJreRange(min = JAVA_17, max = OTHER)
@@ -82,6 +83,7 @@ class EnabledForJreRangeIntegrationTests {
 
 	@Test
 	@Disabled("Only used in a unit test via reflection")
+	@SuppressWarnings("deprecation")
 	@EnabledForJreRange(max = OTHER)
 	void maxOther() {
 		fail("should result in a configuration exception");
@@ -247,6 +249,7 @@ class EnabledForJreRangeIntegrationTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	@EnabledForJreRange(min = OTHER, max = OTHER)
 	void minOtherMaxOther() {
 		assertFalse(onKnownVersion());
