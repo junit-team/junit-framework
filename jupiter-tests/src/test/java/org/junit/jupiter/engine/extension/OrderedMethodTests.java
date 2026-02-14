@@ -12,13 +12,13 @@ package org.junit.jupiter.engine.extension;
 
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Constants.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.jupiter.api.MethodOrderer.Random.RANDOM_SEED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Order.DEFAULT;
-import static org.junit.jupiter.engine.Constants.DEFAULT_PARALLEL_EXECUTION_MODE;
-import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME;
 
@@ -373,7 +373,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 		var testKit = EngineTestKit.engine("junit-jupiter") //
 				.configurationParameter(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true") //
-				.configurationParameter(DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent") //
+				.configurationParameter(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent") //
 				.configurationParameter(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType.name()) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, criticalSeverity.name());
 		if (defaultOrderer != null) {
@@ -385,7 +385,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 	private Events executeRandomTestCaseInParallelWithRandomSeed(String seed) {
 		var configurationParameters = Map.of(//
 			PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true", //
-			DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent", //
+			DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent", //
 			RANDOM_SEED_PROPERTY_NAME, seed //
 		);
 

@@ -14,18 +14,18 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Constants.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
-import static org.junit.jupiter.engine.Constants.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.DEFAULT_PARALLEL_EXECUTION_MODE;
-import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
@@ -228,7 +228,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		ParallelMethodsTestCase.barriersPerClass.clear();
 
 		var configParams = Map.of( //
-			DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent", //
+			DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent", //
 			DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME, "same_thread");
 		var results = executeWithFixedParallelism(3, configParams, ParallelMethodsTestCaseA.class,
 			ParallelMethodsTestCaseB.class, ParallelMethodsTestCaseC.class);
@@ -266,7 +266,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 	@Test
 	void runsIsolatedTestsLastToMaximizeParallelism() {
 		var configParams = Map.of( //
-			DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent", //
+			DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent", //
 			PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME, "3" //
 		);
 		Class<?>[] testClasses = { IsolatedTestCase.class, SuccessfulParallelTestCase.class };
@@ -575,7 +575,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 	}
 
 	private Events executeConcurrently(int parallelism, Class<?>... testClasses) {
-		Map<String, String> configParams = Map.of(DEFAULT_PARALLEL_EXECUTION_MODE, "concurrent");
+		Map<String, String> configParams = Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent");
 		return executeWithFixedParallelism(parallelism, configParams, testClasses) //
 				.allEvents();
 	}

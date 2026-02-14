@@ -12,7 +12,7 @@ package org.junit.jupiter.engine.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.engine.Constants.DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

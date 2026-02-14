@@ -27,8 +27,6 @@ module org.junit.jupiter.engine {
 	requires org.junit.platform.engine;
 	requires org.opentest4j;
 
-	// exports org.junit.jupiter.engine; // Constants...
-
 	uses org.junit.jupiter.api.extension.Extension;
 
 	provides org.junit.platform.engine.TestEngine

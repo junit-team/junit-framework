@@ -13,10 +13,10 @@ package org.junit.jupiter.engine.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
-import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,6 @@ import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDirFactory;
-import org.junit.jupiter.engine.Constants;
 import org.junit.jupiter.engine.descriptor.CustomDisplayNameGenerator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -166,8 +166,8 @@ class DefaultJupiterConfigurationTests {
 	@EnumSource(ParallelExecutorServiceType.class)
 	void doesNotReportAnyIssuesIfParallelExecutionIsEnabledAndConfigurationParameterIsSet(
 			ParallelExecutorServiceType executorServiceType) {
-		var parameters = Map.of(JupiterConfiguration.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, true, //
-			JupiterConfiguration.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType);
+		var parameters = Map.of(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, true, //
+			Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType);
 		List<DiscoveryIssue> issues = new ArrayList<>();
 
 		new DefaultJupiterConfiguration(ConfigurationParametersFactoryForTests.create(parameters),
@@ -178,7 +178,7 @@ class DefaultJupiterConfigurationTests {
 
 	@Test
 	void asksUsersToTryWorkerThreadPoolHierarchicalExecutorServiceIfParallelExecutionIsEnabled() {
-		var parameters = Map.of(JupiterConfiguration.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, true);
+		var parameters = Map.of(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, true);
 		List<DiscoveryIssue> issues = new ArrayList<>();
 
 		new DefaultJupiterConfiguration(configurationParameters(parameters), dummyOutputDirectoryCreator(),
