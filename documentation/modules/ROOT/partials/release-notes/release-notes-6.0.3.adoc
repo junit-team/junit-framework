@@ -1,7 +1,7 @@
 [[v6.0.3]]
 == 6.0.3
 
-*Date of Release:* ❓
+*Date of Release:* February 15, 2026
 
 *Scope:* Bug fixes and enhancements since 6.0.2
 
@@ -19,16 +19,6 @@ repository on GitHub.
 * A deadlock issue in `NamespacedHierarchicalStore.computeIfAbsent(N, K, Function)` has
   been fixed.
 
-[[v6.0.3-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.0.3-junit-platform-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
 
 [[v6.0.3-junit-jupiter]]
 === JUnit Jupiter
@@ -40,31 +30,8 @@ repository on GitHub.
   in a test running on a Java runtime whose version is higher than the version of the last
   `JAVA_*` constant in the `JRE` enum.
 
-[[v6.0.3-junit-jupiter-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.0.3-junit-jupiter-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
 
 [[v6.0.3-junit-vintage]]
 === JUnit Vintage
 
-[[v6.0.3-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.0.3-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.0.3-junit-vintage-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
+No changes.
