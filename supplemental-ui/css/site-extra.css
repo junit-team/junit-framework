@@ -33,6 +33,7 @@ kbd,
 pre {
     font-family: "JetBrains Mono Variable", monospace;
     font-optical-sizing: auto;
+    font-variant-ligatures: none;
 }
 
 .navbar {
