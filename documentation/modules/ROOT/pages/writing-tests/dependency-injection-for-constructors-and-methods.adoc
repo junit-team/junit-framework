@@ -25,10 +25,26 @@ There are currently three built-in resolvers that are registered automatically.
 following demonstrates how to have `TestInfo` injected into a `@BeforeAll` method, test
 class constructor, `@BeforeEach` method, and `@Test` method.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/TestInfoDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TestInfoDemo.kt[tags=user_guide]
+----
+--
+====
 
 * `{RepetitionExtension}`: if a method parameter in a `@RepeatedTest`, `@BeforeEach`, or
   `@AfterEach` method is of type `{RepetitionInfo}`, the `RepetitionExtension` will supply
@@ -49,37 +65,56 @@ In JUnit Jupiter you should use `TestReporter` where you used to print informati
 `stdout` or `stderr` in JUnit 4. Some IDEs print report entries to `stdout` or display
 them in the user interface for test results.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/TestReporterDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TestReporterDemo.kt[tags=user_guide]
+----
+--
+====
 
 NOTE: Other parameter resolvers must be explicitly enabled by registering appropriate
 xref:extensions/overview.adoc[extensions] via `@ExtendWith`.
 
-Check out the `{RandomParametersExtension}` for an example of a custom
-`{ParameterResolver}`. While not intended to be production-ready, it demonstrates the
-simplicity and expressiveness of both the extension model and the parameter resolution
-process. `MyRandomParametersTest` demonstrates how to inject random values into `@Test`
-methods.
+Check out the xref:extensions/registering-extensions.adoc#RandomNumberExtension[`RandomNumberExtension`]
+for an example of a custom `{ParameterResolver}`. While not intended to be production-ready,
+it demonstrates the simplicity and expressiveness of both the extension model and the
+parameter resolution process. `MyRandomParametersTest` demonstrates how to inject random
+values into a constructor and a `@Test` method.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
-@ExtendWith(RandomParametersExtension.class)
-class MyRandomParametersTest {
-
-	@Test
-	void injectsInteger(@Random int i, @Random int j) {
-		assertNotEquals(i, j);
-	}
-
-	@Test
-	void injectsDouble(@Random double d) {
-		assertEquals(0.0, d, 1.0);
-	}
-
-}
+include::example$java/example/MyRandomParametersTest.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/MyRandomParametersTest.kt[tags=user_guide]
+----
+--
+====
 
 For real-world use cases, check out the source code for the `{MockitoExtension}` and the
 `{SpringExtension}`.

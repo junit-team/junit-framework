@@ -76,14 +76,13 @@ In order to use parameterized classes or tests you need to add a dependency on t
 === Parameterized Tests
 
 Parameterized test methods _consume_ arguments directly from the configured source (see
-<<sources>>) following a one-to-one correlation between
-argument source index and method parameter index (see examples in
-<<sources-CsvSource>>). However, a parameterized test
+<<sources>>) following a one-to-one correlation between argument source index and method
+parameter index (see examples in <<sources-CsvSource>>). However, a parameterized test
 method may also choose to _aggregate_ arguments from the source into a single object
-passed to the method (see <<argument-aggregation>>).
-Additional arguments may also be provided by a `ParameterResolver` (e.g., to obtain an
-instance of `TestInfo`, `TestReporter`, etc.). Specifically, a parameterized test method
-must declare formal parameters according to the following rules.
+passed to the method (see <<argument-aggregation>>). Additional arguments may also be
+provided by a `ParameterResolver` — for example, to obtain an instance of `TestInfo`,
+`TestReporter`, and so forth. Specifically, a parameterized test method must declare
+formal parameters according to the following rules.
 
 * Zero or more _indexed parameters_ must be declared first.
 * Zero or more _aggregators_ must be declared next.
@@ -249,11 +248,12 @@ for parameterized tests that accept a single argument.
    - `@NullSource` cannot be used for a parameter that has a primitive type.
 * `{EmptySource}`: provides a single _empty_ argument to the annotated
   `@ParameterizedClass` or `@ParameterizedTest` for parameters of the following types:
-  `java.lang.String`, `java.util.Collection` (and concrete subtypes with a `public` no-arg
-  constructor), `java.util.List`, `java.util.Set`, `java.util.SortedSet`,
-  `java.util.NavigableSet`, `java.util.Map` (and concrete subtypes with a `public` no-arg
-  constructor), `java.util.SortedMap`, `java.util.NavigableMap`, primitive arrays (e.g.,
-  `int[]`, `char[][]`, etc.), object arrays (e.g., `String[]`, `Integer[][]`, etc.).
+  `java.lang.String`, `java.lang.Iterable`, `java.util.Iterator`, `java.util.ListIterator`
+  `java.util.Collection` (and concrete subtypes with a `public` no-arg constructor),
+  `java.util.List`, `java.util.Set`, `java.util.SortedSet`, `java.util.NavigableSet`,
+  `java.util.Map` (and concrete subtypes with a `public` no-arg constructor),
+  `java.util.SortedMap`, `java.util.NavigableMap`, primitive arrays (for example, `int[]`,
+  `char[][]`, etc.), object arrays (for example, `String[]`, `Integer[][]`, etc.).
 * `{NullAndEmptySource}`: a _composed annotation_ that combines the functionality of
   `@NullSource` and `@EmptySource`.
 
@@ -362,16 +362,16 @@ with `@TestInstance(Lifecycle.PER_CLASS)`; whereas, factory methods in external 
 must always be `static`.
 
 Each factory method must generate a _stream_ of _arguments_, and each set of arguments
-within the stream will be provided as the physical arguments for individual invocations
-of the annotated `@ParameterizedClass` or `@ParameterizedTest`. Generally speaking this
+within the stream will be provided as the physical arguments for individual invocations of
+the annotated `@ParameterizedClass` or `@ParameterizedTest`. Generally speaking this
 translates to a `Stream` of `Arguments` (i.e., `Stream<Arguments>`); however, the actual
 concrete return type can take on many forms. In this context, a "stream" is anything that
 JUnit can reliably convert into a `Stream`, such as `Stream`, `DoubleStream`,
 `LongStream`, `IntStream`, `Collection`, `Iterator`, `Iterable`, an array of objects or
 primitives, or any type that provides an `iterator(): Iterator` method (such as, for
 example, a `kotlin.sequences.Sequence`). The "arguments" within the stream can be supplied
-as an instance of `Arguments`, an array of objects (e.g., `Object[]`), or a single value
-if the parameterized class or test method accepts a single argument.
+as an instance of `Arguments`, an array of objects (for example, `Object[]`), or a single
+value if the parameterized class or test method accepts a single argument.
 
 If the return type is `Stream` or one of the primitive streams,
 JUnit will properly close it by calling `BaseStream.close()`,
@@ -431,7 +431,7 @@ factory method is referenced by its name since there is only one such method in 
 class. If there are several local methods with the same name, parameters can also be
 provided to differentiate them – for example, `@MethodSource("factoryMethod()")` or
 `@MethodSource("factoryMethod(java.lang.String)")`. Alternatively, the factory method
-can be referenced by its fully qualified method name, e.g.
+can be referenced by its fully qualified method name — for example,
 `@MethodSource("example.MyTests#factoryMethod(java.lang.String)")`.
 
 [source,java,indent=0]
@@ -880,7 +880,7 @@ integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
 | `double`/`Double`          | `"1.0"`                                  -> `1.0d`
 | `Enum` subclass            | `"SECONDS"`                              -> `TimeUnit.SECONDS`
 | `java.io.File`             | `"/path/to/file"`                        -> `new File("/path/to/file")`
-| `java.lang.Class`          | `"java.lang.Integer"`                    -> `java.lang.Integer.class` _(use `$` for nested classes, e.g. `"java.lang.Thread$State"`)_
+| `java.lang.Class`          | `"java.lang.Integer"`                    -> `java.lang.Integer.class` _(use `$` for nested classes: `"java.lang.Thread$State"`)_
 | `java.lang.Class`          | `"byte"`                                 -> `byte.class` _(primitive types are supported)_
 | `java.lang.Class`          | `"char[]"`                               -> `char[].class` _(array types are supported)_
 | `java.math.BigDecimal`     | `"123.456e789"`                          -> `new BigDecimal("123.456e789")`
@@ -1199,9 +1199,8 @@ will be `"\"\\t\""` which is printed as `"\t"` instead of a blank string or invi
 character. The same applies for a character argument `'\t'`, whose physical representation
 in the display name would be `"'\\t'"` which is printed as `'\t'`.
 
-For a concrete example, if you run the first `nullEmptyAndBlankStrings(String text)`
-parameterized test method from the
-<<sources-null-and-empty>> section above, the following
+For a concrete example, if you run the first `nullValuesAndBlankStrings(String text)`
+parameterized test method from the <<sources-null-and-empty>> section above, the following
 display names are generated.
 
 ----
@@ -1214,8 +1213,7 @@ display names are generated.
 ----
 
 If you run the first `testWithCsvSource(String fruit, int rank)` parameterized test method
-from the <<sources-CsvSource>> section above, the
-following display names are generated.
+from the <<sources-CsvSource>> section above, the following display names are generated.
 
 ----
 [1] fruit = "apple", rank = "1"
@@ -1275,7 +1273,7 @@ You may use `ParameterResolver` extensions with `@ParameterizedTest` methods. Ho
 method parameters that are resolved by argument sources need to come first in the
 parameter list. Since a test class may contain regular tests as well as parameterized
 tests with different parameter lists, values from argument sources are not resolved for
-lifecycle methods (e.g. `@BeforeEach`) and test class constructors.
+lifecycle methods (for example, `@BeforeEach`) and test class constructors.
 
 [source,java,indent=0]
 ----
@@ -1294,7 +1292,7 @@ IDE.
 You may use `ParameterResolver` extensions with `@ParameterizedClass` constructors.
 However, if constructor injection is used, constructor parameters that are resolved by
 argument sources need to come first in the parameter list. Values from argument sources
-are not resolved for regular lifecycle methods (e.g. `@BeforeEach`).
+are not resolved for regular lifecycle methods (for example, `@BeforeEach`).
 
 In addition to regular lifecycle methods, parameterized classes may declare
 `{BeforeParameterizedClassInvocation}` and `{AfterParameterizedClassInvocation}` lifecycle

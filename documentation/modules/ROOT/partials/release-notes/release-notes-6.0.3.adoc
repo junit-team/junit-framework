@@ -1,0 +1,69 @@
+[[v6.0.3]]
+== 6.0.3
+
+*Date of Release:* ❓
+
+*Scope:* Bug fixes and enhancements since 6.0.2
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/116?closed=1+[6.0.3] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v6.0.3-junit-platform]]
+=== JUnit Platform
+
+[[v6.0.3-junit-platform-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[v6.0.3-junit-platform-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.0.3-junit-platform-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
+
+
+[[v6.0.3-junit-jupiter]]
+=== JUnit Jupiter
+
+[[v6.0.3-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* `@EnabledOnJre` and `@DisabledOnJre` once again work reliably when used with `JRE.OTHER`
+  in a test running on a Java runtime whose version is higher than the version of the last
+  `JAVA_*` constant in the `JRE` enum.
+
+[[v6.0.3-junit-jupiter-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.0.3-junit-jupiter-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
+
+
+[[v6.0.3-junit-vintage]]
+=== JUnit Vintage
+
+[[v6.0.3-junit-vintage-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[v6.0.3-junit-vintage-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.0.3-junit-vintage-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓

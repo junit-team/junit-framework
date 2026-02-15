@@ -1,3 +1,5 @@
+import junitbuild.generator.GenerateJreRelatedSourceCode
+
 plugins {
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.code-generator")
@@ -46,4 +48,12 @@ tasks {
 			""")
 		}
 	}
+	val generateJreTestDouble by registering(GenerateJreRelatedSourceCode::class) {
+		templateDir = layout.projectDirectory.dir("src/templates/resources/main")
+		targetDir = layout.buildDirectory.dir("generated/sources/jte/testDouble")
+		maxVersion = 22
+		fileNamePrefix = "TestDouble"
+		additionalTemplateParameters = mapOf("classNamePrefix" to "TestDouble")
+	}
+	sourceSets.testFixtures.get().java.srcDir(generateJreTestDouble.map { it.targetDir })
 }

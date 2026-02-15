@@ -2,6 +2,7 @@
 @import gg.jte.support.ForSupport
 @import junitbuild.generator.model.JRE
 
+@param String classNamePrefix = ""
 @param int minRuntimeVersion
 @param List<JRE> allJres
 @param String licenseHeader
@@ -32,7 +33,7 @@ import org.apiguardian.api.API;
  * @see DisabledForJreRange
  */
 @API(status = STABLE, since = "5.1")
-public enum JRE {
+public enum ${classNamePrefix}JRE {
 
 	/**
 	 * An undefined JRE version.
@@ -80,7 +81,23 @@ public enum JRE {
 	 * <p>This constant returns {@link Integer#MAX_VALUE} for its
 	 * {@linkplain #version() version}. To retrieve the actual version number,
 	 * use {@link #currentVersionNumber()}.
+	 *
+	 * @deprecated You should not reference this constant directly. If you need
+	 * to reference a later version than supported by this enum, you should
+	 * instead use an {@code int} with one of the following annotation
+	 * attributes:
+	 *
+	 * <ul>
+	 *     <li>{@link EnabledOnJre#versions()}</li>
+	 *     <li>{@link DisabledOnJre#versions()}</li>
+	 *     <li>{@link EnabledForJreRange#minVersion()}</li>
+	 *     <li>{@link EnabledForJreRange#maxVersion()}</li>
+	 *     <li>{@link DisabledForJreRange#minVersion()}</li>
+	 *     <li>{@link DisabledForJreRange#maxVersion()}</li>
+	 * </ul>
 	 */
+	@API(status = DEPRECATED, since = "6.1") //
+	@Deprecated(since = "6.1")
 	OTHER(Integer.MAX_VALUE);
 
 	static final int UNDEFINED_VERSION = -1;
@@ -91,7 +108,7 @@ public enum JRE {
 
 	private final int version;
 
-	JRE(int version) {
+	${classNamePrefix}JRE(int version) {
 		this.version = version;
 	}
 
@@ -125,7 +142,7 @@ public enum JRE {
 	}
 
 	/**
-	 * {@return the {@link JRE} for the currently executing JVM, potentially
+	 * {@return the {@link ${classNamePrefix}JRE} for the currently executing JVM, potentially
 	 * {@link #OTHER}}
 	 *
 	 * @since 5.7
@@ -134,19 +151,19 @@ public enum JRE {
 	 */
 	@API(status = DEPRECATED, since = "5.12")
 	@Deprecated(since = "5.12")
-	public static JRE currentVersion() {
+	public static ${classNamePrefix}JRE currentVersion() {
 		return currentJre();
 	}
 
 	/**
-	 * {@return the {@link JRE} for the currently executing JVM, potentially
+	 * {@return the {@link ${classNamePrefix}JRE} for the currently executing JVM, potentially
 	 * {@link #OTHER}}
 	 *
 	 * @since 5.12
 	 * @see #currentVersionNumber()
 	 */
 	@API(status = STABLE, since = "5.12")
-	public static JRE currentJre() {
+	public static ${classNamePrefix}JRE currentJre() {
 		return switch (CURRENT_VERSION) {<%--
 				--%>@for(var jre : allJres)
 			case ${jre.getVersion()} -> JAVA_${jre.getVersion()};<%--
@@ -169,17 +186,28 @@ public enum JRE {
 	}
 
 	/**
-	 * {@return {@code true} if the supplied version number is known to be the
-	 * Java Runtime Environment version for the currently executing JVM or if
-	 * the supplied version number is {@code -1} and the current JVM version
-	 * could not be determined}
+	 * Determine if the supplied version number is considered to be the current
+	 * JRE version.
 	 *
+	 * <p>Returns {@code true} if either of the following is {@code true}.
+	 *
+	 * <ul>
+	 * <li>The supplied version number is known to be the Java Runtime Environment
+	 * version for the currently executing JVM.</li>
+	 * <li>The supplied version number is {@link Integer#MAX_VALUE} and the current
+	 * {@code JRE} is {@link JRE#OTHER OTHER}.</li>
+	 * </ul>
+	 *
+	 * @return {@code true} if the supplied version number is considered to be
+	 * the current JRE version
 	 * @since 5.12
 	 * @see Runtime.Version#feature()
+	 * @see #isCurrentVersion()
+	 * @see #currentJre()
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
 	public static boolean isCurrentVersion(int version) {
-		return version == CURRENT_VERSION;
+		return (version == CURRENT_VERSION) || (version == ${classNamePrefix}JRE.currentJre().version);
 	}
 
 	static boolean isCurrentVersionWithinRange(int min, int max) {

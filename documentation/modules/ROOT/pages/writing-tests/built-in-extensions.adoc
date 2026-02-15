@@ -296,23 +296,24 @@ respective annotations.
 Tests annotated with one of the above annotations will never execute in parallel with
 tests annotated with `@DefaultLocale` or `@DefaultTimeZone`.
 
-[[SystemProperties]]
-== The System Property Extensions
+[[system-properties]]
+== The System Properties Extension
 
-The system property extensions provide a set of annotations that work together to clear,
-set, and restore system properties.
+The system properties extension supports a set of annotations that work together to clear,
+set, and restore JVM system properties.
 
-[[SystemProperties-clear-and-set]]
+[[system-properties-clear-and-set]]
 === @ClearSystemProperty and @SetSystemProperty
 
-The `{ClearSystemProperty}` and `{SetSystemProperty}` annotations can be used to clear
-and set, respectively, the values of system properties for test execution. Both
+The `{ClearSystemProperty}` and `{SetSystemProperty}` annotations can be used to clear and
+set, respectively, the values of JVM system properties for test execution. Both
 annotations work on the test method and class level and are repeatable, combinable, and
 inherited from higher-level containers. After the annotated method has been executed, the
 properties configured in the annotation will be restored to their original value or the
 value of the higher-level container, or will be cleared if they did not previously have a
-value. Other system properties that are changed during the test are _not_ restored
-(unless <<SystemProperties-restore, explicitly enabled>> via `{RestoreSystemProperties}`).
+value. Other system properties that are changed during the test are _not_ restored (unless
+restoration is <<system-properties-restore, explicitly enabled>> via
+`{RestoreSystemProperties}`).
 
 For example, clearing a system property for test execution can be done as follows.
 
@@ -354,7 +355,7 @@ With class-level configuration, the specified system properties are cleared or s
 and reset after each individual test in the annotated class.
 ====
 
-[[SystemProperties-restore]]
+[[system-properties-restore]]
 === @RestoreSystemProperties
 
 The `{RestoreSystemProperties}` annotation can be used to restore changes to system
@@ -400,7 +401,7 @@ property changes made within the annotated class are completely restored after t
 lifecycle, ensuring that changes are not visible to `SomeOtherTestClass`. Note that
 `SomeOtherTestClass` uses the `@ReadsSystemProperty` annotation, which ensures that JUnit
 does not schedule the class to run during any test known to modify system properties (see
-<<SystemProperties-thread-safety>>).
+<<system-properties-thread-safety>>).
 
 [source,java,indent=0]
 ----
@@ -414,7 +415,7 @@ Some other test class, running later:
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
 ----
 
-[[SystemProperties-combined-usage]]
+[[system-properties-combined-usage]]
 === Combining @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties
 
 The three system property annotations can be combined, which can be useful when some
@@ -436,7 +437,7 @@ the referenced properties. `@RestoreSystemProperties` is only needed if system p
 are modified during a test in some way _other than_ via the `Clear` and `Set` annotations.
 ====
 
-[[SystemProperties-thread-safety]]
+[[system-properties-thread-safety]]
 === Thread Safety
 
 Since system properties are global state, reading and writing them during

@@ -215,10 +215,11 @@ public class EngineDiscoveryOrchestrator {
 
 	LauncherDiscoveryListener getLauncherDiscoveryListener(LauncherDiscoveryRequest discoveryRequest,
 			DiscoveryIssueCollector issueCollector) {
-		return ListenerRegistry.copyOf(launcherDiscoveryListenerRegistry) //
+		var delegate = ListenerRegistry.copyOf(launcherDiscoveryListenerRegistry) //
 				.add(discoveryRequest.getDiscoveryListener()) //
 				.add(issueCollector) //
 				.getCompositeListener();
+		return new DiscoveryIssueReportingDiscoveryListener(delegate);
 	}
 
 	private void applyPostDiscoveryFilters(Map<TestEngine, EngineResultInfo> testEngineDescriptors,

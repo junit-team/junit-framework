@@ -4,8 +4,24 @@ The following example provides a glimpse at the minimum requirements for writing
 JUnit Jupiter. Subsequent sections of this chapter will provide further details on all
 available features.
 
-[source,java,indent=0]
 .A first test case
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/MyFirstJUnitJupiterTests.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/MyFirstJUnitJupiterTests.kt[tags=user_guide]
+----
+--
+====

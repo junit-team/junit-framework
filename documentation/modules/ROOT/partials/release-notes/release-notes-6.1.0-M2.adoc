@@ -15,10 +15,12 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* Clarify `TestDescriptor` implementation requirements.
-* Recheck done condition before rejecting extraneous worker in
-  `WorkerThreadPoolHierarchicalTestExecutorService`
-* Add missing precondition checks to `Launcher` implementations
+* A deadlock issue in `NamespacedHierarchicalStore.computeIfAbsent(N, K, Function)` has
+  been fixed.
+* `WorkerThreadPoolHierarchicalTestExecutorService` now rechecks the _done_ condition
+  before rejecting an extraneous worker.
+* Missing precondition checks have been added to `Launcher` implementations.
+* Failures to resolve selectors are now forwarded by the Suite Engine.
 
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -28,8 +30,13 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
+* `TestDescriptor` implementation requirements have now been clarified in the
+  corresponding Javadoc.
 * The `UniqueId.uniqueIdFormat` field has been removed, reducing the size of `UniqueId`
   objects.
+* New `selectClasspathResources(String...)` and `selectClasspathResources(List<String)`
+  methods in `DiscoverySelectors`.
+
 
 [[v6.1.0-M2-junit-jupiter]]
 === JUnit Jupiter
@@ -37,44 +44,47 @@ repository on GitHub.
 [[v6.1.0-M2-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* Enable recursive updates when using `ExtensionContext.Store.computeIfAbsent(K, Function, Class)`.
-  This provides parity with the deprecated `ExtensionContext.Store.getOrComputeIfAbsent(K, Function, Class)`
+* Recursive updates are now supported when using `computeIfAbsent(K, Function, Class)` in
+  the `ExtensionContext.Store`, providing parity with the deprecated
+  `getOrComputeIfAbsent(K, Function, Class)` method.
 
 [[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* ❓
+* The `OTHER` constant of `{JRE}` has been deprecated in favor of the `int`/`int[]`
+  annotation attributes of `{EnabledOnJre}`, `{DisabledOnJre}`, `{EnabledForJreRange}`,
+  and `{DisabledForJreRange}` which allow referencing JRE versions later than those
+  supported by the `JRE` enum.
 
 [[v6.1.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
 * `JAVA_27` has been added to the `JRE` enum for use with `JRE`-based execution conditions.
 * https://www.junit-pioneer.org/[JUnit Pioneer]'s `DefaultLocaleExtension` and
-  `DefaultTimeZoneExtension` are now part of the JUnit Jupiter. Find examples in the
+  `DefaultTimeZoneExtension` are now part of JUnit Jupiter. Find examples in the
   xref:writing-tests/built-in-extensions.adoc#DefaultLocaleAndTimeZone[User Guide].
-* https://www.junit-pioneer.org/[JUnit Pioneer]'s `SystemPropertyExtension` is now part of
-  JUnit Jupiter. Find examples in the
-  xref:writing-tests/built-in-extensions.adoc#SystemProperties[User Guide]. Note: There are
-  some implementation differences between JUnit Pioneer and Jupiter. For details, see the
-  https://github.com/junit-team/junit-framework/pull/5258[corresponding pull request].
-* Support the creation of `Arguments` from iterables. These additions make it
-easier to dynamically build arguments from collections when using
-`@ParameterizedTest`:
+* JUnit Pioneer's `SystemPropertyExtension` is now part of JUnit Jupiter. Find examples in
+  the xref:writing-tests/built-in-extensions.adoc#system-properties[User Guide]. For
+  details regarding implementation differences between JUnit Pioneer and Jupiter, see the
+  corresponding https://github.com/junit-team/junit-framework/pull/5258[pull request].
+* `Arguments` may now be created from instances of `Iterable` via the following new
+  methods which make it easier to dynamically build arguments from collections when using
+  `@ParameterizedTest`.
 ** `Arguments.of(Iterable<?>)`
-** `Arguments.argumentsFrom(Iterable<?>)` (alias)
+** `Arguments.argumentsFrom(Iterable<?>)` (alias for `of(Iterable<?>)`)
 ** `Arguments.argumentSetFrom(String, Iterable<?>)`
 ** `Arguments.toList()` — returns a mutable `List<@Nullable Object>`
-* Exclude competing `@Deprecated` factory methods in
+* `@EmptySource` now supports `Iterable`, `Iterator`, and `ListIterator`.
+* `@Deprecated` factory methods are now excluded in the
   xref:writing-tests/parameterized-classes-and-tests.adoc#argument-conversion-implicit-fallback[fallback String-to-Object]
-  converter.
-* Trim internal stack frames from `AssertionFailedError` stack traces.
-* Introduce new `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)`
-  methods for `AssertionFailureBuilder`. These allow user defined assertions to
-  trim their stacktrace.
+  conversion algorithm.
+* Internal stack frames are now removed from `AssertionFailedError` stack traces.
+* New `trimStacktrace(Class<?>)` and `retainStackTraceElements(int)` methods in
+  `AssertionFailureBuilder` which allow user-defined assertions to trim their stack traces.
 * Generic inline value classes (such as `kotlin.Result<T>`) can now be used as parameters
-  in `@ParameterizedTest` methods when `kotlin-reflect` is on the classpath.
-  Note: Primitive-wrapper inline value classes (e.g., `UInt`, custom value classes wrapping
-  primitives) are not yet supported.
+  in `@ParameterizedTest` methods when `kotlin-reflect` is on the classpath. Note,
+  however, that primitive-wrapper inline value classes (such as `UInt` or custom value
+  classes wrapping primitives) are not yet supported.
 
 
 [[v6.1.0-M2-junit-vintage]]

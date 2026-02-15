@@ -223,22 +223,39 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			rejectIfClosed();
 			return defaultCreator.apply(key);
 		});
-		var storedValue = storedValues.compute(compositeKey, //
-			(__, oldStoredValue) -> {
-				// guard against race conditions, repeated from getStoredValue
-				// this filters out failures inserted by computeIfAbsent
-				if (StoredValue.isNonNullAndPresent(oldStoredValue)) {
-					return oldStoredValue;
-				}
-				rejectIfClosed();
-				return candidateStoredValue;
-			});
 
-		// Only the caller that created the candidateStoredValue may run it
-		if (candidateStoredValue.equals(storedValue)) {
-			return candidateStoredValue.execute();
+		for (;;) {
+			var storedValue = storedValues.compute(compositeKey, //
+				(__, oldStoredValue) -> {
+					// The old stored value remains if a) there is an old stored value and
+					// b) the old stored value has not yet been evaluated or c) the old
+					// stored value was evaluated to a present value.
+					//
+					// Condition b ensures that we do not evaluate or await the evaluation
+					// inside `compute`, this would lead to recursive updates or deadlocks
+					// respectively.
+					// Condition c guards against race conditions (repeated from
+					// getStoredValue) this filters out failures inserted by
+					// computeIfAbsent.
+					if (oldStoredValue != null && (!oldStoredValue.isDone() || oldStoredValue.isPresent())) {
+						return oldStoredValue;
+					}
+					rejectIfClosed();
+					return candidateStoredValue;
+				});
+
+			// Only the caller that created the candidateStoredValue may run it
+			if (candidateStoredValue.equals(storedValue)) {
+				return candidateStoredValue.execute();
+			}
+			// Implicitly awaits evaluation and uses the result if it was present.
+			// this filters out failures inserted by computeIfAbsent
+			// Otherwise, another thread won the race but failed to insert a
+			// present value so we try again.
+			if (storedValue.isPresent()) {
+				return storedValue.evaluate();
+			}
 		}
-		return storedValue.evaluate();
 	}
 
 	/**
@@ -269,29 +286,44 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			rejectIfClosed();
 			return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
 		});
-		var storedValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
-			// guard against race conditions
-			// computeIfAbsent replaces both null and absent values
-			if (StoredValue.evaluateIfNotNull(oldStoredValue) != null) {
-				return oldStoredValue;
-			}
-			rejectIfClosed();
-			return candidateStoredValue;
-		});
 
-		// In a race condition either put, getOrComputeIfAbsent, or another
-		// computeIfAbsent call put a non-null value in the store
-		if (!candidateStoredValue.equals(storedValue)) {
-			return requireNonNull(storedValue.evaluate());
+		for (;;) {
+			var storedValue = storedValues.compute(compositeKey, (__, oldStoredValue) -> {
+				// The old stored value remains if a) there is an old stored value and
+				// b) the old stored value has not yet been evaluated or c) the old
+				// stored value evaluated to null.
+				//
+				// Condition b ensures that we do not evaluate or await the evaluation
+				// inside `compute`, this would lead to recursive updates or deadlocks
+				// respectively.
+				// Condition c ensures we replace both null and absent values.
+				if (oldStoredValue != null && (!oldStoredValue.isDone() || oldStoredValue.evaluate() != null)) {
+					return oldStoredValue;
+				}
+				rejectIfClosed();
+				return candidateStoredValue;
+			});
+
+			// Only the caller that created the candidateStoredValue may run it
+			// and see the exception.
+			if (candidateStoredValue.equals(storedValue)) {
+				Object newResult = candidateStoredValue.execute();
+				// DeferredOptionalValue is quite heavy, replace with lighter container
+				if (candidateStoredValue.isPresent()) {
+					storedValues.computeIfPresent(compositeKey, compareAndPut(storedValue, newStoredValue(newResult)));
+				}
+				return newResult;
+			}
+
+			// Awaits evaluation and uses the stored value if it was not null
+			// this ensures we replace both null and absent values.
+			// Otherwise, another thread won the race but failed to insert a
+			// non-null value so we try again.
+			Object storedResult = storedValue.evaluate();
+			if (storedResult != null) {
+				return storedResult;
+			}
 		}
-		// Only the caller that created the candidateStoredValue may run it
-		// and see the exception.
-		Object newResult = candidateStoredValue.execute();
-		// DeferredOptionalValue is quite heavy, replace with lighter container
-		if (candidateStoredValue.isPresent()) {
-			storedValues.computeIfPresent(compositeKey, compareAndPut(storedValue, newStoredValue(newResult)));
-		}
-		return newResult;
 	}
 
 	private static <N> BiFunction<CompositeKey<N>, StoredValue, StoredValue> compareAndPut(StoredValue expectedValue,
@@ -488,6 +520,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		boolean isPresent();
 
+		boolean isDone();
+
 		static @Nullable Object evaluateIfNotNull(@Nullable StoredValue value) {
 			return value != null ? value.evaluate() : null;
 		}
@@ -519,6 +553,11 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			}
 
 			@Override
+			public boolean isDone() {
+				return true;
+			}
+
+			@Override
 			public int order() {
 				return order;
 			}
@@ -544,6 +583,11 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			@Override
 			public boolean isPresent() {
 				return true;
+			}
+
+			@Override
+			public boolean isDone() {
+				return delegate.isDone();
 			}
 
 			@Nullable
@@ -578,6 +622,11 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			@Override
 			public boolean isPresent() {
 				return evaluate() != null;
+			}
+
+			@Override
+			public boolean isDone() {
+				return delegate.isDone();
 			}
 
 			Object execute() {
@@ -669,6 +718,10 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				UnrecoverableExceptions.rethrowIfUnrecoverable(cause);
 				throw throwAsUncheckedException(cause);
 			}
+		}
+
+		boolean isDone() {
+			return task.isDone();
 		}
 	}
 

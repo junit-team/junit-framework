@@ -47,10 +47,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -641,6 +643,33 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 			var results = execute("testWithEmptySourceForStringAndTestInfo", String.class, TestInfo.class);
 			results.testEvents().succeeded().assertEventsMatchExactly(
 				event(test(), displayName("[1] argument = \"\"")));
+		}
+
+		/**
+		 * @since 6.1
+		 */
+		@Test
+		void executesWithEmptySourceForIterable() {
+			var results = execute("testWithEmptySourceForIterable", Iterable.class);
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
+		}
+
+		/**
+		 * @since 6.1
+		 */
+		@Test
+		void executesWithEmptySourceForIterator() {
+			var results = execute("testWithEmptySourceForIterator", Iterator.class);
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
+		}
+
+		/**
+		 * @since 6.1
+		 */
+		@Test
+		void executesWithEmptySourceForListIterator() {
+			var results = execute("testWithEmptySourceForListIterator", ListIterator.class);
+			results.testEvents().succeeded().assertEventsMatchExactly(event(test(), displayName("[1] argument = []")));
 		}
 
 		/**
@@ -1630,6 +1659,24 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		void testWithEmptySourceForStringAndTestInfo(String argument, TestInfo testInfo) {
 			assertThat(argument).isEmpty();
 			assertThat(testInfo).isNotNull();
+		}
+
+		@ParameterizedTest
+		@EmptySource
+		void testWithEmptySourceForIterable(Iterable<?> argument) {
+			assertThat(argument).isEmpty();
+		}
+
+		@ParameterizedTest
+		@EmptySource
+		void testWithEmptySourceForIterator(Iterator<?> argument) {
+			assertThat(argument).isExhausted();
+		}
+
+		@ParameterizedTest
+		@EmptySource
+		void testWithEmptySourceForListIterator(ListIterator<?> argument) {
+			assertThat(argument).isExhausted();
 		}
 
 		@ParameterizedTest

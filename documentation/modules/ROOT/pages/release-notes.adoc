@@ -9,6 +9,8 @@ include::partial$release-notes/release-notes-6.1.0-M2.adoc[]
 
 include::partial$release-notes/release-notes-6.1.0-M1.adoc[]
 
+include::partial$release-notes/release-notes-6.0.3.adoc[]
+
 include::partial$release-notes/release-notes-6.0.2.adoc[]
 
 include::partial$release-notes/release-notes-6.0.1.adoc[]

@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava17;
 import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava18;
 import static org.junit.jupiter.api.condition.JavaVersionPredicates.onJava19;
 import static org.junit.jupiter.api.condition.JavaVersionPredicates.onKnownVersion;
+import static org.junit.jupiter.api.condition.JavaVersionPredicates.onOtherVersion;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ class DisabledForJreRangeIntegrationTests {
 		fail("should result in a configuration exception");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	@Disabled("Only used in a unit test via reflection")
 	@DisabledForJreRange(min = JAVA_17, max = OTHER)
@@ -74,6 +76,7 @@ class DisabledForJreRangeIntegrationTests {
 
 	@Test
 	@Disabled("Only used in a unit test via reflection")
+	@SuppressWarnings("deprecation")
 	@DisabledForJreRange(max = OTHER)
 	void maxOther() {
 		fail("should result in a configuration exception");
@@ -192,9 +195,10 @@ class DisabledForJreRangeIntegrationTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	@DisabledForJreRange(min = OTHER, max = OTHER)
 	void minOtherMaxOther() {
-		assertTrue(onKnownVersion());
+		assertTrue(onKnownVersion() || onOtherVersion());
 	}
 
 	@Test

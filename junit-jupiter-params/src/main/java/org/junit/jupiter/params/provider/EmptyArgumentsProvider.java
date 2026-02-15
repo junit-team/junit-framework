@@ -17,10 +17,13 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
@@ -52,6 +55,15 @@ class EmptyArgumentsProvider implements ArgumentsProvider {
 
 		if (String.class.equals(parameterType)) {
 			return Stream.of(arguments(""));
+		}
+		if (Iterable.class.equals(parameterType)) {
+			return Stream.of(arguments(EmptyIterable.INSTANCE));
+		}
+		if (Iterator.class.equals(parameterType)) {
+			return Stream.of(arguments(EmptyIterator.INSTANCE));
+		}
+		if (ListIterator.class.equals(parameterType)) {
+			return Stream.of(arguments(EmptyListIterator.INSTANCE));
 		}
 		if (Collection.class.equals(parameterType)) {
 			return Stream.of(arguments(Collections.emptySet()));
@@ -99,6 +111,91 @@ class EmptyArgumentsProvider implements ArgumentsProvider {
 		}
 		catch (NoSuchMethodException e) {
 			return Optional.empty();
+		}
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	private static class EmptyIterable<E> implements Iterable<E> {
+
+		private static final EmptyIterable<Object> INSTANCE = new EmptyIterable<>();
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Iterator<E> iterator() {
+			return (Iterator<E>) EmptyIterator.INSTANCE;
+		}
+
+		@Override
+		public String toString() {
+			return "[]";
+		}
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	private static sealed class EmptyIterator<E> implements Iterator<E> permits EmptyListIterator {
+
+		private static final EmptyIterator<Object> INSTANCE = new EmptyIterator<>();
+
+		@Override
+		public boolean hasNext() {
+			return false;
+		}
+
+		@Override
+		public E next() {
+			throw new NoSuchElementException();
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String toString() {
+			return "[]";
+		}
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	private static final class EmptyListIterator<E> extends EmptyIterator<E> implements ListIterator<E> {
+
+		private static final EmptyListIterator<Object> INSTANCE = new EmptyListIterator<>();
+
+		@Override
+		public boolean hasPrevious() {
+			return false;
+		}
+
+		@Override
+		public E previous() {
+			throw new NoSuchElementException();
+		}
+
+		@Override
+		public int nextIndex() {
+			return 0;
+		}
+
+		@Override
+		public int previousIndex() {
+			return -1;
+		}
+
+		@Override
+		public void set(E e) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void add(E e) {
+			throw new UnsupportedOperationException();
 		}
 	}
 

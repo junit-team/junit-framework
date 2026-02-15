@@ -7,6 +7,7 @@ antora:
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: junit
   - require: '@springio/antora-extensions/root-attachments-extension'
+  - require: '@springio/antora-xref-extension'
 site:
   title: JUnit User Guide
   start_page: junit::overview.adoc
@@ -17,8 +18,22 @@ content:
     start_path: documentation
     worktrees: true
 asciidoc:
+  extensions:
+  - '@asciidoctor/tabs'
   attributes:
+    page-pagination: ''
+    idprefix: '@'
+    idseparator: '-@'
+    table-caption: false
+    table-frame: 'none@'
+    table-grid: 'rows@'
+    table-stripes: 'odd@'
+    figure-caption: false
+    example-caption: false
+    listing-caption: false
+    hide-uri-scheme: '@'
     attribute-missing: warn
+    tabs-sync-option: ''
 runtime:
   log:
     failure_level: warn
@@ -26,3 +41,20 @@ ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
     snapshot: true
+  supplemental_files:
+    - path: css/vendor/tabs.css
+      contents: @GIT_REPO_ROOT@/documentation/node_modules/@asciidoctor/tabs/dist/css/tabs.css
+    - path: js/vendor/tabs.js
+      contents: @GIT_REPO_ROOT@/documentation/node_modules/@asciidoctor/tabs/dist/js/tabs.js
+    - path: partials/footer-scripts.hbs
+      contents: |
+        <script id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
+        <script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>
+        <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-code-language"></script>
+        {{#if env.SITE_SEARCH_PROVIDER}}
+        {{> search-scripts}}
+        {{/if}}
+    - path: partials/head-styles.hbs
+      contents: |
+        <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
+        <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css">

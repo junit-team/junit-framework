@@ -24,20 +24,27 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
 
 /**
- * Marks tests that write system properties but don't use the system property extension themselves.
+ * {@code @WritesSystemProperty} marks tests that write system properties but do
+ * not use the JVM system properties extensions themselves.
  *
- * <p>During
- * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
- * all tests annotated with {@link ClearSystemProperty}, {@link SetSystemProperty}, {@link ReadsSystemProperty}, and {@link WritesSystemProperty}
- * are scheduled in a way that guarantees correctness under mutation of shared global state.</p>
+ * <p>During <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">
+ * parallel test execution</a>, all tests annotated with
+ * {@link SetSystemProperty @SetSystemProperty},
+ * {@link ClearSystemProperty @ClearSystemProperty},
+ * {@link ReadsSystemProperty @ReadsSystemProperty}, and
+ * {@link WritesSystemProperty @WritesSystemProperty} are scheduled in a way that
+ * guarantees correctness under mutation of shared global state.
  *
- * <p>For more details and examples, see
- * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#SystemProperty">the documentation on <code>@ClearSystemProperty</code> and <code>@SetSystemProperty</code></a>.</p>
+ * <p>For further details and examples, see the documentation on all JVM system
+ * property annotations in the
+ * <a href="https://docs.junit.org/current/writing-tests/built-in-extensions.html#system-properties">
+ * User Guide</a>.
  *
  * @since 6.1
+ * @see ReadsSystemProperty @ReadsSystemProperty
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PACKAGE, ElementType.TYPE })
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Inherited
 @ResourceLock(value = Resources.SYSTEM_PROPERTIES, mode = ResourceAccessMode.READ_WRITE)
 @API(status = EXPERIMENTAL, since = "6.1")

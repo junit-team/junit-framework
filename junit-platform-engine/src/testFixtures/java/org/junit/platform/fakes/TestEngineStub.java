@@ -38,7 +38,7 @@ public class TestEngineStub implements TestEngine {
 
 	@Override
 	public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
-		return new TestDescriptorStub(UniqueId.forEngine(getId()), getId());
+		return new TestDescriptorStub(uniqueId.appendEngine(getId()), getId());
 	}
 
 	@Override

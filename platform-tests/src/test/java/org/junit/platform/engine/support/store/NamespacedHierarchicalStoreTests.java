@@ -33,6 +33,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -431,6 +432,30 @@ public class NamespacedHierarchicalStoreTests {
 			assertThat(values).hasSize(threads).containsOnly(1);
 		}
 
+		@SuppressWarnings("deprecation")
+		@RepeatedTest(value = 10, failureThreshold = 1)
+		void simulateRaceConditionInGetOrComputeIfAbsentWithResizingMap() throws Exception {
+			int threads = 10;
+			AtomicInteger counter = new AtomicInteger();
+			List<Object> values;
+
+			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+				values = executeConcurrently(threads, //
+					() -> {
+						// Simulate other extensions computing values,
+						// this will trigger several resizes of the store
+						for (int i = 0; i < 16; i++) {
+							localStore.getOrComputeIfAbsent(namespace, i, __ -> value);
+						}
+						return requireNonNull(
+							localStore.getOrComputeIfAbsent(namespace, key, it -> counter.incrementAndGet()));
+					});
+			}
+
+			assertEquals(1, counter.get());
+			assertThat(values).hasSize(threads).containsOnly(1);
+		}
+
 		@Test
 		void simulateRaceConditionInComputeIfAbsent() throws Exception {
 			int threads = 10;
@@ -440,6 +465,29 @@ public class NamespacedHierarchicalStoreTests {
 			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
 				values = executeConcurrently(threads, //
 					() -> requireNonNull(localStore.computeIfAbsent(namespace, key, it -> counter.incrementAndGet())));
+			}
+
+			assertEquals(1, counter.get());
+			assertThat(values).hasSize(threads).containsOnly(1);
+		}
+
+		@RepeatedTest(value = 10, failureThreshold = 1)
+		void simulateRaceConditionInComputeIfAbsentWithResizingMap() throws Exception {
+			int threads = 10;
+			AtomicInteger counter = new AtomicInteger();
+			List<Object> values;
+
+			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+				values = executeConcurrently(threads, //
+					() -> {
+						// Simulate other extensions computing values,
+						// this will trigger several resizes of the store
+						for (int i = 0; i < 16; i++) {
+							localStore.computeIfAbsent(namespace, i, s -> value);
+						}
+						return requireNonNull(
+							localStore.computeIfAbsent(namespace, key, it -> counter.incrementAndGet()));
+					});
 			}
 
 			assertEquals(1, counter.get());

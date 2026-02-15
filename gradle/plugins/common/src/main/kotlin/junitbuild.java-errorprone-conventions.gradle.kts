@@ -59,7 +59,7 @@ tasks.withType<JavaCompile>().configureEach {
 				enable()
 			}
 			onlyNullMarked = true
-			isJSpecifyMode = true
+			jspecifyMode = true
 			checkContracts = true
 			suppressionNameAliases.add("DataFlowIssue")
 		}
@@ -70,13 +70,8 @@ tasks.withType<JavaCompile>().named { it.startsWith("compileTest") }.configureEa
 	options.errorprone.nullaway {
 		handleTestAssertionLibraries = true
 		excludedFieldAnnotations.addAll(
-			"org.junit.jupiter.api.io.TempDir",
 			"org.junit.jupiter.params.Parameter",
 			"org.junit.runners.Parameterized.Parameter",
-			"org.mockito.Captor",
-			"org.mockito.InjectMocks",
-			"org.mockito.Mock",
-			"org.mockito.Spy",
 		)
 	}
 }

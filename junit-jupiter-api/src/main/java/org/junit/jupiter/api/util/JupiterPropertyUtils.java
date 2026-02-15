@@ -38,13 +38,12 @@ final class JupiterPropertyUtils {
 				.filter(propertyName -> !keySet.contains(propertyName)) //
 				.toList();
 		if (!defaultPropertyNames.isEmpty()) {
-			throw new ExtensionConfigurationException(
-				("SystemPropertyExtension was configured to restore the system properties by [%s]. " //
-						+ "It was not possible to create an accurate snapshot of the system properties using Properties::clone because default properties [%s] were present." //
-				).formatted( //
-					context.getElement().orElseThrow(), //
-					String.join(", ", defaultPropertyNames) //
-				));
+			throw new ExtensionConfigurationException("""
+					SystemPropertiesExtension was configured to restore the system properties by [%s]. \
+					However, it was not possible to create an accurate snapshot of the system properties \
+					using Properties::clone, because default properties were present: %s""" //
+					.formatted(context.getElement().orElseThrow(), defaultPropertyNames));
 		}
 	}
+
 }

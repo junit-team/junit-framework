@@ -33,6 +33,9 @@ import org.apiguardian.api.API;
  *
  * <ul>
  * <li>{@link java.lang.String}</li>
+ * <li>{@link java.lang.Iterable}</li>
+ * <li>{@link java.util.Iterator}</li>
+ * <li>{@link java.util.ListIterator}</li>
  * <li>{@link java.util.Collection} and concrete subtypes with a public no-arg constructor</li>
  * <li>{@link java.util.List}</li>
  * <li>{@link java.util.Set}</li>
