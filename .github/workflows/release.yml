@@ -228,6 +228,7 @@ jobs:
       - name: Update main branch (only for GA releases)
         if: ${{ inputs.dryRun == false && !contains(inputs.releaseVersion, '-') }}
         run: |
+          git fetch origin main
           git switch main
           git merge --ff-only "${RELEASE_TAG}"
           git push origin main
