@@ -23,7 +23,7 @@ import org.junit.jupiter.api.parallel.Execution;
  * Collection of configuration constants for the Jupiter test engine.
  *
  * @since 6.1
- * @see <a href="https://docs.junit.org/6.0.2/running-tests/configuration-parameters.html">User Guide</a>
+ * @see <a href="https://docs.junit.org/current/running-tests/configuration-parameters.html">User Guide</a>
  * section about configuration parameters
  */
 @API(status = STABLE, since = "6.1")
