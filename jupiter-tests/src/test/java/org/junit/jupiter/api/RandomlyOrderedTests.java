@@ -11,8 +11,8 @@
 package org.junit.jupiter.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME;
-import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 
 import java.util.Collections;

@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.engine.config.CachingJupiterConfiguration;
 import org.junit.jupiter.engine.config.DefaultJupiterConfiguration;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -80,7 +81,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 		JupiterConfiguration configuration = getJupiterConfiguration(request);
 		if (configuration.isParallelExecutionEnabled()) {
 			return ParallelHierarchicalTestExecutorServiceFactory.create(new PrefixedConfigurationParameters(
-				request.getConfigurationParameters(), JupiterConfiguration.PARALLEL_CONFIG_PREFIX));
+				request.getConfigurationParameters(), Constants.PARALLEL_CONFIG_PREFIX));
 		}
 		return super.createExecutorService(request);
 	}

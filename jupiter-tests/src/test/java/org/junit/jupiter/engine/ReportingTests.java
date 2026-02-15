@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.engine;
 
-import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;

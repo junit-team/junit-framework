@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.logging.Logger;
@@ -63,13 +64,13 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 	 * Factory for creating and populating a new root registry with the default
 	 * extensions.
 	 *
-	 * <p>If the {@link org.junit.jupiter.engine.Constants#EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME}
+	 * <p>If the {@link Constants#EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME}
 	 * configuration parameter has been set to {@code true}, extensions will be
 	 * auto-detected using Java's {@link ServiceLoader} mechanism and automatically
 	 * registered after the default extensions.
 	 *
 	 * <p>If the
-	 * {@value org.junit.jupiter.engine.Constants#EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME}
+	 * {@value Constants#EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME}
 	 * configuration parameter has been set to {@code true}, the
 	 * {@link PreInterruptThreadDumpPrinter} will be registered.
 	 *

@@ -24,38 +24,17 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.Extension;
-import org.junit.jupiter.api.extension.PreInterruptCallback;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDirFactory;
-import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
-import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
 
 /**
  * @since 5.4
  */
 @API(status = INTERNAL, since = "5.4")
 public interface JupiterConfiguration {
-
-	String EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.include";
-	String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
-	String DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME = "junit.jupiter.conditions.deactivate";
-	String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
-	String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
-	String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
-			+ ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME;
-	String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
-	String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
-	String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
-	String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
-	String EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME = PreInterruptCallback.THREAD_DUMP_ENABLED_PROPERTY_NAME;
-	String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = TestInstance.Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
-	String DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME = DisplayNameGenerator.DEFAULT_GENERATOR_PROPERTY_NAME;
-	String DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME = MethodOrderer.DEFAULT_ORDER_PROPERTY_NAME;
-	String DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME = ClassOrderer.DEFAULT_ORDER_PROPERTY_NAME;
-	String DEFAULT_TEST_INSTANTIATION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME = ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
 
 	Predicate<Class<? extends Extension>> getFilterForAutoDetectedExtensions();
 

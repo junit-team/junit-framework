@@ -20,6 +20,7 @@ import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -108,7 +109,7 @@ class DefaultExecutionModeTests extends AbstractJupiterTestEngineTests {
 			@Nullable ExecutionMode executionMode) {
 		LauncherDiscoveryRequestBuilder request = request().selectors(selectClass(testClass));
 		if (executionMode != null) {
-			request.configurationParameter(Constants.DEFAULT_PARALLEL_EXECUTION_MODE, executionMode.name());
+			request.configurationParameter(Constants.DEFAULT_EXECUTION_MODE_PROPERTY_NAME, executionMode.name());
 		}
 		return (JupiterEngineDescriptor) discoverTests(request.build()).getEngineDescriptor();
 	}

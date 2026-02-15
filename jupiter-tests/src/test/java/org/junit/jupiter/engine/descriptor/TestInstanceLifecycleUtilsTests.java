@@ -11,9 +11,9 @@
 package org.junit.jupiter.engine.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
-import static org.junit.jupiter.engine.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.engine.descriptor.TestInstanceLifecycleUtils.getTestInstanceLifecycle;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;

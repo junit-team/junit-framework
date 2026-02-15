@@ -12,10 +12,10 @@ package org.junit.jupiter.engine.extension;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.PreInterruptCallback;
 import org.junit.jupiter.api.extension.PreInterruptContext;
-import org.junit.jupiter.engine.Constants;
 
 /**
  * Default implementation of {@link PreInterruptCallback}, which prints the stacks
