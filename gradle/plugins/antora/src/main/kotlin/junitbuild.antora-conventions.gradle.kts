@@ -8,7 +8,9 @@ plugins {
 }
 
 val configuration = extensions.create<AntoraConfiguration>("antora")
-configuration.siteDir.convention(layout.buildDirectory.dir("antora-site"))
+
+val siteDir = layout.buildDirectory.dir("antora-site")
+configuration.siteDir.value(siteDir).finalizeValue()
 
 repositories {
 	// Redefined here because the Node.js plugin adds a repo
@@ -64,13 +66,12 @@ tasks.register<NpxTask>("antora") {
 	args.addAll("--clean", "--stacktrace", "--fetch", "--log-format=pretty", "--log-level=all")
 
 	args.add("--to-dir")
-	val outputDir = configuration.siteDir
-	args.add(outputDir.map { it.asFile.toRelativeString(layout.projectDirectory.asFile) })
-	outputs.dir(outputDir)
+	args.add(siteDir.map { it.asFile.toRelativeString(layout.projectDirectory.asFile) })
+	outputs.dir(siteDir)
 
 	outputs.upToDateWhen { false } // not all inputs are tracked
 
-	val playbook = generateAntoraPlaybook.map { it.rootSpec.destinationDir.resolve("antora-playbook.yml") }
+	val playbook = generateAntoraPlaybook.map { it.rootSpec.destinationDir!!.resolve("antora-playbook.yml") }
 	args.add(playbook.map { it.toRelativeString(layout.projectDirectory.asFile) })
 	inputs.file(playbook)
 
