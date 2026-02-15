@@ -392,8 +392,10 @@ tasks {
 						""".trimIndent()
 
 				val version = project.version.toString().replace("-SNAPSHOT", "")
-				val versionedDocsPathOrUrl = if (System.getenv("CI") == "true") "https://docs.junit.org/$version"
-				else layout.buildDirectory.dir("antora-site").get().asFile.toURI().resolve(version).toString()
+				val targetUrl = if (buildParameters.ci)
+					"https://docs.junit.org/$version"
+				else
+					project.antora.siteDir.get().asFile.toURI().resolve(version).toString()
 
 				filter { line ->
 					var result = if (line.startsWith("<head>")) line.replace("<head>", "<head>$favicon") else line
@@ -401,7 +403,7 @@ tasks {
 						result = result.replace("${baseUrl}$moduleName/", baseUrl)
 					}
 
-					result = result.replace("https://docs.junit.org/current", versionedDocsPathOrUrl)
+					result = result.replace("https://docs.junit.org/current", targetUrl)
 
 					return@filter result
 				}
