@@ -270,7 +270,7 @@ jobs:
               generate_release_notes: true,
               body: `JUnit ${jupiterVersion} = Platform ${platformVersion} + Jupiter ${jupiterVersion} + Vintage ${vintageVersion}\n\nSee [Release Notes](https://docs.junit.org/${releaseVersion}/release-notes/).`,
               prerelease: releaseVersion.includes("-"),
-              make_latest: false,
+              make_latest: "false",
             };
             console.log(requestBody);
             await github.rest.repos.createRelease(requestBody);
