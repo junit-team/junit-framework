@@ -40,16 +40,15 @@ tasks.javadoc {
 		}
 	}
 
+	val sourceUrl = "https://docs.junit.org/current"
+	val targetUrl = "https://docs.junit.org/${version.toString().replace("-SNAPSHOT", "")}"
 	doLast {
-		val version = project.version.toString().replace("-SNAPSHOT", "")
-		val targetUrl = "https://docs.junit.org/current"
-
 		destinationDir!!.walkTopDown()
 			.filter { it.extension == "html" }
 			.forEach { file ->
 				val content = file.readText()
-				if (content.contains(targetUrl)) {
-					val updatedContent = content.replace(targetUrl, "https://docs.junit.org/$version")
+				if (content.contains(sourceUrl)) {
+					val updatedContent = content.replace(sourceUrl, targetUrl)
 					file.writeText(updatedContent)
 				}
 			}
