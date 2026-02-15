@@ -390,11 +390,21 @@ tasks {
 						<link rel="icon" type="image/png" href="https://junit.org/assets/img/junit-diamond.png">
 						<link rel="icon" type="image/svg+xml" href="https://junit.org/assets/img/junit-diamond-adaptive.svg" sizes="any">
 						""".trimIndent()
+
+				val version = project.version.toString().replace("-SNAPSHOT", "")
+				val targetUrl = if (buildParameters.ci)
+					"https://docs.junit.org/$version"
+				else
+					project.antora.siteDir.get().asFile.toURI().resolve(version).toString()
+
 				filter { line ->
 					var result = if (line.startsWith("<head>")) line.replace("<head>", "<head>$favicon") else line
 					externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
 						result = result.replace("${baseUrl}$moduleName/", baseUrl)
 					}
+
+					result = result.replace("https://docs.junit.org/current", targetUrl)
+
 					return@filter result
 				}
 			}

@@ -17,8 +17,14 @@ val license: License by rootProject.extra
 val rootTargetDir = layout.buildDirectory.dir("generated/sources/jte")
 
 val generateCode by tasks.registering {
+	dependsOn(tasks.withType<GenerateJreRelatedSourceCode>())
 	group = LifecycleBasePlugin.BUILD_GROUP
 	description = "Generates JRE-related source code."
+}
+
+tasks.withType<GenerateJreRelatedSourceCode>().configureEach {
+	licenseHeaderFile.convention(license.headerFile)
+	additionalTemplateParameters.convention(emptyMap())
 }
 
 sourceSets.named { it != templates.name }.configureEach {
@@ -30,12 +36,7 @@ sourceSets.named { it != templates.name }.configureEach {
 			templates.resources.srcDirs.single().resolve(sourceSetName)
 		}))
 		targetDir.convention(rootTargetDir.map { it.dir(sourceSetName) })
-		licenseHeaderFile.convention(license.headerFile)
 	}
 
 	java.srcDir(task.map { it.targetDir })
-
-	generateCode {
-		dependsOn(task)
-	}
 }

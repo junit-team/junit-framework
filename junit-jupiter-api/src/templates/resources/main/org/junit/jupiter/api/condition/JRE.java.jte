@@ -2,6 +2,7 @@
 @import gg.jte.support.ForSupport
 @import junitbuild.generator.model.JRE
 
+@param String classNamePrefix = ""
 @param int minRuntimeVersion
 @param List<JRE> allJres
 @param String licenseHeader
@@ -32,7 +33,7 @@ import org.apiguardian.api.API;
  * @see DisabledForJreRange
  */
 @API(status = STABLE, since = "5.1")
-public enum JRE {
+public enum ${classNamePrefix}JRE {
 
 	/**
 	 * An undefined JRE version.
@@ -107,7 +108,7 @@ public enum JRE {
 
 	private final int version;
 
-	JRE(int version) {
+	${classNamePrefix}JRE(int version) {
 		this.version = version;
 	}
 
@@ -141,7 +142,7 @@ public enum JRE {
 	}
 
 	/**
-	 * {@return the {@link JRE} for the currently executing JVM, potentially
+	 * {@return the {@link ${classNamePrefix}JRE} for the currently executing JVM, potentially
 	 * {@link #OTHER}}
 	 *
 	 * @since 5.7
@@ -150,19 +151,19 @@ public enum JRE {
 	 */
 	@API(status = DEPRECATED, since = "5.12")
 	@Deprecated(since = "5.12")
-	public static JRE currentVersion() {
+	public static ${classNamePrefix}JRE currentVersion() {
 		return currentJre();
 	}
 
 	/**
-	 * {@return the {@link JRE} for the currently executing JVM, potentially
+	 * {@return the {@link ${classNamePrefix}JRE} for the currently executing JVM, potentially
 	 * {@link #OTHER}}
 	 *
 	 * @since 5.12
 	 * @see #currentVersionNumber()
 	 */
 	@API(status = STABLE, since = "5.12")
-	public static JRE currentJre() {
+	public static ${classNamePrefix}JRE currentJre() {
 		return switch (CURRENT_VERSION) {<%--
 				--%>@for(var jre : allJres)
 			case ${jre.getVersion()} -> JAVA_${jre.getVersion()};<%--
@@ -206,7 +207,7 @@ public enum JRE {
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
 	public static boolean isCurrentVersion(int version) {
-		return (version == CURRENT_VERSION) || (version == JRE.currentJre().version);
+		return (version == CURRENT_VERSION) || (version == ${classNamePrefix}JRE.currentJre().version);
 	}
 
 	static boolean isCurrentVersionWithinRange(int min, int max) {

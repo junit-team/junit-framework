@@ -20,7 +20,7 @@ runs:
     - uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5.0.1
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
-    - uses: testlens-app/setup-testlens@cbf46f117aa1b73f2f101616333e9625b46d4b95 # v1.6.1
+    - uses: testlens-app/setup-testlens@304aa0888a2485ef4135a55d6eb7352e0714a2c1 # v1.7.0
     - shell: bash
       env:
         JAVA_HOME: ${{ steps.setup-gradle-jdk.outputs.path }}
