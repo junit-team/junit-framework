@@ -160,7 +160,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to enable dumping the stack of all
-	 * {@linkplain Thread threads} to {@code System.out} when a timeout has occurred.
+	 * {@linkplain Thread threads} to {@code System.out} when a timeout has occurred: {@value}
 	 *
 	 * <p>This behavior is disabled by default.
 	 */
@@ -182,7 +182,7 @@ public final class Constants {
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
 
 	/**
-	 * Property name used to enable auto-closing of {@link AutoCloseable} instances
+	 * Property name used to enable auto-closing of {@link AutoCloseable} instances: {@value}
 	 *
 	 * <p>By default, auto-closing is enabled.
 	 *
@@ -287,14 +287,14 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all testable and
-	 * lifecycle methods: {@value}.
+	 * lifecycle methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_TIMEOUT_PROPERTY_NAME
 	 */
 	public static final String DEFAULT_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_PROPERTY_NAME;
 
 	/**
-	 * Property name used to set the default timeout for all testable methods: {@value}.
+	 * Property name used to set the default timeout for all testable methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -302,7 +302,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link Test @Test} methods: {@value}.
+	 * {@link Test @Test} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -310,7 +310,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link TestTemplate @TestTemplate} methods: {@value}.
+	 * {@link TestTemplate @TestTemplate} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -318,14 +318,14 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link TestFactory @TestFactory} methods: {@value}.
+	 * {@link TestFactory @TestFactory} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
 	public static final String DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
-	 * Property name used to set the default timeout for all lifecycle methods: {@value}.
+	 * Property name used to set the default timeout for all lifecycle methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -333,7 +333,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link BeforeAll @BeforeAll} methods: {@value}.
+	 * {@link BeforeAll @BeforeAll} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -341,7 +341,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link BeforeEach @BeforeEach} methods: {@value}.
+	 * {@link BeforeEach @BeforeEach} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -349,7 +349,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link AfterEach @AfterEach} methods: {@value}.
+	 * {@link AfterEach @AfterEach} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
@@ -357,14 +357,14 @@ public final class Constants {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link AfterAll @AfterAll} methods: {@value}.
+	 * {@link AfterAll @AfterAll} methods: {@value}
 	 *
 	 * @see Timeout#DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
 	public static final String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
-	 * Property name used to configure whether timeouts are applied to tests: {@value}.
+	 * Property name used to configure whether timeouts are applied to tests: {@value}
 	 *
 	 * @see Timeout#TIMEOUT_MODE_PROPERTY_NAME
 	 */
@@ -385,7 +385,7 @@ public final class Constants {
 	public static final String DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME = ClassOrderer.DEFAULT_ORDER_PROPERTY_NAME;
 
 	/**
-	 * Property name used to set the default timeout thread mode.
+	 * Property name used to set the default timeout thread mode: {@value}
 	 *
 	 * @see Timeout
 	 * @see Timeout.ThreadMode
