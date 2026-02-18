@@ -26,7 +26,7 @@ import org.apiguardian.api.API;
 public final class Constants {
 
 	/**
-	 * Indicates whether parallel execution is enabled for the JUnit Vintage engine.
+	 * Property name used to indicate whether parallel execution is enabled for the JUnit Vintage engine: {@value}
 	 *
 	 * <p>Set this property to {@code true} to enable parallel execution of tests.
 	 * Defaults to {@code false}.
@@ -37,7 +37,7 @@ public final class Constants {
 	public static final String PARALLEL_EXECUTION_ENABLED = "junit.vintage.execution.parallel.enabled";
 
 	/**
-	 * Specifies the size of the thread pool to be used for parallel execution.
+	 * Property name used to specify the size of the thread pool to be used for parallel execution: {@value}
 	 *
 	 * <p>Set this property to an integer value to specify the number of threads
 	 * to be used for parallel execution. Defaults to the number of available
@@ -49,8 +49,8 @@ public final class Constants {
 	public static final String PARALLEL_POOL_SIZE = "junit.vintage.execution.parallel.pool-size";
 
 	/**
-	 * Indicates whether parallel execution is enabled for test classes in the
-	 * JUnit Vintage engine.
+	 * Property name used to indicate whether parallel execution is enabled for test classes in the
+	 * JUnit Vintage engine: {@value}
 	 *
 	 * <p>Set this property to {@code true} to enable parallel execution of test
 	 * classes. Defaults to {@code false}.
@@ -61,8 +61,8 @@ public final class Constants {
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
 
 	/**
-	 * Indicates whether parallel execution is enabled for test methods in the
-	 * JUnit Vintage engine.
+	 * Property name used to indicate whether parallel execution is enabled for test methods in the
+	 * JUnit Vintage engine: {@value}
 	 *
 	 * <p>Set this property to {@code true} to enable parallel execution of test
 	 * methods. Defaults to {@code false}.
@@ -74,7 +74,7 @@ public final class Constants {
 
 	/**
 	 * Property name used to configure whether the JUnit Vintage engine should
-	 * report discovery issues such as deprecation notices.
+	 * report discovery issues such as deprecation notices: {@value}
 	 *
 	 * <p>Set this property to {@code false} to disable reporting of discovery
 	 * issues. Defaults to {@code true}.
