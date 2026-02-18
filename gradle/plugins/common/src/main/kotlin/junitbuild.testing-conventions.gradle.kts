@@ -197,6 +197,10 @@ tasks.withType<Test>().configureEach {
 dependencies {
 	components.all<ByteBuddyAlignmentRule>()
 
+	constraints {
+		testImplementation(dependencyFromLibs("byteBuddy"))
+	}
+
 	testImplementation(platform(dependencyFromLibs("mockito-bom")))
 	testImplementation(dependencyFromLibs("assertj"))
 	testImplementation(dependencyFromLibs("mockito-junit-jupiter"))
