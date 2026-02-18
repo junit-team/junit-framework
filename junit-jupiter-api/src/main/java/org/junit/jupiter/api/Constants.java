@@ -100,6 +100,22 @@ public final class Constants {
 	public static final String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 
 	/**
+	 * Property name used to enable auto-detection and registration of extensions via
+	 * Java's {@link java.util.ServiceLoader} mechanism: {@value}
+	 *
+	 * <p>The default behavior is not to perform auto-detection.
+	 */
+	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
+
+	/**
+	 * Property name used to enable auto-closing of {@link AutoCloseable} instances: {@value}
+	 *
+	 * <p>By default, auto-closing is enabled.
+	 *
+	 */
+	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
+
+	/**
 	 * Property name used to provide patterns for deactivating conditions: {@value}
 	 *
 	 * <h4>Pattern Matching Syntax</h4>
@@ -151,14 +167,6 @@ public final class Constants {
 	public static final String DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME = DisplayNameGenerator.DEFAULT_GENERATOR_PROPERTY_NAME;
 
 	/**
-	 * Property name used to enable auto-detection and registration of extensions via
-	 * Java's {@link java.util.ServiceLoader} mechanism: {@value}
-	 *
-	 * <p>The default behavior is not to perform auto-detection.
-	 */
-	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
-
-	/**
 	 * Property name used to enable dumping the stack of all
 	 * {@linkplain Thread threads} to {@code System.out} when a timeout has occurred: {@value}
 	 *
@@ -180,14 +188,6 @@ public final class Constants {
 	 *
 	 */
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
-
-	/**
-	 * Property name used to enable auto-closing of {@link AutoCloseable} instances: {@value}
-	 *
-	 * <p>By default, auto-closing is enabled.
-	 *
-	 */
-	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 
 	/**
 	 * Property name used to set the default test execution mode: {@value}
