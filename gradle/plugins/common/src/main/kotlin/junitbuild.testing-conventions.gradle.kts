@@ -1,5 +1,6 @@
 import com.gradle.develocity.agent.gradle.internal.test.PredictiveTestSelectionConfigurationInternal
 import com.gradle.develocity.agent.gradle.test.PredictiveTestSelectionMode
+import junitbuild.deps.ByteBuddyAlignmentRule
 import junitbuild.extensions.bundleFromLibs
 import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.trackOperationSystemAsInput
@@ -194,6 +195,8 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
+	components.all<ByteBuddyAlignmentRule>()
+
 	testImplementation(platform(dependencyFromLibs("mockito-bom")))
 	testImplementation(dependencyFromLibs("assertj"))
 	testImplementation(dependencyFromLibs("mockito-junit-jupiter"))
