@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1
 
 plugins {
-	kotlin("jvm") version "2.2.21"
+	kotlin("jvm") version "2.3.10"
 }
 
 repositories {
