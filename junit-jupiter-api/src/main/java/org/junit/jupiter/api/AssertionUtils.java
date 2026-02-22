@@ -17,6 +17,7 @@ import java.util.Deque;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 
@@ -27,7 +28,6 @@ import org.junit.platform.commons.util.UnrecoverableExceptions;
  * @since 5.0
  */
 class AssertionUtils {
-
 	private AssertionUtils() {
 		/* no-op */
 	}
@@ -128,6 +128,15 @@ class AssertionUtils {
 	static boolean objectsAreEqual(@Nullable Object obj1, @Nullable Object obj2) {
 		if (obj1 == null) {
 			return (obj2 == null);
+		}
+		if (obj2 == null) {
+			return false;
+		}
+		if (Boolean.getBoolean("junit.jupiter.disallow.arrays.in.equals.checks")) {
+			if (obj1.getClass().isArray() && obj2.getClass().isArray()) {
+				throw new JUnitException(
+					"Detected array arguments:" + " " + obj1.getClass() + " and " + obj2.getClass());
+			}
 		}
 		return obj1.equals(obj2);
 	}

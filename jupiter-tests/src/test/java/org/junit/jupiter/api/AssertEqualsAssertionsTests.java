@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.function.Executable;
+import org.junit.platform.commons.JUnitException;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -748,6 +749,25 @@ class AssertEqualsAssertionsTests {
 			assertEquals(wrapper, primitive, () -> "message");
 		}
 
+	}
+
+	@Nested
+	class ArraysAsArguments {
+		@Test
+		void objects() {
+			Object object = new Object();
+			Object array1 = new Object[] { object };
+			Object array2 = new Object[] { object };
+			try {
+				System.setProperty("junit.jupiter.disallow.arrays.in.equals.checks", "true");
+				var exception = assertThrows(JUnitException.class, () -> assertEquals(array1, array2));
+				assertEquals("Detected array arguments: class [Ljava.lang.Object; and class [Ljava.lang.Object;",
+					exception.getMessage());
+			}
+			finally {
+				System.clearProperty("junit.jupiter.disallow.arrays.in.equals.checks");
+			}
+		}
 	}
 
 	// -------------------------------------------------------------------------
