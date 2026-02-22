@@ -54,6 +54,12 @@ val tools by sourceSets.creating
 val toolsImplementation by configurations.getting
 
 dependencies {
+	repositories {
+		// TODO: Remove
+		mavenLocal()
+		mavenCentral()
+	}
+
 	implementation(projects.junitJupiterApi) {
 		because("Jupiter API is used in src/main/java")
 	}
