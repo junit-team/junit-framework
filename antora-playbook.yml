@@ -28,10 +28,12 @@ content:
         - '!r5.14.0*'
         - '!r5.14.1'
         - '!r5.14.2'
+        - '!r5.14.3'
         - 'r6.*'
         - '!r6.0.0*'
         - '!r6.0.1'
         - '!r6.0.2'
+        - '!r6.0.3'
         - '!r6.1.0-M1'
       start_path: documentation
       worktrees: true
