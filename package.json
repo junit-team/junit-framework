@@ -8,12 +8,13 @@
     "@antora/site-generator": "3.2.0-alpha.11"
   },
   "dependencies": {
+    "@antora/assembler": "1.0.0-beta.17",
     "@antora/collector-extension": "1.0.2",
     "@antora/lunr-extension": "1.0.0-alpha.13",
-    "@antora/pdf-extension": "^1.0.0-beta.15",
-    "@asciidoctor/tabs": "^1.0.0-beta.6",
+    "@antora/pdf-extension": "1.0.0-beta.17",
+    "@asciidoctor/tabs": "1.0.0-beta.6",
     "@springio/antora-extensions": "1.14.7",
-    "@springio/antora-xref-extension": "^1.0.0-alpha.5",
+    "@springio/antora-xref-extension": "1.0.0-alpha.5",
     "highlight.js": "11.11.1"
   }
 }
