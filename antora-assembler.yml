@@ -9,3 +9,5 @@ asciidoc:
 build:
   keep_source: true
   stderr: ignore
+assembly:
+  link_reference_style: absolute
