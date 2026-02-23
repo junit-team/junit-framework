@@ -116,7 +116,7 @@ class MethodSelectorResolver implements SelectorResolver {
 			String message = """
 					Possible configuration error: method [%s] resulted in multiple TestDescriptors %s. \
 					This is typically the result of annotating a method with multiple competing annotations \
-					such as @Test, @RepeatedTest, @ParameterizedTest, @TestFactory, etc.""".formatted(
+					such as @Test, @RepeatedTest, @RetryTest, @ParameterizedTest, @TestFactory, etc.""".formatted(
 				method.toGenericString(), testDescriptors.map(d -> d.getClass().getName()).toList());
 			issueReporter.reportIssue(
 				DiscoveryIssue.builder(Severity.WARNING, message).source(MethodSource.from(method)));
