@@ -93,7 +93,7 @@ jobs:
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@06192244f17880c9bf69ccd8de5b2e8785822be5 # v1.1.17
+      - uses: sbt/setup-sbt@1cad58d595b729a71ca2254cdf5b43dd6f42d4bb # v1.1.18
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
         working-directory: junit-examples
@@ -206,7 +206,7 @@ jobs:
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@06192244f17880c9bf69ccd8de5b2e8785822be5 # v1.1.17
+      - uses: sbt/setup-sbt@1cad58d595b729a71ca2254cdf5b43dd6f42d4bb # v1.1.18
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Build examples
