@@ -17,7 +17,7 @@ runs:
         distribution: temurin
         java-version: 25
         check-latest: true
-    - uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5.0.1
+    - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
     - uses: testlens-app/setup-testlens@304aa0888a2485ef4135a55d6eb7352e0714a2c1 # v1.7.0
