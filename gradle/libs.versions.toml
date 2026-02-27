@@ -105,6 +105,6 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.3.10" }
 node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.0.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.2.0" }
-shadow = { id = "com.gradleup.shadow", version = "9.3.1" }
+shadow = { id = "com.gradleup.shadow", version = "9.3.2" }
 spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
 spring-antora = { id = "io.spring.antora.generate-antora-yml", version = "0.0.1" }
