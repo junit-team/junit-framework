@@ -1,13 +1,15 @@
 antora:
   extensions:
     - '@antora/collector-extension'
-    - '@antora/pdf-extension'
+    - require: '@antora/html-single-extension'
+      config_file: ./antora-assembler-html.yml
+    - require: '@antora/pdf-extension'
+      config_file: ./antora-assembler-pdf.yml
     - require: '@antora/lunr-extension'
       index_by_heading: true
     - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: junit
     - require: '@springio/antora-extensions/root-attachments-extension'
-    - require: './extensions/single-html-page.js'
     - require: './extensions/root-exports.js'
       root_component_name: junit
       file_name: junit-user-guide
@@ -22,19 +24,19 @@ content:
     - url: https://github.com/junit-team/junit-framework.git
       branches:
         - 'main'
-        - 'antora/*'
-      tags:
-        - 'r5.14.*'
-        - '!r5.14.0*'
-        - '!r5.14.1'
-        - '!r5.14.2'
-        - '!r5.14.3'
-        - 'r6.*'
-        - '!r6.0.0*'
-        - '!r6.0.1'
-        - '!r6.0.2'
-        - '!r6.0.3'
-        - '!r6.1.0-M1'
+#        - 'antora/*'
+#      tags:
+#        - 'r5.14.*'
+#        - '!r5.14.0*'
+#        - '!r5.14.1'
+#        - '!r5.14.2'
+#        - '!r5.14.3'
+#        - 'r6.*'
+#        - '!r6.0.0*'
+#        - '!r6.0.1'
+#        - '!r6.0.2'
+#        - '!r6.0.3'
+#        - '!r6.1.0-M1'
       start_path: documentation
       worktrees: true
 asciidoc:
