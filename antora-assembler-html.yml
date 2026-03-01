@@ -1,12 +1,11 @@
 component_version_filter:
   names: '**'
-asciidoc:
-  attributes:
-    toc: left
-    nofooter: ''
-    revdate:
 build:
   keep_source: true
   command: false # use Asciidoctor.js
 assembly:
+  attributes:
+    toc: left
+    nofooter: ''
+    revdate:
   link_reference_style: relative

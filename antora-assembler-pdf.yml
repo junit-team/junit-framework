@@ -1,12 +1,12 @@
 component_version_filter:
   names: '**'
-asciidoc:
+build:
+  keep_source: true
+  stderr: ignore
+#  command: bundle exec asciidoctor-p # uncomment to make build fail and see attributes
+assembly:
   attributes:
     source-highlighter: rouge
     toc: ''
     revdate:
-build:
-  keep_source: true
-  stderr: ignore
-assembly:
   link_reference_style: absolute
