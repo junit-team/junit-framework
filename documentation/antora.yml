@@ -3,6 +3,7 @@ version: true
 title: JUnit
 nav:
   - modules/ROOT/nav.adoc
+  - modules/ROOT/extra-site-nav.adoc
 ext:
   collector:
     run:
@@ -22,6 +23,9 @@ ext:
     - dir: ./build/plantuml
       clean: true
       into: modules/ROOT/images
+  assembler:
+    nav:
+      - modules/ROOT/nav.adoc
 asciidoc:
   attributes:
     javadoc-root: "xref:attachment$api"
