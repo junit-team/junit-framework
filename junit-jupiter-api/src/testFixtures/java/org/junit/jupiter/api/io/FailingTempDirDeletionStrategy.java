@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 @NullMarked
-public class FailingTempDirDeletionStrategy extends TempDirDeletionStrategy.Standard {
+public class FailingTempDirDeletionStrategy implements TempDirDeletionStrategy {
 
 	public static final Path UNDELETABLE_PATH = Path.of("undeletable");
 
@@ -28,7 +28,7 @@ public class FailingTempDirDeletionStrategy extends TempDirDeletionStrategy.Stan
 	public Map<Path, Exception> delete(Path tempDir, AnnotatedElementContext elementContext,
 			ExtensionContext extensionContext) throws IOException {
 
-		return super.delete(tempDir, path -> {
+		return Standard.INSTANCE.delete(tempDir, path -> {
 			if (path.endsWith(UNDELETABLE_PATH)) {
 				throw new IOException("Simulated failure");
 			}

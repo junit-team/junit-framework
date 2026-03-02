@@ -60,13 +60,13 @@ public interface TempDirDeletionStrategy {
 	Map<Path, Exception> delete(Path tempDir, AnnotatedElementContext elementContext, ExtensionContext extensionContext)
 			throws IOException;
 
-	class Standard implements TempDirDeletionStrategy {
+	final class Standard implements TempDirDeletionStrategy {
 
-		public static final TempDirDeletionStrategy INSTANCE = new Standard();
+		public static final Standard INSTANCE = new Standard();
 
 		private static final Logger LOGGER = LoggerFactory.getLogger(Standard.class);
 
-		public Standard() {
+		private Standard() {
 		}
 
 		@Override
