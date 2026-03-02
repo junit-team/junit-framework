@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.io.FailingTempDirDeletionStrategy.UNDELETABLE_PATH;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
@@ -72,16 +73,14 @@ import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.FailingTempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.io.TempDirFactory.Standard;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
-import org.junit.jupiter.engine.extension.TempDirectory.FileOperations;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -1235,22 +1234,9 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 
 	static class UndeletableTestCase {
 
-		static final Path UNDELETABLE_PATH = Path.of("undeletable");
 		static final String TEMP_DIR = "TEMP_DIR";
 
-		@RegisterExtension
-		BeforeEachCallback injector = context -> context //
-				.getStore(TempDirectory.NAMESPACE) //
-				.put(TempDirectory.FILE_OPERATIONS_KEY, (FileOperations) path -> {
-					if (path.endsWith(UNDELETABLE_PATH)) {
-						throw new IOException("Simulated failure");
-					}
-					else {
-						Files.delete(path);
-					}
-				});
-
-		@TempDir
+		@TempDir(deletionStrategy = FailingTempDirDeletionStrategy.class)
 		Path tempDir;
 
 		@BeforeEach

@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_P
 import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
+import static org.junit.jupiter.api.io.TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
 import static org.junit.jupiter.engine.config.FilteringConfigurationParameterConverter.exclude;
 import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.FORK_JOIN_POOL;
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 import org.junit.jupiter.api.io.CleanupMode;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
@@ -94,6 +96,9 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	private static final InstantiatingConfigurationParameterConverter<TempDirFactory> tempDirFactoryConverter = //
 		new InstantiatingConfigurationParameterConverter<>(TempDirFactory.class, "temp dir factory");
+
+	private static final InstantiatingConfigurationParameterConverter<TempDirDeletionStrategy> tempDirDeletionStrategyConverter = //
+		new InstantiatingConfigurationParameterConverter<>(TempDirDeletionStrategy.class, "temp dir deletion strategy");
 
 	private static final ConfigurationParameterConverter<ExtensionContextScope> extensionContextScopeConverter = //
 		new EnumConfigurationParameterConverter<>(ExtensionContextScope.class, "extension context scope");
@@ -229,6 +234,13 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 		Supplier<Optional<TempDirFactory>> supplier = tempDirFactoryConverter.supply(configurationParameters,
 			DEFAULT_FACTORY_PROPERTY_NAME);
 		return () -> supplier.get().orElse(TempDirFactory.Standard.INSTANCE);
+	}
+
+	@Override
+	public Supplier<TempDirDeletionStrategy> getDefaultTempDirDeletionStrategySupplier() {
+		Supplier<Optional<TempDirDeletionStrategy>> supplier = tempDirDeletionStrategyConverter.supply(
+			configurationParameters, DEFAULT_DELETION_STRATEGY_PROPERTY_NAME);
+		return () -> supplier.get().orElse(TempDirDeletionStrategy.Standard.INSTANCE);
 	}
 
 	@SuppressWarnings("deprecation")

@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api.io;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -138,12 +139,18 @@ public @interface TempDir {
 	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_CLEANUP_MODE_PROPERTY_NAME = "junit.jupiter.tempdir.cleanup.mode.default";
 
+	@API(status = EXPERIMENTAL, since = "6.1")
+	String DEFAULT_DELETION_STRATEGY_PROPERTY_NAME = "junit.jupiter.tempdir.deletion.strategy.default";
+
 	/**
-	 * How the temporary directory gets cleaned up after the test completes.
+	 * In which cases the temporary directory gets cleaned up after the test completes.
 	 *
 	 * @since 5.9
 	 */
 	@API(status = STABLE, since = "5.11")
 	CleanupMode cleanup() default CleanupMode.DEFAULT;
+
+	@API(status = EXPERIMENTAL, since = "6.1")
+	Class<? extends TempDirDeletionStrategy> deletionStrategy() default TempDirDeletionStrategy.class;
 
 }

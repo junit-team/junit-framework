@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_ENABLED_P
 import static org.junit.jupiter.api.Constants.EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
+import static org.junit.jupiter.api.io.TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
 
 import java.util.Optional;
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 import org.junit.jupiter.api.io.CleanupMode;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
@@ -155,6 +157,13 @@ public class CachingJupiterConfiguration implements JupiterConfiguration {
 	public Supplier<TempDirFactory> getDefaultTempDirFactorySupplier() {
 		return (Supplier<TempDirFactory>) cache.computeIfAbsent(DEFAULT_FACTORY_PROPERTY_NAME,
 			__ -> delegate.getDefaultTempDirFactorySupplier());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Supplier<TempDirDeletionStrategy> getDefaultTempDirDeletionStrategySupplier() {
+		return (Supplier<TempDirDeletionStrategy>) cache.computeIfAbsent(DEFAULT_DELETION_STRATEGY_PROPERTY_NAME,
+			__ -> delegate.getDefaultTempDirDeletionStrategySupplier());
 	}
 
 	@Override

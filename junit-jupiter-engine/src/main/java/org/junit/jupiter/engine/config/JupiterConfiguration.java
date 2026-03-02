@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 import org.junit.jupiter.api.io.CleanupMode;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
@@ -67,6 +68,8 @@ public interface JupiterConfiguration {
 	CleanupMode getDefaultTempDirCleanupMode();
 
 	Supplier<TempDirFactory> getDefaultTempDirFactorySupplier();
+
+	Supplier<TempDirDeletionStrategy> getDefaultTempDirDeletionStrategySupplier();
 
 	ExtensionContextScope getDefaultTestInstantiationExtensionContextScope();
 
