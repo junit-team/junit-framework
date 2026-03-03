@@ -16,7 +16,8 @@ repository on GitHub.
 [[v6.0.4-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* A race condition in `NodeTestTask.parentContext` has been fixed.
+
 
 [[v6.0.4-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
