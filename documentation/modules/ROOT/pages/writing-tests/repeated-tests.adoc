@@ -8,6 +8,11 @@ desired. Each invocation of a repeated test behaves like the execution of a regu
 The following example demonstrates how to declare a test named `repeatedTest()` that
 will be automatically repeated 10 times.
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 ----
 @RepeatedTest(10)
@@ -15,6 +20,20 @@ void repeatedTest() {
 	// ...
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+----
+@RepeatedTest(10)
+fun repeatedTest() {
+    // ...
+}
+----
+--
+====
 
 `@RepeatedTest` can be configured with a failure threshold which signifies the number of
 failures after which remaining repetitions will be automatically skipped. Set the
@@ -125,10 +144,26 @@ INFO: About to execute repetition 4 of 5 for repeatedTestInGerman
 INFO: About to execute repetition 5 of 5 for repeatedTestInGerman
 ....
 
-[source,java]
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/RepeatedTestsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/RepeatedTestsDemo.kt[tags=user_guide]
+----
+--
+====
 
 When using the `ConsoleLauncher` with the unicode theme enabled, execution of
 `RepeatedTestsDemo` results in the following output to the console.

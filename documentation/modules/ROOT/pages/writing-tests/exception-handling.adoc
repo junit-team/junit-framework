@@ -26,10 +26,26 @@ In the following example, the `failsDueToUncaughtException()` method throws an
 `ArithmeticException`. Since the exception is not caught within the test method, JUnit
 Jupiter will mark the test as failed.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/exception/UncaughtExceptionHandlingDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/exception/UncaughtExceptionHandlingDemo.kt[tags=user_guide]
+----
+--
+====
 
 NOTE: It's important to note that specifying a `throws` clause in the test method has
 no effect on the outcome of the test. JUnit Jupiter does not interpret a `throws` clause
@@ -59,10 +75,26 @@ In the following example, the `failsDueToUncaughtAssertionError()` method throws
 `AssertionError`. Since the exception is not caught within the test method, JUnit Jupiter
 will mark the test as failed.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/exception/FailedAssertionDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/exception/FailedAssertionDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[expected]]
 == Asserting Expected Exceptions
@@ -81,10 +113,26 @@ type of the thrown exception but also its subclasses, making it suitable for mor
 generalized exception handling tests. The `assertThrows()` assertion method returns the
 thrown exception object to allow performing additional assertions on it.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/exception/ExceptionAssertionDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/exception/ExceptionAssertionDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[expected-assertThrowsExactly]]
 === Using `assertThrowsExactly()`
@@ -95,10 +143,26 @@ exception type. This is useful when precise exception handling behavior needs to
 validated. Similar to `assertThrows()`, the `assertThrowsExactly()` assertion method also
 returns the thrown exception object to allow performing additional assertions on it.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/exception/ExceptionAssertionExactDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/exception/ExceptionAssertionExactDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[not-expected]]
 == Asserting That no Exception is Expected
@@ -109,10 +173,26 @@ _not_ thrown for a given code block within a test method. The `assertDoesNotThro
 assertion can be used when you want to verify that a particular piece of code does not
 throw any exceptions.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/exception/AssertDoesNotThrowExceptionDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/exception/AssertDoesNotThrowExceptionDemo.kt[tags=user_guide]
+----
+--
+====
 
 NOTE: Third-party assertion libraries often provide similar support. For example, AssertJ
 has `assertThatNoException().isThrownBy(() -> ...)`. See also:

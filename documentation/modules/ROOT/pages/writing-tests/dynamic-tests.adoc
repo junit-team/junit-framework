@@ -76,10 +76,26 @@ For demonstration purposes, the `dynamicNodeSingleTest()` method generates a sin
 `DynamicTest` instead of a stream, and the `dynamicNodeSingleContainer()` method generates
 a nested hierarchy of dynamic tests utilizing `DynamicContainer`.
 
-[source,java]
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/DynamicTestsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DynamicTestsDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[named-support]]
 == Dynamic Tests and Named
@@ -90,10 +106,26 @@ shown in the first example below. The second example takes it one step further a
 to provide the code block that should be executed by implementing the `Executable`
 interface along with `Named` via the `NamedExecutable` base class.
 
-[source,java]
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/DynamicTestsNamedDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DynamicTestsNamedDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[uri-test-source]]
 == URI Test Sources for Dynamic Tests
@@ -138,10 +170,26 @@ xref:writing-tests/parallel-execution.adoc[parallel execution]. You can configur
 `ExecutionMode` by using the `dynamicTest(Consumer)` and `dynamicContainer(Consumer)`
 factory methods as illustrated by the following example.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DynamicTestsDemo.java[tags=execution_mode]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DynamicTestsDemo.kt[tags=execution_mode]
+----
+--
+====
 
 Executing the above test factory method results in the following test tree and execution
 modes:

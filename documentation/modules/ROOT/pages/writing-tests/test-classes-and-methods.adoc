@@ -41,11 +41,27 @@ lifecycle methods. For further information on runtime semantics, see
 xref:writing-tests/test-execution-order.adoc[] and
 xref:extensions/relative-execution-order-of-user-code-and-extensions.adoc#wrapping-behavior[Wrapping Behavior of Callbacks].
 
+.A standard test class
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
-.A standard Java test class
 ----
 include::example$java/example/StandardTests.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/StandardTests.kt[tags=user_guide]
+----
+--
+====
 
 It is also possible to use Java `record` classes as test classes as illustrated by the
 following example.
