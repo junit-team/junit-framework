@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine.descriptor;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DynamicNode;
@@ -44,13 +45,22 @@ abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 	}
 
 	@Override
-	public String getLegacyReportingName() {
+	protected String getLegacyReportingBaseName() {
 		// @formatter:off
 		return getParent()
-				.map(TestDescriptor::getLegacyReportingName)
-				.orElseGet(this::getDisplayName)
-						+ "[" + index + "]";
+				.map(it -> {
+					if (it instanceof JupiterTestDescriptor parent) {
+						return parent.getLegacyReportingBaseName();
+					}
+					return it.getLegacyReportingName();
+				})
+				.orElseGet(this::getDisplayName);
 		// @formatter:on
+	}
+
+	@Override
+	protected OptionalInt getLegacyReportingIndex() {
+		return OptionalInt.of(index);
 	}
 
 	@Override

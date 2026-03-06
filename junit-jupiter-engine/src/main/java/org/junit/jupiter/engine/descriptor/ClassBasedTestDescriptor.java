@@ -128,7 +128,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 	}
 
 	@Override
-	public final String getLegacyReportingName() {
+	protected final String getLegacyReportingBaseName() {
 		return getTestClass().getName();
 	}
 
