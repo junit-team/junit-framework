@@ -89,6 +89,8 @@ repository on GitHub.
   classes wrapping primitives) are not yet supported.
 * The new `org.junit.jupiter.api.Constants` class provides constants for
   xref:running-tests/configuration-parameters.adoc[] specific to the Jupiter engine.
+* Kotlin-specific assertions now include a variant of `assertThrowsExactly` with reified
+  generics.
 * Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
   legacy XML reports
 
