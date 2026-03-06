@@ -13,8 +13,10 @@ repository on GitHub.
 [[v5.14.4-junit-platform]]
 === JUnit Platform
 
-No changes.
+[[v5.14.4-junit-platform-bug-fixes]]
+==== Bug Fixes
 
+* A race condition in `NodeTestTask.parentContext` has been fixed.
 
 [[v5.14.4-junit-jupiter]]
 === JUnit Jupiter
