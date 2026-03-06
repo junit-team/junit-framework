@@ -47,6 +47,8 @@ repository on GitHub.
 * Recursive updates are now supported when using `computeIfAbsent(K, Function, Class)` in
   the `ExtensionContext.Store`, providing parity with the deprecated
   `getOrComputeIfAbsent(K, Function, Class)` method.
+* Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
+  legacy XML reports to make them unique
 
 [[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -91,8 +93,6 @@ repository on GitHub.
   xref:running-tests/configuration-parameters.adoc[] specific to the Jupiter engine.
 * Kotlin-specific assertions now include a variant of `assertThrowsExactly` with reified
   generics.
-* Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
-  legacy XML reports
 
 
 [[v6.1.0-M2-junit-vintage]]
