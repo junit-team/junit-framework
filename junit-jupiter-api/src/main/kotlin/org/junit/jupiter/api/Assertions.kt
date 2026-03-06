@@ -342,6 +342,87 @@ inline fun <reified T : Throwable> assertThrows(
 /**
  * Example usage:
  * ```kotlin
+ * val exception = assertThrows<IllegalArgumentException> {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ * @see Assertions.assertThrowsExactly
+ */
+inline fun <reified T : Throwable> assertThrowsExactly(executable: () -> Unit): T {
+    // no contract for `executable` because it is expected to throw an exception instead
+    // of being executed completely (see https://youtrack.jetbrains.com/issue/KT-27748)
+    val throwable: Throwable? =
+        try {
+            executable()
+        } catch (caught: Throwable) {
+            caught
+        } as? Throwable
+
+    return Assertions.assertThrowsExactly(T::class.java) {
+        if (throwable != null) {
+            throw throwable
+        }
+    }
+}
+
+/**
+ * Example usage:
+ * ```kotlin
+ * val exception = assertThrowsExactly<IllegalArgumentException>("Should throw an Exception") {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ * @see Assertions.assertThrowsExactly
+ */
+inline fun <reified T : Throwable> assertThrowsExactly(
+    message: String,
+    executable: () -> Unit
+): T = assertThrowsExactly({ message }, executable)
+
+/**
+ * Example usage:
+ * ```kotlin
+ * val exception = assertThrowsExactly<IllegalArgumentException>({ "Should throw an Exception" }) {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ * @see Assertions.assertThrowsExactly
+ */
+@OptIn(ExperimentalContracts::class)
+inline fun <reified T : Throwable> assertThrowsExactly(
+    noinline message: () -> String,
+    executable: () -> Unit
+): T {
+    contract {
+        callsInPlace(message, AT_MOST_ONCE)
+        // no contract for `executable` because it is expected to throw an exception instead
+        // of being executed completely (see https://youtrack.jetbrains.com/issue/KT-27748)
+    }
+
+    val throwable: Throwable? =
+        try {
+            executable()
+        } catch (caught: Throwable) {
+            caught
+        } as? Throwable
+
+    return Assertions.assertThrowsExactly(
+        T::class.java,
+        {
+            if (throwable != null) {
+                throw throwable
+            }
+        },
+        message
+    )
+}
+
+/**
+ * Example usage:
+ * ```kotlin
  * val result = assertDoesNotThrow {
  *     // Code block that is expected to not throw an exception
  * }
