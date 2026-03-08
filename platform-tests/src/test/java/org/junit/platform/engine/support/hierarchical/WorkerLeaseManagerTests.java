@@ -27,10 +27,10 @@ class WorkerLeaseManagerTests {
 		var lease = manager.tryAcquire();
 		assertThat(lease).isNotNull();
 
-		lease.close();
+		lease.release();
 		assertThat(released.get()).isEqualTo(1);
 
-		lease.close();
+		lease.release();
 		assertThat(released.get()).isEqualTo(1);
 	}
 
@@ -42,13 +42,13 @@ class WorkerLeaseManagerTests {
 		var lease = manager.tryAcquire();
 		assertThat(lease).isNotNull();
 
-		lease.close();
+		lease.release();
 		assertThat(released.get()).isEqualTo(1);
 
 		lease.reacquire();
 		assertThat(released.get()).isEqualTo(1);
 
-		lease.close();
+		lease.release();
 		assertThat(released.get()).isEqualTo(2);
 	}
 }

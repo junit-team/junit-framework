@@ -42,9 +42,9 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -213,12 +213,11 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return;
 		}
 		threadPool.execute(new RunLeaseAwareWorker(workerLease, doneCondition,
-			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition),
-			() -> this.maybeStartWorker(doneCondition)));
+			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition)));
 	}
 
-	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition, Runnable work,
-			Runnable onWorkerFinished) implements Runnable {
+	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition, Runnable work)
+			implements Runnable {
 
 		@Override
 		public void run() {
@@ -227,10 +226,9 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				work.run();
 			}
 			finally {
-				workerLease.release(false);
+				workerLease.release(parentDoneCondition);
 				LOGGER.trace(() -> "stopping worker");
 			}
-			onWorkerFinished.run();
 		}
 	}
 
@@ -839,12 +837,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return null;
 		}
 
-		private ReacquisitionToken release(boolean compensate, BooleanSupplier doneCondition) {
+		private ReacquisitionToken release(BooleanSupplier compensateUntil) {
 			semaphore.release();
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
-			if (compensate) {
-				compensation.accept(doneCondition);
-			}
+			compensation.accept(compensateUntil);
 			return new ReacquisitionToken();
 		}
 
@@ -873,31 +869,22 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		}
 	}
 
-	static class WorkerLease implements AutoCloseable {
+	static class WorkerLease {
 
-		private final BiFunction<Boolean, BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction;
+		private final Function<BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction;
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
-		WorkerLease(BiFunction<Boolean, BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
+		WorkerLease(Function<BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
 			this.releaseAction = releaseAction;
 		}
 
-		@Override
-		public void close() {
-			release(true);
+		public void release() {
+			release(() -> true);
 		}
 
-		public void release(BooleanSupplier doneCondition) {
-			release(true, doneCondition);
-		}
-
-		void release(boolean compensate) {
-			release(compensate, () -> false);
-		}
-
-		void release(boolean compensate, BooleanSupplier doneCondition) {
+		public void release(BooleanSupplier compensateUntil) {
 			if (reacquisitionToken == null) {
-				reacquisitionToken = releaseAction.apply(compensate, doneCondition);
+				reacquisitionToken = releaseAction.apply(compensateUntil);
 			}
 		}
 
@@ -915,7 +902,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (!(r instanceof RunLeaseAwareWorker worker)) {
 				return;
 			}
-			worker.workerLease.release(false);
+			worker.workerLease.release();
 			if (executor.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()
 					|| worker.parentDoneCondition.getAsBoolean()) {
 				return;
