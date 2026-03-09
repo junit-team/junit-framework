@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
@@ -843,10 +842,6 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return new ReacquisitionToken();
 		}
 
-		public boolean isAtLeastOneLeaseTaken() {
-			return semaphore.availablePermits() < parallelism;
-		}
-
 		private class ReacquisitionToken {
 
 			private boolean used = false;
@@ -898,15 +893,9 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			implements RejectedExecutionHandler {
 		@Override
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-			if (!(r instanceof RunLeaseAwareWorker worker)) {
-				return;
+			if (r instanceof RunLeaseAwareWorker worker) {
+				worker.workerLease.release();
 			}
-			worker.workerLease.release();
-			if (executor.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()
-					|| worker.parentDoneCondition.getAsBoolean()) {
-				return;
-			}
-			throw new RejectedExecutionException("Task with " + workerLeaseManager + " rejected from " + executor);
 		}
 	}
 }

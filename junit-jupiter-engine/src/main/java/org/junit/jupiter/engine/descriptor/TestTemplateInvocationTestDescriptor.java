@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.lang.reflect.Method;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
@@ -72,8 +73,8 @@ public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescript
 	}
 
 	@Override
-	public String getLegacyReportingName() {
-		return super.getLegacyReportingName() + "[" + index + "]";
+	protected OptionalInt getLegacyReportingIndex() {
+		return OptionalInt.of(index);
 	}
 
 	@Override

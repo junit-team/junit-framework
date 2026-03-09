@@ -16,10 +16,26 @@ references.
 
 All JUnit Jupiter assumptions are static methods in the `{Assumptions}` class.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/AssumptionsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/AssumptionsDemo.kt[tags=user_guide]
+----
+--
+====
 
 NOTE: It is also possible to use methods from JUnit 4's `org.junit.Assume` class for
 assumptions. Specifically, JUnit Jupiter supports JUnit 4's `AssumptionViolatedException`
