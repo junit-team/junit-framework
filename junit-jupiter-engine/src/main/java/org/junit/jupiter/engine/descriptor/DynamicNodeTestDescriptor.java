@@ -45,7 +45,7 @@ abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 	}
 
 	@Override
-	protected String getLegacyReportingBaseName() {
+	protected final String getLegacyReportingBaseName() {
 		// @formatter:off
 		return getParent()
 				.map(it -> {
