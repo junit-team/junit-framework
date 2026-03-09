@@ -818,12 +818,12 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		private final int parallelism;
 		private final Semaphore semaphore;
-		private final Consumer<BooleanSupplier> onRelease;
+		private final Consumer<BooleanSupplier> compensation;
 
 		WorkerLeaseManager(int parallelism, Consumer<BooleanSupplier> onRelease) {
 			this.parallelism = parallelism;
 			this.semaphore = new Semaphore(parallelism);
-			this.onRelease = onRelease;
+			this.compensation = onRelease;
 		}
 
 		@Nullable
@@ -840,7 +840,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		private ReacquisitionToken release(BooleanSupplier doneCondition) {
 			semaphore.release();
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
-			onRelease.accept(doneCondition);
+			compensation.accept(doneCondition);
 			return new ReacquisitionToken();
 		}
 
