@@ -99,7 +99,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
 
 	private final WorkQueue workQueue = new WorkQueue();
-	private final ExecutorService threadPool;
+	private final ExecutorService executor;
 	private final int parallelism;
 	private final WorkerLeaseManager workerLeaseManager;
 
@@ -135,7 +135,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		parallelism = configuration.getParallelism();
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
 		var rejectedExecutionHandler = new LeaseAwareRejectedExecutionHandler(workerLeaseManager);
-		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
+		executor = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory,
 			rejectedExecutionHandler);
 		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
@@ -144,7 +144,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	@Override
 	public void close() {
 		LOGGER.trace(() -> "shutting down thread pool");
-		threadPool.shutdownNow();
+		executor.shutdownNow();
 	}
 
 	@Override
@@ -205,14 +205,14 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	}
 
 	private void maybeStartWorker(BooleanSupplier doneCondition) {
-		if (threadPool.isShutdown() || workQueue.isEmpty() || doneCondition.getAsBoolean()) {
+		if (executor.isShutdown() || workQueue.isEmpty() || doneCondition.getAsBoolean()) {
 			return;
 		}
 		var workerLease = workerLeaseManager.tryAcquire();
 		if (workerLease == null) {
 			return;
 		}
-		threadPool.execute(new RunLeaseAwareWorker(workerLease, doneCondition,
+		executor.execute(new RunLeaseAwareWorker(workerLease, doneCondition,
 			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition)));
 	}
 
@@ -286,7 +286,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		void processQueueEntries(WorkerLease workerLease, BooleanSupplier doneCondition) {
 			this.workerLease = workerLease;
-			while (!threadPool.isShutdown()) {
+			while (!executor.isShutdown()) {
 				if (doneCondition.getAsBoolean()) {
 					LOGGER.trace(() -> "yielding resource lock");
 					break;
