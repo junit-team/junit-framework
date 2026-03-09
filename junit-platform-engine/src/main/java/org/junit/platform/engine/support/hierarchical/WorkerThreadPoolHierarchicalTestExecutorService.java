@@ -212,18 +212,17 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		if (workerLease == null) {
 			return;
 		}
-		executor.execute(new RunLeaseAwareWorker(workerLease, doneCondition,
-			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition)));
+		executor.execute(new RunLeaseAwareWorker(workerLease, doneCondition));
 	}
 
-	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition, Runnable work)
+	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition)
 			implements Runnable {
 
 		@Override
 		public void run() {
 			LOGGER.trace(() -> "starting worker");
 			try {
-				work.run();
+				WorkerThread.getOrThrow().processQueueEntries(workerLease, parentDoneCondition);
 			}
 			finally {
 				workerLease.release(parentDoneCondition);
