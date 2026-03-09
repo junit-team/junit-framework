@@ -94,12 +94,9 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	private IntStream getLegacyReportingIndexes() {
 		var ownIndex = getLegacyReportingIndex();
 		return getParent() //
-				.flatMap(it -> {
-					if (it instanceof JupiterTestDescriptor parent) {
-						return Optional.of(parent.getLegacyReportingIndexes());
-					}
-					return Optional.empty();
-				}) //
+				.map(it -> it instanceof JupiterTestDescriptor parent //
+						? parent.getLegacyReportingIndexes() //
+						: null) //
 				.map(parentIndexes -> IntStream.concat(parentIndexes, ownIndex.stream())) //
 				.orElseGet(ownIndex::stream);
 	}
