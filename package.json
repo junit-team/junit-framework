@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@antora/collector-extension": "1.0.3",
-    "@antora/html-single-extension": "1.0.0-beta.19",
+    "@antora/html-single-extension": "1.0.0-beta.20",
     "@antora/lunr-extension": "1.0.0-alpha.13",
-    "@antora/pdf-extension": "1.0.0-beta.19",
+    "@antora/pdf-extension": "1.0.0-beta.20",
     "@asciidoctor/tabs": "1.0.0-beta.6",
     "@springio/antora-extensions": "1.14.7",
     "@springio/antora-xref-extension": "1.0.0-alpha.5",
