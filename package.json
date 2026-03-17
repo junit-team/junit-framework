@@ -1,7 +1,7 @@
 {
   "name": "docs.junit.org",
   "scripts": {
-    "build": "npx antora antora-playbook.yml --log-level=all --clean --fetch --stacktrace"
+    "build": "npx antora antora-playbook.yml --log-level=info --clean --fetch --stacktrace"
   },
   "devDependencies": {
     "antora": "3.2.0-alpha.11"
