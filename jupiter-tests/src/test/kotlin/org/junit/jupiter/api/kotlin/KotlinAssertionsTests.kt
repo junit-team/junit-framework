@@ -28,6 +28,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertThrowsExactly
 import org.junit.jupiter.api.fail
 import org.opentest4j.AssertionFailedError
 import org.opentest4j.MultipleFailuresError
@@ -70,6 +71,13 @@ class KotlinAssertionsTests {
         assertThrows<AssertionError>("should fail") { fail({ "message" }) }
         assertThrows<AssertionError>({ "should fail" }) { fail(AssertionError()) }
         assertThrows<AssertionError>({ "should fail" }) { fail(null as Throwable?) }
+    }
+
+    @Test
+    fun assertThrowsExactly() {
+        assertThrowsExactly<AssertionFailedError> { fail("message") }
+        assertThrowsExactly<AssertionFailedError>("should fail") { fail("message") }
+        assertThrowsExactly<AssertionFailedError>({ "should fail" }) { fail("message") }
     }
 
     @Test

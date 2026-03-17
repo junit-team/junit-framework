@@ -56,7 +56,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 	private final Node<C> node;
 	private final Runnable finalizer;
 
-	private @Nullable C parentContext;
+	private volatile @Nullable C parentContext;
 
 	private @Nullable C context;
 

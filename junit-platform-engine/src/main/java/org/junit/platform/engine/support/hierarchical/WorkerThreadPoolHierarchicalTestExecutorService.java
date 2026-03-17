@@ -35,16 +35,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -99,7 +98,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
 
 	private final WorkQueue workQueue = new WorkQueue();
-	private final ExecutorService threadPool;
+	private final ExecutorService executor;
 	private final int parallelism;
 	private final WorkerLeaseManager workerLeaseManager;
 
@@ -135,7 +134,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		parallelism = configuration.getParallelism();
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
 		var rejectedExecutionHandler = new LeaseAwareRejectedExecutionHandler(workerLeaseManager);
-		threadPool = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
+		executor = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory,
 			rejectedExecutionHandler);
 		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
@@ -144,7 +143,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	@Override
 	public void close() {
 		LOGGER.trace(() -> "shutting down thread pool");
-		threadPool.shutdownNow();
+		executor.shutdownNow();
 	}
 
 	@Override
@@ -205,32 +204,29 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	}
 
 	private void maybeStartWorker(BooleanSupplier doneCondition) {
-		if (threadPool.isShutdown() || workQueue.isEmpty() || doneCondition.getAsBoolean()) {
+		if (executor.isShutdown() || workQueue.isEmpty() || doneCondition.getAsBoolean()) {
 			return;
 		}
 		var workerLease = workerLeaseManager.tryAcquire();
 		if (workerLease == null) {
 			return;
 		}
-		threadPool.execute(new RunLeaseAwareWorker(workerLease, doneCondition,
-			() -> WorkerThread.getOrThrow().processQueueEntries(workerLease, doneCondition),
-			() -> this.maybeStartWorker(doneCondition)));
+		executor.execute(new RunLeaseAwareWorker(workerLease, doneCondition));
 	}
 
-	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition, Runnable work,
-			Runnable onWorkerFinished) implements Runnable {
+	private record RunLeaseAwareWorker(WorkerLease workerLease, BooleanSupplier parentDoneCondition)
+			implements Runnable {
 
 		@Override
 		public void run() {
 			LOGGER.trace(() -> "starting worker");
 			try {
-				work.run();
+				WorkerThread.getOrThrow().processQueueEntries(workerLease, parentDoneCondition);
 			}
 			finally {
-				workerLease.release(false);
+				workerLease.release(parentDoneCondition);
 				LOGGER.trace(() -> "stopping worker");
 			}
-			onWorkerFinished.run();
 		}
 	}
 
@@ -288,7 +284,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		void processQueueEntries(WorkerLease workerLease, BooleanSupplier doneCondition) {
 			this.workerLease = workerLease;
-			while (!threadPool.isShutdown()) {
+			while (!executor.isShutdown()) {
 				if (doneCondition.getAsBoolean()) {
 					LOGGER.trace(() -> "yielding resource lock");
 					break;
@@ -822,10 +818,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		private final Semaphore semaphore;
 		private final Consumer<BooleanSupplier> compensation;
 
-		WorkerLeaseManager(int parallelism, Consumer<BooleanSupplier> compensation) {
+		WorkerLeaseManager(int parallelism, Consumer<BooleanSupplier> onRelease) {
 			this.parallelism = parallelism;
 			this.semaphore = new Semaphore(parallelism);
-			this.compensation = compensation;
+			this.compensation = onRelease;
 		}
 
 		@Nullable
@@ -839,17 +835,11 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return null;
 		}
 
-		private ReacquisitionToken release(boolean compensate, BooleanSupplier doneCondition) {
+		private ReacquisitionToken release(BooleanSupplier doneCondition) {
 			semaphore.release();
 			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
-			if (compensate) {
-				compensation.accept(doneCondition);
-			}
+			compensation.accept(doneCondition);
 			return new ReacquisitionToken();
-		}
-
-		public boolean isAtLeastOneLeaseTaken() {
-			return semaphore.availablePermits() < parallelism;
 		}
 
 		private class ReacquisitionToken {
@@ -873,31 +863,22 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		}
 	}
 
-	static class WorkerLease implements AutoCloseable {
+	static class WorkerLease {
 
-		private final BiFunction<Boolean, BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction;
+		private final Function<BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction;
 		private WorkerLeaseManager.@Nullable ReacquisitionToken reacquisitionToken;
 
-		WorkerLease(BiFunction<Boolean, BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
+		WorkerLease(Function<BooleanSupplier, WorkerLeaseManager.ReacquisitionToken> releaseAction) {
 			this.releaseAction = releaseAction;
 		}
 
-		@Override
-		public void close() {
-			release(true);
+		public void release() {
+			release(() -> true);
 		}
 
 		public void release(BooleanSupplier doneCondition) {
-			release(true, doneCondition);
-		}
-
-		void release(boolean compensate) {
-			release(compensate, () -> false);
-		}
-
-		void release(boolean compensate, BooleanSupplier doneCondition) {
 			if (reacquisitionToken == null) {
-				reacquisitionToken = releaseAction.apply(compensate, doneCondition);
+				reacquisitionToken = releaseAction.apply(doneCondition);
 			}
 		}
 
@@ -912,15 +893,9 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			implements RejectedExecutionHandler {
 		@Override
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-			if (!(r instanceof RunLeaseAwareWorker worker)) {
-				return;
+			if (r instanceof RunLeaseAwareWorker worker) {
+				worker.workerLease.release();
 			}
-			worker.workerLease.release(false);
-			if (executor.isShutdown() || workerLeaseManager.isAtLeastOneLeaseTaken()
-					|| worker.parentDoneCondition.getAsBoolean()) {
-				return;
-			}
-			throw new RejectedExecutionException("Task with " + workerLeaseManager + " rejected from " + executor);
 		}
 	}
 }

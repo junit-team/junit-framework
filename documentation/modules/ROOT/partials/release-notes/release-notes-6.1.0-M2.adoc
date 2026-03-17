@@ -47,6 +47,10 @@ repository on GitHub.
 * Recursive updates are now supported when using `computeIfAbsent(K, Function, Class)` in
   the `ExtensionContext.Store`, providing parity with the deprecated
   `getOrComputeIfAbsent(K, Function, Class)` method.
+* Legacy XML reports now include the index of `@ClassTemplate`/`@ParameterizedClass`
+  invocations in test names in legacy XML reports to make them unique
+* Legacy XML reports now include parent display names to make it easier to distinguish
+  between invocations for different parameters
 
 [[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -89,6 +93,8 @@ repository on GitHub.
   classes wrapping primitives) are not yet supported.
 * The new `org.junit.jupiter.api.Constants` class provides constants for
   xref:running-tests/configuration-parameters.adoc[] specific to the Jupiter engine.
+* Kotlin-specific assertions now include a variant of `assertThrowsExactly` with reified
+  generics.
 
 
 [[v6.1.0-M2-junit-vintage]]

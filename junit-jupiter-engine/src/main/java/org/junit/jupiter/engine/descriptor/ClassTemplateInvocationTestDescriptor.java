@@ -19,6 +19,7 @@ import static org.junit.jupiter.engine.extension.MutableExtensionRegistry.create
 import static org.junit.jupiter.engine.support.JupiterThrowableCollectorFactory.createThrowableCollector;
 
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -84,8 +85,13 @@ public class ClassTemplateInvocationTestDescriptor extends JupiterTestDescriptor
 	}
 
 	@Override
-	public String getLegacyReportingName() {
-		return getTestClass().getName() + "[" + index + "]";
+	protected String getLegacyReportingBaseName() {
+		return getTestClass().getName();
+	}
+
+	@Override
+	protected OptionalInt getLegacyReportingIndex() {
+		return OptionalInt.of(index);
 	}
 
 	// --- TestClassAware ------------------------------------------------------

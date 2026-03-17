@@ -5,11 +5,27 @@ several groups of tests. Such nested tests make use of Java's nested classes and
 facilitate hierarchical thinking about the test structure. Here's an elaborate example,
 both as source code and as a screenshot of the execution within an IDE.
 
-[source,java,indent=0]
 .Nested test suite for testing a stack
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TestingAStackDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TestingAStackDemo.kt[tags=user_guide]
+----
+--
+====
 
 When executing this example in an IDE, the test execution tree in the GUI will look
 similar to the following image.
@@ -39,10 +55,26 @@ class is parameterized.
 The following example illustrates how to combine `@Nested` with `@ParameterizedClass` and
 `@ParameterizedTest`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ParameterizedClassDemo.java[tags=nested]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ParameterizedClassDemo.kt[tags=nested]
+----
+--
+====
 
 Executing the above test class yields the following output:
 

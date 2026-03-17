@@ -4,7 +4,7 @@ apiguardian = "1.1.2"
 assertj = "3.27.7"
 bnd = "7.2.1"
 checkstyle = "13.3.0"
-eclipse = "4.38.0"
+eclipse = "4.39.0"
 jackson = "3.1.0"
 jacoco = "0.8.14"
 jmh = "1.37"
@@ -32,14 +32,14 @@ classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.184" }
 commons-io = { module = "commons-io:commons-io", version = "2.21.0" }
 error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.28.0" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.48.0" }
-fastcsv = { module = "de.siegmar:fastcsv", version = "4.1.0" }
+fastcsv = { module = "de.siegmar:fastcsv", version = "4.1.1" }
 groovy = { module = "org.apache.groovy:groovy", version = "5.0.4" }
 groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
 jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.5" }
-jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.6" }
+jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.7" }
 jfrunit = { module = "org.moditect.jfrunit:jfrunit-core", version = "1.0.0.Alpha2" }
 jimfs = { module = "com.google.jimfs:jimfs", version = "1.3.1" }
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
@@ -53,10 +53,10 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 log4j-bom = { module = "org.apache.logging.log4j:log4j-bom", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
-maven = { module = "org.apache.maven:apache-maven", version = "3.9.12" }
+maven = { module = "org.apache.maven:apache-maven", version = "3.9.14" }
 mavenSurefirePlugin = { module = "org.apache.maven.plugins:maven-surefire-plugin", version.ref = "surefire" }
 memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version = "2.8.2" }
-mockito-bom = { module = "org.mockito:mockito-bom", version = "5.22.0" }
+mockito-bom = { module = "org.mockito:mockito-bom", version = "5.23.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
@@ -105,6 +105,6 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.3.10" }
 node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.0.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.2.0" }
-shadow = { id = "com.gradleup.shadow", version = "9.3.2" }
-spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
+shadow = { id = "com.gradleup.shadow", version = "9.4.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.3.0" }
 spring-antora = { id = "io.spring.antora.generate-antora-yml", version = "0.0.1" }
