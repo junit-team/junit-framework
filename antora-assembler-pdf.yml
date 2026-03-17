@@ -1,5 +1,6 @@
 component_version_filter:
   names: '**'
+  prereleases: false
 build:
   keep_source: true
   stderr: ignore

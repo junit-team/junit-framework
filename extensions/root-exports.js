@@ -3,21 +3,10 @@
 module.exports.register = function ({ config }) {
   const { rootComponentName, fileName = rootComponentName } = config
   this.on('navigationBuilt', ({ contentCatalog }) => {
-    const { versions } = contentCatalog.getComponent(rootComponentName)
-    versions.forEach(version => {
-      const pdfFile = contentCatalog.resolveResource(`${version.version}@${rootComponentName}:ROOT:index.pdf`, {}, 'export', ['export'])
-      if (pdfFile) {
-        if (version.prerelease === '-SNAPSHOT') {
-          contentCatalog.removeFile(pdfFile)
-        } else {
-          removeRootComponentNameFromFile(pdfFile, `${fileName}-${version.version}`)
-        }
-      }
-      const htmlFile = contentCatalog.resolveResource(`${version.version}@${rootComponentName}:ROOT:index.html`, {}, 'export', ['export'])
-      if (htmlFile) {
-        removeRootComponentNameFromFile(htmlFile, `${fileName}-${version.version}`)
-      }
-    })
+    contentCatalog.getFiles()
+      .filter(file => file.src.family === 'export')
+      .filter(file => file.src.component === rootComponentName)
+      .forEach(file => removeRootComponentNameFromFile(file, `${fileName}-${file.src.version}`))
   })
 }
 
