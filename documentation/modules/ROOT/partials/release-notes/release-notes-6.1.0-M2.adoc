@@ -47,8 +47,10 @@ repository on GitHub.
 * Recursive updates are now supported when using `computeIfAbsent(K, Function, Class)` in
   the `ExtensionContext.Store`, providing parity with the deprecated
   `getOrComputeIfAbsent(K, Function, Class)` method.
-* Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
-  legacy XML reports to make them unique
+* Legacy XML reports now include the index of `@ClassTemplate`/`@ParameterizedClass`
+  invocations in test names in legacy XML reports to make them unique
+* Legacy XML reports now include parent display names to make it easier to distinguish
+  between invocations for different parameters
 
 [[v6.1.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

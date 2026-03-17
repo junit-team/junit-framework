@@ -35,6 +35,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.joox.Match;
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -92,9 +93,14 @@ class XmlReportWriterTests {
 
 	@Test
 	void writesCapturedOutput() throws Exception {
-		var uniqueId = engineDescriptor.getUniqueId().append("test", "test");
-		var testDescriptor = new TestDescriptorStub(uniqueId, "successfulTest");
-		engineDescriptor.addChild(testDescriptor);
+		var classDescriptor = new TestDescriptorStub(engineDescriptor.getUniqueId().append("class", "SomeClass"),
+			"SomeClass");
+		engineDescriptor.addChild(classDescriptor);
+
+		var testDescriptor = new TestDescriptorStub(classDescriptor.getUniqueId().append("test", "successfulTest"),
+			"successfulTest");
+		classDescriptor.addChild(testDescriptor);
+
 		var testPlan = TestPlan.from(true, Set.of(engineDescriptor), configParams, dummyOutputDirectoryCreator());
 
 		var reportData = new XmlReportData(testPlan, Clock.systemDefaultZone());
@@ -104,13 +110,14 @@ class XmlReportWriterTests {
 			"foo", "bar"));
 		reportData.addReportEntry(TestIdentifier.from(testDescriptor), reportEntry);
 		reportData.addReportEntry(TestIdentifier.from(testDescriptor), ReportEntry.from(Map.of("baz", "qux")));
-		reportData.markFinished(testPlan.getTestIdentifier(uniqueId), successful());
+		reportData.markFinished(testPlan.getTestIdentifier(testDescriptor.getUniqueId()), successful());
 
 		var testsuite = writeXmlReport(testPlan, reportData);
 
 		assertValidAccordingToJenkinsSchema(testsuite.document());
 		assertThat(testsuite.find("system-out").text(0)) //
-				.containsSubsequence("unique-id: ", "test:test", "display-name: successfulTest");
+				.containsSubsequence("unique-id: [engine:engine]/[class:SomeClass]/[test:successfulTest]",
+					"display-name: Engine > SomeClass > successfulTest");
 		assertThat(testsuite.find("system-out").text(1)) //
 				.containsSubsequence("Report Entry #1 (timestamp: ", "- foo: bar", "Report Entry #2 (timestamp: ",
 					"- baz: qux");
@@ -140,6 +147,7 @@ class XmlReportWriterTests {
 	}
 
 	@Test
+	@NullMarked
 	void writesEmptyErrorElementForFailedTestWithoutCause() throws Exception {
 		engineDescriptor = new EngineDescriptor(UniqueId.forEngine("myEngineId"), "Fancy Engine") {
 			@Override

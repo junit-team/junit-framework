@@ -18,6 +18,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
@@ -36,6 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -44,10 +46,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -111,8 +115,8 @@ class XmlReportWriter {
 	private void writeXmlReport(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests,
 			Writer out) throws XMLStreamException {
 
-		try (XmlReport report = new XmlReport(out)) {
-			report.write(testIdentifier, tests);
+		try (var report = new XmlReport(out)) {
+			report.write(testIdentifier, tests, this.reportData.getTestPlan());
 		}
 	}
 
@@ -127,16 +131,16 @@ class XmlReportWriter {
 			this.xml = factory.createXMLStreamWriter(this.out);
 		}
 
-		void write(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests)
+		void write(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests, TestPlan testPlan)
 				throws XMLStreamException {
 			xml.writeStartDocument("UTF-8", "1.0");
 			newLine();
-			writeTestsuite(testIdentifier, tests);
+			writeTestsuite(testIdentifier, tests, testPlan);
 			xml.writeEndDocument();
 		}
 
-		private void writeTestsuite(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests)
-				throws XMLStreamException {
+		private void writeTestsuite(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests,
+				TestPlan testPlan) throws XMLStreamException {
 
 			// NumberFormat is not thread-safe. Thus, we instantiate it here and pass it to
 			// writeTestcase instead of using a constant
@@ -150,10 +154,10 @@ class XmlReportWriter {
 			writeSystemProperties();
 
 			for (Entry<TestIdentifier, AggregatedTestResult> entry : tests.entrySet()) {
-				writeTestcase(entry.getKey(), entry.getValue(), numberFormat);
+				writeTestcase(entry.getKey(), entry.getValue(), numberFormat, testPlan);
 			}
 
-			writeOutputElement("system-out", formatNonStandardAttributesAsString(testIdentifier));
+			writeOutputElement("system-out", formatNonStandardAttributesAsString(testIdentifier, testPlan));
 
 			xml.writeEndElement();
 			newLine();
@@ -194,7 +198,7 @@ class XmlReportWriter {
 		}
 
 		private void writeTestcase(TestIdentifier testIdentifier, AggregatedTestResult testResult,
-				NumberFormat numberFormat) throws XMLStreamException {
+				NumberFormat numberFormat, TestPlan testPlan) throws XMLStreamException {
 
 			xml.writeStartElement("testcase");
 
@@ -207,7 +211,7 @@ class XmlReportWriter {
 
 			List<String> systemOutElements = new ArrayList<>();
 			List<String> systemErrElements = new ArrayList<>();
-			systemOutElements.add(formatNonStandardAttributesAsString(testIdentifier));
+			systemOutElements.add(formatNonStandardAttributesAsString(testIdentifier, testPlan));
 			collectReportEntries(testIdentifier, systemOutElements, systemErrElements);
 			writeOutputElements("system-out", systemOutElements);
 			writeOutputElements("system-err", systemErrElements);
@@ -330,9 +334,18 @@ class XmlReportWriter {
 			return LocalDateTime.now(reportData.getClock()).withNano(0);
 		}
 
-		private String formatNonStandardAttributesAsString(TestIdentifier testIdentifier) {
+		private String formatNonStandardAttributesAsString(TestIdentifier testIdentifier, TestPlan testPlan) {
+			var allDisplayNames = getSelfAndAncestors(testIdentifier, testPlan) //
+					.map(TestIdentifier::getDisplayName) //
+					.collect(toCollection(ArrayDeque::new));
+			var fullDisplayName = String.join(" > ", (Iterable<String>) allDisplayNames::descendingIterator);
 			return "unique-id: " + testIdentifier.getUniqueId() //
-					+ "\ndisplay-name: " + testIdentifier.getDisplayName();
+					+ "\ndisplay-name: " + fullDisplayName;
+		}
+
+		@SuppressWarnings({ "DataFlowIssue", "ConstantValue" })
+		private Stream<TestIdentifier> getSelfAndAncestors(TestIdentifier testIdentifier, TestPlan testPlan) {
+			return Stream.iterate(testIdentifier, Objects::nonNull, it -> testPlan.getParent(it).orElse(null));
 		}
 
 		private void writeOutputElements(String elementName, List<String> elements) throws XMLStreamException {
