@@ -35,6 +35,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 
@@ -314,7 +315,7 @@ public interface TempDirDeletionStrategy {
 
 	}
 
-	final class DeletionException extends RuntimeException {
+	final class DeletionException extends JUnitException {
 
 		@Serial
 		private static final long serialVersionUID = 1L;
