@@ -10,22 +10,63 @@
 
 package org.junit.jupiter.api.io;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionException;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionFailure;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionResult;
 
-record DefaultDeletionResult(List<DeletionFailure> failures) implements DeletionResult {
+record DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) implements DeletionResult {
 
-	DefaultDeletionResult(List<DeletionFailure> failures) {
+	DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) {
+		this.rootDir = rootDir;
 		this.failures = List.copyOf(failures);
+	}
+
+	@Override
+	public DeletionException toException() {
+		if (isSuccessful()) {
+			throw new IllegalStateException("Cannot create an exception for a successful deletion result");
+		}
+		var emptyPath = Path.of("");
+		var joinedPaths = failures().stream() //
+				.map(DeletionFailure::path) //
+				.sorted() //
+				.distinct() //
+				.map(path -> relativizeSafely(rootDir(), path)) //
+				.map(path -> emptyPath.equals(path) ? "<root>" : path.toString()) //
+				.collect(joining(", "));
+		var exception = new DeletionException("Failed to delete temp directory " + rootDir().toAbsolutePath()
+				+ ". The following paths could not be deleted (see suppressed exceptions for details): " + joinedPaths);
+		failures().stream() //
+				.sorted(comparing(DeletionFailure::path)) //
+				.map(DeletionFailure::cause) //
+				.forEach(exception::addSuppressed);
+		return exception;
+	}
+
+	private static Path relativizeSafely(Path rootDir, Path path) {
+		try {
+			return rootDir.relativize(path);
+		}
+		catch (IllegalArgumentException e) {
+			return path;
+		}
 	}
 
 	static final class Builder implements DeletionResult.Builder {
 
+		private final Path rootDir;
 		private final List<DeletionFailure> failures = new ArrayList<>();
+
+		Builder(Path rootDir) {
+			this.rootDir = rootDir;
+		}
 
 		@Override
 		public Builder addFailure(Path path, Exception cause) {
@@ -35,7 +76,7 @@ record DefaultDeletionResult(List<DeletionFailure> failures) implements Deletion
 
 		@Override
 		public DefaultDeletionResult build() {
-			return new DefaultDeletionResult(failures);
+			return new DefaultDeletionResult(rootDir, failures);
 		}
 
 	}

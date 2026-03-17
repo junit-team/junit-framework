@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -28,6 +29,7 @@ import java.nio.file.attribute.DosFileAttributeView;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -58,6 +60,34 @@ public interface TempDirDeletionStrategy {
 	DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext, ExtensionContext extensionContext)
 			throws IOException;
 
+	final class IgnoreFailures implements TempDirDeletionStrategy {
+
+		private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreFailures.class);
+		private final TempDirDeletionStrategy delegate;
+
+		public IgnoreFailures() {
+			this(Standard.INSTANCE);
+		}
+
+		IgnoreFailures(TempDirDeletionStrategy delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext,
+				ExtensionContext extensionContext) throws IOException {
+
+			var result = delegate.delete(tempDir, elementContext, extensionContext);
+
+			if (!result.isSuccessful()) {
+				var exception = result.toException();
+				LOGGER.warn(exception, exception::getMessage);
+			}
+
+			return DeletionResult.builder(tempDir).build();
+		}
+	}
+
 	final class Standard implements TempDirDeletionStrategy {
 
 		public static final Standard INSTANCE = new Standard();
@@ -76,7 +106,16 @@ public interface TempDirDeletionStrategy {
 
 		// package-private for testing
 		DeletionResult delete(Path tempDir, FileOperations fileOperations) throws IOException {
-			var result = DeletionResult.builder();
+			var result = DeletionResult.builder(tempDir);
+			delete(tempDir, fileOperations, (path, cause) -> {
+				result.addFailure(path, cause);
+				tryToDeleteOnExit(path);
+			});
+			return result.build();
+		}
+
+		private void delete(Path tempDir, FileOperations fileOperations, BiConsumer<Path, Exception> failureHandler)
+				throws IOException {
 			Set<Path> retriedPaths = new HashSet<>();
 			Path rootRealPath = tempDir.toRealPath();
 
@@ -154,7 +193,7 @@ public interface TempDirDeletionStrategy {
 						// ignore
 					}
 					catch (DirectoryNotEmptyException exception) {
-						result.addFailure(path, exception);
+						failureHandler.accept(path, exception);
 					}
 					catch (IOException exception) {
 						// IOException includes `AccessDeniedException` thrown by non-readable or non-executable flags
@@ -176,16 +215,14 @@ public interface TempDirDeletionStrategy {
 						}
 						catch (Exception suppressed) {
 							exception.addSuppressed(suppressed);
-							result.addFailure(path, exception);
+							failureHandler.accept(path, exception);
 						}
 					}
 					else {
-						result.addFailure(path, exception);
+						failureHandler.accept(path, exception);
 					}
 				}
 			});
-
-			return result.build();
 		}
 
 		private void deleteWithLogging(Path file, FileOperations fileOperations) throws IOException {
@@ -226,6 +263,15 @@ public interface TempDirDeletionStrategy {
 			}
 		}
 
+		@SuppressWarnings("EmptyCatch")
+		private static void tryToDeleteOnExit(Path path) {
+			try {
+				path.toFile().deleteOnExit();
+			}
+			catch (UnsupportedOperationException ignore) {
+			}
+		}
+
 		// For testing only
 		interface FileOperations {
 
@@ -236,15 +282,19 @@ public interface TempDirDeletionStrategy {
 
 	sealed interface DeletionResult permits DefaultDeletionResult {
 
-		static Builder builder() {
-			return new DefaultDeletionResult.Builder();
+		static Builder builder(Path rootDir) {
+			return new DefaultDeletionResult.Builder(rootDir);
 		}
+
+		Path rootDir();
+
+		List<DeletionFailure> failures();
 
 		default boolean isSuccessful() {
 			return failures().isEmpty();
 		}
 
-		List<DeletionFailure> failures();
+		DeletionException toException();
 
 		sealed interface Builder permits DefaultDeletionResult.Builder {
 
@@ -262,6 +312,16 @@ public interface TempDirDeletionStrategy {
 
 		Exception cause();
 
+	}
+
+	final class DeletionException extends RuntimeException {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		DeletionException(String message) {
+			super(message, null, true, false);
+		}
 	}
 
 }

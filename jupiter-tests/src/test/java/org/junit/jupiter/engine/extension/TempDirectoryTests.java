@@ -80,6 +80,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.io.FailingTempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionException;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.io.TempDirFactory.Standard;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
@@ -250,19 +251,43 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 	void onlyAttemptsToDeleteUndeletablePathsOnce(Class<?> testClass) {
 		var results = executeTestsForClass(testClass);
 
-		var tempDir = results.testEvents().reportingEntryPublished().stream().map(
-			it -> it.getPayload(ReportEntry.class).orElseThrow()).map(
-				it -> Path.of(it.getKeyValuePairs().get(UndeletableTestCase.TEMP_DIR))).findAny().orElseThrow();
+		var tempDir = determineTempDirFromReportEntries(results, UndeletableTestCase.TEMP_DIR);
 
+		assertFailedDueToDeletionException(results, tempDir);
+	}
+
+	@Test
+	@DisplayName("applies globally configured deletion strategy")
+	void appliesGloballyConfiguredDeletionStrategy() {
+		var results = executeTests(builder -> builder //
+				.selectors(selectClass(UndeletableWithDefaultDeletionStrategyTestCase.class)) //
+				.configurationParameter(TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME,
+					FailingTempDirDeletionStrategy.class.getName()));
+
+		var tempDir = determineTempDirFromReportEntries(results,
+			UndeletableWithDefaultDeletionStrategyTestCase.TEMP_DIR);
+
+		assertFailedDueToDeletionException(results, tempDir);
+	}
+
+	private static void assertFailedDueToDeletionException(EngineExecutionResults results, Path tempDir) {
 		assertSingleFailedTest(results, //
 			cause( //
-				instanceOf(IOException.class), //
+				instanceOf(DeletionException.class), //
 				message("Failed to delete temp directory " + tempDir.toAbsolutePath() + ". " + //
 						"The following paths could not be deleted (see suppressed exceptions for details): <root>, undeletable"), //
 				suppressed(0, instanceOf(DirectoryNotEmptyException.class)), //
 				suppressed(1, instanceOf(IOException.class), message("Simulated failure")) //
 			) //
 		);
+	}
+
+	private static Path determineTempDirFromReportEntries(EngineExecutionResults results, String key) {
+		return results.testEvents().reportingEntryPublished().stream() //
+				.map(it -> it.getPayload(ReportEntry.class).orElseThrow()) //
+				.map(it -> Path.of(it.getKeyValuePairs().get(key))) //
+				.findAny() //
+				.orElseThrow();
 	}
 
 	@Test
@@ -548,7 +573,6 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 					null)) //
 				.filter(Objects::nonNull).toList();
 		assertThat(failures).hasSize(1);
-		failures.getFirst().printStackTrace();
 		assertThat(failures.getFirst()).has(allOf(conditions));
 	}
 
@@ -1233,7 +1257,7 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 		}
 
 		private static Map<String, Path> getTempDirs(TestInfo testInfo) {
-			return tempDirs.computeIfAbsent(testInfo.getDisplayName(), __ -> new LinkedHashMap<>());
+			return tempDirs.computeIfAbsent(testInfo.getDisplayName(), _ -> new LinkedHashMap<>());
 		}
 
 		private static void assertAllTempDirsExist(TestInfo testInfo) {
@@ -1262,6 +1286,24 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 	}
 
 	static class UndeletableFileTestCase extends UndeletableTestCase {
+		@Test
+		void test() throws Exception {
+			Files.createFile(tempDir.resolve(UNDELETABLE_PATH));
+		}
+	}
+
+	static class UndeletableWithDefaultDeletionStrategyTestCase extends UndeletableTestCase {
+
+		static final String TEMP_DIR = "TEMP_DIR";
+
+		@TempDir
+		Path tempDir;
+
+		@BeforeEach
+		void reportTempDir(TestReporter reporter) {
+			reporter.publishEntry(TEMP_DIR, tempDir.toString());
+		}
+
 		@Test
 		void test() throws Exception {
 			Files.createFile(tempDir.resolve(UNDELETABLE_PATH));
