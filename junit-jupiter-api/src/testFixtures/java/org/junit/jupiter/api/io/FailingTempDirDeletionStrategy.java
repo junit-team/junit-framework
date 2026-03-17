@@ -13,7 +13,6 @@ package org.junit.jupiter.api.io;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
@@ -25,7 +24,7 @@ public class FailingTempDirDeletionStrategy implements TempDirDeletionStrategy {
 	public static final Path UNDELETABLE_PATH = Path.of("undeletable");
 
 	@Override
-	public Map<Path, Exception> delete(Path tempDir, AnnotatedElementContext elementContext,
+	public DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext,
 			ExtensionContext extensionContext) throws IOException {
 
 		return Standard.INSTANCE.delete(tempDir, path -> {

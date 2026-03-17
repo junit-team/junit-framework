@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.extension;
 
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
@@ -31,7 +32,7 @@ import java.lang.reflect.Parameter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionFailure;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.JUnitException;
@@ -350,9 +352,9 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 			LOGGER.trace(() -> "Cleaning up temp dir " + dir);
 			if (Files.exists(dir)) {
-				Map<Path, Exception> failures = deletionStrategy.get().delete(dir, elementContext, extensionContext);
-				if (!failures.isEmpty()) {
-					throw createIOExceptionWithAttachedFailures(dir, failures);
+				var result = deletionStrategy.get().delete(dir, elementContext, extensionContext);
+				if (!result.isSuccessful()) {
+					throw createIOExceptionWithAttachedFailures(dir, result.failures());
 				}
 			}
 		}
@@ -376,17 +378,20 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 				ClassUtils.nullSafeToString(Class::getSimpleName, executable.getParameterTypes()));
 		}
 
-		private IOException createIOExceptionWithAttachedFailures(Path rootDir, Map<Path, Exception> failures) {
+		private IOException createIOExceptionWithAttachedFailures(Path rootDir, List<DeletionFailure> failures) {
 			Path emptyPath = Path.of("");
-			String joinedPaths = failures.keySet().stream() //
-					.map(this::tryToDeleteOnExit) //
+			String joinedPaths = failures.stream() //
+					.map(DeletionFailure::path) //
+					.sorted().distinct().map(this::tryToDeleteOnExit) //
 					.map(path -> relativizeSafely(rootDir, path)) //
 					.map(path -> emptyPath.equals(path) ? "<root>" : path.toString()) //
 					.collect(joining(", "));
 			IOException exception = new IOException("Failed to delete temp directory " + rootDir.toAbsolutePath()
 					+ ". The following paths could not be deleted (see suppressed exceptions for details): "
 					+ joinedPaths);
-			failures.values().forEach(exception::addSuppressed);
+			failures.stream() //
+					.sorted(comparing(DeletionFailure::path)).map(DeletionFailure::cause) //
+					.forEach(exception::addSuppressed);
 			return exception;
 		}
 

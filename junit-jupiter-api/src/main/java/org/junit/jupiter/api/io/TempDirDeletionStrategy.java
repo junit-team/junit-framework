@@ -26,10 +26,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -52,12 +50,12 @@ public interface TempDirDeletionStrategy {
 	 * @param elementContext the context of the field or parameter where
 	 * {@code @TempDir} is declared; never {@code null}
 	 * @param extensionContext the current extension context; never {@code null}
-	 * @return a {@link Map} with an entry for every {@link Path} that could not
-	 * be deleted and the corresponding {@link Exception}; empty, if deletion
+	 * @return a {@link DeletionResult}, potentially containing failures for
+	 * {@link Path Paths} that could not be deleted or no failures if deletion
 	 * was successful; never {@code null}
 	 * @throws IOException in case of general failures
 	 */
-	Map<Path, Exception> delete(Path tempDir, AnnotatedElementContext elementContext, ExtensionContext extensionContext)
+	DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext, ExtensionContext extensionContext)
 			throws IOException;
 
 	final class Standard implements TempDirDeletionStrategy {
@@ -70,15 +68,15 @@ public interface TempDirDeletionStrategy {
 		}
 
 		@Override
-		public Map<Path, Exception> delete(Path tempDir, AnnotatedElementContext elementContext,
+		public DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext,
 				ExtensionContext extensionContext) throws IOException {
 
 			return delete(tempDir, Files::delete);
 		}
 
 		// package-private for testing
-		SortedMap<Path, Exception> delete(Path tempDir, FileOperations fileOperations) throws IOException {
-			SortedMap<Path, Exception> failures = new TreeMap<>();
+		DeletionResult delete(Path tempDir, FileOperations fileOperations) throws IOException {
+			var result = DeletionResult.builder();
 			Set<Path> retriedPaths = new HashSet<>();
 			Path rootRealPath = tempDir.toRealPath();
 
@@ -156,7 +154,7 @@ public interface TempDirDeletionStrategy {
 						// ignore
 					}
 					catch (DirectoryNotEmptyException exception) {
-						failures.put(path, exception);
+						result.addFailure(path, exception);
 					}
 					catch (IOException exception) {
 						// IOException includes `AccessDeniedException` thrown by non-readable or non-executable flags
@@ -178,16 +176,16 @@ public interface TempDirDeletionStrategy {
 						}
 						catch (Exception suppressed) {
 							exception.addSuppressed(suppressed);
-							failures.put(path, exception);
+							result.addFailure(path, exception);
 						}
 					}
 					else {
-						failures.put(path, exception);
+						result.addFailure(path, exception);
 					}
 				}
 			});
 
-			return failures;
+			return result.build();
 		}
 
 		private void deleteWithLogging(Path file, FileOperations fileOperations) throws IOException {
@@ -235,4 +233,35 @@ public interface TempDirDeletionStrategy {
 
 		}
 	}
+
+	sealed interface DeletionResult permits DefaultDeletionResult {
+
+		static Builder builder() {
+			return new DefaultDeletionResult.Builder();
+		}
+
+		default boolean isSuccessful() {
+			return failures().isEmpty();
+		}
+
+		List<DeletionFailure> failures();
+
+		sealed interface Builder permits DefaultDeletionResult.Builder {
+
+			Builder addFailure(Path path, Exception cause);
+
+			DeletionResult build();
+
+		}
+
+	}
+
+	sealed interface DeletionFailure permits DefaultDeletionResult.DefaultDeletionFailure {
+
+		Path path();
+
+		Exception cause();
+
+	}
+
 }

@@ -15,6 +15,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Objects.requireNonNull;
+import static org.assertj.core.api.Assertions.allOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -47,6 +48,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import com.google.common.jimfs.Configuration;
@@ -87,6 +89,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
+import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 
@@ -96,7 +99,7 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
  *
  * @since 5.8
  */
-@DisplayName("TempDirectory extension (per declaration)")
+@DisplayName("TempDirectory extension")
 class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 
 	private EngineExecutionResults executeTestsForClassWithDefaultFactory(Class<?> testClass,
@@ -540,7 +543,13 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 	@SuppressWarnings("varargs")
 	private static void assertSingleFailedTest(EngineExecutionResults results, Condition<Throwable>... conditions) {
 		results.testEvents().assertStatistics(stats -> stats.started(1).failed(1).succeeded(0));
-		results.testEvents().assertThatEvents().haveExactly(1, finishedWithFailure(conditions));
+		var failures = results.testEvents().stream().filter(finishedWithFailure()::matches) //
+				.map(e -> e.getPayload(TestExecutionResult.class).flatMap(TestExecutionResult::getThrowable).orElse(
+					null)) //
+				.filter(Objects::nonNull).toList();
+		assertThat(failures).hasSize(1);
+		failures.getFirst().printStackTrace();
+		assertThat(failures.getFirst()).has(allOf(conditions));
 	}
 
 	// -------------------------------------------------------------------------
