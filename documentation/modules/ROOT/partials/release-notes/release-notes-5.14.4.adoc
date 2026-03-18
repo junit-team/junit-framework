@@ -1,0 +1,32 @@
+[[v5.14.4]]
+== 5.14.4
+
+*Date of Release:* ❓
+
+*Scope:* Bug fix for legacy XML reporting of `@ClassTemplate`/`@ParameterizedClass` tests
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/MILESTONE_NUMBER?closed=1+[5.14.4] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v5.14.4-junit-platform]]
+=== JUnit Platform
+
+No changes.
+
+
+[[v5.14.4-junit-jupiter]]
+=== JUnit Jupiter
+
+[[v5.14.4-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
+  legacy XML reports to make them unique.
+
+
+[[v5.14.4-junit-vintage]]
+=== JUnit Vintage
+
+No changes.
