@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.descriptor;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
 import static org.apiguardian.api.API.Status.INTERNAL;
@@ -24,11 +25,13 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.Tag;
@@ -76,6 +79,35 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	}
 
 	// --- TestDescriptor ------------------------------------------------------
+
+	@Override
+	public final String getLegacyReportingName() {
+		return getLegacyReportingBaseName()
+				+ getLegacyReportingIndexes().mapToObj(i -> "[" + i + "]").collect(joining());
+	}
+
+	protected String getLegacyReportingBaseName() {
+		return getDisplayName();
+	}
+
+	private IntStream getLegacyReportingIndexes() {
+		OptionalInt ownIndex = getLegacyReportingIndex();
+		return getParent() //
+				.map(it -> it instanceof JupiterTestDescriptor //
+						? ((JupiterTestDescriptor) it).getLegacyReportingIndexes() //
+						: null) //
+				.map(parentIndexes -> IntStream.concat(parentIndexes, asStream(ownIndex))) //
+				.orElse(asStream(ownIndex));
+	}
+
+	private IntStream asStream(final OptionalInt optInt) {
+		return optInt.isPresent() ? IntStream.of(optInt.getAsInt()) : IntStream.empty();
+
+	}
+
+	protected OptionalInt getLegacyReportingIndex() {
+		return OptionalInt.empty();
+	}
 
 	static Set<TestTag> getTags(AnnotatedElement element, Supplier<String> elementDescription,
 			Supplier<TestSource> sourceProvider, Consumer<DiscoveryIssue> issueCollector) {

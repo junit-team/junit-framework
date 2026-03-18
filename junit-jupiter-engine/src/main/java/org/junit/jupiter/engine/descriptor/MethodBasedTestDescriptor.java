@@ -87,7 +87,7 @@ public abstract class MethodBasedTestDescriptor extends JupiterTestDescriptor
 	}
 
 	@Override
-	public String getLegacyReportingName() {
+	protected final String getLegacyReportingBaseName() {
 		return String.format("%s(%s)", getTestMethod().getName(),
 			ClassUtils.nullSafeToString(Class::getSimpleName, getTestMethod().getParameterTypes()));
 	}

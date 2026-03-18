@@ -37,6 +37,7 @@ import static org.junit.platform.testkit.engine.EventConditions.engine;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.EventConditions.legacyReportingName;
 import static org.junit.platform.testkit.engine.EventConditions.started;
 import static org.junit.platform.testkit.engine.EventConditions.test;
 import static org.junit.platform.testkit.engine.EventConditions.uniqueId;
@@ -106,6 +107,7 @@ import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.Event;
+import org.junit.platform.testkit.engine.EventType;
 import org.junit.platform.testkit.engine.Events;
 
 @SuppressWarnings("JUnitMalformedDeclaration")
@@ -132,9 +134,9 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 			event(container("#1"), started()), //
 			event(dynamicTestRegistered("test1")), //
 			event(dynamicTestRegistered("test2")), //
-			event(test("test1"), started()), //
+			event(test("test1"), legacyReportingName("test1()[1]"), started()), //
 			event(test("test1"), finishedSuccessfully()), //
-			event(test("test2"), started()), //
+			event(test("test2"), legacyReportingName("test2()[1]"), started()), //
 			event(test("test2"), finishedSuccessfully()), //
 			event(container("#1"), finishedSuccessfully()), //
 
@@ -142,9 +144,9 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 			event(container("#2"), started()), //
 			event(dynamicTestRegistered("test1")), //
 			event(dynamicTestRegistered("test2")), //
-			event(test("test1"), started()), //
+			event(test("test1"), legacyReportingName("test1()[2]"), started()), //
 			event(test("test1"), finishedWithFailure(message(it -> it.contains("negative")))), //
-			event(test("test2"), started()), //
+			event(test("test2"), legacyReportingName("test2()[2]"), started()), //
 			event(test("test2"), finishedWithFailure(message(it -> it.contains("negative")))), //
 			event(container("#2"), finishedSuccessfully()), //
 
@@ -461,6 +463,18 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 					"afterAll: %s".formatted(classTemplateClass.getSimpleName())
 					// @formatter:on
 			);
+			var legacyReportingNames = results.testEvents() //
+					.filter(it -> it.getType() == EventType.STARTED) //
+					.map(e -> e.getTestDescriptor().getLegacyReportingName());
+			assertThat(legacyReportingNames).containsExactly( //
+				"test(boolean, TestReporter)[1][1][1]", //
+				"test(boolean, TestReporter)[1][1][2]", //
+				"test(boolean, TestReporter)[1][2][1]", //
+				"test(boolean, TestReporter)[1][2][2]", //
+				"test(boolean, TestReporter)[2][1][1]", //
+				"test(boolean, TestReporter)[2][1][2]", //
+				"test(boolean, TestReporter)[2][2][1]", //
+				"test(boolean, TestReporter)[2][2][2]");
 		}
 
 		@ParameterizedTest

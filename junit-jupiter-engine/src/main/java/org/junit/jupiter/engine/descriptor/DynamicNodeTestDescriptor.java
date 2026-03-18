@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import java.util.OptionalInt;
+
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -34,13 +36,22 @@ abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 	}
 
 	@Override
-	public String getLegacyReportingName() {
+	protected final String getLegacyReportingBaseName() {
 		// @formatter:off
 		return getParent()
-				.map(TestDescriptor::getLegacyReportingName)
-				.orElseGet(this::getDisplayName)
-						+ "[" + index + "]";
+				.map(parent -> {
+					if (parent instanceof JupiterTestDescriptor) {
+						return ((JupiterTestDescriptor) parent).getLegacyReportingBaseName();
+					}
+					return parent.getLegacyReportingName();
+				})
+				.orElseGet(this::getDisplayName);
 		// @formatter:on
+	}
+
+	@Override
+	protected OptionalInt getLegacyReportingIndex() {
+		return OptionalInt.of(index);
 	}
 
 	@Override
