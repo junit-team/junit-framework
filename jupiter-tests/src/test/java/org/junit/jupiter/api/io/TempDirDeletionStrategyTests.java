@@ -12,6 +12,7 @@ package org.junit.jupiter.api.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,6 +22,7 @@ import java.util.logging.LogRecord;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionException;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.IgnoreFailures;
@@ -39,7 +41,12 @@ class TempDirDeletionStrategyTests {
 			var undeletableDir = Files.createDirectory(tempDir.resolve("undeletable"));
 			var strategy = new IgnoreFailures(new FailingTempDirDeletionStrategy());
 
-			var result = strategy.delete(undeletableDir, mock(), mock());
+			AnnotatedElementContext annotatedElementContext = mock();
+			var testMethod = IgnoreFailuresTests.class.getDeclaredMethod("logsAndIgnoresFailures", Path.class,
+				LogRecordListener.class);
+			when(annotatedElementContext.getAnnotatedElement()).thenReturn(testMethod.getParameters()[0]);
+
+			var result = strategy.delete(undeletableDir, annotatedElementContext, mock());
 
 			assertThat(result.isSuccessful());
 
@@ -48,11 +55,14 @@ class TempDirDeletionStrategyTests {
 			assertThat(loggedWarnings) //
 					.extracting(LogRecord::getMessage) //
 					.containsExactly(
-						"Failed to delete temp directory %s. The following paths could not be deleted (see suppressed exceptions for details): <root>".formatted(
-							undeletableDir.toAbsolutePath()));
+						"Failed to delete all temporary files for parameter 'tempDir' in method logsAndIgnoresFailures(Path, LogRecordListener)");
 
 			var exception = loggedWarnings.getFirst().getThrown();
 			assertThat(exception).isInstanceOf(DeletionException.class);
+			assertThat(exception).hasMessage(
+				"Failed to delete temp directory %s. The following paths could not be deleted (see suppressed exceptions for details): <root>".formatted(
+					undeletableDir.toAbsolutePath()));
+
 			assertThat(exception.getSuppressed()).hasSize(1);
 			assertThat(exception.getSuppressed()[0]) //
 					.isInstanceOf(IOException.class) //

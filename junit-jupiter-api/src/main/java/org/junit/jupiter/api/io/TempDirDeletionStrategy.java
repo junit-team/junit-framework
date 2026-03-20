@@ -13,10 +13,16 @@ package org.junit.jupiter.api.io;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -110,13 +116,44 @@ public interface TempDirDeletionStrategy {
 
 			if (!result.isSuccessful()) {
 				var exception = result.toException();
-				LOGGER.warn(exception, exception::getMessage);
+				LOGGER.warn(exception, () -> "Failed to delete all temporary files for %s".formatted(
+					descriptionFor(elementContext.getAnnotatedElement())));
 			}
 
 			return DeletionResult.builder(tempDir).build();
 		}
+
+		@API(status = INTERNAL, since = "6.1")
+		public static String descriptionFor(AnnotatedElement annotatedElement) {
+			if (annotatedElement instanceof Field field) {
+				return "field " + field.getDeclaringClass().getSimpleName() + "." + field.getName();
+			}
+			if (annotatedElement instanceof Parameter parameter) {
+				Executable executable = parameter.getDeclaringExecutable();
+				return "parameter '" + parameter.getName() + "' in " + descriptionFor(executable);
+			}
+			throw new IllegalStateException("Unsupported AnnotatedElement type for @TempDir: " + annotatedElement);
+		}
+
+		private static String descriptionFor(Executable executable) {
+			boolean isConstructor = executable instanceof Constructor<?>;
+			String type = isConstructor ? "constructor" : "method";
+			String name = isConstructor ? executable.getDeclaringClass().getSimpleName() : executable.getName();
+			return "%s %s(%s)".formatted(type, name,
+				ClassUtils.nullSafeToString(Class::getSimpleName, executable.getParameterTypes()));
+		}
 	}
 
+	/**
+	 * Standard {@link TempDirDeletionStrategy} implementation that recursively
+	 * deletes all files and directories within the temporary directory.
+	 *
+	 * <p>If a file or directory cannot be deleted, its permissions are reset
+	 * and deletion is attempted again. If deletion still fails, the path is
+	 * scheduled for deletion on JVM exit via
+	 * {@link java.io.File#deleteOnExit()}, if it belongs to the default file
+	 * system.
+	 */
 	final class Standard implements TempDirDeletionStrategy {
 
 		/**

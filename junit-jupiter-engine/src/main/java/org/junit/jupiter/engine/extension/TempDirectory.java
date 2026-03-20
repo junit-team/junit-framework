@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.Ex
 import static org.junit.jupiter.api.io.CleanupMode.DEFAULT;
 import static org.junit.jupiter.api.io.CleanupMode.NEVER;
 import static org.junit.jupiter.api.io.CleanupMode.ON_SUCCESS;
+import static org.junit.jupiter.api.io.TempDirDeletionStrategy.IgnoreFailures.descriptionFor;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotatedFields;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.support.ReflectionSupport.makeAccessible;
@@ -23,8 +24,6 @@ import static org.junit.platform.commons.util.ReflectionUtils.isRecordObject;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.nio.file.FileSystems;
@@ -54,7 +53,6 @@ import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.support.ModifierSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
@@ -353,25 +351,6 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 					throw result.toException();
 				}
 			}
-		}
-
-		private static String descriptionFor(AnnotatedElement annotatedElement) {
-			if (annotatedElement instanceof Field field) {
-				return "field " + field.getDeclaringClass().getSimpleName() + "." + field.getName();
-			}
-			if (annotatedElement instanceof Parameter parameter) {
-				Executable executable = parameter.getDeclaringExecutable();
-				return "parameter '" + parameter.getName() + "' in " + descriptionFor(executable);
-			}
-			throw new IllegalStateException("Unsupported AnnotatedElement type for @TempDir: " + annotatedElement);
-		}
-
-		private static String descriptionFor(Executable executable) {
-			boolean isConstructor = executable instanceof Constructor<?>;
-			String type = isConstructor ? "constructor" : "method";
-			String name = isConstructor ? executable.getDeclaringClass().getSimpleName() : executable.getName();
-			return "%s %s(%s)".formatted(type, name,
-				ClassUtils.nullSafeToString(Class::getSimpleName, executable.getParameterTypes()));
 		}
 	}
 
