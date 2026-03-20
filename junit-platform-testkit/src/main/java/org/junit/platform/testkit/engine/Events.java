@@ -38,6 +38,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Index;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestExecutionResult.Status;
 import org.opentest4j.AssertionFailedError;
@@ -121,6 +122,14 @@ public final class Events {
 
 	/**
 	 * Get the {@link Executions} for the current set of {@linkplain Event events}.
+	 * <p>
+	 * The set of executions is derived from the current set of events by
+	 * taking single {@linkplain  Event#executionSkipped(TestDescriptor, String)
+	 * execution skipped} events and pairs of {@linkplain Event#executionStarted(TestDescriptor)
+	 * execution started} and {@linkplain Event#executionFinished(TestDescriptor, TestExecutionResult)
+	 * execution finished} events. As a consequence, executions for which either
+	 * the started or finished event is not included in the current set of
+	 * events are not included.
 	 *
 	 * @return an instance of {@code Executions} for the current set of events;
 	 * never {@code null}

@@ -18,12 +18,18 @@ import java.time.Instant;
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
+import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 
 /**
  * {@code Execution} encapsulates metadata for the execution of a single
  * {@link TestDescriptor}.
+ * <p>
+ * The execution either coincides with a single
+ * {@linkplain EngineExecutionListener#executionSkipped(TestDescriptor, String) skipped} event or spans a
+ * {@linkplain EngineExecutionListener#executionStarted(TestDescriptor) execution started} and
+ * {@linkplain EngineExecutionListener#executionFinished(TestDescriptor, TestExecutionResult) execution finished} event.
  *
  * @since 1.4
  */

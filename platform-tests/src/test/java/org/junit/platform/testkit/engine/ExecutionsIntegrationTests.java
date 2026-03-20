@@ -37,6 +37,7 @@ class ExecutionsIntegrationTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void executionsFromStartedTestEvents() {
 		var testEvents = getTestEvents();
 

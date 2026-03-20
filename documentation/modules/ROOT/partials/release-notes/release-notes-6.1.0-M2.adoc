@@ -25,7 +25,8 @@ repository on GitHub.
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* ❓
+* Deprecate `Executions.started()` in favor of `Executions.finished()`. Started executions are
+always finished.
 
 [[v6.1.0-M2-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
