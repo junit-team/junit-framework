@@ -24,6 +24,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -335,7 +336,9 @@ public interface TempDirDeletionStrategy {
 		@SuppressWarnings("EmptyCatch")
 		private static void tryToDeleteOnExit(Path path) {
 			try {
-				path.toFile().deleteOnExit();
+				if (FileSystems.getDefault().equals(path.getFileSystem())) {
+					path.toFile().deleteOnExit();
+				}
 			}
 			catch (UnsupportedOperationException ignore) {
 			}
