@@ -28,7 +28,8 @@ jobs:
       matrix:
         jdk:
         - version: 26
-          type: ea
+          type: ga
+          distribution: oracle
         - version: 27
           type: ea
         - version: 26
