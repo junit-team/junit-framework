@@ -232,6 +232,10 @@ asciidoc:
     JRE: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/condition/JRE.html[JRE]'
     # Jupiter I/O
     TempDir: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/io/TempDir.html[@TempDir]'
+    TempDirDeletionStrategy: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/io/TempDirDeletionStrategy.html[TempDirDeletionStrategy]'
+    TempDirDeletionStrategyIgnoreFailures: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/io/TempDirDeletionStrategy.IgnoreFailures.html[IgnoreFailures]'
+    TempDirDeletionStrategyStandard: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/io/TempDirDeletionStrategy.Standard.html[Standard]'
+    TempDirFactory: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/io/TempDirFactory.html[TempDirFactory]'
     # Jupiter Params
     params-provider-package: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/provider/package-summary.html[org.junit.jupiter.params.provider]'
     AfterParameterizedClassInvocation: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/AfterParameterizedClassInvocation.html[@AfterParameterizedClassInvocation]'

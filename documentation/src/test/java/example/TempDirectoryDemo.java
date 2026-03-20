@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 
 @SuppressWarnings("NewClassNamingConvention")
@@ -150,6 +151,18 @@ class TempDirectoryDemo {
 
 	}
 	// end::user_guide_factory_jimfs[]
+
+	static
+	// tag::user_guide_deletion_strategy[]
+	class DeletionStrategyDemo {
+
+		@Test
+		void test(@TempDir(deletionStrategy = TempDirDeletionStrategy.IgnoreFailures.class) Path tempDir) {
+			// perform test
+		}
+
+	}
+	// end::user_guide_deletion_strategy[]
 
 	// tag::user_guide_composed_annotation[]
 	@Target({ ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER })

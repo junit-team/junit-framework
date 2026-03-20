@@ -18,9 +18,17 @@ import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+/**
+ * A {@link TempDirDeletionStrategy} for testing that simulates a deletion
+ * failure for any path ending in {@link #UNDELETABLE_PATH}.
+ */
 @NullMarked
 public class FailingTempDirDeletionStrategy implements TempDirDeletionStrategy {
 
+	/**
+	 * A path segment that, when present at the end of a path, causes deletion
+	 * to fail with a simulated {@link java.io.IOException}.
+	 */
 	public static final Path UNDELETABLE_PATH = Path.of("undeletable");
 
 	@Override

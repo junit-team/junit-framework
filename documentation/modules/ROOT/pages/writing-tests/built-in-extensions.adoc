@@ -59,11 +59,13 @@ xref:running-tests/configuration-parameters.adoc[configuration parameter] to ove
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_cleanup_mode]
 ----
 
+=== Factories
+
 `@TempDir` supports the programmatic creation of temporary directories via the optional
 `factory` attribute. This is typically used to gain control over the temporary directory
 creation, like defining the parent directory or the file system that should be used.
 
-Factories can be created by implementing `TempDirFactory`. Implementations must provide a
+Factories can be created by implementing `{TempDirFactory}`. Implementations must provide a
 no-args constructor and should not make any assumptions regarding when and how many times
 they are instantiated, but they can assume that their `createTempDirectory(...)` and
 `close()` methods will both be called once per instance, in this order, and from the same
@@ -118,9 +120,9 @@ parameter of the `createTempDirectory(...)` method.
 
 You can use the `junit.jupiter.tempdir.factory.default`
 xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the
-fully qualified class name of the `TempDirFactory` you would like to use by default. Just
+fully qualified class name of the `{TempDirFactory}` you would like to use by default. Just
 like for factories configured via the `factory` attribute of the `@TempDir` annotation,
-the supplied class has to implement the `TempDirFactory` interface. The default factory
+the supplied class has to implement the `{TempDirFactory}` interface. The default factory
 will be used for all `@TempDir` annotations unless the `factory` attribute of the
 annotation specifies a different factory.
 
@@ -128,9 +130,52 @@ In summary, the factory for a temporary directory is determined according to the
 precedence rules:
 
 1. The `factory` attribute of the `@TempDir` annotation, if present
-2. The default `TempDirFactory` configured via the configuration
+2. The default `{TempDirFactory}` configured via the configuration
 parameter, if present
 3. Otherwise, `org.junit.jupiter.api.io.TempDirFactory$Standard` will be used.
+
+=== Deletion
+
+`@TempDir` supports the programmatic deletion of temporary directories via the optional
+`deletionStrategy` attribute. This is typically used to gain control over what happens
+when deletion of a file or directory fails.
+
+Deletion strategies can be created by implementing `{TempDirDeletionStrategy}`.
+Implementations must provide a no-args constructor.
+
+Jupiter ships with two built-in deletion strategies:
+
+* `{TempDirDeletionStrategyStandard}` (the default): attempts to delete all files and
+  directories recursively, retrying with permission resets on failure. Paths that still
+  cannot be deleted are scheduled for deletion on JVM exit, if possible, and the test is
+  failed.
+* `{TempDirDeletionStrategyIgnoreFailures}`: delegates to `{TempDirDeletionStrategyStandard}`
+  but suppresses deletion failures by logging a warning instead of failing the test.
+
+The following example uses `{TempDirDeletionStrategyIgnoreFailures}` so that any deletion
+failures are only logged.
+
+[source,java,indent=0]
+.A test class with a temporary directory that ignores deletion failures
+----
+include::example$java/example/TempDirectoryDemo.java[tags=user_guide_deletion_strategy]
+----
+
+You can use the `junit.jupiter.tempdir.deletion.strategy.default`
+xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the
+fully qualified class name of the `{TempDirDeletionStrategy}` you would like to use by
+default. Just like for strategies configured via the `deletionStrategy` attribute of the
+`@TempDir` annotation, the supplied class has to implement the `{TempDirDeletionStrategy}`
+interface. The default strategy will be used for all `@TempDir` annotations unless the
+`deletionStrategy` attribute of the annotation specifies a different strategy.
+
+In summary, the deletion strategy for a temporary directory is determined according to the
+following precedence rules:
+
+1. The `deletionStrategy` attribute of the `@TempDir` annotation, if present
+2. The default `{TempDirDeletionStrategy}` configured via the configuration parameter,
+if present
+3. Otherwise, `org.junit.jupiter.api.io.TempDirDeletionStrategy$Standard` will be used.
 
 [[AutoClose]]
 == The @AutoClose Extension

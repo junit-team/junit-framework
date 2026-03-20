@@ -38,7 +38,26 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
+import org.junit.platform.commons.util.ClassUtils;
 
+/**
+ * {@code TempDirDeletionStrategy} defines the SPI for deleting temporary
+ * directories programmatically.
+ *
+ * <p>A deletion strategy controls how a temporary directory is cleaned up
+ * when the end of its scope is reached.
+ *
+ * <p>Implementations must provide a no-args constructor.
+ *
+ * <p>A {@link TempDirDeletionStrategy} can be configured <em>globally</em>
+ * for the entire test suite via the
+ * {@value TempDir#DEFAULT_DELETION_STRATEGY_PROPERTY_NAME} configuration
+ * parameter (see the User Guide for details) or <em>locally</em> for a test
+ * class field or method parameter via the {@link TempDir @TempDir} annotation.
+ *
+ * @since 6.1
+ * @see TempDir @TempDir
+ */
 @API(status = EXPERIMENTAL, since = "6.1")
 public interface TempDirDeletionStrategy {
 
@@ -61,11 +80,20 @@ public interface TempDirDeletionStrategy {
 	DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext, ExtensionContext extensionContext)
 			throws IOException;
 
+	/**
+	 * A {@link TempDirDeletionStrategy} that delegates to {@link Standard} but
+	 * suppresses deletion failures by logging a warning instead of propagating
+	 * them.
+	 */
 	final class IgnoreFailures implements TempDirDeletionStrategy {
 
 		private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreFailures.class);
 		private final TempDirDeletionStrategy delegate;
 
+		/**
+		 * Create a new {@code IgnoreFailures} strategy that delegates to
+		 * {@link Standard}.
+		 */
 		public IgnoreFailures() {
 			this(Standard.INSTANCE);
 		}
@@ -91,6 +119,9 @@ public interface TempDirDeletionStrategy {
 
 	final class Standard implements TempDirDeletionStrategy {
 
+		/**
+		 * The singleton instance of {@code Standard}.
+		 */
 		public static final Standard INSTANCE = new Standard();
 
 		private static final Logger LOGGER = LoggerFactory.getLogger(Standard.class);
@@ -281,40 +312,107 @@ public interface TempDirDeletionStrategy {
 		}
 	}
 
+	/**
+	 * Represents the result of a {@link TempDirDeletionStrategy#delete} operation,
+	 * including any paths that could not be deleted.
+	 */
 	sealed interface DeletionResult permits DefaultDeletionResult {
 
+		/**
+		 * Create a new {@link Builder} for the supplied root directory.
+		 *
+		 * @param rootDir the root temporary directory; never {@code null}
+		 * @return a new {@code Builder}; never {@code null}
+		 */
 		static Builder builder(Path rootDir) {
 			return new DefaultDeletionResult.Builder(rootDir);
 		}
 
+		/**
+		 * Return the root temporary directory of this deletion operation.
+		 *
+		 * @return the root directory; never {@code null}
+		 */
 		Path rootDir();
 
+		/**
+		 * Return the list of failures that occurred during deletion.
+		 *
+		 * @return the list of failures; never {@code null}
+		 */
 		List<DeletionFailure> failures();
 
+		/**
+		 * Return {@code true} if the deletion was successful, i.e., no
+		 * {@linkplain #failures() failures} were recorded.
+		 */
 		default boolean isSuccessful() {
 			return failures().isEmpty();
 		}
 
+		/**
+		 * Convert this result to a {@link DeletionException} summarizing all
+		 * failures.
+		 *
+		 * <p>Must only be called if {@link #isSuccessful()} returns
+		 * {@code false}.
+		 *
+		 * @return a {@link DeletionException}; never {@code null}
+		 * @throws IllegalStateException if this result is successful
+		 */
 		DeletionException toException();
 
+		/**
+		 * Builder for {@link DeletionResult}.
+		 */
 		sealed interface Builder permits DefaultDeletionResult.Builder {
 
+			/**
+			 * Record a failure for the supplied path.
+			 *
+			 * @param path the path that could not be deleted; never {@code null}
+			 * @param cause the exception that caused the failure; never {@code null}
+			 * @return this builder; never {@code null}
+			 */
 			Builder addFailure(Path path, Exception cause);
 
+			/**
+			 * Build the {@link DeletionResult}.
+			 *
+			 * @return a new {@link DeletionResult}; never {@code null}
+			 */
 			DeletionResult build();
 
 		}
 
 	}
 
+	/**
+	 * Represents a single failure that occurred while attempting to delete a
+	 * path during a {@link TempDirDeletionStrategy#delete} operation.
+	 */
 	sealed interface DeletionFailure permits DefaultDeletionResult.DefaultDeletionFailure {
 
+		/**
+		 * Return the path that could not be deleted.
+		 *
+		 * @return the path; never {@code null}
+		 */
 		Path path();
 
+		/**
+		 * Return the exception that caused the failure.
+		 *
+		 * @return the cause; never {@code null}
+		 */
 		Exception cause();
 
 	}
 
+	/**
+	 * Exception thrown when one or more paths in a temporary directory could
+	 * not be deleted by a {@link TempDirDeletionStrategy}.
+	 */
 	final class DeletionException extends JUnitException {
 
 		@Serial

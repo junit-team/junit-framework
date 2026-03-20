@@ -139,6 +139,19 @@ public @interface TempDir {
 	@API(status = MAINTAINED, since = "5.13.3")
 	String DEFAULT_CLEANUP_MODE_PROPERTY_NAME = "junit.jupiter.tempdir.cleanup.mode.default";
 
+	/**
+	 * Property name used to set the default deletion strategy class name:
+	 * {@value}
+	 *
+	 * <h4>Supported Values</h4>
+	 *
+	 * <p>Supported values include fully qualified class names for types that
+	 * implement {@link TempDirDeletionStrategy}.
+	 *
+	 * <p>If not specified, the default is {@link TempDirDeletionStrategy.Standard}.
+	 *
+	 * @since 6.1
+	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	String DEFAULT_DELETION_STRATEGY_PROPERTY_NAME = "junit.jupiter.tempdir.deletion.strategy.default";
 
@@ -150,6 +163,23 @@ public @interface TempDir {
 	@API(status = STABLE, since = "5.11")
 	CleanupMode cleanup() default CleanupMode.DEFAULT;
 
+	/**
+	 * Deletion strategy for the temporary directory.
+	 *
+	 * <p>Defaults to {@link TempDirDeletionStrategy.Standard}.
+	 *
+	 * <p>As an alternative to setting this attribute, a global
+	 * {@link TempDirDeletionStrategy} can be configured for the entire test
+	 * suite via the {@value #DEFAULT_DELETION_STRATEGY_PROPERTY_NAME}
+	 * configuration parameter. See the User Guide for details. Note, however,
+	 * that a {@code @TempDir} declaration with a custom
+	 * {@code deletionStrategy} always overrides a global
+	 * {@code TempDirDeletionStrategy}.
+	 *
+	 * @return the type of {@code TempDirDeletionStrategy} to use
+	 * @since 6.1
+	 * @see TempDirDeletionStrategy
+	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	Class<? extends TempDirDeletionStrategy> deletionStrategy() default TempDirDeletionStrategy.class;
 
