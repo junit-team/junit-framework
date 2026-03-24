@@ -48,7 +48,7 @@ jobs:
             21
             25
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@0f4528296b4bc09e8ae0fc7be30185a4ab435545 # v6.0.0
+        uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f # v6.0.1
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
