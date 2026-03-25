@@ -48,6 +48,20 @@
 		<module name="EqualsAvoidNull"/>
 		<module name="EmptyStatement"/>
 		<module name="MissingDeprecated"/>
+		<!-- non-private static final fields must be constants and named accordingly.
+		 	 See CONTRIBUTING.md - Constant fields -->
+		<module name="ConstantName">
+			<property name="applyToPrivate" value="false"/>
+		</module>
+		<module name="ConstantName">
+			<!-- private static final fields may be mutable or immutable.
+				 But logger is always mutable. See CONTRIBUTING.md - Constant fields -->
+			<property name="format" value="^(?!^LOGGER$).*$"/>
+			<property name="applyToPublic" value="false"/>
+			<property name="applyToProtected" value="false"/>
+			<property name="applyToPackage" value="false"/>
+		</module>
+
 	</module>
 
 	<module name="JavadocPackage" />

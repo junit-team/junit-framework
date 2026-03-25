@@ -32,7 +32,7 @@ import org.junit.platform.launcher.EngineFilter;
 
 class EngineFilterer {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EngineFilterer.class);
+	private static final Logger logger = LoggerFactory.getLogger(EngineFilterer.class);
 
 	private final List<EngineFilter> engineFilters;
 
@@ -57,7 +57,7 @@ class EngineFilterer {
 
 	private void warnIfAllEnginesExcluded() {
 		if (!checkedTestEngines.isEmpty() && checkedTestEngines.values().stream().allMatch(excluded -> excluded)) {
-			LOGGER.warn(() -> "All TestEngines were excluded by EngineFilters.\n" + getStateDescription());
+			logger.warn(() -> "All TestEngines were excluded by EngineFilters.\n" + getStateDescription());
 		}
 	}
 

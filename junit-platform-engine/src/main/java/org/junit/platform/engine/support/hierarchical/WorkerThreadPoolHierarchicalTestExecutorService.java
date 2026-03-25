@@ -95,7 +95,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		directly.
 	*/
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
+	private static final Logger logger = LoggerFactory.getLogger(WorkerThreadPoolHierarchicalTestExecutorService.class);
 
 	private final WorkQueue workQueue = new WorkQueue();
 	private final ExecutorService executor;
@@ -137,18 +137,18 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		executor = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
 			configuration.getKeepAliveSeconds(), SECONDS, new SynchronousQueue<>(), threadFactory,
 			rejectedExecutionHandler);
-		LOGGER.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
+		logger.trace(() -> "initialized thread pool for parallelism of " + configuration.getParallelism());
 	}
 
 	@Override
 	public void close() {
-		LOGGER.trace(() -> "shutting down thread pool");
+		logger.trace(() -> "shutting down thread pool");
 		executor.shutdownNow();
 	}
 
 	@Override
 	public Future<@Nullable Void> submit(TestTask testTask) {
-		LOGGER.trace(() -> "submit: " + testTask);
+		logger.trace(() -> "submit: " + testTask);
 
 		var workerThread = WorkerThread.get();
 		if (workerThread == null) {
@@ -173,7 +173,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	 */
 	@Override
 	public void invokeAll(List<? extends TestTask> testTasks) {
-		LOGGER.trace(() -> "invokeAll: " + testTasks);
+		logger.trace(() -> "invokeAll: " + testTasks);
 
 		var workerThread = WorkerThread.get();
 		Preconditions.condition(workerThread != null && workerThread.executor() == this,
@@ -219,13 +219,13 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		@Override
 		public void run() {
-			LOGGER.trace(() -> "starting worker");
+			logger.trace(() -> "starting worker");
 			try {
 				WorkerThread.getOrThrow().processQueueEntries(workerLease, parentDoneCondition);
 			}
 			finally {
 				workerLease.release(parentDoneCondition);
-				LOGGER.trace(() -> "stopping worker");
+				logger.trace(() -> "stopping worker");
 			}
 		}
 	}
@@ -286,11 +286,11 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			this.workerLease = workerLease;
 			while (!executor.isShutdown()) {
 				if (doneCondition.getAsBoolean()) {
-					LOGGER.trace(() -> "yielding resource lock");
+					logger.trace(() -> "yielding resource lock");
 					break;
 				}
 				if (workQueue.isEmpty()) {
-					LOGGER.trace(() -> "no queue entries available");
+					logger.trace(() -> "no queue entries available");
 					break;
 				}
 				processQueueEntries();
@@ -415,7 +415,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			}
 			var claimed = workQueue.remove(entry);
 			if (claimed) {
-				LOGGER.trace(() -> "stole work: " + entry.task);
+				logger.trace(() -> "stole work: " + entry.task);
 				var executed = executeStolenWork(entry, blockingMode);
 				if (executed) {
 					return WorkStealResult.EXECUTED_BY_THIS_WORKER;
@@ -439,7 +439,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				}
 				else {
 					runBlocking(future::isDone, () -> {
-						LOGGER.trace(() -> "blocking for forked children : %s".formatted(children));
+						logger.trace(() -> "blocking for forked children : %s".formatted(children));
 						return future.join();
 					});
 				}
@@ -457,7 +457,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (children.isEmpty()) {
 				return;
 			}
-			LOGGER.trace(() -> "running %d children directly".formatted(children.size()));
+			logger.trace(() -> "running %d children directly".formatted(children.size()));
 			if (children.size() == 1) {
 				executeTask(children.get(0));
 				return;
@@ -509,17 +509,17 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (!executed) {
 				var resourceLock = testTask.getResourceLock();
 				try (var ignored = runBlocking(() -> false, () -> {
-					LOGGER.trace(() -> "blocking for resource lock: " + resourceLock);
+					logger.trace(() -> "blocking for resource lock: " + resourceLock);
 					return resourceLock.acquire();
 				})) {
-					LOGGER.trace(() -> "acquired resource lock: " + resourceLock);
+					logger.trace(() -> "acquired resource lock: " + resourceLock);
 					doExecute(testTask);
 				}
 				catch (InterruptedException ex) {
 					Thread.currentThread().interrupt();
 				}
 				finally {
-					LOGGER.trace(() -> "released resource lock: " + resourceLock);
+					logger.trace(() -> "released resource lock: " + resourceLock);
 				}
 			}
 		}
@@ -527,30 +527,30 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		private boolean tryExecuteTask(TestTask testTask) {
 			var resourceLock = testTask.getResourceLock();
 			if (resourceLock.tryAcquire()) {
-				LOGGER.trace(() -> "acquired resource lock: " + resourceLock);
+				logger.trace(() -> "acquired resource lock: " + resourceLock);
 				try (resourceLock) {
 					doExecute(testTask);
 					return true;
 				}
 				finally {
-					LOGGER.trace(() -> "released resource lock: " + resourceLock);
+					logger.trace(() -> "released resource lock: " + resourceLock);
 				}
 			}
 			else {
-				LOGGER.trace(() -> "failed to acquire resource lock: " + resourceLock);
+				logger.trace(() -> "failed to acquire resource lock: " + resourceLock);
 			}
 			return false;
 		}
 
 		private void doExecute(TestTask testTask) {
-			LOGGER.trace(() -> "executing: " + testTask);
+			logger.trace(() -> "executing: " + testTask);
 			stateStack.push(new State());
 			try {
 				testTask.execute();
 			}
 			finally {
 				stateStack.pop();
-				LOGGER.trace(() -> "finished executing: " + testTask);
+				logger.trace(() -> "finished executing: " + testTask);
 			}
 		}
 
@@ -650,7 +650,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			if (entry.future.isDone()) {
 				return callable.call();
 			}
-			LOGGER.trace(() -> "blocking for child task: " + entry.task);
+			logger.trace(() -> "blocking for child task: " + entry.task);
 			return workerThread.runBlocking(entry.future::isDone, () -> {
 				try {
 					return callable.call();
@@ -673,7 +673,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		Entry add(TestTask task, int index) {
 			Entry entry = new Entry(task, index);
-			LOGGER.trace(() -> "forking: " + entry.task);
+			logger.trace(() -> "forking: " + entry.task);
 			return doAdd(entry);
 		}
 
@@ -682,7 +682,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		}
 
 		void reAdd(Entry entry) {
-			LOGGER.trace(() -> "re-enqueuing: " + entry.task);
+			logger.trace(() -> "re-enqueuing: " + entry.task);
 			doAdd(entry);
 		}
 
@@ -726,10 +726,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				this.future = new CompletableFuture<>();
 				this.future.whenComplete((__, t) -> {
 					if (t == null) {
-						LOGGER.trace(() -> "completed normally: " + task);
+						logger.trace(() -> "completed normally: " + task);
 					}
 					else {
-						LOGGER.trace(t, () -> "completed exceptionally: " + task);
+						logger.trace(t, () -> "completed exceptionally: " + task);
 					}
 				});
 				this.task = task;
@@ -828,7 +828,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		WorkerLease tryAcquire() {
 			boolean acquired = semaphore.tryAcquire();
 			if (acquired) {
-				LOGGER.trace(() -> "acquired worker lease for new worker (available: %d)".formatted(
+				logger.trace(() -> "acquired worker lease for new worker (available: %d)".formatted(
 					semaphore.availablePermits()));
 				return new WorkerLease(this::release);
 			}
@@ -837,7 +837,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		private ReacquisitionToken release(BooleanSupplier doneCondition) {
 			semaphore.release();
-			LOGGER.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
+			logger.trace(() -> "release worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			compensation.accept(doneCondition);
 			return new ReacquisitionToken();
 		}
@@ -850,7 +850,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 				Preconditions.condition(!used, "Lease was already reacquired");
 				used = true;
 				semaphore.acquire();
-				LOGGER.trace(() -> "reacquired worker lease (available: %d)".formatted(semaphore.availablePermits()));
+				logger.trace(() -> "reacquired worker lease (available: %d)".formatted(semaphore.availablePermits()));
 			}
 		}
 

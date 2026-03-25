@@ -334,17 +334,17 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 	record Cleanup(CleanupMode cleanupMode, Supplier<TempDirDeletionStrategy> deletionStrategy) {
 
-		private static final Logger LOGGER = LoggerFactory.getLogger(Cleanup.class);
+		private static final Logger logger = LoggerFactory.getLogger(Cleanup.class);
 
 		void run(Path dir, AnnotatedElementContext elementContext, ExtensionContext extensionContext)
 				throws IOException {
 			if (cleanupMode == NEVER || (cleanupMode == ON_SUCCESS && selfOrChildFailed(extensionContext))) {
-				LOGGER.info(() -> "Skipping cleanup of temp dir %s for %s due to CleanupMode.%s.".formatted(dir,
+				logger.info(() -> "Skipping cleanup of temp dir %s for %s due to CleanupMode.%s.".formatted(dir,
 					descriptionFor(elementContext.getAnnotatedElement()), cleanupMode.name()));
 				return;
 			}
 
-			LOGGER.trace(() -> "Cleaning up temp dir " + dir);
+			logger.trace(() -> "Cleaning up temp dir " + dir);
 			if (Files.exists(dir)) {
 				deletionStrategy.get().delete(dir, elementContext, extensionContext) //
 						.toException() //

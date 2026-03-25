@@ -54,7 +54,7 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
  */
 abstract class AbstractExtensionContext<T extends TestDescriptor> implements ExtensionContextInternal, AutoCloseable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractExtensionContext.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractExtensionContext.class);
 	private static final Namespace CLOSEABLE_RESOURCE_LOGGING_NAMESPACE = Namespace.create(
 		AbstractExtensionContext.class, "CloseableResourceLogging");
 
@@ -113,7 +113,7 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 			if (value instanceof Store.CloseableResource resource) {
 				if (isAutoCloseEnabled) {
 					store.computeIfAbsent(value.getClass(), type -> {
-						LOGGER.warn(() -> "Type implements CloseableResource but not AutoCloseable: " + type.getName());
+						logger.warn(() -> "Type implements CloseableResource but not AutoCloseable: " + type.getName());
 						return true;
 					});
 				}

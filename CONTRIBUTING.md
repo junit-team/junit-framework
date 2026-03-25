@@ -54,6 +54,8 @@ I hereby agree to the terms of the JUnit Contributor License Agreement.
 
 ### Naming Conventions
 
+Acronyms are words.
+
 Whenever an acronym is included as part of a type name or method name, keep the first
 letter of the acronym uppercase and use lowercase for the rest of the acronym. Otherwise,
 it becomes _impossible_ to perform camel-cased searches in IDEs, and it becomes
@@ -119,6 +121,17 @@ code -- class names, method names, variable names, etc.
 See [`ExtensionContext`](junit-jupiter-api/src/main/java/org/junit/jupiter/api/extension/ExtensionContext.java) and
 [`ParameterContext`](junit-jupiter-api/src/main/java/org/junit/jupiter/api/extension/ParameterContext.java) for example Javadoc.
 
+### Constant fields
+
+A constant field is a `static final` field whose value is immutable. If a static final
+field has a primitive type or an immutable reference type it is a constant field.
+
+- To minimize accessibility and mutability for all non-private `static final` fields
+  under `src/main` should be constant fields.
+- Constant fields should be named using uppercase words separated by underscores. For
+  example `DEFAULT_HTTP_URL_PROVIDER`.
+
+Note: `org.junit.platform.commons.logging.Logger` is considered mutable.
 
 ### Nullability
 

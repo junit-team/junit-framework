@@ -96,7 +96,7 @@ public interface TempDirDeletionStrategy {
 	 */
 	final class IgnoreFailures implements TempDirDeletionStrategy {
 
-		private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreFailures.class);
+		private static final Logger logger = LoggerFactory.getLogger(IgnoreFailures.class);
 		private final TempDirDeletionStrategy delegate;
 
 		/**
@@ -123,7 +123,7 @@ public interface TempDirDeletionStrategy {
 		}
 
 		private void logWarning(AnnotatedElementContext elementContext, DeletionException exception) {
-			LOGGER.warn(exception, () -> "Failed to delete all temporary files for %s".formatted(
+			logger.warn(exception, () -> "Failed to delete all temporary files for %s".formatted(
 				descriptionFor(elementContext.getAnnotatedElement())));
 		}
 
@@ -169,7 +169,7 @@ public interface TempDirDeletionStrategy {
 		 */
 		public static final Standard INSTANCE = new Standard();
 
-		private static final Logger LOGGER = LoggerFactory.getLogger(Standard.class);
+		private static final Logger logger = LoggerFactory.getLogger(Standard.class);
 
 		private Standard() {
 		}
@@ -201,7 +201,7 @@ public interface TempDirDeletionStrategy {
 
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					LOGGER.trace(() -> "preVisitDirectory: " + dir);
+					logger.trace(() -> "preVisitDirectory: " + dir);
 					if (isLinkWithTargetOutsideTempDir(dir)) {
 						warnAboutLinkWithTargetOutsideTempDir("link", dir);
 						delete(dir, fileOperations);
@@ -215,7 +215,7 @@ public interface TempDirDeletionStrategy {
 
 				@Override
 				public FileVisitResult visitFileFailed(Path file, IOException exc) {
-					LOGGER.trace(exc, () -> "visitFileFailed: " + file);
+					logger.trace(exc, () -> "visitFileFailed: " + file);
 					if (exc instanceof NoSuchFileException && !Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
 						return CONTINUE;
 					}
@@ -226,7 +226,7 @@ public interface TempDirDeletionStrategy {
 
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-					LOGGER.trace(() -> "visitFile: " + file);
+					logger.trace(() -> "visitFile: " + file);
 					if (Files.isSymbolicLink(file) && isLinkWithTargetOutsideTempDir(file)) {
 						warnAboutLinkWithTargetOutsideTempDir("symbolic link", file);
 					}
@@ -236,7 +236,7 @@ public interface TempDirDeletionStrategy {
 
 				@Override
 				public FileVisitResult postVisitDirectory(Path dir, @Nullable IOException exc) {
-					LOGGER.trace(exc, () -> "postVisitDirectory: " + dir);
+					logger.trace(exc, () -> "postVisitDirectory: " + dir);
 					delete(dir, fileOperations);
 					return CONTINUE;
 				}
@@ -248,7 +248,7 @@ public interface TempDirDeletionStrategy {
 						return !path.toRealPath().startsWith(rootRealPath);
 					}
 					catch (IOException e) {
-						LOGGER.trace(e,
+						logger.trace(e,
 							() -> "Failed to determine real path for " + path + "; assuming it is not a link");
 						return false;
 					}
@@ -256,7 +256,7 @@ public interface TempDirDeletionStrategy {
 
 				private void warnAboutLinkWithTargetOutsideTempDir(String linkType, Path file) throws IOException {
 					Path realPath = file.toRealPath();
-					LOGGER.warn(() -> """
+					logger.warn(() -> """
 							Deleting %s from location inside of temp dir (%s) \
 							to location outside of temp dir (%s) but not the target file/directory""".formatted(
 						linkType, file, realPath));
@@ -303,13 +303,13 @@ public interface TempDirDeletionStrategy {
 		}
 
 		private void deleteWithLogging(Path file, FileOperations fileOperations) throws IOException {
-			LOGGER.trace(() -> "Attempting to delete " + file);
+			logger.trace(() -> "Attempting to delete " + file);
 			try {
 				fileOperations.delete(file);
-				LOGGER.trace(() -> "Successfully deleted " + file);
+				logger.trace(() -> "Successfully deleted " + file);
 			}
 			catch (IOException e) {
-				LOGGER.trace(e, () -> "Failed to delete " + file);
+				logger.trace(e, () -> "Failed to delete " + file);
 				throw e;
 			}
 		}

@@ -48,7 +48,7 @@ import org.junit.platform.commons.logging.LoggerFactory;
  */
 class ApiReportGenerator {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApiReportGenerator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ApiReportGenerator.class);
 	private static final String EOL = System.lineSeparator();
 
 	public static void main(String... args) {
@@ -160,7 +160,7 @@ class ApiReportGenerator {
 				.filter(it -> !it.getAnnotationInfo(API.class).isInherited()) //
 				.collect(toCollection(TreeSet::new));
 
-		LOGGER.debug(() -> {
+		logger.debug(() -> {
 			var builder = new StringBuilder("Listing of all " + types.size() + " annotated types:");
 			builder.append(EOL);
 			types.forEach(e -> builder.append(e.getName()).append(EOL));
