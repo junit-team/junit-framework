@@ -38,6 +38,8 @@ repository on GitHub.
   objects.
 * New `selectClasspathResources(String...)` and `selectClasspathResources(List<String)`
   methods in `DiscoverySelectors`.
+* Multiple `junit-platform.properties` files are now supported. Where the same property is set
+  in more than one file, the first value will be used.
 
 
 [[v6.1.0-M2-junit-jupiter]]
