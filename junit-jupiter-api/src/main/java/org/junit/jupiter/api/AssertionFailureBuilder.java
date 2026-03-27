@@ -192,20 +192,37 @@ public class AssertionFailureBuilder {
 	 */
 	public AssertionFailedError build() {
 		String reason = nullSafeGet(this.reason);
-		if (mismatch && includeValuesInMessage) {
-			reason = (reason == null ? "" : reason + ", ") + formatValues(expected, actual);
-		}
 		String message = nullSafeGet(this.message);
+		var assertionFailedError = new AssertionFailedError( //
+			formatExceptionMessage(reason, message), //
+			formatReason(reason, message), //
+			expected, //
+			actual, //
+			cause //
+		);
+		maybeTrimStackTrace(assertionFailedError);
+		return assertionFailedError;
+	}
+
+	private @Nullable String formatReason(@Nullable String reason, @Nullable String message) {
+		if (mismatch) {
+			// TODO: The suffix is implicit due to mismatch, but how to make explicit?
+			reason = (reason == null ? "" : reason + ", ") + "expected did not match actual";
+		}
 		if (reason != null) {
 			message = buildPrefix(message) + reason;
 		}
+		return message;
+	}
 
-		var assertionFailedError = mismatch //
-				? new AssertionFailedError(message, expected, actual, cause) //
-				: new AssertionFailedError(message, cause);
-
-		maybeTrimStackTrace(assertionFailedError);
-		return assertionFailedError;
+	private @Nullable String formatExceptionMessage(@Nullable String reason, @Nullable String message) {
+		if (mismatch && includeValuesInMessage) {
+			reason = (reason == null ? "" : reason + ", ") + formatValues(expected, actual);
+		}
+		if (reason != null) {
+			message = buildPrefix(message) + reason;
+		}
+		return message;
 	}
 
 	private void maybeTrimStackTrace(Throwable throwable) {
