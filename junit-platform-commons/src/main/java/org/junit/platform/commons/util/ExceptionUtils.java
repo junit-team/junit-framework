@@ -200,7 +200,7 @@ public final class ExceptionUtils {
 				if (cause != null) {
 					toVisit.add(cause);
 				}
-				toVisit.addAll(Arrays.asList(current.getSuppressed()));
+				Collections.addAll(toVisit, current.getSuppressed());
 			}
 		}
 

@@ -10,7 +10,6 @@
 
 package org.junit.platform.commons.util;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.util.ReflectionUtils.isInnerClass;
@@ -25,7 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -353,7 +351,7 @@ public final class AnnotationUtils {
 							cause));
 
 					Annotation[] containedAnnotations = (Annotation[]) ReflectionUtils.invokeMethod(method, candidate);
-					found.addAll((Collection<? extends A>) asList(requireNonNull(containedAnnotations)));
+					Collections.addAll(found, (A[]) requireNonNull(containedAnnotations));
 				}
 				// Nested container annotation?
 				else if (isRepeatableAnnotationContainer(candidateAnnotationType)) {

@@ -73,7 +73,9 @@ class ListenerRegistry<T> {
 	@SuppressWarnings("varargs")
 	final ListenerRegistry<T> addAll(T... listeners) {
 		Preconditions.notEmpty(listeners, "listeners array must not be null or empty");
-		return addAll(Arrays.asList(listeners));
+		Preconditions.containsNoNullElements(listeners, "individual listeners must not be null");
+		Collections.addAll(this.listeners, listeners);
+		return this;
 	}
 
 	ListenerRegistry<T> addAll(Collection<? extends T> listeners) {
