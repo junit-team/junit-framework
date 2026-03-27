@@ -22,6 +22,8 @@ dependencies {
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
 	osgiVerification(libs.openTestReporting.tooling.spi)
+
+	testImplementation(projects.junitJupiter)
 }
 
 tasks {
@@ -73,5 +75,8 @@ tasks {
 		manifest {
 			attributes("Main-Class" to "org.junit.platform.console.ConsoleLauncher")
 		}
+	}
+	test {
+		useJUnitPlatform()
 	}
 }

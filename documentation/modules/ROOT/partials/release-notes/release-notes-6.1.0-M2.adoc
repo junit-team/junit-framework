@@ -22,6 +22,8 @@ repository on GitHub.
   before rejecting an extraneous worker.
 * Missing precondition checks have been added to `Launcher` implementations.
 * Failures to resolve selectors are now propagated by the Suite Engine.
+* Console Launcher now accepts Windows file paths and paths with spaces for
+  `--select-file` and `--select-resource`, including line/column query parameters.
 
 [[v6.1.0-M2-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

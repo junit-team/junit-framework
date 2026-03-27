@@ -21,7 +21,9 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqu
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUri;
 
 import java.net.URI;
+import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.ResourceUtils;
 import org.junit.platform.engine.DiscoverySelectorIdentifier;
@@ -42,6 +44,8 @@ import picocli.CommandLine.ITypeConverter;
 
 class SelectorConverter {
 
+	private static final Pattern URI_SCHEME = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.-]*:.*");
+
 	static class Module implements ITypeConverter<ModuleSelector> {
 		@Override
 		public ModuleSelector convert(String value) {
@@ -59,9 +63,9 @@ class SelectorConverter {
 	static class File implements ITypeConverter<FileSelector> {
 		@Override
 		public FileSelector convert(String value) {
-			URI uri = URI.create(value);
-			String path = ResourceUtils.stripQueryComponent(uri).getPath();
-			FilePosition filePosition = FilePosition.fromQuery(uri.getQuery()).orElse(null);
+			ParsedSelectorInput parsed = parsePathAndQuery(value);
+			FilePosition filePosition = FilePosition.fromQuery(parsed.query).orElse(null);
+			String path = parsed.path;
 			return selectFile(path, filePosition);
 		}
 	}
@@ -99,9 +103,9 @@ class SelectorConverter {
 	static class ClasspathResource implements ITypeConverter<ClasspathResourceSelector> {
 		@Override
 		public ClasspathResourceSelector convert(String value) {
-			URI uri = URI.create(value);
-			String path = ResourceUtils.stripQueryComponent(uri).getPath();
-			FilePosition filePosition = FilePosition.fromQuery(uri.getQuery()).orElse(null);
+			ParsedSelectorInput parsed = parsePathAndQuery(value);
+			FilePosition filePosition = FilePosition.fromQuery(parsed.query).orElse(null);
+			String path = parsed.path;
 			return selectClasspathResource(path, filePosition);
 		}
 	}
@@ -127,6 +131,65 @@ class SelectorConverter {
 		@Override
 		public DiscoverySelectorIdentifier convert(String value) {
 			return DiscoverySelectorIdentifier.parse(value);
+		}
+	}
+
+	private static ParsedSelectorInput parsePathAndQuery(String value) {
+		if (looksLikeUri(value) && !looksLikeWindowsDrivePath(value)) {
+			@Nullable ParsedSelectorInput parsed = parseUri(value);
+			if (parsed != null) {
+				return parsed;
+			}
+			if (value.indexOf(' ') >= 0) {
+				parsed = parseUri(value.replace(" ", "%20"));
+				if (parsed != null) {
+					return parsed;
+				}
+			}
+			URI.create(value);
+		}
+		return parseRawPath(value);
+	}
+
+	private static @Nullable ParsedSelectorInput parseUri(String value) {
+		try {
+			URI uri = URI.create(value);
+			String path = ResourceUtils.stripQueryComponent(uri).getPath();
+			if (path == null) {
+				return null;
+			}
+			return new ParsedSelectorInput(path, uri.getQuery());
+		}
+		catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
+	private static ParsedSelectorInput parseRawPath(String value) {
+		int queryIndex = value.indexOf('?');
+		if (queryIndex < 0) {
+			return new ParsedSelectorInput(value, null);
+		}
+		String path = value.substring(0, queryIndex);
+		String query = value.substring(queryIndex + 1);
+		return new ParsedSelectorInput(path, query);
+	}
+
+	private static boolean looksLikeUri(String value) {
+		return URI_SCHEME.matcher(value).matches();
+	}
+
+	private static boolean looksLikeWindowsDrivePath(String value) {
+		return value.length() >= 2 && Character.isLetter(value.charAt(0)) && value.charAt(1) == ':';
+	}
+
+	private static final class ParsedSelectorInput {
+		private final String path;
+		private final @Nullable String query;
+
+		private ParsedSelectorInput(String path, @Nullable String query) {
+			this.path = path;
+			this.query = query;
 		}
 	}
 
