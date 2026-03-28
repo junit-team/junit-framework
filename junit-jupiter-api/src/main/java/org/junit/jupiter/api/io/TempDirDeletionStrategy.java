@@ -47,6 +47,7 @@ import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.ClassUtils;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * {@code TempDirDeletionStrategy} defines the SPI for deleting temporary
@@ -367,7 +368,7 @@ public interface TempDirDeletionStrategy {
 		 * @return a new {@code Builder}; never {@code null}
 		 */
 		static Builder builder(Path rootDir) {
-			return new DefaultDeletionResult.Builder(rootDir);
+			return new DefaultDeletionResult.Builder(Preconditions.notNull(rootDir, "rootDir must not be null"));
 		}
 
 		/**

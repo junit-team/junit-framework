@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionException;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionFailure;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionResult;
+import org.junit.platform.commons.util.Preconditions;
 
 record DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) implements DeletionResult {
 
@@ -70,6 +71,8 @@ record DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) imple
 
 		@Override
 		public Builder addFailure(Path path, Exception cause) {
+			Preconditions.notNull(path, "path must not be null");
+			Preconditions.notNull(cause, "cause must not be null");
 			failures.add(new DefaultDeletionFailure(path, cause));
 			return this;
 		}
