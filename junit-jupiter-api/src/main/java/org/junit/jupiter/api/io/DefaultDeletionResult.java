@@ -34,13 +34,12 @@ record DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) imple
 		if (isSuccessful()) {
 			return Optional.empty();
 		}
-		var emptyPath = Path.of("");
 		var joinedPaths = failures().stream() //
 				.map(DeletionFailure::path) //
 				.sorted() //
 				.distinct() //
-				.map(path -> relativizeSafely(rootDir(), path)) //
-				.map(path -> emptyPath.equals(path) ? "<root>" : path.toString()) //
+				.map(path -> relativizeSafely(rootDir(), path).toString()) //
+				.map(path -> path.isEmpty() ? "<root>" : path) //
 				.collect(joining(", "));
 		var exception = new DeletionException("Failed to delete temp directory " + rootDir().toAbsolutePath()
 				+ ". The following paths could not be deleted (see suppressed exceptions for details): " + joinedPaths);
