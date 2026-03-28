@@ -346,9 +346,9 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 			LOGGER.trace(() -> "Cleaning up temp dir " + dir);
 			if (Files.exists(dir)) {
-				var result = deletionStrategy.get().delete(dir, elementContext, extensionContext);
-				if (!result.isSuccessful()) {
-					throw result.toException();
+				var exception = deletionStrategy.get().delete(dir, elementContext, extensionContext).toException();
+				if (exception.isPresent()) {
+					throw exception.get();
 				}
 			}
 		}

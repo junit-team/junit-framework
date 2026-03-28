@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.joining;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionException;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy.DeletionFailure;
@@ -29,9 +30,9 @@ record DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) imple
 	}
 
 	@Override
-	public DeletionException toException() {
+	public Optional<DeletionException> toException() {
 		if (isSuccessful()) {
-			throw new IllegalStateException("Cannot create an exception for a successful deletion result");
+			return Optional.empty();
 		}
 		var emptyPath = Path.of("");
 		var joinedPaths = failures().stream() //
@@ -47,7 +48,7 @@ record DefaultDeletionResult(Path rootDir, List<DeletionFailure> failures) imple
 				.sorted(comparing(DeletionFailure::path)) //
 				.map(DeletionFailure::cause) //
 				.forEach(exception::addSuppressed);
-		return exception;
+		return Optional.of(exception);
 	}
 
 	private static Path relativizeSafely(Path rootDir, Path path) {

@@ -35,6 +35,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -115,13 +116,14 @@ public interface TempDirDeletionStrategy {
 
 			var result = delegate.delete(tempDir, elementContext, extensionContext);
 
-			if (!result.isSuccessful()) {
-				var exception = result.toException();
-				LOGGER.warn(exception, () -> "Failed to delete all temporary files for %s".formatted(
-					descriptionFor(elementContext.getAnnotatedElement())));
-			}
+			result.toException().ifPresent(ex -> logWarning(elementContext, ex));
 
 			return DeletionResult.builder(tempDir).build();
+		}
+
+		private void logWarning(AnnotatedElementContext elementContext, DeletionException exception) {
+			LOGGER.warn(exception, () -> "Failed to delete all temporary files for %s".formatted(
+				descriptionFor(elementContext.getAnnotatedElement())));
 		}
 
 		@API(status = INTERNAL, since = "6.1")
@@ -397,10 +399,11 @@ public interface TempDirDeletionStrategy {
 		 * <p>Must only be called if {@link #isSuccessful()} returns
 		 * {@code false}.
 		 *
-		 * @return a {@link DeletionException}; never {@code null}
-		 * @throws IllegalStateException if this result is successful
+		 * @return an {@link DeletionException}, if the deletion
+		 * {@linkplain #isSuccessful() was successful; otherwise, empty}; never
+		 * {@code null}
 		 */
-		DeletionException toException();
+		Optional<DeletionException> toException();
 
 		/**
 		 * Builder for {@link DeletionResult}.
