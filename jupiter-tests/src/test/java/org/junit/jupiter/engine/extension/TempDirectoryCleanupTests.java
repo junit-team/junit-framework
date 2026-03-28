@@ -13,6 +13,7 @@ package org.junit.jupiter.engine.extension;
 import static java.nio.file.Files.deleteIfExists;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.api.io.CleanupMode.NEVER;
@@ -88,7 +89,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 		@Test
 		void cleanupModeCustomDefaultField() {
 			LauncherDiscoveryRequest request = request()//
-					.configurationParameter(TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME, "never")//
+					.configurationParameter(DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME, "never")//
 					.selectors(selectMethod(DefaultFieldCase.class, "testDefaultField"))//
 					.build();
 			executeTests(request);
@@ -351,7 +352,7 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 		@Test
 		void cleanupModeCustomDefaultParameter() {
 			LauncherDiscoveryRequest request = request()//
-					.configurationParameter(TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME, "never")//
+					.configurationParameter(DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME, "never")//
 					.selectors(selectMethod(DefaultParameterCase.class, "testDefaultParameter", "java.nio.file.Path"))//
 					.build();
 			executeTests(request);

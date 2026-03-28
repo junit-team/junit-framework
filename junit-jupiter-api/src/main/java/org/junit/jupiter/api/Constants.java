@@ -10,12 +10,14 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.PreInterruptCallback;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
+import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 
@@ -393,12 +395,31 @@ public final class Constants {
 	public static final String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
 
 	/**
-	 * Property name used to set the default factory for temporary directories created via
-	 * the {@link TempDir @TempDir} annotation: {@value}
+	 * Property name used to set the default factory for temporary directories
+	 * created via the {@link TempDir @TempDir} annotation: {@value}
 	 *
 	 * @see TempDir#DEFAULT_FACTORY_PROPERTY_NAME
 	 */
 	public static final String DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME = TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
+
+	/**
+	 * Property name used to configure the default {@link CleanupMode} for
+	 * temporary directories created via the {@link TempDir @TempDir}
+	 * annotation: {@value}
+	 *
+	 * @see TempDir#DEFAULT_CLEANUP_MODE_PROPERTY_NAME
+	 */
+	public static final String DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME = TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
+
+	/**
+	 * Property name used to set the default deletion strategy class name for
+	 * temporary directories created via the {@link TempDir @TempDir}
+	 * annotation: {@value}
+	 *
+	 * @see TempDir#DEFAULT_DELETION_STRATEGY_PROPERTY_NAME
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static final String DEFAULT_TEMP_DIR_DELETION_STRATEGY_PROPERTY_NAME = TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME;
 
 	/**
 	 * Property name used to set the default extension context scope for

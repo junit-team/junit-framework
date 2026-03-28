@@ -25,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEMP_DIR_DELETION_STRATEGY_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.FailingTempDirDeletionStrategy.UNDELETABLE_PATH;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
@@ -62,7 +65,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Nested;
@@ -107,7 +109,7 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 			Class<? extends TempDirFactory> factoryClass) {
 		return executeTests(request() //
 				.selectors(selectClass(testClass)) //
-				.configurationParameter(TempDir.DEFAULT_FACTORY_PROPERTY_NAME, factoryClass.getName()) //
+				.configurationParameter(DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME, factoryClass.getName()) //
 				.build());
 	}
 
@@ -124,8 +126,7 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 	void resolvesSeparateTempDirsForEachAnnotationDeclaration(TestInstance.Lifecycle lifecycle) {
 		var results = executeTests(request() //
 				.selectors(selectClass(AllPossibleDeclarationLocationsTestCase.class)) //
-				.configurationParameter(Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME,
-					lifecycle.name()).build());
+				.configurationParameter(DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME, lifecycle.name()).build());
 
 		results.containerEvents().assertStatistics(stats -> stats.started(2).succeeded(2));
 		results.testEvents().assertStatistics(stats -> stats.started(2).succeeded(2));
@@ -261,7 +262,7 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 	void appliesGloballyConfiguredDeletionStrategy() {
 		var results = executeTests(builder -> builder //
 				.selectors(selectClass(UndeletableWithDefaultDeletionStrategyTestCase.class)) //
-				.configurationParameter(TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME,
+				.configurationParameter(DEFAULT_TEMP_DIR_DELETION_STRATEGY_PROPERTY_NAME,
 					FailingTempDirDeletionStrategy.class.getName()));
 
 		var tempDir = determineTempDirFromReportEntries(results,
