@@ -71,7 +71,7 @@ import org.junit.platform.launcher.listeners.discovery.LauncherDiscoveryListener
  *        selectUniqueId("unique-id-2")
  *    )
  *    .selectors(
- *        selectClasspathRoots(Set.of(Paths.get("/my/local/path1")))
+ *        selectClasspathRoots(Set.of(Path.of("/my/local/path1")))
  *    )
  *   .filters(
  *        includeEngines("junit-jupiter", "spek"),
@@ -304,7 +304,7 @@ public final class LauncherDiscoveryRequestBuilder {
 	public LauncherDiscoveryRequestBuilder listeners(LauncherDiscoveryListener... listeners) {
 		Preconditions.notNull(listeners, "discovery listener array must not be null");
 		Preconditions.containsNoNullElements(listeners, "individual discovery listeners must not be null");
-		this.discoveryListeners.addAll(Arrays.asList(listeners));
+		Collections.addAll(this.discoveryListeners, listeners);
 		return this;
 	}
 

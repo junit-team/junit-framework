@@ -25,6 +25,13 @@ import org.junit.platform.engine.TestExecutionResult;
  * {@code Execution} encapsulates metadata for the execution of a single
  * {@link TestDescriptor}.
  *
+ * <p>The execution either coincides with a single
+ * {@linkplain org.junit.platform.engine.EngineExecutionListener#executionSkipped(TestDescriptor, String) skipped}
+ * event or spans an
+ * {@linkplain org.junit.platform.engine.EngineExecutionListener#executionStarted(TestDescriptor) execution started} and
+ * {@linkplain org.junit.platform.engine.EngineExecutionListener#executionFinished(TestDescriptor, TestExecutionResult)
+ * execution finished} event.
+ *
  * @since 1.4
  */
 @API(status = MAINTAINED, since = "1.7")

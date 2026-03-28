@@ -888,7 +888,7 @@ integral types: `byte`, `short`, `int`, `long`, and their boxed counterparts.
 | `java.net.URI`             | `"https://junit.org/"`                   -> `URI.create("https://junit.org/")`
 | `java.net.URL`             | `"https://junit.org/"`                   -> `URI.create("https://junit.org/").toURL()`
 | `java.nio.charset.Charset` | `"UTF-8"`                                -> `Charset.forName("UTF-8")`
-| `java.nio.file.Path`       | `"/path/to/file"`                        -> `Paths.get("/path/to/file")`
+| `java.nio.file.Path`       | `"/path/to/file"`                        -> `Path.of("/path/to/file")`
 | `java.time.Duration`       | `"PT3S"`                                 -> `Duration.ofSeconds(3)`
 | `java.time.Instant`        | `"1970-01-01T00:00:00Z"`                 -> `Instant.ofEpochMilli(0)`
 | `java.time.LocalDateTime`  | `"2017-03-14T12:34:56.789"`              -> `LocalDateTime.of(2017, 3, 14, 12, 34, 56, 789_000_000)`

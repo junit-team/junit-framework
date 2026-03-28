@@ -10,6 +10,7 @@
 
 package org.junit.platform.testkit.engine;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.io.OutputStream;
@@ -45,6 +46,7 @@ public final class Executions {
 
 	private Executions(Stream<Execution> executions, String category) {
 		Preconditions.notNull(executions, "Execution stream must not be null");
+		Preconditions.notNull(category, "Category must not be null");
 
 		this.executions = executions.toList();
 		this.category = category;
@@ -53,6 +55,7 @@ public final class Executions {
 	Executions(List<Event> events, String category) {
 		Preconditions.notNull(events, "Event list must not be null");
 		Preconditions.containsNoNullElements(events, "Event list must not contain null elements");
+		Preconditions.notNull(category, "Category must not be null");
 
 		this.executions = List.copyOf(createExecutions(events));
 		this.category = category;
@@ -123,6 +126,8 @@ public final class Executions {
 	/**
 	 * Get the skipped {@link Executions} contained in this {@code Executions} object.
 	 *
+	 * <p>Executions that are not skipped are {@linkplain #finished() finished}.
+	 *
 	 * @return the filtered {@code Executions}; never {@code null}
 	 */
 	public Executions skipped() {
@@ -132,14 +137,23 @@ public final class Executions {
 	/**
 	 * Get the started {@link Executions} contained in this {@code Executions} object.
 	 *
+	 * <p>Executions that are not started are {@linkplain #skipped() skipped}.
+	 *
 	 * @return the filtered {@code Executions}; never {@code null}
+	 *
+	 * @deprecated by definition, all started executions are also finished executions.
+	 * Use {@link #finished()} instead.
 	 */
+	@API(status = DEPRECATED, since = "6.1")
+	@Deprecated(since = "6.1", forRemoval = true)
 	public Executions started() {
 		return new Executions(executionsByTerminationInfo(TerminationInfo::notSkipped), this.category + " Started");
 	}
 
 	/**
 	 * Get the finished {@link Executions} contained in this {@code Executions} object.
+	 *
+	 * <p>Executions that are not finished are {@linkplain #skipped() skipped}.
 	 *
 	 * @return the filtered {@code Executions}; never {@code null}
 	 */
@@ -150,6 +164,9 @@ public final class Executions {
 	/**
 	 * Get the aborted {@link Executions} contained in this {@code Executions} object.
 	 *
+	 * <p>The aborted executions are a subset of the {@linkplain #finished() finished}
+	 * executions.
+	 *
 	 * @return the filtered {@code Executions}; never {@code null}
 	 */
 	public Executions aborted() {
@@ -159,6 +176,9 @@ public final class Executions {
 	/**
 	 * Get the succeeded {@link Executions} contained in this {@code Executions} object.
 	 *
+	 * <p>The succeeded executions are a subset of the {@linkplain #finished() finished}
+	 * executions.
+	 *
 	 * @return the filtered {@code Executions}; never {@code null}
 	 */
 	public Executions succeeded() {
@@ -167,6 +187,9 @@ public final class Executions {
 
 	/**
 	 * Get the failed {@link Executions} contained in this {@code Executions} object.
+	 *
+	 * <p>The failed executions are a subset of the {@linkplain #finished() finished}
+	 * executions.
 	 *
 	 * @return the filtered {@code Executions}; never {@code null}
 	 */

@@ -10,7 +10,6 @@
 
 package org.junit.jupiter.engine;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,6 +36,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -438,7 +438,7 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 		List<Condition<? super Event>> conditions = new ArrayList<>();
 		conditions.add(event(engine(), started()));
 		conditions.add(event(container(clazz), started()));
-		conditions.addAll(asList(wrappedConditions));
+		Collections.addAll(conditions, wrappedConditions);
 		conditions.add(event(container(clazz), finishedSuccessfully()));
 		conditions.add(event(engine(), finishedSuccessfully()));
 		return conditions.toArray(new Condition[0]);

@@ -11,7 +11,6 @@
 package org.junit.platform.launcher.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -73,7 +72,9 @@ class ListenerRegistry<T> {
 	@SuppressWarnings("varargs")
 	final ListenerRegistry<T> addAll(T... listeners) {
 		Preconditions.notEmpty(listeners, "listeners array must not be null or empty");
-		return addAll(Arrays.asList(listeners));
+		Preconditions.containsNoNullElements(listeners, "individual listeners must not be null");
+		Collections.addAll(this.listeners, listeners);
+		return this;
 	}
 
 	ListenerRegistry<T> addAll(Collection<? extends T> listeners) {

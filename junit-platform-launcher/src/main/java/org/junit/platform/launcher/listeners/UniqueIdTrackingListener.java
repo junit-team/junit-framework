@@ -18,7 +18,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -208,8 +207,9 @@ public class UniqueIdTrackingListener implements TestExecutionListener {
 	private Path createOutputFile(ConfigurationParameters configurationParameters) {
 		String prefix = configurationParameters.get(OUTPUT_FILE_PREFIX_PROPERTY_NAME) //
 				.orElse(DEFAULT_OUTPUT_FILE_PREFIX);
-		Supplier<Path> workingDirSupplier = () -> configurationParameters.get(WORKING_DIR_PROPERTY_NAME).map(
-			Paths::get).orElseGet(() -> Path.of("."));
+		Supplier<Path> workingDirSupplier = () -> configurationParameters.get(WORKING_DIR_PROPERTY_NAME) //
+				.map(Path::of) //
+				.orElseGet(() -> Path.of("."));
 		return OutputDir.create(configurationParameters.get(OUTPUT_DIR_PROPERTY_NAME), workingDirSupplier) //
 				.createFile(prefix, "txt");
 	}

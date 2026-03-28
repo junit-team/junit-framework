@@ -12,7 +12,6 @@ package org.junit.platform.console.options;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -22,7 +21,7 @@ class ClasspathEntriesConverter implements CommandLine.ITypeConverter<List<Path>
 
 	@Override
 	public List<Path> convert(String value) {
-		return Stream.of(value.split(File.pathSeparator)).map(Paths::get).toList();
+		return Stream.of(value.split(File.pathSeparator)).map(Path::of).toList();
 	}
 
 }

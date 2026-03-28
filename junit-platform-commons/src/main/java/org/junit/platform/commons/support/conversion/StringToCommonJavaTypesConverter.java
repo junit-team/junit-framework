@@ -16,7 +16,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
@@ -31,7 +30,7 @@ class StringToCommonJavaTypesConverter implements StringToObjectConverter {
 		// java.io and java.nio
 		File.class, File::new, //
 		Charset.class, Charset::forName, //
-		Path.class, Paths::get,
+		Path.class, Path::of,
 		// java.net
 		URI.class, URI::create, //
 		URL.class, StringToCommonJavaTypesConverter::toURL,
