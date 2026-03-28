@@ -73,6 +73,11 @@ repository on GitHub.
   the xref:writing-tests/built-in-extensions.adoc#system-properties[User Guide]. For
   details regarding implementation differences between JUnit Pioneer and Jupiter, see the
   corresponding https://github.com/junit-team/junit-framework/pull/5258[pull request].
+* `@TempDir` now allows configuring a deletion strategy for temporary directories. This is
+  typically used to gain control over what happens when deletion of a file or directory
+  fails (see
+  xref:writing-tests/built-in-extensions.adoc#TempDirDeletionStrategy[User Guide] for
+  details).
 * `Arguments` may now be created from instances of `Iterable` via the following new
   methods which make it easier to dynamically build arguments from collections when using
   `@ParameterizedTest`.
