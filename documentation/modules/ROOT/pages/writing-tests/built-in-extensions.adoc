@@ -149,8 +149,8 @@ Jupiter ships with two built-in deletion strategies:
 
 * `{TempDirDeletionStrategyStandard}` (the default): attempts to delete all files and
   directories recursively, retrying with permission resets on failure. Paths that still
-  cannot be deleted are scheduled for deletion on JVM exit, if possible, and the test is
-  failed.
+  cannot be deleted are scheduled for deletion on JVM exit, if possible. Additionally,
+  the test is failed.
 * `{TempDirDeletionStrategyIgnoreFailures}`: delegates to `{TempDirDeletionStrategyStandard}`
   but suppresses deletion failures by logging a warning instead of failing the test.
 
