@@ -1,5 +1,5 @@
 [versions]
-ant = "1.10.15"
+ant = "1.10.16"
 apiguardian = "1.1.2"
 assertj = "3.27.7"
 bnd = "7.2.3"
