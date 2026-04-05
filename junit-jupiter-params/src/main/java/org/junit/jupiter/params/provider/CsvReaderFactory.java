@@ -25,6 +25,7 @@ import de.siegmar.fastcsv.reader.CsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 
@@ -39,8 +40,8 @@ class CsvReaderFactory {
 	private static final char EMPTY_CHAR = '\0';
 	private static final boolean SKIP_EMPTY_LINES = true;
 	private static final boolean TRIM_WHITESPACES_AROUND_QUOTES = true;
-	private static final boolean ALLOW_EXTRA_FIELDS = true;
-	private static final boolean ALLOW_MISSING_FIELDS = true;
+	private static final FieldMismatchStrategy ALLOW_EXTRA_FIELDS = FieldMismatchStrategy.IGNORE;
+	private static final FieldMismatchStrategy ALLOW_MISSING_FIELDS = FieldMismatchStrategy.IGNORE;
 	private static final boolean ALLOW_DUPLICATE_HEADER_FIELDS = true;
 	private static final int MAX_FIELDS = 512;
 	private static final int MAX_RECORD_SIZE = Integer.MAX_VALUE;
@@ -75,8 +76,8 @@ class CsvReaderFactory {
 		var builder = CsvReader.builder()
 				.skipEmptyLines(SKIP_EMPTY_LINES)
 				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES)
-				.allowExtraFields(ALLOW_EXTRA_FIELDS)
-				.allowMissingFields(ALLOW_MISSING_FIELDS)
+				.extraFieldStrategy(ALLOW_EXTRA_FIELDS)
+				.missingFieldStrategy(ALLOW_MISSING_FIELDS)
 				.fieldSeparator(delimiter)
 				.quoteCharacter(csvSource.quoteCharacter())
 				.commentStrategy(commentStrategy)
@@ -105,8 +106,8 @@ class CsvReaderFactory {
 		var builder = CsvReader.builder()
 				.skipEmptyLines(SKIP_EMPTY_LINES)
 				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES)
-				.allowExtraFields(ALLOW_EXTRA_FIELDS)
-				.allowMissingFields(ALLOW_MISSING_FIELDS)
+				.extraFieldStrategy(ALLOW_EXTRA_FIELDS)
+				.missingFieldStrategy(ALLOW_MISSING_FIELDS)
 				.fieldSeparator(delimiter)
 				.quoteCharacter(csvFileSource.quoteCharacter())
 				.commentStrategy(commentStrategy)
