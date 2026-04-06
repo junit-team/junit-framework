@@ -33,9 +33,9 @@ jobs:
     - name: Install GraalVM
       uses: graalvm/setup-graalvm@60c26726de13f8b90771df4bc1641a52a3159994 # v1.5.2
       with:
-        distribution: graalvm-community
-        version: 'latest'
-        java-version: '21'
+        distribution: graalvm
+        version: latest
+        java-version: 21
     - name: Build
       uses: ./.github/actions/main-build
       with:
