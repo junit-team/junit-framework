@@ -281,7 +281,7 @@ class ReflectionUtilsTests {
 		}
 
 		/**
-		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3684">#3684</a>
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3684">GitHub - Issue #3684</a>
 		 */
 		@Test
 		void getInterfaceMethodIfPossible() throws Exception {
@@ -1496,7 +1496,7 @@ class ReflectionUtilsTests {
 
 		/**
 		 * @since 1.9.1
-		 * @see https://github.com/junit-team/junit-framework/issues/2993
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/2993">GitHub - Issue #2993</a>
 		 */
 		@Test
 		void findMethodsFindsDistinctMethodsDeclaredInMultipleInterfaces() {
@@ -1770,7 +1770,7 @@ class ReflectionUtilsTests {
 		}
 
 		/**
-		 * @see https://github.com/junit-team/junit-framework/issues/3553
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3553">GitHub - Issue #3553</a>
 		 */
 		@Test
 		void findMethodsDoesNotAllowInstanceMethodToHideStaticMethod() throws Exception {
@@ -1917,7 +1917,7 @@ class ReflectionUtilsTests {
 	class FindAndReadFieldsTests {
 
 		/**
-		 * @see https://github.com/junit-team/junit-framework/issues/3553
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3553">GitHub - Issue #3553</a>
 		 */
 		@Test
 		void findFieldsDoesNotAllowInstanceFieldToHideStaticField() throws Exception {
@@ -1967,7 +1967,7 @@ class ReflectionUtilsTests {
 		}
 
 		/**
-		 * @see https://github.com/junit-team/junit-framework/issues/3646
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3646">GitHub - Issue #3646</a>
 		 * @since 1.11
 		 */
 		@Test

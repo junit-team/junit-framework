@@ -1018,7 +1018,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 		/**
 		 * @since 5.9.1
-		 * @see https://github.com/junit-team/junit-framework/issues/3001
+		 * @see <a href="https://github.com/junit-team/junit-framework/issues/3001">GitHub - Issue #3001</a>
 		 */
 		@Test
 		void duplicateMethodNames() {
@@ -2042,7 +2042,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	/**
 	 * @since 5.9.1
-	 * @see https://github.com/junit-team/junit-framework/issues/3001
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/3001">GitHub - Issue #3001</a>
 	 */
 	static class DuplicateMethodNamesMethodSourceTestCase {
 

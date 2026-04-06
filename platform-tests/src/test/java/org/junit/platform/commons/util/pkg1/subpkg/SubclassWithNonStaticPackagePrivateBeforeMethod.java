@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.platform.commons.util.pkg1.SuperclassWithStaticPackagePrivateBeforeMethod;
 
 /**
- * @see https://github.com/junit-team/junit-framework/issues/3553
+ * See <a href="https://github.com/junit-team/junit-framework/issues/3553">GitHub -Issue #3553</a>
  */
 public class SubclassWithNonStaticPackagePrivateBeforeMethod extends SuperclassWithStaticPackagePrivateBeforeMethod {
 

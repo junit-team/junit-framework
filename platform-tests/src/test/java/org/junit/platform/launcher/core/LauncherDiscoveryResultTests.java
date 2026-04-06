@@ -31,7 +31,7 @@ import org.junit.platform.launcher.core.LauncherDiscoveryResult.EngineResultInfo
 class LauncherDiscoveryResultTests {
 
 	/**
-	 * @see <a href="https://github.com/junit-team/junit-framework/issues/4862">GitHub issue #4862</>
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/4862">GitHub - Issue #4862</a>
 	 */
 	@Test
 	void withRetainedEnginesMaintainsOriginalTestEngineRegistrationOrder() {

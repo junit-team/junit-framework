@@ -16,7 +16,7 @@ import org.junit.platform.commons.util.pkg1.InstanceLevelDir;
 import org.junit.platform.commons.util.pkg1.SuperclassWithStaticPackagePrivateTempDirField;
 
 /**
- * @see https://github.com/junit-team/junit-framework/issues/3553
+ * @see <a href="https://github.com/junit-team/junit-framework/issues/3553">Github - Issue #3553</a>
  */
 public class SubclassWithNonStaticPackagePrivateTempDirField extends SuperclassWithStaticPackagePrivateTempDirField {
 
