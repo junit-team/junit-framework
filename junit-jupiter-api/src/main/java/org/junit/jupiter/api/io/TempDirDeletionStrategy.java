@@ -152,6 +152,10 @@ public interface TempDirDeletionStrategy {
 	 * Standard {@link TempDirDeletionStrategy} implementation that recursively
 	 * deletes all files and directories within the temporary directory.
 	 *
+	 * <p>Symbolic and other types of links, such as junctions on Windows, are
+	 * not followed. A warning is logged when deleting a link that targets a
+	 * location outside the temporary directory.
+	 *
 	 * <p>If a file or directory cannot be deleted, its permissions are reset
 	 * and deletion is attempted again. If deletion still fails, the path is
 	 * scheduled for deletion on JVM exit via

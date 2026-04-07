@@ -15,7 +15,6 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -63,17 +62,16 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
  * {@code static} field or on a parameter of a
  * {@link org.junit.jupiter.api.BeforeAll @BeforeAll} method.
  *
- * <h2>Clean Up</h2>
+ * <h2>Cleanup/Deletion</h2>
  *
  * <p>By default, when the end of the scope of a temporary directory is reached,
  * &mdash; when the test method or class has finished execution &mdash; JUnit will
  * attempt to clean up the temporary directory by recursively deleting all files
  * and directories in the temporary directory and, finally, the temporary directory
- * itself. Symbolic and other types of links, such as junctions on Windows, are
- * not followed. A warning is logged when deleting a link that targets a
- * location outside the temporary directory. In case deletion of a file or
- * directory fails, an {@link IOException} will be thrown that will cause the
- * test or test class to fail.
+ * itself.
+ *
+ * <p>Two attributes allow customizing <em>when</em> (see {@link #cleanup()})
+ * and <em>how</em> (see {@link #deletionStrategy()}) to clean up.
  *
  * <p>The {@link #cleanup} attribute allows you to configure the {@link CleanupMode}.
  * If the cleanup mode is set to {@link CleanupMode#NEVER NEVER}, the temporary
@@ -83,6 +81,13 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
  * {@link CleanupMode#ALWAYS ALWAYS} clean up mode will be used, but this can be
  * configured globally by setting the {@value #DEFAULT_CLEANUP_MODE_PROPERTY_NAME}
  * configuration parameter.
+ *
+ * <p>The {@link #deletionStrategy()} attribute defines the strategy for
+ * performing the cleanup and dealing with errors such as undeletable files.
+ * By default, the {@link TempDirDeletionStrategy.Standard Standard} strategy is
+ * used which will cause a test or test class to fail in case deletion of a file
+ * or directory fails. This can be configured globally by setting the
+ * {@value #DEFAULT_DELETION_STRATEGY_PROPERTY_NAME} configuration parameter.
  *
  * @since 5.4
  */
