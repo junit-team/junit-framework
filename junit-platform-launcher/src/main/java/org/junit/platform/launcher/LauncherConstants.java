@@ -269,6 +269,21 @@ public class LauncherConstants {
 	@API(status = EXPERIMENTAL, since = "6.0")
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
+	/**
+	 * Property name used to enable the <em>experimental</em> memory cleanup
+	 * mode.
+	 *
+	 * <p>Supported values are {@code true} or {@code false}.
+	 *
+	 * <p>If enabled, the Launcher removes finished or skipped tests and their
+	 * children from the test plan right away to reduce memory consumption,
+	 * particularly in the presence of many dynamically reported tests.
+	 *
+	 * @since 6.1
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	public static final String MEMORY_CLEANUP_ENABLED_PROPERTY_NAME = "junit.platform.execution.memory.cleanup.enabled";
+
 	private LauncherConstants() {
 		/* no-op */
 	}

@@ -34,6 +34,7 @@ import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
+import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
@@ -141,9 +142,19 @@ public class EngineExecutionOrchestrator {
 			EngineExecutionListener parentEngineExecutionListener, TestExecutionListener testExecutionListener,
 			TestPlan testPlan) {
 		ListenerRegistry<EngineExecutionListener> engineExecutionListenerRegistry = forEngineExecutionListeners();
-		engineExecutionListenerRegistry.add(new ExecutionListenerAdapter(testPlan, testExecutionListener));
+		EngineExecutionListener listener = new ExecutionListenerAdapter(testPlan, testExecutionListener);
+		if (isMemoryCleanupEnabled(testPlan)) {
+			listener = new MemoryCleanupListener(listener, testPlan);
+		}
+		engineExecutionListenerRegistry.add(listener);
 		engineExecutionListenerRegistry.add(parentEngineExecutionListener);
 		return engineExecutionListenerRegistry.getCompositeListener();
+	}
+
+	private static Boolean isMemoryCleanupEnabled(TestPlan testPlan) {
+		return testPlan.getConfigurationParameters() //
+				.getBoolean(LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME) //
+				.orElse(false);
 	}
 
 	private void withInterceptedStreams(ConfigurationParameters configurationParameters,

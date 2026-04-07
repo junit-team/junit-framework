@@ -127,6 +127,14 @@ public class TestPlan {
 		directChildren.add(testIdentifier);
 	}
 
+	@API(status = INTERNAL, since = "6.1")
+	public void removeInternal(UniqueId uniqueId) {
+		Preconditions.notNull(uniqueId, "uniqueId must not be null");
+		allIdentifiers.remove(uniqueId);
+		roots.removeIf(testIdentifier -> testIdentifier.getUniqueIdObject().equals(uniqueId));
+		children.remove(uniqueId);
+	}
+
 	/**
 	 * Get the root {@link TestIdentifier TestIdentifiers} for this test plan.
 	 *
