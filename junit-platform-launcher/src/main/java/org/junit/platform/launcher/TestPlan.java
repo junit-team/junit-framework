@@ -19,7 +19,6 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -131,13 +131,23 @@ public class TestPlan {
 	@API(status = INTERNAL, since = "6.1")
 	public void removeInternal(UniqueId uniqueId) {
 		Preconditions.notNull(uniqueId, "uniqueId must not be null");
-		TestIdentifier removedTestIdentifier = allIdentifiers.remove(uniqueId);
-		roots.removeIf(root -> root.getUniqueIdObject().equals(uniqueId));
-		children.remove(uniqueId);
+		var removedTestIdentifier = removeSubtree(uniqueId);
 		if (removedTestIdentifier != null) {
+			roots.removeIf(root -> root.getUniqueIdObject().equals(uniqueId));
 			removedTestIdentifier.getParentIdObject().ifPresent(
-				parentId -> children.getOrDefault(parentId, Collections.emptySet()).remove(removedTestIdentifier));
+				parentId -> children.getOrDefault(parentId, Set.of()).remove(removedTestIdentifier));
 		}
+	}
+
+	private @Nullable TestIdentifier removeSubtree(UniqueId uniqueId) {
+		var testIdentifier = allIdentifiers.remove(uniqueId);
+		var removedChildren = children.remove(uniqueId);
+		if (removedChildren != null && !removedChildren.isEmpty()) {
+			for (var child : removedChildren) {
+				removeSubtree(child.getUniqueIdObject());
+			}
+		}
+		return testIdentifier;
 	}
 
 	/**

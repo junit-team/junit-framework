@@ -10,8 +10,6 @@
 
 package org.junit.platform.launcher.core;
 
-import java.util.stream.Stream;
-
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
@@ -42,11 +40,7 @@ class MemoryCleanupListener extends DelegatingEngineExecutionListener {
 	}
 
 	private void cleanUp(TestDescriptor testDescriptor) {
-		var ownUniqueId = Stream.of(testDescriptor.getUniqueId());
-		var descendantUniqueIds = testDescriptor.getDescendants().stream() //
-				.map(TestDescriptor::getUniqueId);
-		Stream.concat(ownUniqueId, descendantUniqueIds) //
-				.forEach(testPlan::removeInternal);
+		testPlan.removeInternal(testDescriptor.getUniqueId());
 		if (!testDescriptor.isRoot()) {
 			testDescriptor.removeFromHierarchy();
 		}
