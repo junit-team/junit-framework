@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.UniqueId;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
@@ -58,6 +61,7 @@ class MutableTestExecutionSummary implements TestExecutionSummary {
 
 	private final TestPlan testPlan;
 	private final List<Failure> failures = synchronizedList(new ArrayList<>());
+	private final Map<UniqueId, String> descriptions = new ConcurrentHashMap<>();
 	private final long timeStarted;
 	private final long timeStartedNanos;
 	long timeFinished;
@@ -73,6 +77,7 @@ class MutableTestExecutionSummary implements TestExecutionSummary {
 
 	void addFailure(TestIdentifier testIdentifier, Throwable throwable) {
 		this.failures.add(new DefaultFailure(testIdentifier, throwable));
+		this.descriptions.put(testIdentifier.getUniqueIdObject(), describeTest(testIdentifier));
 	}
 
 	@Override
@@ -204,8 +209,9 @@ class MutableTestExecutionSummary implements TestExecutionSummary {
 		if (getTotalFailureCount() > 0) {
 			writer.printf("%nFailures (%d):%n", getTotalFailureCount());
 			this.failures.forEach(failure -> {
-				writer.printf("%s%s%n", TAB, describeTest(failure.getTestIdentifier()));
-				printSource(writer, failure.getTestIdentifier());
+				var testIdentifier = failure.getTestIdentifier();
+				writer.printf("%s%s%n", TAB, descriptions.get(testIdentifier.getUniqueIdObject()));
+				printSource(writer, testIdentifier);
 				writer.printf("%s=> %s%n", DOUBLE_TAB, failure.getException());
 				printStackTrace(writer, failure.getException(), maxStackTraceLines);
 			});
@@ -229,11 +235,11 @@ class MutableTestExecutionSummary implements TestExecutionSummary {
 		this.testPlan.getParent(identifier).ifPresent(parent -> collectTestDescription(parent, descriptionParts));
 	}
 
-	private void printSource(PrintWriter writer, TestIdentifier testIdentifier) {
+	private static void printSource(PrintWriter writer, TestIdentifier testIdentifier) {
 		testIdentifier.getSource().ifPresent(source -> writer.printf("%s%s%n", DOUBLE_TAB, source));
 	}
 
-	private void printStackTrace(PrintWriter writer, Throwable throwable, int max) {
+	private static void printStackTrace(PrintWriter writer, Throwable throwable, int max) {
 		if (throwable.getCause() != null
 				|| (throwable.getSuppressed() != null && throwable.getSuppressed().length > 0)) {
 			max = max / 2;
@@ -242,7 +248,7 @@ class MutableTestExecutionSummary implements TestExecutionSummary {
 		writer.flush();
 	}
 
-	private void printStackTrace(PrintWriter writer, StackTraceElement[] parentTrace, Throwable throwable,
+	private static void printStackTrace(PrintWriter writer, StackTraceElement[] parentTrace, Throwable throwable,
 			String caption, String indentation, Set<Throwable> seenThrowables, int max) {
 		if (seenThrowables.contains(throwable)) {
 			writer.printf("%s%s[%s%s]%n", indentation, TAB, CIRCULAR, throwable);
@@ -272,7 +278,7 @@ class MutableTestExecutionSummary implements TestExecutionSummary {
 		}
 	}
 
-	private int numberOfCommonFrames(StackTraceElement[] currentTrace, StackTraceElement[] parentTrace) {
+	private static int numberOfCommonFrames(StackTraceElement[] currentTrace, StackTraceElement[] parentTrace) {
 		int currentIndex = currentTrace.length - 1;
 		for (int parentIndex = parentTrace.length - 1; currentIndex >= 0
 				&& parentIndex >= 0; currentIndex--, parentIndex--) {
