@@ -136,13 +136,34 @@ xref:writing-tests/tagging-and-filtering.adoc[]), you can create a custom _compo
 named `@Fast` as follows. `@Fast` can then be used as a drop-in replacement for
 `@Tag("fast")`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/Fast.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/Fast.kt[tags=user_guide]
+----
+--
+====
 
 The following `@Test` method demonstrates usage of the `@Fast` annotation.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @Fast
@@ -151,18 +172,54 @@ void myFastTest() {
     // ...
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@Fast
+@Test
+fun myFastTest() {
+    // ...
+}
+----
+--
+====
 
 You can even take that one step further by introducing a custom `@FastTest` annotation
 that can be used as a drop-in replacement for `@Tag("fast")` _and_ `@Test`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/FastTest.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/FastTest.kt[tags=user_guide]
+----
+--
+====
 
 JUnit automatically recognizes the following as a `@Test` method that is tagged with
 "fast".
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @FastTest
@@ -170,3 +227,17 @@ void myFastTest() {
     // ...
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@FastTest
+fun myFastTest() {
+    // ...
+}
+----
+--
+====

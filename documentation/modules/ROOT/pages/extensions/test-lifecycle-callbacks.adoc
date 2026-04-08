@@ -35,20 +35,52 @@ time of a test method. `TimingExtension` implements both `BeforeTestExecutionCal
 and `AfterTestExecutionCallback` in order to time and log the test execution.
 
 [[timing-extension]]
-[source,java,indent=0]
 .An extension that times and logs the execution of test methods
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/timing/TimingExtension.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/timing/TimingExtension.kt[tags=user_guide]
+----
+--
+====
 
 Since the `TimingExtensionTests` class registers the `TimingExtension` via `@ExtendWith`,
 its tests will have this timing applied when they execute.
 
-[source,java,indent=0]
 .A test class that uses the example TimingExtension
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/timing/TimingExtensionTests.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/timing/TimingExtensionTests.kt[tags=user_guide]
+----
+--
+====
 
 The following is an example of the logging produced when `TimingExtensionTests` is run.
 

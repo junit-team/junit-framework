@@ -19,30 +19,78 @@ For example, the following test declares a parameter annotated with `@TempDir` f
 single test method, creates and writes to a file in the temporary directory, and checks
 its content.
 
-[source,java,indent=0]
 .A test method that requires a temporary directory
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_parameter_injection]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_parameter_injection]
+----
+--
+====
 
 You can inject multiple temporary directories by specifying multiple annotated parameters.
 
-[source,java,indent=0]
 .A test method that requires multiple temporary directories
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_multiple_directories]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_multiple_directories]
+----
+--
+====
 
 The following example stores a _shared_ temporary directory in a `static` field. This
 allows the same `sharedTempDir` to be used in all lifecycle methods and test methods of
 the test class. For better isolation, you should use an instance field or constructor
 injection so that each test method uses a separate directory.
 
-[source,java,indent=0]
 .A test class that shares a temporary directory across test methods
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_field_injection]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_field_injection]
+----
+--
+====
 
 The `@TempDir` annotation has an optional `cleanup` attribute that can be set to either
 `NEVER`, `ON_SUCCESS`, or `ALWAYS`. If the cleanup mode is set to `NEVER`, the temporary
@@ -53,11 +101,27 @@ The default cleanup mode is `ALWAYS`. You can use the
 `junit.jupiter.tempdir.cleanup.mode.default`
 xref:running-tests/configuration-parameters.adoc[configuration parameter] to override this default.
 
-[source,java,indent=0]
 .A test class with a temporary directory that doesn't get cleaned up
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_cleanup_mode]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_cleanup_mode]
+----
+--
+====
 
 [[TempDirFactory]]
 === Factories
@@ -80,39 +144,103 @@ string of the generated directory name to help identify it as a created by JUnit
 The following example defines a factory that uses the test name as the directory name
 prefix instead of the `junit` constant value.
 
-[source,java,indent=0]
 .A test class with a temporary directory having the test name as the directory name prefix
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_name_prefix]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_factory_name_prefix]
+----
+--
+====
 
 It is also possible to use an in-memory file system like `{Jimfs}` for the creation of the
 temporary directory. The following example demonstrates how to achieve that.
 
-[source,java,indent=0]
 .A test class with a temporary directory created with the Jimfs in-memory file system
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_factory_jimfs]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_factory_jimfs]
+----
+--
+====
 
 `@TempDir` can also be used as a xref:writing-tests/annotations.adoc#annotations[meta-annotation] to
 reduce repetition. The following code listing shows how to create a custom `@JimfsTempDir`
 annotation that can be used as a drop-in replacement for
 `@TempDir(factory = JimfsTempDirFactory.class)`.
 
-[source,java,indent=0]
 .A custom annotation meta-annotated with `@TempDir`
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_composed_annotation]
+----
+--
+====
 
 The following example demonstrates how to use the custom `@JimfsTempDir` annotation.
 
-[source,java,indent=0]
 .A test class using the custom annotation
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_composed_annotation_usage]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_composed_annotation_usage]
+----
+--
+====
 
 Meta-annotations or additional annotations on the field or parameter the `TempDir`
 annotation is declared on might expose additional attributes to configure the factory.
@@ -157,11 +285,27 @@ Jupiter ships with two built-in deletion strategies:
 The following example uses `{TempDirDeletionStrategyIgnoreFailures}` so that any deletion
 failures are only logged.
 
-[source,java,indent=0]
 .A test class with a temporary directory that ignores deletion failures
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/TempDirectoryDemo.java[tags=user_guide_deletion_strategy]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TempDirectoryDemo.kt[tags=user_guide_deletion_strategy]
+----
+--
+====
 
 You can use the `junit.jupiter.tempdir.deletion.strategy.default`
 xref:running-tests/configuration-parameters.adoc[configuration parameter] to specify the
@@ -219,11 +363,27 @@ The following example demonstrates how to annotate an instance field with `@Auto
 that the resource is automatically closed after test execution. In this example, we assume
 that the default `@TestInstance(Lifecycle.PER_METHOD)` semantics apply.
 
-[source,java,indent=0]
 .A test class using `@AutoClose` to close a resource
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/AutoCloseDemo.java[tags=user_guide_example]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/AutoCloseDemo.kt[tags=user_guide_example]
+----
+--
+====
 <1> Annotate an instance field with `@AutoClose`.
 <2> `WebClient` implements `java.lang.AutoCloseable` which defines a `close()` method that
     will be invoked after each `@Test` method.
@@ -244,10 +404,26 @@ default value is restored.
 The default `Locale` can be specified using an
 {jdk-javadoc-base-url}/java.base/java/util/Locale.html#forLanguageTag-java.lang.String-[IETF BCP 47 language tag string].
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tags=default_locale_language]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tags=default_locale_language]
+----
+--
+====
 
 Alternatively, the default `Locale` can be created using the following attributes from
 which a {jdk-javadoc-base-url}/java.base/java/util/Locale.Builder.html[`Locale.Builder`]
@@ -260,10 +436,26 @@ can create an instance:
 NOTE: The variant needs to be a string which follows the
 https://www.rfc-editor.org/rfc/rfc5646.html[IETF BCP 47 / RFC 5646] syntax.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_language_alternatives]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tag=default_locale_language_alternatives]
+----
+--
+====
 
 Mixing language tag configuration (via the annotation's `value` attribute) and
 attribute-based configuration will cause an exception to be thrown. Furthermore, a
@@ -272,20 +464,52 @@ will be thrown.
 
 Method-level `@DefaultLocale` configuration overrides class-level configuration.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_class_level]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tag=default_locale_class_level]
+----
+--
+====
 
 NOTE: With class-level configuration, the specified locale is set before and reset after
 each individual test in the annotated class.
 
 If your use case is not covered, you can implement the `{LocaleProvider}` interface.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_locale_with_provider]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tag=default_locale_with_provider]
+----
+--
+====
 
 NOTE: The provider implementation must have a no-args (or default) constructor.
 
@@ -296,27 +520,75 @@ The default `TimeZone` is specified according to the
 {jdk-javadoc-base-url}/java.base/java/util/TimeZone.html#getTimeZone(java.lang.String)[TimeZone.getTimeZone(String)]
 method.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_zone]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tag=default_timezone_zone]
+----
+--
+====
 
 Method-level `@DefaultTimeZone` configuration overrides class-level configuration.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_timezone_class_level]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tag=default_timezone_class_level]
+----
+--
+====
 
 NOTE: With class-level configuration, the specified time zone is set before and reset
 after each individual test in the annotated class.
 
 If your use case is not covered, you can implement the `{TimeZoneProvider}` interface.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DefaultLocaleTimezoneExtensionDemo.java[tag=default_time_zone_with_provider]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DefaultLocaleTimezoneExtensionDemo.kt[tag=default_time_zone_with_provider]
+----
+--
+====
 
 NOTE: The provider implementation must have a no-args (or default) constructor.
 
@@ -364,32 +636,95 @@ restoration is <<system-properties-restore, explicitly enabled>> via
 
 For example, clearing a system property for test execution can be done as follows.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_clear_simple]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_clear_simple]
+----
+--
+====
 
 The following demonstrates how to set a system property for test execution.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_set_simple]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_set_simple]
+----
+--
+====
 
 As mentioned before, both annotations are repeatable, and they can also be combined.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_set_and_clear]
-
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_using_set_and_clear]
+----
+--
+====
 
 Note that class-level configuration is overridden by method-level configuration.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_using_at_class_level]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_using_at_class_level]
+----
+--
+====
 
 [NOTE]
 ====
@@ -429,10 +764,26 @@ and fail if any were detected. For classes that extend `Properties` it is assume
 In the following example, `@RestoreSystemProperties` is used on a test method, ensuring
 any changes made in that method are restored.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_restore_test]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_restore_test]
+----
+--
+====
 
 When `@RestoreSystemProperties` is used on a test class, any changes to system properties
 during the entire lifecycle of the test class, including test methods, `@BeforeAll`,
@@ -450,17 +801,49 @@ lifecycle, ensuring that changes are not visible to `SomeOtherTestClass`. Note t
 does not schedule the class to run during any test known to modify system properties (see
 <<system-properties-thread-safety>>).
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_setup]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_class_restore_setup]
+----
+--
+====
 
 Some other test class, running later:
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_class_restore_isolated_class]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_class_restore_isolated_class]
+----
+--
+====
 
 [[system-properties-combined-usage]]
 === Combining @ClearSystemProperty, @SetSystemProperty, and @RestoreSystemProperties
@@ -471,10 +854,26 @@ you need to test an image generation utility that takes configuration from syste
 properties. Basic configuration can be specified declaratively using the `Clear` and `Set`
 annotations, and the image size could be set programmatically.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SystemPropertyExtensionDemo.java[tag=systemproperty_method_combine_all_test]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SystemPropertyExtensionDemo.kt[tag=systemproperty_method_combine_all_test]
+----
+--
+====
 
 [NOTE]
 ====

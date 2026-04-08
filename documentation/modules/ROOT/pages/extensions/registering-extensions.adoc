@@ -19,6 +19,11 @@ For example, to register a `WebServerExtension` for a particular test method, yo
 annotate the test method as follows. We assume the `WebServerExtension` starts a local web
 server and injects the server's URL into parameters annotated with `@WebServerUrl`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @Test
@@ -29,10 +34,32 @@ void getProductList(@WebServerUrl String serverUrl) {
 	assertEquals(200, webClient.get(serverUrl + "/products").getResponseStatus());
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@Test
+@ExtendWith(WebServerExtension::class)
+fun getProductList(@WebServerUrl serverUrl: String) {
+    val webClient = WebClient()
+    // Use WebClient to connect to web server using serverUrl and verify response
+    assertEquals(200, webClient.get("$serverUrl/products").responseStatus)
+}
+----
+--
+====
 
 To register the `WebServerExtension` for all tests in a particular class and its
 subclasses, you would annotate the test class as follows.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @ExtendWith(WebServerExtension.class)
@@ -40,9 +67,28 @@ class MyTests {
 	// ...
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@ExtendWith(WebServerExtension::class)
+class MyTests {
+    // ...
+}
+----
+--
+====
 
 Multiple extensions can be registered together like this:
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @ExtendWith({ DatabaseExtension.class, WebServerExtension.class })
@@ -50,9 +96,28 @@ class MyFirstTests {
 	// ...
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@ExtendWith(DatabaseExtension::class, WebServerExtension::class)
+class MyFirstTests {
+    // ...
+}
+----
+--
+====
 
 As an alternative, multiple extensions can be registered separately like this:
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @ExtendWith(DatabaseExtension.class)
@@ -61,6 +126,21 @@ class MySecondTests {
 	// ...
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@ExtendWith(DatabaseExtension::class)
+@ExtendWith(WebServerExtension::class)
+class MySecondTests {
+    // ...
+}
+----
+--
+====
 
 [TIP]
 .Extension Registration Order
@@ -76,6 +156,11 @@ _xref:writing-tests/annotations.adoc#annotations[composed annotation]_ and use `
 _meta-annotation_ as in the following code listing. Then `@DatabaseAndWebServerExtension`
 can be used in place of `@ExtendWith({ DatabaseExtension.class, WebServerExtension.class })`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 @Target({ ElementType.TYPE, ElementType.METHOD })
@@ -84,6 +169,20 @@ can be used in place of `@ExtendWith({ DatabaseExtension.class, WebServerExtensi
 public @interface DatabaseAndWebServerExtension {
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@ExtendWith(DatabaseExtension::class, WebServerExtension::class)
+annotation class DatabaseAndWebServerExtension
+----
+--
+====
 
 The above examples demonstrate how `@ExtendWith` can be applied at the class level or at
 the method level; however, for certain use cases it makes sense for an extension to be
@@ -94,15 +193,47 @@ provides a `@Random` annotation that is meta-annotated with
 `@ExtendWith(RandomNumberExtension.class)` (see listing below), the extension can be used
 transparently as in the following `RandomNumberDemo` example.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/extensions/Random.java[tags=user_guide]
 ----
+--
 
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/Random.kt[tags=user_guide]
+----
+--
+====
+
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/extensions/RandomNumberDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/RandomNumberDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[RandomNumberExtension]]
 The following code listing provides an example of how one might choose to implement such a
@@ -118,10 +249,26 @@ Specifically, `RandomNumberExtension` implements the following extension APIs:
 - `TestInstancePostProcessor`: to support non-static field injection
 - `ParameterResolver`: to support constructor and method injection
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/extensions/RandomNumberExtension.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/RandomNumberExtension.kt[tags=user_guide]
+----
+--
+====
 
 [TIP]
 .Extension Registration Order for `@ExtendWith` on Fields
@@ -255,11 +402,28 @@ to the static `forPath()` factory method in the `DocumentationExtension`. The co
 level. In addition, `@BeforeEach`, `@AfterEach`, and `@Test` methods can access the
 instance of the extension via the `docs` field if necessary.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 .An extension registered via an instance field
 ----
 include::example$java/example/registration/DocumentationDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+.An extension registered via an instance field
+----
+include::example$kotlin/example/kotlin/registration/DocumentationDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[registration-automatic]]
 == Automatic Extension Registration

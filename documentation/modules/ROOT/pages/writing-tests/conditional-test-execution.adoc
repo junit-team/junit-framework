@@ -60,18 +60,50 @@ architecture, or combination of both via the `{EnabledOnOs}` and `{DisabledOnOs}
 annotations.
 
 [[os-demo]]
-[source,java,indent=0]
 .Conditional execution based on operating system
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_os]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_os]
+----
+--
+====
 
 [[architectures-demo]]
-[source,java,indent=0]
 .Conditional execution based on architecture
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_architecture]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_architecture]
+----
+--
+====
 
 [[jre]]
 == Java Runtime Environment Conditions
@@ -85,10 +117,26 @@ lower bound and `JRE.OTHER` as the upper bound, which allows usage of half open 
 The following listing demonstrates the use of these annotations with predefined {JRE} enum
 constants.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_jre]
+----
+--
+====
 
 Since the enum constants defined in {JRE} are static for any given JUnit release, you
 might find that you need to configure a Java version that is not supported by the `JRE`
@@ -102,10 +150,26 @@ via the `versions` attributes in `@EnabledOnJre` and `@DisabledOnJre` and via th
 The following listing demonstrates the use of these annotations with arbitrary Java
 versions.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_jre_arbitrary_versions]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_jre_arbitrary_versions]
+----
+--
+====
 
 [[native]]
 == Native Image Conditions
@@ -117,10 +181,26 @@ typically used when running tests within a native image using the Gradle and Mav
 plug-ins from the GraalVM https://graalvm.github.io/native-build-tools/latest/[Native
 Build Tools] project.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_native]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_native]
+----
+--
+====
 
 [[system-properties]]
 == System Property Conditions
@@ -130,10 +210,26 @@ system property via the `{EnabledIfSystemProperty}` and `{DisabledIfSystemProper
 annotations. The value supplied via the `matches` attribute will be interpreted as a
 regular expression.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_system_property]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_system_property]
+----
+--
+====
 
 [TIP]
 ====
@@ -151,10 +247,26 @@ environment variable from the underlying operating system via the
 `{EnabledIfEnvironmentVariable}` and `{DisabledIfEnvironmentVariable}` annotations. The
 value supplied via the `matches` attribute will be interpreted as a regular expression.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_environment_variable]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_environment_variable]
+----
+--
+====
 
 [TIP]
 ====
@@ -175,21 +287,55 @@ return type and may accept either no arguments or a single `ExtensionContext` ar
 The following test class demonstrates how to configure a local method named
 `customCondition` via `@EnabledIf` and `@DisabledIf`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_custom]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_custom]
+----
+--
+====
 
 Alternatively, the condition method can be located outside the test class. In this case,
 it must be referenced by its _fully qualified name_ as demonstrated in the following
 example.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 package example;
 
 include::example$java/example/ExternalCustomConditionDemo.java[tags=user_guide_external_custom_condition]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+package example.kotlin
+
+include::example$kotlin/example/kotlin/ExternalCustomConditionDemo.kt[tags=user_guide_external_custom_condition]
+----
+--
+====
 
 [NOTE]
 ====
@@ -214,9 +360,26 @@ method that can be used to determine if the current environment does not support
 graphical display. Thus, if you have a test that depends on graphical support you can
 disable it when such support is unavailable as follows.
 
+[tabs]
+======
+Java::
++
+--
 [source,java,indent=0]
 ----
 @DisabledIf(value = "java.awt.GraphicsEnvironment#isHeadless",
 	disabledReason = "headless environment")
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+@DisabledIf(value = "java.awt.GraphicsEnvironment#isHeadless",
+    disabledReason = "headless environment")
+----
+--
+======
 ====

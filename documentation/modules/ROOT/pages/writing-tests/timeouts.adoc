@@ -6,10 +6,26 @@ unit for the duration defaults to seconds but is configurable.
 
 The following example shows how `@Timeout` is applied to lifecycle and test methods.
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 ----
 include::example$java/example/TimeoutDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+----
+include::example$kotlin/example/kotlin/TimeoutDemo.kt[tags=user_guide]
+----
+--
+====
 
 To apply the same timeout to all test methods within a test class and all of its `@Nested`
 classes, you can declare the `@Timeout` annotation at the class level. It will then be
@@ -117,10 +133,26 @@ does not execute indefinitely. The following example demonstrates how to achieve
 JUnit Jupiter's `@Timeout` annotation. This technique can be used to implement "poll
 until" logic very easily.
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 ----
 include::example$java/example/PollingTimeoutDemo.java[tags=user_guide,indent=0]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+----
+include::example$kotlin/example/kotlin/PollingTimeoutDemo.kt[tags=user_guide,indent=0]
+----
+--
+====
 
 NOTE: If you need more control over polling intervals and greater flexibility with
 asynchronous tests, consider using a dedicated library such as

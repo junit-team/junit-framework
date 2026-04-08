@@ -60,38 +60,102 @@ registered for a test, a `ParameterResolutionException` will be thrown, with a
 message to indicate that competing resolvers have been discovered. See the following
 example:
 
-[source,java,indent=0]
 .Conflicting parameter resolution due to multiple resolvers claiming support for integers
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/extensions/ParameterResolverConflictDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/ParameterResolverConflictDemo.kt[tags=user_guide]
+----
+--
+====
 
 If the conflicting `ParameterResolver` implementations are applied to different test
 methods as shown in the following example, no conflict occurs.
 
-[source,java,indent=0]
 .Fine-grained registration to avoid conflict
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/extensions/ParameterResolverNoConflictDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/ParameterResolverNoConflictDemo.kt[tags=user_guide]
+----
+--
+====
 
 If the conflicting `ParameterResolver` implementations need to be applied to the same test
 method, you can implement a custom type or custom annotation as illustrated by
 `{CustomTypeParameterResolver}` and `{CustomAnnotationParameterResolver}`, respectively.
 
-[source,java,indent=0]
 .Custom type to resolve duplicate types
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/extensions/ParameterResolverCustomTypeDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/ParameterResolverCustomTypeDemo.kt[tags=user_guide]
+----
+--
+====
 
 A custom annotation makes the duplicate type distinguishable from its counterpart:
 
-[source,java,indent=0]
 .Custom annotation to resolve duplicate types
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/extensions/ParameterResolverCustomAnnotationDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/ParameterResolverCustomAnnotationDemo.kt[tags=user_guide]
+----
+--
+====
 
 JUnit includes some built-in parameter resolvers that can cause conflicts if a resolver
 attempts to claim their supported types. For example, `{TestInfo}` provides metadata about

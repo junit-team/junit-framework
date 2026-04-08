@@ -43,11 +43,27 @@ available for backward compatibility.
 An example implementation of `AutoCloseable` is shown below, using an `HttpServer`
 resource.
 
-[source,java,indent=0]
 .`_HttpServer_` resource implementing `_AutoCloseable_`
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/extensions/HttpServerResource.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/HttpServerResource.kt[tags=user_guide]
+----
+--
+====
 
 This resource can then be stored in the desired `ExtensionContext`. It may be stored at
 class or method level, if desired, but this may add unnecessary overhead for this type of
@@ -55,17 +71,49 @@ resource. For this example it might be prudent to store it at root level and ins
 it lazily to ensure it's only created once per test run and reused across different test
 classes and methods.
 
-[source,java,indent=0]
 .Lazily storing in root context with `_Store.computeIfAbsent_`
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/extensions/HttpServerExtension.java[tags=user_guide]
 ----
+--
 
-[source,java,indent=0]
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/HttpServerExtension.kt[tags=user_guide]
+----
+--
+====
+
 .A test case using the `_HttpServerExtension_`
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/HttpServerDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/HttpServerDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[migration]]
 [TIP]
