@@ -19,6 +19,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -130,9 +131,13 @@ public class TestPlan {
 	@API(status = INTERNAL, since = "6.1")
 	public void removeInternal(UniqueId uniqueId) {
 		Preconditions.notNull(uniqueId, "uniqueId must not be null");
-		allIdentifiers.remove(uniqueId);
-		roots.removeIf(testIdentifier -> testIdentifier.getUniqueIdObject().equals(uniqueId));
+		TestIdentifier removedTestIdentifier = allIdentifiers.remove(uniqueId);
+		roots.removeIf(root -> root.getUniqueIdObject().equals(uniqueId));
 		children.remove(uniqueId);
+		if (removedTestIdentifier != null) {
+			removedTestIdentifier.getParentIdObject().ifPresent(
+				parentId -> children.getOrDefault(parentId, Collections.emptySet()).remove(removedTestIdentifier));
+		}
 	}
 
 	/**
