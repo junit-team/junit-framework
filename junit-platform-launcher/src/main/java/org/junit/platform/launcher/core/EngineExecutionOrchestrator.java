@@ -14,7 +14,6 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.launcher.LauncherConstants.DRY_RUN_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
-import static org.junit.platform.launcher.core.ListenerRegistry.forEngineExecutionListeners;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -141,14 +140,14 @@ public class EngineExecutionOrchestrator {
 	private static EngineExecutionListener buildEngineExecutionListener(
 			EngineExecutionListener parentEngineExecutionListener, TestExecutionListener testExecutionListener,
 			TestPlan testPlan) {
-		ListenerRegistry<EngineExecutionListener> engineExecutionListenerRegistry = forEngineExecutionListeners();
-		EngineExecutionListener listener = new ExecutionListenerAdapter(testPlan, testExecutionListener);
+		var registry = ListenerRegistry.forEngineExecutionListeners();
+		registry.add(new ExecutionListenerAdapter(testPlan, testExecutionListener));
+		registry.add(parentEngineExecutionListener);
+		var listener = registry.getCompositeListener();
 		if (isMemoryCleanupEnabled(testPlan)) {
 			listener = new MemoryCleanupListener(listener, testPlan);
 		}
-		engineExecutionListenerRegistry.add(listener);
-		engineExecutionListenerRegistry.add(parentEngineExecutionListener);
-		return engineExecutionListenerRegistry.getCompositeListener();
+		return listener;
 	}
 
 	private static Boolean isMemoryCleanupEnabled(TestPlan testPlan) {
