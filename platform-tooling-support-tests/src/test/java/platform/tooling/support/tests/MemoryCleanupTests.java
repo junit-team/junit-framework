@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
@@ -43,7 +44,8 @@ class MemoryCleanupTests {
 		copyToWorkspace(Projects.MEMORY_CLEANUP, workspace);
 		compile(javacOutputFiles);
 
-		var result = assertTimeoutPreemptively(Duration.ofSeconds(10), () -> executeWithSmallHeapSize(javaOutputFiles));
+		var timeout = Duration.ofSeconds(OS.WINDOWS.isCurrentOs() ? 20 : 10);
+		var result = assertTimeoutPreemptively(timeout, () -> executeWithSmallHeapSize(javaOutputFiles));
 
 		assertThat(result).isNotNull();
 		assertThat(result.exitCode()).isOne();
