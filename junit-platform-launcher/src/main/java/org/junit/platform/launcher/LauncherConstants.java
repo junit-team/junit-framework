@@ -273,7 +273,8 @@ public class LauncherConstants {
 	 * Property name used to enable the <em>experimental</em> memory cleanup
 	 * mode.
 	 *
-	 * <p>Supported values are {@code true} or {@code false}.
+	 * <p>Supported values are {@code true} or {@code false}; defaults to
+	 * {@code false}.
 	 *
 	 * <p>If enabled, the Launcher removes finished or skipped tests and their
 	 * children from the test plan right away to reduce memory consumption,
