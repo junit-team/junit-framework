@@ -38,6 +38,9 @@ repository on GitHub.
   objects.
 * New `selectClasspathResources(String...)` and `selectClasspathResources(List<String)`
   methods in `DiscoverySelectors`.
+* New, experimental memory cleanup mode that is useful when executing a large
+  number of tests. It can be enabled via the new
+  `junit.platform.execution.memory.cleanup.enabled` configuration parameter.
 
 
 [[v6.1.0-M2-junit-jupiter]]
