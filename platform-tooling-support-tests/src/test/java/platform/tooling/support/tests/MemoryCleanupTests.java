@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessResult;
@@ -35,6 +36,7 @@ class MemoryCleanupTests {
 	Path workspace;
 
 	@Test
+	@DisabledOnOpenJ9
 	void runsWithSmallHeapSize(@FilePrefix("javac") OutputFiles javacOutputFiles,
 			@FilePrefix("java") OutputFiles javaOutputFiles) throws Exception {
 
