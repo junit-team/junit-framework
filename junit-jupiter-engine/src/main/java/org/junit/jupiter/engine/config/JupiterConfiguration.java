@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.MethodOrderer;
@@ -41,7 +42,8 @@ public interface JupiterConfiguration {
 
 	Optional<String> getRawConfigurationParameter(String key);
 
-	<T> Optional<T> getRawConfigurationParameter(String key, Function<? super String, ? extends T> transformer);
+	<T> Optional<T> getRawConfigurationParameter(String key,
+			Function<? super String, ? extends @Nullable T> transformer);
 
 	boolean isParallelExecutionEnabled();
 

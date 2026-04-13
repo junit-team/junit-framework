@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -73,7 +74,8 @@ public class CachingJupiterConfiguration implements JupiterConfiguration {
 	}
 
 	@Override
-	public <T> Optional<T> getRawConfigurationParameter(String key, Function<? super String, ? extends T> transformer) {
+	public <T> Optional<T> getRawConfigurationParameter(String key,
+			Function<? super String, ? extends @Nullable T> transformer) {
 		return delegate.getRawConfigurationParameter(key, transformer);
 	}
 
