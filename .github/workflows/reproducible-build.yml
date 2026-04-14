@@ -33,9 +33,10 @@ jobs:
       uses: ./.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
         arguments: |
           --quiet \
-          --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+          --no-configuration-cache
     - name: Build and compare checksums
       shell: bash
       run: ./.github/scripts/checkBuildReproducibility.sh
