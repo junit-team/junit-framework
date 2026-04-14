@@ -31,6 +31,7 @@ jobs:
           type: ga
         - version: 27
           type: ea
+          broken-by-issue: "https://github.com/junit-team/junit-framework/issues/5605"
         - version: 26
           type: ea
           release: leyden
@@ -68,13 +69,15 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: |
-            -Ptesting.enableJaCoCo=false \
-            -PjavaToolchain.version=${{ matrix.jdk.version }} \
-            -Dscan.tag.JDK_${{ matrix.jdk.version }} \
-            build \
-            --no-configuration-cache #Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+          # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+          arguments: >-
+            -Ptesting.enableJaCoCo=false
+            -PjavaToolchain.version=${{ matrix.jdk.version }}
+            -Dscan.tag.JDK_${{ matrix.jdk.version }}
+            build
+            --no-configuration-cache
+          broken-by-issue: ${{ matrix.jdk.broken-by-issue }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
           name: Open Test Reports (${{ github.job }} ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }}))
@@ -109,15 +112,16 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: |
-            -Ptesting.enableJaCoCo=false \
-            -PjavaToolchain.version=${{ matrix.jdk }} \
-            -PjavaToolchain.implementation=j9 \
-            -Dscan.tag.JDK_${{ matrix.jdk }} \
-            -Dscan.tag.OpenJ9 \
-            build \
-            --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+          # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+          arguments: >-
+            -Ptesting.enableJaCoCo=false
+            -PjavaToolchain.version=${{ matrix.jdk }}
+            -PjavaToolchain.implementation=j9
+            -Dscan.tag.JDK_${{ matrix.jdk }}
+            -Dscan.tag.OpenJ9
+            build
+            --no-configuration-cache
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
           name: Open Test Reports (${{ github.job }})

@@ -1,11 +1,11 @@
 [versions]
-ant = "1.10.16"
+ant = "1.10.17"
 apiguardian = "1.1.2"
 assertj = "3.27.7"
 bnd = "7.2.3"
 checkstyle = "13.4.0"
 eclipse = "4.39.0"
-jackson = "3.1.1"
+jackson = "3.1.2"
 jacoco = "0.8.14"
 jmh = "1.37"
 junit4 = "4.13.2"
@@ -30,7 +30,7 @@ byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.8" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
 classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.184" }
 commons-io = { module = "commons-io:commons-io", version = "2.21.0" }
-error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.28.0" }
+error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.29.0" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.48.0" }
 fastcsv = { module = "de.siegmar:fastcsv", version = "4.2.0" }
 groovy = { module = "org.apache.groovy:groovy", version = "5.0.5" }

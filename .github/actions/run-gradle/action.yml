@@ -5,6 +5,10 @@ inputs:
     required: true
     description: Gradle arguments
     default: build
+  broken-by-issue:
+    required: false
+    description: Expect the build to fail due the referenced GitHub issue
+    default: ""
   encryptionKey:
     required: true
     description: Gradle cache encryption key
@@ -32,4 +36,23 @@ runs:
         -Pjunit.develocity.predictiveTestSelection.selectRemainingTests=${{ github.event_name != 'pull_request' }} \
         "-Dscan.value.GitHub job=${{ github.job }}" \
         javaToolchains \
-        ${{ inputs.arguments }}
+        ${{ inputs.arguments }} || error_code=$?
+        
+        
+        if [ -n "${{ inputs.broken-by-issue }}" ]; then
+          if [ -n "$error_code" ]; then
+            # we expected the build to fail, it failed => pass 
+            exit 0
+          else            
+            # we expected the build to fail, it didn't => fail
+            RED='\033[0;31m'
+            RESET='\033[0m' # No Color
+            echo "${RED}Build was expected to fail, but it passed. Was ${{ inputs.broken-by-issue }} resolved?${RESET}"
+            exit 1            
+          fi
+        fi
+        
+        # exit with the original error code if set
+        if [ -n "$error_code" ]; then
+          exit "$error_code"
+        fi
