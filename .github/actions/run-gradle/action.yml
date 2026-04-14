@@ -38,7 +38,8 @@ runs:
         javaToolchains \
         ${{ inputs.arguments }} || error_code=$?
         
-        if [ "$error_code" -eq 0 && "${{ inputs.broken-by-issue }}" != "" ]; then
+        # error_code is not set if the build was sucesfull.
+        if [ -z "$error_code" ] && [ -n "${{ inputs.broken-by-issue }}" ]; then
           echo "Build was expected to fail, but it passed. Was ${{ inputs.broken-by-issue }} resolved?"
           exit 1
         fi
