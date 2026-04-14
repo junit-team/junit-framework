@@ -38,13 +38,19 @@ runs:
         javaToolchains \
         ${{ inputs.arguments }} || error_code=$?
         
-        # error_code is not set if the build was sucesfull.
-        if [ -z "$error_code" ] && [ -n "${{ inputs.broken-by-issue }}" ]; then
-          echo "Build was expected to fail, but it passed. Was ${{ inputs.broken-by-issue }} resolved?"
-          exit 1
+        
+        if [ -n "${{ inputs.broken-by-issue }}" ]; then
+          if [ -n "$error_code" ]; then
+            # we expected the build to fail, it failed => pass 
+            exit 0
+          else            
+            # we expected the build to fail, it didn't => fail
+            echo "Build was expected to fail, but it passed. Was ${{ inputs.broken-by-issue }} resolved?"
+            exit 1            
+          fi
         fi
         
-        # exit with the original error_code
-        if [ ! -z "$error_code" ]; then
+        # exit with the original error code if set
+        if [ -n "$error_code" ]; then
           exit "$error_code"
         fi
