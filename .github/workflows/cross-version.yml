@@ -31,6 +31,7 @@ jobs:
           type: ga
         - version: 27
           type: ea
+          broken-by-issue: "https://github.com/junit-team/junit-framework/issues/5605"
         - version: 26
           type: ea
           release: leyden
@@ -38,7 +39,6 @@ jobs:
         - version: 27
           type: ea
           release: valhalla
-          broken-by-issue: "https://github.com/junit-team/junit-framework/issues/5605"
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
     runs-on: ubuntu-latest
     steps:
@@ -77,7 +77,7 @@ jobs:
             -Dscan.tag.JDK_${{ matrix.jdk.version }}
             build
             --no-configuration-cache
-          broken-by-issue: ${{ matrix.broken-by-issue }}
+          broken-by-issue: ${{ matrix.jdk.broken-by-issue }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
