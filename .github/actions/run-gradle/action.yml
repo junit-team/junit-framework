@@ -44,4 +44,7 @@ runs:
           exit 1
         fi
         
-        exit "$error_code"
+        # exit with the original error_code
+        if [ -n "$error_code" ]; then
+          exit "$error_code"
+        fi
