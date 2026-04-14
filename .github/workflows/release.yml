@@ -57,7 +57,7 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: >
+          arguments: >-
             --rerun-tasks
             -Pmanifest.buildTimestamp="${{ steps.referenceJar.outputs.buildTimestamp }}"
             -Pmanifest.createdBy="${{ steps.referenceJar.outputs.createdBy }}"

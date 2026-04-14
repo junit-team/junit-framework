@@ -55,7 +55,7 @@ jobs:
       uses: ./.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: >
+        arguments: >-
           --no-build-cache
           -Dscan.tag.CodeQL
           classes

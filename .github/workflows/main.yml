@@ -41,7 +41,7 @@ jobs:
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-        arguments: >
+        arguments: >-
           :platform-tooling-support-tests:test
           build
           jacocoRootReport
@@ -98,7 +98,7 @@ jobs:
         ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: >
+        arguments: >-
           publishAllPublicationsToMavenCentralSnapshotsRepository -x check
           prepareGitHubAttestation
     - name: Generate build provenance attestations
@@ -128,7 +128,7 @@ jobs:
       uses: ./.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: >
+        arguments: >-
           antora
           -Pantora.downloadNode=false
           -Dscan.tag.Documentation

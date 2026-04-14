@@ -71,7 +71,7 @@ jobs:
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-          arguments: >
+          arguments: >-
             -Ptesting.enableJaCoCo=false
             -PjavaToolchain.version=${{ matrix.jdk.version }}
             -Dscan.tag.JDK_${{ matrix.jdk.version }}
@@ -114,7 +114,7 @@ jobs:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           expect-failure: ${{ matrix.expect-failure }}
           # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-          arguments: >
+          arguments: >-
             -Ptesting.enableJaCoCo=false
             -PjavaToolchain.version=${{ matrix.jdk }}
             -PjavaToolchain.implementation=j9
