@@ -57,11 +57,11 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: |
-            --rerun-tasks \
-            -Pmanifest.buildTimestamp="${{ steps.referenceJar.outputs.buildTimestamp }}" \
-            -Pmanifest.createdBy="${{ steps.referenceJar.outputs.createdBy }}" \
-            :verifyArtifactsInStagingRepositoryAreReproducible \
+          arguments: >
+            --rerun-tasks
+            -Pmanifest.buildTimestamp="${{ steps.referenceJar.outputs.buildTimestamp }}"
+            -Pmanifest.createdBy="${{ steps.referenceJar.outputs.createdBy }}"
+            :verifyArtifactsInStagingRepositoryAreReproducible
             --remote-repo-url=${{ env.STAGING_REPO_URL }}
       - name: Generate build provenance attestations
         if: ${{ inputs.dryRun == false }}

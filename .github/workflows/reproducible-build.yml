@@ -34,8 +34,8 @@ jobs:
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
-        arguments: |
-          --quiet \
+        arguments: >
+          --quiet
           --no-configuration-cache
     - name: Build and compare checksums
       shell: bash
