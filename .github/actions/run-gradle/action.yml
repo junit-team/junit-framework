@@ -45,6 +45,6 @@ runs:
         fi
         
         # exit with the original error_code
-        if [ -n "$error_code" ]; then
+        if [ ! -z "$error_code" ]; then
           exit "$error_code"
         fi
