@@ -113,7 +113,6 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          expect-failure: ${{ matrix.expect-failure }}
           # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
           arguments: >-
             -Ptesting.enableJaCoCo=false
