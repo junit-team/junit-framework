@@ -5,6 +5,10 @@ inputs:
     required: true
     description: Gradle arguments
     default: build
+  broken-by-issue:
+    required: false
+    description: Expect the build to fail due the referenced issue
+    default: ""
   encryptionKey:
     required: true
     description: Gradle cache encryption key
@@ -33,3 +37,8 @@ runs:
         "-Dscan.value.GitHub job=${{ github.job }}" \
         javaToolchains \
         ${{ inputs.arguments }}
+        
+        if [ "$?" -eq 0 && ${{ inputs.broken-by-issue }} != "" ]; then
+          echo "Build was expected to fail, but it passed. Was ${{ inputs.broken-by-issue }} resolved?"
+          exit 1
+        fi

@@ -34,14 +34,13 @@ jobs:
         - version: 26
           type: ea
           release: leyden
+          broken-by-issue: "TODO: Dummy for testing"
         - version: 27
           type: ea
           release: valhalla
-          # TODO: Turn back on again.
-          continue-on-error: true
+          broken-by-issue: "https://github.com/junit-team/junit-framework/issues/5605"
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.continue-on-error || false }}
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -112,6 +111,7 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          expect-failure: ${{ matrix.expect-failure }}
           arguments: |
             -Ptesting.enableJaCoCo=false \
             -PjavaToolchain.version=${{ matrix.jdk }} \
