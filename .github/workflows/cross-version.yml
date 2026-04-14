@@ -70,12 +70,13 @@ jobs:
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
           arguments: |
             -Ptesting.enableJaCoCo=false \
             -PjavaToolchain.version=${{ matrix.jdk.version }} \
             -Dscan.tag.JDK_${{ matrix.jdk.version }} \
             build \
-            --no-configuration-cache #Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+            --no-configuration-cache
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
