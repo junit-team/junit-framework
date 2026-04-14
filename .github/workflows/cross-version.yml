@@ -35,7 +35,6 @@ jobs:
         - version: 26
           type: ea
           release: leyden
-          broken-by-issue: "TODO: Dummy for testing"
         - version: 27
           type: ea
           release: valhalla

@@ -7,7 +7,7 @@ inputs:
     default: build
   broken-by-issue:
     required: false
-    description: Expect the build to fail due the referenced issue
+    description: Expect the build to fail due the referenced GitHub issue
     default: ""
   encryptionKey:
     required: true
