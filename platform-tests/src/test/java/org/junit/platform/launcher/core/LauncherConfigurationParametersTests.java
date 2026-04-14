@@ -201,11 +201,15 @@ class LauncherConfigurationParametersTests {
 	}
 
 	@Test
-	void warnsOnMultiplePropertyResources(@TempDir Path tempDir, @TrackLogRecords LogRecordListener logRecordListener)
+	void mergesOnMultiplePropertyResources(@TempDir Path tempDir, @TrackLogRecords LogRecordListener logRecordListener)
 			throws Exception {
+		String uniqueKey = KEY + ".unique-modifier";
+		String someValue = "another value from second config file";
 
 		Properties properties = new Properties();
 		properties.setProperty(KEY, "from second config file");
+
+		properties.setProperty(uniqueKey, someValue);
 		try (var out = Files.newOutputStream(tempDir.resolve(CONFIG_FILE_NAME))) {
 			properties.store(out, "");
 		}
@@ -217,14 +221,18 @@ class LauncherConfigurationParametersTests {
 			Thread.currentThread().setContextClassLoader(customClassLoader);
 			ConfigurationParameters configParams = fromMapAndFile(Map.of(), CONFIG_FILE_NAME);
 
-			assertThat(configParams.get(KEY)).contains(CONFIG_FILE);
+			assertThat(configParams.get(KEY)).isPresent();
+			assertThat(configParams.get(KEY).orElse("<missing>")).isEqualTo(CONFIG_FILE);
+
+			assertThat(configParams.get(uniqueKey)).isPresent();
+			assertThat(configParams.get(uniqueKey).orElse("<missing>")).isEqualTo(someValue);
 
 			assertThat(logRecordListener.stream(Level.WARNING).map(LogRecord::getMessage)) //
 					.hasSize(1) //
 					.first(as(InstanceOfAssertFactories.STRING)) //
 					.contains("""
 							Discovered 2 '%s' configuration files on the classpath (see below); \
-							only the first (*) will be used.
+							properties will be merged, but when there is a conflict, only the first (*) will be used.
 							- %s (*)
 							- %s"""//
 							.formatted(CONFIG_FILE_NAME, originalResource,

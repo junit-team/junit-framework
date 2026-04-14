@@ -255,9 +255,12 @@ class LauncherConfigurationParameters implements ConfigurationParameters {
 		Properties props = new Properties();
 
 		try {
-			URL configFileUrl = findConfigFile(configFileName);
-			if (configFileUrl != null) {
-				loadClasspathResource(configFileUrl, props);
+			List<URL> configFileUrls = findConfigFiles(configFileName);
+			// Reverse the list, so that files early on the classpath take priority where there's a conflict
+			Collections.reverse(configFileUrls);
+
+			for (URL url : configFileUrls) {
+				loadClasspathResource(url, props);
 			}
 		}
 		catch (Exception ex) {
@@ -269,14 +272,10 @@ class LauncherConfigurationParameters implements ConfigurationParameters {
 		return props;
 	}
 
-	private static @Nullable URL findConfigFile(String configFileName) throws IOException {
+	private static List<URL> findConfigFiles(String configFileName) throws IOException {
 
 		ClassLoader classLoader = ClassLoaderUtils.getDefaultClassLoader();
 		List<URL> urls = Collections.list(classLoader.getResources(configFileName));
-
-		if (urls.size() == 1) {
-			return urls.get(0);
-		}
 
 		if (urls.size() > 1) {
 
@@ -293,14 +292,12 @@ class LauncherConfigurationParameters implements ConfigurationParameters {
 						Stream.of(configFileUrl + " (*)"), //
 						resources.stream().skip(1).map(URI::toString) //
 					).collect(joining("\n- ", "\n- ", ""));
-					return "Discovered %d '%s' configuration files on the classpath (see below); only the first (*) will be used.%s".formatted(
+					return "Discovered %d '%s' configuration files on the classpath (see below); properties will be merged, but when there is a conflict, only the first (*) will be used.%s".formatted(
 						resources.size(), configFileName, formattedResourceList);
 				});
 			}
-			return configFileUrl;
 		}
-
-		return null;
+		return urls;
 	}
 
 	private static void loadClasspathResource(URL configFileUrl, Properties props) throws IOException {
