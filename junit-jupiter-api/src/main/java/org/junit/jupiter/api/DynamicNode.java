@@ -95,7 +95,7 @@ public abstract class DynamicNode {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	public sealed interface Configuration<T extends Configuration<T>>
-			permits AbstractConfiguration, DynamicTest.Configuration, DynamicContainer.Configuration {
+			permits AbstractConfiguration, DynamicContainer.Configuration, DynamicTest.Configuration {
 
 		/**
 		 * Set the {@linkplain DynamicNode#getDisplayName() display name} to use
