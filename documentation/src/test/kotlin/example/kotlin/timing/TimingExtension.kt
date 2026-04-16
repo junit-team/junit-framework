@@ -24,8 +24,6 @@ import java.util.logging.Logger
 class TimingExtension :
     BeforeTestExecutionCallback,
     AfterTestExecutionCallback {
-    private val logger: Logger = Logger.getLogger(TimingExtension::class.java.name)
-
     override fun beforeTestExecution(context: ExtensionContext) {
         getStore(context).put(START_TIME, System.currentTimeMillis())
     }
@@ -41,6 +39,7 @@ class TimingExtension :
     private fun getStore(context: ExtensionContext): Store = context.getStore(Namespace.create(javaClass, context.requiredTestMethod))
 
     companion object {
+        private val logger: Logger = Logger.getLogger(TimingExtension::class.java.name)
         private const val START_TIME = "start time"
     }
 }

@@ -25,6 +25,20 @@ include::example$kotlin/example/kotlin/DisplayNameDemo.kt[tags=user_guide]
 --
 ====
 
+[TIP]
+====
+In Kotlin, you can use backtick-enclosed function names as an alternative to
+`@DisplayName` for simple display names:
+
+[source,kotlin,indent=0]
+----
+@Test
+fun `custom test name containing spaces`() {
+    // will be displayed as "custom test name containing spaces"
+}
+----
+====
+
 [NOTE]
 ====
 Control characters in text-based arguments in display names for parameterized tests are

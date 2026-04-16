@@ -35,16 +35,13 @@ class HttpServerDemo {
         assertEquals("This is a test", responseBody)
     }
 
-    companion object {
-        @JvmStatic
-        private fun sendRequest(url: URL): String {
-            val connection = url.openConnection() as HttpURLConnection
-            val contentLength = connection.contentLength
-            url.openStream().use { response ->
-                val content = ByteArray(contentLength)
-                assertEquals(contentLength, response.read(content))
-                return String(content, Charsets.UTF_8)
-            }
+    private fun sendRequest(url: URL): String {
+        val connection = url.openConnection() as HttpURLConnection
+        val contentLength = connection.contentLength
+        url.openStream().use { response ->
+            val content = ByteArray(contentLength)
+            assertEquals(contentLength, response.read(content))
+            return String(content, Charsets.UTF_8)
         }
     }
 }

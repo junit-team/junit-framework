@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Timeout.ThreadMode;
 
-@Tag("timeout")
 // tag::user_guide[]
+@Tag("timeout")
 class TimeoutDemo {
 
 	@BeforeEach

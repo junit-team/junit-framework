@@ -16,6 +16,7 @@ import java.nio.file.Path
 
 // tag::user_guide[]
 class DocumentationDemo {
+    @JvmField
     @RegisterExtension
     val docs: DocumentationExtension =
         DocumentationExtension.forPath(lookUpDocsDir())

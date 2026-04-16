@@ -118,7 +118,7 @@ include::example$kotlin/example/kotlin/HttpServerDemo.kt[tags=user_guide]
 [[migration]]
 [TIP]
 .Migration Note for Resource Cleanup
-====
+======
 The framework automatically closes resources stored in the `ExtensionContext.Store` that
 implement `AutoCloseable`. In versions prior to 5.13, only resources implementing
 `Store.CloseableResource` were automatically closed.
@@ -127,6 +127,11 @@ If you're developing an extension that needs to support both JUnit Jupiter 5.13+
 earlier versions and your extension stores resources that need to be cleaned up, you
 should implement both interfaces:
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 public class MyResource implements Store.CloseableResource, AutoCloseable {
@@ -136,7 +141,22 @@ public class MyResource implements Store.CloseableResource, AutoCloseable {
     }
 }
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+class MyResource : Store.CloseableResource, AutoCloseable {
+    override fun close() {
+        // Resource cleanup code
+    }
+}
+----
+--
+====
 
 This ensures that your resource will be properly closed regardless of which JUnit Jupiter
 version is being used.
-====
+======
