@@ -62,6 +62,11 @@ class InternalTestPlan extends TestPlan {
 	}
 
 	@Override
+	public void removeInternal(UniqueId uniqueId) {
+		delegate.removeInternal(uniqueId);
+	}
+
+	@Override
 	public Set<TestIdentifier> getRoots() {
 		return delegate.getRoots();
 	}

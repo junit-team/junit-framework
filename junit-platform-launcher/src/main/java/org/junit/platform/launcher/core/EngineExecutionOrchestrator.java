@@ -14,7 +14,6 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.launcher.LauncherConstants.DRY_RUN_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
-import static org.junit.platform.launcher.core.ListenerRegistry.forEngineExecutionListeners;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -34,6 +33,7 @@ import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
+import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
@@ -140,10 +140,20 @@ public class EngineExecutionOrchestrator {
 	private static EngineExecutionListener buildEngineExecutionListener(
 			EngineExecutionListener parentEngineExecutionListener, TestExecutionListener testExecutionListener,
 			TestPlan testPlan) {
-		ListenerRegistry<EngineExecutionListener> engineExecutionListenerRegistry = forEngineExecutionListeners();
-		engineExecutionListenerRegistry.add(new ExecutionListenerAdapter(testPlan, testExecutionListener));
-		engineExecutionListenerRegistry.add(parentEngineExecutionListener);
-		return engineExecutionListenerRegistry.getCompositeListener();
+		var registry = ListenerRegistry.forEngineExecutionListeners();
+		registry.add(new ExecutionListenerAdapter(testPlan, testExecutionListener));
+		registry.add(parentEngineExecutionListener);
+		var listener = registry.getCompositeListener();
+		if (isMemoryCleanupEnabled(testPlan)) {
+			listener = new MemoryCleanupListener(listener, testPlan);
+		}
+		return listener;
+	}
+
+	private static Boolean isMemoryCleanupEnabled(TestPlan testPlan) {
+		return testPlan.getConfigurationParameters() //
+				.getBoolean(LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME) //
+				.orElse(false);
 	}
 
 	private void withInterceptedStreams(ConfigurationParameters configurationParameters,

@@ -95,7 +95,7 @@ public abstract class DynamicNode {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	public sealed interface Configuration<T extends Configuration<T>>
-			permits DynamicTest.Configuration, DynamicContainer.Configuration, AbstractConfiguration {
+			permits AbstractConfiguration, DynamicContainer.Configuration, DynamicTest.Configuration {
 
 		/**
 		 * Set the {@linkplain DynamicNode#getDisplayName() display name} to use
@@ -127,7 +127,7 @@ public abstract class DynamicNode {
 	}
 
 	abstract static sealed class AbstractConfiguration<T extends Configuration<T>> implements Configuration<T>
-			permits DynamicTest.DefaultConfiguration, DynamicContainer.DefaultConfiguration {
+			permits DynamicContainer.DefaultConfiguration, DynamicTest.DefaultConfiguration {
 
 		private @Nullable String displayName;
 		private @Nullable URI testSourceUri;

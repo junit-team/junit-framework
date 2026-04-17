@@ -54,6 +54,7 @@ class AssertLinesMatch {
 		assertLinesMatch(expectedLines, actualLines, (Object) message);
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	static void assertLinesMatch(Stream<String> expectedLines, Stream<String> actualLines,
 			@Nullable Object messageOrSupplier) {
 		notNull(expectedLines, "expectedLines must not be null");
@@ -69,6 +70,7 @@ class AssertLinesMatch {
 		assertLinesMatch(expectedListOfStrings, actualListOfStrings, messageOrSupplier);
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	static void assertLinesMatch(List<String> expectedLines, List<String> actualLines,
 			@Nullable Object messageOrSupplier) {
 		notNull(expectedLines, "expectedLines must not be null");
