@@ -34,10 +34,8 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.net.URI;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -81,6 +79,68 @@ import org.opentest4j.AssertionFailedError;
  * @since 5.0
  */
 class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
+
+    static class TestTemplateWithUriSource {
+
+        @TestTemplate
+        @ExtendWith(UriProvider.class)
+        void template() {
+        }
+
+        static class UriProvider implements TestTemplateInvocationContextProvider {
+
+            @Override
+            public boolean supportsTestTemplate(ExtensionContext context) {
+                return true;
+            }
+
+            @Override
+            public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
+                    ExtensionContext context) {
+
+                return Stream.of(new TestTemplateInvocationContext() {
+
+                    @Override
+                    public String getDisplayName(int invocationIndex) {
+                        return "[1]";
+                    }
+
+                    @Override
+                    public Optional<URI> getTestSourceUri() {
+                        return Optional.of(URI.create("custom://test"));
+                    }
+                });
+            }
+        }
+    }
+
+    @Test
+    void templateUsesCustomUriSourceWhenProvided() {
+        LauncherDiscoveryRequest request = request().selectors(
+                selectMethod(TestTemplateWithUriSource.class, "template")
+        ).build();
+
+        EngineExecutionResults results = executeTests(request);
+
+        Events events = results.allEvents();
+
+        events.assertStatistics(stats -> stats.dynamicallyRegistered(1));
+
+        TestDescriptor descriptor = events.dynamicallyRegistered()
+                .map(Event::getTestDescriptor)
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(descriptor.getSource()).isPresent();
+        assertThat(descriptor.getSource().get())
+                .isInstanceOf(org.junit.platform.engine.support.descriptor.UriSource.class);
+
+        var uriSource = (org.junit.platform.engine.support.descriptor.UriSource) descriptor.getSource().get();
+
+        assertThat(uriSource.getUri()).isEqualTo(URI.create("custom://test"));
+    }
+
+
 
 	@Test
 	void templateWithSingleRegisteredExtensionIsInvoked() {
