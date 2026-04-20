@@ -40,11 +40,12 @@ jobs:
       uses: ./.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: |
-          :platform-tooling-support-tests:test \
-          build \
-          jacocoRootReport \
-          --no-configuration-cache # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+        # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
+        arguments: >-
+          :platform-tooling-support-tests:test
+          build
+          jacocoRootReport
+          --no-configuration-cache
     - name: Upload to Codecov.io
       uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       with:
@@ -97,8 +98,8 @@ jobs:
         ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: |
-          publishAllPublicationsToMavenCentralSnapshotsRepository -x check \
+        arguments: >-
+          publishAllPublicationsToMavenCentralSnapshotsRepository -x check
           prepareGitHubAttestation
     - name: Generate build provenance attestations
       uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
@@ -120,16 +121,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install graphviz
     - name: Install Node.js
-      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
         node-version-file: documentation/.tool-versions
     - name: Build Documentation
       uses: ./.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        arguments: |
-          antora \
-          -Pantora.downloadNode=false \
+        arguments: >-
+          antora
+          -Pantora.downloadNode=false
           -Dscan.tag.Documentation
 
   deploy_documentation:
