@@ -37,6 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -116,7 +117,7 @@ class XmlReportWriter {
 			Writer out) throws XMLStreamException {
 
 		try (XmlReport report = new XmlReport(out)) {
-			report.write(testIdentifier, tests);
+			report.write(testIdentifier, tests, this.reportData.getTestPlan());
 		}
 	}
 
@@ -131,16 +132,16 @@ class XmlReportWriter {
 			this.xml = factory.createXMLStreamWriter(this.out);
 		}
 
-		void write(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests)
+		void write(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests, TestPlan testPlan)
 				throws XMLStreamException {
 			xml.writeStartDocument("UTF-8", "1.0");
 			newLine();
-			writeTestsuite(testIdentifier, tests);
+			writeTestsuite(testIdentifier, tests, testPlan);
 			xml.writeEndDocument();
 		}
 
-		private void writeTestsuite(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests)
-				throws XMLStreamException {
+		private void writeTestsuite(TestIdentifier testIdentifier, Map<TestIdentifier, AggregatedTestResult> tests,
+				TestPlan testPlan) throws XMLStreamException {
 
 			// NumberFormat is not thread-safe. Thus, we instantiate it here and pass it to
 			// writeTestcase instead of using a constant
@@ -154,10 +155,10 @@ class XmlReportWriter {
 			writeSystemProperties();
 
 			for (Entry<TestIdentifier, AggregatedTestResult> entry : tests.entrySet()) {
-				writeTestcase(entry.getKey(), entry.getValue(), numberFormat);
+				writeTestcase(entry.getKey(), entry.getValue(), numberFormat, testPlan);
 			}
 
-			writeOutputElement("system-out", formatNonStandardAttributesAsString(testIdentifier));
+			writeOutputElement("system-out", formatNonStandardAttributesAsString(testIdentifier, testPlan));
 
 			xml.writeEndElement();
 			newLine();
@@ -198,7 +199,7 @@ class XmlReportWriter {
 		}
 
 		private void writeTestcase(TestIdentifier testIdentifier, AggregatedTestResult testResult,
-				NumberFormat numberFormat) throws XMLStreamException {
+				NumberFormat numberFormat, TestPlan testPlan) throws XMLStreamException {
 
 			xml.writeStartElement("testcase");
 
@@ -211,7 +212,7 @@ class XmlReportWriter {
 
 			List<String> systemOutElements = new ArrayList<>();
 			List<String> systemErrElements = new ArrayList<>();
-			systemOutElements.add(formatNonStandardAttributesAsString(testIdentifier));
+			systemOutElements.add(formatNonStandardAttributesAsString(testIdentifier, testPlan));
 			collectReportEntries(testIdentifier, systemOutElements, systemErrElements);
 			writeOutputElements("system-out", systemOutElements);
 			writeOutputElements("system-err", systemErrElements);
@@ -334,9 +335,16 @@ class XmlReportWriter {
 			return LocalDateTime.now(reportData.getClock()).withNano(0);
 		}
 
-		private String formatNonStandardAttributesAsString(TestIdentifier testIdentifier) {
+		private String formatNonStandardAttributesAsString(TestIdentifier testIdentifier, TestPlan testPlan) {
+			ArrayDeque<String> displayNames = new ArrayDeque<>();
+			TestIdentifier current = testIdentifier;
+			while (current != null) {
+				displayNames.push(current.getDisplayName());
+				current = testPlan.getParent(current).orElse(null);
+			}
+			String fullDisplayName = String.join(" > ", displayNames);
 			return "unique-id: " + testIdentifier.getUniqueId() //
-					+ "\ndisplay-name: " + testIdentifier.getDisplayName();
+					+ "\ndisplay-name: " + fullDisplayName;
 		}
 
 		private void writeOutputElements(String elementName, List<String> elements) throws XMLStreamException {
