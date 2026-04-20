@@ -24,6 +24,8 @@ No changes.
 
 * Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
   legacy XML reports to make them unique.
+* Legacy XML reports now include parent display names to make it easier to distinguish
+  between invocations for different parameters.
 
 
 [[v5.14.4-junit-vintage]]

@@ -90,7 +90,7 @@ class LegacyXmlReportGeneratingListenerTests {
 		assertThat(testcase.attr("classname")).isEqualTo("dummy");
 		assertThat(testcase.child("system-out").text()) //
 				.containsSubsequence("unique-id: [engine:dummy]/[test:succeedingTest]",
-					"display-name: display<-->Name 😎");
+					"display-name: dummy > display<-->Name 😎");
 
 		assertThat(testsuite.find("skipped")).isEmpty();
 		assertThat(testsuite.find("failure")).isEmpty();
