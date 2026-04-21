@@ -31,14 +31,12 @@ jobs:
           type: ga
         - version: 27
           type: ea
-          broken-by-issue: "https://github.com/uber/NullAway/issues/1534"
         - version: 26
           type: ea
           release: leyden
         - version: 27
           type: ea
           release: valhalla
-          broken-by-issue: "https://github.com/uber/NullAway/issues/1534"
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
     runs-on: ubuntu-latest
     steps:
