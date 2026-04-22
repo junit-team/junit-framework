@@ -28,11 +28,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.support.ParameterDeclaration;
 import org.junit.jupiter.params.support.ParameterDeclarations;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
 
@@ -40,18 +42,30 @@ import org.junit.platform.commons.util.Preconditions;
  * @since 5.4
  * @see EmptySource
  */
-class EmptyArgumentsProvider implements ArgumentsProvider {
+class EmptyArgumentsProvider extends AnnotationBasedArgumentsProvider<EmptySource> {
 
 	@Override
-	public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
+	protected Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context,
+			EmptySource annotation) {
 
-		Optional<ParameterDeclaration> firstParameter = parameters.getFirst();
+		var explicitType = annotation.type();
 
-		Preconditions.condition(firstParameter.isPresent(),
-			() -> "@EmptySource cannot provide an empty argument to %s: no formal parameters declared.".formatted(
-				parameters.getSourceElementDescription()));
+		if (explicitType.equals(Unset.class)) {
+			Optional<ParameterDeclaration> firstParameter = parameters.getFirst();
 
-		Class<?> parameterType = firstParameter.get().getParameterType();
+			Preconditions.condition(firstParameter.isPresent(),
+				() -> "@EmptySource cannot provide an empty argument to %s: no formal parameters declared.".formatted(
+					parameters.getSourceElementDescription()));
+
+			return provideEmptyArgument(firstParameter.get().getParameterType(),
+				() -> "to " + parameters.getSourceElementDescription());
+		}
+
+		return provideEmptyArgument(explicitType, () -> "for 'type'");
+	}
+
+	private static Stream<Arguments> provideEmptyArgument(Class<?> parameterType,
+			Supplier<String> errorDetailsSupplier) {
 
 		if (String.class.equals(parameterType)) {
 			return Stream.of(arguments(""));
@@ -101,8 +115,8 @@ class EmptyArgumentsProvider implements ArgumentsProvider {
 		}
 		// else
 		throw new PreconditionViolationException(
-			"@EmptySource cannot provide an empty argument to %s: [%s] is not a supported type.".formatted(
-				parameters.getSourceElementDescription(), parameterType.getName()));
+			"@EmptySource cannot provide an empty argument %s: [%s] is not a supported type.".formatted(
+				errorDetailsSupplier.get(), parameterType.getName()));
 	}
 
 	private static Optional<Constructor<?>> getDefaultConstructor(Class<?> clazz) {
@@ -199,4 +213,9 @@ class EmptyArgumentsProvider implements ArgumentsProvider {
 		}
 	}
 
+	static final class Unset {
+		private Unset() {
+			throw new JUnitException("Must not be instantiated");
+		}
+	}
 }

@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -20,13 +21,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.params.converter.ArgumentConverter;
 
 /**
  * {@code @EmptySource} is an {@link ArgumentsSource} which provides a single
  * <em>empty</em> argument to the annotated {@code @ParameterizedClass}
  * or {@code @ParameterizedTest}.
  *
- * <h2>Supported Parameter Types</h2>
+ * <h2 id="supported-parameter-types">Supported Parameter Types</h2>
  *
  * <p>This argument source will only provide an empty argument for the following
  * parameter types.
@@ -48,6 +50,10 @@ import org.apiguardian.api.API;
  * <li>object arrays &mdash; for example {@code String[]}, {@code Integer[][]}, etc.</li>
  * </ul>
  *
+ * <p>Unless the {@link #type()} is set, the parameter type is determined from
+ * the first (and only) parameter of the annotated {@code @ParameterizedClass}
+ * or {@code @ParameterizedTest}.
+ *
  * <h2>Inheritance</h2>
  *
  * <p>This annotation is {@linkplain Inherited inherited} within class hierarchies.
@@ -67,4 +73,18 @@ import org.apiguardian.api.API;
 @ArgumentsSource(EmptyArgumentsProvider.class)
 @SuppressWarnings("exports")
 public @interface EmptySource {
+
+	/**
+	 * The type of the empty argument to provide.
+	 *
+	 * <p>Must be one of the
+	 * <a href="#supported-parameter-types">supported parameter types</a>.
+	 *
+	 * <p>Setting this attribute is usually not necessary because the type will
+	 * be derived from the first (and only) parameter. Setting it explicitly
+	 * allows using an {@link ArgumentConverter} to convert from the specified
+	 * type to the actual parameter type.
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1")
+	Class<?> type() default EmptyArgumentsProvider.Unset.class;
 }

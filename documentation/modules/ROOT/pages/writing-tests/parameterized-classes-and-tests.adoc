@@ -954,7 +954,7 @@ include::example$java/example/ParameterizedTestDemo.java[tags=implicit_fallback_
 === Explicit Conversion
 
 Instead of relying on implicit argument conversion, you may explicitly specify an
-`ArgumentConverter` to use for a certain parameter using the `@ConvertWith` annotation
+`{ArgumentConverter}` to use for a certain parameter using the `@ConvertWith` annotation
 like in the following example. Note that an implementation of `ArgumentConverter` must be
 declared as either a top-level class or as a `static` nested class.
 
@@ -986,7 +986,7 @@ composed annotation `JavaTimeConversionPattern`.
 include::example$java/example/ParameterizedTestDemo.java[tags=explicit_java_time_converter]
 ----
 
-If you wish to implement a custom `ArgumentConverter` that also consumes an annotation
+If you wish to implement a custom `{ArgumentConverter}` that also consumes an annotation
 (like `JavaTimeArgumentConverter`), you have the possibility to extend the
 `{AnnotationBasedArgumentConverter}` class.
 

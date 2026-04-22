@@ -105,6 +105,9 @@ repository on GitHub.
   generics.
 * The new `org.junit.jupiter.api.Constants` class provides constants for
   xref:running-tests/configuration-parameters.adoc[] specific to the Jupiter engine.
+* The `{EmptySource}` annotation now provides a `type` attribute that allows configuring
+  the type of the empty argument explicitly. This is intended to be used in conjunction
+  with an `{ArgumentConverter}` that supports the specified type.
 
 
 [[v6.1.0-M2-junit-vintage]]

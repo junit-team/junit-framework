@@ -65,6 +65,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
@@ -639,6 +640,13 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Test
+		void testWithEmptySourceForStringFromAnnotationAttribute() {
+			var results = execute("testWithEmptySourceForStringFromAnnotationAttribute", Object.class);
+			results.testEvents().succeeded().assertEventsMatchExactly(
+				event(test(), displayName("[1] argument = \"\"")));
+		}
+
+		@Test
 		void executesWithEmptySourceForStringAndTestInfo() {
 			var results = execute("testWithEmptySourceForStringAndTestInfo", String.class, TestInfo.class);
 			results.testEvents().succeeded().assertEventsMatchExactly(
@@ -791,6 +799,18 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 						instanceOf(PreconditionViolationException.class), //
 						message(msg -> msg.matches("@EmptySource cannot provide an empty argument to method .+: \\["
 								+ parameterType.getName() + "] is not a supported type."))//
+					)));
+		}
+
+		@Test
+		void testWithEmptySourceForUnsupportedReferenceTypeFromAttribute() {
+			var methodName = "testWithEmptySourceForUnsupportedReferenceTypeFromAttribute";
+			execute(methodName, String.class).containerEvents().failed().assertEventsMatchExactly(//
+				event(container(methodName), //
+					finishedWithFailure(//
+						instanceOf(PreconditionViolationException.class), //
+						message(
+							"@EmptySource cannot provide an empty argument for 'type': [java.lang.Integer] is not a supported type.")//
 					)));
 		}
 
@@ -1655,6 +1675,12 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@ParameterizedTest
+		@EmptySource(type = String.class)
+		void testWithEmptySourceForStringFromAnnotationAttribute(Object argument) {
+			assertThat(argument).asInstanceOf(InstanceOfAssertFactories.STRING).isEmpty();
+		}
+
+		@ParameterizedTest
 		@EmptySource
 		void testWithEmptySourceForStringAndTestInfo(String argument, TestInfo testInfo) {
 			assertThat(argument).isEmpty();
@@ -1814,6 +1840,12 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		@ParameterizedTest
 		@EmptySource
 		void testWithEmptySourceForUnsupportedReferenceType(Integer argument) {
+			fail("should not have been executed");
+		}
+
+		@ParameterizedTest
+		@EmptySource(type = Integer.class)
+		void testWithEmptySourceForUnsupportedReferenceTypeFromAttribute(String argument) {
 			fail("should not have been executed");
 		}
 

@@ -246,6 +246,7 @@ asciidoc:
     ArgumentsProvider: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/provider/ArgumentsProvider.html[ArgumentsProvider]'
     ArgumentsAccessor: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/aggregator/ArgumentsAccessor.html[ArgumentsAccessor]'
     ArgumentsAggregator: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/aggregator/ArgumentsAggregator.html[ArgumentsAggregator]'
+    ArgumentConverter: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/converter/ArgumentConverter.html[ArgumentConverter]'
     BeforeParameterizedClassInvocation: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/BeforeParameterizedClassInvocation.html[@BeforeParameterizedClassInvocation]'
     CsvArgumentsProvider: '{junit-framework-repo}/blob/main/junit-jupiter-params/src/main/java/org/junit/jupiter/params/provider/CsvArgumentsProvider.java[CsvArgumentsProvider]'
     EmptySource: '{javadoc-root}/org.junit.jupiter.params/org/junit/jupiter/params/provider/EmptySource.html[@EmptySource]'
