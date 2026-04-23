@@ -57,8 +57,8 @@ public class SystemPropertyExtensionDemo {
 	}
 	// end::systemproperty_using_set_and_clear[]
 
-	// tag::systemproperty_using_at_class_level[]
 	@Nested
+	// tag::systemproperty_using_at_class_level[]
 	@ClearSystemProperty(key = "some property")
 	class MySystemPropertyTest {
 
@@ -85,9 +85,9 @@ public class SystemPropertyExtensionDemo {
 	@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 	class SystemPropertyRestoreExample {
 
-		// tag::systemproperty_class_restore_setup[]
 		@Nested
 		@Order(1)
+		// tag::systemproperty_class_restore_setup[]
 		@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 		@RestoreSystemProperties
 		class MySystemPropertyRestoreTest {
@@ -119,9 +119,9 @@ public class SystemPropertyExtensionDemo {
 		}
 		// end::systemproperty_class_restore_setup[]
 
-		// tag::systemproperty_class_restore_isolated_class[]
 		@Nested
 		@Order(2)
+		// tag::systemproperty_class_restore_isolated_class[]
 		@ReadsSystemProperty
 		class SomeOtherTestClass {
 
@@ -133,7 +133,6 @@ public class SystemPropertyExtensionDemo {
 			}
 
 		}
-
 		// end::systemproperty_class_restore_isolated_class[]
 	}
 

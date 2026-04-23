@@ -23,10 +23,17 @@ import org.junit.jupiter.params.provider.ValueSource
 
 @Suppress("ClassName")
 class DisplayNameGeneratorDemo {
+    // @formatter:off
     @Nested
     // tag::user_guide_replace_underscores[]
     @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
-    inner class A_year_is_not_supported {
+    // end::user_guide_replace_underscores[]
+    inner
+    // tag::user_guide_replace_underscores[]
+    class A_year_is_not_supported {
+        // end::user_guide_replace_underscores[]
+        // @formatter:on
+        // tag::user_guide_replace_underscores[]
         @Test
         fun if_it_is_zero() {
         }
@@ -39,10 +46,17 @@ class DisplayNameGeneratorDemo {
     }
     // end::user_guide_replace_underscores[]
 
+    // @formatter:off
     @Nested
     // tag::user_guide_indicative_sentences[]
     @IndicativeSentencesGeneration(separator = " -> ", generator = ReplaceUnderscores::class)
-    inner class A_year_is_a_leap_year {
+    // end::user_guide_indicative_sentences[]
+    inner
+    // tag::user_guide_indicative_sentences[]
+    class A_year_is_a_leap_year {
+        // end::user_guide_indicative_sentences[]
+        // @formatter:on
+        // tag::user_guide_indicative_sentences[]
         @Test
         fun if_it_is_divisible_by_4_but_not_by_100() {
         }
@@ -54,11 +68,18 @@ class DisplayNameGeneratorDemo {
     }
     // end::user_guide_indicative_sentences[]
 
+    // @formatter:off
     @Nested
     // tag::user_guide_custom_sentence_fragments[]
     @SentenceFragment("A year is a leap year")
     @IndicativeSentencesGeneration
-    inner class LeapYearTests {
+    // end::user_guide_custom_sentence_fragments[]
+    inner
+    // tag::user_guide_custom_sentence_fragments[]
+    class LeapYearTests {
+        // end::user_guide_custom_sentence_fragments[]
+        // @formatter:on
+        // tag::user_guide_custom_sentence_fragments[]
         @SentenceFragment("if it is divisible by 4 but not by 100")
         @Test
         fun divisibleBy4ButNotBy100() {

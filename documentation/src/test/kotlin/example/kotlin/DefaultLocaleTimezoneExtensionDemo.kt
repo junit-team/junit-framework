@@ -63,10 +63,17 @@ class DefaultLocaleTimezoneExtensionDemo {
     }
     // end::default_locale_language_alternatives[]
 
-    // tag::default_locale_class_level[]
+    // @formatter:off
     @Nested
+    // tag::default_locale_class_level[]
     @DefaultLocale(language = "fr")
-    inner class MyLocaleTests {
+    // end::default_locale_class_level[]
+    inner
+    // tag::default_locale_class_level[]
+    class MyLocaleTests {
+        // end::default_locale_class_level[]
+        // @formatter:on
+        // tag::default_locale_class_level[]
         @Test
         fun test_with_class_level_configuration() {
             assertThat(Locale.getDefault()).isEqualTo(Locale.Builder().setLanguage("fr").build())
@@ -106,10 +113,18 @@ class DefaultLocaleTimezoneExtensionDemo {
     }
     // end::default_timezone_zone[]
 
-    // tag::default_timezone_class_level[]
+    // @formatter:off
     @Nested
+    // tag::default_timezone_class_level[]
     @DefaultTimeZone("CET")
-    inner class MyTimeZoneTests {
+    // end::default_timezone_class_level[]
+    inner
+    // tag::default_timezone_class_level[]
+    class MyTimeZoneTests {
+        // end::default_timezone_class_level[]
+        // @formatter:on
+        // tag::default_timezone_class_level[]
+
         @Test
         fun test_with_class_level_configuration() {
             assertThat(TimeZone.getDefault()).isEqualTo(TimeZone.getTimeZone("CET"))

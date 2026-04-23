@@ -22,12 +22,19 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.time.Duration
 
 class ParameterizedClassDemo {
+    // @formatter:off
     @Nested
     // tag::nested[]
     @Execution(SAME_THREAD)
     @ParameterizedClass
     @ValueSource(strings = ["apple", "banana"])
-    inner class FruitTests {
+    // end::nested[]
+    inner
+    // tag::nested[]
+    class FruitTests {
+        // end::nested[]
+        // @formatter:on
+        // tag::nested[]
         @Parameter
         lateinit var fruit: String
 

@@ -55,10 +55,18 @@ class SystemPropertyExtensionDemo {
     }
     // end::systemproperty_using_set_and_clear[]
 
-    // tag::systemproperty_using_at_class_level[]
+    // @formatter:off
     @Nested
+    // tag::systemproperty_using_at_class_level[]
     @ClearSystemProperty(key = "some property")
-    inner class MySystemPropertyTest {
+    // end::systemproperty_using_at_class_level[]
+    inner
+    // tag::systemproperty_using_at_class_level[]
+    class MySystemPropertyTest {
+        // end::systemproperty_using_at_class_level[]
+        // @formatter:on
+        // tag::systemproperty_using_at_class_level[]
+
         @Test
         @SetSystemProperty(key = "some property", value = "new value")
         fun clearedAtClasslevel() {
@@ -80,12 +88,19 @@ class SystemPropertyExtensionDemo {
     @Nested
     @TestClassOrder(ClassOrderer.OrderAnnotation::class)
     inner class SystemPropertyRestoreExample {
-        // tag::systemproperty_class_restore_setup[]
+        // @formatter:off
         @Nested
         @Order(1)
+        // tag::systemproperty_class_restore_setup[]
         @TestInstance(TestInstance.Lifecycle.PER_CLASS)
         @RestoreSystemProperties
-        inner class MySystemPropertyRestoreTest {
+        // end::systemproperty_class_restore_setup[]
+        inner
+        // tag::systemproperty_class_restore_setup[]
+        class MySystemPropertyRestoreTest {
+            // end::systemproperty_class_restore_setup[]
+            // @formatter:on
+            // tag::systemproperty_class_restore_setup[]
             @BeforeAll
             fun beforeAll() {
                 System.setProperty("A", "A value")
@@ -112,11 +127,18 @@ class SystemPropertyExtensionDemo {
         }
         // end::systemproperty_class_restore_setup[]
 
+        // @formatter:off
         // tag::systemproperty_class_restore_isolated_class[]
         @Nested
         @Order(2)
         @ReadsSystemProperty
-        inner class SomeOtherTestClass {
+        // end::systemproperty_class_restore_isolated_class[]
+        inner
+        // tag::systemproperty_class_restore_isolated_class[]
+        class SomeOtherTestClass {
+            // end::systemproperty_class_restore_isolated_class[]
+            // @formatter:on
+            // tag::systemproperty_class_restore_isolated_class[]
             @Test
             fun isolatedTest() {
                 assertThat(System.getProperty("A")).isNull()
@@ -124,7 +146,6 @@ class SystemPropertyExtensionDemo {
                 assertThat(System.getProperty("C")).isNull()
             }
         }
-
         // end::systemproperty_class_restore_isolated_class[]
     }
 
