@@ -50,7 +50,7 @@ import org.junit.jupiter.params.converter.ArgumentConverter;
  * <li>object arrays &mdash; for example {@code String[]}, {@code Integer[][]}, etc.</li>
  * </ul>
  *
- * <p>Unless the {@link #type()} is set, the parameter type is determined from
+ * <p>Unless the {@link #type()} is set, the parameter type is derived from
  * the first (and only) parameter of the annotated {@code @ParameterizedClass}
  * or {@code @ParameterizedTest}.
  *
@@ -86,5 +86,5 @@ public @interface EmptySource {
 	 * type to the actual parameter type.
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	Class<?> type() default EmptyArgumentsProvider.Unset.class;
+	Class<?> type() default EmptyArgumentsProvider.Derived.class;
 }
