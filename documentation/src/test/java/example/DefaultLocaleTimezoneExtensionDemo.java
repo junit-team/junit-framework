@@ -54,8 +54,8 @@ public class DefaultLocaleTimezoneExtensionDemo {
 	}
 	// end::default_locale_language_alternatives[]
 
-	// tag::default_locale_class_level[]
 	@Nested
+	// tag::default_locale_class_level[]
 	@DefaultLocale(language = "fr")
 	class MyLocaleTests {
 
@@ -102,8 +102,8 @@ public class DefaultLocaleTimezoneExtensionDemo {
 	}
 	// end::default_timezone_zone[]
 
-	// tag::default_timezone_class_level[]
 	@Nested
+	// tag::default_timezone_class_level[]
 	@DefaultTimeZone("CET")
 	class MyTimeZoneTests {
 
