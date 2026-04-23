@@ -50,7 +50,7 @@ class EmptyArgumentsProvider extends AnnotationBasedArgumentsProvider<EmptySourc
 
 		var explicitType = annotation.type();
 
-		if (explicitType.equals(Unset.class)) {
+		if (explicitType.equals(Derived.class)) {
 			Optional<ParameterDeclaration> firstParameter = parameters.getFirst();
 
 			Preconditions.condition(firstParameter.isPresent(),
@@ -213,8 +213,8 @@ class EmptyArgumentsProvider extends AnnotationBasedArgumentsProvider<EmptySourc
 		}
 	}
 
-	static final class Unset {
-		private Unset() {
+	static final class Derived {
+		private Derived() {
 			throw new JUnitException("Must not be instantiated");
 		}
 	}
