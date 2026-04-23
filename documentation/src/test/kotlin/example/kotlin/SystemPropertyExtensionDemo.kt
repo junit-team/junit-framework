@@ -128,9 +128,9 @@ class SystemPropertyExtensionDemo {
         // end::systemproperty_class_restore_setup[]
 
         // @formatter:off
-        // tag::systemproperty_class_restore_isolated_class[]
         @Nested
         @Order(2)
+        // tag::systemproperty_class_restore_isolated_class[]
         @ReadsSystemProperty
         // end::systemproperty_class_restore_isolated_class[]
         inner
