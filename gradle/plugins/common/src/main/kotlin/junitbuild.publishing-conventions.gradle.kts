@@ -90,6 +90,11 @@ publishing {
 						name = "Juliette de Rancourt"
 						email = "derancourt.juliette@gmail.com"
 					}
+					developer {
+						id = "mpkorstanje"
+						name = "M.P. Korstanje"
+						email = "mpkorstanje@junit.org"
+					}
 				}
 			}
 		}
