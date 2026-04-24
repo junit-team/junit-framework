@@ -49,14 +49,14 @@ class AssertInstanceOf {
 	private static <T> T assertInstanceOf(Class<T> expectedType, @Nullable Object actualValue,
 			@Nullable Object messageOrSupplier) {
 		if (!expectedType.isInstance(actualValue)) {
-			assertionFailure() //
+			throw assertionFailure() //
 					.message(messageOrSupplier) //
 					.reason(actualValue == null ? "Unexpected null value" : "Unexpected type") //
 					.expected(expectedType) //
 					.actual(actualValue == null ? null : actualValue.getClass()) //
 					.cause(actualValue instanceof Throwable t ? t : null) //
 					.trimStacktrace(Assertions.class) //
-					.buildAndThrow();
+					.build();
 		}
 		return expectedType.cast(actualValue);
 	}

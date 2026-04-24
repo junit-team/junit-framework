@@ -117,10 +117,9 @@ public class Assertions {
 	 * generic return type {@code V}.
 	 */
 	@Contract(" -> fail")
-	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
+	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V fail() {
-		AssertionUtils.fail();
-		return null; // appeasing the compiler: this line will never be executed.
+		throw AssertionUtils.failure();
 	}
 
 	/**
@@ -138,10 +137,9 @@ public class Assertions {
 	 * }</pre>
 	 */
 	@Contract("_ -> fail")
-	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
+	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V fail(@Nullable String message) {
-		AssertionUtils.fail(message);
-		return null; // appeasing the compiler: this line will never be executed.
+		throw AssertionUtils.failure(message);
 	}
 
 	/**
@@ -152,10 +150,9 @@ public class Assertions {
 	 * generic return type {@code V}.
 	 */
 	@Contract("_, _ -> fail")
-	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
+	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V fail(@Nullable String message, @Nullable Throwable cause) {
-		AssertionUtils.fail(message, cause);
-		return null; // appeasing the compiler: this line will never be executed.
+		throw AssertionUtils.failure(message, cause);
 	}
 
 	/**
@@ -165,10 +162,9 @@ public class Assertions {
 	 * generic return type {@code V}.
 	 */
 	@Contract("_ -> fail")
-	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
+	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V fail(@Nullable Throwable cause) {
-		AssertionUtils.fail(cause);
-		return null; // appeasing the compiler: this line will never be executed.
+		throw AssertionUtils.failure(cause);
 	}
 
 	/**
@@ -179,10 +175,9 @@ public class Assertions {
 	 * generic return type {@code V}.
 	 */
 	@Contract("_ -> fail")
-	@SuppressWarnings({ "NullAway", "TypeParameterUnusedInFormals" })
+	@SuppressWarnings("TypeParameterUnusedInFormals")
 	public static <V> V fail(Supplier<@Nullable String> messageSupplier) {
-		AssertionUtils.fail(messageSupplier);
-		return null; // appeasing the compiler: this line will never be executed.
+		throw AssertionUtils.failure(messageSupplier);
 	}
 
 	// --- assertTrue ----------------------------------------------------------

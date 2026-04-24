@@ -17,8 +17,8 @@ import java.util.Deque;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.annotation.Contract;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
+import org.opentest4j.AssertionFailedError;
 
 /**
  * {@code AssertionUtils} is a collection of utility methods that are common to
@@ -32,41 +32,36 @@ class AssertionUtils {
 		/* no-op */
 	}
 
-	@Contract(" -> fail")
-	static void fail() {
+	static AssertionFailedError failure() {
 		throw assertionFailure() //
 				.trimStacktrace(Assertions.class) //
 				.build();
 	}
 
-	@Contract("_ -> fail")
-	static void fail(@Nullable String message) {
-		throw assertionFailure() //
+	static AssertionFailedError failure(@Nullable String message) {
+		return assertionFailure() //
 				.message(message) //
 				.trimStacktrace(Assertions.class) //
 				.build();
 	}
 
-	@Contract("_, _ -> fail")
-	static void fail(@Nullable String message, @Nullable Throwable cause) {
-		throw assertionFailure() //
+	static AssertionFailedError failure(@Nullable String message, @Nullable Throwable cause) {
+		return assertionFailure() //
 				.message(message) //
 				.cause(cause) //
 				.trimStacktrace(Assertions.class) //
 				.build();
 	}
 
-	@Contract("_ -> fail")
-	static void fail(@Nullable Throwable cause) {
+	static AssertionFailedError failure(@Nullable Throwable cause) {
 		throw assertionFailure() //
 				.cause(cause) //
 				.trimStacktrace(Assertions.class) //
 				.build();
 	}
 
-	@Contract("_ -> fail")
-	static void fail(Supplier<@Nullable String> messageSupplier) {
-		throw assertionFailure() //
+	static AssertionFailedError failure(Supplier<@Nullable String> messageSupplier) {
+		return assertionFailure() //
 				.message(nullSafeGet(messageSupplier)) //
 				.trimStacktrace(Assertions.class) //
 				.build();
@@ -133,7 +128,7 @@ class AssertionUtils {
 	}
 
 	private static void failIllegalDelta(String delta) {
-		fail("positive delta expected but was: <" + delta + ">");
+		throw failure("positive delta expected but was: <" + delta + ">");
 	}
 
 }
