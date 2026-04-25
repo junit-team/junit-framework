@@ -199,17 +199,17 @@ jobs:
           sudo apt-get install --yes poppler-utils
       - name: Wait for deployment
         if: ${{ inputs.dryRun == false }}
-        id: pagesDeployment
         timeout-minutes: 30
-        run: |
-          URL="https://docs.junit.org/${{ inputs.releaseVersion }}/_exports/junit-user-guide-${{ inputs.releaseVersion }}.pdf"
-          ./.github/scripts/waitForUrl.sh "$URL"
-          echo "pdfUrl=$URL" >> "$GITHUB_OUTPUT"
+        run: ./.github/scripts/waitForUrl.sh "${URL}"
+        env:
+          URL: https://docs.junit.org/${{ inputs.releaseVersion }}/
       - name: Verify integrity of PDF version of User Guide
-        if: ${{ inputs.dryRun == false }}
+        if: inputs.dryRun == false && !contains(inputs.releaseVersion, '-')
         run: |
-          curl --silent --fail --location --output /tmp/junit-user-guide.pdf "${{ steps.pagesDeployment.outputs.pdfUrl }}"
+          curl --silent --fail --location --output /tmp/junit-user-guide.pdf "${PDF_URL}"
           pdfinfo /tmp/junit-user-guide.pdf
+        env:
+          PDF_URL: https://docs.junit.org/${{ inputs.releaseVersion }}/_exports/junit-user-guide-${{ inputs.releaseVersion }}.pdf
 
   update_examples:
     name: Update examples
