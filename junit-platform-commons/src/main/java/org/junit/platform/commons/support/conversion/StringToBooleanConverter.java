@@ -20,7 +20,7 @@ class StringToBooleanConverter implements StringToObjectConverter {
 	}
 
 	@Override
-	public Object convert(String source, Class<?> targetType) {
+	public Boolean convert(String source, Class<?> targetType) {
 		boolean isTrue = "true".equalsIgnoreCase(source);
 		Preconditions.condition(isTrue || "false".equalsIgnoreCase(source),
 			() -> "String must be 'true' or 'false' (ignoring case): " + source);

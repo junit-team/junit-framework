@@ -19,7 +19,7 @@ import org.junit.platform.commons.util.Preconditions;
 
 class StringToNumberConverter implements StringToObjectConverter {
 
-	private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Map.of( //
+	private static final Map<Class<? extends Number>, Function<String, ? extends Number>> CONVERTERS = Map.of( //
 		Byte.class, Byte::decode, //
 		Short.class, Short::decode, //
 		Integer.class, Integer::decode, //
@@ -39,8 +39,8 @@ class StringToNumberConverter implements StringToObjectConverter {
 	}
 
 	@Override
-	public Object convert(String source, Class<?> targetType) {
-		Function<String, ?> converter = Preconditions.notNull(CONVERTERS.get(targetType),
+	public Number convert(String source, Class<?> targetType) {
+		Function<String, ? extends Number> converter = Preconditions.notNull(CONVERTERS.get(targetType),
 			() -> "No registered converter for %s".formatted(targetType.getName()));
 		return converter.apply(source.replace("_", ""));
 	}

@@ -20,7 +20,7 @@ class StringToCharacterConverter implements StringToObjectConverter {
 	}
 
 	@Override
-	public Object convert(String source, Class<?> targetType) {
+	public Character convert(String source, Class<?> targetType) {
 		Preconditions.condition(source.length() == 1, () -> "String must have length of 1: " + source);
 		return source.charAt(0);
 	}
