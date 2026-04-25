@@ -27,6 +27,8 @@ jobs:
         - version: 25
           type: ga
         - version: 26
+          type: ga
+        - version: 27
           type: ea
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
     runs-on: ubuntu-latest
