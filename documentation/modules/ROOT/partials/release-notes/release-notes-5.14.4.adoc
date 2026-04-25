@@ -1,12 +1,12 @@
 [[v5.14.4]]
 == 5.14.4
 
-*Date of Release:* ❓
+*Date of Release:* April 26, 2026
 
-*Scope:* Bug fix for legacy XML reporting of `@ClassTemplate`/`@ParameterizedClass` tests
+*Scope:* Bug fixes and enhancements since 5.14.3
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
-link:{junit-framework-repo}+/milestone/MILESTONE_NUMBER?closed=1+[5.14.4] milestone page in the JUnit
+link:{junit-framework-repo}+/milestone/118?closed=1+[5.14.4] milestone page in the JUnit
 repository on GitHub.
 
 
@@ -18,14 +18,15 @@ repository on GitHub.
 
 * A race condition in `NodeTestTask.parentContext` has been fixed.
 
+
 [[v5.14.4-junit-jupiter]]
 === JUnit Jupiter
 
 [[v5.14.4-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* Include index of `@ClassTemplate`/`@ParameterizedClass` invocations in test names in
-  legacy XML reports to make them unique.
+* Legacy XML reports now include the index of `@ClassTemplate`/`@ParameterizedClass`
+  invocations in test names to make them unique.
 * Legacy XML reports now include parent display names to make it easier to distinguish
   between invocations for different parameters.
 
