@@ -12,10 +12,7 @@ package org.junit.vintage.engine.descriptor;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
 
-import java.util.Set;
-
 import org.apiguardian.api.API;
-import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 
@@ -27,10 +24,6 @@ public class VintageEngineDescriptor extends EngineDescriptor {
 
 	public VintageEngineDescriptor(UniqueId uniqueId) {
 		super(uniqueId, "JUnit Vintage");
-	}
-
-	public Set<TestDescriptor> getModifiableChildren() {
-		return children;
 	}
 
 }

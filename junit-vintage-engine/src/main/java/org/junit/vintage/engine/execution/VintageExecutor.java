@@ -14,7 +14,6 @@ import static java.util.Objects.requireNonNullElse;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +29,6 @@ import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.EngineExecutionListener;
-import org.junit.platform.engine.TestDescriptor;
 import org.junit.vintage.engine.Constants;
 import org.junit.vintage.engine.descriptor.RunnerTestDescriptor;
 import org.junit.vintage.engine.descriptor.VintageEngineDescriptor;
@@ -88,10 +86,12 @@ public class VintageExecutor {
 
 	private void executeClassesAndMethodsSequentially(CancellationToken cancellationToken) {
 		RunnerExecutor runnerExecutor = new RunnerExecutor(engineExecutionListener, cancellationToken);
-		for (Iterator<TestDescriptor> iterator = engineDescriptor.getModifiableChildren().iterator(); iterator.hasNext();) {
-			runnerExecutor.execute((RunnerTestDescriptor) iterator.next());
-			iterator.remove();
-		}
+		engineDescriptor.getChildren().stream() //
+				.map(RunnerTestDescriptor.class::cast) //
+				.forEach(it -> {
+					runnerExecutor.execute(it);
+					it.removeFromHierarchy();
+				});
 	}
 
 	private boolean executeInParallel(CancellationToken cancellationToken) {
@@ -126,7 +126,7 @@ public class VintageExecutor {
 	}
 
 	private List<RunnerTestDescriptor> collectRunnerTestDescriptors(ExecutorService executorService) {
-		return engineDescriptor.getModifiableChildren().stream() //
+		return engineDescriptor.getChildren().stream() //
 				.map(RunnerTestDescriptor.class::cast) //
 				.map(it -> methods ? parallelMethodExecutor(it, executorService) : it) //
 				.toList();

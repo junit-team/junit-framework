@@ -345,8 +345,7 @@ public interface TestDescriptor {
 	default void accept(Visitor visitor) {
 		Preconditions.notNull(visitor, "Visitor must not be null");
 		visitor.visit(this);
-		// Create a copy of the set in order to avoid a ConcurrentModificationException
-		new LinkedHashSet<>(this.getChildren()).forEach(child -> child.accept(visitor));
+		this.getChildren().forEach(child -> child.accept(visitor));
 	}
 
 	/**
