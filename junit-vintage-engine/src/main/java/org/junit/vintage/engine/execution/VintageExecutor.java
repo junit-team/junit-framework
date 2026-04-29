@@ -93,7 +93,10 @@ public class VintageExecutor {
 			var testDescriptor = (RunnerTestDescriptor) iterator.next();
 			runnerExecutor.execute(testDescriptor);
 			// Remove testDescriptor references from the engine to allow garbage collection
-			testDescriptor.removeFromHierarchy();
+			// TODO: This is weird.
+			if (!testDescriptor.isRoot()) {
+				testDescriptor.removeFromHierarchy();
+			}
 			// Remove copied testDescriptor references to allow garbage collection
 			iterator.remove();
 		}
