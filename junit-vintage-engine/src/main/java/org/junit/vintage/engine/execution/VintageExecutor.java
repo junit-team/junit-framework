@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNullElse;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -86,12 +87,16 @@ public class VintageExecutor {
 
 	private void executeClassesAndMethodsSequentially(CancellationToken cancellationToken) {
 		RunnerExecutor runnerExecutor = new RunnerExecutor(engineExecutionListener, cancellationToken);
-		engineDescriptor.getChildren().stream() //
-				.map(RunnerTestDescriptor.class::cast) //
-				.forEach(it -> {
-					runnerExecutor.execute(it);
-					it.removeFromHierarchy();
-				});
+		// Create a copy to avoid a ConcurrentModificationException
+		var children = new LinkedHashSet<>(engineDescriptor.getModifiableChildren());
+		for (var iterator = children.iterator(); iterator.hasNext();) {
+			var testDescriptor = (RunnerTestDescriptor) iterator.next();
+			runnerExecutor.execute(testDescriptor);
+			// Remove testDescriptor references from the engine to allow garbage collection
+			testDescriptor.removeFromHierarchy();
+			// Remove copied testDescriptor references to allow garbage collection
+			iterator.remove();
+		}
 	}
 
 	private boolean executeInParallel(CancellationToken cancellationToken) {
