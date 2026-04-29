@@ -34,8 +34,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *     <li>using a {@link Locale.Builder Locale.Builder} together with
  *         <ul>
  *            <li>a language</li>
- *            <li>a language and a county</li>
- *            <li>a language, a county, and a variant</li>
+ *            <li>a language and a country</li>
+ *            <li>a language, a country, and a variant</li>
  *         </ul>
  *     </li>
  * </ul>
@@ -62,7 +62,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <a href="https://docs.junit.org/current/writing-tests/parallel-execution.html">parallel test execution</a>,
  * all tests annotated with {@link DefaultLocale @DefaultLocale},
  * {@link ReadsDefaultLocale @ReadsDefaultLocale}, and
- * {@link WritesDefaultLocale} are scheduled in a way that guarantees
+ * {@link WritesDefaultLocale @WritesDefaultLocale} are scheduled in a way that guarantees
  * correctness under mutation of shared global state.
  *
  * <p>For more details and examples, see the
