@@ -87,17 +87,14 @@ public class VintageExecutor {
 
 	private void executeClassesAndMethodsSequentially(CancellationToken cancellationToken) {
 		RunnerExecutor runnerExecutor = new RunnerExecutor(engineExecutionListener, cancellationToken);
-		// Create a copy to avoid a ConcurrentModificationException
-		var children = new LinkedHashSet<>(engineDescriptor.getModifiableChildren());
+		// Create a mutable copy so test descriptors can be made available for
+		// GC immediately after execution.
+		var children = new LinkedHashSet<>(engineDescriptor.getChildren());
 		for (var iterator = children.iterator(); iterator.hasNext();) {
 			var testDescriptor = (RunnerTestDescriptor) iterator.next();
 			runnerExecutor.execute(testDescriptor);
-			// Remove testDescriptor references from the engine to allow garbage collection
-			// TODO: This is weird.
-			if (!testDescriptor.isRoot()) {
-				testDescriptor.removeFromHierarchy();
-			}
-			// Remove copied testDescriptor references to allow garbage collection
+			// Remove the test descriptor from the engine and iterable to allow GC.
+			engineDescriptor.removeChild(testDescriptor);
 			iterator.remove();
 		}
 	}
