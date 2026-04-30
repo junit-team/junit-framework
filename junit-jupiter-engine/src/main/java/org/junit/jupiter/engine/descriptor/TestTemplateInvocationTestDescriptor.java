@@ -14,7 +14,11 @@ import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
+import org.junit.platform.engine.TestSource;
+import org.junit.platform.engine.support.descriptor.UriSource;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -48,12 +52,15 @@ public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescript
 
 	private final int index;
 
+    private @Nullable URI testSourceUri;
+
 	TestTemplateInvocationTestDescriptor(UniqueId uniqueId, Class<?> testClass, Method templateMethod,
 			TestTemplateInvocationContext invocationContext, int index, JupiterConfiguration configuration) {
 		super(uniqueId, invocationContext.getDisplayName(index), testClass, templateMethod, configuration,
 			interceptorCall);
 		this.invocationContext = invocationContext;
 		this.index = index;
+        this.testSourceUri = invocationContext.getTestSourceUri().orElse(null);
 	}
 
 	// --- JupiterTestDescriptor -----------------------------------------------
@@ -96,6 +103,14 @@ public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescript
 		// forget invocationContext so it can be garbage collected
 		this.invocationContext = null;
 	}
+
+    @Override
+    public Optional<TestSource> getSource() {
+        if (this.testSourceUri != null) {
+            return Optional.of(UriSource.from(this.testSourceUri));
+        }
+        return super.getSource();
+    }
 
 	private TestTemplateInvocationContext requiredInvocationContext() {
 		return requireNonNull(this.invocationContext);

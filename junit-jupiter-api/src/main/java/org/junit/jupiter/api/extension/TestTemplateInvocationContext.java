@@ -14,7 +14,9 @@ import static java.util.Collections.emptyList;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import org.apiguardian.api.API;
 
@@ -80,5 +82,7 @@ public interface TestTemplateInvocationContext {
 	@API(status = EXPERIMENTAL, since = "6.0")
 	default void prepareInvocation(ExtensionContext context) {
 	}
+
+    default Optional<URI> getTestSourceUri() { return Optional.empty(); }
 
 }
