@@ -81,7 +81,8 @@ class EngineTestKitTests {
 			ArgumentCaptor<NamespacedHierarchicalStore<Namespace>> storeCaptor = forClass(
 				NamespacedHierarchicalStore.class);
 
-			verify(mockOrchestrator).execute(any(), any(), storeCaptor.capture(), eq(CancellationToken.disabled()));
+			verify(mockOrchestrator).execute(any(), any(), any(), storeCaptor.capture(),
+				eq(CancellationToken.disabled()));
 			assertNotNull(storeCaptor.getValue(), "Request level store should be passed to execute");
 		}
 	}

@@ -74,7 +74,8 @@ public class EngineExecutionOrchestrator {
 	 * {@linkplain TestExecutionListener testExecutionListener} of execution
 	 * events.
 	 */
-	@API(status = INTERNAL, since = "1.9", consumers = "org.junit.platform.suite.engine")
+	@API(status = INTERNAL, since = "1.9", consumers = { "org.junit.platform.testkit",
+			"org.junit.platform.suite.engine" })
 	public void execute(LauncherDiscoveryResult discoveryResult, EngineExecutionListener engineExecutionListener,
 			TestExecutionListener testExecutionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
 			CancellationToken cancellationToken) {
@@ -176,8 +177,7 @@ public class EngineExecutionOrchestrator {
 	 * discovery results} and notifies the supplied {@linkplain
 	 * EngineExecutionListener listener} of execution events.
 	 */
-	@API(status = INTERNAL, since = "1.7", consumers = "org.junit.platform.testkit")
-	public void execute(LauncherDiscoveryResult discoveryResult, EngineExecutionListener engineExecutionListener,
+	private void execute(LauncherDiscoveryResult discoveryResult, EngineExecutionListener engineExecutionListener,
 			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken) {
 		Preconditions.notNull(discoveryResult, "discoveryResult must not be null");
 		Preconditions.notNull(engineExecutionListener, "engineExecutionListener must not be null");

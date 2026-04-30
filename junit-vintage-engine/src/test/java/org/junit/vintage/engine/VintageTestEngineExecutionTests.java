@@ -50,6 +50,8 @@ import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
+import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
@@ -158,6 +160,46 @@ class VintageTestEngineExecutionTests {
 			event(test("successfulTest"), started()), //
 			event(test("successfulTest"), finishedSuccessfully()), //
 			event(container(testClass), finishedSuccessfully()), //
+			event(engine(), finishedSuccessfully()));
+	}
+
+	@Test
+	void executesMultiplePlainJUnit4TestCases() {
+		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request() //
+				.selectors(DiscoverySelectors.selectClass(PlainJUnit4TestCaseWithTwoTestMethods.class),
+					DiscoverySelectors.selectClass(PlainJUnit4TestCaseWithFiveTestMethods.class)) //
+				.enableImplicitConfigurationParameters(false) //
+				.build();
+
+		execute(request).allEvents().assertEventsMatchLoosely( //
+			event(engine(), started()), //
+			event(container(PlainJUnit4TestCaseWithTwoTestMethods.class), started()), //
+			event(container(PlainJUnit4TestCaseWithTwoTestMethods.class), finishedSuccessfully()), //
+			event(container(PlainJUnit4TestCaseWithFiveTestMethods.class), started()), //
+			event(container(PlainJUnit4TestCaseWithFiveTestMethods.class), finishedSuccessfully()), //
+			event(engine(), finishedSuccessfully()));
+	}
+
+	@Test
+	void executesMultiplePlainJUnit4TestCasesWithMemoryCleanupEnabled() {
+		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request() //
+				.configurationParameter(LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME, "true") //
+				.configurationParameter(LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME, "false") //
+				.selectors( //
+					DiscoverySelectors.selectClass(PlainJUnit4TestCaseWithTwoTestMethods.class), //
+					DiscoverySelectors.selectClass(PlainJUnit4TestCaseWithFiveTestMethods.class)) //
+				.enableImplicitConfigurationParameters(false) //
+				.build();
+
+		EngineExecutionResults execute = execute(request);
+
+		// TODO: Disable debug
+		execute.allEvents().debug().assertEventsMatchLoosely( //
+			event(engine(), started()), //
+			event(container(PlainJUnit4TestCaseWithTwoTestMethods.class), started()), //
+			event(container(PlainJUnit4TestCaseWithTwoTestMethods.class), finishedSuccessfully()), //
+			event(container(PlainJUnit4TestCaseWithFiveTestMethods.class), started()), //
+			event(container(PlainJUnit4TestCaseWithFiveTestMethods.class), finishedSuccessfully()), //
 			event(engine(), finishedSuccessfully()));
 	}
 

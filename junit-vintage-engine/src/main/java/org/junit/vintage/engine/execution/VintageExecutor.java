@@ -14,7 +14,7 @@ import static java.util.Objects.requireNonNullElse;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +30,6 @@ import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.EngineExecutionListener;
-import org.junit.platform.engine.TestDescriptor;
 import org.junit.vintage.engine.Constants;
 import org.junit.vintage.engine.descriptor.RunnerTestDescriptor;
 import org.junit.vintage.engine.descriptor.VintageEngineDescriptor;
@@ -88,8 +87,14 @@ public class VintageExecutor {
 
 	private void executeClassesAndMethodsSequentially(CancellationToken cancellationToken) {
 		RunnerExecutor runnerExecutor = new RunnerExecutor(engineExecutionListener, cancellationToken);
-		for (Iterator<TestDescriptor> iterator = engineDescriptor.getModifiableChildren().iterator(); iterator.hasNext();) {
-			runnerExecutor.execute((RunnerTestDescriptor) iterator.next());
+		// Create a mutable copy so test descriptors can be made available for
+		// GC immediately after execution.
+		var children = new LinkedHashSet<>(engineDescriptor.getChildren());
+		for (var iterator = children.iterator(); iterator.hasNext();) {
+			var testDescriptor = (RunnerTestDescriptor) iterator.next();
+			runnerExecutor.execute(testDescriptor);
+			// Remove the test descriptor from the engine and iterable to allow GC.
+			engineDescriptor.removeChild(testDescriptor);
 			iterator.remove();
 		}
 	}
@@ -126,7 +131,7 @@ public class VintageExecutor {
 	}
 
 	private List<RunnerTestDescriptor> collectRunnerTestDescriptors(ExecutorService executorService) {
-		return engineDescriptor.getModifiableChildren().stream() //
+		return engineDescriptor.getChildren().stream() //
 				.map(RunnerTestDescriptor.class::cast) //
 				.map(it -> methods ? parallelMethodExecutor(it, executorService) : it) //
 				.toList();

@@ -44,6 +44,7 @@ import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.core.EngineDiscoveryOrchestrator;
 import org.junit.platform.launcher.core.EngineExecutionOrchestrator;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -259,8 +260,11 @@ public final class EngineTestKit {
 		LauncherDiscoveryResult discoveryResult = discoverUsingOrchestrator(testEngine, discoveryRequest);
 		TestDescriptor engineTestDescriptor = discoveryResult.getEngineTestDescriptor(testEngine);
 		Preconditions.notNull(engineTestDescriptor, "TestEngine did not yield a TestDescriptor");
-		withRequestLevelStore(
-			store -> new EngineExecutionOrchestrator().execute(discoveryResult, listener, store, cancellationToken));
+		TestExecutionListener noop = new TestExecutionListener() {
+
+		};
+		withRequestLevelStore(store -> new EngineExecutionOrchestrator().execute(discoveryResult, listener, noop, store,
+			cancellationToken));
 	}
 
 	private static void withRequestLevelStore(Consumer<NamespacedHierarchicalStore<Namespace>> action) {

@@ -148,7 +148,7 @@ public abstract class AbstractTestDescriptor implements TestDescriptor {
 
 	@Override
 	public final Set<? extends TestDescriptor> getChildren() {
-		return Collections.unmodifiableSet(this.children);
+		return Collections.unmodifiableSet(new LinkedHashSet<>(this.children));
 	}
 
 	@Override
