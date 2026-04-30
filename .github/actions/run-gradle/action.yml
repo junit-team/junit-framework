@@ -24,7 +24,7 @@ runs:
     - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
-    - uses: testlens-app/setup-testlens@0232fb63c43e5b93421545ba67bbb2981790a87f # v1.8.0
+    - uses: testlens-app/setup-testlens@9c133d83ab2a89290a72589bbddb6773b9b5e503 # v1.9.0
       with:
         write-log-files: true
     - shell: bash
