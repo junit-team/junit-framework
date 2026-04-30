@@ -9,6 +9,7 @@ pluginManagement {
 
 plugins {
 	id("junitbuild.build-parameters")
+	id("junitbuild.maven-central-publishing")
 	id("junitbuild.settings-conventions")
 }
 

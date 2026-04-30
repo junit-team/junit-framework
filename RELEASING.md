@@ -7,7 +7,7 @@
 - [ ] Change release date in Release Notes
 - [ ] Change release date in `README.MD`
 - [ ] Commit with message "Release ${VERSION}"
-- [ ] Execute `./gradlew --no-build-cache --no-configuration-cache clean build jreleaserDeploy`
+- [ ] Execute `./gradlew --no-build-cache --no-configuration-cache clean build publishAggregationToCentralPortal`
 - [ ] Tag current commit: `git tag -s -m ${VERSION} r${VERSION}`
 - [ ] Change `version` in `gradle.properties` on release branch to new development versions and commit with message "Back to snapshots for further development" or similar
 - [ ] Push release branch and tag to GitHub: `git push --set-upstream --follow-tags origin HEAD`
