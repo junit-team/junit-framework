@@ -55,6 +55,7 @@ import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
+import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 import org.junit.platform.launcher.core.NamespacedHierarchicalStoreProviders;
 import org.junit.platform.suite.api.AfterSuite;
@@ -106,9 +107,9 @@ class SuiteEngineTests {
 	@ValueSource(classes = { SelectClassesSuite.class, InheritedSuite.class })
 	void selectClasses(Class<?> suiteClass) {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(suiteClass));
-			var testKit = builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(suiteClass))
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
@@ -306,15 +307,60 @@ class SuiteEngineTests {
 	@Test
 	void suiteSuite() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SuiteSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SuiteSuite.class))
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.testEvents()
 				.assertThatEvents()
 				.haveExactly(1, event(test(SuiteSuite.class.getName()), finishedSuccessfully()))
 				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
+		// @formatter:on
+	}
+
+	@Test
+	void multipleSuites() {
+		// @formatter:off
+		var testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(
+						selectClass(SelectClassesSuite.class),
+						selectClass(MultipleSuite.class)
+				)
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+
+		assertThat(testKit.discover().getDiscoveryIssues())
+				.isEmpty();
+
+		testKit
+				.execute()
+				.testEvents()
+				.assertThatEvents()
+				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()));
+		// @formatter:on
+	}
+
+	@Test
+	void multipleSuitesWithMemoryCleanupEnabled() {
+		// @formatter:off
+		var testKit = EngineTestKit.engine(ENGINE_ID)
+				.configurationParameter(LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME, "true") //
+				.selectors(
+						selectClass(SelectClassesSuite.class),
+						selectClass(MultipleSuite.class)
+				)
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+
+		assertThat(testKit.discover().getDiscoveryIssues())
+				.isEmpty();
+
+		testKit
+				.execute()
+				.testEvents()
+				.assertThatEvents()
+				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
 
