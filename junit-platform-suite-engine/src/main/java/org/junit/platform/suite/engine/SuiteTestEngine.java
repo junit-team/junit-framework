@@ -12,6 +12,7 @@ package org.junit.platform.suite.engine;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
@@ -71,12 +72,14 @@ public final class SuiteTestEngine implements TestEngine {
 
 		engineExecutionListener.executionStarted(suiteEngineDescriptor);
 
-		// @formatter:off
-		suiteEngineDescriptor.getChildren()
-				.stream()
-				.map(SuiteTestDescriptor.class::cast)
-				.forEach(suiteTestDescriptor -> suiteTestDescriptor.execute(engineExecutionListener, requestLevelStore, cancellationToken));
-		// @formatter:on
+		// Create a mutable copy so test descriptors can be made available for
+		// GC immediately after execution.
+		var children = new LinkedHashSet<>(suiteEngineDescriptor.getChildren());
+		for (var iterator = children.iterator(); iterator.hasNext();) {
+			var suiteTestDescriptor = (SuiteTestDescriptor) iterator.next();
+			suiteTestDescriptor.execute(engineExecutionListener, requestLevelStore, cancellationToken);
+			iterator.remove();
+		}
 		engineExecutionListener.executionFinished(suiteEngineDescriptor, TestExecutionResult.successful());
 	}
 
