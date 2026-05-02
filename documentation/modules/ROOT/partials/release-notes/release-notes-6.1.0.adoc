@@ -16,8 +16,8 @@ repository on GitHub.
 [[v6.1.0-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* `TestDescriptor.getChildren()` now returns immutable set of children rather than a
-  merely unmodifiable.
+* `AbstractTestDescriptor.getChildren()` now returns immutable set of children rather than a
+  merely unmodifiable set.
 
 [[v6.1.0-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
