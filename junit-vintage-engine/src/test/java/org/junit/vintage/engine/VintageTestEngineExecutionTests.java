@@ -193,8 +193,7 @@ class VintageTestEngineExecutionTests {
 
 		EngineExecutionResults execute = execute(request);
 
-		// TODO: Disable debug
-		execute.allEvents().debug().assertEventsMatchLoosely( //
+		execute.allEvents().assertEventsMatchLoosely( //
 			event(engine(), started()), //
 			event(container(PlainJUnit4TestCaseWithTwoTestMethods.class), started()), //
 			event(container(PlainJUnit4TestCaseWithTwoTestMethods.class), finishedSuccessfully()), //
