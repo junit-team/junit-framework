@@ -1,0 +1,26 @@
+name: Lock resolved issues
+
+on:
+  schedule:
+    - cron: '13 7 * * 6'
+  workflow_dispatch:
+
+concurrency:
+  group: lock-resolved-issues
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      discussions: write
+    steps:
+      - uses: dessant/lock-threads@7266a7ce5c1df01b1c6db85bf8cd86c737dadbe7 # v6.0.0
+        with:
+          issue-comment: |
+            This issue was resolved and the conversation been locked due to inactivity.
+
+            The JUnit team generally speaking doesn't look at resolved issues. If you do have a similar request or problem, please create a new issue. You can include a reference to this issue to provide additional context.
+          process-only: issues
+          log-output: true
