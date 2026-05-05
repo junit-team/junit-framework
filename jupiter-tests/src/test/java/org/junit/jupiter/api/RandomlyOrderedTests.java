@@ -45,10 +45,7 @@ class RandomlyOrderedTests {
 				"C_TestCase#b", "C_TestCase#c", "C_TestCase#a", "A_TestCase#b", "A_TestCase#c", "A_TestCase#a");
 		});
 
-		assertThat(listener.stream()
-				.map(LogRecord::getMessage)
-				.filter(message -> message.contains(seed)))
-				.hasSize(1); // was logged 80 times before #4647
+		assertThat(listener.stream().map(LogRecord::getMessage).filter(message -> message.contains(seed))).hasSize(1); // was logged 80 times before #4647
 	}
 
 	private Events executeTests(@SuppressWarnings("SameParameterValue") String randomSeed) {

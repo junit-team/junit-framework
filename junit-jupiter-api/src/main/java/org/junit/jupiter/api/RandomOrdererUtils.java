@@ -43,7 +43,7 @@ class RandomOrdererUtils {
 				if (!CUSTOM_SEEDS_ALREADY_LOGGED.contains(configurationParameter)) {
 					CUSTOM_SEEDS_ALREADY_LOGGED.add(configurationParameter);
 					logger.config(() -> "Using custom seed for configuration parameter [%s] with value [%s].".formatted(
-							RANDOM_SEED_PROPERTY_NAME, configurationParameter));
+						RANDOM_SEED_PROPERTY_NAME, configurationParameter));
 				}
 				return Long.valueOf(configurationParameter);
 			}
