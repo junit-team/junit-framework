@@ -18,8 +18,11 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.LogRecord;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
 
@@ -31,24 +34,30 @@ class RandomlyOrderedTests {
 	private static final Set<String> callSequence = Collections.synchronizedSet(new LinkedHashSet<>());
 
 	@Test
-	void randomSeedForClassAndMethodOrderingIsDeterministic() {
-		IntStream.range(0, 20).forEach(i -> {
+	void randomSeedForClassAndMethodOrderingIsDeterministic(@TrackLogRecords LogRecordListener listener) {
+		var seed = "1618034";
+		IntStream.range(0, 20).forEach(_ -> {
 			callSequence.clear();
-			var tests = executeTests(1618034);
+			var tests = executeTests(seed);
 
 			tests.assertStatistics(stats -> stats.succeeded(callSequence.size()));
 			assertThat(callSequence).containsExactlyInAnyOrder("B_TestCase#b", "B_TestCase#c", "B_TestCase#a",
 				"C_TestCase#b", "C_TestCase#c", "C_TestCase#a", "A_TestCase#b", "A_TestCase#c", "A_TestCase#a");
 		});
+
+		assertThat(listener.stream()
+				.map(LogRecord::getMessage)
+				.filter(message -> message.contains(seed)))
+				.hasSize(1); // was logged 80 times before #4647
 	}
 
-	private Events executeTests(@SuppressWarnings("SameParameterValue") long randomSeed) {
+	private Events executeTests(@SuppressWarnings("SameParameterValue") String randomSeed) {
 		// @formatter:off
 		return EngineTestKit
 				.engine("junit-jupiter")
 				.configurationParameter(DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME, ClassOrderer.Random.class.getName())
 				.configurationParameter(DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME, MethodOrderer.Random.class.getName())
-				.configurationParameter(MethodOrderer.Random.RANDOM_SEED_PROPERTY_NAME, String.valueOf(randomSeed))
+				.configurationParameter(MethodOrderer.Random.RANDOM_SEED_PROPERTY_NAME, randomSeed)
 				.selectors(selectClasses(A_TestCase.class, B_TestCase.class, C_TestCase.class))
 				.execute()
 				.testEvents();
