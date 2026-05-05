@@ -28,6 +28,8 @@ class RandomOrdererUtils {
 
 	static final String RANDOM_SEED_PROPERTY_NAME = "junit.jupiter.execution.order.random.seed";
 
+	static final String RANDOM_SEED_LOG_FREQUENCY_PROPERTY_NAME = "junit.jupiter.execution.order.random.seed.log.frequency";
+
 	static final long DEFAULT_SEED = System.nanoTime();
 
 	static final Set<String> CUSTOM_SEEDS_ALREADY_LOGGED = new CopyOnWriteArraySet<>();
@@ -40,8 +42,13 @@ class RandomOrdererUtils {
 			Logger logger) {
 		return configurationParameterLookup.apply(RANDOM_SEED_PROPERTY_NAME).map(configurationParameter -> {
 			try {
+				// TODO Replace seed logging memory with launcher session store backed logic
+				var frequency = configurationParameterLookup.apply(RANDOM_SEED_LOG_FREQUENCY_PROPERTY_NAME).orElse(
+					"once_per_runtime");
 				if (!CUSTOM_SEEDS_ALREADY_LOGGED.contains(configurationParameter)) {
-					CUSTOM_SEEDS_ALREADY_LOGGED.add(configurationParameter);
+					if ("once_per_runtime".equalsIgnoreCase(frequency)) {
+						CUSTOM_SEEDS_ALREADY_LOGGED.add(configurationParameter);
+					}
 					logger.config(() -> "Using custom seed for configuration parameter [%s] with value [%s].".formatted(
 						RANDOM_SEED_PROPERTY_NAME, configurationParameter));
 				}
