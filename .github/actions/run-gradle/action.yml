@@ -27,7 +27,6 @@ runs:
     - uses: testlens-app/setup-testlens@d96a555133c275a00949d2cc77b70fe9a4242ebf # v1.9.2
       with:
         write-log-files: true
-        instrumentation-version: '1.9.1'
     - shell: bash
       env:
         JAVA_HOME: ${{ steps.setup-gradle-jdk.outputs.path }}
