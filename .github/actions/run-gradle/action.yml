@@ -63,3 +63,4 @@ runs:
       with:
         name: TestLens logs (${{ github.job }} - ${{ job.check_run_id }})
         path: '**/build/**/testlens-logs/**'
+        if-no-files-found: ignore
