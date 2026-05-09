@@ -18,7 +18,7 @@ dependencies {
 	}
 
 	if (!project.hasProperty("withoutKotlinxCoroutines")) {
-		testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+		testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
 	}
 }
 
