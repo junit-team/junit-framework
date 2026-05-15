@@ -7,7 +7,7 @@ permissions: {}
 jobs:
   deploy_documentation:
     name: Deploy Documentation
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     permissions:
       actions: write
     steps:
