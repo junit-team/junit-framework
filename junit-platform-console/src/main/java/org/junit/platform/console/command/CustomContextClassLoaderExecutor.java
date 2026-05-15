@@ -10,37 +10,38 @@
 
 package org.junit.platform.console.command;
 
-import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * @since 1.0
  */
 class CustomContextClassLoaderExecutor {
 
-	private final Optional<ClassLoader> customClassLoader;
+	private final @Nullable CustomClassLoader customClassLoader;
 	private final CustomClassLoaderCloseStrategy closeStrategy;
 
-	CustomContextClassLoaderExecutor(Optional<ClassLoader> customClassLoader) {
+	CustomContextClassLoaderExecutor(@Nullable CustomClassLoader customClassLoader) {
 		this(customClassLoader, CustomClassLoaderCloseStrategy.CLOSE_AFTER_CALLING_LAUNCHER);
 	}
 
-	CustomContextClassLoaderExecutor(Optional<ClassLoader> customClassLoader,
+	CustomContextClassLoaderExecutor(@Nullable CustomClassLoader customClassLoader,
 			CustomClassLoaderCloseStrategy closeStrategy) {
 		this.customClassLoader = customClassLoader;
 		this.closeStrategy = closeStrategy;
 	}
 
 	<T> T invoke(Supplier<T> supplier) {
-		if (customClassLoader.isPresent()) {
+		if (customClassLoader != null) {
 			// Only get/set context class loader when necessary to prevent problems with
 			// security managers
-			return replaceThreadContextClassLoaderAndInvoke(customClassLoader.get(), supplier);
+			return replaceThreadContextClassLoaderAndInvoke(customClassLoader, supplier);
 		}
 		return supplier.get();
 	}
 
-	private <T> T replaceThreadContextClassLoaderAndInvoke(ClassLoader customClassLoader, Supplier<T> supplier) {
+	private <T> T replaceThreadContextClassLoaderAndInvoke(CustomClassLoader customClassLoader, Supplier<T> supplier) {
 		ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(customClassLoader);

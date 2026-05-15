@@ -26,7 +26,9 @@ repository on GitHub.
 [[v6.2.0-M1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* When using `ConsoleLauncher` with the `-cp`/`--classpath` option, it now creates a
+  custom `ClassLoader` that does _not_ implement `AutoCloseable` to avoid accidentally
+  closing it in test code which can lead to test failures that are hard to diagnose.
 
 
 [[v6.2.0-M1-junit-jupiter]]

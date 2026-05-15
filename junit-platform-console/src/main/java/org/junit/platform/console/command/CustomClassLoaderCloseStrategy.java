@@ -30,14 +30,12 @@ public enum CustomClassLoaderCloseStrategy {
 	CLOSE_AFTER_CALLING_LAUNCHER {
 
 		@Override
-		public void handle(ClassLoader customClassLoader) {
-			if (customClassLoader instanceof @SuppressWarnings("resource") AutoCloseable closeable) {
-				try {
-					closeable.close();
-				}
-				catch (Exception ex) {
-					throw new JUnitException("Failed to close custom class loader", ex);
-				}
+		void handle(CustomClassLoader customClassLoader) {
+			try {
+				customClassLoader.close();
+			}
+			catch (Exception ex) {
+				throw new JUnitException("Failed to close custom class loader", ex);
 			}
 		}
 	},
@@ -52,7 +50,7 @@ public enum CustomClassLoaderCloseStrategy {
 	KEEP_OPEN {
 
 		@Override
-		public void handle(ClassLoader customClassLoader) {
+		void handle(CustomClassLoader customClassLoader) {
 			// do nothing
 		}
 	};
@@ -60,6 +58,6 @@ public enum CustomClassLoaderCloseStrategy {
 	/**
 	 * Handle the class loader according to the strategy.
 	 */
-	public abstract void handle(ClassLoader classLoader);
+	abstract void handle(CustomClassLoader classLoader);
 
 }
