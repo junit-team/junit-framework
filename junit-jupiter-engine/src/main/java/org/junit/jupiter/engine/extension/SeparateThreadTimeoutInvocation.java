@@ -13,7 +13,6 @@ package org.junit.jupiter.engine.extension;
 import static org.junit.jupiter.api.timeout.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
 
 import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
@@ -23,30 +22,29 @@ import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
  */
 class SeparateThreadTimeoutInvocation<T extends @Nullable Object> implements Invocation<T> {
 
-	private final Invocation<T> delegate;
-	private final TimeoutDuration timeout;
-	private final Supplier<String> descriptionSupplier;
-	private final PreInterruptCallbackInvocation preInterruptCallback;
+	private final TimeoutInvocationParameters<T> parameters;
 
-	SeparateThreadTimeoutInvocation(Invocation<T> delegate, TimeoutDuration timeout,
-			Supplier<String> descriptionSupplier, PreInterruptCallbackInvocation preInterruptCallback) {
-		this.delegate = delegate;
-		this.timeout = timeout;
-		this.descriptionSupplier = descriptionSupplier;
-		this.preInterruptCallback = preInterruptCallback;
+	SeparateThreadTimeoutInvocation(TimeoutInvocationParameters<T> parameters) {
+		this.parameters = parameters;
 	}
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public T proceed() throws Throwable {
+		var timeout = parameters.timeout();
+		var delegate = parameters.invocation();
+		var descriptionSupplier = parameters.descriptionSupplier();
 		return executeWithPreemptiveTimeout(timeout.toDuration(), delegate::proceed, descriptionSupplier,
-			(__, ___, cause, testThread) -> {
-				TimeoutException exception = TimeoutExceptionFactory.create(descriptionSupplier.get(), timeout, null);
-				if (testThread != null) {
-					preInterruptCallback.executePreInterruptCallback(testThread, exception::addSuppressed);
-				}
-				exception.initCause(cause);
-				return exception;
-			});
+			(__, ___, cause, testThread) -> newTimeoutException(cause, testThread));
+	}
+
+	private TimeoutException newTimeoutException(@Nullable Throwable cause, @Nullable Thread testThread) {
+		TimeoutException exception = TimeoutExceptionFactory.create(parameters.descriptionSupplier().get(),
+			parameters.timeout(), parameters.threadDumpEnabled(), null);
+		if (testThread != null) {
+			parameters.preInterruptCallback().executePreInterruptCallback(testThread, exception::addSuppressed);
+		}
+		exception.initCause(cause);
+		return exception;
 	}
 }

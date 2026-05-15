@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.engine.execution.NamespaceAwareStore;
-import org.junit.jupiter.engine.extension.TimeoutInvocationFactory.TimeoutInvocationParameters;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
@@ -48,7 +47,7 @@ class SeparateThreadTimeoutInvocationTests {
 		});
 
 		assertThatThrownBy(invocation::proceed) //
-				.hasMessage("method() timed out after " + PREEMPTIVE_TIMEOUT_MILLIS + " milliseconds") //
+				.hasMessageStartingWith("method() timed out after " + PREEMPTIVE_TIMEOUT_MILLIS + " milliseconds") //
 				.isInstanceOf(TimeoutException.class) //
 				.hasRootCauseMessage("Execution timed out in thread " + threadName.get());
 	}
@@ -78,7 +77,7 @@ class SeparateThreadTimeoutInvocationTests {
 			Namespace.create(namespace.getParts()));
 		var parameters = new TimeoutInvocationParameters<>(invocation,
 			new TimeoutDuration(PREEMPTIVE_TIMEOUT_MILLIS, MILLISECONDS), () -> "method()",
-			PreInterruptCallbackInvocation.NOOP);
+			PreInterruptCallbackInvocation.NOOP, false);
 		return (SeparateThreadTimeoutInvocation<T>) new TimeoutInvocationFactory(store) //
 				.create(ThreadMode.SEPARATE_THREAD, parameters);
 	}

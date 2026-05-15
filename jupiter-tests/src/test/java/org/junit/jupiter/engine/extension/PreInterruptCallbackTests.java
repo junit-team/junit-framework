@@ -167,7 +167,7 @@ class PreInterruptCallbackTests extends AbstractJupiterTestEngineTests {
 		interruptCallbackShallThrowException.set(true);
 		Events tests = executeTestsForClass(DefaultPreInterruptCallbackWithExplicitCallbackTestCase.class).testEvents();
 		tests.failed().assertEventsMatchExactly(event(test(TC),
-			finishedWithFailure(instanceOf(TimeoutException.class), message(TIMEOUT_ERROR_MSG),
+			finishedWithFailure(instanceOf(TimeoutException.class), message(it -> it.startsWith(TIMEOUT_ERROR_MSG)),
 				suppressed(0, instanceOf(InterruptedException.class)),
 				suppressed(1, instanceOf(IllegalStateException.class)))));
 		assertTrue(interruptedTest.get());
@@ -178,7 +178,7 @@ class PreInterruptCallbackTests extends AbstractJupiterTestEngineTests {
 	}
 
 	private static void assertTestHasTimedOut(Events tests) {
-		assertTestHasTimedOut(tests, message(TIMEOUT_ERROR_MSG));
+		assertTestHasTimedOut(tests, message(it -> it.startsWith(TIMEOUT_ERROR_MSG)));
 	}
 
 	private static void assertTestHasTimedOut(Events tests, Condition<Throwable> messageCondition) {

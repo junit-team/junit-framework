@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.engine.execution.NamespaceAwareStore;
 import org.junit.jupiter.engine.extension.TimeoutInvocationFactory.SingleThreadExecutorResource;
-import org.junit.jupiter.engine.extension.TimeoutInvocationFactory.TimeoutInvocationParameters;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.mockito.Mock;
@@ -57,7 +56,7 @@ class TimeoutInvocationFactoryTests {
 	@BeforeEach
 	void setUp() {
 		parameters = new TimeoutInvocationParameters<>(invocation, timeoutDuration, () -> "description",
-			PreInterruptCallbackInvocation.NOOP);
+			PreInterruptCallbackInvocation.NOOP, false);
 		timeoutInvocationFactory = new TimeoutInvocationFactory(store);
 	}
 

@@ -85,7 +85,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("testMethod() timed out after 10 milliseconds");
+				.hasMessageStartingWith("testMethod() timed out after 10 milliseconds");
 	}
 
 	@Test
@@ -124,7 +124,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		else {
 			assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("testMethod() timed out after 10 milliseconds");
+					.hasMessageStartingWith("testMethod() timed out after 10 milliseconds");
 		}
 	}
 
@@ -143,7 +143,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 					.isLessThan(Duration.ofSeconds(1));
 			assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("testTemplateMethod() timed out after 10 milliseconds");
+					.hasMessageStartingWith("testTemplateMethod() timed out after 10 milliseconds");
 		});
 	}
 
@@ -161,7 +161,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("testFactoryMethod() timed out after 10 milliseconds");
+				.hasMessageStartingWith("testFactoryMethod() timed out after 10 milliseconds");
 	}
 
 	@ParameterizedTest(name = "{0}")
@@ -183,7 +183,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 							.isLessThan(Duration.ofSeconds(1));
 					assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 							.isInstanceOf(TimeoutException.class) //
-							.hasMessageEndingWith("timed out after 10000000 nanoseconds");
+							.hasMessageContaining("timed out after 10000000 nanoseconds");
 				}));
 	}
 
@@ -199,7 +199,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		assertThat(execution.getTerminationInfo().getExecutionResult().getStatus()).isEqualTo(FAILED);
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("methodThatDoesNotThrowInterruptedException() timed out after 1 millisecond");
+				.hasMessageStartingWith("methodThatDoesNotThrowInterruptedException() timed out after 1 millisecond");
 	}
 
 	@Test
@@ -217,7 +217,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("setUp() timed out after 10 milliseconds");
+				.hasMessageStartingWith("setUp() timed out after 10 milliseconds");
 	}
 
 	@Test
@@ -234,7 +234,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("setUp() timed out after 10 milliseconds");
+				.hasMessageStartingWith("setUp() timed out after 10 milliseconds");
 	}
 
 	@Test
@@ -251,7 +251,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("tearDown() timed out after 10 milliseconds");
+				.hasMessageStartingWith("tearDown() timed out after 10 milliseconds");
 	}
 
 	@Test
@@ -269,7 +269,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessage("tearDown() timed out after 10 milliseconds");
+				.hasMessageStartingWith("tearDown() timed out after 10 milliseconds");
 	}
 
 	@ParameterizedTest(name = "{0}")
@@ -285,7 +285,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.map(execution -> execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.findFirst();
 		assertThat(failure).containsInstanceOf(TimeoutException.class);
-		assertThat(failure.orElseThrow()).hasMessage(slowMethod + " timed out after 1 nanosecond");
+		assertThat(failure.orElseThrow()).hasMessageStartingWith(slowMethod + " timed out after 1 nanosecond");
 	}
 
 	static Stream<Arguments> appliesDefaultTimeoutsFromConfigurationParameters() {
@@ -323,7 +323,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				.isLessThan(Duration.ofSeconds(1));
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(TimeoutException.class) //
-				.hasMessageEndingWith(
+				.hasMessageContaining(
 					"$NestedClassWithOuterSetupMethodTestCase#setUp() timed out after 10 milliseconds");
 	}
 
@@ -357,7 +357,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 			Throwable failure = execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow();
 			assertThat(failure) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("testMethod() timed out after 100 milliseconds");
+					.hasMessageStartingWith("testMethod() timed out after 100 milliseconds");
 			assertThat(failure.getCause()) //
 					.hasMessageStartingWith("Execution timed out in ") //
 					.hasStackTraceContaining(TimeoutExceedingSeparateThreadTestCase.class.getName() + ".testMethod");
@@ -418,7 +418,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 			Execution stuckExecution = findExecution(results.testEvents(), "stuck()");
 			assertThat(stuckExecution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("stuck() timed out after 10 milliseconds");
+					.hasMessageStartingWith("stuck() timed out after 10 milliseconds");
 
 			Execution testZeroExecution = findExecution(results.testEvents(), "testZero()");
 			assertThat(testZeroExecution.getTerminationInfo().getExecutionResult().getStatus()) //
@@ -437,17 +437,17 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 			Execution stuck = findExecution(results.testEvents(), "testZero()");
 			assertThat(stuck.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("testZero() timed out after 10 milliseconds");
+					.hasMessageStartingWith("testZero() timed out after 10 milliseconds");
 
 			Execution testZeroExecution = findExecution(results.testEvents(), "testOne()");
 			assertThat(testZeroExecution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("testOne() timed out after 10 milliseconds");
+					.hasMessageStartingWith("testOne() timed out after 10 milliseconds");
 
 			Execution testOneExecution = findExecution(results.testEvents(), "testTwo()");
 			assertThat(testOneExecution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("testTwo() timed out after 10 milliseconds");
+					.hasMessageStartingWith("testTwo() timed out after 10 milliseconds");
 		}
 
 		@Test
@@ -459,7 +459,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 			Execution stuckExecution = findExecution(results.testEvents(), "stuck()");
 			assertThat(stuckExecution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 					.isInstanceOf(TimeoutException.class) //
-					.hasMessage("stuck() timed out after 10 milliseconds");
+					.hasMessageStartingWith("stuck() timed out after 10 milliseconds");
 
 			Execution testZeroExecution = findExecution(results.testEvents(), "testZero()");
 			assertThat(testZeroExecution.getTerminationInfo().getExecutionResult().getStatus()) //
@@ -493,7 +493,7 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 				Execution execution = findExecution(results.testEvents(), "exceptionThrown()");
 				assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 						.isInstanceOf(TimeoutException.class) //
-						.hasMessage("exceptionThrown() timed out after 100 milliseconds");
+						.hasMessageStartingWith("exceptionThrown() timed out after 100 milliseconds");
 			}
 
 			@Test

@@ -34,12 +34,13 @@ class SameThreadTimeoutInvocationTests {
 		var exception = assertThrows(TimeoutException.class, () -> withExecutor(executor -> {
 			var delegate = new EventuallyInterruptibleInvocation();
 			var duration = new TimeoutDuration(1, NANOSECONDS);
-			var timeoutInvocation = new SameThreadTimeoutInvocation<>(delegate, duration, executor, () -> "execution",
-				PreInterruptCallbackInvocation.NOOP);
+			var parameters = new TimeoutInvocationParameters<>(delegate, duration, () -> "execution",
+				PreInterruptCallbackInvocation.NOOP, false);
+			var timeoutInvocation = new SameThreadTimeoutInvocation<>(parameters, executor);
 			timeoutInvocation.proceed();
 		}));
 		assertFalse(Thread.currentThread().isInterrupted());
-		assertThat(exception).hasMessage("execution timed out after 1 nanosecond");
+		assertThat(exception).hasMessageStartingWith("execution timed out after 1 nanosecond");
 	}
 
 	private void withExecutor(ThrowingConsumer<ScheduledExecutorService> consumer) throws Throwable {

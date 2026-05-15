@@ -13,12 +13,13 @@ package org.junit.jupiter.engine.extension;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
@@ -32,21 +33,18 @@ class TimeoutInvocationFactory {
 		this.store = Preconditions.notNull(store, "store must not be null");
 	}
 
-	<T> Invocation<T> create(ThreadMode threadMode, TimeoutInvocationParameters<T> timeoutInvocationParameters) {
-		Preconditions.notNull(threadMode, "thread mode must not be null");
-		Preconditions.condition(threadMode != ThreadMode.INFERRED, "thread mode must not be INFERRED");
-		Preconditions.notNull(timeoutInvocationParameters, "timeout invocation parameters must not be null");
-		if (threadMode == ThreadMode.SEPARATE_THREAD) {
-			return new SeparateThreadTimeoutInvocation<>(timeoutInvocationParameters.getInvocation(),
-				timeoutInvocationParameters.getTimeoutDuration(), timeoutInvocationParameters.getDescriptionSupplier(),
-				timeoutInvocationParameters.getPreInterruptCallback());
-		}
-		return new SameThreadTimeoutInvocation<>(timeoutInvocationParameters.getInvocation(),
-			timeoutInvocationParameters.getTimeoutDuration(), getThreadExecutorForSameThreadInvocation(),
-			timeoutInvocationParameters.getDescriptionSupplier(),
-			timeoutInvocationParameters.getPreInterruptCallback());
+	<T extends @Nullable Object> Invocation<T> create(ThreadMode threadMode,
+			TimeoutInvocationParameters<T> parameters) {
+		Preconditions.notNull(parameters, "timeout invocation parameters must not be null");
+		return switch (Preconditions.notNull(threadMode, "thread mode must not be null")) {
+			case SAME_THREAD -> new SameThreadTimeoutInvocation<>(parameters,
+				getThreadExecutorForSameThreadInvocation());
+			case SEPARATE_THREAD -> new SeparateThreadTimeoutInvocation<>(parameters);
+			case INFERRED -> throw new PreconditionViolationException("thread mode must not be INFERRED");
+		};
 	}
 
+	@SuppressWarnings("resource")
 	private ScheduledExecutorService getThreadExecutorForSameThreadInvocation() {
 		return store.computeIfAbsent(SingleThreadExecutorResource.class).get();
 	}
@@ -88,37 +86,4 @@ class TimeoutInvocationFactory {
 		}
 	}
 
-	static class TimeoutInvocationParameters<T> {
-
-		private final Invocation<T> invocation;
-		private final TimeoutDuration timeout;
-		private final Supplier<String> descriptionSupplier;
-		private final PreInterruptCallbackInvocation preInterruptCallback;
-
-		TimeoutInvocationParameters(Invocation<T> invocation, TimeoutDuration timeout,
-				Supplier<String> descriptionSupplier, PreInterruptCallbackInvocation preInterruptCallback) {
-			this.invocation = Preconditions.notNull(invocation, "invocation must not be null");
-			this.timeout = Preconditions.notNull(timeout, "timeout must not be null");
-			this.descriptionSupplier = Preconditions.notNull(descriptionSupplier,
-				"description supplier must not be null");
-			this.preInterruptCallback = Preconditions.notNull(preInterruptCallback,
-				"preInterruptCallback must not be null");
-		}
-
-		public Invocation<T> getInvocation() {
-			return invocation;
-		}
-
-		public TimeoutDuration getTimeoutDuration() {
-			return timeout;
-		}
-
-		public Supplier<String> getDescriptionSupplier() {
-			return descriptionSupplier;
-		}
-
-		public PreInterruptCallbackInvocation getPreInterruptCallback() {
-			return preInterruptCallback;
-		}
-	}
 }
