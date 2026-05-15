@@ -1,20 +1,7 @@
 name: Cross-Version
 
 on:
-  schedule:
-    - cron: '0 0 * * 6' # Every Saturday at 00:00 UTC
-  push:
-    branches:
-      - main
-      - 'releases/**'
-  pull_request:
-    branches:
-      - '**'
-
-concurrency:
-  # Cancels in-progress runs only for pull requests
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  workflow_call:
 
 permissions: {}
 

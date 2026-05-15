@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+    tags-ignore:
+      - '**'
+  pull_request:
+  merge_group:
+  schedule:
+    - cron: '33 17 * * 0'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  attestations: write
+  contents: write
+  id-token: write
+  pull-requests: read
+  security-events: write
+
+concurrency:
+  # Cancels in-progress runs only for pull requests
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-slim
+    outputs:
+      github-actions: ${{ steps.filter.outputs.github-actions }}
+    permissions:
+      pull-requests: read
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        if: github.event_name != 'pull_request'
+        with:
+          fetch-depth: 1
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: |
+            github-actions:
+              - '.github/**'
+
+  Build:
+    uses: ./.github/workflows/_build.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  Cross-Version:
+    uses: ./.github/workflows/_cross-version.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  Reproducibility:
+    uses: ./.github/workflows/_reproducible-build.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  CodeQL:
+    uses: ./.github/workflows/_codeql.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      security-events: write
+
+  zizmor:
+    name: GitHub Actions Security Analysis
+    needs: changes
+    if: needs.changes.outputs.github-actions == 'true'
+    uses: ./.github/workflows/_zizmor-analysis.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      security-events: write
+
+  Publish:
+    if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework'
+    needs: [ Build ]
+    uses: ./.github/workflows/_publish.yml
+    secrets: inherit
+    permissions:
+      actions: write # to trigger documentation deployment workflow
+      attestations: write # for build provenance attestation
+      id-token: write # for build provenance attestation
+
+  status:
+    name: Status
+    needs: [ Build, Cross-Version, Reproducibility, CodeQL, zizmor, Publish ]
+    if: always()
+    runs-on: ubuntu-slim
+    steps:
+      - name: Determine overall status
+        env:
+          STATUS: ${{ join(needs.*.result, ',') }}
+          FAILURE: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'cancelled') }}
+        run: |
+          if [ "$FAILURE" = "true" ]; then
+            exit 1
+          fi

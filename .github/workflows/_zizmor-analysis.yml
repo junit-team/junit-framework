@@ -1,15 +1,7 @@
 name: GitHub Actions Security Analysis
 
 on:
-  push:
-    branches:
-      - main
-      - 'releases/**'
-    paths:
-      - '.github/**'
-  pull_request:
-    paths:
-      - '.github/**'
+  workflow_call:
 
 permissions: {}
 

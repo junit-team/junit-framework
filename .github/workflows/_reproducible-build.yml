@@ -1,18 +1,7 @@
 name: Reproducible build
 
 on:
-  push:
-    branches:
-      - main
-      - 'releases/**'
-  pull_request:
-    branches:
-      - '**'
-
-concurrency:
-  # Cancels in-progress runs only for pull requests
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  workflow_call:
 
 permissions: {}
 
