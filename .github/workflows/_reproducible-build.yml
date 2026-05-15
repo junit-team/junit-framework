@@ -9,8 +9,7 @@ env:
   DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
 jobs:
-  check_build_reproducibility:
-    name: 'Check build reproducibility'
+  Check:
     runs-on: ubuntu-latest
     steps:
     - name: Check out repository
