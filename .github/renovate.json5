@@ -3,6 +3,7 @@
   extends: [
     'github>junit-team/renovate-config',
   ],
+  platformAutomerge: true,
   baseBranchPatterns: [
     'main',
     'docs-site'
