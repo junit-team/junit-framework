@@ -66,7 +66,6 @@ jobs:
 
   documentation:
     name: Documentation
-    needs: macOS
     runs-on: ubuntu-latest
     steps:
     - name: Check out repository
