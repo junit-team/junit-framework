@@ -13,7 +13,6 @@ package example.kotlin
 import com.google.common.jimfs.Configuration
 import com.google.common.jimfs.Jimfs
 import example.kotlin.TempDirectoryDemo.InMemoryTempDirDemo.JimfsTempDirFactory
-import example.util.ListWriter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -37,7 +36,7 @@ class TempDirectoryDemo {
     ) {
         val file = tempDir.resolve("test.txt")
 
-        ListWriter(file).write("a", "b", "c")
+        Files.write(file, listOf("a,b,c"))
 
         assertEquals(listOf("a,b,c"), Files.readAllLines(file))
     }
@@ -50,7 +49,7 @@ class TempDirectoryDemo {
         @TempDir target: Path
     ) {
         val sourceFile = source.resolve("test.txt")
-        ListWriter(sourceFile).write("a", "b", "c")
+        Files.write(sourceFile, listOf("a,b,c"))
 
         val targetFile = Files.copy(sourceFile, target.resolve("test.txt"))
 
@@ -65,7 +64,7 @@ class TempDirectoryDemo {
         fun writeItemsToFile() {
             val file = sharedTempDir.resolve("test.txt")
 
-            ListWriter(file).write("a", "b", "c")
+            Files.write(file, listOf("a,b,c"))
 
             assertEquals(listOf("a,b,c"), Files.readAllLines(file))
         }
