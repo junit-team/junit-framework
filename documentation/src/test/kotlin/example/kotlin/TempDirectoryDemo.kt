@@ -36,9 +36,9 @@ class TempDirectoryDemo {
     ) {
         val file = tempDir.resolve("test.txt")
 
-        Files.write(file, listOf("a,b,c"))
+        Files.write(file, listOf("a", "b", "c"))
 
-        assertEquals(listOf("a,b,c"), Files.readAllLines(file))
+        assertEquals(listOf("a", "b", "c"), Files.readAllLines(file))
     }
     // end::user_guide_parameter_injection[]
 
@@ -49,12 +49,12 @@ class TempDirectoryDemo {
         @TempDir target: Path
     ) {
         val sourceFile = source.resolve("test.txt")
-        Files.write(sourceFile, listOf("a,b,c"))
+        Files.write(sourceFile, listOf("a", "b", "c"))
 
         val targetFile = Files.copy(sourceFile, target.resolve("test.txt"))
 
         assertNotEquals(sourceFile, targetFile)
-        assertEquals(listOf("a,b,c"), Files.readAllLines(targetFile))
+        assertEquals(listOf("a", "b", "c"), Files.readAllLines(targetFile))
     }
     // end::user_guide_multiple_directories[]
 
@@ -64,9 +64,9 @@ class TempDirectoryDemo {
         fun writeItemsToFile() {
             val file = sharedTempDir.resolve("test.txt")
 
-            Files.write(file, listOf("a,b,c"))
+            Files.write(file, listOf("a", "b", "c"))
 
-            assertEquals(listOf("a,b,c"), Files.readAllLines(file))
+            assertEquals(listOf("a", "b", "c"), Files.readAllLines(file))
         }
 
         @Test
