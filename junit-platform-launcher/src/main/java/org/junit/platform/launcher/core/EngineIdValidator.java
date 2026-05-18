@@ -10,14 +10,17 @@
 
 package org.junit.platform.launcher.core;
 
+import static org.junit.platform.engine.DiscoveryIssue.Severity.WARNING;
+
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.TestEngine;
+import org.junit.platform.engine.UniqueId;
 
 /**
  * @since 1.7
@@ -25,18 +28,23 @@ import org.junit.platform.engine.TestEngine;
 class EngineIdValidator {
 
 	private EngineIdValidator() {
+		/* no-op */
+	}
+
+	static void validateReservedPrefix(TestEngine testEngine, UniqueId uniqueEngineId,
+			DiscoveryIssueCollector issueCollector) {
+		String engineId = testEngine.getId();
+		if (engineId.startsWith("junit-") && wellKnownClassNameForEngineId(testEngine) == null) {
+			var message = "Third-party TestEngine implementations are forbidden to use the reserved 'junit-' prefix for their ID";
+			issueCollector.issueEncountered(uniqueEngineId, DiscoveryIssue.create(WARNING, message));
+		}
 	}
 
 	static Iterable<TestEngine> validate(Iterable<TestEngine> testEngines) {
 		Set<String> ids = new HashSet<>();
 		for (TestEngine testEngine : testEngines) {
-			// check usage of reserved ID prefix
-			if (!validateReservedIds(testEngine)) {
-				getLogger().warn(
-					() -> "Third-party TestEngine implementations are forbidden to use the reserved 'junit-' prefix for their ID: '%s'".formatted(
-						testEngine.getId()));
-			}
-
+			// check usage of reserved ids
+			validateReservedIds(testEngine);
 			// check uniqueness
 			if (!ids.add(testEngine.getId())) {
 				throw new JUnitException(
@@ -46,32 +54,23 @@ class EngineIdValidator {
 		return testEngines;
 	}
 
-	private static Logger getLogger() {
-		// Not a constant to avoid problems with building GraalVM native images
-		return LoggerFactory.getLogger(EngineIdValidator.class);
+	// https://github.com/junit-team/junit-framework/issues/1557
+	private static void validateReservedIds(TestEngine testEngine) {
+		var expectedClassName = wellKnownClassNameForEngineId(testEngine);
+		if (expectedClassName == null) {
+			return;
+		}
+		validateWellKnownClassName(testEngine, expectedClassName);
 	}
 
-	// https://github.com/junit-team/junit-framework/issues/1557
-	private static boolean validateReservedIds(TestEngine testEngine) {
+	private static @Nullable String wellKnownClassNameForEngineId(TestEngine testEngine) {
 		String engineId = Preconditions.notBlank(testEngine.getId(),
 			() -> "ID for TestEngine [%s] must not be null or blank".formatted(testEngine.getClass().getName()));
-		if (!engineId.startsWith("junit-")) {
-			return true;
-		}
 		return switch (engineId) {
-			case "junit-jupiter" -> {
-				validateWellKnownClassName(testEngine, "org.junit.jupiter.engine.JupiterTestEngine");
-				yield true;
-			}
-			case "junit-vintage" -> {
-				validateWellKnownClassName(testEngine, "org.junit.vintage.engine.VintageTestEngine");
-				yield true;
-			}
-			case "junit-platform-suite" -> {
-				validateWellKnownClassName(testEngine, "org.junit.platform.suite.engine.SuiteTestEngine");
-				yield true;
-			}
-			default -> false;
+			case "junit-jupiter" -> "org.junit.jupiter.engine.JupiterTestEngine";
+			case "junit-vintage" -> "org.junit.vintage.engine.VintageTestEngine";
+			case "junit-platform-suite" -> "org.junit.platform.suite.engine.SuiteTestEngine";
+			default -> null;
 		};
 	}
 

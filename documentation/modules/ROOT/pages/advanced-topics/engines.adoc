@@ -34,8 +34,8 @@ by the JUnit Team may use the `junit-` prefix for their `TestEngine` IDs.
 
 * If any third-party `TestEngine` claims to be `junit-jupiter` or `junit-vintage`, an
   exception will be thrown, immediately halting execution of the JUnit Platform.
-* If any third-party `TestEngine` uses the `junit-` prefix for its ID, a warning message
-  will be logged. Later releases of the JUnit Platform will throw an exception for such
+* If any third-party `TestEngine` uses the `junit-` prefix for its ID, a discovery issue
+  will be created. Later releases of the JUnit Platform will throw an exception for such
   violations.
 ====
 

@@ -29,7 +29,8 @@ repository on GitHub.
 * When using `ConsoleLauncher` with the `-cp`/`--classpath` option, it now creates a
   custom `ClassLoader` that does _not_ implement `AutoCloseable` to avoid accidentally
   closing it in test code which can lead to test failures that are hard to diagnose.
-
+* When using a third-party engine that uses the `junit-` prefix a discovery issue is
+  emitted.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
