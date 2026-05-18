@@ -21,6 +21,10 @@ import java.net.URLClassLoader;
  */
 class CustomClassLoader extends ClassLoader {
 
+	static {
+		ClassLoader.registerAsParallelCapable();
+	}
+
 	CustomClassLoader(URLClassLoader parent) {
 		super(parent);
 	}
