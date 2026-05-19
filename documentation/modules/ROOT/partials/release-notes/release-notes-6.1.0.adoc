@@ -1,7 +1,7 @@
 [[v6.1.0]]
 == 6.1.0
 
-*Date of Release:* May 17, 2026
+*Date of Release:* May 19, 2026
 
 *Scope:*
 
