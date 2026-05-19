@@ -16,7 +16,7 @@ on:
         default: false
       skipPublishStep:
         type: boolean
-        description: Enable dry-run mode
+        description: Skip publish step
         required: false
         default: false
 
