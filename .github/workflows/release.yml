@@ -14,6 +14,11 @@ on:
         description: Enable dry-run mode
         required: false
         default: false
+      skipPublishStep:
+        type: boolean
+        description: Enable dry-run mode
+        required: false
+        default: false
 
 permissions: {}
 
@@ -132,6 +137,7 @@ jobs:
 
   publish_deployment:
     name: Publish to Maven Central
+    if: ${{ inputs.skipPublishStep == false }}
     needs: [ verify_reproducibility, verify_consumability, close_github_milestone ]
     runs-on: ubuntu-latest
     steps:
