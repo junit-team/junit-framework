@@ -77,7 +77,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
-          ref: "refs/tags/${{ env.RELEASE_TAG }}"
           path: junit-framework
           persist-credentials: false
       - name: Check out examples repository
@@ -140,7 +139,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
-          ref: "refs/tags/${{ env.RELEASE_TAG }}"
           persist-credentials: false
       - name: Release staging repository
         if: ${{ inputs.dryRun == false }}
