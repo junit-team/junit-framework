@@ -137,7 +137,6 @@ jobs:
 
   publish_deployment:
     name: Publish to Maven Central
-    if: ${{ inputs.skipPublishStep == false }}
     needs: [ verify_reproducibility, verify_consumability, close_github_milestone ]
     runs-on: ubuntu-latest
     steps:
@@ -147,7 +146,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Release staging repository
-        if: ${{ inputs.dryRun == false }}
+        if: ${{ inputs.dryRun == false && inputs.skipPublishStep == false }}
         uses: ./.github/actions/run-gradle
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
