@@ -17,7 +17,9 @@
 * New experimental memory cleanup mode for large test suites
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
-link:{junit-framework-repo}+/milestone/119?closed=1+[6.1.0] milestone page in the JUnit
+link:{junit-framework-repo}+/milestone/104?closed=1+[6.1.0-M1],
+link:{junit-framework-repo}+/milestone/112?closed=1+[6.1.0-RC1], and
+link:{junit-framework-repo}+/milestone/119?closed=1+[6.1.0] milestone pages in the JUnit
 repository on GitHub.
 
 
