@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@code ReflectiveInvocationContext} encapsulates the <em>context</em> of
@@ -56,7 +57,7 @@ public interface ReflectiveInvocationContext<T extends Executable> {
 	 * @return the arguments of the executable in this invocation context;
 	 * immutable and never {@code null}
 	 */
-	List<Object> getArguments();
+	List<@Nullable Object> getArguments();
 
 	/**
 	 * Get the target object of this invocation context, if available.

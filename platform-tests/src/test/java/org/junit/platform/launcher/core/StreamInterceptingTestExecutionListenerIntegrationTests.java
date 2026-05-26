@@ -103,8 +103,8 @@ class StreamInterceptingTestExecutionListenerIntegrationTests {
 		var engine = new DemoHierarchicalTestEngine("engine");
 		TestDescriptor test = engine.addTest("test", () -> printStreamSupplier.get().print("1234567890"));
 
-		assertThat(StreamInterceptor.registerStdout(1)).isPresent();
-		assertThat(StreamInterceptor.registerStderr(1)).isPresent();
+		assertThat(StreamInterceptor.registerStdout(1)).isNotNull();
+		assertThat(StreamInterceptor.registerStderr(1)).isNotNull();
 
 		var launcher = createLauncher(engine);
 		var listener = mock(TestExecutionListener.class);

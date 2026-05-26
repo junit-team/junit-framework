@@ -182,7 +182,7 @@ class ParameterizedInvocationNameFormatter {
 		formatters.put(ARGUMENTS_PLACEHOLDER, new CachingByArgumentsLengthPartialFormatter(
 			length -> new MessageFormatPartialFormatter(argumentsPattern(length), argumentMaxLength)));
 		formatters.put(ARGUMENT_SET_NAME_OR_ARGUMENTS_WITH_NAMES_PLACEHOLDER, (context, result) -> {
-			PartialFormatter formatterToUse = context.argumentSetName.isPresent() //
+			PartialFormatter formatterToUse = context.argumentSetName != null //
 					? argumentSetNameFormatter //
 					: argumentsWithNamesFormatter;
 			formatterToUse.append(context, result);
@@ -206,7 +206,7 @@ class ParameterizedInvocationNameFormatter {
 
 	@SuppressWarnings("ArrayRecordComponent")
 	private record ArgumentsContext(int invocationIndex, @Nullable Object[] consumedArguments,
-			Optional<String> argumentSetName, boolean quoteTextArguments) {
+			@Nullable String argumentSetName, boolean quoteTextArguments) {
 	}
 
 	@FunctionalInterface
@@ -222,8 +222,8 @@ class ParameterizedInvocationNameFormatter {
 
 		@Override
 		public void append(ArgumentsContext context, StringBuffer result) {
-			if (context.argumentSetName.isPresent()) {
-				result.append(context.argumentSetName.get());
+			if (context.argumentSetName != null) {
+				result.append(context.argumentSetName);
 				return;
 			}
 			throw new ExtensionConfigurationException(
