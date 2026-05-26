@@ -55,13 +55,12 @@ public class InterceptingExecutableInvoker {
 	 * invocation via all registered {@linkplain InvocationInterceptor
 	 * interceptors}
 	 */
-	public <T> T invoke(Constructor<T> constructor, Optional<Object> outerInstance,
+	public <T> T invoke(Constructor<T> constructor, @Nullable Object outerInstance,
 			ExtensionContextSupplier extensionContext, ExtensionRegistry extensionRegistry,
 			ReflectiveInterceptorCall<Constructor<T>, T> interceptorCall) {
 
 		@Nullable
-		Object[] arguments = resolveParameters(constructor, Optional.empty(), outerInstance, extensionContext,
-			extensionRegistry);
+		Object[] arguments = resolveParameters(constructor, null, outerInstance, extensionContext, extensionRegistry);
 		ConstructorInvocation<T> invocation = new ConstructorInvocation<>(constructor, arguments);
 		return invoke(invocation, invocation, extensionContext, extensionRegistry, interceptorCall);
 	}
@@ -89,16 +88,13 @@ public class InterceptingExecutableInvoker {
 			ExtensionContext extensionContext, ExtensionRegistry extensionRegistry,
 			ReflectiveInterceptorCall<Method, T> interceptorCall) {
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Optional<Object> optionalTarget = (target instanceof Optional optional ? optional
-				: Optional.ofNullable(target));
 		@Nullable
-		Object[] arguments = resolveParameters(method, optionalTarget, extensionContext, extensionRegistry);
-		MethodInvocation<T> invocation = new MethodInvocation<>(method, optionalTarget, arguments);
+		Object[] arguments = resolveParameters(method, target, extensionContext, extensionRegistry);
+		MethodInvocation<T> invocation = new MethodInvocation<>(method, target, arguments);
 		return invoke(invocation, invocation, extensionContext, extensionRegistry, interceptorCall);
 	}
 
-	private <E extends Executable, T> T invoke(Invocation<T> originalInvocation,
+	private <E extends Executable, T extends @Nullable Object> T invoke(Invocation<T> originalInvocation,
 			ReflectiveInvocationContext<E> invocationContext, ExtensionContext extensionContext,
 			ExtensionRegistry extensionRegistry, ReflectiveInterceptorCall<E, T> call) {
 		return interceptorChain.invoke(originalInvocation, extensionRegistry, (interceptor,

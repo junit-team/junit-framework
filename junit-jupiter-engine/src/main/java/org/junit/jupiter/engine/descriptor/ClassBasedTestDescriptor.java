@@ -347,7 +347,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 	protected final TestInstances instantiateTestClass(Optional<TestInstances> outerInstances,
 			ExtensionRegistry registry, ExtensionContextSupplier extensionContext) {
 
-		Optional<Object> outerInstance = outerInstances.map(TestInstances::getInnermostInstance);
+		Object outerInstance = outerInstances.map(TestInstances::getInnermostInstance).orElse(null);
 		invokeTestInstancePreConstructCallbacks(new DefaultTestInstanceFactoryContext(getTestClass(), outerInstance),
 			registry, extensionContext);
 		Object instance = this.testInstanceFactory != null //
@@ -357,7 +357,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 				.orElse(DefaultTestInstances.of(instance));
 	}
 
-	private Object invokeTestInstanceFactory(TestInstanceFactory testInstanceFactory, Optional<Object> outerInstance,
+	private Object invokeTestInstanceFactory(TestInstanceFactory testInstanceFactory, @Nullable Object outerInstance,
 			ExtensionContextSupplier extensionContext) {
 		Object instance;
 
@@ -402,7 +402,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 		return instance;
 	}
 
-	private Object invokeTestClassConstructor(Optional<Object> outerInstance, ExtensionRegistry registry,
+	private Object invokeTestClassConstructor(@Nullable Object outerInstance, ExtensionRegistry registry,
 			ExtensionContextSupplier extensionContext) {
 
 		Constructor<?> constructor = ReflectionUtils.getDeclaredConstructor(getTestClass());
