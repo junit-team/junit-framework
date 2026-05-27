@@ -16,7 +16,6 @@ import static org.junit.jupiter.engine.execution.ParameterResolutionUtils.resolv
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -76,8 +75,7 @@ public class InterceptingExecutableInvoker {
 	 *
 	 * @param method the method to invoke and resolve parameters for
 	 * @param target the target on which the executable will be invoked,
-	 * potentially wrapped in an {@link Optional}; can be {@code null} or an
-	 * empty {@code Optional} for a {@code static} method
+	 * can be {@code null} for a {@code static} method.
 	 * @param extensionContext the current {@code ExtensionContext}
 	 * @param extensionRegistry the {@code ExtensionRegistry} to retrieve
 	 * {@code ParameterResolvers} from
