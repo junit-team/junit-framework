@@ -36,10 +36,7 @@ class MethodInvocation<T extends @Nullable Object> implements Invocation<T>, Ref
 
 	@Override
 	public Class<?> getTargetClass() {
-		if (target != null) {
-			return this.target.getClass();
-		}
-		return this.method.getDeclaringClass();
+		return this.target != null ? this.target.getClass() : this.method.getDeclaringClass();
 	}
 
 	@Override
