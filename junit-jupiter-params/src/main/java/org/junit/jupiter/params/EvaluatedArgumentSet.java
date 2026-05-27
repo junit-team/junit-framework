@@ -11,7 +11,6 @@
 package org.junit.jupiter.params;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
 
@@ -53,9 +52,9 @@ class EvaluatedArgumentSet {
 
 	private final @Nullable Object[] all;
 	private final @Nullable Object[] consumed;
-	private final Optional<String> name;
+	private final @Nullable String name;
 
-	private EvaluatedArgumentSet(@Nullable Object[] all, @Nullable Object[] consumed, Optional<String> name) {
+	private EvaluatedArgumentSet(@Nullable Object[] all, @Nullable Object[] consumed, @Nullable String name) {
 		this.all = all;
 		this.consumed = consumed;
 		this.name = name;
@@ -89,7 +88,8 @@ class EvaluatedArgumentSet {
 		return extractFromNamed(this.consumed[index], Named::getPayload);
 	}
 
-	Optional<String> getName() {
+	@Nullable
+	String getName() {
 		return this.name;
 	}
 
@@ -100,11 +100,11 @@ class EvaluatedArgumentSet {
 		return arguments.length > newLength ? Arrays.copyOf(arguments, newLength) : arguments;
 	}
 
-	private static Optional<String> determineName(Arguments arguments) {
+	private static @Nullable String determineName(Arguments arguments) {
 		if (arguments instanceof ArgumentSet set) {
-			return Optional.of(set.getName());
+			return set.getName();
 		}
-		return Optional.empty();
+		return null;
 	}
 
 	private static @Nullable Object[] extractFromNamed(@Nullable Object[] arguments,

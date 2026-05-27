@@ -72,11 +72,11 @@ public class FilterResult {
 
 	private final boolean included;
 
-	private final Optional<String> reason;
+	private final @Nullable String reason;
 
 	private FilterResult(boolean included, @Nullable String reason) {
 		this.included = included;
-		this.reason = Optional.ofNullable(reason);
+		this.reason = reason;
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class FilterResult {
 	 * if available.
 	 */
 	public Optional<String> getReason() {
-		return this.reason;
+		return Optional.ofNullable(this.reason);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class FilterResult {
 		// @formatter:off
 		return new ToStringBuilder(this)
 				.append("included", this.included)
-				.append("reason", this.reason.orElse("<unknown>"))
+				.append("reason", this.reason != null ? this.reason : "<unknown>")
 				.toString();
 		// @formatter:on
 	}
