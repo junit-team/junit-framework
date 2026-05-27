@@ -55,7 +55,7 @@ public interface ReflectiveInvocationContext<T extends Executable> {
 	 * Get the arguments of the executable in this invocation context.
 	 *
 	 * @return the arguments of the executable in this invocation context;
-	 * immutable and never {@code null}
+	 * immutable and never {@code null} but may contain {@code null}.
 	 */
 	List<@Nullable Object> getArguments();
 
