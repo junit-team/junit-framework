@@ -14,7 +14,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
-import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall;
@@ -34,8 +33,8 @@ class InterceptingExecutableInvokerTests extends AbstractExecutableInvokerTests 
 
 	@Override
 	<T> T invokeConstructor(Constructor<T> constructor, @Nullable Object outerInstance) {
-		return newInvoker().invoke(constructor, Optional.ofNullable(outerInstance), __ -> extensionContext,
-			extensionRegistry, passthroughInterceptor());
+		return newInvoker().invoke(constructor, outerInstance, __ -> extensionContext, extensionRegistry,
+			passthroughInterceptor());
 	}
 
 	private InterceptingExecutableInvoker newInvoker() {

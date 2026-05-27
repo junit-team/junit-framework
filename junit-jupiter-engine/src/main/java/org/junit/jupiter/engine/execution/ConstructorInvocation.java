@@ -43,8 +43,9 @@ class ConstructorInvocation<T> implements Invocation<T>, ReflectiveInvocationCon
 	}
 
 	@Override
-	public List<Object> getArguments() {
-		return unmodifiableList(Arrays.asList(this.arguments));
+	public List<@Nullable Object> getArguments() {
+		List<@Nullable Object> list = Arrays.asList(this.arguments);
+		return unmodifiableList(list);
 	}
 
 	@Override

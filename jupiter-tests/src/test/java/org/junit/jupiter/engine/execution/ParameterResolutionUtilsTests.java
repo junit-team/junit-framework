@@ -22,7 +22,6 @@ import static org.mockito.Mockito.mock;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -89,8 +88,8 @@ class ParameterResolutionUtilsTests {
 			ConstructorInjectionTestCase.class);
 
 		Exception exception = assertThrows(ParameterResolutionException.class,
-			() -> ParameterResolutionUtils.resolveParameters(constructor, Optional.empty(), Optional.empty(),
-				extensionContext, extensionRegistry));
+			() -> ParameterResolutionUtils.resolveParameters(constructor, null, null, extensionContext,
+				extensionRegistry));
 
 		assertThat(exception.getMessage())//
 				.contains("No ParameterResolver registered for parameter [java.lang.String")//
@@ -353,12 +352,12 @@ class ParameterResolutionUtilsTests {
 
 	private <T> @Nullable Object[] resolveConstructorParameters(Class<T> clazz, @Nullable Object outerInstance) {
 		Constructor<T> constructor = ReflectionUtils.getDeclaredConstructor(clazz);
-		return ParameterResolutionUtils.resolveParameters(constructor, Optional.empty(),
-			Optional.ofNullable(outerInstance), extensionContext, extensionRegistry);
+		return ParameterResolutionUtils.resolveParameters(constructor, null, outerInstance, extensionContext,
+			extensionRegistry);
 	}
 
 	private @Nullable Object[] resolveMethodParameters() {
-		return ParameterResolutionUtils.resolveParameters(requireNonNull(this.method), Optional.of(this.instance),
+		return ParameterResolutionUtils.resolveParameters(requireNonNull(this.method), this.instance,
 			this.extensionContext, this.extensionRegistry);
 	}
 

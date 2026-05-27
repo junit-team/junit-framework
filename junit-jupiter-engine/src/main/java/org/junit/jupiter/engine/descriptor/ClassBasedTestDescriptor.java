@@ -344,20 +344,20 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 			ExtensionContextSupplier extensionContext, ExtensionRegistry registry,
 			JupiterEngineExecutionContext context);
 
-	protected final TestInstances instantiateTestClass(Optional<TestInstances> outerInstances,
+	protected final TestInstances instantiateTestClass(@Nullable TestInstances outerInstances,
 			ExtensionRegistry registry, ExtensionContextSupplier extensionContext) {
 
-		Optional<Object> outerInstance = outerInstances.map(TestInstances::getInnermostInstance);
+		Object outerInstance = outerInstances != null ? outerInstances.getInnermostInstance() : null;
 		invokeTestInstancePreConstructCallbacks(new DefaultTestInstanceFactoryContext(getTestClass(), outerInstance),
 			registry, extensionContext);
 		Object instance = this.testInstanceFactory != null //
 				? invokeTestInstanceFactory(this.testInstanceFactory, outerInstance, extensionContext) //
 				: invokeTestClassConstructor(outerInstance, registry, extensionContext);
-		return outerInstances.map(instances -> DefaultTestInstances.of(instances, instance)) //
-				.orElse(DefaultTestInstances.of(instance));
+		return outerInstances != null ? DefaultTestInstances.of(outerInstances, instance)
+				: DefaultTestInstances.of(instance);
 	}
 
-	private Object invokeTestInstanceFactory(TestInstanceFactory testInstanceFactory, Optional<Object> outerInstance,
+	private Object invokeTestInstanceFactory(TestInstanceFactory testInstanceFactory, @Nullable Object outerInstance,
 			ExtensionContextSupplier extensionContext) {
 		Object instance;
 
@@ -402,7 +402,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 		return instance;
 	}
 
-	private Object invokeTestClassConstructor(Optional<Object> outerInstance, ExtensionRegistry registry,
+	private Object invokeTestClassConstructor(@Nullable Object outerInstance, ExtensionRegistry registry,
 			ExtensionContextSupplier extensionContext) {
 
 		Constructor<?> constructor = ReflectionUtils.getDeclaredConstructor(getTestClass());

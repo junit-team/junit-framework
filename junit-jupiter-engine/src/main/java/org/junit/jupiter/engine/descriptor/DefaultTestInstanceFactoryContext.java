@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.descriptor;
 
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.TestInstanceFactoryContext;
 import org.junit.platform.commons.util.ToStringBuilder;
 
@@ -20,7 +21,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  *
  * @since 5.3
  */
-record DefaultTestInstanceFactoryContext(Class<?> testClass, Optional<Object> outerInstance)
+record DefaultTestInstanceFactoryContext(Class<?> testClass, @Nullable Object outerInstance)
 		implements TestInstanceFactoryContext {
 
 	@Override
@@ -30,7 +31,7 @@ record DefaultTestInstanceFactoryContext(Class<?> testClass, Optional<Object> ou
 
 	@Override
 	public Optional<Object> getOuterInstance() {
-		return this.outerInstance;
+		return Optional.ofNullable(this.outerInstance);
 	}
 
 	@Override

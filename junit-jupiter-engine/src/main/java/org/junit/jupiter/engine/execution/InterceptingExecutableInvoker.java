@@ -16,7 +16,6 @@ import static org.junit.jupiter.engine.execution.ParameterResolutionUtils.resolv
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -55,13 +54,12 @@ public class InterceptingExecutableInvoker {
 	 * invocation via all registered {@linkplain InvocationInterceptor
 	 * interceptors}
 	 */
-	public <T> T invoke(Constructor<T> constructor, Optional<Object> outerInstance,
+	public <T> T invoke(Constructor<T> constructor, @Nullable Object outerInstance,
 			ExtensionContextSupplier extensionContext, ExtensionRegistry extensionRegistry,
 			ReflectiveInterceptorCall<Constructor<T>, T> interceptorCall) {
 
 		@Nullable
-		Object[] arguments = resolveParameters(constructor, Optional.empty(), outerInstance, extensionContext,
-			extensionRegistry);
+		Object[] arguments = resolveParameters(constructor, null, outerInstance, extensionContext, extensionRegistry);
 		ConstructorInvocation<T> invocation = new ConstructorInvocation<>(constructor, arguments);
 		return invoke(invocation, invocation, extensionContext, extensionRegistry, interceptorCall);
 	}
@@ -77,8 +75,7 @@ public class InterceptingExecutableInvoker {
 	 *
 	 * @param method the method to invoke and resolve parameters for
 	 * @param target the target on which the executable will be invoked,
-	 * potentially wrapped in an {@link Optional}; can be {@code null} or an
-	 * empty {@code Optional} for a {@code static} method
+	 * can be {@code null} for a {@code static} method.
 	 * @param extensionContext the current {@code ExtensionContext}
 	 * @param extensionRegistry the {@code ExtensionRegistry} to retrieve
 	 * {@code ParameterResolvers} from
@@ -89,16 +86,13 @@ public class InterceptingExecutableInvoker {
 			ExtensionContext extensionContext, ExtensionRegistry extensionRegistry,
 			ReflectiveInterceptorCall<Method, T> interceptorCall) {
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Optional<Object> optionalTarget = (target instanceof Optional optional ? optional
-				: Optional.ofNullable(target));
 		@Nullable
-		Object[] arguments = resolveParameters(method, optionalTarget, extensionContext, extensionRegistry);
-		MethodInvocation<T> invocation = new MethodInvocation<>(method, optionalTarget, arguments);
+		Object[] arguments = resolveParameters(method, target, extensionContext, extensionRegistry);
+		MethodInvocation<T> invocation = new MethodInvocation<>(method, target, arguments);
 		return invoke(invocation, invocation, extensionContext, extensionRegistry, interceptorCall);
 	}
 
-	private <E extends Executable, T> T invoke(Invocation<T> originalInvocation,
+	private <E extends Executable, T extends @Nullable Object> T invoke(Invocation<T> originalInvocation,
 			ReflectiveInvocationContext<E> invocationContext, ExtensionContext extensionContext,
 			ExtensionRegistry extensionRegistry, ReflectiveInterceptorCall<E, T> call) {
 		return interceptorChain.invoke(originalInvocation, extensionRegistry, (interceptor,
