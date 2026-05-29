@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onArch
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onFreebsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onLinux;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onMac;
+import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onNetbsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onOpenbsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onSolaris;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onWindows;
@@ -130,6 +131,15 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	}
 
 	/**
+	 * @see DisabledOnOsIntegrationTests#netbsd()
+	 */
+	@Test
+	void netbsd() {
+		evaluateCondition();
+		assertDisabledOnCurrentOsIf(onNetbsd());
+	}
+
+	/**
 	 * @see DisabledOnOsIntegrationTests#windows()
 	 */
 	@Test
@@ -153,8 +163,8 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	@Test
 	void other() {
 		evaluateCondition();
-		assertDisabledOnCurrentOsIf(
-			!(onAix() || onFreebsd() || onLinux() || onMac() || onOpenbsd() || onSolaris() || onWindows()));
+		assertDisabledOnCurrentOsIf(!(onAix() || onFreebsd() || onLinux() || onMac() || onNetbsd() || onOpenbsd()
+				|| onSolaris() || onWindows()));
 	}
 
 	/**

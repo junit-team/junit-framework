@@ -33,6 +33,7 @@ import org.junit.platform.commons.util.StringUtils;
  * @see #FREEBSD
  * @see #LINUX
  * @see #MAC
+ * @see #NETBSD
  * @see #OPENBSD
  * @see #SOLARIS
  * @see #WINDOWS
@@ -70,6 +71,14 @@ public enum OS {
 	MAC,
 
 	/**
+	 * NetBSD operating system.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = STABLE, since = "6.2")
+	NETBSD,
+
+	/**
 	 * OpenBSD operating system.
 	 *
 	 * @since 5.9
@@ -89,7 +98,7 @@ public enum OS {
 
 	/**
 	 * An operating system other than {@link #AIX}, {@link #FREEBSD}, {@link #LINUX},
-	 * {@link #MAC}, {@link #OPENBSD}, {@link #SOLARIS}, or {@link #WINDOWS}.
+	 * {@link #MAC}, {@link #NETBSD}, {@link #OPENBSD}, {@link #SOLARIS}, or {@link #WINDOWS}.
 	 */
 	OTHER;
 
@@ -133,6 +142,9 @@ public enum OS {
 		}
 		if (osName.contains("mac")) {
 			return MAC;
+		}
+		if (osName.contains("netbsd")) {
+			return NETBSD;
 		}
 		if (osName.contains("openbsd")) {
 			return OPENBSD;

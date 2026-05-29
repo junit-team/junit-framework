@@ -48,6 +48,7 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
+* Added `OS.NETBSD` enum constant for use with `@EnabledOnOs` and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
 

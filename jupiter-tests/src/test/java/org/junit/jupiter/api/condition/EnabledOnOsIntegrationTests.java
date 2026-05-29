@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.condition.OS.AIX;
 import static org.junit.jupiter.api.condition.OS.FREEBSD;
 import static org.junit.jupiter.api.condition.OS.LINUX;
 import static org.junit.jupiter.api.condition.OS.MAC;
+import static org.junit.jupiter.api.condition.OS.NETBSD;
 import static org.junit.jupiter.api.condition.OS.OPENBSD;
 import static org.junit.jupiter.api.condition.OS.OTHER;
 import static org.junit.jupiter.api.condition.OS.SOLARIS;
@@ -52,7 +53,7 @@ class EnabledOnOsIntegrationTests {
 	}
 
 	@Test
-	@EnabledOnOs({ AIX, FREEBSD, LINUX, MAC, OPENBSD, WINDOWS, SOLARIS, OTHER })
+	@EnabledOnOs({ AIX, FREEBSD, LINUX, MAC, NETBSD, OPENBSD, WINDOWS, SOLARIS, OTHER })
 	void enabledOnEveryOs() {
 	}
 
@@ -93,6 +94,12 @@ class EnabledOnOsIntegrationTests {
 	}
 
 	@Test
+	@EnabledOnOs(NETBSD)
+	void netbsd() {
+		assertTrue(onNetbsd());
+	}
+
+	@Test
 	@EnabledOnOs(WINDOWS)
 	void windows() {
 		assertTrue(onWindows());
@@ -107,7 +114,8 @@ class EnabledOnOsIntegrationTests {
 	@Test
 	@EnabledOnOs(value = OTHER, disabledReason = "Disabled on almost every OS")
 	void other() {
-		assertFalse(onAix() || onFreebsd() || onLinux() || onMac() || onOpenbsd() || onSolaris() || onWindows());
+		assertFalse(
+			onAix() || onFreebsd() || onLinux() || onMac() || onNetbsd() || onOpenbsd() || onSolaris() || onWindows());
 	}
 
 	@Test
@@ -182,6 +190,10 @@ class EnabledOnOsIntegrationTests {
 
 	static boolean onMac() {
 		return OS_NAME.contains("mac");
+	}
+
+	static boolean onNetbsd() {
+		return OS_NAME.contains("netbsd");
 	}
 
 	static boolean onOpenbsd() {

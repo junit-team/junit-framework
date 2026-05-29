@@ -66,6 +66,12 @@ class OSTests {
 		}
 
 		@ParameterizedTest
+		@ValueSource(strings = { "NETBSD", "NetBSD" })
+		void netbsd(String name) {
+			assertEquals(OS.NETBSD, OS.parse(name));
+		}
+
+		@ParameterizedTest
 		@ValueSource(strings = { "SOLARIS", "SunOS" })
 		void solaris(String name) {
 			assertEquals(OS.SOLARIS, OS.parse(name));
