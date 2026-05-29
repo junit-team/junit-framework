@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onAix;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onArchitecture;
+import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onDragonflybsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onFreebsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onLinux;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onMac;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onOpen
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onSolaris;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onWindows;
 import static org.junit.jupiter.api.condition.OS.AIX;
+import static org.junit.jupiter.api.condition.OS.DRAGONFLYBSD;
 import static org.junit.jupiter.api.condition.OS.FREEBSD;
 import static org.junit.jupiter.api.condition.OS.LINUX;
 import static org.junit.jupiter.api.condition.OS.MAC;
@@ -59,7 +61,7 @@ class DisabledOnOsIntegrationTests {
 	}
 
 	@Test
-	@DisabledOnOs(value = { AIX, FREEBSD, LINUX, MAC, NETBSD, OPENBSD, WINDOWS, SOLARIS,
+	@DisabledOnOs(value = { AIX, DRAGONFLYBSD, FREEBSD, LINUX, MAC, NETBSD, OPENBSD, WINDOWS, SOLARIS,
 			OTHER }, disabledReason = "Disabled on every OS")
 	void disabledOnEveryOs() {
 		fail("should be disabled");
@@ -69,6 +71,12 @@ class DisabledOnOsIntegrationTests {
 	@DisabledOnOs(AIX)
 	void aix() {
 		assertFalse(onAix());
+	}
+
+	@Test
+	@DisabledOnOs(DRAGONFLYBSD)
+	void dragonflybsd() {
+		assertFalse(onDragonflybsd());
 	}
 
 	@Test
@@ -122,8 +130,8 @@ class DisabledOnOsIntegrationTests {
 	@Test
 	@DisabledOnOs(OTHER)
 	void other() {
-		assertTrue(
-			onAix() || onFreebsd() || onLinux() || onMac() || onNetbsd() || onOpenbsd() || onSolaris() || onWindows());
+		assertTrue(onAix() || onDragonflybsd() || onFreebsd() || onLinux() || onMac() || onNetbsd() || onOpenbsd()
+				|| onSolaris() || onWindows());
 	}
 
 	@Test

@@ -12,6 +12,7 @@ package org.junit.jupiter.api.condition;
 
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onAix;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onArchitecture;
+import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onDragonflybsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onFreebsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onLinux;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onMac;
@@ -83,6 +84,15 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	void aix() {
 		evaluateCondition();
 		assertDisabledOnCurrentOsIf(onAix());
+	}
+
+	/**
+	 * @see DisabledOnOsIntegrationTests#dragonflybsd()
+	 */
+	@Test
+	void dragonflybsd() {
+		evaluateCondition();
+		assertDisabledOnCurrentOsIf(onDragonflybsd());
 	}
 
 	/**
@@ -163,8 +173,8 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	@Test
 	void other() {
 		evaluateCondition();
-		assertDisabledOnCurrentOsIf(!(onAix() || onFreebsd() || onLinux() || onMac() || onNetbsd() || onOpenbsd()
-				|| onSolaris() || onWindows()));
+		assertDisabledOnCurrentOsIf(!(onAix() || onDragonflybsd() || onFreebsd() || onLinux() || onMac() || onNetbsd()
+				|| onOpenbsd() || onSolaris() || onWindows()));
 	}
 
 	/**

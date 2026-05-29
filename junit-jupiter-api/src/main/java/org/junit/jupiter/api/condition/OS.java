@@ -30,6 +30,7 @@ import org.junit.platform.commons.util.StringUtils;
  *
  * @since 5.1
  * @see #AIX
+ * @see #DRAGONFLYBSD
  * @see #FREEBSD
  * @see #LINUX
  * @see #MAC
@@ -51,6 +52,14 @@ public enum OS {
 	 */
 	@API(status = STABLE, since = "5.3")
 	AIX,
+
+	/**
+	 * DragonFly BSD operating system.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = STABLE, since = "6.2")
+	DRAGONFLYBSD,
 
 	/**
 	 * FreeBSD operating system.
@@ -97,8 +106,9 @@ public enum OS {
 	WINDOWS,
 
 	/**
-	 * An operating system other than {@link #AIX}, {@link #FREEBSD}, {@link #LINUX},
-	 * {@link #MAC}, {@link #NETBSD}, {@link #OPENBSD}, {@link #SOLARIS}, or {@link #WINDOWS}.
+	 * An operating system other than {@link #AIX}, {@link #DRAGONFLYBSD},
+	 * {@link #FREEBSD}, {@link #LINUX}, {@link #MAC}, {@link #NETBSD},
+	 * {@link #OPENBSD}, {@link #SOLARIS}, or {@link #WINDOWS}.
 	 */
 	OTHER;
 
@@ -133,6 +143,9 @@ public enum OS {
 
 		if (osName.contains("aix")) {
 			return AIX;
+		}
+		if (osName.contains("dragonflybsd")) {
+			return DRAGONFLYBSD;
 		}
 		if (osName.contains("freebsd")) {
 			return FREEBSD;
