@@ -35,15 +35,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
 import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
@@ -67,6 +70,7 @@ import org.junit.platform.suite.engine.testcases.DynamicTestsTestCase;
 import org.junit.platform.suite.engine.testcases.ErroneousTestCase;
 import org.junit.platform.suite.engine.testcases.JUnit4TestsTestCase;
 import org.junit.platform.suite.engine.testcases.MultipleTestsTestCase;
+import org.junit.platform.suite.engine.testcases.SingleFailingTestTestCase;
 import org.junit.platform.suite.engine.testcases.SingleTestTestCase;
 import org.junit.platform.suite.engine.testcases.TaggedTestTestCase;
 import org.junit.platform.suite.engine.testsuites.AbstractSuite;
@@ -80,6 +84,7 @@ import org.junit.platform.suite.engine.testsuites.EmptyDynamicTestWithFailIfNoTe
 import org.junit.platform.suite.engine.testsuites.EmptyTestCaseSuite;
 import org.junit.platform.suite.engine.testsuites.EmptyTestCaseWithFailIfNoTestFalseSuite;
 import org.junit.platform.suite.engine.testsuites.ErroneousTestSuite;
+import org.junit.platform.suite.engine.testsuites.FailingSuite;
 import org.junit.platform.suite.engine.testsuites.InheritedSuite;
 import org.junit.platform.suite.engine.testsuites.MultiEngineSuite;
 import org.junit.platform.suite.engine.testsuites.MultipleSuite;
@@ -628,6 +633,28 @@ class SuiteEngineTests {
 				.assertThatEvents()
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
+	}
+
+	@Test
+	void failingSuite(@TrackLogRecords LogRecordListener listener) {
+		// @formatter:off
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(FailingSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues())
+				.isEmpty();
+
+		testKit
+				.execute()
+				.testEvents()
+				.debug()
+				.assertThatEvents()
+				.haveExactly(1, event(test(FailingSuite.class.getName()), finishedWithFailure()))
+				.haveExactly(1, event(test(SingleFailingTestTestCase.class.getName()),finishedWithFailure()));
+		// @formatter:on
+
+		// Warnings from failing listeners.
+		assertThat(listener.stream(Level.WARNING)).isEmpty();
 	}
 
 	@Test
