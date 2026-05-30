@@ -48,7 +48,6 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult;
-import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
@@ -170,7 +169,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 		executeBeforeSuiteMethods(throwableCollector);
 
-		TestExecutionSummary summary = executeTests(executionListener, requestLevelStore, cancellationToken,
+		SuiteSummaryGeneratingListener summary = executeTests(executionListener, requestLevelStore, cancellationToken,
 			throwableCollector);
 
 		executeAfterSuiteMethods(throwableCollector);
@@ -191,7 +190,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		}
 	}
 
-	private @Nullable TestExecutionSummary executeTests(EngineExecutionListener executionListener,
+	private @Nullable SuiteSummaryGeneratingListener executeTests(EngineExecutionListener executionListener,
 			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken,
 			ThrowableCollector throwableCollector) {
 
@@ -215,7 +214,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		}
 	}
 
-	private TestExecutionResult computeTestExecutionResult(@Nullable TestExecutionSummary summary,
+	private TestExecutionResult computeTestExecutionResult(@Nullable SuiteSummaryGeneratingListener summary,
 			ThrowableCollector throwableCollector) {
 		var throwable = throwableCollector.getThrowable();
 		if (throwable != null) {

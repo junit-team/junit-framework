@@ -27,8 +27,6 @@ import org.junit.platform.launcher.core.EngineDiscoveryOrchestrator;
 import org.junit.platform.launcher.core.EngineExecutionOrchestrator;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult;
 import org.junit.platform.launcher.core.ServiceLoaderTestEngineRegistry;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
-import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 /**
  * @since 1.8
@@ -59,12 +57,15 @@ class SuiteLauncher {
 		return discoveryOrchestrator.discover(discoveryRequest, parentId);
 	}
 
-	TestExecutionSummary execute(LauncherDiscoveryResult discoveryResult, EngineExecutionListener executionListener,
-			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken) {
-		SummaryGeneratingListener listener = new SummaryGeneratingListener();
+	<E> SuiteSummaryGeneratingListener execute(LauncherDiscoveryResult discoveryResult,
+			EngineExecutionListener executionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
+			CancellationToken cancellationToken) {
+
+		SuiteSummaryGeneratingListener listener = new SuiteSummaryGeneratingListener();
+
 		executionOrchestrator.execute(discoveryResult, executionListener, listener, requestLevelStore,
 			cancellationToken);
-		return listener.getSummary();
+		return listener;
 	}
 
 }
