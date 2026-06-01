@@ -457,14 +457,22 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 					@Test
 					@SetSystemProperty(key = "A", value = "3")
 					@DisplayName("change the property so that it can be restored")
-					void test(){
+					void changePropertyForRestore() {
 						assertThat(System.getProperty("A")).isEqualTo("3");
+					}
+
+					@Test
+					@SetSystemProperty(key = "A", value = "3")
+					@DisplayName("change the property programmatically so that it can be restored")
+					void programmaticallyChangePropertyForRestore() {
+						System.setProperty("B", "mutated B");
 					}
 				}
 
 				@AfterAll
-				static void afterAll(){
+				static void afterAll() {
 					assertThat(System.getProperty("A")).isEqualTo("1");
+					assertThat(System.getProperty("B")).isEqualTo("new B");
 				}
 
 			}
