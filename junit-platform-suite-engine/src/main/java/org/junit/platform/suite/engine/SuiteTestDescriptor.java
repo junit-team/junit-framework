@@ -219,13 +219,13 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		}
 	}
 
-	private TestExecutionResult computeTestExecutionResult(@Nullable SuiteSummaryGeneratingListener summary,
+	private TestExecutionResult computeTestExecutionResult(SuiteSummaryGeneratingListener summary,
 			ThrowableCollector throwableCollector) {
 		var throwable = throwableCollector.getThrowable();
 		if (throwable != null) {
 			return TestExecutionResult.failed(throwable);
 		}
-		if (failIfNoTests && requireNonNull(summary).getTestsFoundCount() == 0) {
+		if (failIfNoTests && summary.getTestsFoundCount() == 0) {
 			return TestExecutionResult.failed(new NoTestsDiscoveredException(suiteClass));
 		}
 		return TestExecutionResult.successful();
