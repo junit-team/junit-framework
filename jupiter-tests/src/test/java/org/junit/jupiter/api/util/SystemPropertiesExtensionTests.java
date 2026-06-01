@@ -445,6 +445,30 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 				assertThat(System.getProperty("B")).isEqualTo("new B");
 			}
 
+			@Nested
+			@SetSystemProperty(key = "A", value = "1")
+			@DisplayName("a sparsely annotated class structure")
+			class DeeplyNestedClass {
+
+				@Nested
+				@DisplayName("system properties should be restored to deeply nested class when they are not provided in deeper nested class")
+				class DeeperNestedClass {
+
+					@Test
+					@SetSystemProperty(key = "A", value = "3")
+					@DisplayName("change the property so that it can be restored")
+					void test(){
+						assertThat(System.getProperty("A")).isEqualTo("3");
+					}
+				}
+
+				@AfterAll
+				static void afterAll(){
+					assertThat(System.getProperty("A")).isEqualTo("1");
+				}
+
+			}
+
 		}
 
 		@Nested
@@ -695,13 +719,6 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 	@Nested
 	@DisplayName("properties are restored after ParameterizedTest")
 	class RestoreAfterParameterizedTest {
-
-		// This reproduces the system properties not being reset when set as part of a ParameterizedTest.
-		// These test all set only their 'own' system property and check ALL system properties.
-		// This will show in the test output which of the properties was not reset and thus give a clear
-		// indication which test actually did not work correctly.
-		// So the effect is that the BAD test does not fail, all the tests that are run AFTER this BAD test will fail.
-		// How many depends on the (random) order the tests are executed in. In any case the finish check will fail.
 
 		private static final String PROP_NORMAL_TEST = "Normal Test PROP Variable";
 		private static final String PROP_PARAM_TEST = "ParameterizedTest PROP Variable";
