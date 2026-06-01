@@ -23,6 +23,7 @@ import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.core.EngineDiscoveryOrchestrator;
 import org.junit.platform.launcher.core.EngineExecutionOrchestrator;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult;
@@ -57,15 +58,12 @@ class SuiteLauncher {
 		return discoveryOrchestrator.discover(discoveryRequest, parentId);
 	}
 
-	<E> SuiteSummaryGeneratingListener execute(LauncherDiscoveryResult discoveryResult,
-			EngineExecutionListener executionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
+	void execute(LauncherDiscoveryResult discoveryResult, EngineExecutionListener executionListener,
+			TestExecutionListener testExecutionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
 			CancellationToken cancellationToken) {
 
-		SuiteSummaryGeneratingListener listener = new SuiteSummaryGeneratingListener();
-
-		executionOrchestrator.execute(discoveryResult, executionListener, listener, requestLevelStore,
+		executionOrchestrator.execute(discoveryResult, executionListener, testExecutionListener, requestLevelStore,
 			cancellationToken);
-		return listener;
 	}
 
 }
