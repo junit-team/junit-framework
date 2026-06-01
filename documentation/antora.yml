@@ -175,6 +175,7 @@ asciidoc:
     RestoreSystemProperties: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/RestoreSystemProperties.html[@RestoreSystemProperties]'
     ReadsSystemProperty: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/ReadsSystemProperty.html[@ReadsSystemProperty]'
     WritesSystemProperty: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/WritesSystemProperty.html[@WritesSystemProperty]'
+    AbstractSystemPropertiesExtension: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/util/AbstractSystemPropertiesExtension.html[@AbstractSystemPropertiesExtension]'
     # Jupiter Parallel API
     Execution: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/parallel/Execution.html[@Execution]'
     Isolated: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/parallel/Isolated.html[@Isolated]'

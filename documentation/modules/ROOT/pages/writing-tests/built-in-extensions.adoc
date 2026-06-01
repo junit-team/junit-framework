@@ -905,3 +905,16 @@ need to be annotated with the respective annotation:
 
 Tests annotated in this way will never execute in parallel with tests annotated with
 `@ClearSystemProperty`, `@SetSystemProperty`, or `@RestoreSystemProperties`.
+
+
+[[system-properties-extensibility]]
+=== System Property extensibility
+
+If you want to have customized annotations, that will for example limit keys to some enum values, you can use
+{AbstractSystemPropertiesExtension} as a base of your extension. With this abstraction you need to provide 3 class types:
+
+ - annotation used to set system property
+ - annotation used to clear system property
+ - annotation used to restore system properties.
+
+Annotations provided by those functions should be annotated with {WritesSystemProperty}.
