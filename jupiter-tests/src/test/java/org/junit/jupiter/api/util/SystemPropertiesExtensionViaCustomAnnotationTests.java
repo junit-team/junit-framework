@@ -12,12 +12,12 @@ package org.junit.jupiter.api.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
-import static org.junit.jupiter.api.util.SystemPropertiesExtensionViaCustomAnnotationTests.Property.A;
-import static org.junit.jupiter.api.util.SystemPropertiesExtensionViaCustomAnnotationTests.Property.B;
-import static org.junit.jupiter.api.util.SystemPropertiesExtensionViaCustomAnnotationTests.Property.C;
-import static org.junit.jupiter.api.util.SystemPropertiesExtensionViaCustomAnnotationTests.Property.D;
-import static org.junit.jupiter.api.util.SystemPropertiesExtensionViaCustomAnnotationTests.Property.E;
-import static org.junit.jupiter.api.util.SystemPropertiesExtensionViaCustomAnnotationTests.Property.F;
+import static org.junit.jupiter.api.util.testannotations.Property.A;
+import static org.junit.jupiter.api.util.testannotations.Property.B;
+import static org.junit.jupiter.api.util.testannotations.Property.C;
+import static org.junit.jupiter.api.util.testannotations.Property.D;
+import static org.junit.jupiter.api.util.testannotations.Property.E;
+import static org.junit.jupiter.api.util.testannotations.Property.F;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
@@ -28,13 +28,11 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Properties;
 
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,91 +46,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.util.testannotations.ClearProp;
+import org.junit.jupiter.api.util.testannotations.SetProp;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 @DisplayName("Customized System Properties Extension")
-@SuppressWarnings("ClassEscapesDefinedScope")
 class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterTestEngineTests {
-
-	enum Property {
-		A, B, C, D, E, F
-	}
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD, ElementType.TYPE })
-	@Inherited
-	@Repeatable(SetProp.SetProps.class)
-	@WritesSystemProperty
-	@ExtendWith(CustomSystemPropertiesExtension.class)
-	@interface SetProp {
-		Property key();
-
-		String value();
-		@Retention(RetentionPolicy.RUNTIME)
-		@Target({ ElementType.METHOD, ElementType.TYPE })
-		@Inherited
-		@WritesSystemProperty
-		@interface SetProps {
-			SetProp[] value();
-		}
-	}
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.METHOD, ElementType.TYPE })
-	@Inherited
-	@Repeatable(ClearProp.ClearProps.class)
-	@WritesSystemProperty
-	@ExtendWith(CustomSystemPropertiesExtension.class)
-	@interface ClearProp {
-		Property key();
-
-		@Retention(RetentionPolicy.RUNTIME)
-		@Target({ ElementType.METHOD, ElementType.TYPE })
-		@Inherited
-		@WritesSystemProperty
-		@interface ClearProps {
-			ClearProp[] value();
-		}
-	}
-	final static class CustomSystemPropertiesExtension
-			extends AbstractSystemPropertiesExtension<SetProp, ClearProp, RestoreSystemProperties> {
-
-		protected @NonNull Class<SetProp> setPropertyAnnotation() {
-			return SetProp.class;
-		}
-
-		protected @NonNull Class<RestoreSystemProperties> restoreAnnotation() {
-			return RestoreSystemProperties.class;
-		}
-
-		protected @NonNull Class<ClearProp> clearAnnotation() {
-			return ClearProp.class;
-		}
-
-		@Override
-		@NonNull
-		String setAnnotationKey(SetProp annotation) {
-			return annotation.key().name();
-		}
-
-		@Override
-		@NonNull
-		String setAnnotationValue(SetProp annotation) {
-			return annotation.value();
-		}
-
-		@Override
-		@NonNull
-		String clearAnnotationKey(ClearProp annotation) {
-			return annotation.key().name();
-		}
-
-	}
 
 	@BeforeAll
 	static void globalSetUp() {
@@ -217,7 +142,7 @@ class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterT
 			assertThat(System.getProperty(B.name())).isEqualTo("new B");
 			assertThat(System.getProperty(C.name())).isEqualTo("old C");
 
-			assertThat(System.getProperty("clear prop D")).isEqualTo("new D");
+			assertThat(System.getProperty(D.name())).isEqualTo("new D");
 			assertThat(System.getProperty(E.name())).isNull();
 			assertThat(System.getProperty(F.name())).isNull();
 		}
@@ -239,7 +164,7 @@ class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterT
 			assertThat(System.getProperty(B.name())).isNull();
 			assertThat(System.getProperty(C.name())).isEqualTo("old C");
 
-			assertThat(System.getProperty("clear prop D")).isEqualTo("new D");
+			assertThat(System.getProperty(D.name())).isEqualTo("new D");
 			assertThat(System.getProperty(E.name())).isEqualTo("new E");
 			assertThat(System.getProperty(F.name())).isNull();
 		}
@@ -265,7 +190,7 @@ class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterT
 			assertThat(System.getProperty(A.name())).isEqualTo("new A");
 			assertThat(System.getProperty(B.name())).isEqualTo("old B");
 			assertThat(System.getProperty(C.name())).isEqualTo("old C");
-			assertThat(System.getProperty("clear prop D")).isEqualTo("new D");
+			assertThat(System.getProperty(D.name())).isEqualTo("new D");
 
 			assertThat(System.getProperty(E.name())).isNull();
 			assertThat(System.getProperty(F.name())).isNull();
@@ -324,7 +249,7 @@ class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterT
 				assertThat(System.getProperty(B.name())).isNull();
 				assertThat(System.getProperty(C.name())).isEqualTo("old C");
 
-				assertThat(System.getProperty("clear prop D")).isEqualTo("new D");
+				assertThat(System.getProperty(D.name())).isEqualTo("new D");
 				assertThat(System.getProperty(E.name())).isEqualTo("new E");
 				assertThat(System.getProperty(F.name())).isNull();
 			}
@@ -387,7 +312,7 @@ class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterT
 				assertThat(System.getProperty(B.name())).isNull();
 				assertThat(System.getProperty(C.name())).isEqualTo("old C");
 
-				assertThat(System.getProperty("clear prop D")).isEqualTo("new D");
+				assertThat(System.getProperty(D.name())).isEqualTo("new D");
 				assertThat(System.getProperty(E.name())).isEqualTo("new E");
 				assertThat(System.getProperty(F.name())).isNull();
 			}
@@ -670,7 +595,7 @@ class SystemPropertiesExtensionViaCustomAnnotationTests extends AbstractJupiterT
 		void shouldInheritClearAndSetProperty() {
 			assertThat(System.getProperty(A.name())).isNull();
 			assertThat(System.getProperty(B.name())).isNull();
-			assertThat(System.getProperty("clear prop D")).isEqualTo("new D");
+			assertThat(System.getProperty(D.name())).isEqualTo("new D");
 			assertThat(System.getProperty(E.name())).isEqualTo("new E");
 		}
 

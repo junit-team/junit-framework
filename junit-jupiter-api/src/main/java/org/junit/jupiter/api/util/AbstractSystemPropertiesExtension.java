@@ -56,37 +56,37 @@ public abstract class AbstractSystemPropertiesExtension<SET extends Annotation, 
 	 * Defines the annotation used to set a system property.
 	 * @since 6.2
 	 */
-	abstract Class<SET> setPropertyAnnotation();
+	protected abstract Class<SET> setPropertyAnnotation();
 
 	/**
 	 * Defines the annotation used to restore system properties.
 	 * @since 6.2
 	 */
-	abstract Class<RESTORE> restoreAnnotation();
+	protected abstract Class<RESTORE> restoreAnnotation();
 
 	/**
 	 * Defines the annotation used to clear a system property.
 	 * @since 6.2
 	 */
-	abstract Class<CLEAR> clearAnnotation();
+	protected abstract Class<CLEAR> clearAnnotation();
 
 	/**
 	 * Gets the system property name from {@link SET} annotation.
 	 * @since 6.2
 	 */
-	abstract String setAnnotationKey(SET annotation);
+	protected abstract String setAnnotationKey(SET annotation);
 
 	/**
 	 * Gets the system property value from {@link SET} annotation.
 	 * @since 6.2
 	 */
-	abstract String setAnnotationValue(SET annotation);
+	protected abstract String setAnnotationValue(SET annotation);
 
 	/**
 	 * Gets the system property name from {@link CLEAR} annotation.
 	 * @since 6.2
 	 */
-	abstract String clearAnnotationKey(CLEAR annotation);
+	protected abstract String clearAnnotationKey(CLEAR annotation);
 
 	protected AbstractSystemPropertiesExtension() {
 		// no-op

@@ -40,17 +40,17 @@ final class SystemPropertiesExtension
 	}
 
 	@Override
-	String setAnnotationKey(SetSystemProperty annotation) {
+	protected String setAnnotationKey(SetSystemProperty annotation) {
 		return annotation.key();
 	}
 
 	@Override
-	String setAnnotationValue(SetSystemProperty annotation) {
+	protected String setAnnotationValue(SetSystemProperty annotation) {
 		return annotation.value();
 	}
 
 	@Override
-	String clearAnnotationKey(ClearSystemProperty annotation) {
+	protected String clearAnnotationKey(ClearSystemProperty annotation) {
 		return annotation.key();
 	}
 
