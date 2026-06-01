@@ -241,7 +241,7 @@ final class SystemPropertiesExtension
 	private Optional<EntriesBackup> findIncrementalBackup(ExtensionContext originalContext,
 			ExtensionContext incrementContext) {
 		var key = getStoreKey(originalContext, incrementContext, BackupType.INCREMENTAL);
-		EntriesBackup entriesBackup = getStore(originalContext).get(key, EntriesBackup.class);
+		var entriesBackup = getStore(originalContext).get(key, EntriesBackup.class);
 		return Optional.ofNullable(entriesBackup);
 	}
 
