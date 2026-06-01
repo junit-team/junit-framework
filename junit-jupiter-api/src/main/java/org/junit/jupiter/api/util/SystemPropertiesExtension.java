@@ -108,7 +108,8 @@ final class SystemPropertiesExtension
 				.findFirst();
 	}
 
-	private void clearAndSetEntries(ExtensionContext originalContext, ExtensionContext incrementContext, boolean doIncrementalBackup) {
+	private void clearAndSetEntries(ExtensionContext originalContext, ExtensionContext incrementContext,
+			boolean doIncrementalBackup) {
 
 		incrementContext.getElement().ifPresent(element -> {
 			var entriesToClear = findEntriesToClear(element);
