@@ -108,10 +108,10 @@ final class SystemPropertiesExtension
 				.findFirst();
 	}
 
-	private void clearAndSetEntries(ExtensionContext originalContext, ExtensionContext incrementContext,
+	private void clearAndSetEntries(ExtensionContext originalContext, ExtensionContext currentContext,
 			boolean doIncrementalBackup) {
 
-		incrementContext.getElement().ifPresent(element -> {
+		currentContext.getElement().ifPresent(element -> {
 			var entriesToClear = findEntriesToClear(element);
 			var entriesToSet = findEntriesToSet(element);
 			preventClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
@@ -122,7 +122,7 @@ final class SystemPropertiesExtension
 
 			// Only backup original values if we didn't already do bulk storage of the original state
 			if (doIncrementalBackup) {
-				storeIncrementalBackup(originalContext, incrementContext, entriesToClear, entriesToSet.keySet());
+				storeIncrementalBackup(originalContext, currentContext, entriesToClear, entriesToSet.keySet());
 			}
 
 			// For consistency don't use Properties::setProperty or System.setProperty here
