@@ -448,11 +448,11 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 			@Nested
 			@SetSystemProperty(key = "A", value = "1")
 			@DisplayName("a sparsely annotated class structure")
-			class DeeplyNestedClass {
+			class SparselyAnnotatedStructure {
 
 				@Nested
-				@DisplayName("system properties should be restored to deeply nested class when they are not provided in deeper nested class")
-				class DeeperNestedClass {
+				@DisplayName("system properties should be restored to values from the parent when they are not provided by this class")
+				class WithoutSystemPropertyAnnotations {
 
 					@Test
 					@SetSystemProperty(key = "A", value = "3")
@@ -465,7 +465,7 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 					@SetSystemProperty(key = "A", value = "3")
 					@DisplayName("change the property programmatically so that it can be restored")
 					void programmaticallyChangePropertyForRestore() {
-						System.setProperty("B", "mutated B");
+						System.setProperty("B", "changed B");
 					}
 				}
 
