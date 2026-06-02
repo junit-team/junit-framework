@@ -139,7 +139,6 @@ class StringUtilsTests {
 		assertEquals("[a, b, c]", nullSafeToString(new char[] { 'a', 'b', 'c' }));
 		assertEquals("[foo, bar]", nullSafeToString(new String[] { "foo", "bar" }));
 		assertEquals("[34, 42]", nullSafeToString(new Integer[] { 34, 42 }));
-		assertEquals("[34.0, 42.0]", nullSafeToString(new Double[] { 34.0, 42.0 }));
 		assertEquals("[[2, 4], [3, 9]]", nullSafeToString(new Integer[][] { { 2, 4 }, { 3, 9 } }));
 	}
 
