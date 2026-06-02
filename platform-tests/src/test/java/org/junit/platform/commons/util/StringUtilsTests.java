@@ -21,6 +21,7 @@ import static org.junit.platform.commons.util.StringUtils.containsIsoControlChar
 import static org.junit.platform.commons.util.StringUtils.containsWhitespace;
 import static org.junit.platform.commons.util.StringUtils.doesNotContainIsoControlCharacter;
 import static org.junit.platform.commons.util.StringUtils.doesNotContainWhitespace;
+import static org.junit.platform.commons.util.StringUtils.defaultToString;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
 import static org.junit.platform.commons.util.StringUtils.isNotBlank;
 import static org.junit.platform.commons.util.StringUtils.nullSafeToString;
@@ -126,6 +127,11 @@ class StringUtilsTests {
 		assertEquals(" ", replaceWhitespaceCharacters("\f", " "));
 
 		assertPreconditionViolationFor(() -> replaceWhitespaceCharacters("", null));
+	}
+
+	@Test
+	void defaultToStringChecks(){
+		assertEquals("null",defaultToString(null));
 	}
 
 	@Test
