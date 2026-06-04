@@ -2,7 +2,7 @@
 ant = "1.10.17"
 apiguardian = "1.1.2"
 assertj = "3.27.7"
-bnd = "7.2.3"
+bnd = "7.3.0"
 checkstyle = "13.5.0"
 eclipse = "4.39.0"
 jackson = "3.1.4"
