@@ -132,7 +132,6 @@ class StringUtilsTests {
 	@Test
 	void defaultToStringReturnsNullForNullInput() {
 		assertEquals("null", defaultToString(null));
-
 	}
 
 	@Test
