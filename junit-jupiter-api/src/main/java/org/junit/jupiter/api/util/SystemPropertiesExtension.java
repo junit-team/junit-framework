@@ -97,8 +97,8 @@ final class SystemPropertiesExtension
 		});
 
 		// we have to apply the annotations from the outermost to the innermost context.
-		forEachInReverseOrder(allContexts,
-			currentContext -> clearAndSetEntries(currentContext, originalContext, restoreAnnotationContext.isEmpty()));
+		forEachInReverseOrder(allContexts, currentContext -> clearAndSetEntries(currentContext,
+			originalContext.getUniqueId(), restoreAnnotationContext.isEmpty()));
 	}
 
 	private Optional<ExtensionContext> findFirstRestoreAnnotationContext(List<ExtensionContext> contexts) {
@@ -107,8 +107,7 @@ final class SystemPropertiesExtension
 				.findFirst();
 	}
 
-	private void clearAndSetEntries(ExtensionContext currentContext, ExtensionContext originalContext,
-			boolean doIncrementalBackup) {
+	private void clearAndSetEntries(ExtensionContext currentContext, String uniqueId, boolean doIncrementalBackup) {
 
 		currentContext.getElement().ifPresent(element -> {
 			var entriesToClear = findEntriesToClear(element);
@@ -121,7 +120,7 @@ final class SystemPropertiesExtension
 
 			// Only backup original values if we didn't already do bulk storage of the original state
 			if (doIncrementalBackup) {
-				storeIncrementalBackup(originalContext, entriesToClear, entriesToSet.keySet());
+				storeIncrementalBackup(currentContext, uniqueId, entriesToClear, entriesToSet.keySet());
 			}
 
 			// For consistency don't use Properties::setProperty or System.setProperty here
@@ -175,14 +174,14 @@ final class SystemPropertiesExtension
 					));
 	}
 
-	private void storeIncrementalBackup(ExtensionContext context, Collection<String> entriesToClear,
+	private void storeIncrementalBackup(ExtensionContext context, String uniqueId, Collection<String> entriesToClear,
 			Collection<String> entriesToSet) {
 		var backup = new EntriesBackup(entriesToClear, entriesToSet);
-		getStore(context).put(getStoreKey(context, BackupType.INCREMENTAL), backup);
+		getStore(context).put(new StoreKey(uniqueId, BackupType.INCREMENTAL), backup);
 	}
 
 	private void storeCompleteBackup(ExtensionContext context, Properties backup) {
-		getStore(context).put(getStoreKey(context, BackupType.COMPLETE), backup);
+		getStore(context).put(new StoreKey(context.getUniqueId(), BackupType.COMPLETE), backup);
 	}
 
 	/**
@@ -204,7 +203,7 @@ final class SystemPropertiesExtension
 	}
 
 	private @Nullable Properties getCompleteBackup(ExtensionContext context) {
-		var key = getStoreKey(context, BackupType.COMPLETE);
+		var key = new StoreKey(context.getUniqueId(), BackupType.COMPLETE);
 		return getStore(context).get(key, Properties.class);
 	}
 
@@ -222,12 +221,13 @@ final class SystemPropertiesExtension
 		// Try a complete restore first
 		if (!restoreOriginalCompleteBackup(originalContext)) {
 			// A complete backup is not available, so restore incrementally from innermost to outermost
-			findAllExtensionContexts(originalContext).forEach(__ -> restoreOriginalIncrementalBackup(originalContext));
+			findAllExtensionContexts(originalContext) //
+					.forEach(context -> restoreOriginalIncrementalBackup(context, originalContext.getUniqueId()));
 		}
 	}
 
-	private void restoreOriginalIncrementalBackup(ExtensionContext originalContext) {
-		var backup = getIncrementalBackup(originalContext);
+	private void restoreOriginalIncrementalBackup(ExtensionContext context, String uniqueId) {
+		var backup = getIncrementalBackup(context, uniqueId);
 		if (backup != null) {
 			backup.restoreBackup();
 		}
@@ -242,17 +242,13 @@ final class SystemPropertiesExtension
 		return contexts;
 	}
 
-	private @Nullable EntriesBackup getIncrementalBackup(ExtensionContext originalContext) {
-		var key = getStoreKey(originalContext, BackupType.INCREMENTAL);
-		return getStore(originalContext).get(key, EntriesBackup.class);
+	private @Nullable EntriesBackup getIncrementalBackup(ExtensionContext context, String uniqueId) {
+		var key = new StoreKey(uniqueId, BackupType.INCREMENTAL);
+		return getStore(context).get(key, EntriesBackup.class);
 	}
 
 	private ExtensionContext.Store getStore(ExtensionContext context) {
 		return context.getStore(ExtensionContext.Namespace.create(getClass()));
-	}
-
-	private StoreKey getStoreKey(ExtensionContext context, BackupType type) {
-		return new StoreKey(context.getUniqueId(), type);
 	}
 
 	private record StoreKey(String uniqueId, BackupType type) {
