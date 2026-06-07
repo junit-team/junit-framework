@@ -5,6 +5,8 @@
 
 This document contains the change log for all JUnit releases since 6.0 GA.
 
+include::partial$release-notes/release-notes-6.1.1.adoc[]
+
 include::partial$release-notes/release-notes-6.1.0.adoc[]
 
 include::partial$release-notes/release-notes-6.0.3.adoc[]
