@@ -34,6 +34,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.util.ToStringBuilder;
 
 /**
  * {@code Extension} which provides support for the following annotations.
@@ -291,6 +292,14 @@ final class SystemPropertiesExtension
 			var properties = System.getProperties();
 			entriesToClear.forEach(properties::remove);
 			properties.putAll(entriesToSet);
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this) //
+					.append("entriesToClear", this.entriesToClear) //
+					.append("entriesToSet", this.entriesToSet) //
+					.toString();
 		}
 	}
 
