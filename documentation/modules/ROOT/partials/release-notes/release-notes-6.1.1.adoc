@@ -1,0 +1,67 @@
+[[v6.1.1]]
+== 6.1.1
+
+*Date of Release:* ❓
+
+*Scope:* Bug fixes and enhancements since 6.1.0
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/120?closed=1+[6.1.1] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v6.1.1-junit-platform]]
+=== JUnit Platform
+
+[[v6.1.1-junit-platform-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[v6.1.1-junit-platform-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.1.1-junit-platform-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
+
+
+[[v6.1.1-junit-jupiter]]
+=== JUnit Jupiter
+
+[[v6.1.1-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[v6.1.1-junit-jupiter-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.1.1-junit-jupiter-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
+
+
+[[v6.1.1-junit-vintage]]
+=== JUnit Vintage
+
+[[v6.1.1-junit-vintage-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[v6.1.1-junit-vintage-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.1.1-junit-vintage-new-features-and-improvements]]
+==== New Features and Improvements
+
+* ❓
