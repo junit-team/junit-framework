@@ -19,6 +19,7 @@ import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuild
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -47,8 +48,11 @@ import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult;
-import org.junit.platform.launcher.listeners.TestExecutionSummary;
+import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
@@ -170,8 +174,8 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 		executeBeforeSuiteMethods(throwableCollector);
 
-		TestExecutionSummary summary = executeTests(executionListener, requestLevelStore, cancellationToken,
-			throwableCollector);
+		var summary = new SuiteSummaryGeneratingListener();
+		executeTests(executionListener, summary, requestLevelStore, cancellationToken, throwableCollector);
 
 		executeAfterSuiteMethods(throwableCollector);
 
@@ -191,12 +195,12 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		}
 	}
 
-	private @Nullable TestExecutionSummary executeTests(EngineExecutionListener executionListener,
+	private void executeTests(EngineExecutionListener executionListener, TestExecutionListener testExecutionListener,
 			NamespacedHierarchicalStore<Namespace> requestLevelStore, CancellationToken cancellationToken,
 			ThrowableCollector throwableCollector) {
 
 		if (throwableCollector.isNotEmpty()) {
-			return null;
+			return;
 		}
 
 		// #2838: The discovery result from a suite may have been filtered by
@@ -205,7 +209,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		LauncherDiscoveryResult discoveryResult = requireNonNull(this.launcherDiscoveryResult).withRetainedEngines(
 			getChildren()::contains);
 
-		return requireNonNull(launcher).execute(discoveryResult, executionListener, requestLevelStore,
+		requireNonNull(launcher).execute(discoveryResult, executionListener, testExecutionListener, requestLevelStore,
 			cancellationToken);
 	}
 
@@ -215,13 +219,13 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		}
 	}
 
-	private TestExecutionResult computeTestExecutionResult(@Nullable TestExecutionSummary summary,
+	private TestExecutionResult computeTestExecutionResult(SuiteSummaryGeneratingListener summary,
 			ThrowableCollector throwableCollector) {
 		var throwable = throwableCollector.getThrowable();
 		if (throwable != null) {
 			return TestExecutionResult.failed(throwable);
 		}
-		if (failIfNoTests && requireNonNull(summary).getTestsFoundCount() == 0) {
+		if (failIfNoTests && summary.getTestsFoundCount() == 0) {
 			return TestExecutionResult.failed(new NoTestsDiscoveredException(suiteClass));
 		}
 		return TestExecutionResult.successful();
@@ -278,6 +282,27 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		public void issueEncountered(UniqueId engineUniqueId, DiscoveryIssue issue) {
 			DiscoveryIssue transformedIssue = this.issueTransformer.apply(engineUniqueId, issue);
 			this.discoveryListener.issueEncountered(engineUniqueId, transformedIssue);
+		}
+	}
+
+	/**
+	 * A minimal implementation of the {@link SummaryGeneratingListener}.
+	 * <p>
+	 * The {@code SummaryGeneratingListener} assumes that all the ancestors all
+	 * test descriptors are in the test plan. This isn't true for the suite engine
+	 * which only executes a subtree of the test plan. This implementation tracks
+	 * only the essentials.
+	 */
+	private static final class SuiteSummaryGeneratingListener implements TestExecutionListener {
+		private final AtomicLong testsFound = new AtomicLong();
+
+		@Override
+		public void testPlanExecutionStarted(TestPlan testPlan) {
+			this.testsFound.set(testPlan.countTestIdentifiers(TestIdentifier::isTest));
+		}
+
+		long getTestsFoundCount() {
+			return testsFound.get();
 		}
 	}
 }
