@@ -16,7 +16,7 @@ repository on GitHub.
 [[v6.1.1-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* The Suite Engine no longer logs "No TestIdentifier with unique ID" for failing tests.
 
 [[v6.1.1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
