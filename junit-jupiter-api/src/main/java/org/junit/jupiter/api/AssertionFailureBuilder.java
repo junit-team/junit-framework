@@ -30,6 +30,11 @@ import org.opentest4j.AssertionFailedError;
  * <p>Using this builder ensures consistency in how failure message are formatted
  * within JUnit Jupiter and for custom user-defined assertions.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 5.9
  * @see AssertionFailedError
  */
