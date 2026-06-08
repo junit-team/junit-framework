@@ -22,6 +22,8 @@ import org.junit.platform.commons.JUnitException;
  * {@link ArgumentsAggregator} when an error occurs while aggregating
  * arguments.
  *
+ * <p>This class is not intended to be extended by clients.
+ *
  * @since 5.2
  * @see ArgumentsAggregator
  */

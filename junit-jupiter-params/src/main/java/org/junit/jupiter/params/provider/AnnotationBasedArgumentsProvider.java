@@ -30,6 +30,8 @@ import org.junit.platform.commons.util.Preconditions;
  * {@link ArgumentsProvider} implementations that also need to consume an
  * annotation in order to provide the arguments.
  *
+ * <p>This class is designed for extension.
+ *
  * @since 5.10
  * @see org.junit.jupiter.params.ParameterizedClass
  * @see org.junit.jupiter.params.ParameterizedTest

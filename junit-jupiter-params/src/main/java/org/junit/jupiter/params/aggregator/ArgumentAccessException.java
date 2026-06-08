@@ -22,6 +22,8 @@ import org.junit.platform.commons.JUnitException;
  * {@link ArgumentsAccessor} if an error occurs while accessing
  * or converting an argument.
  *
+ * <p>This class is not intended to be extended by clients.
+ *
  * @since 5.2
  * @see ArgumentsAccessor
  */
