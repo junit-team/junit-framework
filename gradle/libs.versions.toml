@@ -76,7 +76,7 @@ xmlunit-assertj = { module = "org.xmlunit:xmlunit-assertj3", version.ref = "xmlu
 xmlunit-placeholders = { module = "org.xmlunit:xmlunit-placeholders", version.ref = "xmlunit" }
 xmlunit-jakarta-jaxb-impl = { module = "org.xmlunit:xmlunit-jakarta-jaxb-impl", version.ref = "xmlunit" }
 testingAnnotations = { module = "com.gradle:develocity-testing-annotations", version = "2.0.1" }
-woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.2.0" }
+woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.2.1" }
 
 # Only declared here so Dependabot knows when to update the referenced versions
 eclipse-platform = { module = "org.eclipse.platform:org.eclipse.platform", version.ref = "eclipse" }
