@@ -33,6 +33,7 @@ repository on GitHub.
   emitted.
 * `JAVA_28` has been added to the `JRE` enum for use with `JRE`-based execution
   conditions.
+* `junit-platform-console-standalone` is now part of the `junit-bom`
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
