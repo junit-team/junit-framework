@@ -24,7 +24,8 @@ import org.junit.platform.commons.JUnitException;
  *
  * <h2>Extensibility</h2>
  *
- * <p>This class is designed for extension.
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
  *
  * @since 5.2
  * @see ArgumentsAccessor
