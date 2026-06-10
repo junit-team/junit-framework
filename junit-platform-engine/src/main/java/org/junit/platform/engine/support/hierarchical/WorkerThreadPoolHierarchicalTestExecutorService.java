@@ -843,7 +843,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return new ReacquisitionToken();
 		}
 
-		private class ReacquisitionToken {
+		class ReacquisitionToken {
 
 			private boolean used = false;
 
