@@ -31,7 +31,7 @@ import org.apiguardian.api.API;
  * @see ExecutionRequest#getCancellationToken()
  */
 @API(status = EXPERIMENTAL, since = "6.0")
-public sealed interface CancellationToken permits RegularCancellationToken, DisabledCancellationToken {
+public sealed interface CancellationToken permits DisabledCancellationToken, RegularCancellationToken {
 
 	/**
 	 * Create a new, uncancelled cancellation token.
