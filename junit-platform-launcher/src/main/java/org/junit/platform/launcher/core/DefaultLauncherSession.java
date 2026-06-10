@@ -52,6 +52,7 @@ class DefaultLauncherSession implements LauncherSession {
 	private final LauncherSessionListener listener;
 	private final DelegatingLauncher launcher;
 
+	@SuppressWarnings("ReferenceEquality")
 	DefaultLauncherSession(List<LauncherInterceptor> interceptors, //
 			Supplier<LauncherSessionListener> listenerSupplier, //
 			Function<NamespacedHierarchicalStore<Namespace>, Launcher> launcherFactory //
@@ -81,6 +82,7 @@ class DefaultLauncherSession implements LauncherSession {
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public void close() {
 		if (launcher.delegate != ClosedLauncher.INSTANCE) {
 			launcher.delegate = ClosedLauncher.INSTANCE;

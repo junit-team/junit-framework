@@ -43,6 +43,7 @@ class OutcomeDelayingEngineExecutionListener extends DelegatingEngineExecutionLi
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public void executionSkipped(TestDescriptor testDescriptor, String reason) {
 		if (testDescriptor == engineDescriptor) {
 			outcome = Outcome.SKIPPED;
@@ -54,6 +55,7 @@ class OutcomeDelayingEngineExecutionListener extends DelegatingEngineExecutionLi
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public void executionStarted(TestDescriptor testDescriptor) {
 		if (testDescriptor == engineDescriptor) {
 			engineStarted = true;
@@ -62,6 +64,7 @@ class OutcomeDelayingEngineExecutionListener extends DelegatingEngineExecutionLi
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public void executionFinished(TestDescriptor testDescriptor, TestExecutionResult executionResult) {
 		if (testDescriptor == engineDescriptor) {
 			outcome = Outcome.FINISHED;

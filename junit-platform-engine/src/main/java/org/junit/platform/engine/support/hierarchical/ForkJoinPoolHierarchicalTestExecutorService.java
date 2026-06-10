@@ -136,6 +136,7 @@ public class ForkJoinPoolHierarchicalTestExecutorService implements Hierarchical
 		return completedFuture(null);
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private boolean isAlreadyRunningInForkJoinPool() {
 		return ForkJoinTask.getPool() == forkJoinPool;
 	}

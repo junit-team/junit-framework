@@ -181,6 +181,7 @@ class AssertArrayEquals {
 		assertArrayEquals(expected, actual, new ArrayDeque<>(), messageSupplier);
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(boolean @Nullable [] expected, boolean @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -202,6 +203,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(char @Nullable [] expected, char @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -224,6 +226,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(byte @Nullable [] expected, byte @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -246,6 +249,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(short @Nullable [] expected, short @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -268,6 +272,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(int @Nullable [] expected, int @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -290,6 +295,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(long @Nullable [] expected, long @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -312,6 +318,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(float @Nullable [] expected, float @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -334,6 +341,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(float @Nullable [] expected, float @Nullable [] actual, float delta,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -357,6 +365,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(double @Nullable [] expected, double @Nullable [] actual,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -379,6 +388,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(double @Nullable [] expected, double @Nullable [] actual, double delta,
 			@Nullable Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
@@ -402,6 +412,7 @@ class AssertArrayEquals {
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertArrayEquals(@Nullable Object @Nullable [] expected, @Nullable Object @Nullable [] actual,
 			Deque<Integer> indexes, @Nullable Object messageOrSupplier) {
 
