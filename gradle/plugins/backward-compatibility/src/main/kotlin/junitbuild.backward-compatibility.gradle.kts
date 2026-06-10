@@ -31,6 +31,12 @@ dependencies {
 			}
 			because("Workaround for GHSA-72hv-8253-57qq")
 		}
+		roseauDependencies("org.codehaus.plexus:plexus-utils") {
+			version {
+				require("3.6.1")
+			}
+			because("Workaround for CVE-2025-67030")
+		}
 	}
 }
 
