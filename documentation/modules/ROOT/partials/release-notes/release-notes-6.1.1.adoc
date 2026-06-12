@@ -35,7 +35,7 @@ repository on GitHub.
 [[v6.1.1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* Restore original values set by `@SetSystemProperty` when used with a `@ParameterizedTest`.
 
 [[v6.1.1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
