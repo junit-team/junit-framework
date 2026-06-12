@@ -44,6 +44,7 @@ public class TestSourceProvider {
 	private final Map<Description, TestSource> testSourceCache = new ConcurrentHashMap<>();
 	private final Map<Class<?>, List<Method>> methodsCache = synchronizedMap(new LruCache<>(31));
 
+	@SuppressWarnings("ReferenceEquality")
 	public @Nullable TestSource findTestSource(Description description) {
 		TestSource testSource = testSourceCache.computeIfAbsent(description, this::computeTestSource);
 		return testSource == NULL_SOURCE ? null : testSource;

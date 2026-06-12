@@ -258,6 +258,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public final void after(JupiterEngineExecutionContext context) {
 
 		ThrowableCollector throwableCollector = context.getThrowableCollector();

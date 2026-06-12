@@ -31,6 +31,9 @@ repository on GitHub.
   closing it in test code which can lead to test failures that are hard to diagnose.
 * When using a third-party engine that uses the `junit-` prefix a discovery issue is
   emitted.
+* `JAVA_28` has been added to the `JRE` enum for use with `JRE`-based execution
+  conditions.
+* `junit-platform-console-standalone` is now part of the `junit-bom`
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter

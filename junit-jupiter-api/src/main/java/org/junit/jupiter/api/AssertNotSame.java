@@ -32,12 +32,14 @@ class AssertNotSame {
 		assertNotSame(unexpected, actual, (String) null);
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	static void assertNotSame(@Nullable Object unexpected, @Nullable Object actual, @Nullable String message) {
 		if (unexpected == actual) {
 			failSame(actual, message);
 		}
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	static void assertNotSame(@Nullable Object unexpected, @Nullable Object actual,
 			Supplier<@Nullable String> messageSupplier) {
 		if (unexpected == actual) {

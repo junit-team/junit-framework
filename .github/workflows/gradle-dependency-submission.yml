@@ -18,7 +18,7 @@ jobs:
       contents: write
     steps:
     - name: Check out repository
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       with:
         fetch-depth: 1
         persist-credentials: false
@@ -30,8 +30,8 @@ jobs:
         check-latest: true
     - name: Generate and submit dependency graph
       id: dependency-submission
-      uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+      uses: gradle/actions/dependency-submission@5e2ebd065dc2488b7a6ad670704656cbbe1e8f60 # v6.1.1
       continue-on-error: true
     - name: Generate and submit dependency graph (retry)
       if: steps.dependency-submission.outcome == 'failure'
-      uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+      uses: gradle/actions/dependency-submission@5e2ebd065dc2488b7a6ad670704656cbbe1e8f60 # v6.1.1

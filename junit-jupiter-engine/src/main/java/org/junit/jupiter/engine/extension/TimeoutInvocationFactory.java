@@ -50,7 +50,7 @@ class TimeoutInvocationFactory {
 	}
 
 	@SuppressWarnings({ "deprecation", "try" })
-	private abstract static class ExecutorResource implements Store.CloseableResource, AutoCloseable {
+	abstract static class ExecutorResource implements Store.CloseableResource, AutoCloseable {
 
 		private final ScheduledExecutorService executor;
 

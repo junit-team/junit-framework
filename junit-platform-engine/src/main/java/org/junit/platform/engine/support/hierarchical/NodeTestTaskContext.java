@@ -20,6 +20,7 @@ record NodeTestTaskContext(EngineExecutionListener listener, HierarchicalTestExe
 		ThrowableCollector.Factory throwableCollectorFactory, NodeExecutionAdvisor executionAdvisor,
 		CancellationToken cancellationToken) {
 
+	@SuppressWarnings("ReferenceEquality")
 	NodeTestTaskContext withListener(EngineExecutionListener listener) {
 		if (this.listener == listener) {
 			return this;

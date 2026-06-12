@@ -85,11 +85,13 @@ class FallbackStringToObjectConverter implements StringToObjectConverter {
 		= new ConcurrentHashMap<>(64);
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public boolean canConvertTo(Class<?> targetType) {
 		return findFactoryExecutable(targetType) != NULL_EXECUTABLE;
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public @Nullable Object convert(String source, Class<?> targetType) throws Exception {
 		Function<String, @Nullable Object> executable = findFactoryExecutable(targetType);
 		Preconditions.condition(executable != NULL_EXECUTABLE,
