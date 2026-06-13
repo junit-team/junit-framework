@@ -20,6 +20,11 @@ import org.junit.platform.commons.JUnitException;
 /**
  * Thrown if an error is encountered while parsing CSV input.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 5.3
  * @see CsvSource
  * @see CsvFileSource

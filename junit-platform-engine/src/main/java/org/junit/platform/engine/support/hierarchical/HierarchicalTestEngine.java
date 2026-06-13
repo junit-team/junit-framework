@@ -23,6 +23,10 @@ import org.junit.platform.engine.TestEngine;
  * Abstract base class for all {@link TestEngine} implementations that wish
  * to organize test suites hierarchically based on the {@link Node} abstraction.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>This class is designed for extension by test engine implementations.
+ *
  * @param <C> the type of {@code EngineExecutionContext} used by this engine
  * @since 1.0
  * @see Node

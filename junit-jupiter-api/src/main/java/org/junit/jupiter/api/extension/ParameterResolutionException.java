@@ -22,6 +22,11 @@ import org.junit.platform.commons.util.Preconditions;
  * Thrown if an error is encountered in the configuration or execution of a
  * {@link ParameterResolver}.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 5.0
  * @see ParameterResolver
  */
