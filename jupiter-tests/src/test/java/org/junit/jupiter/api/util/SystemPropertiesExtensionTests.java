@@ -41,14 +41,11 @@ import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
 
 @DisplayName("System Properties Extension")
 class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
@@ -373,47 +370,6 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 			}
 
 		}
-
-		@Nested
-		@DisplayName("RestorableContext Workflow Tests")
-		@MockitoSettings
-		class RestorableContextWorkflowTests {
-
-			@Mock
-			ExtensionContext context;
-
-			@Test
-			@DisplayName("Workflow of RestorableContext")
-			void workflowOfRestorableContexts() {
-				Properties initialState = System.getProperties(); //This is a live reference
-
-				try {
-					Properties returnedFromPrepareToEnter = spe.prepareToEnterRestorableContext(context);
-					Properties postPrepareToEnterSysProps = System.getProperties();
-					spe.prepareToExitRestorableContext(initialState);
-					Properties postPrepareToExitSysProps = System.getProperties();
-
-					assertThat(returnedFromPrepareToEnter) //
-							.withFailMessage(
-								"prepareToEnterRestorableContext should return actual original or deep copy") //
-							.isSameAs(initialState);
-
-					assertThat(returnedFromPrepareToEnter) //
-							.withFailMessage("prepareToEnterRestorableContext should replace the actual Sys Props") //
-							.isNotSameAs(postPrepareToEnterSysProps);
-
-					assertThat(postPrepareToEnterSysProps).isEqualTo(initialState);
-
-					assertThat(postPrepareToExitSysProps).isSameAs(initialState);
-
-				}
-				finally {
-					System.setProperties(initialState); // Ensure complete recovery
-				}
-			}
-
-		}
-
 	}
 
 	@Nested

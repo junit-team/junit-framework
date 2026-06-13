@@ -11,13 +11,13 @@
 package org.junit.jupiter.api.util;
 
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.util.JupiterPropertyUtils.cloneWithoutDefaults;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,16 +25,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.platform.commons.util.ToStringBuilder;
 
 /**
  * {@code Extension} which provides support for the following annotations.
@@ -50,34 +47,6 @@ import org.junit.platform.commons.util.ToStringBuilder;
 final class SystemPropertiesExtension
 		implements BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
 
-	/**
-	 * Prepare for entering a context that must be restorable.
-	 *
-	 * <p>The context is prepared by pre-emptively swapping out the current
-	 * System properties with a snapshot. The original system properties are
-	 * restored after the test.
-	 *
-	 * @return the original {@link System#getProperties} object
-	 */
-	Properties prepareToEnterRestorableContext(ExtensionContext context) {
-		var current = System.getProperties();
-		var clone = JupiterPropertyUtils.cloneWithoutDefaults(context, current);
-		System.setProperties(clone);
-		return current;
-	}
-
-	/**
-	 * Prepare to exit a restorable context.
-	 *
-	 * <p>The entry environment will be restored to the state passed in as {@code Properties}.
-	 *
-	 * @param properties a non-null {@code Properties} that contains all entries
-	 * of the entry environment
-	 */
-	void prepareToExitRestorableContext(Properties properties) {
-		System.setProperties(properties);
-	}
-
 	@Override
 	public void beforeAll(ExtensionContext context) {
 		applyForAllContexts(context);
@@ -88,18 +57,27 @@ final class SystemPropertiesExtension
 		applyForAllContexts(context);
 	}
 
-	private void applyForAllContexts(ExtensionContext originalContext) {
-		var allContexts = findAllExtensionContexts(originalContext);
+	private void applyForAllContexts(ExtensionContext context) {
+		var allContexts = findAllExtensionContexts(context);
+		var modification = createDeferredPropertyModification(allContexts);
 
-		var restoreAnnotationContext = findFirstRestoreAnnotationContext(allContexts);
-		restoreAnnotationContext.ifPresent(annotatedElementContext -> {
-			var properties = this.prepareToEnterRestorableContext(annotatedElementContext);
-			storeCompleteBackup(originalContext, properties);
-		});
-
-		// we have to apply the annotations from the outermost to the innermost context.
-		forEachInReverseOrder(allContexts,
-			currentContext -> clearAndSetEntries(originalContext, currentContext, restoreAnnotationContext.isEmpty()));
+		// Please do not refactor out the common parts.
+		findFirstRestoreAnnotationContext(allContexts) //
+				.ifPresentOrElse(
+					// Do a complete backup of the properties
+					restoreAnnotationContext -> {
+						var properties = System.getProperties();
+						storeCompleteBackup(context, properties);
+						var clonedProperties = cloneWithoutDefaults(restoreAnnotationContext, properties);
+						modification.applyTo(clonedProperties);
+						System.setProperties(clonedProperties);
+					},
+					// Backup only the modified properties
+					() -> {
+						var properties = System.getProperties();
+						storePartialBackup(context, modification.createInverseApplyTo(properties));
+						modification.applyTo(properties);
+					});
 	}
 
 	private Optional<ExtensionContext> findFirstRestoreAnnotationContext(List<ExtensionContext> contexts) {
@@ -108,28 +86,22 @@ final class SystemPropertiesExtension
 				.findFirst();
 	}
 
-	private void clearAndSetEntries(ExtensionContext originalContext, ExtensionContext currentContext,
-			boolean doIncrementalBackup) {
-
-		currentContext.getElement().ifPresent(element -> {
+	private DeferredPropertyModification createDeferredPropertyModification(List<ExtensionContext> allContexts) {
+		var modification = new DeferredPropertyModification();
+		// we have to apply the annotations from the outermost to the innermost context.
+		forEachInReverseOrder(allContexts, currentContext -> currentContext.getElement().ifPresent(element -> {
 			var entriesToClear = findEntriesToClear(element);
 			var entriesToSet = findEntriesToSet(element);
-			preventClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
 
 			if (entriesToClear.isEmpty() && entriesToSet.isEmpty()) {
 				return;
 			}
 
-			// Only backup original values if we didn't already do bulk storage of the original state
-			if (doIncrementalBackup) {
-				storeIncrementalBackup(originalContext, currentContext, entriesToClear, entriesToSet.keySet());
-			}
-
-			// For consistency don't use Properties::setProperty or System.setProperty here
-			var properties = System.getProperties();
-			entriesToClear.forEach(properties::remove);
-			properties.putAll(entriesToSet);
-		});
+			preventClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
+			entriesToClear.forEach(modification::clearProperty);
+			entriesToSet.forEach(modification::setProperty);
+		}));
+		return modification;
 	}
 
 	private Set<String> findEntriesToClear(AnnotatedElement element) {
@@ -176,37 +148,18 @@ final class SystemPropertiesExtension
 					));
 	}
 
-	private void storeIncrementalBackup(ExtensionContext context, ExtensionContext incrementContext,
-			Collection<String> entriesToClear, Collection<String> entriesToSet) {
-		var backup = new EntriesBackup(entriesToClear, entriesToSet);
-		getStore(context).put(getStoreKey(context, incrementContext, BackupType.INCREMENTAL), backup);
+	private void storePartialBackup(ExtensionContext context, DeferredPropertyModification backup) {
+		getStore(context).put(createStoreKey(context, BackupType.PARTIAL), backup);
 	}
 
 	private void storeCompleteBackup(ExtensionContext context, Properties backup) {
-		getStore(context).put(getStoreKey(context, context, BackupType.COMPLETE), backup);
+		getStore(context).put(createStoreKey(context, BackupType.COMPLETE), backup);
 	}
 
-	/**
-	 * Restore the complete original state of the entries as they were prior to
-	 * this {@code ExtensionContext}, if the complete state was initially stored
-	 * in a before all/each event.
-	 *
-	 * @param context the {@code ExtensionContext} which may have a bulk backup stored
-	 * @return true if a complete backup exists and was used to restore, false if not
-	 */
-	private boolean restoreOriginalCompleteBackup(ExtensionContext context) {
-		var backup = getCompleteBackup(context);
-		if (backup != null) {
-			prepareToExitRestorableContext(backup);
-			return true;
-		}
-		// No complete backup - false will let the caller know to continue w/ an incremental restore
-		return false;
-	}
-
-	private @Nullable Properties getCompleteBackup(ExtensionContext context) {
-		var key = getStoreKey(context, context, BackupType.COMPLETE);
-		return getStore(context).get(key, Properties.class);
+	private Optional<Properties> findCompleteBackup(ExtensionContext context) {
+		var key = createStoreKey(context, BackupType.COMPLETE);
+		var backup = getStore(context).get(key, Properties.class);
+		return Optional.ofNullable(backup);
 	}
 
 	@Override
@@ -219,14 +172,13 @@ final class SystemPropertiesExtension
 		restoreForAllContexts(context);
 	}
 
-	private void restoreForAllContexts(ExtensionContext originalContext) {
+	private void restoreForAllContexts(ExtensionContext context) {
 		// Try a complete restore first
-		if (!restoreOriginalCompleteBackup(originalContext)) {
-			// A complete backup is not available, so restore incrementally from innermost to outermost
-			findAllExtensionContexts(originalContext) //
-					.forEach(currentContext -> findIncrementalBackup(originalContext, currentContext) //
-							.ifPresent(EntriesBackup::restoreBackup));
-		}
+		findCompleteBackup(context) //
+				.ifPresentOrElse(System::setProperties, //
+					// A complete backup is not available, so use partial backup
+					() -> findPartialBackup(context) //
+							.ifPresent(backup -> backup.applyTo(System.getProperties())));
 	}
 
 	private static List<ExtensionContext> findAllExtensionContexts(ExtensionContext context) {
@@ -238,70 +190,81 @@ final class SystemPropertiesExtension
 		return contexts;
 	}
 
-	private Optional<EntriesBackup> findIncrementalBackup(ExtensionContext originalContext,
-			ExtensionContext incrementContext) {
-		var key = getStoreKey(originalContext, incrementContext, BackupType.INCREMENTAL);
-		var entriesBackup = getStore(originalContext).get(key, EntriesBackup.class);
-		return Optional.ofNullable(entriesBackup);
+	private Optional<DeferredPropertyModification> findPartialBackup(ExtensionContext context) {
+		var key = createStoreKey(context, BackupType.PARTIAL);
+		var backup = getStore(context).get(key, DeferredPropertyModification.class);
+		return Optional.ofNullable(backup);
 	}
 
 	private ExtensionContext.Store getStore(ExtensionContext context) {
 		return context.getStore(ExtensionContext.Namespace.create(getClass()));
 	}
 
-	private StoreKey getStoreKey(ExtensionContext context, ExtensionContext incrementContext, BackupType type) {
-		return new StoreKey(context.getUniqueId(), incrementContext.getUniqueId(), type);
+	private StoreKey createStoreKey(ExtensionContext context, BackupType type) {
+		return new StoreKey(context.getUniqueId(), type);
 	}
 
-	private record StoreKey(String id, String incrementId, BackupType type) {
+	private record StoreKey(String id, BackupType type) {
 	}
 
 	private enum BackupType {
 		/**
-		 * Store entry is for an incremental backup object.
+		 * Store entry is for a partial backup object.
 		 */
-		INCREMENTAL,
+		PARTIAL,
 		/**
 		 * Store entry is for a complete backup object.
 		 */
 		COMPLETE
 	}
 
-	private static final class EntriesBackup {
+	/**
+	 * A sequence of deferred modification applied to a
+	 * {@link Properties} object represented as a single modification.
+	 */
+	private static class DeferredPropertyModification {
+		private static final Object REMOVED = new Object();
+		private final Map<String, Object> changes = new HashMap<>();
 
-		private final Set<String> entriesToClear = new HashSet<>();
-		private final Map<String, Object> entriesToSet = new HashMap<>();
+		void clearProperty(String key) {
+			changes.put(key, REMOVED);
+		}
 
-		EntriesBackup(Collection<String> entriesToClear, Collection<String> entriesToSet) {
-			var properties = System.getProperties();
-			Stream.concat(entriesToClear.stream(), entriesToSet.stream()).forEach(entry -> {
-				// Do not use Properties::getProperty or System.getProperty here, since
-				// this would prevent backing up non-string values.
-				Object backup = properties.get(entry);
-				if (backup == null) {
-					this.entriesToClear.add(entry);
+		void setProperty(String key, Object value) {
+			changes.put(key, value);
+		}
+
+		void applyTo(Properties properties) {
+			changes.forEach((key, value) -> {
+				// For consistency don't use Properties::setProperty here
+				if (REMOVED.equals(value)) {
+					properties.remove(key);
 				}
 				else {
-					this.entriesToSet.put(entry, backup);
+					properties.put(key, value);
 				}
 			});
 		}
 
-		void restoreBackup() {
-			// We can't use Properties::setProperty or System.setProperty here, since
-			// this would prevent restoring non-string values.
-			var properties = System.getProperties();
-			entriesToClear.forEach(properties::remove);
-			properties.putAll(entriesToSet);
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringBuilder(this) //
-					.append("entriesToClear", this.entriesToClear) //
-					.append("entriesToSet", this.entriesToSet) //
-					.toString();
+		/**
+		 * Creates the inverse of calling {@link #applyTo(Properties)} such
+		 * that {@code modification.applyTo(properties); inverse.applyTo(properties);}
+		 * has no observable effect.
+		 */
+		DeferredPropertyModification createInverseApplyTo(Properties properties) {
+			DeferredPropertyModification inverse = new DeferredPropertyModification();
+			changes.keySet().forEach(key -> {
+				// Do not use Properties::getProperty here, since this would
+				// prevent backing up non-string values.
+				Object backup = properties.get(key);
+				if (backup == null) {
+					inverse.clearProperty(key);
+				}
+				else {
+					inverse.setProperty(key, backup);
+				}
+			});
+			return inverse;
 		}
 	}
-
 }
