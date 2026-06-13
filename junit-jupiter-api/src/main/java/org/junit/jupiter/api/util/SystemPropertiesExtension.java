@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.util.ToStringBuilder;
 
 /**
  * {@code Extension} which provides support for the following annotations.
@@ -102,7 +103,7 @@ final class SystemPropertiesExtension
 		// Try a complete restore first
 		findCompleteBackup(context) //
 				.ifPresentOrElse(System::setProperties, //
-						// A complete backup is not available, so use partial backup
+					// A complete backup is not available, so use partial backup
 					() -> findPartialBackup(context) //
 							.ifPresent(backup -> backup.applyTo(System.getProperties())));
 	}
@@ -188,6 +189,20 @@ final class SystemPropertiesExtension
 				}
 			});
 			return inverse;
+		}
+
+		@Override
+		public String toString() {
+			var builder = new ToStringBuilder(DeferredPropertyModification.class);
+			this.changes.forEach((key, value) -> {
+				if (REMOVED.equals(value)) {
+					builder.append(key, null);
+				}
+				else {
+					builder.append(key, value);
+				}
+			});
+			return builder.toString();
 		}
 
 		static DeferredPropertyModification create(List<ExtensionContext> allContexts) {
