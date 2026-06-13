@@ -59,7 +59,7 @@ final class SystemPropertiesExtension
 
 	private void applyForAllContexts(ExtensionContext context) {
 		var allContexts = findAllExtensionContexts(context);
-		var modification = createDeferredPropertyModification(allContexts);
+		var modification = DeferredPropertyModification.create(allContexts);
 
 		// Please do not refactor out the common parts.
 		findFirstRestoreAnnotationContext(allContexts) //
@@ -80,86 +80,12 @@ final class SystemPropertiesExtension
 					});
 	}
 
-	private Optional<ExtensionContext> findFirstRestoreAnnotationContext(List<ExtensionContext> contexts) {
-		return contexts.stream() //
-				.filter(context -> isAnnotated(context.getElement(), RestoreSystemProperties.class)) //
-				.findFirst();
-	}
-
-	private DeferredPropertyModification createDeferredPropertyModification(List<ExtensionContext> allContexts) {
-		var modification = new DeferredPropertyModification();
-		// we have to apply the annotations from the outermost to the innermost context.
-		forEachInReverseOrder(allContexts, currentContext -> currentContext.getElement().ifPresent(element -> {
-			var entriesToClear = findEntriesToClear(element);
-			var entriesToSet = findEntriesToSet(element);
-
-			if (entriesToClear.isEmpty() && entriesToSet.isEmpty()) {
-				return;
-			}
-
-			preventClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
-			entriesToClear.forEach(modification::clearProperty);
-			entriesToSet.forEach(modification::setProperty);
-		}));
-		return modification;
-	}
-
-	private Set<String> findEntriesToClear(AnnotatedElement element) {
-		return findRepeatableAnnotations(element, ClearSystemProperty.class).stream() //
-				.map(ClearSystemProperty::key) //
-				// already distinct due to findRepeatableAnnotations
-				.collect(toSet());
-	}
-
-	private Map<String, String> findEntriesToSet(AnnotatedElement element) {
-		var entries = new HashMap<String, String>();
-		var duplicatePropertyNames = new HashSet<String>();
-
-		findRepeatableAnnotations(element, SetSystemProperty.class) //
-				.forEach(annotation -> {
-					var key = annotation.key();
-					if (entries.put(key, annotation.value()) != null) {
-						duplicatePropertyNames.add(key);
-					}
-				});
-
-		requireUniqueEntries(element, duplicatePropertyNames);
-		return entries;
-	}
-
-	private void preventClearAndSetSameEntries(AnnotatedElement element, Set<String> entriesToClear,
-			Set<String> entriesToSet) {
-		requireUniqueEntries(element, //
-			entriesToClear.stream() //
-					.filter(entriesToSet::contains) //
-					.collect(toSet()));
-	}
-
-	private static void requireUniqueEntries(AnnotatedElement annotatedElement, Set<String> duplicatePropertNames) {
-		if (duplicatePropertNames.isEmpty()) {
-			return;
-		}
-		throw new ExtensionConfigurationException(
-			"SystemPropertyExtension was configured to set/clear %s [%s] more than once by [%s]." //
-					.formatted( //
-						duplicatePropertNames.size() == 1 ? "property" : "properties", //
-						String.join(", ", duplicatePropertNames), //
-						annotatedElement //
-					));
-	}
-
-	private void storePartialBackup(ExtensionContext context, DeferredPropertyModification backup) {
-		getStore(context).put(createStoreKey(context, BackupType.PARTIAL), backup);
-	}
-
 	private void storeCompleteBackup(ExtensionContext context, Properties backup) {
 		getStore(context).put(createStoreKey(context, BackupType.COMPLETE), backup);
 	}
 
-	private Optional<Properties> findCompleteBackup(ExtensionContext context) {
-		var key = createStoreKey(context, BackupType.COMPLETE);
-		var backup = getStore(context).get(key, Properties.class);
-		return Optional.ofNullable(backup);
+	private void storePartialBackup(ExtensionContext context, DeferredPropertyModification backup) {
+		getStore(context).put(createStoreKey(context, BackupType.PARTIAL), backup);
 	}
 
 	@Override
@@ -176,18 +102,15 @@ final class SystemPropertiesExtension
 		// Try a complete restore first
 		findCompleteBackup(context) //
 				.ifPresentOrElse(System::setProperties, //
-					// A complete backup is not available, so use partial backup
+						// A complete backup is not available, so use partial backup
 					() -> findPartialBackup(context) //
 							.ifPresent(backup -> backup.applyTo(System.getProperties())));
 	}
 
-	private static List<ExtensionContext> findAllExtensionContexts(ExtensionContext context) {
-		var contexts = new ArrayList<ExtensionContext>();
-		do {
-			contexts.add(context);
-			context = context.getParent().orElse(null);
-		} while (context != null);
-		return contexts;
+	private Optional<Properties> findCompleteBackup(ExtensionContext context) {
+		var key = createStoreKey(context, BackupType.COMPLETE);
+		var backup = getStore(context).get(key, Properties.class);
+		return Optional.ofNullable(backup);
 	}
 
 	private Optional<DeferredPropertyModification> findPartialBackup(ExtensionContext context) {
@@ -196,12 +119,12 @@ final class SystemPropertiesExtension
 		return Optional.ofNullable(backup);
 	}
 
-	private ExtensionContext.Store getStore(ExtensionContext context) {
-		return context.getStore(ExtensionContext.Namespace.create(getClass()));
-	}
-
 	private StoreKey createStoreKey(ExtensionContext context, BackupType type) {
 		return new StoreKey(context.getUniqueId(), type);
+	}
+
+	private ExtensionContext.Store getStore(ExtensionContext context) {
+		return context.getStore(ExtensionContext.Namespace.create(getClass()));
 	}
 
 	private record StoreKey(String id, BackupType type) {
@@ -266,5 +189,82 @@ final class SystemPropertiesExtension
 			});
 			return inverse;
 		}
+
+		static DeferredPropertyModification create(List<ExtensionContext> allContexts) {
+			var modification = new DeferredPropertyModification();
+			// we have to apply the annotations from the outermost to the innermost context.
+			forEachInReverseOrder(allContexts, currentContext -> currentContext.getElement().ifPresent(element -> {
+				var entriesToClear = findEntriesToClear(element);
+				var entriesToSet = findEntriesToSet(element);
+
+				if (entriesToClear.isEmpty() && entriesToSet.isEmpty()) {
+					return;
+				}
+
+				requireNoClearAndSetSameEntries(element, entriesToClear, entriesToSet.keySet());
+				entriesToClear.forEach(modification::clearProperty);
+				entriesToSet.forEach(modification::setProperty);
+			}));
+			return modification;
+		}
+
+		private static Set<String> findEntriesToClear(AnnotatedElement element) {
+			return findRepeatableAnnotations(element, ClearSystemProperty.class).stream() //
+					.map(ClearSystemProperty::key) //
+					// already distinct due to findRepeatableAnnotations
+					.collect(toSet());
+		}
+
+		private static Map<String, String> findEntriesToSet(AnnotatedElement element) {
+			var entries = new HashMap<String, String>();
+			var duplicatePropertyNames = new HashSet<String>();
+
+			findRepeatableAnnotations(element, SetSystemProperty.class) //
+					.forEach(annotation -> {
+						var key = annotation.key();
+						if (entries.put(key, annotation.value()) != null) {
+							duplicatePropertyNames.add(key);
+						}
+					});
+
+			requireUniqueEntries(element, duplicatePropertyNames);
+			return entries;
+		}
+
+		private static void requireNoClearAndSetSameEntries(AnnotatedElement element, Set<String> entriesToClear,
+				Set<String> entriesToSet) {
+			requireUniqueEntries(element, //
+				entriesToClear.stream() //
+						.filter(entriesToSet::contains) //
+						.collect(toSet()));
+		}
+
+		private static void requireUniqueEntries(AnnotatedElement annotatedElement, Set<String> duplicatePropertNames) {
+			if (duplicatePropertNames.isEmpty()) {
+				return;
+			}
+			throw new ExtensionConfigurationException(
+				"SystemPropertyExtension was configured to set/clear %s [%s] more than once by [%s]." //
+						.formatted( //
+							duplicatePropertNames.size() == 1 ? "property" : "properties", //
+							String.join(", ", duplicatePropertNames), //
+							annotatedElement //
+						));
+		}
+	}
+
+	private static List<ExtensionContext> findAllExtensionContexts(ExtensionContext context) {
+		var contexts = new ArrayList<ExtensionContext>();
+		do {
+			contexts.add(context);
+			context = context.getParent().orElse(null);
+		} while (context != null);
+		return contexts;
+	}
+
+	private static Optional<ExtensionContext> findFirstRestoreAnnotationContext(List<ExtensionContext> contexts) {
+		return contexts.stream() //
+				.filter(context -> isAnnotated(context.getElement(), RestoreSystemProperties.class)) //
+				.findFirst();
 	}
 }
