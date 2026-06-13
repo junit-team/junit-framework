@@ -23,6 +23,10 @@ import org.junit.jupiter.params.support.FieldContext;
  * {@link ArgumentsAggregator} implementations that do not need to distinguish
  * between fields and method/constructor parameters.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>This class is designed for extension.
+ *
  * @since 5.0
  * @see ArgumentsAggregator
  */

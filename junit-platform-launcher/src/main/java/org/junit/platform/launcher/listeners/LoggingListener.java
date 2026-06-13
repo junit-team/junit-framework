@@ -30,6 +30,11 @@ import org.junit.platform.launcher.TestPlan;
  * for all events via a {@link BiConsumer} that consumes {@code Throwable}
  * and {@code Supplier<String>}.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 1.0
  * @see #forJavaUtilLogging()
  * @see #forJavaUtilLogging(Level)

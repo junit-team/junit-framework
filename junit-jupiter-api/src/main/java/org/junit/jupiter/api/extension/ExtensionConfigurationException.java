@@ -22,6 +22,11 @@ import org.junit.platform.commons.JUnitException;
  * Thrown if an error is encountered regarding the configuration of an
  * extension.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 5.0
  */
 @API(status = STABLE, since = "5.0")
