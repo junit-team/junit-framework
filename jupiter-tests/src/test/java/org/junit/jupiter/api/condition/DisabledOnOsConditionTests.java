@@ -12,9 +12,11 @@ package org.junit.jupiter.api.condition;
 
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onAix;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onArchitecture;
+import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onDragonflybsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onFreebsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onLinux;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onMac;
+import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onNetbsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onOpenbsd;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onSolaris;
 import static org.junit.jupiter.api.condition.EnabledOnOsIntegrationTests.onWindows;
@@ -85,6 +87,15 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	}
 
 	/**
+	 * @see DisabledOnOsIntegrationTests#dragonflybsd()
+	 */
+	@Test
+	void dragonflybsd() {
+		evaluateCondition();
+		assertDisabledOnCurrentOsIf(onDragonflybsd());
+	}
+
+	/**
 	 * @see DisabledOnOsIntegrationTests#freebsd()
 	 */
 	@Test
@@ -130,6 +141,15 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	}
 
 	/**
+	 * @see DisabledOnOsIntegrationTests#netbsd()
+	 */
+	@Test
+	void netbsd() {
+		evaluateCondition();
+		assertDisabledOnCurrentOsIf(onNetbsd());
+	}
+
+	/**
 	 * @see DisabledOnOsIntegrationTests#windows()
 	 */
 	@Test
@@ -153,8 +173,8 @@ class DisabledOnOsConditionTests extends AbstractExecutionConditionTests {
 	@Test
 	void other() {
 		evaluateCondition();
-		assertDisabledOnCurrentOsIf(
-			!(onAix() || onFreebsd() || onLinux() || onMac() || onOpenbsd() || onSolaris() || onWindows()));
+		assertDisabledOnCurrentOsIf(!(onAix() || onDragonflybsd() || onFreebsd() || onLinux() || onMac() || onNetbsd()
+				|| onOpenbsd() || onSolaris() || onWindows()));
 	}
 
 	/**
