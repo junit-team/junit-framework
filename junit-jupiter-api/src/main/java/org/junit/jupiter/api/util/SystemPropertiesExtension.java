@@ -53,83 +53,71 @@ final class SystemPropertiesExtension
 		var modification = SystemPropertiesModification.create(allContexts);
 
 		// Please do not refactor out the common parts.
-		findFirstRestoreAnnotationContext(allContexts) //
-				.ifPresentOrElse(
+		var backup = findFirstRestoreAnnotationContext(allContexts) //
+				.<Backup> map(restoreAnnotationContext -> {
 					// Do a complete backup of the properties
-					restoreAnnotationContext -> {
-						var properties = System.getProperties();
-						storeCompleteBackup(context, properties);
-						var clonedProperties = cloneWithoutDefaults(restoreAnnotationContext, properties);
-						modification.applyTo(clonedProperties);
-						System.setProperties(clonedProperties);
-					},
+					var properties = System.getProperties();
+					var clonedProperties = cloneWithoutDefaults(restoreAnnotationContext, properties);
+					modification.applyTo(clonedProperties);
+					System.setProperties(clonedProperties);
+					return new Backup.Complete(properties);
+				}).orElseGet(() -> {
 					// Backup only the modified properties
-					() -> {
-						var properties = System.getProperties();
-						storePartialBackup(context, modification.createInverseApplyTo(properties));
-						modification.applyTo(properties);
-					});
-	}
+					var properties = System.getProperties();
+					var partialBackup = new Backup.Partial(modification.createInverseApplyTo(properties));
+					modification.applyTo(properties);
+					return partialBackup;
+				});
 
-	private void storeCompleteBackup(ExtensionContext context, Properties backup) {
-		getStore(context).put(createStoreKey(context, BackupType.COMPLETE), backup);
-	}
-
-	private void storePartialBackup(ExtensionContext context, SystemPropertiesModification backup) {
-		getStore(context).put(createStoreKey(context, BackupType.PARTIAL), backup);
+		storeBackup(context, backup);
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) {
-		restoreForAllContexts(context);
+		restoreBackup(context);
 	}
 
 	@Override
 	public void afterAll(ExtensionContext context) {
-		restoreForAllContexts(context);
+		restoreBackup(context);
 	}
 
-	private void restoreForAllContexts(ExtensionContext context) {
-		// Try a complete restore first
-		findCompleteBackup(context) //
-				.ifPresentOrElse(System::setProperties, //
-					// A complete backup is not available, so use partial backup
-					() -> findPartialBackup(context) //
-							.ifPresent(backup -> backup.applyTo(System.getProperties())));
+	private void restoreBackup(ExtensionContext context) {
+		findBackup(context).ifPresent(Backup::restore);
 	}
 
-	private Optional<Properties> findCompleteBackup(ExtensionContext context) {
-		var key = createStoreKey(context, BackupType.COMPLETE);
-		var backup = getStore(context).get(key, Properties.class);
+	private void storeBackup(ExtensionContext context, Backup backup) {
+		getStore(context).put(context.getUniqueId(), backup);
+	}
+
+	private Optional<Backup> findBackup(ExtensionContext context) {
+		var backup = getStore(context).get(context.getUniqueId(), Backup.class);
 		return Optional.ofNullable(backup);
-	}
-
-	private Optional<SystemPropertiesModification> findPartialBackup(ExtensionContext context) {
-		var key = createStoreKey(context, BackupType.PARTIAL);
-		var backup = getStore(context).get(key, SystemPropertiesModification.class);
-		return Optional.ofNullable(backup);
-	}
-
-	private StoreKey createStoreKey(ExtensionContext context, BackupType type) {
-		return new StoreKey(context.getUniqueId(), type);
 	}
 
 	private ExtensionContext.Store getStore(ExtensionContext context) {
 		return context.getStore(ExtensionContext.Namespace.create(getClass()));
 	}
 
-	private record StoreKey(String id, BackupType type) {
-	}
+	private sealed interface Backup {
 
-	private enum BackupType {
-		/**
-		 * Store entry is for a partial backup object.
-		 */
-		PARTIAL,
-		/**
-		 * Store entry is for a complete backup object.
-		 */
-		COMPLETE
+		void restore();
+
+		/// Partial backup
+		record Partial(SystemPropertiesModification inverseModification) implements Backup {
+			@Override
+			public void restore() {
+				inverseModification.applyTo(System.getProperties());
+			}
+		}
+
+		/// Complete backup
+		record Complete(Properties originalProperties) implements Backup {
+			@Override
+			public void restore() {
+				System.setProperties(originalProperties);
+			}
+		}
 	}
 
 	private static List<ExtensionContext> findAllExtensionContexts(ExtensionContext context) {
