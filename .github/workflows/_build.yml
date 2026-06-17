@@ -18,7 +18,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Install GraalVM
-      uses: graalvm/setup-graalvm@329c42c5f4c343bceb505f0b28cc8499bc2bf174 # v1.5.4
+      uses: graalvm/setup-graalvm@809afe62741147990fbf405045cd15e61bffedfe # v1.5.5
       with:
         distribution: graalvm
         version: latest
