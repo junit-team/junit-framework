@@ -2,6 +2,9 @@ name: Codeberg
 
 on: [ push ]
 
+permissions:
+  contents: read
+
 jobs:
   mirror:
     name: Mirror repo
