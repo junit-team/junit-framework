@@ -36,12 +36,18 @@ public abstract class SimpleArgumentsAggregator implements ArgumentsAggregator {
 	public SimpleArgumentsAggregator() {
 	}
 
+	/**
+	 * Delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
+	 */
 	@Override
 	public @Nullable Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context)
 			throws ArgumentsAggregationException {
 		return aggregateArguments(accessor, context.getParameter().getType(), context, context.getIndex());
 	}
 
+	/**
+	 * Delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
+	 */
 	@Override
 	public @Nullable Object aggregateArguments(ArgumentsAccessor accessor, FieldContext context)
 			throws ArgumentsAggregationException {
