@@ -3,7 +3,7 @@ ant = "1.10.17"
 apiguardian = "1.1.2"
 assertj = "3.27.7"
 bnd = "7.3.0"
-checkstyle = "13.5.0"
+checkstyle = "13.6.0"
 eclipse = "4.40.0"
 jackson = "3.2.0"
 jacoco = "0.8.15"
@@ -60,7 +60,7 @@ mockito-bom = { module = "org.mockito:mockito-bom", version = "5.23.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
-nullaway = { module = "com.uber.nullaway:nullaway", version = "0.13.6" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.13.7" }
 opentest4j = { module = "org.opentest4j:opentest4j", version.ref = "opentest4j" }
 openTestReporting-cli = { module = "org.opentest4j.reporting:open-test-reporting-cli", version.ref = "openTestReporting" }
 openTestReporting-events = { module = "org.opentest4j.reporting:open-test-reporting-events", version.ref = "openTestReporting" }
@@ -94,7 +94,7 @@ xmlunit = ["xmlunit-assertj", "xmlunit-placeholders", "xmlunit-jakarta-jaxb-impl
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.5" }
 commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.6.0" }
-develocity = { id = "com.gradle.develocity", version = "4.4.2" }
+develocity = { id = "com.gradle.develocity", version = "4.4.3" }
 download = { id = "de.undercouch.download", version = "5.7.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "5.1.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
@@ -106,5 +106,5 @@ node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.1.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.5.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.4.2" }
-spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.7.0" }
 spring-antora = { id = "io.spring.antora.generate-antora-yml", version = "0.0.1" }

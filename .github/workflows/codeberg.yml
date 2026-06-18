@@ -1,0 +1,23 @@
+name: Codeberg
+
+on: [ push ]
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    name: Mirror repo
+    runs-on: ubuntu-latest
+    if: github.repository == 'junit-team/junit-framework'
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+      - uses: yesolutions/mirror-action@1708f16cdb28634fd3ba10c5c79abc91f5578a14 # v0.7.0
+        with:
+          REMOTE: https://codeberg.org/junit-team/junit-framework.git
+          GIT_USERNAME: junit-builds
+          GIT_PASSWORD: ${{ secrets.CODEBERG_TOKEN }}
