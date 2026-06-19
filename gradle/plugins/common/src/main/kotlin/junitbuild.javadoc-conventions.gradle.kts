@@ -45,18 +45,20 @@ tasks.javadoc {
 	val targetUrl = "https://docs.junit.org/${version.toString().replace("-SNAPSHOT", "")}"
 	doLast {
 		destinationDir!!.walkTopDown()
-			.filter { it.extension == "html" }
 			.forEach { file ->
-				val content = file.readText()
-				if (content.contains(sourceUrl)) {
-					val updatedContent = content.replace(sourceUrl, targetUrl)
-					file.writeText(updatedContent)
+				if (file.extension == "html") {
+					val content = file.readText()
+					if (content.contains(sourceUrl)) {
+						val updatedContent = content.replace(sourceUrl, targetUrl)
+						file.writeText(updatedContent)
+					}
+				} else if (file.name == "stylesheet.css") {
+					// Remove invalid import of `dejavu.css` due to `javadoc --no-fonts`
+					val filteredLines = file.readLines()
+						.filter { !it.startsWith("@import url('fonts/") }
+					file.toPath().writeLines(filteredLines)
 				}
 			}
-			// TODO Remove invalid import of `dejavu.css` due to `javadoc --no-fonts`
-			//	filesMatching("**/stylesheet.css") {
-			//	filter { line -> if (line.startsWith("@import url('fonts/")) null else line }
-			//	}
 	}
 }
 
