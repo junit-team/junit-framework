@@ -31,6 +31,7 @@ tasks.javadoc {
 			addBooleanOption("Xdoclint:all,-missing", true)
 			addBooleanOption("html5", true)
 			addBooleanOption("Werror", true)
+			addBooleanOption("-no-fonts", true)
 			addMultilineStringsOption("tag").value = listOf(
 				"apiNote:a:API Note:",
 				"implNote:a:Implementation Note:"
@@ -52,6 +53,10 @@ tasks.javadoc {
 					file.writeText(updatedContent)
 				}
 			}
+			// TODO Remove invalid import of `dejavu.css` due to `javadoc --no-fonts`
+			//	filesMatching("**/stylesheet.css") {
+			//	filter { line -> if (line.startsWith("@import url('fonts/")) null else line }
+			//	}
 	}
 }
 
