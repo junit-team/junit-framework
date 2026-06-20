@@ -37,7 +37,7 @@ public abstract class SimpleArgumentsAggregator implements ArgumentsAggregator {
 	}
 
 	/**
-	 * Delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
+	 * By default, this method delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
 	 */
 	@Override
 	public @Nullable Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context)
@@ -46,7 +46,7 @@ public abstract class SimpleArgumentsAggregator implements ArgumentsAggregator {
 	}
 
 	/**
-	 * Delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
+	 * By default, this method delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
 	 */
 	@Override
 	public @Nullable Object aggregateArguments(ArgumentsAccessor accessor, FieldContext context)
