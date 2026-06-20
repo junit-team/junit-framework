@@ -11,13 +11,13 @@ plugins {
 description = "JUnit"
 group = "org.junit"
 
-val license by extra(License(
+extra["license"] = License(
 	name = "Eclipse Public License v2.0",
 	url = uri("https://www.eclipse.org/legal/epl-v20.html"),
-	headerFile = layout.projectDirectory.file("gradle/config/spotless/eclipse-public-license-2.0.java")
-))
+	headerFile = layout.settingsDirectory.file("gradle/config/spotless/eclipse-public-license-2.0.java")
+)
 
-val platformProjects by extra(listOf(
+val platformProjects = listOf(
 		projects.junitPlatformCommons,
 		projects.junitPlatformConsole,
 		projects.junitPlatformConsoleStandalone,
@@ -28,22 +28,30 @@ val platformProjects by extra(listOf(
 		projects.junitPlatformSuiteApi,
 		projects.junitPlatformSuiteEngine,
 		projects.junitPlatformTestkit
-).map { dependencyProject(it) })
+)
+	.map { dependencyProject(it) }
+	.also { extra["platformProjects"] = it }
 
-val jupiterProjects by extra(listOf(
+val jupiterProjects = listOf(
 		projects.junitJupiter,
 		projects.junitJupiterApi,
 		projects.junitJupiterEngine,
 		projects.junitJupiterMigrationsupport,
 		projects.junitJupiterParams
-).map { dependencyProject(it) })
+)
+	.map { dependencyProject(it) }
+	.also { extra["jupiterProjects"] = it }
 
-val vintageProjects by extra(listOf(
-	dependencyProject(projects.junitVintageEngine)
-))
+val vintageProjects = listOf(
+	projects.junitVintageEngine
+)
+	.map { dependencyProject(it) }
+	.also { extra["vintageProjects"] = it }
 
-val mavenizedProjects by extra(listOf(dependencyProject(projects.junitStart)) + platformProjects + jupiterProjects + vintageProjects)
-val modularProjects by extra(mavenizedProjects - setOf(dependencyProject(projects.junitPlatformConsoleStandalone)))
+val mavenizedProjects = (listOf(dependencyProject(projects.junitStart)) + platformProjects + jupiterProjects + vintageProjects)
+	.also { extra["mavenizedProjects"] = it }
+val modularProjects = (mavenizedProjects - setOf(dependencyProject(projects.junitPlatformConsoleStandalone)))
+	.also { extra["modularProjects"] = it }
 
 dependencies {
 	modularProjects.forEach {

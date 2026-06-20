@@ -7,7 +7,8 @@ plugins {
 	id("junitbuild.jacoco-conventions")
 }
 
-val mavenizedProjects: List<Project> by rootProject.extra
+@Suppress("UNCHECKED_CAST")
+val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 
 tasks.withType<Test>().configureEach {
 	configure<JacocoTaskExtension> {
@@ -15,7 +16,7 @@ tasks.withType<Test>().configureEach {
 	}
 }
 
-val codeCoverageClassesJar by tasks.registering(Jar::class) {
+val codeCoverageClassesJar = tasks.register("codeCoverageClassesJar", Jar::class) {
 	from(tasks.jar.map { zipTree(it.archiveFile) })
 	archiveClassifier = "jacoco"
 	enabled = project in mavenizedProjects

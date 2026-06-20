@@ -48,7 +48,7 @@ tasks {
 			""")
 		}
 	}
-	val generateJreTestDouble by registering(GenerateJreRelatedSourceCode::class) {
+	val generateJreTestDouble = register("generateJreTestDouble", GenerateJreRelatedSourceCode::class) {
 		templateDir = layout.projectDirectory.dir("src/templates/resources/main")
 		targetDir = layout.buildDirectory.dir("generated/sources/jte/testDouble")
 		maxVersion = 22

@@ -25,10 +25,8 @@ val buildTimeAndDate = buildParameters.manifest.buildTimestamp
 	.orNull
 	?: OffsetDateTime.now()
 
-val buildDate: String by extra { dateFormatter.format(buildTimeAndDate) }
-val buildTime: String by extra { timeFormatter.format(buildTimeAndDate) }
-val buildRevision: String by extra {
-	providers.exec {
-		commandLine("git", "rev-parse", "--verify", "HEAD")
-	}.standardOutput.asText.get().trim()
-}
+extra["buildDate"] = dateFormatter.format(buildTimeAndDate)
+extra["buildTime"] = timeFormatter.format(buildTimeAndDate)
+extra["buildRevision"] = providers.exec {
+	commandLine("git", "rev-parse", "--verify", "HEAD")
+}.standardOutput.asText.get().trim()

@@ -19,8 +19,10 @@ plugins {
 	id("junitbuild.testing-conventions")
 }
 
-val mavenizedProjects: List<Project> by rootProject
-val modularProjects: List<Project> by rootProject
+@Suppress("UNCHECKED_CAST")
+val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
+@Suppress("UNCHECKED_CAST")
+val modularProjects = rootProject.extra["modularProjects"] as List<Project>
 
 // Because we need to set up Javadoc aggregation
 modularProjects.forEach { evaluationDependsOn(it.path) }
@@ -50,8 +52,8 @@ val allJavadocSinceValuesClasspath = configurations.resolvable("allJavadocSinceV
 		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named("javadoc-since-values"))
 	}
 }
-val tools by sourceSets.creating
-val toolsImplementation by configurations.getting
+val tools = sourceSets.create("tools")
+val toolsImplementation = configurations[tools.implementationConfigurationName]
 
 dependencies {
 	implementation(projects.junitJupiterApi) {
@@ -91,7 +93,7 @@ dependencies {
 	standaloneConsoleLauncher(projects.junitPlatformConsoleStandalone)
 }
 
-val buildRevision: String by rootProject.extra
+val buildRevision = rootProject.extra["buildRevision"] as String
 val snapshot = version.isSnapshot()
 val releaseBranch = if (snapshot) "HEAD" else "r${version}"
 val replaceCurrentDocs = buildParameters.documentation.replaceCurrentDocs
@@ -125,7 +127,7 @@ tasks {
 	val consoleLauncherTestEventXmlFiles =
 		files(consoleLauncherTestReportsDir.map { it.asFileTree.matching { include("**/open-test-report.xml") } })
 
-	val consoleLauncherTest by registering(RunConsoleLauncher::class) {
+	val consoleLauncherTest = register("consoleLauncherTest", RunConsoleLauncher::class) {
 		args.addAll("execute")
 		args.addAll("--scan-classpath")
 		args.addAll("--config=junit.platform.reporting.open.xml.enabled=true")
@@ -185,35 +187,35 @@ tasks {
 		config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleMain.xml"))
 	}
 
-	val generateConsoleLauncherOptions by registering(CaptureJavaExecOutput::class) {
+	val generateConsoleLauncherOptions = register("generateConsoleLauncherOptions", CaptureJavaExecOutput::class) {
 		classpath.from(standaloneConsoleLauncherClasspath)
 		mainClass = "org.junit.platform.console.ConsoleLauncher"
 		args.addAll("--help", "--disable-banner")
 		outputFile = consoleLauncherOptionsFile
 	}
 
-	val generateConsoleLauncherDiscoverOptions by registering(CaptureJavaExecOutput::class) {
+	val generateConsoleLauncherDiscoverOptions = register("generateConsoleLauncherDiscoverOptions", CaptureJavaExecOutput::class) {
 		classpath.from(standaloneConsoleLauncherClasspath)
 		mainClass = "org.junit.platform.console.ConsoleLauncher"
 		args.addAll("discover", "--help", "--disable-banner")
 		outputFile = consoleLauncherDiscoverOptionsFile
 	}
 
-	val generateConsoleLauncherExecuteOptions by registering(CaptureJavaExecOutput::class) {
+	val generateConsoleLauncherExecuteOptions = register("generateConsoleLauncherExecuteOptions", CaptureJavaExecOutput::class) {
 		classpath.from(standaloneConsoleLauncherClasspath)
 		mainClass = "org.junit.platform.console.ConsoleLauncher"
 		args.addAll("execute", "--help", "--disable-banner")
 		outputFile = consoleLauncherExecuteOptionsFile
 	}
 
-	val generateConsoleLauncherEnginesOptions by registering(CaptureJavaExecOutput::class) {
+	val generateConsoleLauncherEnginesOptions = register("generateConsoleLauncherEnginesOptions", CaptureJavaExecOutput::class) {
 		classpath.from(standaloneConsoleLauncherClasspath)
 		mainClass = "org.junit.platform.console.ConsoleLauncher"
 		args.addAll("engines", "--help", "--disable-banner")
 		outputFile = consoleLauncherEnginesOptionsFile
 	}
 
-	val generateApiTables by registering(JavaExec::class) {
+	val generateApiTables = register("generateApiTables", JavaExec::class) {
 		classpath = tools.runtimeClasspath
 		mainClass = "org.junit.api.tools.ApiReportGenerator"
 		systemProperty("api.moduleNames", modularProjects.map { it.javaModuleName }.sorted().joinToString(","))
@@ -229,7 +231,7 @@ tasks {
 		outputs.file(experimentalApisTableFile)
 	}
 
-	val generateStandaloneConsoleLauncherShadowedArtifactsFile by registering(GenerateStandaloneConsoleLauncherShadowedArtifactsFile::class) {
+	val generateStandaloneConsoleLauncherShadowedArtifactsFile = register("generateStandaloneConsoleLauncherShadowedArtifactsFile", GenerateStandaloneConsoleLauncherShadowedArtifactsFile::class) {
 		inputJar.fileProvider(standaloneConsoleLauncherClasspath.flatMap { it.elements.map { it.single().asFile } })
 		outputFile = standaloneConsoleLauncherShadowedArtifactsFile
 	}
@@ -241,7 +243,7 @@ tasks {
 
 	val plantUmlOutputDirectory = plantUml.flatMap { it.outputDirectory }
 
-	val generateAsciidocInputs by registering {
+	val generateAsciidocInputs = register("generateAsciidocInputs") {
 		dependsOn(
 			generateConsoleLauncherOptions,
 			generateConsoleLauncherDiscoverOptions,
@@ -253,7 +255,7 @@ tasks {
 		)
 	}
 
-	val downloadJavadocElementLists by registering {
+	val downloadJavadocElementLists = register("downloadJavadocElementLists") {
 		outputs.cacheIf { true }
 		outputs.dir(elementListsDir).withPropertyName("elementListsDir")
 		inputs.property("externalModulesWithoutModularJavadoc", externalModulesWithoutModularJavadoc)
@@ -268,7 +270,7 @@ tasks {
 		}
 	}
 
-	val mergeJavadocSinceValues by registering {
+	val mergeJavadocSinceValues = register("mergeJavadocSinceValues") {
 		inputs.files(allJavadocSinceValuesClasspath).withPathSensitivity(PathSensitivity.NONE)
 		val outputFile = layout.buildDirectory.file("docs/aggregated-javadoc-since-values.txt")
 		outputs.file(outputFile)
@@ -289,7 +291,7 @@ tasks {
 		}
 	}
 
-	val aggregateJavadocs by registering(Javadoc::class) {
+	val aggregateJavadocs = register("aggregateJavadocs", Javadoc::class) {
 		dependsOn(modularProjects.map { it.tasks.jar })
 		dependsOn(downloadJavadocElementLists)
 		group = "Documentation"
@@ -372,7 +374,7 @@ tasks {
 		options.destinationDirectory = layout.buildDirectory.dir("docs/javadoc").get().asFile
 	}
 
-	val fixJavadoc by registering(Copy::class) {
+	val fixJavadoc = register("fixJavadoc", Copy::class) {
 		dependsOn(aggregateJavadocs)
 		group = "Documentation"
 		description = "Fix links to external API specs in the locally aggregated Javadoc HTML files"
@@ -416,7 +418,7 @@ tasks {
 		into(layout.buildDirectory.dir("docs/fixedJavadoc"))
 	}
 
-	val prepareGitHubAttestation by registering(Sync::class) {
+	val prepareGitHubAttestation = register("prepareGitHubAttestation", Sync::class) {
 		from(attestationClasspath)
 		into(layout.buildDirectory.dir("attestation"))
 		rename("(.*)-SNAPSHOT.jar", "$1-SNAPSHOT+${buildRevision.substring(0, 7)}.jar")

@@ -23,15 +23,12 @@ tasks {
 	}
 	jar {
 		bundle {
-			val importAPIGuardian: String by extra
-			val importJSpecify: String by extra
-			val importCommonsLogging: String by extra
 			bnd("""
 				# Import JUnit4 packages with a version
 				Import-Package: \
-					$importAPIGuardian,\
-					$importJSpecify,\
-					$importCommonsLogging,\
+					${extra["importAPIGuardian"]},\
+					${extra["importJSpecify"]},\
+					${extra["importCommonsLogging"]},\
 					org.junit;version="[${libs.versions.junit4Min.get()},5)",\
 					org.junit.rules;version="[${libs.versions.junit4Min.get()},5)",\
 					*

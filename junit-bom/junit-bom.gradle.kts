@@ -7,7 +7,8 @@ description = "${rootProject.description} (Bill of Materials)"
 
 dependencies {
 	constraints {
-		val mavenizedProjects: List<Project> by rootProject.extra
+		@Suppress("UNCHECKED_CAST")
+		val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 		mavenizedProjects.sorted()
 				.forEach {
 					val version = buildParameters.jitpack.version

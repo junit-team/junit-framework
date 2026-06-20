@@ -39,12 +39,10 @@ tasks.compileJava {
 
 tasks.jar {
 	bundle {
-		val importAPIGuardian: String by extra
-		val importJSpecify: String by extra
 		bnd("""
 			Import-Package: \
-				$importAPIGuardian,\
-				$importJSpecify,\
+				${extra["importAPIGuardian"]},\
+				${extra["importJSpecify"]},\
 				kotlin.*;resolution:="optional",\
 				kotlinx.*;resolution:="optional",\
 				*

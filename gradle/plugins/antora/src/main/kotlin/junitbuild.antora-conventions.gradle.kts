@@ -21,7 +21,7 @@ tasks.register("generateAntoraResources") {
 	dependsOn("generateAntoraYml")
 }
 
-val generateAntoraPlaybook by tasks.registering(Copy::class) {
+val generateAntoraPlaybook = tasks.register("generateAntoraPlaybook", Copy::class) {
 
 	val gitRepoRoot = providers.exec {
 		commandLine("git", "worktree", "list", "--porcelain", "-z")

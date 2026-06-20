@@ -11,7 +11,7 @@ repositories {
 	mavenCentral()
 }
 
-val junitVersion: String by project
+val junitVersion = project.properties["junitVersion"] as String
 
 dependencies {
 	testImplementation(kotlin("stdlib"))

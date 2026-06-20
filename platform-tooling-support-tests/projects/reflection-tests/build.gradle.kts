@@ -2,7 +2,7 @@ plugins {
 	java
 }
 
-val junitVersion: String by project
+val junitVersion = project.properties["junitVersion"] as String
 
 repositories {
 	maven { url = uri(file(System.getProperty("maven.repo"))) }

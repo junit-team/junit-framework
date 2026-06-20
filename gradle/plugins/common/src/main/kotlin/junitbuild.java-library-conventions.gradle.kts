@@ -11,10 +11,11 @@ plugins {
 	id("junitbuild.java-errorprone-conventions")
 }
 
-val mavenizedProjects: List<Project> by rootProject.extra
-val buildDate: String by rootProject.extra
-val buildTime: String by rootProject.extra
-val buildRevision: Any by rootProject.extra
+@Suppress("UNCHECKED_CAST")
+val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
+val buildDate = rootProject.extra["buildDate"] as String
+val buildTime = rootProject.extra["buildTime"] as String
+val buildRevision = rootProject.extra["buildRevision"] as String
 
 val extension = extensions.create<JavaLibraryExtension>("javaLibrary")
 
