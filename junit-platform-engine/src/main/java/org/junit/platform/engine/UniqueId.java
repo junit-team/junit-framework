@@ -10,6 +10,7 @@
 
 package org.junit.platform.engine;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.io.IOException;
@@ -346,6 +347,14 @@ public final class UniqueId implements Cloneable, Serializable {
 		 */
 		public String getValue() {
 			return this.value;
+		}
+
+		/**
+		 * {@return whether this segment is of type <em>engine</em>}
+		 */
+		@API(status = EXPERIMENTAL, since = "6.1.1")
+		public boolean hasEngineType() {
+			return ENGINE_SEGMENT_TYPE.equals(this.type);
 		}
 
 		@Override
