@@ -2,7 +2,7 @@ plugins {
 	kotlin("jvm") version "2.3.21"
 }
 
-val junitVersion: String by project
+val junitVersion = providers.gradleProperty("junitVersion").orNull
 
 repositories {
 	maven { url = uri(file(System.getProperty("maven.repo"))) }

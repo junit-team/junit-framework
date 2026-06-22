@@ -1,19 +1,20 @@
 import junitbuild.extensions.capitalized
 import junitbuild.release.VerifyBinaryArtifactsAreIdentical
+import org.gradle.internal.extensions.core.extra
 
-val tempRepoName by extra("temp")
-val tempRepoDir by extra {
-	layout.buildDirectory.dir("repo").get().asFile
-}
+val tempRepoName = "temp"
+val tempRepoDir = layout.buildDirectory.dir("repo").get().asFile
+extra["tempRepoName"] = tempRepoName
+extra["tempRepoDir"] = tempRepoDir
 
-val clearTempRepoDir by tasks.registering {
+val clearTempRepoDir = tasks.register("clearTempRepoDir") {
 	val dir = tempRepoDir
 	doFirst {
 		dir.deleteRecursively()
 	}
 }
 
-val publishAllSubprojectsToTempRepository by tasks.registering
+val publishAllSubprojectsToTempRepository = tasks.register("publishAllSubprojectsToTempRepository")
 
 tasks.register<VerifyBinaryArtifactsAreIdentical>("verifyArtifactsInStagingRepositoryAreReproducible") {
 	dependsOn(publishAllSubprojectsToTempRepository)

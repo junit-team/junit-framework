@@ -11,6 +11,9 @@ dependencies {
 
 	implementation(projects.junitJupiterEngine)
 
+	compileOnly(libs.apiguardian)
+	compileOnly(libs.jspecify)
+
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
 }

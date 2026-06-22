@@ -7,9 +7,14 @@ plugins {
 	id("junitbuild.build-parameters")
 }
 
-val jupiterProjects: List<Project> by rootProject
-val platformProjects: List<Project> by rootProject
-val vintageProjects: List<Project> by rootProject
+@Suppress("UNCHECKED_CAST")
+val jupiterProjects = rootProject.extra["jupiterProjects"] as List<Project>
+
+@Suppress("UNCHECKED_CAST")
+val platformProjects = rootProject.extra["platformProjects"] as List<Project>
+
+@Suppress("UNCHECKED_CAST")
+val vintageProjects = rootProject.extra["vintageProjects"] as List<Project>
 
 group = buildParameters.publishing.group
 	.getOrElse(when (project) {
@@ -49,7 +54,7 @@ publishing {
 				}
 				licenses {
 					license {
-						val license: License by rootProject.extra
+						val license = rootProject.extra["license"] as License
 						name = license.name
 						url = license.url.toString()
 					}

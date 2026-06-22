@@ -48,7 +48,7 @@ val extension = extensions.create<BackwardCompatibilityChecksExtension>("backwar
 	}
 }
 
-val downloadPreviousReleaseJar by tasks.registering(Download::class) {
+val downloadPreviousReleaseJar = tasks.register("downloadPreviousReleaseJar", Download::class) {
 	if (gradle.startParameter.isOffline) {
 		enabled = false
 	}
@@ -64,7 +64,7 @@ val downloadPreviousReleaseJar by tasks.registering(Download::class) {
 
 val roseauCsvFile = layout.buildDirectory.file("reports/roseau/breaking-changes.csv")
 
-val roseau by tasks.registering(RoseauDiff::class) {
+val roseau = tasks.register("roseau", RoseauDiff::class) {
 	if (gradle.startParameter.isOffline) {
 		enabled = false
 	}
@@ -83,7 +83,7 @@ val roseau by tasks.registering(RoseauDiff::class) {
 	reportDir = layout.buildDirectory.dir("reports/roseau")
 }
 
-val checkBackwardCompatibility by tasks.registering {
+val checkBackwardCompatibility = tasks.register("checkBackwardCompatibility") {
 	dependsOn(roseau)
 }
 

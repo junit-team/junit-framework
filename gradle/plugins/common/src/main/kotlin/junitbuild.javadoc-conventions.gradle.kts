@@ -69,7 +69,7 @@ tasks.named<Jar>("javadocJar").configure {
 	}
 }
 
-val extractJavadocSinceValues by tasks.registering {
+val extractJavadocSinceValues = tasks.register("extractJavadocSinceValues") {
 	inputs.files(sourceSets.main.get().allJava).withPathSensitivity(PathSensitivity.NONE)
 	val outputFile = layout.buildDirectory.file("docs/javadoc-since-values.txt")
 	outputs.file(outputFile)

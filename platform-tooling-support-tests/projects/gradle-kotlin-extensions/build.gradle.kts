@@ -11,7 +11,7 @@ repositories {
 	mavenCentral()
 }
 
-val junitVersion: String by project
+val junitVersion = providers.gradleProperty("junitVersion").orNull
 
 dependencies {
 	testImplementation(kotlin("stdlib"))

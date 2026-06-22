@@ -54,7 +54,8 @@ val mavenDistributionClasspath = configurations.resolvable("mavenDistributionCla
 	extendsFrom(mavenDistribution.get())
 }
 
-val modularProjects: List<Project> by rootProject
+@Suppress("UNCHECKED_CAST")
+val modularProjects = rootProject.extra["modularProjects"] as List<Project>
 
 dependencies {
 	implementation(libs.commons.io) {
@@ -103,16 +104,17 @@ dependencies {
 
 val mavenDistributionDir = layout.buildDirectory.dir("maven-distribution")
 
-val unzipMavenDistribution by tasks.registering(Sync::class) {
+val unzipMavenDistribution = tasks.register("unzipMavenDistribution", Sync::class) {
 	from(zipTree(mavenDistributionClasspath.flatMap { d -> d.elements.map { e -> e.single() } }))
 	into(mavenDistributionDir)
 }
 
-val normalizeMavenRepo by tasks.registering(Sync::class) {
+val normalizeMavenRepo = tasks.register("normalizeMavenRepo", Sync::class) {
 
-	val mavenizedProjects: List<Project> by rootProject
-	val tempRepoDir: File by rootProject
-	val tempRepoName: String by rootProject
+	@Suppress("UNCHECKED_CAST")
+	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
+	val tempRepoDir = rootProject.extra["tempRepoDir"] as File
+	val tempRepoName = rootProject.extra["tempRepoName"] as String
 
 	// All maven-aware projects must be published to the local temp repository
 	(mavenizedProjects + dependencyProject(projects.junitBom))
@@ -134,7 +136,7 @@ val normalizeMavenRepo by tasks.registering(Sync::class) {
 	into(layout.buildDirectory.dir("normalized-repo"))
 }
 
-val archUnit by testing.suites.registering(JvmTestSuite::class) {
+val archUnit = testing.suites.register("archUnit", JvmTestSuite::class) {
 	dependencies {
 		implementation(libs.archunit) {
 			because("checking the architecture")
@@ -184,7 +186,7 @@ tasks.check {
 	dependsOn(archUnit)
 }
 
-val test by testing.suites.getting(JvmTestSuite::class) {
+testing.suites.named<JvmTestSuite>("test") {
 	dependencies {
 		implementation(libs.bndlib) {
 			because("parsing OSGi metadata")

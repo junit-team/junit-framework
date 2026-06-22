@@ -3,7 +3,7 @@ plugins {
 	id("org.graalvm.buildtools.native")
 }
 
-val junitVersion: String by project
+val junitVersion = providers.gradleProperty("junitVersion").orNull
 
 dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")

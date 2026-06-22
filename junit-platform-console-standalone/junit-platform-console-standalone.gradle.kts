@@ -33,11 +33,11 @@ tasks {
 			attributes("Main-Class" to "org.junit.platform.console.ConsoleLauncher")
 		}
 	}
-	val shadowedArtifactsFile by registering(WriteArtifactsFile::class) {
+	val shadowedArtifactsFile = register("shadowedArtifactsFile", WriteArtifactsFile::class) {
 		from(configurations.shadowedClasspath)
 		outputFile = layout.buildDirectory.file("shadowed-artifacts")
 	}
-	val extractThirdPartyLicenses by registering(Sync::class) {
+	val extractThirdPartyLicenses = register("extractThirdPartyLicenses", Sync::class) {
 		from(withArchiveOperations { ops -> configurations.shadowedClasspath.flatMap { it.elements }.map { it.map(ops::zipTree) } })
 		into(layout.buildDirectory.dir("thirdPartyLicenses"))
 		include("LICENSE.txt")
@@ -71,13 +71,11 @@ tasks {
 		}
 
 		bundle {
-			val importAPIGuardian: String by extra
-			val importJSpecify: String by extra
 			bnd("""
 				# Customize the imports because this is an aggregate jar
 				Import-Package: \
-					$importAPIGuardian,\
-					$importJSpecify,\
+					${extra["importAPIGuardian"]},\
+					${extra["importJSpecify"]},\
 					kotlin.*;resolution:="optional",\
 					kotlinx.*;resolution:="optional",\
 					*
