@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.joining;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.util.FunctionUtils.where;
 import static org.junit.platform.engine.DiscoveryIssue.Severity.*;
-import static org.junit.platform.suite.engine.JupiterDisabledUtils.reportUseOfJupiterDisabled;
+import static org.junit.platform.suite.engine.SuiteAnnotationSupport.findAnnotationByName;
 import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuilder.request;
 
 import java.lang.reflect.Method;
@@ -73,7 +73,8 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	static final String SEGMENT_TYPE = "suite";
-	public static final SkipResult CANCELLED_SKIP_RESULT = SkipResult.skip("Execution cancelled");
+	private static final SkipResult CANCELLED_SKIP_RESULT = SkipResult.skip("Execution cancelled");
+	private static final String ORG_JUNIT_JUPITER_API_DISABLED = "org.junit.jupiter.api.Disabled";
 
 	private final SuiteLauncherDiscoveryRequestBuilder discoveryRequestBuilder = request();
 	private final ConfigurationParameters configurationParameters;
@@ -105,6 +106,16 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 				.map(Suite::failIfNoTests)
 				.orElseThrow(() -> new JUnitException("Suite [%s] was not annotated with @Suite".formatted(suiteClass.getName())));
 		// @formatter:on
+	}
+
+	static void reportUseOfJupiterDisabled(Class<?> suiteClass, DiscoveryIssueReporter issueReporter) {
+		findAnnotationByName(suiteClass, ORG_JUNIT_JUPITER_API_DISABLED) //
+				.map(annotation -> {
+					String message = "The suite [%s] was annotated with [%s] which does not disabled the suite. Did you mean to use [%s]?" //
+							.formatted(suiteClass, annotation.annotationType().getName(), Disabled.class.getName());
+					return DiscoveryIssue.create(INFO, message);
+				}) //
+				.ifPresent(issueReporter::reportIssue);
 	}
 
 	SuiteTestDescriptor addDiscoveryRequestFrom(Class<?> suiteClass) {
