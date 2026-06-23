@@ -15,6 +15,8 @@ import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.joining;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.util.FunctionUtils.where;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.*;
+import static org.junit.platform.suite.engine.JupiterDisabledUtils.reportUseOfJupiterDisabled;
 import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuilder.request;
 
 import java.lang.reflect.Method;
@@ -94,6 +96,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		this.suiteClass = suiteClass;
 		this.lifecycleMethods = new LifecycleMethods(suiteClass, issueReporter);
 		this.discoveryRequestBuilder.listener(DiscoveryIssueForwardingListener.create(id, discoveryListener));
+		reportUseOfJupiterDisabled(suiteClass, issueReporter);
 	}
 
 	private static Boolean getFailIfNoTests(Class<?> suiteClass) {
@@ -152,7 +155,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		var nonBlank = issueReporter.createReportingCondition(StringUtils::isNotBlank, __ -> {
 			String message = "@SuiteDisplayName on %s must be declared with a non-blank value.".formatted(
 					suiteClass.getName());
-			return DiscoveryIssue.builder(DiscoveryIssue.Severity.WARNING, message)
+			return DiscoveryIssue.builder(WARNING, message)
 					.source(ClassSource.from(suiteClass))
 					.build();
 		}).toPredicate();

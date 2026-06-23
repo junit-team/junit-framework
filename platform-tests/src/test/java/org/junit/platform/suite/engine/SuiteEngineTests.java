@@ -13,6 +13,7 @@ package org.junit.platform.suite.engine;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TemporaryClasspathExecutor.withAdditionalClasspathRoot;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.INFO;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.TagFilter.excludeTags;
@@ -88,6 +89,7 @@ import org.junit.platform.suite.engine.testsuites.EmptyTestCaseWithFailIfNoTestF
 import org.junit.platform.suite.engine.testsuites.ErroneousTestSuite;
 import org.junit.platform.suite.engine.testsuites.FailingSuite;
 import org.junit.platform.suite.engine.testsuites.InheritedSuite;
+import org.junit.platform.suite.engine.testsuites.JupiterDisabledSuite;
 import org.junit.platform.suite.engine.testsuites.MultiEngineSuite;
 import org.junit.platform.suite.engine.testsuites.MultipleSuite;
 import org.junit.platform.suite.engine.testsuites.NestedSuite;
@@ -591,7 +593,7 @@ class SuiteEngineTests {
 				.append(SuiteTestDescriptor.SEGMENT_TYPE, CyclicSuite.class.getName());
 		var message = "The suite configuration of [%s] resulted in a cycle [%s] and will not be discovered a second time."
 				.formatted(CyclicSuite.class.getName(), expectedUniqueId);
-		var issue = DiscoveryIssue.builder(Severity.INFO, message)
+		var issue = DiscoveryIssue.builder(INFO, message)
 				.source(ClassSource.from(CyclicSuite.class))
 				.build();
 
@@ -835,36 +837,52 @@ class SuiteEngineTests {
 
 	@Test
 	void disabledSuite() {
-		// @formatter:off
-		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(DisabledSuite.class));
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID) //
+				.selectors(selectClass(DisabledSuite.class)) //
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir)); //
 
-		assertThat(testKit.discover().getDiscoveryIssues())
+		assertThat(testKit.discover().getDiscoveryIssues())//
 				.isEmpty();
 
-		testKit
-				.execute()
-				.allEvents()
-				.assertThatEvents()
-				.haveExactly(1, event(container(DisabledSuite.class.getName()), skippedWithReason(DisabledSuite.class + " is @Disabled")));
-		// @formatter:on
+		testKit.execute() //
+				.allEvents() //
+				.assertThatEvents() //
+				.haveExactly(1, event(container(DisabledSuite.class.getName()),
+					skippedWithReason(DisabledSuite.class + " is @Disabled")));
 	}
 
 	@Test
 	void disabledSuiteWithReason() {
-		// @formatter:off
-		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(DisabledWithReasonSuite.class));
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID).selectors(
+			selectClass(DisabledWithReasonSuite.class)) //
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
 
-		assertThat(testKit.discover().getDiscoveryIssues())
-				.isEmpty();
+		assertThat(testKit.discover().getDiscoveryIssues()).isEmpty();
 
-		testKit
-				.execute()
-				.allEvents()
-				.assertThatEvents()
-				.haveExactly(1, event(container(DisabledWithReasonSuite.class.getName()), skippedWithReason("for testing purposes")));
-		// @formatter:on
+		testKit.execute() //
+				.allEvents() //
+				.assertThatEvents() //
+				.haveExactly(1, event(container(DisabledWithReasonSuite.class.getName()),
+					skippedWithReason("for testing purposes")));
+	}
+
+	@Test
+	void usingJupiterDisabledLogsAnIssue() {
+		var testKit = EngineTestKit.engine(ENGINE_ID).selectors(
+			selectClass(JupiterDisabledSuite.class)).outputDirectoryCreator(
+				hierarchicalOutputDirectoryCreator(outputDir));
+
+		var expectedIssue = DiscoveryIssue.create(INFO,
+			("The suite [%s] was annotated with [org.junit.jupiter.api.Disabled] which does not disabled the suite. "
+					+ "Did you mean to use [org.junit.platform.suite.api.Disabled]?") //
+							.formatted(JupiterDisabledSuite.class));
+		assertThat(testKit.discover().getDiscoveryIssues()).contains(expectedIssue);
+
+		testKit.execute() //
+				.testEvents() //
+				.assertThatEvents() //
+				.haveExactly(1, event(test(JupiterDisabledSuite.class.getName()), finishedSuccessfully())) //
+				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------
