@@ -34,4 +34,9 @@ final class SuiteAnnotationSupport {
 				.filter(Annotation.class::isAssignableFrom) //
 				.map(aClass -> (Class<? extends Annotation>) aClass);
 	}
+
+	private SuiteAnnotationSupport() {
+		/* no-op */
+	}
+
 }
