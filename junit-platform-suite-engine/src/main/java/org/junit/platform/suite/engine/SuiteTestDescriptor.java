@@ -15,7 +15,8 @@ import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.joining;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.util.FunctionUtils.where;
-import static org.junit.platform.engine.DiscoveryIssue.Severity.*;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.INFO;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.WARNING;
 import static org.junit.platform.suite.engine.SuiteAnnotationSupport.findAnnotationByName;
 import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuilder.request;
 
