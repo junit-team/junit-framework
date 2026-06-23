@@ -77,6 +77,8 @@ import org.junit.platform.suite.engine.testsuites.AbstractSuite;
 import org.junit.platform.suite.engine.testsuites.BlankSuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.ConfigurationSuite;
 import org.junit.platform.suite.engine.testsuites.CyclicSuite;
+import org.junit.platform.suite.engine.testsuites.DisabledSuite;
+import org.junit.platform.suite.engine.testsuites.DisabledWithReasonSuite;
 import org.junit.platform.suite.engine.testsuites.DynamicSuite;
 import org.junit.platform.suite.engine.testsuites.EmptyCyclicSuite;
 import org.junit.platform.suite.engine.testsuites.EmptyDynamicTestSuite;
@@ -829,6 +831,40 @@ class SuiteEngineTests {
 
 		assertThat(testKit.discover().getDiscoveryIssues()) //
 				.noneMatch(issue -> issue.message().contains("@SuiteDisplayName"));
+	}
+
+	@Test
+	void disabledSuite() {
+		// @formatter:off
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(DisabledSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues())
+				.isEmpty();
+
+		testKit
+				.execute()
+				.allEvents()
+				.assertThatEvents()
+				.haveExactly(1, event(container(DisabledSuite.class.getName()), skippedWithReason(DisabledSuite.class + " is @Disabled")));
+		// @formatter:on
+	}
+
+	@Test
+	void disabledSuiteWithReason() {
+		// @formatter:off
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(DisabledWithReasonSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues())
+				.isEmpty();
+
+		testKit
+				.execute()
+				.allEvents()
+				.assertThatEvents()
+				.haveExactly(1, event(container(DisabledWithReasonSuite.class.getName()), skippedWithReason("for testing purposes")));
+		// @formatter:on
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------

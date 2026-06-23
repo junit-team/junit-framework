@@ -42,6 +42,7 @@ import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
+import org.junit.platform.engine.support.hierarchical.Node.SkipResult;
 import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCollector;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 import org.junit.platform.engine.support.store.Namespace;
@@ -53,6 +54,7 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.suite.api.Disabled;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
@@ -69,6 +71,7 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	static final String SEGMENT_TYPE = "suite";
+	public static final SkipResult CANCELLED_SKIP_RESULT = SkipResult.skip("Execution cancelled");
 
 	private final SuiteLauncherDiscoveryRequestBuilder discoveryRequestBuilder = request();
 	private final ConfigurationParameters configurationParameters;
@@ -163,9 +166,9 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	void execute(EngineExecutionListener executionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
 			CancellationToken cancellationToken) {
-
-		if (cancellationToken.isCancellationRequested()) {
-			executionListener.executionSkipped(this, "Execution cancelled");
+		var skipResult = checkWhetherSkipped(cancellationToken);
+		if (skipResult.isSkipped()) {
+			executionListener.executionSkipped(this, skipResult.getReason().orElse("<unknown>"));
 			return;
 		}
 
@@ -181,6 +184,24 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 		TestExecutionResult testExecutionResult = computeTestExecutionResult(summary, throwableCollector);
 		executionListener.executionFinished(this, testExecutionResult);
+	}
+
+	private SkipResult checkWhetherSkipped(CancellationToken cancellationToken) {
+		return cancellationToken.isCancellationRequested() //
+				? CANCELLED_SKIP_RESULT //
+				: shouldBeSkipped();
+	}
+
+	private SkipResult shouldBeSkipped() {
+		return findAnnotation(suiteClass, Disabled.class) //
+				.map(this::toSkipResult) //
+				.orElse(SkipResult.doNotSkip());
+	}
+
+	private SkipResult toSkipResult(Disabled disabled) {
+		var value = disabled.value();
+		var reason = StringUtils.isNotBlank(value) ? value : suiteClass + " is @Disabled";
+		return SkipResult.skip(reason);
 	}
 
 	private void executeBeforeSuiteMethods(ThrowableCollector throwableCollector) {
