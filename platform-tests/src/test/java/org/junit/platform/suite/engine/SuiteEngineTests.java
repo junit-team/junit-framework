@@ -73,6 +73,7 @@ import org.junit.platform.suite.engine.testcases.JUnit4TestsTestCase;
 import org.junit.platform.suite.engine.testcases.MultipleTestsTestCase;
 import org.junit.platform.suite.engine.testcases.SingleFailingTestTestCase;
 import org.junit.platform.suite.engine.testcases.SingleTestTestCase;
+import org.junit.platform.suite.engine.testcases.SingleTestWithTestReporterTestCase;
 import org.junit.platform.suite.engine.testcases.TaggedTestTestCase;
 import org.junit.platform.suite.engine.testsuites.AbstractSuite;
 import org.junit.platform.suite.engine.testsuites.BlankSuiteDisplayNameSuite;
@@ -94,6 +95,7 @@ import org.junit.platform.suite.engine.testsuites.SelectByIdentifierSuite;
 import org.junit.platform.suite.engine.testsuites.SelectClassesSuite;
 import org.junit.platform.suite.engine.testsuites.SelectMethodsSuite;
 import org.junit.platform.suite.engine.testsuites.SelectorProcessingErrorTestSuite;
+import org.junit.platform.suite.engine.testsuites.SingleTestWithTestReporterSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteWithErroneousTestSuite;
@@ -113,9 +115,8 @@ class SuiteEngineTests {
 	@ValueSource(classes = { SelectClassesSuite.class, InheritedSuite.class })
 	void selectClasses(Class<?> suiteClass) {
 		// @formatter:off
-		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(suiteClass))
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+		var testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(suiteClass));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
@@ -317,7 +318,6 @@ class SuiteEngineTests {
 		// @formatter:off
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectClass(SuiteSuite.class))
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
@@ -334,8 +334,7 @@ class SuiteEngineTests {
 				.selectors(
 						selectClass(SelectClassesSuite.class),
 						selectClass(MultipleSuite.class)
-				)
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+				);
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
@@ -359,8 +358,7 @@ class SuiteEngineTests {
 				.selectors(
 						selectClass(SelectClassesSuite.class),
 						selectClass(MultipleSuite.class)
-				)
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+				);
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
@@ -381,9 +379,8 @@ class SuiteEngineTests {
 		// @formatter:off
 		UniqueId uniqId = UniqueId.forEngine(ENGINE_ID)
 				.append(SuiteTestDescriptor.SEGMENT_TYPE, SelectClassesSuite.class.getName());
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectUniqueId(uniqId));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectUniqueId(uniqId))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
@@ -436,10 +433,9 @@ class SuiteEngineTests {
 				.append(ClassTestDescriptor.SEGMENT_TYPE, MultipleTestsTestCase.class.getName())
 				.append(TestMethodTestDescriptor.SEGMENT_TYPE, "test()");
 
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
-				.selectors(selectClass(SelectClassesSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+				.selectors(selectClass(SelectClassesSuite.class))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
@@ -601,9 +597,8 @@ class SuiteEngineTests {
 				.source(ClassSource.from(CyclicSuite.class))
 				.build();
 
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+		var testKit = EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectClass(CyclicSuite.class));
-			var testKit = builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.containsExactly(issue);
@@ -634,9 +629,8 @@ class SuiteEngineTests {
 	@Test
 	void threePartCyclicSuite() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(ThreePartCyclicSuite.PartA.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(ThreePartCyclicSuite.PartA.class))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
@@ -671,9 +665,8 @@ class SuiteEngineTests {
 	@Test
 	void selectByIdentifier() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SelectByIdentifierSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SelectByIdentifierSuite.class))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
@@ -685,14 +678,14 @@ class SuiteEngineTests {
 	@Test
 	void passesOutputDirectoryCreatorToEnginesInSuite() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SelectClassesSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SingleTestWithTestReporterSuite.class))
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
 				.haveExactly(1, event(suite(SingleTestWithTestReporterSuite.class), finishedSuccessfully()))
-				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
+				.haveExactly(1, event(test(SingleTestWithTestReporterTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 
 		assertThat(outputDir).isDirectoryRecursivelyContaining("glob:**/test.txt");
