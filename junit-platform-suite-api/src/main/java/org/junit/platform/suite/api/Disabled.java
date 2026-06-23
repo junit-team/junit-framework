@@ -25,7 +25,7 @@ import org.apiguardian.api.API;
  * currently <em>disabled</em> and should not be executed.
  *
  * <p>{@code @Disabled} may optionally be declared with a {@linkplain #value
- * reason} to document why the annotated test class or test method is disabled.
+ * reason} to document why the annotated suite is disabled.
  *
  * <p>This annotation is not {@link java.lang.annotation.Inherited @Inherited}.
  * Consequently, if you wish to apply the same semantics to a subclass, this
@@ -42,7 +42,7 @@ import org.apiguardian.api.API;
 public @interface Disabled {
 
 	/**
-	 * The reason this annotated test class or test method is disabled.
+	 * The reason this annotated suite is disabled.
 	 */
 	String value() default "";
 
