@@ -14,12 +14,17 @@ import static org.junit.platform.commons.support.AnnotationSupport.findAnnotatio
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.support.ReflectionSupport;
 
 final class SuiteAnnotationSupport {
+
+	// Should only ever contain the result of loading org.junit.jupiter.api.Disabled.
+	private static final Map<String, Optional<Class<? extends Annotation>>> cache = new ConcurrentHashMap<>(1);
 
 	static Optional<? extends Annotation> findAnnotationByName(@Nullable AnnotatedElement element,
 			String annotationTypeName) {
@@ -27,9 +32,13 @@ final class SuiteAnnotationSupport {
 				.flatMap(annotationClass -> findAnnotation(element, annotationClass));
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Optional<? extends Class<? extends Annotation>> annotationForName(String annotationTypeName) {
-		return ReflectionSupport.tryToLoadClass(annotationTypeName) //
+		return cache.computeIfAbsent(annotationTypeName, SuiteAnnotationSupport::tryToLoadAnnotation);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Optional<Class<? extends Annotation>> tryToLoadAnnotation(String s) {
+		return ReflectionSupport.tryToLoadClass(s) //
 				.toOptional() //
 				.filter(Annotation.class::isAssignableFrom) //
 				.map(aClass -> (Class<? extends Annotation>) aClass);
