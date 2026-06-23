@@ -10,15 +10,19 @@
 
 package org.junit.platform.suite.engine.testcases;
 
+import java.nio.file.Files;
+
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestReporter;
 
 /**
- * @since 1.8
+ * @since 6.2
  */
-public class SingleTestTestCase {
+public class SingleTestWithTestReporterTestCase {
 
 	@Test
-	void test() {
-
+	void test(TestReporter testReporter) {
+		testReporter.publishFile("test.txt", MediaType.TEXT_PLAIN_UTF_8, file -> Files.writeString(file, "test"));
 	}
 }
