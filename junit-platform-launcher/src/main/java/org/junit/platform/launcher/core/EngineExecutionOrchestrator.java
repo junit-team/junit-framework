@@ -151,7 +151,7 @@ public class EngineExecutionOrchestrator {
 		return listener;
 	}
 
-	private static Boolean isMemoryCleanupEnabled(TestPlan testPlan) {
+	private static boolean isMemoryCleanupEnabled(TestPlan testPlan) {
 		return testPlan.getConfigurationParameters() //
 				.getBoolean(LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME) //
 				.orElse(false);

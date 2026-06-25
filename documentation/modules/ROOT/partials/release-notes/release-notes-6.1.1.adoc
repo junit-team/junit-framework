@@ -26,7 +26,9 @@ repository on GitHub.
 [[v6.1.1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* Allow excluding engines from memory cleanup mode (in case it's enabled) via new
+  `junit.platform.execution.memory.cleanup.engines.excluded` configuration parameter that
+  takes a comma-separated list of engine IDs (for example, `junit-vintage,junit-jupiter`).
 
 
 [[v6.1.1-junit-jupiter]]

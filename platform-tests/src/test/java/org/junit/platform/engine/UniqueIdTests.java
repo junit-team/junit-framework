@@ -52,13 +52,17 @@ class UniqueIdTests {
 
 			assertEquals("[engine:junit-jupiter]", uniqueId.toString());
 			assertSegment(uniqueId.getSegments().getFirst(), "engine", "junit-jupiter");
+			assertThat(uniqueId.getLastSegment().isEngine()).isTrue();
 		}
 
 		@Test
 		void engineIdCanBeAppended() {
 			var suiteEngineId = UniqueId.forEngine(SUITE_ENGINE_ID);
+
 			var uniqueId = suiteEngineId.appendEngine(ENGINE_ID);
+
 			assertSegment(uniqueId.getSegments().get(1), "engine", "junit-jupiter");
+			assertThat(uniqueId.getLastSegment().isEngine()).isTrue();
 		}
 
 		@Test
@@ -87,12 +91,14 @@ class UniqueIdTests {
 
 		@Test
 		void appendingOneSegment() {
-			var engineId = UniqueId.root("engine", ENGINE_ID);
+			var engineId = UniqueId.forEngine(ENGINE_ID);
 			var classId = engineId.append("class", "org.junit.MyClass");
 
 			assertThat(classId.getSegments()).hasSize(2);
 			assertSegment(classId.getSegments().get(0), "engine", ENGINE_ID);
+			assertThat(classId.getSegments().get(0).isEngine()).isTrue();
 			assertSegment(classId.getSegments().get(1), "class", "org.junit.MyClass");
+			assertThat(classId.getSegments().get(1).isEngine()).isFalse();
 		}
 
 		@Test
