@@ -56,10 +56,15 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache-read-only: ${{ github.ref != 'refs/heads/docs-site' }}
-      - name: Disable Gradle daemon for all builds # to avoid running out of memory
+      - name: Configure Gradle
         run: |
           mkdir -p $GRADLE_USER_HOME
-          echo "org.gradle.daemon=false" >> $GRADLE_USER_HOME/gradle.properties
+          cat >> $GRADLE_USER_HOME/gradle.properties<< EOF
+          // Disable Gradle daemon for all builds to avoid running out of memory
+          org.gradle.daemon=false
+          // Enable pushing to remote build cache
+          junit.develocity.buildCache.pushEnabled=${{ github.repository == 'junit-team/junit-framework' }}
+          EOF
       - name: Download dependencies (Ruby)
         run: bundle install
       - name: Download dependencies (NPM)
