@@ -54,6 +54,10 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache-read-only: ${{ github.ref != 'refs/heads/docs-site' }}
+      - name: Disable Gradle daemon for all builds # to avoid running out of memory
+        run: |
+          mkdir -p $GRADLE_USER_HOME
+          echo "org.gradle.daemon=false" >> $GRADLE_USER_HOME/gradle.properties
       - name: Download dependencies (Ruby)
         run: bundle install
       - name: Download dependencies (NPM)
