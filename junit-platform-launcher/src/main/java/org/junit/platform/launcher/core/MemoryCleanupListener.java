@@ -84,7 +84,7 @@ class MemoryCleanupListener extends DelegatingEngineExecutionListener {
 		var segments = uniqueId.getSegments();
 		for (int i = segments.size() - 1; i >= 0; i--) {
 			var segment = segments.get(i);
-			if (segment.hasEngineType()) {
+			if (segment.isEngine()) {
 				return Optional.of(segment.getValue());
 			}
 		}

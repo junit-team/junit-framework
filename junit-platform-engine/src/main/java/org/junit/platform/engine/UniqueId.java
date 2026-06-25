@@ -71,10 +71,12 @@ public final class UniqueId implements Cloneable, Serializable {
 	 * format.
 	 *
 	 * <p>The engine ID will be stored in a {@link Segment} with
-	 * {@link Segment#getType type} {@code "engine"}.
+	 * {@link Segment#getType type} {@value #ENGINE_SEGMENT_TYPE}.
 	 *
 	 * @param engineId the engine ID; never {@code null} or blank
 	 * @see #root(String, String)
+	 * @see #appendEngine(String)
+	 * @see Segment#isEngine()
 	 */
 	public static UniqueId forEngine(String engineId) {
 		Preconditions.notBlank(engineId, "engineId must not be null or blank");
@@ -185,6 +187,8 @@ public final class UniqueId implements Cloneable, Serializable {
 	 * @param engineId the engine ID; never {@code null} or blank
 	 *
 	 * @since 1.8
+	 * @see #forEngine(String)
+	 * @see Segment#isEngine()
 	 */
 	@API(status = STABLE, since = "1.10")
 	public UniqueId appendEngine(String engineId) {
@@ -351,9 +355,13 @@ public final class UniqueId implements Cloneable, Serializable {
 
 		/**
 		 * {@return whether this segment is of type <em>engine</em>}
+		 *
+		 * @since 6.1.1
+		 * @see UniqueId#forEngine(String)
+		 * @see UniqueId#appendEngine(String)
 		 */
 		@API(status = EXPERIMENTAL, since = "6.1.1")
-		public boolean hasEngineType() {
+		public boolean isEngine() {
 			return ENGINE_SEGMENT_TYPE.equals(this.type);
 		}
 
