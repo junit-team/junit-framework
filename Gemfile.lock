@@ -17,7 +17,7 @@ GEM
       prawn-templates (~> 0.1.0)
       treetop (~> 1.6.0)
       ttfunk (~> 1.7.0)
-    concurrent-ruby (1.3.6)
+    concurrent-ruby (1.3.7)
     css_parser (1.22.0)
       addressable
     hashery (2.1.2)
