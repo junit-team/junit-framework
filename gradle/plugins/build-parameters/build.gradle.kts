@@ -98,6 +98,9 @@ buildParameters {
 		string("group") {
 			description = "Group ID for published Maven artifacts"
 		}
+		string("timeout") {
+			description = "Publishing timeout for Maven Central"
+		}
 	}
 	group("jitpack") {
 		string("version") {

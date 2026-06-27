@@ -153,7 +153,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: nmcpPublishDeployment -PnmcpDeploymentId=${{ inputs.deploymentId }}
+          arguments: nmcpPublishDeployment -PnmcpDeploymentId=${{ inputs.deploymentId }} -Ppublishing.timeout=PT30M
 
   publish_documentation:
     name: Publish documentation

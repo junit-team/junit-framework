@@ -1,8 +1,10 @@
 import nmcp.NmcpAggregationExtension
+import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
 plugins {
+	id("junitbuild.build-parameters")
 	id("com.gradleup.nmcp.settings")
 }
 
@@ -12,7 +14,7 @@ nmcpSettings {
 		password = providers.gradleProperty("mavenCentralPassword")
 		publishingType = "USER_MANAGED"
 		validationTimeout = 10.minutes.toJavaDuration()
-		publishingTimeout = 30.minutes.toJavaDuration()
+		publishingTimeout = buildParameters.publishing.timeout.map(Duration::parse)
 	}
 }
 
