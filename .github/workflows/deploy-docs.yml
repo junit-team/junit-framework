@@ -69,6 +69,8 @@ jobs:
         run: bundle install
       - name: Download dependencies (NPM)
         run: npm ci
+      - name: Expose GitHub Actions environment for collector-cache Antora extension
+        uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
       - name: Run Antora
         run: npm run build
       - name: Check out docs.junit.org repo
