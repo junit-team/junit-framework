@@ -7,30 +7,22 @@ const expandPath = require('@antora/expand-path-helper')
 const ospath = require('path')
 const resolvedCopyRecursiveJs = require.resolve('./cache-scandir')
 const { createHash } = require('crypto')
+// @actions/cache is ESM-only, so load it via dynamic import from this CommonJS module.
+const cacheLib = import('@actions/cache')
 
 module.exports.register = function ({ playbook, config = {} }) {
   const logger = this.getLogger('collector-cache')
-  const siteUrl = playbook.site?.url
   const excludes = config.excludes || []
-  const configuredBaseCacheUrl = config.baseCacheUrl
-  if (!siteUrl && !configuredBaseCacheUrl) {
-    throw new Error(
-      "One of playbook site.url or collector-cache plugin's base_cache_url property is required."
-    )
-  }
-  const baseCacheUrl = configuredBaseCacheUrl || siteUrl + '/.cache'
   const getUserCacheDir = this.require('cache-directory')
   const fs = this.require('fs')
-  const decompress = this.require('decompress')
-  const { concat: get } = this.require('simple-get')
 
-  const outputDir = ospath.join(playbook.dir, 'build/antora/collector-cache/.cache')
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true })
-  }
-
-  const zipInfo = []
+  const cacheInfo = []
   this.once('contentAggregated', async ({ playbook, contentAggregate }) => {
+    const cache = await cacheLib
+    const cacheAvailable = cache.isFeatureAvailable()
+    if (!cacheAvailable) {
+      logger.info('GitHub Actions cache is not available; skipping restore/save operations')
+    }
     const baseCacheDir = getBaseCacheDir(getUserCacheDir, playbook)
     for (const { origins } of contentAggregate) {
       for (const origin of origins) {
@@ -42,23 +34,20 @@ module.exports.register = function ({ playbook, config = {} }) {
           const shortref = refhash.slice(0, 7)
           const cacheDirName = `${shortref}-${refname}`
           const cacheDir = ospath.join(baseCollectorCacheCacheDir, cacheDirName)
-          const zipFileName = `${cacheDirName}.zip`
-          const zipCacheFile = ospath.join(outputDir, zipFileName)
+          const cacheKey = `collector-cache-${repositoryCacheDirName}-${cacheDirName}`
           if (!fs.existsSync(baseCollectorCacheCacheDir)) {
             fs.mkdirSync(baseCollectorCacheCacheDir, { recursive: true })
           }
-          if (!fs.existsSync(cacheDir)) {
-            // try and restore from URL by downloading zip
-            const cacheUrl = `${baseCacheUrl}/${cacheDirName}.zip`
-            const content = await download(get, cacheUrl).then((content) => content)
-            if (content) {
-              fs.writeFileSync(zipCacheFile, content)
-              await decompress(zipCacheFile, ospath.join(baseCollectorCacheCacheDir, cacheDirName)).then((files) =>
-                logger.debug(`Successfully unzipped ${zipCacheFile}.`)
-              )
-              logger.info(`Successfully restored cache from ${cacheUrl}`)
+          if (cacheAvailable && !fs.existsSync(cacheDir)) {
+            // try and restore from the GitHub Actions cache
+            const restoredKey = await cache.restoreCache([cacheDir], cacheKey).catch((err) => {
+              logger.warn(`Failed to restore cache for key ${cacheKey}: ${err.message}`)
+              return undefined
+            })
+            if (restoredKey) {
+              logger.info(`Successfully restored cache for key ${cacheKey}`)
             } else {
-              logger.info(`Unable to restore cache from ${cacheUrl}`)
+              logger.info(`Unable to restore cache for key ${cacheKey}`)
             }
           }
           if (fs.existsSync(cacheDir)) {
@@ -84,31 +73,23 @@ module.exports.register = function ({ playbook, config = {} }) {
                 cachedConfig.push.apply(cachedConfig, cachedCollectorConfig)
               })
             })
-            // add the zip of cache to be published
-            zipInfo.push({ cacheDir, zipCacheFile })
+            if (cacheAvailable) {
+              cacheInfo.push({ cacheDir, cacheKey })
+            }
           }
         }
       }
     }
   })
   this.once('beforePublish', async () => {
-    for (const info of zipInfo) {
-      await zip(fs, logger, info.cacheDir, info.zipCacheFile)
+    if (cacheInfo) {
+      const cache = await cacheLib
+      for (const {cacheDir, cacheKey} of cacheInfo) {
+        await cache.saveCache([cacheDir], cacheKey)
+        logger.info(`Saved cache for key ${cacheKey}`)
+      }
     }
   })
-}
-
-function download (get, url) {
-  return new Promise((resolve, reject) =>
-    get({ url }, (err, response, contents) => {
-      // return resolve(undefined)
-      if (response?.statusCode === 404) return resolve(undefined)
-      if (err) return reject(err)
-      if (response?.statusCode === 200) return resolve(contents)
-      const message = `${url} returned response code ${response?.statusCode} (${response?.statusMessage})`
-      reject(Object.assign(new Error(message), { name: 'HTTPError' }))
-    })
-  )
 }
 
 function getBaseCacheDir (getUserCacheDir, { dir: dot, runtime: { cacheDir: preferredDir } = {} }) {
@@ -131,41 +112,4 @@ function createCachedCollectorConfig (scanDir, cacheDir, subDir) {
       },
     },
   ]
-}
-
-const zip = async function (fs, logger, src, destination) {
-  const path = require('path')
-  const { ZipArchive } = await import('archiver')
-  const destParent = path.dirname(destination)
-  if (!fs.existsSync(destParent)) {
-    fs.mkdirs(destParent, { recursive: true })
-  }
-  const output = fs.createWriteStream(destination)
-  const archive = new ZipArchive({
-    zlib: { level: 9 }, // Sets the compression level.
-  })
-
-  // good practice to catch warnings (ie stat failures and other non-blocking errors)
-  archive.on('warning', function (err) {
-    if (err.code === 'ENOENT') {
-      // log warning
-    } else {
-      // throw error
-      throw err
-    }
-  })
-
-  // good practice to catch this error explicitly
-  archive.on('error', function (err) {
-    throw err
-  })
-
-  // pipe archive data to the file
-  archive.pipe(output)
-
-  archive.directory(src, false)
-
-  await archive.finalize()
-
-  logger.info(`Saving ${src} into ${destination}`)
 }

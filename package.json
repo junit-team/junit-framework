@@ -7,6 +7,7 @@
     "antora": "3.2.0-rc.2"
   },
   "dependencies": {
+    "@actions/cache": "^6.1.0",
     "@antora/collector-extension": "1.0.3",
     "@antora/html-single-extension": "1.0.0-beta.20",
     "@antora/lunr-extension": "1.0.0-alpha.13",
