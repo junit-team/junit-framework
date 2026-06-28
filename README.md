@@ -6,10 +6,10 @@ This branch contains the Antora project for building JUnit's documentation site.
 
 It requires Node.js (for Antora) and Ruby (for asciidoctor.pdf).
 
-A `.tool-versions` file can be used with `asdf`:
+A `.tool-versions` file can be used with `asdf` or `mise`:
 
 ```
-asdf install
+asdf install # or mise install
 npm install
 bundle install
 ```
