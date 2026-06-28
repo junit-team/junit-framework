@@ -1,7 +1,7 @@
 [[v6.1.1]]
 == 6.1.1
 
-*Date of Release:* ❓
+*Date of Release:* June 28, 2026
 
 *Scope:* Bug fixes and enhancements since 6.1.0
 
@@ -17,11 +17,6 @@ repository on GitHub.
 ==== Bug Fixes
 
 * The Suite Engine no longer logs "No TestIdentifier with unique ID" for failing tests.
-
-[[v6.1.1-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
 
 [[v6.1.1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
@@ -39,11 +34,6 @@ repository on GitHub.
 
 * Restore original values set by `@SetSystemProperty` when used with a `@ParameterizedTest`.
 
-[[v6.1.1-junit-jupiter-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
 [[v6.1.1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
@@ -54,17 +44,4 @@ repository on GitHub.
 [[v6.1.1-junit-vintage]]
 === JUnit Vintage
 
-[[v6.1.1-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.1.1-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.1.1-junit-vintage-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
+No changes.
