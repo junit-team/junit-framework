@@ -1,5 +1,8 @@
 antora:
   extensions:
+    - require: './extensions/collector-cache.js'
+      excludes:
+        - main
     - '@antora/collector-extension'
     - require: '@antora/html-single-extension'
       config_file: ./antora-assembler-html.yml
