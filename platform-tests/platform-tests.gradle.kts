@@ -11,15 +11,15 @@ plugins {
 	id("junitbuild.jmh-conventions")
 }
 
-val processStarter by sourceSets.creating {
+val sourceSet = sourceSets.create("processStarter") {
 	java {
 		srcDir("src/processStarter/java")
 	}
 }
 
 java {
-	registerFeature(processStarter.name) {
-		usingSourceSet(processStarter)
+	registerFeature(sourceSet.name) {
+		usingSourceSet(sourceSet)
 	}
 }
 
@@ -64,7 +64,8 @@ dependencies {
 	}
 
 	// --- Test run-time dependencies ---------------------------------------------
-	val mavenizedProjects: List<Project> by rootProject
+	@Suppress("UNCHECKED_CAST")
+	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 	mavenizedProjects.filter { it.path != projects.junitPlatformConsoleStandalone.path }.forEach {
 		// Add all projects to the classpath for tests using classpath scanning
 		testRuntimeOnly(it)
@@ -79,13 +80,13 @@ dependencies {
 	jmh(libs.junit4)
 
 	// --- ProcessStarter dependencies --------------------------------------------
-	processStarter.implementationConfigurationName(libs.groovy) {
+	sourceSet.implementationConfigurationName(libs.groovy) {
 		because("it provides convenience methods to handle process output")
 	}
-	processStarter.implementationConfigurationName(libs.commons.io) {
+	sourceSet.implementationConfigurationName(libs.commons.io) {
 		because("it uses TeeOutputStream")
 	}
-	processStarter.implementationConfigurationName(libs.opentest4j) {
+	sourceSet.implementationConfigurationName(libs.opentest4j) {
 		because("it throws TestAbortedException")
 	}
 }
@@ -120,8 +121,8 @@ tasks {
 			includeTags("junit4")
 		}
 	}
-	val testWoodstox by registering(Test::class) {
-		val test by testing.suites.existing(JvmTestSuite::class)
+	val testWoodstox = register("testWoodstox", Test::class) {
+		val test = testing.suites.named<JvmTestSuite>("test")
 		testClassesDirs = files(test.map { it.sources.output.classesDirs })
 		classpath = files(sourceSets.main.map { it.output }) + files(test.map { it.sources.output }) + woodstoxRuntimeClasspath.get()
 		group = JavaBasePlugin.VERIFICATION_GROUP
@@ -130,10 +131,10 @@ tasks {
 	check {
 		dependsOn(testWoodstox)
 	}
-	named<JavaCompile>(processStarter.compileJavaTaskName).configure {
+	named<JavaCompile>(sourceSet.compileJavaTaskName).configure {
 		options.release = javaLibrary.testJavaVersion.map { it.majorVersion.toInt() }
 	}
-	named<Checkstyle>("checkstyle${processStarter.name.capitalized()}").configure {
+	named<Checkstyle>("checkstyle${sourceSet.name.capitalized()}").configure {
 		config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleMain.xml"))
 	}
 }

@@ -6,7 +6,7 @@ plugins {
 	java
 }
 
-val templates by sourceSets.creating
+val templates = sourceSets.create("templates")
 val templatesCompileOnly = configurations[templates.compileOnlyConfigurationName]
 
 dependencies {
@@ -14,10 +14,10 @@ dependencies {
 	templatesCompileOnly("junitbuild.base:code-generator-model")
 }
 
-val license: License by rootProject.extra
+val license = rootProject.extra["license"] as License
 val rootTargetDir = layout.buildDirectory.dir("generated/sources/jte")
 
-val generateCode by tasks.registering {
+val generateCode = tasks.register("generateCode") {
 	dependsOn(tasks.withType<GenerateJreRelatedSourceCode>())
 	group = LifecycleBasePlugin.BUILD_GROUP
 	description = "Generates JRE-related source code."

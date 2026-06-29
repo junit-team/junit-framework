@@ -31,6 +31,7 @@ tasks.javadoc {
 			addBooleanOption("Xdoclint:all,-missing", true)
 			addBooleanOption("html5", true)
 			addBooleanOption("Werror", true)
+			addBooleanOption("-no-fonts", true)
 			addMultilineStringsOption("tag").value = listOf(
 				"apiNote:a:API Note:",
 				"implNote:a:Implementation Note:"
@@ -44,12 +45,18 @@ tasks.javadoc {
 	val targetUrl = "https://docs.junit.org/${version.toString().replace("-SNAPSHOT", "")}"
 	doLast {
 		destinationDir!!.walkTopDown()
-			.filter { it.extension == "html" }
 			.forEach { file ->
-				val content = file.readText()
-				if (content.contains(sourceUrl)) {
-					val updatedContent = content.replace(sourceUrl, targetUrl)
-					file.writeText(updatedContent)
+				if (file.extension == "html") {
+					val content = file.readText()
+					if (content.contains(sourceUrl)) {
+						val updatedContent = content.replace(sourceUrl, targetUrl)
+						file.writeText(updatedContent)
+					}
+				} else if (file.name == "stylesheet.css") {
+					// Remove invalid import of `dejavu.css` due to `javadoc --no-fonts`
+					val filteredLines = file.readLines()
+						.filter { !it.startsWith("@import url('fonts/") }
+					file.toPath().writeLines(filteredLines)
 				}
 			}
 	}
@@ -62,7 +69,7 @@ tasks.named<Jar>("javadocJar").configure {
 	}
 }
 
-val extractJavadocSinceValues by tasks.registering {
+val extractJavadocSinceValues = tasks.register("extractJavadocSinceValues") {
 	inputs.files(sourceSets.main.get().allJava).withPathSensitivity(PathSensitivity.NONE)
 	val outputFile = layout.buildDirectory.file("docs/javadoc-since-values.txt")
 	outputs.file(outputFile)

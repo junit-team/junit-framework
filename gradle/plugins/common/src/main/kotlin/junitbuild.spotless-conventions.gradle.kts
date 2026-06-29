@@ -5,8 +5,6 @@ plugins {
 	id("com.diffplug.spotless")
 }
 
-val license: License by rootProject.extra
-
 spotless {
 
 	format("misc") {
@@ -25,6 +23,7 @@ spotless {
 
 	pluginManager.withPlugin("java") {
 
+		val license = rootProject.extra["license"] as License
 		val configDir = rootProject.layout.projectDirectory.dir("gradle/config/eclipse")
 		val importOrderConfigFile = configDir.file("junit-eclipse.importorder")
 		val javaFormatterConfigFile = configDir.file("junit-eclipse-formatter-settings.xml")
@@ -53,6 +52,7 @@ spotless {
 	}
 
 	pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+		val license = rootProject.extra["license"] as License
 		kotlin {
 			targetExclude("**/src/test/resources/**")
 			ktlint(requiredVersionFromLibs("ktlint"))
@@ -64,6 +64,7 @@ spotless {
 	}
 
 	pluginManager.withPlugin("groovy") {
+		val license = rootProject.extra["license"] as License
 		groovy {
 			licenseHeaderFile(license.headerFile)
 			trimTrailingWhitespace()

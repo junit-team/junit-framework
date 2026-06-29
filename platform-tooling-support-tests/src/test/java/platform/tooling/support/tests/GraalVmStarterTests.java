@@ -43,8 +43,11 @@ class GraalVmStarterTests {
 		var result = ProcessStarters.gradlew() //
 				.workingDir(copyToWorkspace(Projects.GRAALVM_STARTER, workspace)) //
 				.addArguments("-Dmaven.repo=" + MavenRepo.dir()) //
-				.addArguments("javaToolchains", "nativeTest", "--no-daemon", "--stacktrace", "--no-build-cache",
-					"--warning-mode=fail", "--refresh-dependencies") //
+				.addArguments("javaToolchains", "nativeTest", "--no-daemon", "--stacktrace", "--no-build-cache", //
+					// Use `--warning-mode=fail` again after the following issue is resolved and released:
+					// https://github.com/graalvm/native-build-tools/issues/900
+					"--warning-mode=all", //
+					"--refresh-dependencies") //
 				.redirectOutput(outputFiles) //
 				.startAndWait();
 
