@@ -70,7 +70,7 @@ jobs:
             --remote-repo-url=${{ env.STAGING_REPO_URL }}
       - name: Generate build provenance attestations
         if: ${{ inputs.dryRun == false }}
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: build/repo/**/*.jar
 
@@ -93,7 +93,7 @@ jobs:
           path: junit-examples
           persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
         with:
           java-version: 25
           distribution: temurin
@@ -153,7 +153,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          arguments: nmcpPublishDeployment -PnmcpDeploymentId=${{ inputs.deploymentId }}
+          arguments: nmcpPublishDeployment -PnmcpDeploymentId=${{ inputs.deploymentId }} -Ppublishing.timeout=PT30M
 
   publish_documentation:
     name: Publish documentation
@@ -201,7 +201,7 @@ jobs:
           token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_EXAMPLES_REPO }}
           persist-credentials: true
       - name: Set up JDK
-        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
         with:
           java-version: 25
           distribution: temurin

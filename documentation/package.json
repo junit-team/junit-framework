@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "antora": "3.2.0-alpha.12"
+    "antora": "3.2.0-rc.2"
   },
   "dependencies": {
     "@antora/collector-extension": "1.0.3",

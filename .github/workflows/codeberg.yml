@@ -5,6 +5,9 @@ on: [ push ]
 permissions:
   contents: read
 
+concurrency:
+  group: codeberg-group
+
 jobs:
   mirror:
     name: Mirror repo
