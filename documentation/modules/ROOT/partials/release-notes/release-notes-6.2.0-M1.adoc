@@ -39,7 +39,9 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* The `junit.jupiter.params.displayname.argument.maxlength` configuration parameter is
+  now validated and rejected with a clear error when set to a non-positive value instead
+  of causing parameterized tests to fail with an internal exception.
 
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
