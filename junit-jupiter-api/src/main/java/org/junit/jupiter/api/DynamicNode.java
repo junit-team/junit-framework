@@ -26,11 +26,6 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * {@code DynamicNode} serves as the abstract base class for a container or a
  * test case generated at runtime.
  *
- * <h2>Extensibility</h2>
- *
- * <p>Although it is technically possible to extend this class, extension is
- * strongly discouraged.
- *
  * @since 5.0
  * @see DynamicTest
  * @see DynamicContainer

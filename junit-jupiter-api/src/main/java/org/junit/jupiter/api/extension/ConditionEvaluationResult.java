@@ -22,11 +22,6 @@ import org.junit.platform.commons.util.ToStringBuilder;
 /**
  * The result of evaluating an {@link ExecutionCondition}.
  *
- * <h2>Extensibility</h2>
- *
- * <p>Although it is technically possible to extend this class, extension is
- * strongly discouraged.
- *
  * @since 5.0
  */
 @API(status = STABLE, since = "5.0")
