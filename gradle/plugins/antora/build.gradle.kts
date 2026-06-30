@@ -8,11 +8,11 @@ dependencies {
 	implementation(projects.buildParameters)
 	implementation(libs.plugins.node.markerCoordinates)
 	constraints {
-		implementation("com.fasterxml.jackson.core:jackson-core") {
+		implementation("com.fasterxml.jackson.core:jackson-databind") {
 			version {
-				require("2.21.1")
+				require("2.22.0")
 			}
-			because("Workaround for GHSA-72hv-8253-57qq")
+			because("Workaround for CVE-2026-54512 et al.")
 		}
 	}
 	implementation(libs.plugins.spring.antora.markerCoordinates)

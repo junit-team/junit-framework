@@ -17,12 +17,17 @@ val javaLibraryExtension = project.the<JavaLibraryExtension>()
 tasks.withType<KotlinCompile>().configureEach {
 	compilerOptions {
 		jvmTarget = javaLibraryExtension.mainJavaVersion.map { JvmTarget.fromTarget(it.toString()) }
-		apiVersion = KOTLIN_2_1
+
+		apiVersion = KOTLIN_2_1 // remove suppression below when upgrading
 		languageVersion = apiVersion
+
 		allWarningsAsErrors.convention(true)
 		javaParameters = true
+
 		freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
 		freeCompilerArgs.add(jvmTarget.map { "-Xjdk-release=${JavaVersion.toVersion(it.target).majorVersion}" })
+		// Silence deprecation warning for language/API version which is fixed to 2.1 for backward compatibility
+		freeCompilerArgs.add("-Xsuppress-version-warnings")
 	}
 }
 

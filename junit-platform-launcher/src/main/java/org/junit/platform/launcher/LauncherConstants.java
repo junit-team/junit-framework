@@ -17,6 +17,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.engine.EngineDiscoveryRequest;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
 
 /**
@@ -290,9 +291,32 @@ public class LauncherConstants {
 	 * maintainers of the affected listeners or engines.
 	 *
 	 * @since 6.1
+	 * @see #MEMORY_CLEANUP_EXCLUDED_ENGINES_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
 	public static final String MEMORY_CLEANUP_ENABLED_PROPERTY_NAME = "junit.platform.execution.memory.cleanup.enabled";
+
+	/**
+	 * Property name used to configure which test engines should be excluded from
+	 * memory cleanup in case it's enabled.
+	 *
+	 * <p>If set, value must be a comma-separated list of test engine IDs.
+	 * If an engine is excluded, it's {@link TestIdentifier TestIdentifiers}
+	 * will still be removed from the {@link TestPlan} but it's
+	 * {@link TestDescriptor TestDescriptors} will not be removed from their
+	 * parents by calling {@link TestDescriptor#removeFromHierarchy()}.
+	 *
+	 * <p>This can be useful to work around performance issues with specific engines
+	 * when memory cleanup is enabled. For example, to exclude the Vintage engine:
+	 * {@code junit-vintage}.
+	 *
+	 * <p>If not specified, all engines are subject to memory cleanup when enabled.
+	 *
+	 * @since 6.1.1
+	 * @see #MEMORY_CLEANUP_ENABLED_PROPERTY_NAME
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1.1")
+	public static final String MEMORY_CLEANUP_EXCLUDED_ENGINES_PROPERTY_NAME = "junit.platform.execution.memory.cleanup.engines.excluded";
 
 	private LauncherConstants() {
 		/* no-op */
