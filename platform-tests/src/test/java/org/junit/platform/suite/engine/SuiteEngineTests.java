@@ -860,13 +860,13 @@ class SuiteEngineTests {
 	}
 
 	@Test
-	void usingJupiterDisabledLogsAnIssue() {
+	void usingJupiterDisabledReportsAnIssue() {
 		var testKit = EngineTestKit.engine(ENGINE_ID).selectors(
 			selectClass(JupiterDisabledSuite.class)).outputDirectoryCreator(
 				hierarchicalOutputDirectoryCreator(outputDir));
 
 		var expectedIssue = DiscoveryIssue.create(INFO,
-			("The suite [%s] was annotated with [org.junit.jupiter.api.Disabled] which does not disabled the suite. "
+			("The suite [%s] was annotated with [org.junit.jupiter.api.Disabled] which does *not* disable the suite. "
 					+ "Did you mean to use [org.junit.platform.suite.api.Disabled]?") //
 							.formatted(JupiterDisabledSuite.class));
 		assertThat(testKit.discover().getDiscoveryIssues()).contains(expectedIssue);

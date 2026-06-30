@@ -112,7 +112,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 	static void reportUseOfJupiterDisabled(Class<?> suiteClass, DiscoveryIssueReporter issueReporter) {
 		findAnnotationByName(suiteClass, ORG_JUNIT_JUPITER_API_DISABLED) //
 				.map(annotation -> {
-					String message = "The suite [%s] was annotated with [%s] which does not disabled the suite. Did you mean to use [%s]?" //
+					String message = "The suite [%s] was annotated with [%s] which does *not* disable the suite. Did you mean to use [%s]?" //
 							.formatted(suiteClass, annotation.annotationType().getName(), Disabled.class.getName());
 					return DiscoveryIssue.create(INFO, message);
 				}) //
