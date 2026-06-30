@@ -22,3 +22,11 @@ indent_style = tab
 [*.xml.snapshot]
 # The expected XML files contain trailing spaces. Removing them let the tests fail.
 trim_trailing_whitespace = false
+
+[.idea/*.xml]
+# Config files from IntelliJ are without a final newline.
+insert_final_newline = false
+
+[documentation/modules/ROOT/images/extensions_StoreHierarchy.svg]
+# SVG files from draw.io are without a final newline
+insert_final_newline = false
