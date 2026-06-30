@@ -18,3 +18,7 @@ ij_kotlin_allow_trailing_comma_on_call_site = false
 
 [*.kts]
 indent_style = tab
+
+[*.xml.snapshot]
+# The expected XML files contain trailing spaces. Removing them let the tests fail.
+trim_trailing_whitespace = false

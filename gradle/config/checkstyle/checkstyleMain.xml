@@ -4,7 +4,7 @@
 	<property name="severity" value="error" />
 
 	<module name="TreeWalker">
-		<module name="SuppressWarningsHolder" />	
+		<module name="SuppressWarningsHolder" />
 		<module name="JavadocMethod">
 			<property name="allowMissingParamTags" value="true" />
 			<property name="allowMissingReturnTag" value="true" />
