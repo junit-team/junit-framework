@@ -492,8 +492,8 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 				.selectors(selectMethod(TestCase.class, "testWithCsvSource", String.class.getName())) //
 				.execute();
 		results.allEvents().assertThatEvents() //
-				.haveExactly(1, event(container(), finishedWithFailure(message(msg -> msg.contains(
-					ParameterizedInvocationNameFormatter.ARGUMENT_MAX_LENGTH_KEY + " must be a positive number")))));
+				.haveExactly(1, event(container(), finishedWithFailure(message(
+					ParameterizedInvocationNameFormatter.ARGUMENT_MAX_LENGTH_KEY + " must be a positive number: 0"))));
 	}
 
 	@Test
