@@ -71,6 +71,13 @@ class KotlinAssertionsTests {
         assertThrows<AssertionError>("should fail") { fail({ "message" }) }
         assertThrows<AssertionError>({ "should fail" }) { fail(AssertionError()) }
         assertThrows<AssertionError>({ "should fail" }) { fail(null as Throwable?) }
+
+        assertThrows(AssertionError::class) { fail("message") }
+        assertThrows(AssertionError::class) { fail("message", AssertionError()) }
+        assertThrows(AssertionError::class) { fail("message", null) }
+        assertThrows(AssertionError::class, "should fail") { fail({ "message" }) }
+        assertThrows(AssertionError::class, { "should fail" }) { fail(AssertionError()) }
+        assertThrows(AssertionError::class, { "should fail" }) { fail(null as Throwable?) }
     }
 
     @Test
@@ -78,15 +85,26 @@ class KotlinAssertionsTests {
         assertThrowsExactly<AssertionFailedError> { fail("message") }
         assertThrowsExactly<AssertionFailedError>("should fail") { fail("message") }
         assertThrowsExactly<AssertionFailedError>({ "should fail" }) { fail("message") }
+
+        assertThrowsExactly(AssertionFailedError::class) { fail("message") }
+        assertThrowsExactly(AssertionFailedError::class, "should fail") { fail("message") }
+        assertThrowsExactly(AssertionFailedError::class, { "should fail" }) { fail("message") }
     }
 
     @Test
-    fun `expected context exception testing`() =
+    fun `expected context exception testing`() {
         runBlocking<Unit> {
             assertThrows<AssertionError>("Should fail async") {
                 suspend { fail("Should fail async") }()
             }
         }
+
+        runBlocking<Unit> {
+            assertThrows(AssertionError::class, "Should fail async") {
+                suspend { fail("Should fail async") }()
+            }
+        }
+    }
 
     @TestFactory
     fun `assertDoesNotThrow behaves as expected`(): Stream<out DynamicNode> =
@@ -141,6 +159,18 @@ class KotlinAssertionsTests {
                             "Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
                         )
                     },
+                    dynamicTest("for no arguments variant (exception as value") {
+                        val exception =
+                            assertThrows(AssertionError::class) {
+                                assertDoesNotThrow {
+                                    fail("fail")
+                                }
+                            }
+                        assertMessageEquals(
+                            exception,
+                            "Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
+                        )
+                    },
                     dynamicTest("for no arguments variant (suspended)") {
                         runBlocking {
                             val exception =
@@ -155,9 +185,35 @@ class KotlinAssertionsTests {
                             )
                         }
                     },
+                    dynamicTest("for no arguments variant (suspended, exception as value)") {
+                        runBlocking {
+                            val exception =
+                                assertThrows(AssertionError::class) {
+                                    assertDoesNotThrow {
+                                        suspend { fail("fail") }()
+                                    }
+                                }
+                            assertMessageEquals(
+                                exception,
+                                "Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
+                            )
+                        }
+                    },
                     dynamicTest("for message variant") {
                         val exception =
                             assertThrows<AssertionError> {
+                                assertDoesNotThrow("Does not throw") {
+                                    fail("fail")
+                                }
+                            }
+                        assertMessageEquals(
+                            exception,
+                            "Does not throw ==> Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
+                        )
+                    },
+                    dynamicTest("for message variant (exception as value)") {
+                        val exception =
+                            assertThrows(AssertionError::class) {
                                 assertDoesNotThrow("Does not throw") {
                                     fail("fail")
                                 }
@@ -181,9 +237,35 @@ class KotlinAssertionsTests {
                             )
                         }
                     },
+                    dynamicTest("for message variant (suspended, exception as value)") {
+                        runBlocking {
+                            val exception =
+                                assertThrows(AssertionError::class) {
+                                    assertDoesNotThrow("Does not throw") {
+                                        suspend { fail("fail") }()
+                                    }
+                                }
+                            assertMessageEquals(
+                                exception,
+                                "Does not throw ==> Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
+                            )
+                        }
+                    },
                     dynamicTest("for message supplier variant") {
                         val exception =
                             assertThrows<AssertionError> {
+                                assertDoesNotThrow({ "Does not throw" }) {
+                                    fail("fail")
+                                }
+                            }
+                        assertMessageEquals(
+                            exception,
+                            "Does not throw ==> Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
+                        )
+                    },
+                    dynamicTest("for message supplier variant (exception as value)") {
+                        val exception =
+                            assertThrows(AssertionError::class) {
                                 assertDoesNotThrow({ "Does not throw" }) {
                                     fail("fail")
                                 }
@@ -206,6 +288,20 @@ class KotlinAssertionsTests {
                                 "Does not throw ==> Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
                             )
                         }
+                    },
+                    dynamicTest("for message supplier variant (suspended, exception as value)") {
+                        runBlocking {
+                            val exception =
+                                assertThrows(AssertionError::class) {
+                                    assertDoesNotThrow({ "Does not throw" }) {
+                                        suspend { fail("fail") }()
+                                    }
+                                }
+                            assertMessageEquals(
+                                exception,
+                                "Does not throw ==> Unexpected exception thrown: org.opentest4j.AssertionFailedError: fail"
+                            )
+                        }
                     }
                 )
             )
@@ -217,7 +313,14 @@ class KotlinAssertionsTests {
             assertThrows<MultipleFailuresError>("Should have thrown multiple errors") {
                 assertAll(Stream.of({ assertFalse(true) }, { assertFalse(true) }))
             }
+
+        val multipleFailuresErrorExceptionAsValue =
+            assertThrows(MultipleFailuresError::class, "Should have thrown multiple errors") {
+                assertAll(Stream.of({ assertFalse(true) }, { assertFalse(true) }))
+            }
+
         assertExpectedExceptionTypes(multipleFailuresError, AssertionFailedError::class, AssertionFailedError::class)
+        assertExpectedExceptionTypes(multipleFailuresErrorExceptionAsValue, AssertionFailedError::class, AssertionFailedError::class)
     }
 
     @Test
@@ -226,7 +329,13 @@ class KotlinAssertionsTests {
             assertThrows<MultipleFailuresError>("Should have thrown multiple errors") {
                 assertAll(setOf({ assertFalse(true) }, { assertFalse(true) }))
             }
+
+        val multipleFailuresErrorExceptionAsValue =
+            assertThrows(MultipleFailuresError::class, "Should have thrown multiple errors") {
+                assertAll(setOf({ assertFalse(true) }, { assertFalse(true) }))
+            }
         assertExpectedExceptionTypes(multipleFailuresError, AssertionFailedError::class, AssertionFailedError::class)
+        assertExpectedExceptionTypes(multipleFailuresErrorExceptionAsValue, AssertionFailedError::class, AssertionFailedError::class)
     }
 
     @Test
@@ -238,7 +347,15 @@ class KotlinAssertionsTests {
                 // This should never execute:
                 expectAssertionFailedError()
             }
+
+        val errorExceptionAsValue =
+            assertThrows<AssertionFailedError>("assertThrows did not throw the correct exception") {
+                assertThrows(IllegalStateException::class, assertionMessage) { }
+                // This should never execute:
+                expectAssertionFailedError()
+            }
         assertMessageStartsWith(error, assertionMessage)
+        assertMessageStartsWith(errorExceptionAsValue, assertionMessage)
     }
 
     @Test
@@ -254,7 +371,12 @@ class KotlinAssertionsTests {
             assertThrows<AssertionError> {
                 assertInstanceOf<String>(StringBuilder(), "Should be a String")
             }
+        val resultExceptionAsValue =
+            assertThrows(AssertionError::class) {
+                assertInstanceOf<String>(StringBuilder(), "Should be a String")
+            }
         assertMessageStartsWith(result, "Should be a String")
+        assertMessageStartsWith(resultExceptionAsValue, "Should be a String")
     }
 
     @Test
@@ -263,7 +385,12 @@ class KotlinAssertionsTests {
             assertThrows<AssertionError> {
                 assertInstanceOf<String>(null, "Should be a String")
             }
+        val resultExceptionAsValue =
+            assertThrows(AssertionError::class) {
+                assertInstanceOf<String>(null, "Should be a String")
+            }
         assertMessageStartsWith(result, "Should be a String")
+        assertMessageStartsWith(resultExceptionAsValue, "Should be a String")
     }
 
     @Test
@@ -288,8 +415,13 @@ class KotlinAssertionsTests {
             assertThrows<AssertionFailedError> {
                 assertInstanceOf<String>(null)
             }
+        val errorExceptionAsValue =
+            assertThrows(AssertionFailedError::class) {
+                assertInstanceOf<String>(null)
+            }
 
         assertMessageStartsWith(error, "Unexpected null value")
+        assertMessageStartsWith(errorExceptionAsValue, "Unexpected null value")
     }
 
     @Test
