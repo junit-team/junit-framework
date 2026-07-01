@@ -22,6 +22,12 @@ body {
     }
 }
 
+.navbar-item svg {
+    height: 20px;
+    width: 20px;
+    margin-right: .5ex;
+}
+
 .doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
     font-family: "Blinker", sans-serif;
     font-weight: 600;
