@@ -15,6 +15,9 @@ import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.joining;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.commons.util.FunctionUtils.where;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.INFO;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.WARNING;
+import static org.junit.platform.suite.engine.SuiteAnnotationSupport.findAnnotationByName;
 import static org.junit.platform.suite.engine.SuiteLauncherDiscoveryRequestBuilder.request;
 
 import java.lang.reflect.Method;
@@ -42,6 +45,7 @@ import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
+import org.junit.platform.engine.support.hierarchical.Node.SkipResult;
 import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCollector;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 import org.junit.platform.engine.support.store.Namespace;
@@ -53,6 +57,7 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryResult;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.suite.api.Disabled;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
@@ -69,6 +74,8 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	static final String SEGMENT_TYPE = "suite";
+	private static final SkipResult CANCELLED_SKIP_RESULT = SkipResult.skip("Execution cancelled");
+	private static final String ORG_JUNIT_JUPITER_API_DISABLED = "org.junit.jupiter.api.Disabled";
 
 	private final SuiteLauncherDiscoveryRequestBuilder discoveryRequestBuilder = request();
 	private final ConfigurationParameters configurationParameters;
@@ -91,6 +98,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		this.suiteClass = suiteClass;
 		this.lifecycleMethods = new LifecycleMethods(suiteClass, issueReporter);
 		this.discoveryRequestBuilder.listener(DiscoveryIssueForwardingListener.create(id, discoveryListener));
+		reportUseOfJupiterDisabled(suiteClass, issueReporter);
 	}
 
 	private static Boolean getFailIfNoTests(Class<?> suiteClass) {
@@ -99,6 +107,16 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 				.map(Suite::failIfNoTests)
 				.orElseThrow(() -> new JUnitException("Suite [%s] was not annotated with @Suite".formatted(suiteClass.getName())));
 		// @formatter:on
+	}
+
+	static void reportUseOfJupiterDisabled(Class<?> suiteClass, DiscoveryIssueReporter issueReporter) {
+		findAnnotationByName(suiteClass, ORG_JUNIT_JUPITER_API_DISABLED) //
+				.map(annotation -> {
+					String message = "The suite [%s] was annotated with [%s] which does *not* disable the suite. Did you mean to use [%s]?" //
+							.formatted(suiteClass, annotation.annotationType().getName(), Disabled.class.getName());
+					return DiscoveryIssue.create(INFO, message);
+				}) //
+				.ifPresent(issueReporter::reportIssue);
 	}
 
 	SuiteTestDescriptor addDiscoveryRequestFrom(Class<?> suiteClass) {
@@ -149,7 +167,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 		var nonBlank = issueReporter.createReportingCondition(StringUtils::isNotBlank, __ -> {
 			String message = "@SuiteDisplayName on %s must be declared with a non-blank value.".formatted(
 					suiteClass.getName());
-			return DiscoveryIssue.builder(DiscoveryIssue.Severity.WARNING, message)
+			return DiscoveryIssue.builder(WARNING, message)
 					.source(ClassSource.from(suiteClass))
 					.build();
 		}).toPredicate();
@@ -163,9 +181,9 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	void execute(EngineExecutionListener executionListener, NamespacedHierarchicalStore<Namespace> requestLevelStore,
 			CancellationToken cancellationToken) {
-
-		if (cancellationToken.isCancellationRequested()) {
-			executionListener.executionSkipped(this, "Execution cancelled");
+		var skipResult = checkWhetherSkipped(cancellationToken);
+		if (skipResult.isSkipped()) {
+			executionListener.executionSkipped(this, skipResult.getReason().orElse("<unknown>"));
 			return;
 		}
 
@@ -181,6 +199,24 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 		TestExecutionResult testExecutionResult = computeTestExecutionResult(summary, throwableCollector);
 		executionListener.executionFinished(this, testExecutionResult);
+	}
+
+	private SkipResult checkWhetherSkipped(CancellationToken cancellationToken) {
+		return cancellationToken.isCancellationRequested() //
+				? CANCELLED_SKIP_RESULT //
+				: shouldBeSkipped();
+	}
+
+	private SkipResult shouldBeSkipped() {
+		return findAnnotation(suiteClass, Disabled.class) //
+				.map(this::toSkipResult) //
+				.orElse(SkipResult.doNotSkip());
+	}
+
+	private SkipResult toSkipResult(Disabled disabled) {
+		var value = disabled.value();
+		var reason = StringUtils.isNotBlank(value) ? value : suiteClass + " is @Disabled";
+		return SkipResult.skip(reason);
 	}
 
 	private void executeBeforeSuiteMethods(ThrowableCollector throwableCollector) {

@@ -1,4 +1,3 @@
-import nmcp.NmcpAggregationExtension
 import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
@@ -20,9 +19,6 @@ nmcpSettings {
 
 gradle.lifecycle.afterProject {
 	if (project == rootProject) {
-		the<NmcpAggregationExtension>().apply {
-			publishAllChecksums = true
-		}
 		tasks.named<Zip>("nmcpZipAggregation") {
 			eachFile {
 				if (name.contains(".asc.")) {

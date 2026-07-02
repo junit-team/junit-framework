@@ -74,6 +74,8 @@ class ParameterizedInvocationNameFormatter {
 
 		int argumentMaxLength = extensionContext.getConfigurationParameter(ARGUMENT_MAX_LENGTH_KEY, Integer::parseInt) //
 				.orElse(512);
+		Preconditions.condition(argumentMaxLength > 0,
+			() -> ARGUMENT_MAX_LENGTH_KEY + " must be a positive number: " + argumentMaxLength);
 
 		return new ParameterizedInvocationNameFormatter(pattern, extensionContext.getDisplayName(), declarationContext,
 			argumentMaxLength);

@@ -94,14 +94,14 @@ xmlunit = ["xmlunit-assertj", "xmlunit-placeholders", "xmlunit-jakarta-jaxb-impl
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.5" }
 commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.7.0" }
-develocity = { id = "com.gradle.develocity", version = "4.4.3" }
+develocity = { id = "com.gradle.develocity", version = "4.5.0" }
 download = { id = "de.undercouch.download", version = "5.7.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "5.1.0" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.4.0" }
-nmcp-settings = { id = "com.gradleup.nmcp.settings", version = "1.6.0" }
+nmcp-settings = { id = "com.gradleup.nmcp.settings", version = "1.6.1" }
 node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.1.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.5.0" }

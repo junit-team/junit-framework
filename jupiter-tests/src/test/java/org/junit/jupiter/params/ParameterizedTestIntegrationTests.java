@@ -486,6 +486,17 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Test
+	void failsContainerWhenArgumentMaxLengthIsNotPositive() {
+		var results = EngineTestKit.engine(new JupiterTestEngine()) //
+				.configurationParameter(ParameterizedInvocationNameFormatter.ARGUMENT_MAX_LENGTH_KEY, "0") //
+				.selectors(selectMethod(TestCase.class, "testWithCsvSource", String.class.getName())) //
+				.execute();
+		results.allEvents().assertThatEvents() //
+				.haveExactly(1, event(container(), finishedWithFailure(message(
+					ParameterizedInvocationNameFormatter.ARGUMENT_MAX_LENGTH_KEY + " must be a positive number: 0"))));
+	}
+
+	@Test
 	void displayNamePatternFromConfiguration() {
 		var results = EngineTestKit.engine(new JupiterTestEngine()) //
 				.configurationParameter(ParameterizedInvocationNameFormatter.DISPLAY_NAME_PATTERN_KEY, "{index}") //

@@ -32,6 +32,8 @@ repository on GitHub.
 * When using a third-party engine that uses the `junit-` prefix a discovery issue is
   emitted.
 * `junit-platform-console-standalone` is now part of the `junit-bom`
+* `@org.junit.platform.suite.api.Disabled` can be used annotate a `@Suite`-annotated
+  class. If so annotated, the suite will not be executed.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
@@ -39,7 +41,9 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* The `junit.jupiter.params.displayname.argument.maxlength` configuration parameter is
+  now validated and rejected with a clear error when set to a non-positive value instead
+  of causing parameterized tests to fail with an internal exception.
 
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -49,6 +53,8 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
+* Added `OS.NETBSD` and `OS.DRAGONFLYBSD` enum constants for use with `@EnabledOnOs`
+  and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
 

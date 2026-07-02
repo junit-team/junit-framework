@@ -42,6 +42,12 @@ class OSTests {
 		}
 
 		@ParameterizedTest
+		@ValueSource(strings = { "DRAGONFLYBSD", "DragonFlyBSD" })
+		void dragonflybsd(String name) {
+			assertEquals(OS.DRAGONFLYBSD, OS.parse(name));
+		}
+
+		@ParameterizedTest
 		@ValueSource(strings = { "FREEBSD", "FreeBSD" })
 		void freebsd(String name) {
 			assertEquals(OS.FREEBSD, OS.parse(name));
@@ -63,6 +69,12 @@ class OSTests {
 		@ValueSource(strings = { "OPENBSD", "OpenBSD" })
 		void openbsd(String name) {
 			assertEquals(OS.OPENBSD, OS.parse(name));
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = { "NETBSD", "NetBSD" })
+		void netbsd(String name) {
+			assertEquals(OS.NETBSD, OS.parse(name));
 		}
 
 		@ParameterizedTest

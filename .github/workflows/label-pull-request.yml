@@ -33,17 +33,17 @@ jobs:
                 }
               }
             `;
-            
+
             const {repository} = await github.graphql(query, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pr: context.issue.number
             });
-            
+
             let labels = Array.from(new Set(repository.pullRequest.closingIssuesReferences.nodes
                 .flatMap((node) => node.labels.nodes.map((label) => label.name))))
                 .filter((label) => !label.startsWith("status:") && label !== "up-for-grabs");
-            
+
             if (labels.length > 0) {
                 console.log(`Adding labels to PR: ${labels}`);
                 await github.rest.issues.addLabels({
