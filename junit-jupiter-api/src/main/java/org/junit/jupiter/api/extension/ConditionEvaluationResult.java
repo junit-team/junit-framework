@@ -25,7 +25,7 @@ import org.junit.platform.commons.util.ToStringBuilder;
  * @since 5.0
  */
 @API(status = STABLE, since = "5.0")
-public final class ConditionEvaluationResult {
+public class ConditionEvaluationResult {
 
 	/**
 	 * Factory for creating <em>enabled</em> results.
