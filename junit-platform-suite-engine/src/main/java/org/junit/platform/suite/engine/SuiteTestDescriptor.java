@@ -337,6 +337,13 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 			this.testsFound.set(testPlan.countTestIdentifiers(TestIdentifier::isTest));
 		}
 
+		@Override
+		public void dynamicTestRegistered(TestIdentifier testIdentifier) {
+			if (testIdentifier.isTest()) {
+				testsFound.incrementAndGet();
+			}
+		}
+
 		long getTestsFoundCount() {
 			return testsFound.get();
 		}
