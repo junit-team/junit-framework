@@ -18,6 +18,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqu
 import static org.junit.platform.launcher.TagFilter.excludeTags;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.junit.platform.suite.engine.SuiteEngineDescriptor.ENGINE_ID;
+import static org.junit.platform.suite.engine.SuiteEventConditions.suite;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.displayName;
 import static org.junit.platform.testkit.engine.EventConditions.engine;
@@ -121,9 +122,9 @@ class SuiteEngineTests {
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(suiteClass.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(suiteClass), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -139,8 +140,9 @@ class SuiteEngineTests {
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(SelectMethodsSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(MultipleTestsTestCase.class.getName(), "test()"), finishedSuccessfully()))
 				.doNotHave(event(test(MultipleTestsTestCase.class.getName(), "test2()")));
 		// @formatter:on
@@ -303,8 +305,9 @@ class SuiteEngineTests {
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectClass(DynamicSuite.class))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(DynamicSuite.class), finishedSuccessfully()))
 				.haveExactly(2, event(test(DynamicTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -316,10 +319,10 @@ class SuiteEngineTests {
 				.selectors(selectClass(SuiteSuite.class))
 				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SuiteSuite.class.getName()), finishedSuccessfully()))
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SuiteSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -339,10 +342,12 @@ class SuiteEngineTests {
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()));
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
+				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
 
@@ -362,10 +367,12 @@ class SuiteEngineTests {
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()));
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
+				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
 
@@ -378,9 +385,9 @@ class SuiteEngineTests {
 				.selectors(selectUniqueId(uniqId));
 			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -397,9 +404,9 @@ class SuiteEngineTests {
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -413,9 +420,9 @@ class SuiteEngineTests {
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -434,11 +441,11 @@ class SuiteEngineTests {
 				.selectors(selectClass(SelectClassesSuite.class));
 			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()))
-				.haveExactly(1, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -462,9 +469,9 @@ class SuiteEngineTests {
 				.selectors(selectUniqueId(uniqueId))
 				.selectors(selectUniqueId(uniqueId2))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -490,8 +497,9 @@ class SuiteEngineTests {
 					selectUniqueId(uniqueId2)
 				)
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(ConfigurationSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(ConfigurationSuite.class.getName(), "test1()"), finishedSuccessfully()))
 				.haveExactly(1, event(test(ConfigurationSuite.class.getName(), "test2()"), finishedSuccessfully()));
 		// @formatter:on
@@ -504,7 +512,7 @@ class SuiteEngineTests {
 				.filter(MethodSource.class::isInstance)
 				.map(MethodSource.class::cast)
 				.filter(classSource -> SingleTestTestCase.class.equals(classSource.getJavaClass()))
-				.map(classSource -> FilterResult.excluded("Was a test in SimpleTest"))
+				.map(_ -> FilterResult.excluded("Was a test in SimpleTest"))
 				.orElseGet(() -> FilterResult.included("Was not a test in SimpleTest"));
 
 		EngineTestKit.engine(ENGINE_ID)
@@ -525,7 +533,7 @@ class SuiteEngineTests {
 				.execute()
 				.containerEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(container(EmptyTestCaseSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
+				.haveExactly(1, event(suite(EmptyTestCaseSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
 		// @formatter:on
 	}
 
@@ -549,7 +557,7 @@ class SuiteEngineTests {
 				.execute()
 				.containerEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(container(EmptyDynamicTestSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
+				.haveExactly(1, event(suite(EmptyDynamicTestSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
 		// @formatter:on
 	}
 
@@ -561,7 +569,7 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
-				.haveAtLeastOne(event(container(EmptyDynamicTestWithFailIfNoTestFalseSuite.class), finishedSuccessfully()));
+				.haveAtLeastOne(event(suite(EmptyDynamicTestWithFailIfNoTestFalseSuite.class), finishedSuccessfully()));
 		// @formatter:on
 	}
 
@@ -604,6 +612,7 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(CyclicSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -616,7 +625,7 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(container(EmptyCyclicSuite.class), finishedWithFailure(message(
+				.haveExactly(1, event(suite(EmptyCyclicSuite.class), finishedWithFailure(message(
 						"Suite [org.junit.platform.suite.engine.testsuites.EmptyCyclicSuite] did not discover any tests"
 				))));
 		// @formatter:on
@@ -631,6 +640,9 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(ThreePartCyclicSuite.PartA.class), finishedSuccessfully()))
+				.haveExactly(1, event(suite(ThreePartCyclicSuite.PartB.class), finishedSuccessfully()))
+				.haveExactly(1, event(suite(ThreePartCyclicSuite.PartC.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -646,10 +658,9 @@ class SuiteEngineTests {
 
 		testKit
 				.execute()
-				.testEvents()
-				.debug()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(FailingSuite.class.getName()), finishedWithFailure()))
+				.haveExactly(1, event(suite(FailingSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleFailingTestTestCase.class.getName()),finishedWithFailure()));
 		// @formatter:on
 
@@ -664,9 +675,9 @@ class SuiteEngineTests {
 				.selectors(selectClass(SelectByIdentifierSuite.class));
 			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectByIdentifierSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectByIdentifierSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -678,8 +689,9 @@ class SuiteEngineTests {
 				.selectors(selectClass(SelectClassesSuite.class));
 			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(SingleTestWithTestReporterSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 
@@ -765,9 +777,9 @@ class SuiteEngineTests {
 			results.allEvents() //
 					.assertStatistics(stats -> stats.started(3).succeeded(2).aborted(1).skipped(2)) //
 					.assertEventsMatchLooselyInOrder( //
-						event(container(CancellingSuite.class), started()), //
+						event(suite(CancellingSuite.class), started()), //
 						event(container(SingleTestTestCase.class), skippedWithReason("Execution cancelled")), //
-						event(container(CancellingSuite.class), finishedSuccessfully()), //
+						event(suite(CancellingSuite.class), finishedSuccessfully()), //
 						event(container(SelectMethodsSuite.class), skippedWithReason("Execution cancelled")) //
 					);
 		}
@@ -787,8 +799,10 @@ class SuiteEngineTests {
 			var results = testKit.execute();
 
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(container(SingleTestTestCase.class),
-						skippedWithReason("Execution cancelled"))).haveExactly(0, event(test(), started()));
+					.haveExactly(1, event(suite(CancellingSuite.class), finishedSuccessfully())) //
+					.haveExactly(1, //
+						event(container(SingleTestTestCase.class), skippedWithReason("Execution cancelled"))) //
+					.haveExactly(0, event(test(), started()));
 
 			assertThat(CancellingSuite.afterCalled) //
 					.describedAs("@AfterSuite method was called") //
@@ -860,11 +874,13 @@ class SuiteEngineTests {
 	private static class PrivateSuite {
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	@Suite
 	@SelectClasses(names = "org.junit.platform.suite.engine.testcases.SingleTestTestCase")
 	abstract class AbstractInnerSuite {
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	@Suite
 	@SelectClasses(names = "org.junit.platform.suite.engine.testcases.SingleTestTestCase")
 	class InnerSuite {
