@@ -38,28 +38,31 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 
 		CsvReaderFactory.validate(csvSource);
 
+		var isFirst = true;
 		List<Arguments> arguments = new ArrayList<>();
-
-		try (var reader = CsvReaderFactory.createReaderFor(csvSource, getData(csvSource))) {
-			boolean useHeadersInDisplayName = csvSource.useHeadersInDisplayName();
-			for (CsvRecord record : reader) {
-				arguments.add(processCsvRecord(record, useHeadersInDisplayName));
+		for (String data : getData(csvSource)) {
+			boolean useHeadersInDisplayName = isFirst && csvSource.useHeadersInDisplayName();
+			isFirst = false;
+			try (var reader = CsvReaderFactory.createReaderFor(csvSource, data)) {
+				for (CsvRecord record : reader) {
+					arguments.add(processCsvRecord(record, useHeadersInDisplayName));
+				}
 			}
-		}
-		catch (Throwable throwable) {
-			throw handleCsvException(throwable, csvSource);
+			catch (Throwable throwable) {
+				throw handleCsvException(throwable, csvSource);
+			}
 		}
 
 		return arguments.stream();
 	}
 
-	private static String getData(CsvSource csvSource) {
+	private static String[] getData(CsvSource csvSource) {
 		var values = csvSource.value();
 		Preconditions.condition(values.length > 0 ^ !csvSource.textBlock().isEmpty(),
 			() -> "@CsvSource must be declared with either `value` or `textBlock` but not both");
 
 		if (!csvSource.textBlock().isEmpty()) {
-			return csvSource.textBlock();
+			return new String[] { csvSource.textBlock() };
 		}
 		else {
 			for (int i = 0; i < values.length; i++) {
@@ -67,7 +70,7 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 				Preconditions.notBlank(values[i],
 					() -> "CSV record at index %d must not be blank".formatted(finalI + 1));
 			}
-			return String.join("\n", values);
+			return values;
 		}
 	}
 
