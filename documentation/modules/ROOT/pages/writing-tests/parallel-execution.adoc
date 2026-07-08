@@ -43,10 +43,26 @@ method.
 You can use the `@Execution` annotation to explicitly configure the execution mode for a
 test class or method:
 
-[source,java]
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/ExplicitExecutionModeDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ExplicitExecutionModeDemo.kt[tags=user_guide]
+----
+--
+====
 
 This allows test classes or methods to opt in or out of concurrent execution regardless of
 the globally configured default.
@@ -70,7 +86,7 @@ combining both configuration parameters, you can configure classes to run in par
 their methods in the same thread:
 
 [source,properties]
-.Configuration parameters to execute top-level classes in parallel but methods in same thread
+.Configuration parameters to execute top-level classes in parallel but methods in the same thread
 ----
 junit.jupiter.execution.parallel.enabled = true
 junit.jupiter.execution.parallel.mode.default = same_thread
@@ -197,9 +213,9 @@ If no configuration strategy is set, JUnit Jupiter uses the `dynamic` configurat
 strategy with a factor of `1`. Consequently, the desired parallelism will be equal to the
 number of available processors/cores.
 
-.Parallelism alone does not imply maximum number of concurrent threads
+.Parallelism alone does not imply the maximum number of concurrent threads
 NOTE: By default, JUnit Jupiter does not guarantee that the number of threads used to
-execute test will not exceed the configured parallelism. For example, when using one
+execute a test will not exceed the configured parallelism. For example, when using one
 of the synchronization mechanisms described in the next section, the executor service
 implementation may spawn additional threads to ensure execution continues with sufficient
 parallelism. If you require such guarantees, it is possible to limit the maximum number of
@@ -316,17 +332,49 @@ an access mode. Two tests that require `READ` access to a shared resource may ru
 parallel with each other but not while any other test that requires `READ_WRITE` access
 to the same shared resource is running.
 
-[source,java]
 .Declaring shared resources "statically" with `{ResourceLock}` annotation
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/sharedresources/StaticSharedResourcesDemo.java[tags=user_guide]
 ----
+--
 
-[source,java]
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/sharedresources/StaticSharedResourcesDemo.kt[tags=user_guide]
+----
+--
+====
+
 .Adding shared resources "dynamically" with `{ResourceLocksProvider}` implementation
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/sharedresources/DynamicSharedResourcesDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/sharedresources/DynamicSharedResourcesDemo.kt[tags=user_guide]
+----
+--
+====
 
 Also, "static" shared resources can be declared for _direct_ child nodes via the `target`
 attribute in the `{ResourceLock}` annotation, the attribute accepts a value from
@@ -344,8 +392,24 @@ didn't have `target = CHILDREN`. This is because the test class declares a `READ
 shared resource, but one test method holds a `READ_WRITE` lock,
 which would force the `SAME_THREAD` execution mode for all the test methods.
 
-[source,java]
-.Declaring shared resources for child nodes with `target` attribute
+.Declaring shared resources for child nodes with the `target` attribute
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/sharedresources/ChildrenSharedResourcesDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/sharedresources/ChildrenSharedResourcesDemo.kt[tags=user_guide]
+----
+--
+====
