@@ -37,40 +37,59 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 			CsvSource csvSource) {
 
 		CsvReaderFactory.validate(csvSource);
+		validateValueAndTextBlock(csvSource);
 
-		var isFirst = true;
+		if (csvSource.textBlock().isEmpty()) {
+			return provideArgumentsFromValueArray(csvSource);
+		}
+		return provideArgumentsFromTextBlock(csvSource);
+	}
+
+	private static Stream<Arguments> provideArgumentsFromValueArray(CsvSource csvSource) {
+		boolean useHeadersInDisplayName = csvSource.useHeadersInDisplayName();
+		boolean isFirstRecord = true;
+		List<String> headers = List.of();
 		List<Arguments> arguments = new ArrayList<>();
-		for (String data : getData(csvSource)) {
-			boolean useHeadersInDisplayName = isFirst && csvSource.useHeadersInDisplayName();
-			isFirst = false;
+		for (String data : csvSource.value()) {
 			try (var reader = CsvReaderFactory.createReaderFor(csvSource, data)) {
 				for (CsvRecord record : reader) {
-					arguments.add(processCsvRecord(record, useHeadersInDisplayName));
+					if (isFirstRecord && useHeadersInDisplayName) {
+						headers = record.getFields();
+					}
+					else {
+						arguments.add(processCsvRecord(record, useHeadersInDisplayName, headers));
+					}
+					isFirstRecord = false;
 				}
 			}
 			catch (Throwable throwable) {
 				throw handleCsvException(throwable, csvSource);
 			}
 		}
-
 		return arguments.stream();
 	}
 
-	private static String[] getData(CsvSource csvSource) {
+	private static Stream<Arguments> provideArgumentsFromTextBlock(CsvSource csvSource) {
+		List<Arguments> arguments = new ArrayList<>();
+		try (var reader = CsvReaderFactory.createReaderFor(csvSource, csvSource.textBlock())) {
+			boolean useHeadersInDisplayName = csvSource.useHeadersInDisplayName();
+			for (CsvRecord record : reader) {
+				arguments.add(processCsvRecord(record, useHeadersInDisplayName));
+			}
+		}
+		catch (Throwable throwable) {
+			throw handleCsvException(throwable, csvSource);
+		}
+		return arguments.stream();
+	}
+
+	private static void validateValueAndTextBlock(CsvSource csvSource) {
 		var values = csvSource.value();
 		Preconditions.condition(values.length > 0 ^ !csvSource.textBlock().isEmpty(),
 			() -> "@CsvSource must be declared with either `value` or `textBlock` but not both");
-
-		if (!csvSource.textBlock().isEmpty()) {
-			return new String[] { csvSource.textBlock() };
-		}
-		else {
-			for (int i = 0; i < values.length; i++) {
-				int finalI = i;
-				Preconditions.notBlank(values[i],
-					() -> "CSV record at index %d must not be blank".formatted(finalI + 1));
-			}
-			return values;
+		for (int i = 0; i < values.length; i++) {
+			int finalI = i;
+			Preconditions.notBlank(values[i], () -> "CSV record at index %d must not be blank".formatted(finalI + 1));
 		}
 	}
 
@@ -80,9 +99,12 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 	 * CSV record wrapped in an {@link Arguments} instance.
 	 */
 	static Arguments processCsvRecord(CsvRecord record, boolean useHeadersInDisplayName) {
-		List<String> fields = record.getFields();
 		List<String> headers = useHeadersInDisplayName ? getHeaders(record) : List.of();
+		return processCsvRecord(record, useHeadersInDisplayName, headers);
+	}
 
+	private static Arguments processCsvRecord(CsvRecord record, boolean useHeadersInDisplayName, List<String> headers) {
+		List<String> fields = record.getFields();
 		Preconditions.condition(!useHeadersInDisplayName || fields.size() <= headers.size(), //
 			() -> "The number of columns (%d) exceeds the number of supplied headers (%d) in CSV record: %s".formatted( //
 				fields.size(), headers.size(), fields)); //

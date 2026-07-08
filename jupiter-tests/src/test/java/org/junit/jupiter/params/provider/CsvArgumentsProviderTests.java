@@ -87,6 +87,21 @@ class CsvArgumentsProviderTests {
 	}
 
 	@Test
+	void providesMultipleArgumentsUsingMultipleTextBlocks() {
+		var annotation = csvSource("""
+				a
+				b
+				""", """
+				c
+				d
+				""");
+
+		var arguments = provideArguments(annotation);
+
+		assertThat(arguments).containsExactly(array("a"), array("b"), array("c"), array("d"));
+	}
+
+	@Test
 	void providesMultipleArgumentsFromTextBlock() {
 		var annotation = csvSource().textBlock("""
 				foo
@@ -208,6 +223,14 @@ class CsvArgumentsProviderTests {
 		var arguments = provideArguments(annotation);
 
 		assertThat(arguments).containsExactly(array("foo, bar"));
+	}
+
+	@Test
+	void understandsUnfinishedQuotesFromDifferentArgumentsShouldNotBeJoined() {
+		var annotation = csvSource("a, 'b", "c', d");
+		var arguments = provideArguments(annotation);
+		// Note: The parser leniently closes the unclosed quote for b.
+		assertThat(arguments).containsExactly(array("a", "b"), array("c'", "d"));
 	}
 
 	@Test

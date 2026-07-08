@@ -68,7 +68,8 @@ class CsvReaderFactory {
 
 	static CsvReader<? extends CsvRecord> createReaderFor(CsvSource csvSource, String data) {
 		String delimiter = selectDelimiter(csvSource.delimiter(), csvSource.delimiterString());
-		var commentStrategy = csvSource.textBlock().isEmpty() ? NONE : SKIP;
+		boolean hasTextBlock = !csvSource.textBlock().isEmpty();
+		var commentStrategy = hasTextBlock ? SKIP : NONE;
 		// @formatter:off
 		validateControlCharactersDiffer(
 				delimiter, csvSource.quoteCharacter(), csvSource.commentCharacter(), commentStrategy);
@@ -88,7 +89,8 @@ class CsvReaderFactory {
 				Set.of(csvSource.nullValues()),
 				csvSource.ignoreLeadingAndTrailingWhitespace(),
 				csvSource.maxCharsPerColumn(),
-				csvSource.useHeadersInDisplayName()
+				// For CsvSource.value we manually process the header.
+				hasTextBlock && csvSource.useHeadersInDisplayName()
 		);
 		// @formatter:on
 		return builder.build(callbackHandler, data);
