@@ -74,6 +74,8 @@ spotless {
 
 	yaml {
 		target("**/*.yaml", "**/*.yml")
+		trimTrailingWhitespace()
+		endWithNewline()
 	}
 
 	// Explicitly configure line endings to avoid Spotless to search for .gitattributes file
