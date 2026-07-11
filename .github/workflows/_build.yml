@@ -21,7 +21,6 @@ jobs:
       uses: graalvm/setup-graalvm@186d0493a2df5eb62df5ecc498883d18fd58c303 # v1.6.2
       with:
         distribution: graalvm
-        version: latest
         java-version: 21
     - name: Build
       uses: ./.github/actions/main-build
