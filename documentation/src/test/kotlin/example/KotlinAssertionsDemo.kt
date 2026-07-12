@@ -64,7 +64,7 @@ class KotlinAssertionsDemo {
             assertThrows(ArithmeticException::class, "Should throw an exception") {
                 calculator.divide(1, 0)
             }
-        assertEquals("boom", exception.message)
+        assertEquals("/ by zero", exception.message)
     }
 
     @Test
