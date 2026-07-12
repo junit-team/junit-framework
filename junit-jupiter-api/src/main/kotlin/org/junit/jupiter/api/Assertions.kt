@@ -300,7 +300,7 @@ inline fun <reified T : Throwable> assertThrows(executable: () -> Unit): T {
  * i.e. when using a @ParameterizedTest that provides exception classes as values.
  * @see Assertions.assertThrows
  */
-@API(status = EXPERIMENTAL, since = "6.2.0")
+@API(status = EXPERIMENTAL, since = "6.2")
 inline fun <T : Throwable> assertThrows(
     expectedType: KClass<T>,
     executable: () -> Unit
@@ -349,7 +349,7 @@ inline fun <reified T : Throwable> assertThrows(
  * i.e. when using a @ParameterizedTest that provides exception classes as values.
  * @see Assertions.assertThrows
  */
-@API(status = EXPERIMENTAL, since = "6.2.0")
+@API(status = EXPERIMENTAL, since = "6.2")
 inline fun <T : Throwable> assertThrows(
     expectedType: KClass<T>,
     message: String,
@@ -409,7 +409,7 @@ inline fun <reified T : Throwable> assertThrows(
  * @see Assertions.assertThrows
  */
 @OptIn(ExperimentalContracts::class)
-@API(status = EXPERIMENTAL, since = "6.2.0")
+@API(status = EXPERIMENTAL, since = "6.2")
 inline fun <T : Throwable> assertThrows(
     expectedType: KClass<T>,
     noinline message: () -> String,
@@ -479,7 +479,7 @@ inline fun <reified T : Throwable> assertThrowsExactly(executable: () -> Unit): 
  *  i.e. when using a @ParameterizedTest that provides exception classes as values.
  * @see Assertions.assertThrowsExactly
  */
-@API(status = EXPERIMENTAL, since = "6.2.0")
+@API(status = EXPERIMENTAL, since = "6.2")
 inline fun <T : Throwable> assertThrowsExactly(
     expectedType: KClass<T>,
     executable: () -> Unit
@@ -528,7 +528,7 @@ inline fun <reified T : Throwable> assertThrowsExactly(
  *  i.e. when using a @ParameterizedTest that provides exception classes as values.
  * @see Assertions.assertThrowsExactly
  */
-@API(status = EXPERIMENTAL, since = "6.2.0")
+@API(status = EXPERIMENTAL, since = "6.2")
 inline fun <T : Throwable> assertThrowsExactly(
     expectedType: KClass<T>,
     message: String,
@@ -588,7 +588,7 @@ inline fun <reified T : Throwable> assertThrowsExactly(
  * @see Assertions.assertThrowsExactly
  */
 @OptIn(ExperimentalContracts::class)
-@API(status = EXPERIMENTAL, since = "6.2.0")
+@API(status = EXPERIMENTAL, since = "6.2")
 inline fun <T : Throwable> assertThrowsExactly(
     expectedType: KClass<T>,
     noinline message: () -> String,
