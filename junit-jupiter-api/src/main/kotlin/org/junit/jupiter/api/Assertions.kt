@@ -13,6 +13,7 @@
 package org.junit.jupiter.api
 
 import org.apiguardian.api.API
+import org.apiguardian.api.API.Status.EXPERIMENTAL
 import org.apiguardian.api.API.Status.MAINTAINED
 import org.apiguardian.api.API.Status.STABLE
 import org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure
