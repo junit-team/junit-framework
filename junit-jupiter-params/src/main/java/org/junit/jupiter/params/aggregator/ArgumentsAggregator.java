@@ -44,6 +44,10 @@ import org.junit.platform.commons.JUnitException;
  * often they are called. Since instances may potentially be cached and called
  * from different threads, they should be thread-safe.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>This interface is designed to be implemented by clients.
+ *
  * @since 5.2
  * @see AggregateWith
  * @see ArgumentsAccessor

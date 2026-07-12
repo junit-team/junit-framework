@@ -23,6 +23,10 @@ import org.junit.jupiter.params.support.FieldContext;
  * {@link ArgumentsAggregator} implementations that do not need to distinguish
  * between fields and method/constructor parameters.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>This class is designed for extension.
+ *
  * @since 5.0
  * @see ArgumentsAggregator
  */
@@ -32,12 +36,18 @@ public abstract class SimpleArgumentsAggregator implements ArgumentsAggregator {
 	public SimpleArgumentsAggregator() {
 	}
 
+	/**
+	 * By default, this method delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
+	 */
 	@Override
 	public @Nullable Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context)
 			throws ArgumentsAggregationException {
 		return aggregateArguments(accessor, context.getParameter().getType(), context, context.getIndex());
 	}
 
+	/**
+	 * By default, this method delegates to {@link #aggregateArguments(ArgumentsAccessor, Class, AnnotatedElementContext, int)}.
+	 */
 	@Override
 	public @Nullable Object aggregateArguments(ArgumentsAccessor accessor, FieldContext context)
 			throws ArgumentsAggregationException {

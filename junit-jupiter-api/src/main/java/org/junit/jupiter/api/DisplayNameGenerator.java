@@ -44,7 +44,13 @@ import org.junit.platform.commons.util.Preconditions;
  * <p>Display names are typically used for test reporting in IDEs and build
  * tools and may contain spaces, special characters, and even emoji.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>This interface is designed to be implemented by clients.
+ *
  * <p>Concrete implementations must have a <em>default constructor</em>.
+ *
+ * <h2>Configuration</h2>
  *
  * <p>A {@link DisplayNameGenerator} can be configured <em>globally</em> for the
  * entire test suite via the {@value #DEFAULT_GENERATOR_PROPERTY_NAME}

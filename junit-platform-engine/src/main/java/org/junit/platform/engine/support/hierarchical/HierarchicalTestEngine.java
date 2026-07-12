@@ -23,6 +23,10 @@ import org.junit.platform.engine.TestEngine;
  * Abstract base class for all {@link TestEngine} implementations that wish
  * to organize test suites hierarchically based on the {@link Node} abstraction.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>This class is designed for extension by test engine implementations.
+ *
  * @param <C> the type of {@code EngineExecutionContext} used by this engine
  * @since 1.0
  * @see Node
@@ -38,7 +42,11 @@ public abstract class HierarchicalTestEngine<C extends EngineExecutionContext> i
 	 * service}; create an initial {@linkplain #createExecutionContext execution
 	 * context}; execute the behavior of all {@linkplain Node nodes} in the
 	 * hierarchy starting with the supplied {@code request}'s
-	 * {@linkplain ExecutionRequest#getRootTestDescriptor() root} and notify
+	 * {@linkplain ExecutionRequest#getRootTestDescriptor() root}, collecting
+	 * every thrown throwable using the
+	 * {@linkplain org.junit.platform.engine.support.hierarchical.ThrowableCollector
+	 * throwable collector} returned by
+	 * {@linkplain #createThrowableCollectorFactory(ExecutionRequest)}; and notify
 	 * its {@linkplain ExecutionRequest#getEngineExecutionListener() execution
 	 * listener} of test execution events.
 	 *
@@ -48,6 +56,7 @@ public abstract class HierarchicalTestEngine<C extends EngineExecutionContext> i
 	 * @see Node
 	 * @see #createExecutorService
 	 * @see #createExecutionContext
+	 * @see #createThrowableCollectorFactory
 	 */
 	@Override
 	public final void execute(ExecutionRequest request) {
