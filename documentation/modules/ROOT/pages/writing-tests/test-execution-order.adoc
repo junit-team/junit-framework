@@ -41,10 +41,26 @@ NOTE: See also: xref:extensions/relative-execution-order-of-user-code-and-extens
 The following example demonstrates how to guarantee that test methods are executed in the
 order specified via the `@Order` annotation.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/OrderedTestsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/OrderedTestsDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[methods-default]]
 === Setting the Default Method Orderer
@@ -132,7 +148,23 @@ Note that a local `@TestClassOrder` declaration always overrides an inherited
 The following example demonstrates how to guarantee that `@Nested` test classes are
 executed in the order specified via the `@Order` annotation.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/OrderedNestedTestClassesDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/OrderedNestedTestClassesDemo.kt[tags=user_guide]
+----
+--
+====
