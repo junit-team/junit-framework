@@ -38,6 +38,8 @@ jobs:
     - name: Build
       if: matrix.build-mode == 'manual'
       uses: ./.github/actions/run-gradle
+      env:
+        CODEQL_EXTRACTOR_JAVA_AGENT_DISABLE_KOTLIN: true # blocked by https://github.com/github/codeql/issues/21938
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: >-
