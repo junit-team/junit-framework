@@ -215,7 +215,7 @@ number of available processors/cores.
 
 .Parallelism alone does not imply the maximum number of concurrent threads
 NOTE: By default, JUnit Jupiter does not guarantee that the number of threads used to
-execute a test will not exceed the configured parallelism. For example, when using one
+execute tests will not exceed the configured parallelism. For example, when using one
 of the synchronization mechanisms described in the next section, the executor service
 implementation may spawn additional threads to ensure execution continues with sufficient
 parallelism. If you require such guarantees, it is possible to limit the maximum number of
