@@ -10,9 +10,6 @@
 
 package org.junit.jupiter.params.provider;
 
-import static de.siegmar.fastcsv.reader.CommentStrategy.NONE;
-import static de.siegmar.fastcsv.reader.CommentStrategy.SKIP;
-
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -91,7 +88,7 @@ abstract class CsvReaderConfiguration {
 	private static void validateControlCharactersDiffer(String delimiter, char quoteCharacter, char commentCharacter,
 			CommentStrategy commentStrategy) {
 
-		if (commentStrategy == NONE) {
+		if (commentStrategy == CommentStrategy.NONE) {
 			Preconditions.condition(stringValuesUnique(delimiter, quoteCharacter),
 				() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
 						"must differ").formatted(delimiter, quoteCharacter));
@@ -158,8 +155,8 @@ abstract class CsvReaderConfiguration {
 
 		@Override
 		CommentStrategy commentStrategy() {
-			// For CsvSource.value comments are read as if they are fields.
-			return NONE;
+			// For CsvSource.value does not support comments
+			return CommentStrategy.NONE;
 		}
 
 		@Override
@@ -219,7 +216,7 @@ abstract class CsvReaderConfiguration {
 
 		@Override
 		CommentStrategy commentStrategy() {
-			return SKIP;
+			return CommentStrategy.SKIP;
 		}
 
 		@Override
@@ -278,7 +275,7 @@ abstract class CsvReaderConfiguration {
 
 		@Override
 		CommentStrategy commentStrategy() {
-			return SKIP;
+			return CommentStrategy.SKIP;
 		}
 
 		@Override
