@@ -303,7 +303,7 @@ class CsvArgumentsProviderTests {
 
 	@Test
 	void throwsExceptionIfBothDelimitersAreSimultaneouslySet() {
-		var annotation = csvSource().delimiter('|').delimiterString("~~~").build();
+		var annotation = csvSource().lines("foo").delimiter('|').delimiterString("~~~").build();
 
 		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny())//
 				.withMessageStartingWith("The delimiter and delimiterString attributes cannot be set simultaneously in")//
