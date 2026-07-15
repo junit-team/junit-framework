@@ -105,21 +105,16 @@ abstract class CsvReaderConfiguration {
 		return uniqueCount == values.length;
 	}
 
-	final CsvReaderFactory.DefaultFieldModifier fieldModifier() {
-		return new CsvReaderFactory.DefaultFieldModifier(emptyValue(), nullValues(),
-			ignoreLeadingAndTrailingWhitespace());
-	}
-
 	final int maxFieldSize() {
 		return maxCharsPerColumn() == -1 ? Integer.MAX_VALUE : maxCharsPerColumn();
 	}
 
 	final String delimiter() {
 		char delimiter = delimiterCharacter();
-		String delimiterString = delimiterString();
 		if (delimiter != EMPTY_CHAR) {
 			return String.valueOf(delimiter);
 		}
+		var delimiterString = delimiterString();
 		if (!delimiterString.isEmpty()) {
 			return delimiterString;
 		}
@@ -155,7 +150,7 @@ abstract class CsvReaderConfiguration {
 
 		@Override
 		CommentStrategy commentStrategy() {
-			// For CsvSource.value does not support comments
+			// CsvSource.value does not support comments
 			return CommentStrategy.NONE;
 		}
 

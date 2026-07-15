@@ -58,19 +58,25 @@ class CsvReaderFactory {
 				.commentStrategy(configuration.commentStrategy()) //
 				.commentCharacter(configuration.commentCharacter()); //
 
+		var fieldModifier = (FieldModifier) new DefaultFieldModifier(//
+			configuration.emptyValue(), //
+			configuration.nullValues(), //
+			configuration.ignoreLeadingAndTrailingWhitespace() //
+		);
+
 		var callbackHandler = configuration.namedCsvRecords() //
 				? NamedCsvRecordHandler.builder() //
 						.allowDuplicateHeaderFields(ALLOW_DUPLICATE_HEADER_FIELDS) //
 						.maxFields(MAX_FIELDS) //
 						.maxRecordSize(MAX_RECORD_SIZE) //
 						.maxFieldSize(configuration.maxFieldSize()) //
-						.fieldModifier(configuration.fieldModifier()) //
+						.fieldModifier(fieldModifier) //
 						.build() //
 				: CsvRecordHandler.builder() //
 						.maxFields(MAX_FIELDS) //
 						.maxRecordSize(MAX_RECORD_SIZE) //
 						.maxFieldSize(configuration.maxFieldSize()) //
-						.fieldModifier(configuration.fieldModifier()) //
+						.fieldModifier(fieldModifier) //
 						.build();
 
 		return builder.build(callbackHandler, reader);
