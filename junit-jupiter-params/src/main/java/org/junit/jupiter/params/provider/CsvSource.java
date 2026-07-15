@@ -121,7 +121,8 @@ public @interface CsvSource {
 	 * <h4>Text Blocks</h4>
 	 *
 	 * <p>If <em>text block</em> syntax is supported by your programming language,
-	 * you may also declare your CSV content as a textblock.
+	 * you may also declare your CSV content as a textblock. Note that unlike
+	 * {@link #textBlock()} {@code value} does not support comments.
 	 *
 	 * <p>When using text blocks each value corresponds to a CSV document and
 	 * will be split using the specified {@link #delimiter} or
