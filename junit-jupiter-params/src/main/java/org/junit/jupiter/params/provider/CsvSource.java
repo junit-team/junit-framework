@@ -105,7 +105,7 @@ public @interface CsvSource {
 	 * {@link #useHeadersInDisplayName}). Moreover, each specified value must
 	 * not be blank.
 	 *
-	 * <h5>Example</h5>
+	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * {@literal @}ParameterizedTest
 	 * {@literal @}CsvSource({
