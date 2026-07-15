@@ -225,6 +225,9 @@ class CsvArgumentsProviderTests {
 		assertThat(arguments).containsExactly(array("foo, bar"));
 	}
 
+	/**
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/5017">GitHub issue #5017</a>
+	 */
 	@Test
 	void understandsUnfinishedQuotesFromDifferentArgumentsShouldNotBeJoined() {
 		var annotation = csvSource("a, 'b", "c', d");
