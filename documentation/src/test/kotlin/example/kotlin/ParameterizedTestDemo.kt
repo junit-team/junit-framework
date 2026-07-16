@@ -132,7 +132,7 @@ class ParameterizedTestDemo {
     @ParameterizedTest
     @EnumSource(names = ["DAYS", "HOURS"])
     fun testWithEnumSourceInclude(unit: ChronoUnit) {
-        assertTrue(EnumSet.of(ChronoUnit.DAYS, ChronoUnit.HOURS).contains(unit))
+        assertTrue(unit in EnumSet.of(ChronoUnit.DAYS, ChronoUnit.HOURS))
     }
     // end::EnumSource_include_example[]
 
@@ -140,7 +140,7 @@ class ParameterizedTestDemo {
     @ParameterizedTest
     @EnumSource(from = "HOURS", to = "DAYS")
     fun testWithEnumSourceRange(unit: ChronoUnit) {
-        assertTrue(EnumSet.of(ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ChronoUnit.DAYS).contains(unit))
+        assertTrue(unit in EnumSet.of(ChronoUnit.HOURS, ChronoUnit.HALF_DAYS, ChronoUnit.DAYS))
     }
     // end::EnumSource_range_example[]
 
@@ -148,7 +148,7 @@ class ParameterizedTestDemo {
     @ParameterizedTest
     @EnumSource(mode = EXCLUDE, names = ["ERAS", "FOREVER"])
     fun testWithEnumSourceExclude(unit: ChronoUnit) {
-        assertFalse(EnumSet.of(ChronoUnit.ERAS, ChronoUnit.FOREVER).contains(unit))
+        assertFalse(unit in EnumSet.of(ChronoUnit.ERAS, ChronoUnit.FOREVER))
     }
     // end::EnumSource_exclude_example[]
 
@@ -164,8 +164,8 @@ class ParameterizedTestDemo {
     @ParameterizedTest
     @EnumSource(from = "HOURS", to = "DAYS", mode = EXCLUDE, names = ["HALF_DAYS"])
     fun testWithEnumSourceRangeExclude(unit: ChronoUnit) {
-        assertTrue(EnumSet.of(ChronoUnit.HOURS, ChronoUnit.DAYS).contains(unit))
-        assertFalse(EnumSet.of(ChronoUnit.HALF_DAYS).contains(unit))
+        assertTrue(unit in EnumSet.of(ChronoUnit.HOURS, ChronoUnit.DAYS))
+        assertFalse(unit in EnumSet.of(ChronoUnit.HALF_DAYS))
     }
     // end::EnumSource_range_exclude_example[]
 
@@ -240,7 +240,7 @@ class ParameterizedTestDemo {
     // end::named_arguments_FieldSource_example[]
 
     private fun assertFruit(fruit: String) {
-        assertTrue(listOf("apple", "banana", "cherry", "dewberry").contains(fruit))
+        assertTrue(fruit in listOf("apple", "banana", "cherry", "dewberry"))
     }
 
     // tag::multi_arg_FieldSource_example[]
@@ -378,14 +378,9 @@ class ParameterizedTestDemo {
 
     // end::implicit_fallback_conversion_example[]
     // tag::implicit_fallback_conversion_example_Book[]
-    class Book private constructor(
+    class Book(
         val title: String
-    ) {
-        companion object {
-            @JvmStatic
-            fun fromTitle(title: String): Book = Book(title)
-        }
-    }
+    )
     // end::implicit_fallback_conversion_example_Book[]
 
     // tag::explicit_conversion_example[]

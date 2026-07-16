@@ -634,11 +634,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=simple_MethodSourc
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=simple_MethodSource_example]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=simple_MethodSource_example,indent=0]
 
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=stringProvider]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=stringProvider,indent=0]
 ----
 --
 ====
@@ -662,14 +662,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=simple_MethodSourc
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=simple_MethodSource_without_value_example]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=simple_MethodSource_without_value_example,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=testWithDefaultLocalMethodSource_provider]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=testWithDefaultLocalMethodSource_provider,indent=0]
 ----
 --
 ====
@@ -691,9 +688,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=primitive_MethodSo
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[lines=189..193;567]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=primitive_MethodSource_example,indent=0]
+
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=range,indent=0]
 ----
 --
 ====
@@ -719,9 +718,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=multi_arg_MethodSo
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=multi_arg_MethodSource_example;stringIntAndListProvider]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=multi_arg_MethodSource_example,indent=0]
+
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=stringIntAndListProvider,indent=0]
 ----
 --
 ====
@@ -775,9 +776,11 @@ include::example$java/example/MethodSourceParameterResolutionDemo.java[tags=para
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/MethodSourceParameterResolutionDemo.kt[tags=parameter_resolution_MethodSource_example]
+include::example$kotlin/example/kotlin/MethodSourceParameterResolutionDemo.kt[tags=parameter_resolution_MethodSource_example,indent=0]
+
+include::example$kotlin/example/kotlin/MethodSourceParameterResolutionDemo.kt[tags=parameter_resolution_factory_MethodSource_example,indent=0]
 ----
 --
 ====
@@ -847,14 +850,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=default_field_Fiel
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=default_field_FieldSource_example]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=default_field_FieldSource_example,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=arrayOfFruits]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=arrayOfFruits,indent=0]
 ----
 --
 ====
@@ -877,14 +877,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=explicit_field_Fie
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=explicit_field_FieldSource_example]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=explicit_field_FieldSource_example,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=listOfFruits]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=listOfFruits,indent=0]
 ----
 --
 ====
@@ -909,19 +906,13 @@ include::example$java/example/ParameterizedTestDemo.java[tags=multiple_fields_Fi
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=multiple_fields_FieldSource_example]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=multiple_fields_FieldSource_example,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=listOfFruits]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=listOfFruits,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=additionalFruits]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=additionalFruits,indent=0]
 ----
 --
 ====
@@ -947,14 +938,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=named_arguments_Fi
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_arguments_FieldSource_example]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_arguments_FieldSource_example,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=namedArgumentsSupplier]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=namedArgumentsSupplier,indent=0]
 ----
 --
 ====
@@ -987,14 +975,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=multi_arg_FieldSou
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=multi_arg_FieldSource_example]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=multi_arg_FieldSource_example,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=stringIntAndListArguments]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=stringIntAndListArguments,indent=0]
 ----
 --
 ====
@@ -1407,19 +1392,13 @@ include::example$java/example/ParameterizedTestDemo.java[tags=repeatable_annotat
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=repeatable_annotations]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=repeatable_annotations,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=someProvider]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=someProvider,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=otherProvider]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=otherProvider,indent=0]
 ----
 --
 ====
@@ -1997,14 +1976,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=named_arguments]
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_arguments]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_arguments,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=namedArguments]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=namedArguments,indent=0]
 ----
 --
 ====
@@ -2046,14 +2022,11 @@ include::example$java/example/ParameterizedTestDemo.java[tags=named_argument_set
 Kotlin::
 +
 --
-[source,kotlin,indent=0]
+[source,kotlin]
 ----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_argument_set]
-----
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_argument_set,indent=0]
 
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=argumentSets]
+include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=argumentSets,indent=0]
 ----
 --
 ====

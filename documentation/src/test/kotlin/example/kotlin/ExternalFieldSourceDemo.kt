@@ -16,9 +16,14 @@ import org.junit.jupiter.params.provider.FieldSource
 class ExternalFieldSourceDemo {
     // tag::external_field_FieldSource_example[]
     @ParameterizedTest
-    @FieldSource("example.FruitUtils#tropicalFruits")
+    @FieldSource("example.kotlin.FruitUtils#tropicalFruits")
     fun testWithExternalFieldSource(tropicalFruit: String) {
         // test with tropicalFruit
     }
     // end::external_field_FieldSource_example[]
+}
+
+object FruitUtils {
+    @JvmField
+    val tropicalFruits: List<String> = listOf("pineapple", "kiwi")
 }
