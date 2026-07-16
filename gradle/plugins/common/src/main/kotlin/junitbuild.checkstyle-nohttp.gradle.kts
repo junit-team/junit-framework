@@ -15,9 +15,9 @@ dependencies {
 		}
 		checkstyle("ch.qos.logback:logback-classic") {
 			version {
-				require("1.5.25")
+				require("1.5.35")
 			}
-			because("Workaround for CVE-2026-1225")
+			because("Workaround for CVE-2026-10532")
 		}
 		checkstyle("org.codehaus.plexus:plexus-utils") {
 			version {

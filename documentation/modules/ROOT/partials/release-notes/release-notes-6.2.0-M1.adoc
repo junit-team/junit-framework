@@ -34,6 +34,10 @@ repository on GitHub.
 * `junit-platform-console-standalone` is now part of the `junit-bom`
 * `@org.junit.platform.suite.api.Disabled` can be used annotate a `@Suite`-annotated
   class. If so annotated, the suite will not be executed.
+* The `org.junit.jupiter.api.assertThrows` Kotlin API and its related functions have
+  added variants that use an exception class as a value rather than a type parameter.
+  This is to primarily to address the current issue/s when trying to use
+  `@ParameterizedTest` that produces exceptions as values.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter

@@ -18,7 +18,7 @@ This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
 ## Latest Releases
 
-- General Availability (GA): [JUnit 6.1.1](https://github.com/junit-team/junit-framework/releases/tag/r6.1.1) (June 28, 2026)
+- General Availability (GA): [JUnit 6.1.2](https://github.com/junit-team/junit-framework/releases/tag/r6.1.2) (July 12, 2026)
 - Preview (Milestone/Release Candidate): N/A
 
 ## Documentation
@@ -44,11 +44,10 @@ Ask JUnit-related questions on [StackOverflow] or use the Q&A category on [GitHu
 
 ## Continuous Integration Builds
 
-[![CI](https://github.com/junit-team/junit-framework/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/main.yml) [![Cross-Version](https://github.com/junit-team/junit-framework/actions/workflows/cross-version.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/cross-version.yml)
+[![CI](https://github.com/junit-team/junit-framework/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/ci.yml)
 
-Official CI build server used to perform quick checks on submitted pull requests and for
-build matrices including the latest released OpenJDK and early access builds of the next
-OpenJDK.
+Official CI build that performs quick checks on submitted pull requests and runs
+build matrices for the latest release and early access versions of OpenJDK.
 
 ## Code Coverage
 
