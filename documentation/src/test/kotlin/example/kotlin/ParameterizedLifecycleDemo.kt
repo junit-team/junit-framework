@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v2.0 which
@@ -9,16 +9,6 @@
  */
 
 @file:JvmName("ParameterizedLifecycleDemo")
-
-/*
- * Copyright 2015-2026 the original author or authors.
- *
- * All rights reserved. This program and the accompanying materials are
- * made available under the terms of the Eclipse Public License v2.0 which
- * accompanies this distribution and is available at
- *
- * https://www.eclipse.org/legal/epl-v20.html
- */
 
 package example.kotlin
 
@@ -35,24 +25,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 // tag::example[]
-class TextFile(
-    val fileName: String,
-    val content: String
-) {
-    var path: Path? = null
-
-    override fun toString(): String = fileName
-}
-
-fun textFiles(): List<TextFile> =
-    listOf(
-        // tag::custom_line_break[]
-        TextFile("file1", "first content"),
-        // tag::custom_line_break[]
-        TextFile("file2", "second content")
-// tag::custom_line_break[]
-    )
-
 @ParameterizedClass
 @MethodSource("textFiles")
 class TextFileTests {
@@ -73,7 +45,7 @@ class TextFileTests {
         @JvmStatic
         @AfterParameterizedClassInvocation
         fun afterInvocation(textFile: TextFile) { // <3>
-            val actualContent = Files.readString(textFile.path!!)
+            val actualContent = Files.readString(textFile.path)
             assertEquals(textFile.content, actualContent, "Content must not have changed")
             // Custom cleanup logic, if necessary
             // File will be deleted automatically by @TempDir support
@@ -82,7 +54,7 @@ class TextFileTests {
 
     @Test
     fun test() {
-        assertTrue(Files.exists(textFile.path!!)) // <2>
+        assertTrue(Files.exists(textFile.path)) // <2>
     }
 
     @Test
@@ -90,4 +62,19 @@ class TextFileTests {
         // ...
     }
 }
+
+class TextFile(
+    val fileName: String,
+    val content: String
+) {
+    lateinit var path: Path
+
+    override fun toString(): String = fileName
+}
+
+fun textFiles(): List<TextFile> =
+    listOf(
+        TextFile("file1", "first content"),
+        TextFile("file2", "second content")
+    )
 // end::example[]

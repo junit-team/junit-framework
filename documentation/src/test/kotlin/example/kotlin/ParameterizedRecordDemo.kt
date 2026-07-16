@@ -17,8 +17,8 @@ import org.junit.jupiter.params.ParameterizedClass
 import org.junit.jupiter.params.provider.CsvSource
 
 class ParameterizedRecordDemo {
-    @Nested
     // tag::example[]
+    @Nested
     @ParameterizedClass
     @CsvSource("apple, 23", "banana, 42")
     inner class FruitTests(
@@ -39,7 +39,7 @@ class ParameterizedRecordDemo {
     // end::example[]
 
     private fun assertFruit(fruit: String) {
-        assertTrue(listOf("apple", "banana", "cherry", "dewberry").contains(fruit))
+        assertTrue(fruit in listOf("apple", "banana", "cherry", "dewberry"))
     }
 
     private fun assertQuantity(quantity: Int) {

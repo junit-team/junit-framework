@@ -126,7 +126,7 @@ class ParameterizedClassDemo {
 
     private fun assertFruit(fruit: String) {
         assertTrue(
-            listOf("apple", "banana", "cherry", "dewberry").contains(fruit)
+            fruit in listOf("apple", "banana", "cherry", "dewberry")
         ) { "not a fruit: $fruit" }
     }
 

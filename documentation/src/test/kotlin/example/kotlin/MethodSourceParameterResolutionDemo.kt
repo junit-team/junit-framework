@@ -23,6 +23,10 @@ import java.util.stream.Stream
 
 class MethodSourceParameterResolutionDemo {
     // tag::parameter_resolution_MethodSource_example[]
+    @JvmField
+    @RegisterExtension
+    val integerResolver = IntegerResolver()
+
     @ParameterizedTest
     @MethodSource("factoryMethodWithArguments")
     fun testWithFactoryMethodWithArguments(argument: String) {
@@ -41,17 +45,12 @@ class MethodSourceParameterResolutionDemo {
         ): Any = 2
     }
     // end::parameter_resolution_MethodSource_example[]
-
-    companion object {
-        @JvmField
-        @RegisterExtension
-        val integerResolver = IntegerResolver()
-
-        @JvmStatic
-        fun factoryMethodWithArguments(quantity: Int): Stream<Arguments> =
-            Stream.of(
-                arguments("$quantity apples"),
-                arguments("$quantity lemons")
-            )
-    }
 }
+
+// tag::parameter_resolution_factory_MethodSource_example[]
+fun factoryMethodWithArguments(quantity: Int): Stream<Arguments> =
+    Stream.of(
+        arguments("$quantity apples"),
+        arguments("$quantity lemons")
+    )
+// end::parameter_resolution_factory_MethodSource_example[]
