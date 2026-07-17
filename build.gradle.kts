@@ -61,3 +61,20 @@ dependencies {
 	jacocoAggregation(projects.jupiterTests)
 	jacocoAggregation(projects.platformTests)
 }
+
+spotless {
+	format("misc") {
+		target("*.gradle.kts", "*/*.gradle.kts", "gradle/plugins/**/*.gradle.kts", "**/.gitignore")
+		targetExclude("gradle/plugins/**/build/**")
+		leadingSpacesToTabs()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	yaml {
+		target(
+			"*.yml", "*.yaml",
+			".github/**/*.yml", ".github/**/*.yaml",
+			"gradle/**/*.yml", "gradle/**/*.yaml"
+		)
+	}
+}

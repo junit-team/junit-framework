@@ -121,6 +121,14 @@ require(externalModulesWithoutModularJavadoc.values.all { it.endsWith("/") }) {
 	"all base URLs must end with a trailing slash: $externalModulesWithoutModularJavadoc"
 }
 
+spotless {
+	format("asciidoctor") {
+		target("modules/**/*.adoc")
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
 tasks {
 
 	val consoleLauncherTestReportsDir = project.layout.buildDirectory.dir("console-launcher-test-results")
