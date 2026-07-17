@@ -426,7 +426,7 @@ tasks {
 		into(layout.buildDirectory.dir("docs/fixedJavadoc"))
 	}
 
-	val prepareGitHubAttestation = register("prepareGitHubAttestation", Sync::class) {
+	register("prepareGitHubAttestation", Sync::class) {
 		from(attestationClasspath)
 		into(layout.buildDirectory.dir("attestation"))
 		rename("(.*)-SNAPSHOT.jar", "$1-SNAPSHOT+${buildRevision.substring(0, 7)}.jar")
