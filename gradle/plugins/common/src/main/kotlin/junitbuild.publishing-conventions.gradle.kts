@@ -7,22 +7,15 @@ plugins {
 	id("junitbuild.build-parameters")
 }
 
-@Suppress("UNCHECKED_CAST")
-val jupiterProjects = rootProject.extra["jupiterProjects"] as List<Project>
-
-@Suppress("UNCHECKED_CAST")
-val platformProjects = rootProject.extra["platformProjects"] as List<Project>
-
-@Suppress("UNCHECKED_CAST")
-val vintageProjects = rootProject.extra["vintageProjects"] as List<Project>
-
 group = buildParameters.publishing.group
-	.getOrElse(when (project) {
-		in jupiterProjects -> "org.junit.jupiter"
-		in platformProjects -> "org.junit.platform"
-		in vintageProjects -> "org.junit.vintage"
-		else -> "org.junit"
-	})
+	.getOrElse(
+		when {
+			name.startsWith("junit-jupiter") -> "org.junit.jupiter"
+			name.startsWith("junit-platform") -> "org.junit.platform"
+			name.startsWith("junit-vintage") -> "org.junit.vintage"
+			else -> "org.junit"
+		}
+	)
 
 val signArtifacts = buildParameters.publishing.signArtifacts.getOrElse(!(project.version.isSnapshot() || buildParameters.ci))
 
