@@ -8,7 +8,7 @@ plugins {
 }
 
 @Suppress("UNCHECKED_CAST")
-val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
+val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 
 tasks.withType<Test>().configureEach {
 	configure<JacocoTaskExtension> {
@@ -19,7 +19,7 @@ tasks.withType<Test>().configureEach {
 val codeCoverageClassesJar = tasks.register("codeCoverageClassesJar", Jar::class) {
 	from(tasks.jar.map { zipTree(it.archiveFile) })
 	archiveClassifier = "jacoco"
-	enabled = project.path in mavenizedProjects.map { it.path }
+	enabled = project in mavenizedProjects
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 

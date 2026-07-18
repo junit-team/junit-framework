@@ -65,7 +65,7 @@ dependencies {
 
 	// --- Test run-time dependencies ---------------------------------------------
 	@Suppress("UNCHECKED_CAST")
-	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
+	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 	mavenizedProjects.filter { it.path != projects.junitPlatformConsoleStandalone.path }.forEach {
 		// Add all projects to the classpath for tests using classpath scanning
 		testRuntimeOnly(it)

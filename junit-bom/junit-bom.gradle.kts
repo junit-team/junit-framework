@@ -8,16 +8,14 @@ description = "${rootProject.description} (Bill of Materials)"
 dependencies {
 	constraints {
 		@Suppress("UNCHECKED_CAST")
-		val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
-		val jitPackVersion = buildParameters.jitpack.version
-			.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
-		mavenizedProjects.sortedBy { it.name }
-			.forEach {
-				api(
-					jitPackVersion
-						.orElse(provider { it.version })
-						.map { version -> "${it.group}:${it.name}:${version}" })
-			}
+		val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
+		mavenizedProjects.sorted()
+				.forEach {
+					val version = buildParameters.jitpack.version
+						.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
+						.getOrElse(it.version.toString())
+					api("${it.group}:${it.name}:${version}")
+				}
 	}
 }
 

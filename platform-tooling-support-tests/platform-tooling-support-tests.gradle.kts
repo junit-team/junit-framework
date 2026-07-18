@@ -55,7 +55,7 @@ val mavenDistributionClasspath = configurations.resolvable("mavenDistributionCla
 }
 
 @Suppress("UNCHECKED_CAST")
-val modularProjects = rootProject.extra["modularProjects"] as List<ProjectDependency>
+val modularProjects = rootProject.extra["modularProjects"] as List<Project>
 
 dependencies {
 	implementation(libs.commons.io) {
@@ -112,13 +112,13 @@ val unzipMavenDistribution = tasks.register("unzipMavenDistribution", Sync::clas
 val normalizeMavenRepo = tasks.register("normalizeMavenRepo", Sync::class) {
 
 	@Suppress("UNCHECKED_CAST")
-	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
+	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 	val tempRepoDir = rootProject.extra["tempRepoDir"] as File
 	val tempRepoName = rootProject.extra["tempRepoName"] as String
 
 	// All maven-aware projects must be published to the local temp repository
-	(mavenizedProjects + projects.junitBom)
-		.map { project -> dependencyProject(project).tasks.named("publishAllPublicationsTo${tempRepoName.capitalized()}Repository") }
+	(mavenizedProjects + dependencyProject(projects.junitBom))
+		.map { project -> project.tasks.named("publishAllPublicationsTo${tempRepoName.capitalized()}Repository") }
 		.forEach { dependsOn(it) }
 
 	from(tempRepoDir) {
@@ -228,7 +228,7 @@ testing.suites.named<JvmTestSuite>("test") {
 				systemProperty("junit.modules", modularProjects.map { it.javaModuleName }.joinToString(","))
 
 				jvmArgumentProviders += CommandLineArgumentProvider {
-					modularProjects.map { "-Djunit.moduleSourcePath.${it.javaModuleName}=${dependencyProject(it).sourceSets["main"].allJava.sourceDirectories.filter { it.exists() }.asPath}" }
+					modularProjects.map { "-Djunit.moduleSourcePath.${it.javaModuleName}=${it.sourceSets["main"].allJava.sourceDirectories.filter { it.exists() }.asPath}" }
 				}
 
 				inputs.apply {

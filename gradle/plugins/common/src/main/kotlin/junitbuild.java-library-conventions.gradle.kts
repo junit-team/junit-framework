@@ -12,7 +12,7 @@ plugins {
 }
 
 @Suppress("UNCHECKED_CAST")
-val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
+val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
 val buildDate = rootProject.extra["buildDate"] as String
 val buildTime = rootProject.extra["buildTime"] as String
 val buildRevision = rootProject.extra["buildRevision"] as String
@@ -23,7 +23,7 @@ java {
 	modularity.inferModulePath = true
 }
 
-if (project.path in mavenizedProjects.map { it.path }) {
+if (project in mavenizedProjects) {
 
 	apply(plugin = "junitbuild.javadoc-conventions")
 	apply(plugin = "junitbuild.publishing-conventions")
