@@ -1,5 +1,3 @@
-import junitbuild.extensions.dependencyProject
-
 plugins {
 	id("junitbuild.base-conventions")
 	id("junitbuild.build-metadata")
@@ -17,40 +15,28 @@ extra["license"] = License(
 	headerFile = layout.settingsDirectory.file("gradle/config/spotless/eclipse-public-license-2.0.java")
 )
 
-val platformProjects = listOf(
-		projects.junitPlatformCommons,
-		projects.junitPlatformConsole,
-		projects.junitPlatformConsoleStandalone,
-		projects.junitPlatformEngine,
-		projects.junitPlatformLauncher,
-		projects.junitPlatformReporting,
-		projects.junitPlatformSuite,
-		projects.junitPlatformSuiteApi,
-		projects.junitPlatformSuiteEngine,
-		projects.junitPlatformTestkit
-)
-	.map { dependencyProject(it) }
-	.also { extra["platformProjects"] = it }
-
-val jupiterProjects = listOf(
-		projects.junitJupiter,
-		projects.junitJupiterApi,
-		projects.junitJupiterEngine,
-		projects.junitJupiterMigrationsupport,
-		projects.junitJupiterParams
-)
-	.map { dependencyProject(it) }
-	.also { extra["jupiterProjects"] = it }
-
-val vintageProjects = listOf(
+val mavenizedProjects = listOf(
+	projects.junitStart,
+	projects.junitPlatformCommons,
+	projects.junitPlatformConsole,
+	projects.junitPlatformConsoleStandalone,
+	projects.junitPlatformEngine,
+	projects.junitPlatformLauncher,
+	projects.junitPlatformReporting,
+	projects.junitPlatformSuite,
+	projects.junitPlatformSuiteApi,
+	projects.junitPlatformSuiteEngine,
+	projects.junitPlatformTestkit,
+	projects.junitJupiter,
+	projects.junitJupiterApi,
+	projects.junitJupiterEngine,
+	projects.junitJupiterMigrationsupport,
+	projects.junitJupiterParams,
 	projects.junitVintageEngine
 )
-	.map { dependencyProject(it) }
-	.also { extra["vintageProjects"] = it }
-
-val mavenizedProjects = (listOf(dependencyProject(projects.junitStart)) + platformProjects + jupiterProjects + vintageProjects)
 	.also { extra["mavenizedProjects"] = it }
-val modularProjects = (mavenizedProjects - setOf(dependencyProject(projects.junitPlatformConsoleStandalone)))
+
+val modularProjects = (mavenizedProjects - setOf(projects.junitPlatformConsoleStandalone))
 	.also { extra["modularProjects"] = it }
 
 dependencies {

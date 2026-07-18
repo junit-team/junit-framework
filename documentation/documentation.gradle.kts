@@ -2,6 +2,7 @@ import junitbuild.exec.CaptureJavaExecOutput
 import junitbuild.exec.ClasspathSystemPropertyProvider
 import junitbuild.exec.GenerateStandaloneConsoleLauncherShadowedArtifactsFile
 import junitbuild.exec.RunConsoleLauncher
+import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.isSnapshot
 import junitbuild.extensions.javaModuleName
 import junitbuild.javadoc.JavadocValuesOption
@@ -20,9 +21,9 @@ plugins {
 }
 
 @Suppress("UNCHECKED_CAST")
-val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<Project>
+val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
 @Suppress("UNCHECKED_CAST")
-val modularProjects = rootProject.extra["modularProjects"] as List<Project>
+val modularProjects = rootProject.extra["modularProjects"] as List<ProjectDependency>
 
 // Because we need to set up Javadoc aggregation
 modularProjects.forEach { evaluationDependsOn(it.path) }
@@ -300,7 +301,7 @@ tasks {
 	}
 
 	val aggregateJavadocs = register("aggregateJavadocs", Javadoc::class) {
-		dependsOn(modularProjects.map { it.tasks.jar })
+		dependsOn(modularProjects.map { dependencyProject(it).tasks.jar })
 		dependsOn(downloadJavadocElementLists)
 		group = "Documentation"
 		description = "Generates aggregated Javadocs"
@@ -351,7 +352,7 @@ tasks {
 			addOption(ModuleSpecificJavadocFileOption("-module-source-path", modularProjects.associate { project ->
 				project.javaModuleName to provider {
 					files(
-						project.sourceSets.named { it.startsWith("main") }.map {
+						dependencyProject(project).sourceSets.named { it.startsWith("main") }.map {
 							it.allJava.srcDirs.filter { it.exists() }
 						}
 					).asPath
@@ -374,9 +375,9 @@ tasks {
 		}
 
 		source(modularProjects.map { project ->
-			files(project.sourceSets.named { it.startsWith("main") }.map { it.allJava })
+			files(dependencyProject(project).sourceSets.named { it.startsWith("main") }.map { it.allJava })
 		})
-		classpath = files(modularProjects.map { it.sourceSets.main.get().compileClasspath })
+		classpath = files(modularProjects.map { dependencyProject(it).sourceSets.main.get().compileClasspath })
 
 		setMaxMemory("1024m")
 		options.destinationDirectory = layout.buildDirectory.dir("docs/javadoc").get().asFile
