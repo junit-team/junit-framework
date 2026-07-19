@@ -1,5 +1,6 @@
 import aQute.bnd.gradle.BundleTaskExtension
 import aQute.bnd.gradle.Resolve
+import java.time.Instant
 
 plugins {
 	`java-library`
@@ -12,7 +13,9 @@ val projectDescription = objects.property<String>().convention(provider { projec
 // metadata into the jar
 tasks.withType<Jar>().named {
 	it == "jar" || it == "shadowJar"
-}.all { // configure tasks eagerly as workaround for https://github.com/bndtools/bnd/issues/5695
+}.configureEach {
+
+	val buildTimestamp = rootProject.extra["buildTimestamp"] as Instant
 
 	val importAPIGuardian = "org.apiguardian.*;resolution:=\"optional\""
 		.also { extra["importAPIGuardian"] = it }
@@ -72,6 +75,8 @@ tasks.withType<Jar>().named {
 				# See https://bnd.bndtools.org/instructions/noimportjava.html
 				# Issue: https://github.com/junit-team/junit-framework/issues/4733
 				-noimportjava: true
+
+				-reproducible: ${buildTimestamp.epochSecond}
 			"""
 		)
 

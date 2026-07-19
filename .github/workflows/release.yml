@@ -57,14 +57,14 @@ jobs:
           sudo apt-get update && sudo apt-get install --yes jc
           unzip -c /tmp/reference.jar META-INF/MANIFEST.MF | jc --jar-manifest | jq '.[0]' > /tmp/manifest.json
           echo "createdBy=$(jq --raw-output .Created_By /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
-          echo "buildTimestamp=$(jq --raw-output .Build_Date /tmp/manifest.json) $(jq --raw-output .Build_Time /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
+          echo "sourceDateEpoch=$(jq --raw-output .Build_Date /tmp/manifest.json) $(jq --raw-output .Build_Time /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
       - name: Verify artifacts
         uses: ./.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-
             --rerun-tasks
-            -Pmanifest.buildTimestamp="${{ steps.referenceJar.outputs.buildTimestamp }}"
+            -PsourceDateEpoch="${{ steps.referenceJar.outputs.sourceDateEpoch }}"
             -Pmanifest.createdBy="${{ steps.referenceJar.outputs.createdBy }}"
             :verifyArtifactsInStagingRepositoryAreReproducible
             --remote-repo-url=${{ env.STAGING_REPO_URL }}

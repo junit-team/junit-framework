@@ -2,6 +2,7 @@ import junitbuild.extensions.javaModuleName
 import junitbuild.java.UpdateJarAction
 import net.ltgt.gradle.errorprone.errorprone
 import net.ltgt.gradle.nullaway.nullaway
+import java.time.Instant
 
 plugins {
 	id("junitbuild.java-library-conventions")
@@ -54,6 +55,7 @@ tasks {
 		}
 		doLast(objects.newInstance(UpdateJarAction::class).apply {
 			javaLauncher = project.javaToolchains.launcherFor(java.toolchain)
+			date = rootProject.extra["buildTimestamp"] as Instant
 			args.addAll(
 				"--file", archiveFile.get().asFile.absolutePath,
 				"--main-class", "org.junit.platform.console.ConsoleLauncher",

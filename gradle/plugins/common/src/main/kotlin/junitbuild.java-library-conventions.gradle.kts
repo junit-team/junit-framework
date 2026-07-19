@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import junitbuild.extensions.isSnapshot
+import java.time.Instant
 
 plugins {
 	`java-library`
@@ -13,6 +14,7 @@ plugins {
 
 @Suppress("UNCHECKED_CAST")
 val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
+val buildTimestamp = rootProject.extra["buildTimestamp"] as Instant
 val buildDate = rootProject.extra["buildDate"] as String
 val buildTime = rootProject.extra["buildTime"] as String
 val buildRevision = rootProject.extra["buildRevision"] as String
@@ -85,7 +87,7 @@ if (project.path in mavenizedProjects.map { it.path }) {
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
-	isPreserveFileTimestamps = false
+	reproducibleFileTimestamp = buildTimestamp.toEpochMilli()
 	isReproducibleFileOrder = true
 	dirPermissions {
 		unix("rwxr-xr-x")
