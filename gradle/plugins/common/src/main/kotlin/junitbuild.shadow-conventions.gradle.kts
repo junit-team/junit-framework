@@ -38,12 +38,20 @@ tasks {
 	shadowJar {
 		configurations = listOf(shadowedClasspath.get())
 		exclude("META-INF/maven/**")
+
 		excludes.remove("module-info.class")
-		archiveClassifier = ""
 		from(sourceSets.main.get().output.classesDirs) {
 			include("module-info.class")
 		}
+
+		duplicatesStrategy = DuplicatesStrategy.FAIL
+		filesMatching("module-info.class") {
+			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+		}
+
+		archiveClassifier = ""
 		addMultiReleaseAttribute = false
+		failOnDuplicateEntries = true
 	}
 	jar {
 		dependsOn(shadowJar)
