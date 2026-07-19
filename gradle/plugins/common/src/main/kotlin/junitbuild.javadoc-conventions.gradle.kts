@@ -70,13 +70,17 @@ tasks.named<Jar>("javadocJar").configure {
 }
 
 val extractJavadocSinceValues = tasks.register("extractJavadocSinceValues") {
-	inputs.files(sourceSets.main.get().allJava).withPathSensitivity(PathSensitivity.NONE)
+	val sourceFiles = files(sourceSets.main.get().allJava.elements)
+	inputs.files(sourceFiles).withPathSensitivity(PathSensitivity.NONE)
+
 	val outputFile = layout.buildDirectory.file("docs/javadoc-since-values.txt")
 	outputs.file(outputFile)
+
 	outputs.cacheIf { true }
+
 	doFirst {
 		val regex = "\\s+(?:\\*|///) @since ([0-9.]+).*".toRegex()
-		val values = sourceSets.main.get().allJava.files.asSequence()
+		val values = sourceFiles.files.asSequence()
 			.flatMap { file -> file.readLines().asSequence() }
 			.mapNotNull(regex::matchEntire)
 			.map { result -> result.groupValues[1] }

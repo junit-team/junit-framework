@@ -227,8 +227,8 @@ testing.suites.named<JvmTestSuite>("test") {
 
 				systemProperty("junit.modules", modularProjects.map { it.javaModuleName }.joinToString(","))
 
-				jvmArgumentProviders += CommandLineArgumentProvider {
-					modularProjects.map { "-Djunit.moduleSourcePath.${it.javaModuleName}=${dependencyProject(it).sourceSets["main"].allJava.sourceDirectories.filter { it.exists() }.asPath}" }
+				modularProjects.forEach {
+					jvmArgumentProviders += ModuleSourcePath(dependencyProject(it))
 				}
 
 				inputs.apply {
@@ -327,4 +327,15 @@ class MavenDistribution(project: Project, sourceTask: TaskProvider<*>, distribut
 		.fileProvider(project.files(distributionDir).builtBy(sourceTask).elements.map { it.single().asFile.listFilesOrdered().single() })
 
 	override fun asArguments() = listOf("-DmavenDistribution=${mavenDistribution.get().asFile.absolutePath}")
+}
+
+class ModuleSourcePath(project: Project) : CommandLineArgumentProvider {
+	@Input
+	val moduleName: Property<String> = project.objects.property<String>().value(project.javaModuleName)
+
+	@Internal // already tracked indirectly
+	val dirs: ConfigurableFileCollection = project.objects.fileCollection()
+		.from(project.sourceSets["main"].allJava.sourceDirectories.filter { it.exists() })
+
+	override fun asArguments() = listOf("-Djunit.moduleSourcePath.${moduleName.get()}=${dirs.asPath}")
 }

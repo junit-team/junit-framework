@@ -51,10 +51,8 @@ val generateOpenTestHtmlReport = tasks.register("generateOpenTestHtmlReport", Ja
 		outputLocation = layout.buildDirectory.file("reports/open-test-report.html")
 	}
 	if (buildParameters.testing.hideOpenTestReportHtmlGeneratorOutput) {
-		standardOutput = object : OutputStream() {
-			override fun write(b: Int) {
-				// discard output
-			}
+		doFirst {
+			standardOutput = OutputStream.nullOutputStream()
 		}
 	}
 	outputs.cacheIf { true }

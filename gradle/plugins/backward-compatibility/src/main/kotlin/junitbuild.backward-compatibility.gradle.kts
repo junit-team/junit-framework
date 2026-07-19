@@ -52,7 +52,8 @@ val downloadPreviousReleaseJar = tasks.register("downloadPreviousReleaseJar", Do
 	if (gradle.startParameter.isOffline) {
 		enabled = false
 	}
-	onlyIf { extension.enabled.get() }
+	val enabled = extension.enabled
+	onlyIf { enabled.get() }
 	val previousVersion = extension.previousVersion.get()
 	src("https://repo1.maven.org/maven2/${project.group.toString().replace(".", "/")}/${project.name}/$previousVersion/${project.name}-$previousVersion.jar")
 	dest(layout.buildDirectory.dir("previousRelease"))
@@ -68,7 +69,8 @@ val roseau = tasks.register("roseau", RoseauDiff::class) {
 	if (gradle.startParameter.isOffline) {
 		enabled = false
 	}
-	onlyIf { extension.enabled.get() }
+	val enabled = extension.enabled
+	onlyIf { enabled.get() }
 
 	toolClasspath.from(roseauClasspath)
 	libraryClasspath.from(configurations.compileClasspath)

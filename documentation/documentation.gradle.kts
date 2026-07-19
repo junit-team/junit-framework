@@ -229,15 +229,17 @@ tasks {
 		mainClass = "org.junit.api.tools.ApiReportGenerator"
 		systemProperty("api.moduleNames", modularProjects.map { it.javaModuleName }.sorted().joinToString(","))
 		jvmArgumentProviders += ClasspathSystemPropertyProvider("api.modulePath", apiReportClasspath.get())
+		val deprecationFile = deprecatedApisTableFile
+		val experimentalFile = experimentalApisTableFile
 		argumentProviders += CommandLineArgumentProvider {
 			listOf(
-				"DEPRECATED=${deprecatedApisTableFile.get().asFile.absolutePath}",
-				"EXPERIMENTAL=${experimentalApisTableFile.get().asFile.absolutePath}",
+				"DEPRECATED=${deprecationFile.get().asFile.absolutePath}",
+				"EXPERIMENTAL=${experimentalFile.get().asFile.absolutePath}",
 			)
 		}
 		outputs.cacheIf { true }
-		outputs.file(deprecatedApisTableFile)
-		outputs.file(experimentalApisTableFile)
+		outputs.file(deprecationFile)
+		outputs.file(experimentalFile)
 	}
 
 	val generateStandaloneConsoleLauncherShadowedArtifactsFile = register("generateStandaloneConsoleLauncherShadowedArtifactsFile", GenerateStandaloneConsoleLauncherShadowedArtifactsFile::class) {
@@ -266,12 +268,19 @@ tasks {
 
 	val downloadJavadocElementLists = register("downloadJavadocElementLists") {
 		outputs.cacheIf { true }
-		outputs.dir(elementListsDir).withPropertyName("elementListsDir")
-		inputs.property("externalModulesWithoutModularJavadoc", externalModulesWithoutModularJavadoc)
+
+		val targetDir = elementListsDir
+		outputs.dir(targetDir).withPropertyName("targetDir")
+
+		val modules = externalModulesWithoutModularJavadoc
+		inputs.property("modules", modules)
+
+		val textResourceFactory = resources.text
+
 		doFirst {
-			externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
-				val resource = resources.text.fromUri("${baseUrl}element-list")
-				elementListsDir.get().asFile.resolve(moduleName).apply {
+			modules.forEach { (moduleName, baseUrl) ->
+				val resource = textResourceFactory.fromUri("${baseUrl}element-list")
+				targetDir.get().asFile.resolve(moduleName).apply {
 					mkdir()
 					resolve("element-list").writeText("module:$moduleName\n${resource.asString()}")
 				}
@@ -280,15 +289,20 @@ tasks {
 	}
 
 	val mergeJavadocSinceValues = register("mergeJavadocSinceValues") {
-		inputs.files(allJavadocSinceValuesClasspath).withPathSensitivity(PathSensitivity.NONE)
+
+		val classpath = files(allJavadocSinceValuesClasspath.flatMap { it.elements })
+		inputs.files(classpath).withPathSensitivity(PathSensitivity.NONE)
+
 		val outputFile = layout.buildDirectory.file("docs/aggregated-javadoc-since-values.txt")
 		outputs.file(outputFile)
+
 		outputs.cacheIf { true }
+
 		doFirst {
 			val initialVersions = setOf("1.0", "4.12", "5.0")
 			val noPublicItems = setOf("1.3.1", "5.0.3", "5.4.1", "5.11.3")
 			val excludes = initialVersions + noPublicItems
-			val values = allJavadocSinceValuesClasspath.get().files.asSequence()
+			val values = classpath.files.asSequence()
 				.flatMap { it.readLines().asSequence() }
 				.filter { it.isNotBlank() && it !in excludes }
 				.sortedBy { VersionNumber(it) }
@@ -312,6 +326,8 @@ tasks {
 		inputs.file(additionalStylesheetFile)
 		val overviewFile = "src/javadoc/junit-overview.html"
 		inputs.file(overviewFile)
+
+		notCompatibleWithConfigurationCache("--module and --since options need to be lazy")
 
 		options {
 
@@ -389,11 +405,19 @@ tasks {
 		description = "Fix links to external API specs in the locally aggregated Javadoc HTML files"
 
 		val inputDir = aggregateJavadocs.map { it.destinationDir!! }
-		inputs.property("externalModulesWithoutModularJavadoc", externalModulesWithoutModularJavadoc)
+		val modules = externalModulesWithoutModularJavadoc
+		inputs.property("externalModulesWithoutModularJavadoc", modules)
 		from(inputDir.map { File(it, "element-list") }) {
 			// For compatibility with pre JDK 10 versions of the Javadoc tool
 			rename { "package-list" }
 		}
+		val targetUrl = provider { project.version.toString().replace("-SNAPSHOT", "") }
+			.map { version ->
+				if (buildParameters.ci)
+					"https://docs.junit.org/$version"
+				else
+					project.antora.siteDir.get().asFile.toURI().resolve(version).toString()
+			}
 		from(inputDir) {
 			filesMatching("**/*.html") {
 				val favicon =
@@ -402,19 +426,13 @@ tasks {
 						<link rel="icon" type="image/svg+xml" href="https://junit.org/assets/img/junit-diamond-adaptive.svg" sizes="any">
 						""".trimIndent()
 
-				val version = project.version.toString().replace("-SNAPSHOT", "")
-				val targetUrl = if (buildParameters.ci)
-					"https://docs.junit.org/$version"
-				else
-					project.antora.siteDir.get().asFile.toURI().resolve(version).toString()
-
 				filter { line ->
 					var result = if (line.startsWith("<head>")) line.replace("<head>", "<head>$favicon") else line
-					externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
+					modules.forEach { (moduleName, baseUrl) ->
 						result = result.replace("${baseUrl}$moduleName/", baseUrl)
 					}
 
-					result = result.replace("https://docs.junit.org/current", targetUrl)
+					result = result.replace("https://docs.junit.org/current", targetUrl.get())
 
 					return@filter result
 				}
