@@ -54,7 +54,12 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
 
-* ❓
+* When using `@CsvSource.value[]` CSV records starting with a comment character cause the
+  test to fail. Either change `commentCharacter` to something else or enclose the field in
+  quotes.
+* When using `@CsvSource.value[]` the `commentCharacter` must be distinct from both
+  `delimiter` and `quoteCharacter`.
+
 
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
