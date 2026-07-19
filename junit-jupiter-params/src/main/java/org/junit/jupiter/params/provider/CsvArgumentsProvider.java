@@ -72,8 +72,8 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 
 	private static void requireNoCsvComments(CsvRecord record, CsvReaderConfiguration configuration) {
 		Preconditions.condition(!record.isComment(),
-			() -> "Comments may not be used when using @CsvSourve.value. Either use @CsvSourve.textBlock or change the comment character to something other than [%s].".formatted(
-				configuration.commentCharacter()));
+			() -> "Comments may not be used when using @CsvSourve.value. Either change the comment character to something other than [%s] or enclose the field in [%s]".formatted(
+				configuration.commentCharacter(), configuration.quoteCharacter()));
 	}
 
 	private static Stream<Arguments> provideArgumentsFromTextBlock(CsvSource csvSource, String textBlock) {

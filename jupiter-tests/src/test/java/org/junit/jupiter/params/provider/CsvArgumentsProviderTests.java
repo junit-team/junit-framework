@@ -410,7 +410,7 @@ class CsvArgumentsProviderTests {
 
 		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny())//
 				.withMessageStartingWith(
-					"Comments may not be used when using @CsvSourve.value. Either use @CsvSourve.textBlock or change the comment character to something other than [#].");
+					"Comments may not be used when using @CsvSourve.value. Either change the comment character to something other than [#] or enclose the field in [']");
 	}
 
 	@Test
