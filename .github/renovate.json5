@@ -38,5 +38,10 @@
       ],
       "groupName": "@antora/assembler",
     },
+    {
+      matchManagers: 'gradle-wrapper',
+      ignoreUnstable: false,
+      allowedVersions: '/^\\d+(\\.\\d+)+(-rc-\\d+)?$/',
+    },
   ],
 }

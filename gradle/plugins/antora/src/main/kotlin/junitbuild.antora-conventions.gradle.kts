@@ -52,6 +52,7 @@ node {
 	version = providers.fileContents(layout.projectDirectory.file(".tool-versions")).asText.map {
 		it.substringAfter("nodejs").trim()
 	}
+	workDir = layout.settingsDirectory.dir(".gradle/nodejs")
 }
 
 tasks.npmInstall {

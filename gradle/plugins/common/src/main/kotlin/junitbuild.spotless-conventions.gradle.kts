@@ -7,16 +7,8 @@ plugins {
 
 spotless {
 
-	format("misc") {
-		target("*.gradle.kts", "gradle/plugins/**/*.gradle.kts", "*.gitignore")
-		targetExclude("gradle/plugins/**/build/**")
-		leadingSpacesToTabs()
-		trimTrailingWhitespace()
-		endWithNewline()
-	}
-
-	format("documentation") {
-		target("*.adoc", "*.md", "src/**/*.adoc", "src/**/*.md")
+	format("markdown") {
+		target("*.md", "src/**/*.md")
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
@@ -73,7 +65,7 @@ spotless {
 	}
 
 	yaml {
-		target("**/*.yaml", "**/*.yml")
+		target("*.yaml", "*.yml")
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
@@ -81,13 +73,4 @@ spotless {
 	// Explicitly configure line endings to avoid Spotless to search for .gitattributes file
 	// see https://github.com/gradle/gradle/issues/25469#issuecomment-3444231151
 	lineEndings = LineEnding.UNIX
-}
-
-tasks {
-	named("spotlessDocumentation") {
-		outputs.doNotCacheIf("negative avoidance savings") { true }
-	}
-	named("spotlessMisc") {
-		outputs.doNotCacheIf("negative avoidance savings") { true }
-	}
 }

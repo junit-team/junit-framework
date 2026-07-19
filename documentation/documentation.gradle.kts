@@ -121,6 +121,14 @@ require(externalModulesWithoutModularJavadoc.values.all { it.endsWith("/") }) {
 	"all base URLs must end with a trailing slash: $externalModulesWithoutModularJavadoc"
 }
 
+spotless {
+	format("asciidoctor") {
+		target("modules/**/*.adoc")
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
 tasks {
 
 	val consoleLauncherTestReportsDir = project.layout.buildDirectory.dir("console-launcher-test-results")
@@ -418,7 +426,7 @@ tasks {
 		into(layout.buildDirectory.dir("docs/fixedJavadoc"))
 	}
 
-	val prepareGitHubAttestation = register("prepareGitHubAttestation", Sync::class) {
+	register("prepareGitHubAttestation", Sync::class) {
 		from(attestationClasspath)
 		into(layout.buildDirectory.dir("attestation"))
 		rename("(.*)-SNAPSHOT.jar", "$1-SNAPSHOT+${buildRevision.substring(0, 7)}.jar")
