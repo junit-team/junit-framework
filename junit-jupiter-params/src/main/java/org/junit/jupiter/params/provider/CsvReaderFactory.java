@@ -53,7 +53,7 @@ class CsvReaderFactory {
 				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES) //
 				.extraFieldStrategy(ALLOW_EXTRA_FIELDS) //
 				.missingFieldStrategy(ALLOW_MISSING_FIELDS) //
-				.fieldSeparator(configuration.delimiter()) //
+				.fieldSeparator(configuration.fieldSeparator()) //
 				.quoteCharacter(configuration.quoteCharacter()) //
 				.commentStrategy(configuration.commentStrategy()) //
 				.commentCharacter(configuration.commentCharacter()); //
