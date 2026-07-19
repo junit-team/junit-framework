@@ -16,15 +16,3 @@ nmcpSettings {
 		publishingTimeout = buildParameters.publishing.timeout.map(Duration::parse)
 	}
 }
-
-gradle.lifecycle.afterProject {
-	if (project == rootProject) {
-		tasks.named<Zip>("nmcpZipAggregation") {
-			eachFile {
-				if (name.contains(".asc.")) {
-					exclude()
-				}
-			}
-		}
-	}
-}
