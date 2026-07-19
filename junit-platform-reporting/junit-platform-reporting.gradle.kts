@@ -32,6 +32,7 @@ tasks {
 			val packageName = "org.opentest4j.reporting.${name}"
 			relocate(packageName, "org.junit.platform.reporting.shadow.${packageName}")
 		}
+		exclude("META-INF/LICENSE.md")
 		from(projectDir) {
 			include("LICENSE-open-test-reporting.md")
 			into("META-INF")
