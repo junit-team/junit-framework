@@ -58,7 +58,7 @@ class CsvReaderFactory {
 				.commentStrategy(configuration.commentStrategy()) //
 				.commentCharacter(configuration.commentCharacter()); //
 
-		var fieldModifier = (FieldModifier) new DefaultFieldModifier(//
+		var fieldModifier = new DefaultFieldModifier(//
 			configuration.emptyValue(), //
 			configuration.nullValues(), //
 			configuration.ignoreLeadingAndTrailingWhitespace() //
