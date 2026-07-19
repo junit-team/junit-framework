@@ -43,7 +43,7 @@ import org.junit.platform.engine.reporting.FileEntry;
 class ReportingTests extends AbstractJupiterTestEngineTests {
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
+	@CsvSource("""
 			PER_CLASS,  1, 7, 5
 			PER_METHOD, 0, 9, 7
 			""")

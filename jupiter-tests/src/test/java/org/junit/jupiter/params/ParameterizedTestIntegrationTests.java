@@ -143,7 +143,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
+	@CsvSource("""
 			apple,   True
 			banana,  true
 			lemon,   false
@@ -160,7 +160,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(nullValues = "null", textBlock = """
+	@CsvSource(nullValues = "null", value = """
 			apple,   True
 			banana,  true
 			lemon,   false
@@ -710,7 +710,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		 * @since 5.10
 		 */
 		@ParameterizedTest(name = "{1}")
-		@CsvSource(textBlock = """
+		@CsvSource("""
 				testWithEmptySourceForArrayList,  java.util.ArrayList
 				testWithEmptySourceForLinkedList, java.util.LinkedList
 				""")
@@ -729,7 +729,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		 * @since 5.10
 		 */
 		@ParameterizedTest(name = "{1}")
-		@CsvSource(textBlock = """
+		@CsvSource("""
 				testWithEmptySourceForSortedSet,     java.util.SortedSet
 				testWithEmptySourceForNavigableSet,  java.util.NavigableSet
 				testWithEmptySourceForHashSet,       java.util.HashSet
@@ -751,7 +751,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		 * @since 5.10
 		 */
 		@ParameterizedTest(name = "{1}")
-		@CsvSource(textBlock = """
+		@CsvSource("""
 				testWithEmptySourceForSortedMap,     java.util.SortedMap
 				testWithEmptySourceForNavigableMap,  java.util.NavigableMap
 				testWithEmptySourceForHashMap,       java.util.HashMap
@@ -799,7 +799,7 @@ class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@ParameterizedTest(name = "{1}")
-		@CsvSource(textBlock = """
+		@CsvSource("""
 				testWithEmptySourceForPrimitive,                int
 				testWithEmptySourceForUnsupportedReferenceType, java.lang.Integer
 				""")

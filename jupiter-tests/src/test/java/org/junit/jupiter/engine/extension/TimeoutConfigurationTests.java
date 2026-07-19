@@ -65,7 +65,7 @@ class TimeoutConfigurationTests {
 	}
 
 	@ParameterizedTest
-	@CsvSource(textBlock = """
+	@CsvSource("""
 			Enabled,           false
 			Disabled,          true
 			Disabled_ON_debug, false

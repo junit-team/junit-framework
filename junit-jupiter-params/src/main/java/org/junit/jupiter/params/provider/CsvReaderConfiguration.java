@@ -42,8 +42,8 @@ record CsvReaderConfiguration( //
 		validateValueAndTextBlock(csvSource);
 		Preconditions.condition(csvSource.value().length > 0, () -> "@CsvSource must be declared with `value`");
 		return validate(csvSource, new CsvReaderConfiguration( //
-			// CsvSource.value does not support comments
-			CommentStrategy.NONE,
+			// Comments in CsvSource.value are rejected manually.
+			CommentStrategy.READ,
 			// For CsvSource.value we manually process the header.
 			false, //
 			csvSource.commentCharacter(), //
@@ -62,7 +62,9 @@ record CsvReaderConfiguration( //
 		Preconditions.condition(!csvSource.textBlock().isEmpty(),
 			() -> "@CsvSource must be declared with a `textBlock`");
 		return validate(csvSource, new CsvReaderConfiguration( //
-			CommentStrategy.SKIP, csvSource.useHeadersInDisplayName(), csvSource.commentCharacter(), //
+			CommentStrategy.SKIP, //
+			csvSource.useHeadersInDisplayName(), //
+			csvSource.commentCharacter(), //
 			csvSource.delimiter(), //
 			csvSource.delimiterString(), //
 			csvSource.emptyValue(), //
@@ -75,7 +77,9 @@ record CsvReaderConfiguration( //
 
 	static CsvReaderConfiguration fromCsvFileSource(CsvFileSource csvSource) {
 		return validate(csvSource, new CsvReaderConfiguration( //
-			CommentStrategy.SKIP, csvSource.useHeadersInDisplayName(), csvSource.commentCharacter(), //
+			CommentStrategy.SKIP, //
+			csvSource.useHeadersInDisplayName(), //
+			csvSource.commentCharacter(), //
 			csvSource.delimiter(), //
 			csvSource.delimiterString(), //
 			csvSource.emptyValue(), //
@@ -106,8 +110,7 @@ record CsvReaderConfiguration( //
 		validateControlCharactersDiffer( //
 			configuration.fieldSeparator(), //
 			configuration.quoteCharacter(), //
-			configuration.commentCharacter(), //
-			configuration.commentStrategy() //
+			configuration.commentCharacter() //
 		);
 		return configuration;
 	}
@@ -123,18 +126,11 @@ record CsvReaderConfiguration( //
 	}
 
 	private static void validateControlCharactersDiffer(String fieldSeparator, char quoteCharacter,
-			char commentCharacter, CommentStrategy commentStrategy) {
+			char commentCharacter) {
 
-		if (commentStrategy == CommentStrategy.NONE) {
-			Preconditions.condition(stringValuesUnique(fieldSeparator, quoteCharacter),
-				() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
-						"must differ").formatted(fieldSeparator, quoteCharacter));
-		}
-		else {
-			Preconditions.condition(stringValuesUnique(fieldSeparator, quoteCharacter, commentCharacter),
-				() -> ("delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
-						"must all differ").formatted(fieldSeparator, quoteCharacter, commentCharacter));
-		}
+		Preconditions.condition(stringValuesUnique(fieldSeparator, quoteCharacter, commentCharacter),
+			() -> ("delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
+					"must all differ").formatted(fieldSeparator, quoteCharacter, commentCharacter));
 	}
 
 	private static boolean stringValuesUnique(Object... values) {
