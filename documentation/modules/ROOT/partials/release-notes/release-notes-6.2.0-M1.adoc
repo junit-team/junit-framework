@@ -48,6 +48,8 @@ repository on GitHub.
 * The `junit.jupiter.params.displayname.argument.maxlength` configuration parameter is
   now validated and rejected with a clear error when set to a non-positive value instead
   of causing parameterized tests to fail with an internal exception.
+* The elements of `@CsvSource.value[]` are now treated as individual CSV documents. This
+  prevents unfinished quotes in one document from affecting another.
 
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

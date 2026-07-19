@@ -105,10 +105,6 @@ public @interface CsvSource {
 	 * {@link #useHeadersInDisplayName}). Moreover, each specified value must
 	 * not be blank.
 	 *
-	 * <p>If <em>text block</em> syntax is supported by your programming language,
-	 * you may find it more convenient to declare your CSV content via the
-	 * {@link #textBlock} attribute.
-	 *
 	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * {@literal @}ParameterizedTest
@@ -122,12 +118,46 @@ public @interface CsvSource {
 	 *     // ...
 	 * }</pre>
 	 *
+	 * <h4>Text Blocks</h4>
+	 *
+	 * <p>If <em>text block</em> syntax is supported by your programming language,
+	 * you may also declare your CSV content as a textblock. Note that unlike
+	 * {@link #textBlock()} {@code value} does not support comments.
+	 *
+	 * <p>When using text blocks each value corresponds to a CSV document and
+	 * will be split using the specified {@link #delimiter} or
+	 * {@link #delimiterString}. The first record of the first document may
+	 * optionally be used to supply CSV headers (see {@link #useHeadersInDisplayName}).
+	 * Moreover, each specified value must not be blank.
+	 *
+	 * <p>Java's <a href="https://docs.oracle.com/en/java/javase/17/text-blocks/index.html">text block</a>
+	 * feature automatically removes <em>incidental whitespace</em> when the code
+	 * is compiled. However, other JVM languages such as Groovy and Kotlin do not.
+	 * Thus, if you are using a programming language other than Java and your text
+	 * block contains comments or new lines within quoted strings, you will need
+	 * to ensure that there is no leading whitespace within your text block.
+	 *
+	 * <h5>Example</h5>
+	 * <pre class="code">
+	 * {@literal @}ParameterizedTest
+	 * {@literal @}CsvSource(
+	 *     """
+	 *     apple,         1
+	 *     banana,        2
+	 *     'lemon, lime', 0xF1
+	 *     strawberry,    700_000
+	 *     """
+	 * )
+	 * void test(String fruit, int rank) {
+	 *     // ...
+	 * }</pre>
+	 *
 	 * @see #textBlock
 	 */
 	String[] value() default {};
 
 	/**
-	 * The CSV records to use as the source of arguments, supplied as a single
+	 * The CSV document to use as the source of arguments, supplied as a single
 	 * <em>text block</em>; must not be empty.
 	 *
 	 * <p>Defaults to an empty string. You therefore must supply CSV content
@@ -135,7 +165,7 @@ public @interface CsvSource {
 	 *
 	 * <p>Text block syntax is supported by various languages on the JVM
 	 * including Java SE. If text blocks are not supported, you
-	 * should declare your CSV content via the {@link #value} attribute.
+	 * should declare your CSV records via the {@link #value} attribute.
 	 *
 	 * <p>Each record in the text block corresponds to a record in a CSV file and will
 	 * be split using the specified {@link #delimiter} or {@link #delimiterString}.

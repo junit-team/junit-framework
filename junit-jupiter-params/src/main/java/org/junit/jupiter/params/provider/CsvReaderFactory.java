@@ -10,18 +10,14 @@
 
 package org.junit.jupiter.params.provider;
 
-import static de.siegmar.fastcsv.reader.CommentStrategy.NONE;
-import static de.siegmar.fastcsv.reader.CommentStrategy.SKIP;
-
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
-import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
@@ -29,15 +25,11 @@ import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 
-import org.junit.platform.commons.util.Preconditions;
-
 /**
  * @since 6.0
  */
 class CsvReaderFactory {
 
-	private static final String DEFAULT_DELIMITER = ",";
-	private static final char EMPTY_CHAR = '\0';
 	private static final boolean SKIP_EMPTY_LINES = true;
 	private static final boolean TRIM_WHITESPACES_AROUND_QUOTES = true;
 	private static final FieldMismatchStrategy ALLOW_EXTRA_FIELDS = FieldMismatchStrategy.IGNORE;
@@ -46,138 +38,48 @@ class CsvReaderFactory {
 	private static final int MAX_FIELDS = 512;
 	private static final int MAX_RECORD_SIZE = Integer.MAX_VALUE;
 
-	static void validate(CsvSource csvSource) {
-		validateMaxCharsPerColumn(csvSource.maxCharsPerColumn());
-		validateDelimiter(csvSource.delimiter(), csvSource.delimiterString(), csvSource);
+	static CsvReader<? extends CsvRecord> createReaderFor(CsvReaderConfiguration configuration, String data) {
+		return createReaderFor(configuration, new StringReader(data));
 	}
 
-	static void validate(CsvFileSource csvFileSource) {
-		validateMaxCharsPerColumn(csvFileSource.maxCharsPerColumn());
-		validateDelimiter(csvFileSource.delimiter(), csvFileSource.delimiterString(), csvFileSource);
-	}
-
-	private static void validateMaxCharsPerColumn(int maxCharsPerColumn) {
-		Preconditions.condition(maxCharsPerColumn > 0 || maxCharsPerColumn == -1,
-			() -> "maxCharsPerColumn must be a positive number or -1: " + maxCharsPerColumn);
-	}
-
-	private static void validateDelimiter(char delimiter, String delimiterString, Annotation annotation) {
-		Preconditions.condition(delimiter == EMPTY_CHAR || delimiterString.isEmpty(),
-			() -> "The delimiter and delimiterString attributes cannot be set simultaneously in " + annotation);
-	}
-
-	static CsvReader<? extends CsvRecord> createReaderFor(CsvSource csvSource, String data) {
-		String delimiter = selectDelimiter(csvSource.delimiter(), csvSource.delimiterString());
-		var commentStrategy = csvSource.textBlock().isEmpty() ? NONE : SKIP;
-		// @formatter:off
-		validateControlCharactersDiffer(
-				delimiter, csvSource.quoteCharacter(), csvSource.commentCharacter(), commentStrategy);
-
-		var builder = CsvReader.builder()
-				.skipEmptyLines(SKIP_EMPTY_LINES)
-				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES)
-				.extraFieldStrategy(ALLOW_EXTRA_FIELDS)
-				.missingFieldStrategy(ALLOW_MISSING_FIELDS)
-				.fieldSeparator(delimiter)
-				.quoteCharacter(csvSource.quoteCharacter())
-				.commentStrategy(commentStrategy)
-				.commentCharacter(csvSource.commentCharacter());
-
-		var callbackHandler = createCallbackHandler(
-				csvSource.emptyValue(),
-				Set.of(csvSource.nullValues()),
-				csvSource.ignoreLeadingAndTrailingWhitespace(),
-				csvSource.maxCharsPerColumn(),
-				csvSource.useHeadersInDisplayName()
-		);
-		// @formatter:on
-		return builder.build(callbackHandler, data);
-	}
-
-	static CsvReader<? extends CsvRecord> createReaderFor(CsvFileSource csvFileSource, InputStream inputStream,
+	static CsvReader<? extends CsvRecord> createReaderFor(CsvReaderConfiguration configuration, InputStream inputStream,
 			Charset charset) {
+		return createReaderFor(configuration, new InputStreamReader(inputStream, charset));
+	}
 
-		String delimiter = selectDelimiter(csvFileSource.delimiter(), csvFileSource.delimiterString());
-		var commentStrategy = SKIP;
-		// @formatter:off
-		validateControlCharactersDiffer(
-				delimiter, csvFileSource.quoteCharacter(), csvFileSource.commentCharacter(), commentStrategy);
+	private static CsvReader<? extends CsvRecord> createReaderFor(CsvReaderConfiguration configuration, Reader reader) {
+		var builder = CsvReader.builder() //
+				.skipEmptyLines(SKIP_EMPTY_LINES) //
+				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES) //
+				.extraFieldStrategy(ALLOW_EXTRA_FIELDS) //
+				.missingFieldStrategy(ALLOW_MISSING_FIELDS) //
+				.fieldSeparator(configuration.fieldSeparator()) //
+				.quoteCharacter(configuration.quoteCharacter()) //
+				.commentStrategy(configuration.commentStrategy()) //
+				.commentCharacter(configuration.commentCharacter()); //
 
-		var builder = CsvReader.builder()
-				.skipEmptyLines(SKIP_EMPTY_LINES)
-				.trimWhitespacesAroundQuotes(TRIM_WHITESPACES_AROUND_QUOTES)
-				.extraFieldStrategy(ALLOW_EXTRA_FIELDS)
-				.missingFieldStrategy(ALLOW_MISSING_FIELDS)
-				.fieldSeparator(delimiter)
-				.quoteCharacter(csvFileSource.quoteCharacter())
-				.commentStrategy(commentStrategy)
-				.commentCharacter(csvFileSource.commentCharacter());
-
-		var callbackHandler = createCallbackHandler(
-				csvFileSource.emptyValue(),
-				Set.of(csvFileSource.nullValues()),
-				csvFileSource.ignoreLeadingAndTrailingWhitespace(),
-				csvFileSource.maxCharsPerColumn(),
-				csvFileSource.useHeadersInDisplayName()
+		var fieldModifier = new DefaultFieldModifier(//
+			configuration.emptyValue(), //
+			configuration.nullValues(), //
+			configuration.ignoreLeadingAndTrailingWhitespace() //
 		);
-		// @formatter:on
-		return builder.build(callbackHandler, inputStream, charset);
-	}
 
-	private static String selectDelimiter(char delimiter, String delimiterString) {
-		if (delimiter != EMPTY_CHAR) {
-			return String.valueOf(delimiter);
-		}
-		if (!delimiterString.isEmpty()) {
-			return delimiterString;
-		}
-		return DEFAULT_DELIMITER;
-	}
+		var callbackHandler = configuration.namedCsvRecords() //
+				? NamedCsvRecordHandler.builder() //
+						.allowDuplicateHeaderFields(ALLOW_DUPLICATE_HEADER_FIELDS) //
+						.maxFields(MAX_FIELDS) //
+						.maxRecordSize(MAX_RECORD_SIZE) //
+						.maxFieldSize(configuration.maxFieldSize()) //
+						.fieldModifier(fieldModifier) //
+						.build() //
+				: CsvRecordHandler.builder() //
+						.maxFields(MAX_FIELDS) //
+						.maxRecordSize(MAX_RECORD_SIZE) //
+						.maxFieldSize(configuration.maxFieldSize()) //
+						.fieldModifier(fieldModifier) //
+						.build();
 
-	private static void validateControlCharactersDiffer(String delimiter, char quoteCharacter, char commentCharacter,
-			CommentStrategy commentStrategy) {
-
-		if (commentStrategy == NONE) {
-			Preconditions.condition(stringValuesUnique(delimiter, quoteCharacter),
-				() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
-						"must differ").formatted(delimiter, quoteCharacter));
-		}
-		else {
-			Preconditions.condition(stringValuesUnique(delimiter, quoteCharacter, commentCharacter),
-				() -> ("delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
-						"must all differ").formatted(delimiter, quoteCharacter, commentCharacter));
-		}
-	}
-
-	private static boolean stringValuesUnique(Object... values) {
-		long uniqueCount = Stream.of(values).map(String::valueOf).distinct().count();
-		return uniqueCount == values.length;
-	}
-
-	private static CsvCallbackHandler<? extends CsvRecord> createCallbackHandler(String emptyValue,
-			Set<String> nullValues, boolean ignoreLeadingAndTrailingWhitespaces, int maxCharsPerColumn,
-			boolean useHeadersInDisplayName) {
-
-		int maxFieldSize = maxCharsPerColumn == -1 ? Integer.MAX_VALUE : maxCharsPerColumn;
-		FieldModifier modifier = new DefaultFieldModifier(emptyValue, nullValues, ignoreLeadingAndTrailingWhitespaces);
-
-		// @formatter:off
-		if (useHeadersInDisplayName) {
-			return NamedCsvRecordHandler.builder()
-					.allowDuplicateHeaderFields(ALLOW_DUPLICATE_HEADER_FIELDS)
-					.maxFields(MAX_FIELDS)
-					.maxRecordSize(MAX_RECORD_SIZE)
-					.maxFieldSize(maxFieldSize)
-					.fieldModifier(modifier)
-					.build();
-		}
-		return CsvRecordHandler.builder()
-				.maxFields(MAX_FIELDS)
-				.maxRecordSize(MAX_RECORD_SIZE)
-				.maxFieldSize(maxFieldSize)
-				.fieldModifier(modifier)
-				.build();
-		// @formatter:on
+		return builder.build(callbackHandler, reader);
 	}
 
 	record DefaultFieldModifier(String emptyValue, Set<String> nullValues, boolean ignoreLeadingAndTrailingWhitespaces)

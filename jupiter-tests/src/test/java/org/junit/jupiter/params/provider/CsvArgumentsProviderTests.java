@@ -87,6 +87,21 @@ class CsvArgumentsProviderTests {
 	}
 
 	@Test
+	void providesMultipleArgumentsUsingMultipleTextBlocks() {
+		var annotation = csvSource("""
+				a
+				b
+				""", """
+				c
+				d
+				""");
+
+		var arguments = provideArguments(annotation);
+
+		assertThat(arguments).containsExactly(array("a"), array("b"), array("c"), array("d"));
+	}
+
+	@Test
 	void providesMultipleArgumentsFromTextBlock() {
 		var annotation = csvSource().textBlock("""
 				foo
@@ -210,6 +225,17 @@ class CsvArgumentsProviderTests {
 		assertThat(arguments).containsExactly(array("foo, bar"));
 	}
 
+	/**
+	 * @see <a href="https://github.com/junit-team/junit-framework/issues/5017">GitHub issue #5017</a>
+	 */
+	@Test
+	void understandsUnfinishedQuotesFromDifferentArgumentsShouldNotBeJoined() {
+		var annotation = csvSource("a, 'b", "c', d");
+		var arguments = provideArguments(annotation);
+		// Note: The parser leniently closes the unclosed quote for b.
+		assertThat(arguments).containsExactly(array("a", "b"), array("c'", "d"));
+	}
+
 	@Test
 	void understandsCustomQuotes() {
 		var annotation = csvSource().quoteCharacter('~').lines("~foo, bar~").build();
@@ -277,7 +303,7 @@ class CsvArgumentsProviderTests {
 
 	@Test
 	void throwsExceptionIfBothDelimitersAreSimultaneouslySet() {
-		var annotation = csvSource().delimiter('|').delimiterString("~~~").build();
+		var annotation = csvSource().lines("foo").delimiter('|').delimiterString("~~~").build();
 
 		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny())//
 				.withMessageStartingWith("The delimiter and delimiterString attributes cannot be set simultaneously in")//
