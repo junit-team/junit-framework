@@ -33,7 +33,13 @@ publishing {
 	publications {
 		create<MavenPublication>("maven") {
 			version = buildParameters.jitpack.version
-				.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
+				.map { value ->
+					val pattern = "(.+)-[0-9a-f]+-\\d+".toRegex()
+					val matcher = requireNotNull(pattern.matchEntire(value)) {
+						"Jitpack version does not match expected pattern: $pattern"
+					}
+					matcher.groupValues[1] + "-SNAPSHOT"
+				}
 				.getOrElse(project.version.toString())
 			pom {
 				name.set(provider {
