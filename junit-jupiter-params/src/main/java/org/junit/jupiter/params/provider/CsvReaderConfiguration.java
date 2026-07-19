@@ -23,16 +23,16 @@ import org.junit.platform.commons.util.Preconditions;
  * {@code textBlock} and {@link CsvFileSource}.
  */
 record CsvReaderConfiguration( //
-                               CommentStrategy commentStrategy,//
-                               boolean namedCsvRecords, //
-                               char commentCharacter,//
-                               char delimiter, //
-                               String delimiterString, //
-                               String emptyValue, //
-                               boolean ignoreLeadingAndTrailingWhitespace, //
-                               int maxCharsPerColumn,//
-                               Set<String> nullValues,//
-                               char quoteCharacter //
+		CommentStrategy commentStrategy, //
+		boolean namedCsvRecords, //
+		char commentCharacter, //
+		char delimiter, //
+		String delimiterString, //
+		String emptyValue, //
+		boolean ignoreLeadingAndTrailingWhitespace, //
+		int maxCharsPerColumn, //
+		Set<String> nullValues, //
+		char quoteCharacter //
 ) {
 
 	private static final String DEFAULT_DELIMITER = ",";
@@ -42,58 +42,54 @@ record CsvReaderConfiguration( //
 		validateValueAndTextBlock(csvSource);
 		Preconditions.condition(csvSource.value().length > 0, () -> "@CsvSource must be declared with `value`");
 		return validate(csvSource, new CsvReaderConfiguration( //
-				// CsvSource.value does not support comments
-				CommentStrategy.NONE,
-				// For CsvSource.value we manually process the header.
-				false, //
-				csvSource.commentCharacter(), //
-				csvSource.delimiter(), //
-				csvSource.delimiterString(), //
-				csvSource.emptyValue(), //
-				csvSource.ignoreLeadingAndTrailingWhitespace(), //
-				csvSource.maxCharsPerColumn(), //
-				Set.of(csvSource.nullValues()), //
-				csvSource.quoteCharacter()//
+			// CsvSource.value does not support comments
+			CommentStrategy.NONE,
+			// For CsvSource.value we manually process the header.
+			false, //
+			csvSource.commentCharacter(), //
+			csvSource.delimiter(), //
+			csvSource.delimiterString(), //
+			csvSource.emptyValue(), //
+			csvSource.ignoreLeadingAndTrailingWhitespace(), //
+			csvSource.maxCharsPerColumn(), //
+			Set.of(csvSource.nullValues()), //
+			csvSource.quoteCharacter()//
 		));
 	}
 
 	static CsvReaderConfiguration fromTextBlockCsvSource(CsvSource csvSource) {
 		validateValueAndTextBlock(csvSource);
 		Preconditions.condition(!csvSource.textBlock().isEmpty(),
-				() -> "@CsvSource must be declared with a `textBlock`");
+			() -> "@CsvSource must be declared with a `textBlock`");
 		return validate(csvSource, new CsvReaderConfiguration( //
-				CommentStrategy.SKIP,
-				csvSource.useHeadersInDisplayName(),
-				csvSource.commentCharacter(), //
-				csvSource.delimiter(), //
-				csvSource.delimiterString(), //
-				csvSource.emptyValue(), //
-				csvSource.ignoreLeadingAndTrailingWhitespace(), //
-				csvSource.maxCharsPerColumn(), //
-				Set.of(csvSource.nullValues()), //
-				csvSource.quoteCharacter()//
+			CommentStrategy.SKIP, csvSource.useHeadersInDisplayName(), csvSource.commentCharacter(), //
+			csvSource.delimiter(), //
+			csvSource.delimiterString(), //
+			csvSource.emptyValue(), //
+			csvSource.ignoreLeadingAndTrailingWhitespace(), //
+			csvSource.maxCharsPerColumn(), //
+			Set.of(csvSource.nullValues()), //
+			csvSource.quoteCharacter()//
 		));
 	}
 
 	static CsvReaderConfiguration fromCsvFileSource(CsvFileSource csvSource) {
 		return validate(csvSource, new CsvReaderConfiguration( //
-				CommentStrategy.SKIP,
-				csvSource.useHeadersInDisplayName(),
-				csvSource.commentCharacter(), //
-				csvSource.delimiter(), //
-				csvSource.delimiterString(), //
-				csvSource.emptyValue(), //
-				csvSource.ignoreLeadingAndTrailingWhitespace(), //
-				csvSource.maxCharsPerColumn(), //
-				Set.of(csvSource.nullValues()), //
-				csvSource.quoteCharacter()//
+			CommentStrategy.SKIP, csvSource.useHeadersInDisplayName(), csvSource.commentCharacter(), //
+			csvSource.delimiter(), //
+			csvSource.delimiterString(), //
+			csvSource.emptyValue(), //
+			csvSource.ignoreLeadingAndTrailingWhitespace(), //
+			csvSource.maxCharsPerColumn(), //
+			Set.of(csvSource.nullValues()), //
+			csvSource.quoteCharacter()//
 		));
 	}
 
 	private static void validateValueAndTextBlock(CsvSource csvSource) {
 		var values = csvSource.value();
 		Preconditions.condition(values.length > 0 ^ !csvSource.textBlock().isEmpty(),
-				() -> "@CsvSource must be declared with either `value` or `textBlock` but not both");
+			() -> "@CsvSource must be declared with either `value` or `textBlock` but not both");
 		for (int i = 0; i < values.length; i++) {
 			int finalI = i;
 			Preconditions.notBlank(values[i], () -> "CSV record at index %d must not be blank".formatted(finalI + 1));
@@ -103,41 +99,41 @@ record CsvReaderConfiguration( //
 	private static CsvReaderConfiguration validate(Annotation csvSource, CsvReaderConfiguration configuration) {
 		validateMaxCharsPerColumn(configuration.maxCharsPerColumn());
 		validateDelimiter( //
-				configuration.delimiter(), //
-				configuration.delimiterString(), //
-				csvSource //
+			configuration.delimiter(), //
+			configuration.delimiterString(), //
+			csvSource //
 		);
 		validateControlCharactersDiffer( //
-				configuration.fieldSeparator(), //
-				configuration.quoteCharacter(), //
-				configuration.commentCharacter(), //
-				configuration.commentStrategy() //
+			configuration.fieldSeparator(), //
+			configuration.quoteCharacter(), //
+			configuration.commentCharacter(), //
+			configuration.commentStrategy() //
 		);
 		return configuration;
 	}
 
 	private static void validateMaxCharsPerColumn(int maxCharsPerColumn) {
 		Preconditions.condition(maxCharsPerColumn > 0 || maxCharsPerColumn == -1,
-				() -> "maxCharsPerColumn must be a positive number or -1: " + maxCharsPerColumn);
+			() -> "maxCharsPerColumn must be a positive number or -1: " + maxCharsPerColumn);
 	}
 
 	private static void validateDelimiter(char delimiter, String delimiterString, Annotation annotation) {
 		Preconditions.condition(delimiter == EMPTY_CHAR || delimiterString.isEmpty(),
-				() -> "The delimiter and delimiterString attributes cannot be set simultaneously in " + annotation);
+			() -> "The delimiter and delimiterString attributes cannot be set simultaneously in " + annotation);
 	}
 
-	private static void validateControlCharactersDiffer(String fieldSeparator, char quoteCharacter, char commentCharacter,
-			CommentStrategy commentStrategy) {
+	private static void validateControlCharactersDiffer(String fieldSeparator, char quoteCharacter,
+			char commentCharacter, CommentStrategy commentStrategy) {
 
 		if (commentStrategy == CommentStrategy.NONE) {
 			Preconditions.condition(stringValuesUnique(fieldSeparator, quoteCharacter),
-					() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
-							"must differ").formatted(fieldSeparator, quoteCharacter));
+				() -> ("delimiter or delimiterString: '%s' and quoteCharacter: '%s' " + //
+						"must differ").formatted(fieldSeparator, quoteCharacter));
 		}
 		else {
 			Preconditions.condition(stringValuesUnique(fieldSeparator, quoteCharacter, commentCharacter),
-					() -> ("delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
-							"must all differ").formatted(fieldSeparator, quoteCharacter, commentCharacter));
+				() -> ("delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
+						"must all differ").formatted(fieldSeparator, quoteCharacter, commentCharacter));
 		}
 	}
 
