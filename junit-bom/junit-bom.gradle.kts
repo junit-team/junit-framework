@@ -15,8 +15,9 @@ dependencies {
 			.forEach {
 				api(
 					jitPackVersion
-						.orElse(provider { it.version })
-						.map { version -> "${it.group}:${it.name}:${version}" })
+						.map<Any> { version -> "${it.group}:${it.name}:${version}" }
+						.orElse(it)
+				)
 			}
 	}
 }
