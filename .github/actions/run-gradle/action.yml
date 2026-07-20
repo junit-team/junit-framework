@@ -87,7 +87,7 @@ runs:
         -Pjunit.develocity.predictiveTestSelection.enabled=true \
         -Pjunit.develocity.predictiveTestSelection.selectRemainingTests=${{ github.event_name != 'pull_request' }} \
         "-Dscan.value.GitHub job=${{ github.job }}" \
-        -Dscan.tag.ac-step-2 \
+        -Dscan.tag.ac-step-3 \
         javaToolchains \
         ${{ inputs.arguments }} || error_code=$?
 
@@ -113,8 +113,7 @@ runs:
       if: success()
       id: store_cache
       continue-on-error: true
-#      run: $ARTIFACT_CACHE_CMD store $ARTIFACT_CACHE_CMD_OPTS
-      run: echo "Disabled!"
+      run: $ARTIFACT_CACHE_CMD store $ARTIFACT_CACHE_CMD_OPTS
       shell: bash
     - name: Warn on Cache Store Failure
       if: steps.store_cache.outcome == 'failure'
