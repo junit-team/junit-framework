@@ -24,6 +24,56 @@ runs:
     - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
+        cache-disabled: true
+    - name: Provision and configure Artifact Cache
+      shell: bash
+      env:
+        # Artifact Cache CLI Configuration
+        ARTIFACT_CACHE_CLI_VERSION: 1.4.0
+        ARTIFACT_CACHE_IMAGE: junit-framework
+
+        # Develocity Server
+        DV_SERVER: https://ge.junit.org
+
+        # Authentication (from secrets)
+        ARTIFACT_CACHE_REPO_USERNAME: ${{ github.actor }}
+        ARTIFACT_CACHE_REPO_PASSWORD: ${{ github.token }}
+
+        # Repository location - replace with your internal artifact repository URL
+        ARTIFACT_CACHE_REPO: https://maven.pkg.github.com/${{ github.repository }}
+
+        # CLI Configuration
+        ARTIFACT_CACHE_CLI_FILENAME: develocity-artifact-cache-cli
+        ARTIFACT_CACHE_OPTS: "--gradle-home=/home/runner/.gradle"
+      run: |
+        TOOL_DIR="${{ runner.tool_cache }}/develocity/artifact-cache/${{ env.ARTIFACT_CACHE_CLI_VERSION }}"
+        JAR_PATH="$TOOL_DIR/${{ env.ARTIFACT_CACHE_CLI_FILENAME }}.jar"
+        mkdir -p "$TOOL_DIR"
+
+        # Download if not present
+        if [ ! -f "$JAR_PATH" ]; then
+          echo "Downloading Artifact Cache CLI v${{ env.ARTIFACT_CACHE_CLI_VERSION }}..."
+          curl --location --fail --silent --show-error \
+            --connect-timeout 5 --max-time 30 \
+            --retry 3 --retry-delay 3 --retry-max-time 60 \
+            --user "$ARTIFACT_CACHE_REPO_USERNAME:$ARTIFACT_CACHE_REPO_PASSWORD" \
+            "${{ env.ARTIFACT_CACHE_REPO }}/com/gradle/${{ env.ARTIFACT_CACHE_CLI_FILENAME }}/${{ env.ARTIFACT_CACHE_CLI_VERSION }}/${{ env.ARTIFACT_CACHE_CLI_FILENAME }}-${{ env.ARTIFACT_CACHE_CLI_VERSION }}.jar" \
+            --output "$JAR_PATH"
+        fi
+
+        CMD="${{ env[format('JAVA_HOME_21_{0}', runner.arch)] }}/bin/java -jar $JAR_PATH"
+        echo "ARTIFACT_CACHE_CMD=$CMD" >> $GITHUB_ENV
+
+        CMD_OPTS="--dv-server=$DV_SERVER ${ARTIFACT_CACHE_IMAGE:+--image-name=$ARTIFACT_CACHE_IMAGE} $ARTIFACT_CACHE_OPTS"
+        echo "ARTIFACT_CACHE_CMD_OPTS=$CMD_OPTS" >> $GITHUB_ENV
+    - name: Restore from Artifact Cache
+      id: restore_cache
+      shell: bash
+      run: $ARTIFACT_CACHE_CMD restore $ARTIFACT_CACHE_CMD_OPTS
+    - name: Warn on Cache Restore Failure
+      if: steps.restore_cache.outcome == 'failure'
+      shell: bash
+      run: 'echo "WARNING: Could not restore the Artifact Cache. The build will proceed but may be slower."'
     - uses: testlens-app/setup-testlens@3f82d2dc6cd5c03f02ce5f7885a21195d85f8d14 # v1.9.3
       with:
         write-log-files: true
@@ -58,6 +108,22 @@ runs:
         if [ -n "$error_code" ]; then
           exit "$error_code"
         fi
+    - name: Store to Artifact Cache
+      if: success()
+      id: store_cache
+      continue-on-error: true
+      run: $ARTIFACT_CACHE_CMD store $ARTIFACT_CACHE_CMD_OPTS
+      shell: bash
+    - name: Warn on Cache Store Failure
+      if: steps.store_cache.outcome == 'failure'
+      run: 'echo "WARNING: Failed to store in the Artifact Cache."'
+      shell: bash
+    - name: Persist Artifact Cache Logs
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: artifact-cache.log
+        path: '~/.develocity/artifact-cache/artifact-cache.log'
+        retention-days: 7
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: ${{ always() }}
       with:
