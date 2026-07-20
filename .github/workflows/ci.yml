@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'releases/**'
+      - 'marc/develocity-experiments'
     tags-ignore:
       - '**'
   pull_request:
