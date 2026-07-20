@@ -36,6 +36,7 @@ jobs:
     permissions:
       attestations: write # required for build provenance attestation
       id-token: write # required for build provenance attestation
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -139,6 +140,8 @@ jobs:
     name: Publish to Maven Central
     needs: [ verify_reproducibility, verify_consumability, close_github_milestone ]
     runs-on: ubuntu-latest
+    permissions:
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

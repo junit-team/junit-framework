@@ -27,24 +27,28 @@ jobs:
     secrets: inherit
     permissions:
       contents: read
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
 
   Cross-Version:
     uses: ./.github/workflows/_cross-version.yml
     secrets: inherit
     permissions:
       contents: read
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
 
   Reproducibility:
     uses: ./.github/workflows/_reproducible-build.yml
     secrets: inherit
     permissions:
       contents: read
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
 
   CodeQL:
     uses: ./.github/workflows/_codeql.yml
     secrets: inherit
     permissions:
       contents: read
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
       security-events: write
 
   zizmor:
@@ -64,6 +68,7 @@ jobs:
       actions: write # to trigger documentation deployment workflow
       attestations: write # for build provenance attestation
       id-token: write # for build provenance attestation
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
 
   status:
     name: Status

@@ -3,7 +3,8 @@ name: CI
 on:
   workflow_call:
 
-permissions: {}
+permissions:
+  packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
 
 env:
   DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}

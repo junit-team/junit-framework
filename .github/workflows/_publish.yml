@@ -15,6 +15,7 @@ jobs:
     permissions:
       attestations: write # required for build provenance attestation
       id-token: write # required for build provenance attestation
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
     if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && (startsWith(github.ref, 'refs/heads/releases/') || github.ref == 'refs/heads/main')
     steps:
     - name: Check out repository

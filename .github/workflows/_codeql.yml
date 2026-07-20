@@ -13,6 +13,7 @@ jobs:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
+      packages: read # to download the Develocity Artifact Cache CLI from GitHub Packages
       security-events: write
     strategy:
       fail-fast: false
