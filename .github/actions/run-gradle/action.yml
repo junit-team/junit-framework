@@ -61,7 +61,7 @@ runs:
             --output "$JAR_PATH"
         fi
 
-        CMD="${{ env[format('JAVA_HOME_21_{0}', runner.arch)] }}/bin/java -jar $JAR_PATH"
+        CMD="${{ env[format('JAVA_HOME_25_{0}', runner.arch)] }}/bin/java -jar $JAR_PATH"
         echo "ARTIFACT_CACHE_CMD=$CMD" >> $GITHUB_ENV
 
         CMD_OPTS="--dv-server=$DV_SERVER ${ARTIFACT_CACHE_IMAGE:+--image-name=$ARTIFACT_CACHE_IMAGE} $ARTIFACT_CACHE_OPTS"
