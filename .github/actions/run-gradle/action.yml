@@ -33,7 +33,7 @@ runs:
         ARTIFACT_CACHE_IMAGE: junit-framework
 
         # Develocity Server
-        DV_SERVER: https://ge.junit.org
+        DV_SERVER: https://develocity.junit.org
 
         # Authentication (from secrets)
         ARTIFACT_CACHE_REPO_USERNAME: ${{ github.actor }}
