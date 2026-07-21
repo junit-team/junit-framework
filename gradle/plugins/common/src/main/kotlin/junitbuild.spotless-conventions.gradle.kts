@@ -29,7 +29,6 @@ spotless {
 			eclipse(majorMinorVersion).configFile(javaFormatterConfigFile)
 			trimTrailingWhitespace()
 			endWithNewline()
-			removeUnusedImports()
 		}
 
 		format("moduleAndPackageInfo") {
