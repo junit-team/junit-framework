@@ -19,7 +19,7 @@ dependencyResolutionManagement {
 }
 
 val buildParameters = the<BuildParametersExtension>()
-val develocityServer = "https://ge.junit.org"
+val develocityServer = "https://develocity.junit.org"
 val useDevelocityInstance = !gradle.startParameter.isBuildScan
 
 develocity {

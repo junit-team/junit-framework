@@ -49,13 +49,13 @@ in `build/reports/jacoco/jacocoRootReport/html/index.html`.
 
 ## Develocity
 
-[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.junit.org/scans)
+[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://develocity.junit.org/scans)
 
 JUnit 5 utilizes [Develocity](https://gradle.com/) for [Build Scans](https://scans.gradle.com/),
 [Build Cache](https://docs.gradle.org/current/userguide/build_cache.html), and
 [Predictive Test Selection](https://docs.gradle.com/enterprise/predictive-test-selection/).
 
-The latest Build Scans are available on [ge.junit.org](https://ge.junit.org/). Currently,
+The latest Build Scans are available on [develocity.junit.org](https://develocity.junit.org/). Currently,
 only core team members can publish Build Scans on that server.
 You can, however, publish a Build Scan to [scans.gradle.com](https://scans.gradle.com/) by
 using the `--scan` parameter explicitly.

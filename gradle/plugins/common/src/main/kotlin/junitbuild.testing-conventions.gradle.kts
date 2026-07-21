@@ -96,7 +96,7 @@ tasks.withType<Test>().configureEach {
 
 			// Ensure PTS works when publishing Build Scans to scans.gradle.com
 			this as PredictiveTestSelectionConfigurationInternal
-			server = uri("https://ge.junit.org")
+			server = uri("https://develocity.junit.org")
 
 			mergeCodeCoverage = true
 		}
