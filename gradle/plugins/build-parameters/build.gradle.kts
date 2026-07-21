@@ -34,7 +34,7 @@ buildParameters {
 			group("buildCache") {
 				string("server") {
 					description =
-						"Remote build cache server address (protocol and hostname), e.g. https://eu-build-cache-ge.junit.org"
+						"Remote build cache server address (protocol and hostname), e.g. https://eu-develocity-node.junit.org"
 				}
 				bool("pushEnabled") {
 					description =
