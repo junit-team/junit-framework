@@ -119,11 +119,11 @@ runs:
       if: steps.store_cache.outcome == 'failure'
       run: 'echo "WARNING: Failed to store in the Artifact Cache."'
       shell: bash
-    - name: Persist Artifact Cache Logs
+    - name: Persist Artifact Cache Directory
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: artifact-cache.log
-        path: '~/.develocity/artifact-cache/artifact-cache.log'
+        name: artifact-cache
+        path: '~/.develocity/artifact-cache'
         retention-days: 7
     - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: ${{ always() }}
