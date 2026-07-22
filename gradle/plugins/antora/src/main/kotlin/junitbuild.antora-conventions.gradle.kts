@@ -18,6 +18,7 @@ repositories {
 }
 
 tasks.register("generateAntoraResources") {
+	group = "docs"
 	dependsOn("generateAntoraYml")
 }
 
