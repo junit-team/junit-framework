@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package platform.tooling.support.tests;
+package platform.tooling.support;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,12 +33,12 @@ public class Projects {
 	private Projects() {
 	}
 
-	static Path copyToWorkspace(String project, Path workspace) throws IOException {
+	public static Path copyToWorkspace(String project, Path workspace) throws IOException {
 		PathUtils.copyDirectory(getSourceDirectory(project), workspace);
 		return workspace;
 	}
 
-	static Path getSourceDirectory(String project) {
+	public static Path getSourceDirectory(String project) {
 		return Path.of("projects").resolve(project);
 	}
 }

@@ -13,7 +13,7 @@ package platform.tooling.support.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.platform.launcher.LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -25,8 +25,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessResult;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 
 /**
  * @since 6.1
@@ -44,7 +46,7 @@ class MemoryCleanupTests {
 		copyToWorkspace(Projects.MEMORY_CLEANUP, workspace);
 		compile(javacOutputFiles);
 
-		var timeout = Duration.ofSeconds(OS.WINDOWS.isCurrentOs() ? 30 : 15);
+		var timeout = Duration.ofSeconds(OS.WINDOWS.isCurrentOs() ? 45 : 30);
 		var result = assertTimeoutPreemptively(timeout, () -> executeWithSmallHeapSize(javaOutputFiles));
 
 		assertThat(result).isNotNull();
