@@ -105,7 +105,7 @@ of the JUnit Platform, JUnit Jupiter, and JUnit Vintage.
 [Gradle toolchains]: https://docs.gradle.org/current/userguide/toolchains.html
 [Gradle Wrapper]: https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:using_wrapper
 [JaCoCo]: https://www.eclemma.org/jacoco/
-[Javadoc]: https://api.junit.org
+[Javadoc]: https://docs.junit.org/current/api/
 [JDK 25]: https://javaalmanac.io/jdk/25/
 [Release Notes]: https://docs.junit.org/current/release-notes.html
 [Examples]: https://github.com/junit-team/junit-examples
