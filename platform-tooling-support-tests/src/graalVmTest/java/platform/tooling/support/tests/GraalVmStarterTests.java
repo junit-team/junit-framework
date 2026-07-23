@@ -13,15 +13,17 @@ package platform.tooling.support.tests;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.platform.commons.util.StringUtils.isNotBlank;
 import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.tests.process.OutputFiles;
 
 import platform.tooling.support.FilePrefix;
@@ -33,13 +35,17 @@ import platform.tooling.support.Projects;
  * @since 1.9.1
  */
 @DisabledOnOpenJ9
-@EnabledIfEnvironmentVariable(named = "GRAALVM_HOME", matches = ".+")
 class GraalVmStarterTests {
 
-	@Test
+	@ParameterizedTest
+	@ValueSource(ints = { 21, 25 })
 	@Timeout(value = 10, unit = MINUTES)
-	void runsTestsInNativeImage(@TempDir Path workspace, @FilePrefix("gradle") OutputFiles outputFiles)
+	void runsTestsInNativeImage(int jdkVersion, @TempDir Path workspace, @FilePrefix("gradle") OutputFiles outputFiles)
 			throws Exception {
+		var envVarName = "GRAALVM_%d_HOME".formatted(jdkVersion);
+		var graalVmHome = System.getenv(envVarName);
+		assumeTrue(isNotBlank(graalVmHome), () -> "Expected env var is not set: " + envVarName);
+
 		var result = ProcessStarters.gradlew() //
 				.workingDir(copyToWorkspace(Projects.GRAALVM_STARTER, workspace)) //
 				.addArguments("-Dmaven.repo=" + MavenRepo.dir()) //
@@ -47,8 +53,10 @@ class GraalVmStarterTests {
 					// Use `--warning-mode=fail` again after the following issue is resolved and released:
 					// https://github.com/graalvm/native-build-tools/issues/900
 					"--warning-mode=all", //
-					"--refresh-dependencies") //
+					"--refresh-dependencies", //
+					"-PjdkVersion=" + jdkVersion) //
 				.redirectOutput(outputFiles) //
+				.putEnvironment("GRAALVM_HOME", graalVmHome) //
 				.startAndWait();
 
 		assertEquals(0, result.exitCode());

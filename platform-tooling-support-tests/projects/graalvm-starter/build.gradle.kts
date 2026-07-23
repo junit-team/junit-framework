@@ -4,6 +4,7 @@ plugins {
 }
 
 val junitVersion = providers.gradleProperty("junitVersion").orNull
+val jdkVersion = providers.gradleProperty("jdkVersion").orNull!!.toInt()
 
 dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
@@ -14,7 +15,7 @@ dependencies {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-	options.release = 21
+	options.release = jdkVersion
 }
 
 tasks.test {
@@ -31,16 +32,9 @@ tasks.test {
 	}
 }
 
-val initializeAtBuildTime = mapOf(
+val initializeAtBuildTime = mapOf<String, List<String>>(
 	// These need to be added to native-build-tools
-	"5.14.1" to listOf(
-		// https://github.com/graalvm/native-build-tools/pull/794
-		"org.junit.jupiter.engine.discovery.MethodSegmentResolver"
-	),
-	"6.1" to listOf(
-		// https://github.com/graalvm/native-build-tools/pull/867
-		"org.junit.platform.launcher.core.DiscoveryIssueReportingDiscoveryListener",
-	),
+	"6.2" to listOf(),
 )
 
 graalvmNative {
@@ -50,9 +44,11 @@ graalvmNative {
 	binaries {
 		named("test") {
 			buildArgs.add("-H:+ReportExceptionStackTraces")
-			val classNames = initializeAtBuildTime.values.flatten()
-			if (classNames.isNotEmpty()) {
-				buildArgs.add("--initialize-at-build-time=${classNames.joinToString(",")}")
+			if (jdkVersion <= 21) { // no longer necessary on higher versions, see https://github.com/graalvm/native-build-tools/pull/693
+				val classNames = initializeAtBuildTime.values.flatten()
+				if (classNames.isNotEmpty()) {
+					buildArgs.add("--initialize-at-build-time=${classNames.joinToString(",")}")
+				}
 			}
 		}
 	}

@@ -1,0 +1,17 @@
+name: Set up GraalVM
+description: Installs GraalVM and exports its home directory under a versioned env var
+inputs:
+  java-version:
+    required: true
+    description: "The GraalVM Java version to install"
+runs:
+  using: "composite"
+  steps:
+    - uses: graalvm/setup-graalvm@0def53c0fd8534bc13416c9469f5be45265824fd # v1.6.3
+      with:
+        distribution: graalvm
+        java-version: ${{ inputs.java-version }}
+    - shell: bash
+      env:
+        JAVA_VERSION: ${{ inputs.java-version }}
+      run: echo "GRAALVM_${JAVA_VERSION}_HOME=$GRAALVM_HOME" >> "$GITHUB_ENV" # zizmor: ignore[github-env]
