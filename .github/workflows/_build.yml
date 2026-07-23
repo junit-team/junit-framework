@@ -26,12 +26,10 @@ jobs:
       uses: ./.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-        # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
         arguments: >-
           :platform-tooling-support-tests:test
           build
           jacocoRootReport
-          --no-configuration-cache
     - name: Upload to Codecov.io
       uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
