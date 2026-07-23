@@ -27,6 +27,7 @@ jobs:
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: >-
+          :platform-tooling-support-tests:graalVmTest
           :platform-tooling-support-tests:test
           build
           jacocoRootReport

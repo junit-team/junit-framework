@@ -1,11 +1,9 @@
-import com.gradle.develocity.agent.gradle.internal.test.TestDistributionConfigurationInternal
 import junitbuild.extensions.capitalized
 import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.javaModuleName
 import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.kotlin.dsl.support.listFilesOrdered
-import java.time.Duration
 
 plugins {
 	id("junitbuild.build-parameters")
@@ -61,7 +59,7 @@ dependencies {
 	implementation(libs.commons.io) {
 		because("moving/deleting directory trees")
 	}
-	implementation(projects.platformTests) {
+	api(projects.platformTests) {
 		capabilities {
 			requireFeature("process-starter")
 		}
@@ -172,18 +170,41 @@ val archUnit = testing.suites.register("archUnit", JvmTestSuite::class) {
 	}
 }
 
+val graalVmTest = testing.suites.register("graalVmTest", JvmTestSuite::class) {
+	dependencies {
+		implementation(project())
+		implementation(projects.junitJupiter)
+		implementation(testFixtures(projects.junitJupiterApi))
+		implementation(libs.assertj)
+		runtimeOnly(projects.junitPlatformLauncher)
+		runtimeOnly(projects.junitPlatformReporting)
+		runtimeOnly(libs.openTestReporting.events)
+		runtimeOnly.bundle(libs.bundles.log4j)
+	}
+
+	targets {
+		all {
+			testTask.configure {
+				configureToolingSupportTests()
+			}
+		}
+	}
+}
+
 tasks.compileJava {
 	options.errorprone {
 		disableAllChecks = true
 	}
 }
 
-tasks.named<Checkstyle>("checkstyle${archUnit.name.capitalized()}").configure {
-	config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleTest.xml"))
+listOf(archUnit, graalVmTest).forEach { suite ->
+	tasks.named<Checkstyle>("checkstyle${suite.name.capitalized()}").configure {
+		config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleTest.xml"))
+	}
 }
 
 tasks.check {
-	dependsOn(archUnit)
+	dependsOn(archUnit, graalVmTest)
 }
 
 testing.suites.named<JvmTestSuite>("test") {
@@ -208,18 +229,7 @@ testing.suites.named<JvmTestSuite>("test") {
 		all {
 			testTask.configure {
 				shouldRunAfter(archUnit)
-
-				// Opt-out via system property: '-Dplatform.tooling.support.tests.enabled=false'
-				enabled = System.getProperty("platform.tooling.support.tests.enabled")?.toBoolean() ?: true
-
-				// The following if-block is necessary since Gradle will otherwise
-				// always publish all mavenizedProjects even if this "test" task
-				// is not executed.
-				if (enabled) {
-					dependsOn(normalizeMavenRepo)
-					jvmArgumentProviders += MavenRepo(project, normalizeMavenRepo.map { it.destinationDir })
-				}
-				environment.remove("JAVA_TOOL_OPTIONS")
+				configureToolingSupportTests()
 
 				jvmArgumentProviders += JarPath(project, thirdPartyJarsClasspath.get(), "thirdPartyJars")
 				jvmArgumentProviders += JarPath(project, antJarsClasspath.get(), "antJars")
@@ -232,38 +242,47 @@ testing.suites.named<JvmTestSuite>("test") {
 				}
 
 				inputs.apply {
-					dir("projects").withPathSensitivity(RELATIVE)
-					file("${rootDir}/gradle.properties").withPathSensitivity(RELATIVE)
-					file("${rootDir}/settings.gradle.kts").withPathSensitivity(RELATIVE)
-					file("${rootDir}/gradlew").withPathSensitivity(RELATIVE)
-					file("${rootDir}/gradlew.bat").withPathSensitivity(RELATIVE)
-					dir("${rootDir}/gradle/wrapper").withPathSensitivity(RELATIVE)
 					dir("${rootDir}/documentation/src/main").withPathSensitivity(RELATIVE)
 					dir("${rootDir}/documentation/src/test").withPathSensitivity(RELATIVE)
 				}
 
-				// Disable capturing output since parallel execution is enabled and output of
-				// external processes happens on non-test threads which can't reliably be
-				// attributed to the test that started the process.
-				systemProperty("junit.platform.output.capture.stdout", "false")
-				systemProperty("junit.platform.output.capture.stderr", "false")
-
-				develocity {
-					testDistribution {
-						requirements.add("jdk=17")
-						this as TestDistributionConfigurationInternal
-						preferredMaxDuration = Duration.ofMillis(500)
-					}
-				}
-
 				jvmArgumentProviders += JavaHomeDir(project, 17, develocity.testDistribution.enabled)
-
-				val gradleJavaVersion = JavaVersion.current().majorVersion.toInt()
-				jvmArgumentProviders += JavaHomeDir(project, gradleJavaVersion, develocity.testDistribution.enabled)
-				systemProperty("gradle.java.version", gradleJavaVersion)
 			}
 		}
 	}
+}
+
+fun Test.configureToolingSupportTests() {
+	// Opt-out via system property: '-Dplatform.tooling.support.tests.enabled=false'
+	enabled = System.getProperty("platform.tooling.support.tests.enabled")?.toBoolean() ?: true
+
+	// The following if-block is necessary since Gradle will otherwise
+	// always publish all mavenizedProjects even if this test task
+	// is not executed.
+	if (enabled) {
+		dependsOn(normalizeMavenRepo)
+		jvmArgumentProviders += MavenRepo(project, normalizeMavenRepo.map { it.destinationDir })
+	}
+	environment.remove("JAVA_TOOL_OPTIONS")
+
+	inputs.apply {
+		dir("projects").withPathSensitivity(RELATIVE)
+		file("${rootDir}/gradle.properties").withPathSensitivity(RELATIVE)
+		file("${rootDir}/settings.gradle.kts").withPathSensitivity(RELATIVE)
+		file("${rootDir}/gradlew").withPathSensitivity(RELATIVE)
+		file("${rootDir}/gradlew.bat").withPathSensitivity(RELATIVE)
+		dir("${rootDir}/gradle/wrapper").withPathSensitivity(RELATIVE)
+	}
+
+	// Disable capturing output since parallel execution is enabled and output of
+	// external processes happens on non-test threads which can't reliably be
+	// attributed to the test that started the process.
+	systemProperty("junit.platform.output.capture.stdout", "false")
+	systemProperty("junit.platform.output.capture.stderr", "false")
+
+	val gradleJavaVersion = JavaVersion.current().majorVersion.toInt()
+	jvmArgumentProviders += JavaHomeDir(project, gradleJavaVersion, develocity.testDistribution.enabled)
+	systemProperty("gradle.java.version", gradleJavaVersion)
 }
 
 class MavenRepo(project: Project, @get:Internal val repoDir: Provider<File>) : CommandLineArgumentProvider {

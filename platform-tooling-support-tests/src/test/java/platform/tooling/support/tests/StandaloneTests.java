@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
-import static platform.tooling.support.tests.Projects.getSourceDirectory;
+import static platform.tooling.support.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.getSourceDirectory;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,9 +40,11 @@ import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessResult;
 import org.opentest4j.TestAbortedException;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 import platform.tooling.support.ThirdPartyJars;
 
 /**

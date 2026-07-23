@@ -12,7 +12,7 @@ package platform.tooling.support.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,9 +24,11 @@ import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessResult;
 import org.opentest4j.TestAbortedException;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 
 /**
  * @since 6.0

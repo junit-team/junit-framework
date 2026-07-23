@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package platform.tooling.support.tests;
+package platform.tooling.support;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -20,6 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(OutputAttachingExtension.class)
-@interface FilePrefix {
+public @interface FilePrefix {
 	String value();
 }
