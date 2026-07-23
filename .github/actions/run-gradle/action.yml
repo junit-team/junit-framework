@@ -30,7 +30,6 @@ runs:
       env:
         # Artifact Cache CLI Configuration
         ARTIFACT_CACHE_CLI_VERSION: 1.4.0
-        ARTIFACT_CACHE_IMAGE: junit-framework
 
         # Develocity Server
         DV_SERVER: https://develocity.junit.org
