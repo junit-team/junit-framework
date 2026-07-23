@@ -43,7 +43,6 @@ runs:
 
         # CLI Configuration
         ARTIFACT_CACHE_CLI_FILENAME: develocity-artifact-cache-cli
-        ARTIFACT_CACHE_OPTS: "--gradle-home=/home/runner/.gradle"
       run: |
         TOOL_DIR="${{ runner.tool_cache }}/develocity/artifact-cache/${{ env.ARTIFACT_CACHE_CLI_VERSION }}"
         JAR_PATH="$TOOL_DIR/${{ env.ARTIFACT_CACHE_CLI_FILENAME }}.jar"
