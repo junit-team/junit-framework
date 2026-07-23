@@ -8,7 +8,7 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package platform.tooling.support.tests;
+package platform.tooling.support;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -28,6 +28,7 @@ jobs:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         # Disable configuration cache due to https://github.com/diffplug/spotless/issues/2318
         arguments: >-
+          :platform-tooling-support-tests:graalVmTest
           :platform-tooling-support-tests:test
           build
           jacocoRootReport

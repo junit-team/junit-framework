@@ -12,7 +12,7 @@ package platform.tooling.support.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,9 +24,11 @@ import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 import platform.tooling.support.ThirdPartyJars;
 
 /**

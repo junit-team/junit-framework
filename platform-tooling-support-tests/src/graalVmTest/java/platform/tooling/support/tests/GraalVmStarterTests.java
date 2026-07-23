@@ -13,11 +13,10 @@ package platform.tooling.support.tests;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -25,13 +24,14 @@ import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.tests.process.OutputFiles;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 
 /**
  * @since 1.9.1
  */
-@Order(Integer.MIN_VALUE)
 @DisabledOnOpenJ9
 @EnabledIfEnvironmentVariable(named = "GRAALVM_HOME", matches = ".+")
 class GraalVmStarterTests {
