@@ -69,6 +69,8 @@ runs:
     - name: Restore from Artifact Cache
       id: restore_cache
       shell: bash
+      env:
+        JDK_JAVA_OPTIONS: --sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED
       run: $ARTIFACT_CACHE_CMD restore $ARTIFACT_CACHE_CMD_OPTS
     - name: Warn on Cache Restore Failure
       if: steps.restore_cache.outcome == 'failure'
@@ -113,6 +115,8 @@ runs:
       if: success()
       id: store_cache
       continue-on-error: true
+      env:
+        JDK_JAVA_OPTIONS: --sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED
       run: $ARTIFACT_CACHE_CMD store $ARTIFACT_CACHE_CMD_OPTS
       shell: bash
     - name: Warn on Cache Store Failure
