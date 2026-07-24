@@ -5,9 +5,13 @@ import junitbuild.exec.RunConsoleLauncher
 import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.isSnapshot
 import junitbuild.extensions.javaModuleName
-import junitbuild.javadoc.JavadocValuesOption
-import junitbuild.javadoc.ModuleSpecificJavadocFileOption
+import junitbuild.javadoc.GenerateJavadoc
 import junitbuild.javadoc.VersionNumber
+import junitbuild.javadoc.addStylesheet
+import junitbuild.javadoc.linkOffline
+import junitbuild.javadoc.moduleSourcePath
+import junitbuild.javadoc.overview
+import junitbuild.javadoc.since
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import java.nio.file.Files
 import kotlin.io.path.writeLines
@@ -121,6 +125,7 @@ val externalModulesWithoutModularJavadoc = mapOf(
 require(externalModulesWithoutModularJavadoc.values.all { it.endsWith("/") }) {
 	"all base URLs must end with a trailing slash: $externalModulesWithoutModularJavadoc"
 }
+val aggregatedJavadocSinceValuesFile = layout.buildDirectory.file("docs/aggregated-javadoc-since-values.txt")
 
 spotless {
 	format("asciidoctor") {
@@ -293,7 +298,7 @@ tasks {
 		val classpath = files(allJavadocSinceValuesClasspath.flatMap { it.elements })
 		inputs.files(classpath).withPathSensitivity(PathSensitivity.NONE)
 
-		val outputFile = layout.buildDirectory.file("docs/aggregated-javadoc-since-values.txt")
+		val outputFile = aggregatedJavadocSinceValuesFile
 		outputs.file(outputFile)
 
 		outputs.cacheIf { true }
@@ -314,89 +319,72 @@ tasks {
 		}
 	}
 
-	val aggregateJavadocs = register("aggregateJavadocs", Javadoc::class) {
+	val aggregateJavadocs = register("aggregateJavadocs", GenerateJavadoc::class) {
 		dependsOn(modularProjects.map { dependencyProject(it).tasks.jar })
-		dependsOn(downloadJavadocElementLists)
+		dependsOn(downloadJavadocElementLists, mergeJavadocSinceValues)
+
 		group = "Documentation"
 		description = "Generates aggregated Javadocs"
 
-		title = "JUnit $version API"
+		overview(layout.projectDirectory.file("src/javadoc/junit-overview.html"))
+		addStylesheet(layout.projectDirectory.file("src/javadoc/junit-stylesheet.css"))
+		since(aggregatedJavadocSinceValuesFile)
 
-		val additionalStylesheetFile = "src/javadoc/junit-stylesheet.css"
-		inputs.file(additionalStylesheetFile)
-		val overviewFile = "src/javadoc/junit-overview.html"
-		inputs.file(overviewFile)
+		jvmArgs.add("-Xmx1g")
 
-		notCompatibleWithConfigurationCache("--module and --since options need to be lazy")
+		val title = "JUnit $version API"
+		args.addAll(
+				"-locale", "en", // must be the first option
+				"-encoding", "UTF-8",
+				"-quiet",
+				"-doctitle", title,
+				"-windowtitle", title,
+				"-header", "JUnit",
+				"-protected",
+				"-splitindex",
+				"-Xdoclint:all,-missing",
+				"-Werror",
+				"-html5",
+				"-tag", "apiNote:a:API Note:",
+				"-tag", "implNote:a:Implementation Note:",
+				"-link", jdkJavadocBaseUrl,
+				"-link", "https://junit.org/junit4/javadoc/${libs.versions.junit4.get()}/",
+				"-group", "Jupiter", "org.junit.jupiter*",
+				"-group", "Vintage", "org.junit.vintage*",
+				"-group", "Platform", "org.junit.platform*",
+				"--no-fonts",
+				"-use",
+				"-notimestamp",
+		)
 
-		options {
-
-			memberLevel = JavadocMemberLevel.PROTECTED
-			header = rootProject.description
-			encoding = "UTF-8"
-			locale = "en"
-			overview = overviewFile
-			jFlags("-Xmx1g")
-
-			this as StandardJavadocDocletOptions
-			splitIndex(true)
-			addBooleanOption("Xdoclint:all,-missing", true)
-			addBooleanOption("Werror", true)
-			addBooleanOption("html5", true)
-			addMultilineStringsOption("tag").value = listOf(
-					"apiNote:a:API Note:",
-					"implNote:a:Implementation Note:"
-			)
-
-			links(jdkJavadocBaseUrl)
-			links("https://junit.org/junit4/javadoc/${libs.versions.junit4.get()}/")
-			externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
-				linksOffline(baseUrl, elementListsDir.get().asFile.resolve(moduleName).absolutePath)
-			}
-
-			groups = mapOf(
-					"Jupiter" to listOf("org.junit.jupiter*"),
-					"Vintage" to listOf("org.junit.vintage*"),
-					"Platform" to listOf("org.junit.platform*")
-			)
-			addStringOption("-add-stylesheet", additionalStylesheetFile)
-			addBooleanOption("-no-fonts", true)
-			use(true)
-			noTimestamp(true)
-
-			addStringsOption("-module", ",").value = modularProjects.map { it.javaModuleName }
-			addOption(ModuleSpecificJavadocFileOption("-module-source-path", modularProjects.associate { project ->
-				project.javaModuleName to provider {
-					files(
-						dependencyProject(project).sourceSets.named { it.startsWith("main") }.map {
-							it.allJava.srcDirs.filter { it.exists() }
-						}
-					).asPath
-				}
-			}))
-			addStringOption("-add-modules", "info.picocli,org.opentest4j.reporting.events,de.siegmar.fastcsv")
-			addOption(ModuleSpecificJavadocFileOption("-add-reads", mapOf(
-					"org.junit.platform.console" to provider { "info.picocli" },
-					"org.junit.platform.reporting" to provider { "org.opentest4j.reporting.events" },
-					"org.junit.jupiter.params" to provider { "de.siegmar.fastcsv" }
-			)))
-
-			val javadocSinceValuesFile: Provider<File> = mergeJavadocSinceValues.map { it.outputs.files.singleFile }
-			inputs.file(javadocSinceValuesFile)
-				.withPathSensitivity(PathSensitivity.NONE)
-				.withPropertyName("javadoc-since-values-file")
-			addOption(JavadocValuesOption("-since", javadocSinceValuesFile.map { file ->
-				file.readLines().asSequence().filter { it.isNotBlank() }.toList()
-			}))
+		externalModulesWithoutModularJavadoc.forEach { (moduleName, baseUrl) ->
+			linkOffline(baseUrl, elementListsDir.map { it.dir(moduleName) })
 		}
 
-		source(modularProjects.map { project ->
+		modularProjects.forEach { project ->
+			moduleSourcePath(
+					project.javaModuleName,
+					files(dependencyProject(project).sourceSets.named { it.startsWith("main") }.map {
+						it.allJava.sourceDirectories
+					})
+			)
+		}
+
+		sourceFiles.from(modularProjects.map { project ->
 			files(dependencyProject(project).sourceSets.named { it.startsWith("main") }.map { it.allJava })
 		})
-		classpath = files(modularProjects.map { dependencyProject(it).sourceSets.main.get().compileClasspath })
 
-		setMaxMemory("1024m")
-		options.destinationDirectory = layout.buildDirectory.dir("docs/javadoc").get().asFile
+		classpath.from(modularProjects.map { dependencyProject(it).sourceSets.main.get().compileClasspath })
+
+		args.addAll(
+			"--module", modularProjects.joinToString(",") { it.javaModuleName },
+			"--add-modules", "info.picocli,org.opentest4j.reporting.events,de.siegmar.fastcsv",
+			"--add-reads", "org.junit.platform.console=info.picocli",
+			"--add-reads", "org.junit.platform.reporting=org.opentest4j.reporting.events",
+			"--add-reads", "org.junit.jupiter.params=de.siegmar.fastcsv",
+		)
+
+		outputDirectory = layout.buildDirectory.dir("docs/javadoc")
 	}
 
 	val fixJavadoc = register("fixJavadoc", Copy::class) {
@@ -404,10 +392,10 @@ tasks {
 		group = "Documentation"
 		description = "Fix links to external API specs in the locally aggregated Javadoc HTML files"
 
-		val inputDir = aggregateJavadocs.map { it.destinationDir!! }
+		val inputDir = aggregateJavadocs.flatMap { it.outputDirectory }
 		val modules = externalModulesWithoutModularJavadoc
 		inputs.property("externalModulesWithoutModularJavadoc", modules)
-		from(inputDir.map { File(it, "element-list") }) {
+		from(inputDir.map { it.file("element-list") }) {
 			// For compatibility with pre JDK 10 versions of the Javadoc tool
 			rename { "package-list" }
 		}
