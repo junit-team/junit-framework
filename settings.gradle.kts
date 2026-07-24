@@ -22,8 +22,6 @@ dependencyResolutionManagement {
 	}
 }
 
-includeBuild("gradle/base")
-
 rootProject.name = "junit-framework"
 
 include("documentation")
