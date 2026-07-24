@@ -405,12 +405,12 @@ class CsvArgumentsProviderTests {
 	}
 
 	@Test
-	void ignoresCommentCharacterWhenUsingValueAttribute() {
+	void rejectCommentCharacterWhenUsingValueAttribute() {
 		var annotation = csvSource("#foo", "#bar,baz", "baz,#quux");
 
-		var arguments = provideArguments(annotation);
-
-		assertThat(arguments).containsExactly(array("#foo"), array("#bar", "baz"), array("baz", "#quux"));
+		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny())//
+				.withMessageStartingWith(
+					"Comments may not be used when using @CsvSourve.value. Either change the comment character to something other than [#] or enclose the field in [']");
 	}
 
 	@Test
@@ -439,37 +439,21 @@ class CsvArgumentsProviderTests {
 		assertThat(arguments).containsExactly(array("bar", "*baz"), array("*bar", "baz"));
 	}
 
-	@Test
-	void doesNotThrowExceptionWhenDelimiterAndCommentCharacterTheSameWhenUsingValueAttribute() {
-		var annotation = csvSource().lines("foo#bar").delimiter('#').commentCharacter('#').build();
-
-		var arguments = provideArguments(annotation);
-
-		assertThat(arguments).containsExactly(array("foo", "bar"));
-	}
-
 	@ParameterizedTest
-	@MethodSource("invalidDelimiterAndQuoteCharacterCombinations")
-	void doesNotThrowExceptionWhenDelimiterAndCommentCharacterAreTheSameWhenUsingValueAttribute(Object delimiter,
-			char quoteCharacter) {
+	@MethodSource("invalidDelimiterQuoteCharacterAndCommentCharacterCombinations")
+	void throwsExceptionWhenControlCharactersAreTheSameWhenUsingValueArrayAttribute(Object delimiter,
+			char quoteCharacter, char commentCharacter) {
 
-		var builder = csvSource().lines("foo").quoteCharacter(quoteCharacter);
+		var builder = csvSource().lines("foo").quoteCharacter(quoteCharacter).commentCharacter(commentCharacter);
 
 		var annotation = delimiter instanceof Character c //
 				? builder.delimiter(c).build() //
 				: builder.delimiterString(delimiter.toString()).build();
 
-		var message = "delimiter or delimiterString: '%s' and quoteCharacter: '%s' must differ";
+		var message = "delimiter or delimiterString: '%s', quoteCharacter: '%s', and commentCharacter: '%s' " + //
+				"must all differ";
 		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny()) //
-				.withMessage(message.formatted(delimiter, quoteCharacter));
-	}
-
-	static Stream<Arguments> invalidDelimiterAndQuoteCharacterCombinations() {
-		return Stream.of(
-			// delimiter
-			Arguments.of('*', '*'), //
-			// delimiterString
-			Arguments.of("*", '*'));
+				.withMessage(message.formatted(delimiter, quoteCharacter, commentCharacter));
 	}
 
 	@ParameterizedTest

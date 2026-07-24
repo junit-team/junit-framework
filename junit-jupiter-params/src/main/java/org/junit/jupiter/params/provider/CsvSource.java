@@ -59,19 +59,13 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  *
  * <p>In general, CSV records should not contain explicit newlines ({@code \n})
  * unless they are placed within quoted strings. Note that CSV records supplied
- * via {@link #textBlock} will implicitly contain newlines at the end of each
+ * via a <em>text block</em> will implicitly contain newlines at the end of each
  * physical line within the text block. Thus, if a CSV column wraps across a
  * new line in a text block, the column must be a quoted string.
  *
  * <p>Note that {@link #delimiter} (or {@link #delimiterString}),
- * {@link #quoteCharacter}, and {@link #commentCharacter} (when
- * {@link #textBlock} is used) are treated as <em>control characters</em>.
- *
- * <ul>
- *   <li>{@link #delimiter} and {@link #quoteCharacter} must always be distinct.</li>
- *   <li>{@link #commentCharacter} must be distinct from the others only when
- *   {@link #textBlock} is used.</li>
- * </ul>
+ * {@link #quoteCharacter}, and {@link #commentCharacter} are treated as
+ * <em>control characters</em> and must always be distinct.
  *
  * <h2>Inheritance</h2>
  *
@@ -341,7 +335,7 @@ public @interface CsvSource {
 	boolean ignoreLeadingAndTrailingWhitespace() default true;
 
 	/**
-	 * The character used to denote comments in a {@linkplain #textBlock text block}.
+	 * The character used to denote comments.
 	 *
 	 * <p>Any line that begins with this character will be treated as a comment
 	 * and ignored during parsing. Note that there is one exception to this rule:

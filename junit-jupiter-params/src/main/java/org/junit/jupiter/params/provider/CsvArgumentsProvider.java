@@ -53,6 +53,7 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 		for (String data : values) {
 			try (var reader = CsvReaderFactory.createReaderFor(configuration, data)) {
 				for (CsvRecord record : reader) {
+					requireNoCsvComments(record, configuration);
 					if (isFirstRecord && useHeadersInDisplayName) {
 						headers = record.getFields();
 					}
@@ -67,6 +68,12 @@ class CsvArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvSource> {
 			}
 		}
 		return arguments.stream();
+	}
+
+	private static void requireNoCsvComments(CsvRecord record, CsvReaderConfiguration configuration) {
+		Preconditions.condition(!record.isComment(),
+			() -> "Comments may not be used when using @CsvSourve.value. Either change the comment character to something other than [%s] or enclose the field in [%s]".formatted(
+				configuration.commentCharacter(), configuration.quoteCharacter()));
 	}
 
 	private static Stream<Arguments> provideArgumentsFromTextBlock(CsvSource csvSource, String textBlock) {
