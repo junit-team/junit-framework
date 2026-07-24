@@ -10,31 +10,99 @@
 
 package example.kotlin
 
+import example.util.StringUtils
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD
 import org.junit.jupiter.params.Parameter
 import org.junit.jupiter.params.ParameterizedClass
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.Duration
 
 class ParameterizedClassDemo {
-    // @formatter:off
+    @Nested
+    // tag::first_example[]
+    @ParameterizedClass
+    @ValueSource(strings = ["racecar", "radar", "able was I ere I saw elba"])
+    inner class PalindromeTests {
+        @Parameter
+        lateinit var candidate: String
+
+        @Test
+        fun palindrome() {
+            assertTrue(StringUtils.isPalindrome(candidate))
+        }
+
+        @Test
+        fun reversePalindrome() {
+            val reverseCandidate = candidate.reversed()
+            assertTrue(StringUtils.isPalindrome(reverseCandidate))
+        }
+    }
+    // end::first_example[]
+
+    @Nested
+    inner class ConstructorInjection {
+        @Nested
+        // tag::constructor_injection[]
+        @ParameterizedClass
+        @CsvSource("apple, 23", "banana, 42")
+        inner class FruitTests(
+            private val fruit: String,
+            private val quantity: Int
+        ) {
+            @Test
+            fun test() {
+                assertFruit(fruit)
+                assertQuantity(quantity)
+            }
+
+            @Test
+            fun anotherTest() {
+                // ...
+            }
+        }
+        // end::constructor_injection[]
+    }
+
+    @Nested
+    inner class FieldInjection {
+        @Nested
+        // tag::field_injection[]
+        @ParameterizedClass
+        @CsvSource("apple, 23", "banana, 42")
+        inner class FruitTests {
+            @Parameter(0)
+            lateinit var fruit: String
+
+            @Parameter(1)
+            var quantity: Int = 0
+
+            @Test
+            fun test() {
+                assertFruit(fruit)
+                assertQuantity(quantity)
+            }
+
+            @Test
+            fun anotherTest() {
+                // ...
+            }
+        }
+        // end::field_injection[]
+    }
+
     @Nested
     // tag::nested[]
     @Execution(SAME_THREAD)
     @ParameterizedClass
     @ValueSource(strings = ["apple", "banana"])
-    // end::nested[]
-    inner
-    // tag::nested[]
-    class FruitTests {
-        // end::nested[]
-        // @formatter:on
-        // tag::nested[]
+    inner class FruitTests {
         @Parameter
         lateinit var fruit: String
 
@@ -58,7 +126,7 @@ class ParameterizedClassDemo {
 
     private fun assertFruit(fruit: String) {
         assertTrue(
-            listOf("apple", "banana", "cherry", "dewberry").contains(fruit)
+            fruit in listOf("apple", "banana", "cherry", "dewberry")
         ) { "not a fruit: $fruit" }
     }
 
