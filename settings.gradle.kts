@@ -27,6 +27,7 @@ develocity {
 	if (useDevelocityInstance) {
 		// Publish to scans.gradle.com when `--scan` is used explicitly
 		server = develocityServer
+		edgeDiscovery = true
 	}
 	buildScan {
 		uploadInBackground = !buildParameters.ci
@@ -60,9 +61,9 @@ buildCache {
 			server = buildCacheServer.orNull
 			isPush = buildParameters.junit.develocity.buildCache.pushEnabled
 		}
-	} else {
+	} else if (buildCacheServer.isPresent) {
 		remote<HttpBuildCache> {
-			url = uri(buildCacheServer.getOrElse(develocityServer)).resolve("/cache/")
+			url = uri(buildCacheServer.get()).resolve("/cache/")
 		}
 	}
 }
