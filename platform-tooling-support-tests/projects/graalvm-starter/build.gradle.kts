@@ -38,6 +38,10 @@ val initializeAtBuildTime = mapOf<String, List<String>>(
 )
 
 graalvmNative {
+	agent {
+		// Only record metadata for JUnit's own classes when running with `-Pagent`
+		accessFilterFiles.from(layout.projectDirectory.file("agent-access-filter.json"))
+	}
 	metadataRepository {
 		enabled = false
 	}

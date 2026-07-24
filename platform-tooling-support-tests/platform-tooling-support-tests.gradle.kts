@@ -176,6 +176,9 @@ val graalVmTest = testing.suites.register("graalVmTest", JvmTestSuite::class) {
 		implementation(projects.junitJupiter)
 		implementation(testFixtures(projects.junitJupiterApi))
 		implementation(libs.assertj)
+		implementation(libs.jackson.databind) {
+			because("parsing GraalVM reachability metadata")
+		}
 		runtimeOnly(projects.junitPlatformLauncher)
 		runtimeOnly(projects.junitPlatformReporting)
 		runtimeOnly(libs.openTestReporting.events)
