@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 include("build-parameters")
 include("code-generator-model")
 include("dsl-extensions")
+include("settings-conventions")

@@ -3,6 +3,7 @@ pluginManagement {
 }
 
 plugins {
+	id("junitbuild.settings-conventions")
 	id("junitbuild.dsl-extensions") apply false
 }
 

@@ -1,5 +1,3 @@
-import buildparameters.BuildParametersExtension
-
 pluginManagement {
 	includeBuild("gradle/base")
 	includeBuild("gradle/plugins")
@@ -12,60 +10,15 @@ plugins {
 	id("junitbuild.build-parameters")
 	id("junitbuild.maven-central-publishing")
 	id("junitbuild.settings-conventions")
+	// Add the Kotlin plugin to the classpath to avoid classloader issues due
+	// to included builds (see https://github.com/gradle/gradle/issues/31278).
+	// Renovate will keep the version in sync with libs.versions.toml.
+	id("org.jetbrains.kotlin.jvm") version "2.4.10" apply false
 }
 
 dependencyResolutionManagement {
 	repositories {
 		mavenCentral()
-	}
-}
-
-val buildParameters = the<BuildParametersExtension>()
-val develocityServer = "https://develocity.junit.org"
-val useDevelocityInstance = !gradle.startParameter.isBuildScan
-
-develocity {
-	if (useDevelocityInstance) {
-		// Publish to scans.gradle.com when `--scan` is used explicitly
-		server = develocityServer
-		edgeDiscovery = true
-	}
-	buildScan {
-		uploadInBackground = !buildParameters.ci
-
-		publishing {
-			onlyIf { it.isAuthenticated }
-		}
-
-		obfuscation {
-			if (buildParameters.ci) {
-				username { "github" }
-			} else {
-				hostname { null }
-				ipAddresses { emptyList() }
-			}
-		}
-
-		if (buildParameters.junit.develocity.testDistribution.enabled) {
-			tag("test-distribution")
-		}
-	}
-}
-
-buildCache {
-	local {
-		isEnabled = !buildParameters.ci
-	}
-	val buildCacheServer = buildParameters.junit.develocity.buildCache.server
-	if (useDevelocityInstance) {
-		remote(develocity.buildCache) {
-			server = buildCacheServer.orNull
-			isPush = buildParameters.junit.develocity.buildCache.pushEnabled
-		}
-	} else if (buildCacheServer.isPresent) {
-		remote<HttpBuildCache> {
-			url = uri(buildCacheServer.get()).resolve("/cache/")
-		}
 	}
 }
 
