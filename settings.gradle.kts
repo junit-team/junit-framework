@@ -1,6 +1,8 @@
-import buildparameters.BuildParametersExtension
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 
 pluginManagement {
+	includeBuild("gradle/base")
 	includeBuild("gradle/plugins")
 	repositories {
 		gradlePluginPortal()
@@ -11,6 +13,10 @@ plugins {
 	id("junitbuild.build-parameters")
 	id("junitbuild.maven-central-publishing")
 	id("junitbuild.settings-conventions")
+	// Add the Kotlin plugin to the classpath to avoid classloader issues due
+	// to included builds (see https://github.com/gradle/gradle/issues/31278).
+	// Renovate will keep the version in sync with libs.versions.toml.
+	id("org.jetbrains.kotlin.jvm") version "2.4.10" apply false
 }
 
 dependencyResolutionManagement {
@@ -19,90 +25,19 @@ dependencyResolutionManagement {
 	}
 }
 
-val buildParameters = the<BuildParametersExtension>()
-val develocityServer = "https://develocity.junit.org"
-val useDevelocityInstance = !gradle.startParameter.isBuildScan
-
-develocity {
-	if (useDevelocityInstance) {
-		// Publish to scans.gradle.com when `--scan` is used explicitly
-		server = develocityServer
-		edgeDiscovery = true
-	}
-	buildScan {
-		uploadInBackground = !buildParameters.ci
-
-		publishing {
-			onlyIf { it.isAuthenticated }
-		}
-
-		obfuscation {
-			if (buildParameters.ci) {
-				username { "github" }
-			} else {
-				hostname { null }
-				ipAddresses { emptyList() }
-			}
-		}
-
-		if (buildParameters.junit.develocity.testDistribution.enabled) {
-			tag("test-distribution")
-		}
-	}
-}
-
-buildCache {
-	local {
-		isEnabled = !buildParameters.ci
-	}
-	val buildCacheServer = buildParameters.junit.develocity.buildCache.server
-	if (useDevelocityInstance) {
-		remote(develocity.buildCache) {
-			server = buildCacheServer.orNull
-			isPush = buildParameters.junit.develocity.buildCache.pushEnabled
-		}
-	} else if (buildCacheServer.isPresent) {
-		remote<HttpBuildCache> {
-			url = uri(buildCacheServer.get()).resolve("/cache/")
-		}
-	}
-}
-
-includeBuild("gradle/base")
-
 rootProject.name = "junit-framework"
 
-include("documentation")
-include("junit-jupiter")
-include("junit-jupiter-api")
-include("junit-jupiter-engine")
-include("junit-jupiter-migrationsupport")
-include("junit-jupiter-params")
-include("junit-start")
-include("junit-platform-commons")
-include("junit-platform-console")
-include("junit-platform-console-standalone")
-include("junit-platform-engine")
-include("junit-platform-launcher")
-include("junit-platform-reporting")
-include("junit-platform-suite")
-include("junit-platform-suite-api")
-include("junit-platform-suite-engine")
-include("junit-platform-testkit")
-include("junit-vintage-engine")
-include("jupiter-tests")
-include("platform-tests")
-include("platform-tooling-support-tests")
-include("junit-bom")
-
-// check that every subproject has a custom build file
-// based on the project name
-rootProject.children.forEach { project ->
-	project.buildFileName = "${project.name}.gradle.kts"
-	require(project.buildFile.isFile) {
-		"${project.buildFile} must exist"
+rootDir.toPath()
+	.listDirectoryEntries()
+	.asSequence()
+	.filter { it.isDirectory() }
+	.map { it.toFile() }
+	.map { it to it.resolve("${it.name}.gradle.kts") }
+	.filter { it.second.exists() }
+	.forEach { (dir, buildScript) ->
+		include(dir.name)
+		project(dir).buildFileName = buildScript.name
 	}
-}
 
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

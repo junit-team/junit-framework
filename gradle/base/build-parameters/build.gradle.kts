@@ -2,8 +2,6 @@ plugins {
 	alias(libs.plugins.buildParameters)
 }
 
-group = "junitbuild"
-
 buildParameters {
 	enableValidation = false
 	pluginId("junitbuild.build-parameters")

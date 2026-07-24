@@ -3,6 +3,7 @@ pluginManagement {
 }
 
 plugins {
+	id("junitbuild.settings-conventions")
 	id("junitbuild.dsl-extensions") apply false
 }
 
@@ -21,7 +22,6 @@ rootProject.name = "plugins"
 
 include("antora")
 include("backward-compatibility")
-include("build-parameters")
 include("common")
 include("code-generator")
 include("javadoc")
