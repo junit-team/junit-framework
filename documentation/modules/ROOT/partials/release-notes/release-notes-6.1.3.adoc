@@ -16,7 +16,8 @@ repository on GitHub.
 [[v6.1.3-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* Provide serialization metadata for `UniqueId` to fix compatibility with GraalVM 25
+* Provide reachability metadata for `junit-platform-engine` to restore compatibility with
+  GraalVM 25
 
 [[v6.1.3-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
