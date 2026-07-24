@@ -176,6 +176,9 @@ val graalVmTest = testing.suites.register("graalVmTest", JvmTestSuite::class) {
 		implementation(projects.junitJupiter)
 		implementation(testFixtures(projects.junitJupiterApi))
 		implementation(libs.assertj)
+		implementation(libs.jackson.databind) {
+			because("parsing GraalVM reachability metadata")
+		}
 		runtimeOnly(projects.junitPlatformLauncher)
 		runtimeOnly(projects.junitPlatformReporting)
 		runtimeOnly(libs.openTestReporting.events)
@@ -186,8 +189,10 @@ val graalVmTest = testing.suites.register("graalVmTest", JvmTestSuite::class) {
 		all {
 			testTask.configure {
 				configureToolingSupportTests()
-				val graalVmHome = providers.environmentVariable("GRAALVM_HOME")
-				onlyIf("GRAALVM_HOME environment variable is set") { graalVmHome.isPresent }
+				val graalVmHomePattern = "GRAALVM_\\d+_HOME".toRegex()
+				val graalVmHomePresent = providers.environmentVariablesPrefixedBy("GRAALVM_")
+					.map { it.keys.any { name -> name.matches(graalVmHomePattern) } }
+				onlyIf("a GRAALVM_<version>_HOME environment variable is set") { graalVmHomePresent.get() }
 			}
 		}
 	}

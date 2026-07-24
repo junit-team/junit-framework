@@ -36,6 +36,7 @@ fastcsv = { module = "de.siegmar:fastcsv", version = "4.3.1" }
 groovy = { module = "org.apache.groovy:groovy", version = "5.0.7" }
 groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.5" }
