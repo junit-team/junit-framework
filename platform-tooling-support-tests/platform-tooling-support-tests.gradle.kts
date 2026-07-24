@@ -186,6 +186,8 @@ val graalVmTest = testing.suites.register("graalVmTest", JvmTestSuite::class) {
 		all {
 			testTask.configure {
 				configureToolingSupportTests()
+				val graalVmHome = providers.environmentVariable("GRAALVM_HOME")
+				onlyIf("GRAALVM_HOME environment variable is set") { graalVmHome.isPresent }
 			}
 		}
 	}
