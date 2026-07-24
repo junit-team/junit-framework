@@ -1,6 +1,7 @@
 import buildparameters.BuildParametersExtension
 
 pluginManagement {
+	includeBuild("gradle/base")
 	includeBuild("gradle/plugins")
 	repositories {
 		gradlePluginPortal()

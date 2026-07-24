@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
 	implementation("junitbuild.base:dsl-extensions")
-	implementation(projects.buildParameters)
+	implementation("junitbuild.base:build-parameters")
 	implementation(projects.backwardCompatibility)
 	implementation(libs.plugins.kotlin.markerCoordinates)
 	implementation(libs.plugins.bnd.markerCoordinates)

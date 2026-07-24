@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-	implementation(projects.buildParameters)
+	implementation("junitbuild.base:build-parameters")
 	implementation(libs.plugins.node.markerCoordinates)
 	constraints {
 		implementation("com.fasterxml.jackson.core:jackson-databind") {

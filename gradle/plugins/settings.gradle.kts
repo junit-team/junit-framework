@@ -21,7 +21,6 @@ rootProject.name = "plugins"
 
 include("antora")
 include("backward-compatibility")
-include("build-parameters")
 include("common")
 include("code-generator")
 include("publishing")
