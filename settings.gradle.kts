@@ -1,3 +1,6 @@
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+
 pluginManagement {
 	includeBuild("gradle/base")
 	includeBuild("gradle/plugins")
@@ -24,37 +27,17 @@ dependencyResolutionManagement {
 
 rootProject.name = "junit-framework"
 
-include("documentation")
-include("junit-jupiter")
-include("junit-jupiter-api")
-include("junit-jupiter-engine")
-include("junit-jupiter-migrationsupport")
-include("junit-jupiter-params")
-include("junit-start")
-include("junit-platform-commons")
-include("junit-platform-console")
-include("junit-platform-console-standalone")
-include("junit-platform-engine")
-include("junit-platform-launcher")
-include("junit-platform-reporting")
-include("junit-platform-suite")
-include("junit-platform-suite-api")
-include("junit-platform-suite-engine")
-include("junit-platform-testkit")
-include("junit-vintage-engine")
-include("jupiter-tests")
-include("platform-tests")
-include("platform-tooling-support-tests")
-include("junit-bom")
-
-// check that every subproject has a custom build file
-// based on the project name
-rootProject.children.forEach { project ->
-	project.buildFileName = "${project.name}.gradle.kts"
-	require(project.buildFile.isFile) {
-		"${project.buildFile} must exist"
+rootDir.toPath()
+	.listDirectoryEntries()
+	.asSequence()
+	.filter { it.isDirectory() }
+	.map { it.toFile() }
+	.map { it to it.resolve("${it.name}.gradle.kts") }
+	.filter { it.second.exists() }
+	.forEach { (dir, buildScript) ->
+		include(dir.name)
+		project(dir).buildFileName = buildScript.name
 	}
-}
 
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
