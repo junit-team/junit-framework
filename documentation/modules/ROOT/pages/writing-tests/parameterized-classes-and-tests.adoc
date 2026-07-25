@@ -619,7 +619,7 @@ Using a text block, the previous example can be implemented as follows.
 [source,java,indent=0]
 ----
 @ParameterizedTest
-@CsvSource(useHeadersInDisplayName = true, textBlock = """
+@CsvSource(useHeadersInDisplayName = true, value = """
 	FRUIT,         RANK
 	apple,         1
 	banana,        2

@@ -224,7 +224,7 @@ public @interface CsvSource {
 	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * {@literal @}ParameterizedTest(name = "[{index}] {arguments}")
-	 * {@literal @}CsvSource(useHeadersInDisplayName = true, textBlock = """
+	 * {@literal @}CsvSource(useHeadersInDisplayName = true, value = """
 	 *     FRUIT,         RANK
 	 *     apple,         1
 	 *     banana,        2
