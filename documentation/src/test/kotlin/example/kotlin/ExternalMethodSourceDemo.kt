@@ -8,9 +8,9 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-// tag::external_MethodSource_example[]
 package example.kotlin
 
+// tag::external_MethodSource_example[]
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
