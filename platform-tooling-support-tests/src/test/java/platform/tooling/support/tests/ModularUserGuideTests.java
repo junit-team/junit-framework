@@ -33,6 +33,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.tests.process.OutputFiles;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
 import platform.tooling.support.ThirdPartyJars;

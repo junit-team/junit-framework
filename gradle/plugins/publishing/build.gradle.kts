@@ -6,6 +6,6 @@ plugins {
 
 dependencies {
 	implementation("junitbuild.base:dsl-extensions")
-	implementation(projects.buildParameters)
+	implementation("junitbuild.base:build-parameters")
 	implementation(libs.plugins.nmcp.settings.markerCoordinates)
 }

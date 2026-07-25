@@ -1,6 +1,8 @@
 name: Codeberg
 
-on: [ push ]
+on:
+  schedule:
+    - cron: "59 * * * *"
 
 permissions:
   contents: read

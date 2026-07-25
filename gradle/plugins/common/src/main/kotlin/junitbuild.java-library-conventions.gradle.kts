@@ -74,16 +74,6 @@ if (project.path in mavenizedProjects.map { it.path }) {
 			}
 		}
 	}
-
-} else {
-	tasks {
-		jar {
-			enabled = false
-		}
-		javadoc {
-			enabled = false
-		}
-	}
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {

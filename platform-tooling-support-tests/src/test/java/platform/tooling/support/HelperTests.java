@@ -10,14 +10,13 @@
 
 package platform.tooling.support;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Order;
@@ -30,24 +29,25 @@ class HelperTests {
 
 	@Test
 	void loadModuleDirectoryNames() {
-		assertLinesMatch(List.of( //
-			"junit-jupiter", //
-			"junit-jupiter-api", //
-			"junit-jupiter-engine", //
-			"junit-jupiter-migrationsupport", //
-			"junit-jupiter-params", //
-			"junit-start", //
-			"junit-platform-commons", //
-			"junit-platform-console", //
-			"junit-platform-engine", //
-			"junit-platform-launcher", //
-			"junit-platform-reporting", //
-			"junit-platform-suite", //
-			"junit-platform-suite-api", //
-			"junit-platform-suite-engine", //
-			"junit-platform-testkit", //
-			"junit-vintage-engine"//
-		), Helper.loadModuleDirectoryNames());
+		assertThat(Helper.loadModuleDirectoryNames()) //
+				.containsExactlyInAnyOrder( //
+					"junit-jupiter", //
+					"junit-jupiter-api", //
+					"junit-jupiter-engine", //
+					"junit-jupiter-migrationsupport", //
+					"junit-jupiter-params", //
+					"junit-start", //
+					"junit-platform-commons", //
+					"junit-platform-console", //
+					"junit-platform-engine", //
+					"junit-platform-launcher", //
+					"junit-platform-reporting", //
+					"junit-platform-suite", //
+					"junit-platform-suite-api", //
+					"junit-platform-suite-engine", //
+					"junit-platform-testkit", //
+					"junit-vintage-engine"//
+				);
 	}
 
 	@Test
