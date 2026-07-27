@@ -169,29 +169,13 @@ include::example$kotlin/example/kotlin/ParameterizedClassDemo.kt[tags=constructo
 --
 ====
 
-You may use _records_ to implement parameterized classes that avoid the boilerplate code
+In Java, you can use _records_ to implement parameterized classes that avoid the boilerplate code
 of declaring a test class constructor.
 
-[tabs]
-====
-Java::
-+
---
 [source,java,indent=0]
 ----
 include::example$java/example/ParameterizedRecordDemo.java[tags=example]
 ----
---
-
-Kotlin::
-+
---
-[source,kotlin,indent=0]
-----
-include::example$kotlin/example/kotlin/ParameterizedRecordDemo.kt[tags=example]
-----
---
-====
 
 [[consuming-arguments-field-injection]]
 ==== Field Injection

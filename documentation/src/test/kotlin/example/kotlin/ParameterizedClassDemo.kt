@@ -25,11 +25,18 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.time.Duration
 
 class ParameterizedClassDemo {
+    // @formatter:off
     @Nested
     // tag::first_example[]
     @ParameterizedClass
     @ValueSource(strings = ["racecar", "radar", "able was I ere I saw elba"])
-    inner class PalindromeTests {
+    // end::first_example[]
+    inner
+    // tag::first_example[]
+    class PalindromeTests {
+        // end::first_example[]
+        // @formatter:on
+        // tag::first_example[]
         @Parameter
         lateinit var candidate: String
 
@@ -48,14 +55,21 @@ class ParameterizedClassDemo {
 
     @Nested
     inner class ConstructorInjection {
+        // @formatter:off
         @Nested
         // tag::constructor_injection[]
         @ParameterizedClass
         @CsvSource("apple, 23", "banana, 42")
-        inner class FruitTests(
+        // end::constructor_injection[]
+        inner
+        // tag::constructor_injection[]
+        class FruitTests(
             private val fruit: String,
             private val quantity: Int
         ) {
+            // end::constructor_injection[]
+            // @formatter:on
+            // tag::constructor_injection[]
             @Test
             fun test() {
                 assertFruit(fruit)
@@ -72,11 +86,18 @@ class ParameterizedClassDemo {
 
     @Nested
     inner class FieldInjection {
+        // @formatter:off
         @Nested
         // tag::field_injection[]
         @ParameterizedClass
         @CsvSource("apple, 23", "banana, 42")
-        inner class FruitTests {
+        // end::field_injection[]
+        inner
+        // tag::field_injection[]
+        class FruitTests {
+            // end::field_injection[]
+            // @formatter:on
+            // tag::field_injection[]
             @Parameter(0)
             lateinit var fruit: String
 
@@ -97,12 +118,19 @@ class ParameterizedClassDemo {
         // end::field_injection[]
     }
 
+    // @formatter:off
     @Nested
     // tag::nested[]
     @Execution(SAME_THREAD)
     @ParameterizedClass
     @ValueSource(strings = ["apple", "banana"])
-    inner class FruitTests {
+    // end::nested[]
+    inner
+    // tag::nested[]
+    class FruitTests {
+        // end::nested[]
+        // @formatter:on
+        // tag::nested[]
         @Parameter
         lateinit var fruit: String
 
