@@ -61,7 +61,6 @@ import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalUnit
 import java.util.EnumSet
 import java.util.function.Supplier
-import java.util.stream.IntStream
 import java.util.stream.Stream
 
 @Execution(SAME_THREAD)
@@ -551,20 +550,20 @@ class ParameterizedTestDemo {
 }
 
 // tag::stringProvider[]
-fun stringProvider(): Stream<String> = Stream.of("apple", "banana")
+fun stringProvider() = sequenceOf("apple", "banana")
 // end::stringProvider[]
 
 // tag::testWithDefaultLocalMethodSource_provider[]
-fun testWithDefaultLocalMethodSource(): Stream<String> = Stream.of("apple", "banana")
+fun testWithDefaultLocalMethodSource() = sequenceOf("apple", "banana")
 // end::testWithDefaultLocalMethodSource_provider[]
 
 // tag::range[]
-fun range(): IntStream = IntStream.range(0, 20).skip(10)
+fun range() = 10..<20
 // end::range[]
 
 // tag::stringIntAndListProvider[]
-fun stringIntAndListProvider(): Stream<Arguments> =
-    Stream.of(
+fun stringIntAndListProvider() =
+    sequenceOf(
         arguments("apple", 1, listOf("a", "b")),
         arguments("lemon", 2, listOf("x", "y"))
     )
@@ -601,8 +600,8 @@ var stringIntAndListArguments =
 // end::stringIntAndListArguments[]
 
 // tag::namedArguments[]
-fun namedArguments(): Stream<Arguments> =
-    Stream.of(
+fun namedArguments() =
+    sequenceOf(
         arguments(named("An important file", File("path1"))),
         arguments(named("Another file", File("path2")))
     )
@@ -617,9 +616,9 @@ val argumentSets =
 // end::argumentSets[]
 
 // tag::someProvider[]
-fun someProvider(): Stream<String> = Stream.of("foo")
+fun someProvider() = sequenceOf("foo")
 // end::someProvider[]
 
 // tag::otherProvider[]
-fun otherProvider(): Stream<String> = Stream.of("bar")
+fun otherProvider() = sequenceOf("bar")
 // end::otherProvider[]

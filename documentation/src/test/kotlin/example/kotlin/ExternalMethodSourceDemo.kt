@@ -13,7 +13,6 @@ package example.kotlin
 // tag::external_MethodSource_example[]
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.stream.Stream
 
 class ExternalMethodSourceDemo {
     @ParameterizedTest
@@ -25,6 +24,6 @@ class ExternalMethodSourceDemo {
 
 object StringsProviders {
     @JvmStatic
-    fun tinyStrings(): Stream<String> = Stream.of(".", "oo", "OOO")
+    fun tinyStrings() = sequenceOf(".", "oo", "OOO")
 }
 // end::external_MethodSource_example[]

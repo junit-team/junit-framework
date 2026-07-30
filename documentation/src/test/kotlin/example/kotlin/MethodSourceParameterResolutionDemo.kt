@@ -16,10 +16,8 @@ import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.stream.Stream
 
 class MethodSourceParameterResolutionDemo {
     // tag::parameter_resolution_MethodSource_example[]
@@ -48,8 +46,8 @@ class MethodSourceParameterResolutionDemo {
 }
 
 // tag::parameter_resolution_factory_MethodSource_example[]
-fun factoryMethodWithArguments(quantity: Int): Stream<Arguments> =
-    Stream.of(
+fun factoryMethodWithArguments(quantity: Int) =
+    sequenceOf(
         arguments("$quantity apples"),
         arguments("$quantity lemons")
     )
