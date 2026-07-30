@@ -61,88 +61,107 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 	public void testPlanExecutionStarted(TestPlan testPlan) {
 		this.testPlan = testPlan;
 
+		StringBuilder output = new StringBuilder();
 		String prefix = "Test plan execution started. Number of static tests: ";
-		printNumberOfTests(testPlan, prefix);
-		printf(Style.CONTAINER, "%s%n", theme.root());
+		appendNumberOfTests(output, testPlan, prefix);
+		append(output, Style.CONTAINER, "%s%n", theme.root());
+		print(output);
 	}
 
 	@Override
 	public void testPlanExecutionFinished(TestPlan testPlan) {
-		printNumberOfTests(testPlan, "Test plan execution finished. Number of all tests: ");
+		StringBuilder output = new StringBuilder();
+		appendNumberOfTests(output, testPlan, "Test plan execution finished. Number of all tests: ");
+		print(output);
 	}
 
-	private void printNumberOfTests(TestPlan testPlan, String prefix) {
+	private void appendNumberOfTests(StringBuilder output, TestPlan testPlan, String prefix) {
 		long tests = testPlan.countTestIdentifiers(TestIdentifier::isTest);
-		printf(NONE, "%s", prefix);
-		printf(Style.TEST, "%d%n", tests);
+		append(output, NONE, "%s", prefix);
+		append(output, Style.TEST, "%d%n", tests);
 	}
 
 	@Override
 	public void executionStarted(TestIdentifier testIdentifier) {
 		startedMillisByUniqueId.put(testIdentifier.getUniqueIdObject(), System.currentTimeMillis());
 		int nestingLevel = nestingLevel(testIdentifier);
-		printVerticals(nestingLevel, theme.entry());
+		StringBuilder output = new StringBuilder();
+		appendVerticals(output, nestingLevel, theme.entry());
 		if (testIdentifier.isContainer()) {
-			printf(Style.CONTAINER, " %s", testIdentifier.getDisplayName());
-			printf(NONE, "%n");
-			return;
+			append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
+			append(output, NONE, "%n");
 		}
-		printf(Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
-		printDetails(nestingLevel, testIdentifier);
+		else {
+			append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
+			appendDetails(output, nestingLevel, testIdentifier);
+		}
+		print(output);
 	}
 
 	@Override
 	public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
 		long startedMillis = requireNonNull(startedMillisByUniqueId.remove(testIdentifier.getUniqueIdObject()));
 		int nestingLevel = nestingLevel(testIdentifier);
+		StringBuilder output = new StringBuilder();
 		testExecutionResult.getThrowable().ifPresent(
-			t -> printDetail(nestingLevel, Style.FAILED, "caught", readStackTrace(t)));
+			t -> appendDetail(output, nestingLevel, Style.FAILED, "caught", readStackTrace(t)));
 		if (testIdentifier.isContainer()) {
-			printVerticals(nestingLevel, theme.end());
-			printf(Style.CONTAINER, " %s", testIdentifier.getDisplayName());
-			printf(NONE, " finished after %d ms.%n", System.currentTimeMillis() - startedMillis);
-			return;
+			appendVerticals(output, nestingLevel, theme.end());
+			append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
+			append(output, NONE, " finished after %d ms.%n", System.currentTimeMillis() - startedMillis);
 		}
-		printDetail(nestingLevel, NONE, "duration", "%d ms%n", System.currentTimeMillis() - startedMillis);
-		String status = theme.status(testExecutionResult) + " " + testExecutionResult.getStatus();
-		printDetail(nestingLevel, Style.valueOf(testExecutionResult), "status", "%s%n", status);
+		else {
+			appendDetail(output, nestingLevel, NONE, "duration", "%d ms%n", System.currentTimeMillis() - startedMillis);
+			String status = theme.status(testExecutionResult) + " " + testExecutionResult.getStatus();
+			appendDetail(output, nestingLevel, Style.valueOf(testExecutionResult), "status", "%s%n", status);
+		}
+		print(output);
 	}
 
 	@Override
 	public void executionSkipped(TestIdentifier testIdentifier, String reason) {
 		int nestingLevel = nestingLevel(testIdentifier);
-		printVerticals(nestingLevel, theme.entry());
-		printf(Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
-		printDetails(nestingLevel, testIdentifier);
-		printDetail(nestingLevel, Style.SKIPPED, "reason", reason);
-		printDetail(nestingLevel, Style.SKIPPED, "status", theme.skipped() + " SKIPPED");
+		StringBuilder output = new StringBuilder();
+		appendVerticals(output, nestingLevel, theme.entry());
+		append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
+		appendDetails(output, nestingLevel, testIdentifier);
+		appendDetail(output, nestingLevel, Style.SKIPPED, "reason", reason);
+		appendDetail(output, nestingLevel, Style.SKIPPED, "status", theme.skipped() + " SKIPPED");
+		print(output);
 	}
 
 	@Override
 	public void dynamicTestRegistered(TestIdentifier testIdentifier) {
-		printVerticals(nestingLevel(testIdentifier), theme.entry());
-		printf(Style.DYNAMIC, " %s", testIdentifier.getDisplayName());
-		printf(NONE, "%s%n", " dynamically registered");
+		StringBuilder output = new StringBuilder();
+		appendVerticals(output, nestingLevel(testIdentifier), theme.entry());
+		append(output, Style.DYNAMIC, " %s", testIdentifier.getDisplayName());
+		append(output, NONE, "%s%n", " dynamically registered");
+		print(output);
 	}
 
 	@Override
 	public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
-		printDetail(nestingLevel(testIdentifier), Style.REPORTED, "reports", entry.toString());
+		StringBuilder output = new StringBuilder();
+		appendDetail(output, nestingLevel(testIdentifier), Style.REPORTED, "reports", entry.toString());
+		print(output);
 	}
 
 	@Override
 	public void fileEntryPublished(TestIdentifier testIdentifier, FileEntry file) {
-		printDetail(nestingLevel(testIdentifier), Style.REPORTED, "reports", file.toString());
+		StringBuilder output = new StringBuilder();
+		appendDetail(output, nestingLevel(testIdentifier), Style.REPORTED, "reports", file.toString());
+		print(output);
 	}
 
 	/**
-	 * Print static information about the test identifier.
+	 * Append static information about the test identifier.
 	 */
-	private void printDetails(int nestingLevel, TestIdentifier testIdentifier) {
-		printDetail(nestingLevel, NONE, "tags", "%s%n", testIdentifier.getTags());
-		printDetail(nestingLevel, NONE, "uniqueId", "%s%n", testIdentifier.getUniqueId());
-		printDetail(nestingLevel, NONE, "parent", "%s%n", testIdentifier.getParentId().orElse("[]"));
-		testIdentifier.getSource().ifPresent(source -> printDetail(nestingLevel, NONE, "source", "%s%n", source));
+	private void appendDetails(StringBuilder output, int nestingLevel, TestIdentifier testIdentifier) {
+		appendDetail(output, nestingLevel, NONE, "tags", "%s%n", testIdentifier.getTags());
+		appendDetail(output, nestingLevel, NONE, "uniqueId", "%s%n", testIdentifier.getUniqueId());
+		appendDetail(output, nestingLevel, NONE, "parent", "%s%n", testIdentifier.getParentId().orElse("[]"));
+		testIdentifier.getSource().ifPresent(
+			source -> appendDetail(output, nestingLevel, NONE, "source", "%s%n", source));
 	}
 
 	/**
@@ -170,44 +189,53 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 		return verticals[Math.min(nestingLevel, verticals.length - 1)];
 	}
 
-	private void printVerticals(int nestingLevel, String tile) {
-		printf(NONE, verticals(nestingLevel));
-		printf(NONE, tile);
+	private void appendVerticals(StringBuilder output, int nestingLevel, String tile) {
+		append(output, NONE, verticals(nestingLevel));
+		append(output, NONE, tile);
 	}
 
-	private void printf(Style style, String message, Object... args) {
-		out.printf(colorPalette.paint(style, message), args);
+	private void append(StringBuilder output, Style style, String message, Object... args) {
+		output.append(colorPalette.paint(style, message).formatted(args));
+	}
+
+	/**
+	 * Write the output of a single event with a single write so that events printed
+	 * concurrently cannot interleave within a line.
+	 */
+	private void print(StringBuilder output) {
+		out.print(output);
 		out.flush();
 	}
 
 	/**
-	 * Print single detail with a potential multi-line message.
+	 * Append single detail with a potential multi-line message.
 	 */
-	private void printDetail(int nestingLevel, Style style, String detail, String format, Object... args) {
-		// print initial verticals - expecting to be at start of the line
+	private void appendDetail(StringBuilder output, int nestingLevel, Style style, String detail, String format,
+			Object... args) {
+		// append initial verticals - expecting to be at start of the line
 		String verticals = verticals(nestingLevel + 1);
-		printf(NONE, verticals);
+		append(output, NONE, verticals);
 		String detailFormat = "%9s";
 		// omit detail string if it's empty
 		if (!detail.isEmpty()) {
-			printf(NONE, "%s", (detailFormat + ": ").formatted(detail));
+			append(output, NONE, "%s", (detailFormat + ": ").formatted(detail));
 		}
-		// trivial case: at least one arg is given? Let printf do the entire work
+		// trivial case: at least one arg is given? Let the format do the entire work
 		if (args.length > 0) {
-			printf(style, format, args);
+			append(output, style, format, args);
 			return;
 		}
 		// still here? Split format into separate lines and indent them from the second line on
 		String[] lines = format.split("\\R");
-		printf(style, "%s", lines[0]);
+		append(output, style, "%s", lines[0]);
 		if (lines.length > 1) {
 			String delimiter = System.lineSeparator() + verticals + (detailFormat + "    ").formatted("");
 			for (int i = 1; i < lines.length; i++) {
-				printf(NONE, "%s", delimiter);
-				printf(style, "%s", lines[i]);
+				append(output, NONE, "%s", delimiter);
+				append(output, style, "%s", lines[i]);
 			}
 		}
-		printf(NONE, "%n");
+		append(output, NONE, "%n");
 	}
 
 	@Override
@@ -217,9 +245,11 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 			@Override
 			public void preVisitContainer(TestIdentifier testIdentifier) {
 				if (!testPlan.getChildren(testIdentifier).isEmpty()) {
-					printVerticals(nestingLevel(testIdentifier), theme.entry());
-					printf(Style.CONTAINER, " %s", testIdentifier.getDisplayName());
-					printf(NONE, "%n");
+					StringBuilder output = new StringBuilder();
+					appendVerticals(output, nestingLevel(testIdentifier), theme.entry());
+					append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
+					append(output, NONE, "%n");
+					print(output);
 				}
 			}
 
@@ -227,17 +257,21 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 			public void visit(TestIdentifier testIdentifier) {
 				if (testPlan.getChildren(testIdentifier).isEmpty()) {
 					int nestingLevel = nestingLevel(testIdentifier);
-					printVerticals(nestingLevel, theme.entry());
-					printf(Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
-					printDetails(nestingLevel, testIdentifier);
+					StringBuilder output = new StringBuilder();
+					appendVerticals(output, nestingLevel, theme.entry());
+					append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
+					appendDetails(output, nestingLevel, testIdentifier);
+					print(output);
 				}
 			}
 
 			@Override
 			public void postVisitContainer(TestIdentifier testIdentifier) {
 				if (!testPlan.getChildren(testIdentifier).isEmpty()) {
-					printVerticals(nestingLevel(testIdentifier), theme.end());
-					printf(Style.CONTAINER, " %s%n", testIdentifier.getDisplayName());
+					StringBuilder output = new StringBuilder();
+					appendVerticals(output, nestingLevel(testIdentifier), theme.end());
+					append(output, Style.CONTAINER, " %s%n", testIdentifier.getDisplayName());
+					print(output);
 				}
 			}
 		});

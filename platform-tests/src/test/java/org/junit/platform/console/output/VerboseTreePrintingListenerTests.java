@@ -10,8 +10,10 @@
 
 package org.junit.platform.console.output;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.engine.TestExecutionResult.failed;
 import static org.junit.platform.engine.TestExecutionResult.successful;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
@@ -20,8 +22,11 @@ import static org.mockito.Mockito.mock;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +46,9 @@ class VerboseTreePrintingListenerTests {
 
 	private static final String EOL = System.lineSeparator();
 	private static final Pattern DURATION = Pattern.compile("duration: (\\d+) ms");
+	private static final Pattern LABEL = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
+	private static final int NUM_THREADS = 4;
+	private static final int TESTS_PER_THREAD = 50;
 
 	@Test
 	void executionSkipped() {
@@ -194,6 +202,45 @@ class VerboseTreePrintingListenerTests {
 		assertThat(reportedDurations(stringWriter)).hasSize(2).anyMatch(duration -> duration >= 100);
 	}
 
+	@Test
+	void linesAreNotInterleavedWhenExecutionsArePrintedConcurrently() throws Exception {
+		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
+		var identifiers = new ArrayList<TestIdentifier>();
+		for (int i = 0; i < TESTS_PER_THREAD * NUM_THREADS; i++) {
+			var test = new TestDescriptorStub(engine.getUniqueId().append("method", "test" + i + "()"),
+				"test" + i + "()");
+			engine.addChild(test);
+			identifiers.add(TestIdentifier.from(test));
+		}
+
+		var stringWriter = new StringWriter();
+		var listener = listener(stringWriter, engine);
+		var barrier = new CyclicBarrier(NUM_THREADS);
+		var executor = Executors.newFixedThreadPool(NUM_THREADS);
+		try {
+			for (int thread = 0; thread < NUM_THREADS; thread++) {
+				int offset = thread * TESTS_PER_THREAD;
+				executor.submit(() -> {
+					await(barrier);
+					for (int i = offset; i < offset + TESTS_PER_THREAD; i++) {
+						var testIdentifier = identifiers.get(i);
+						listener.executionStarted(testIdentifier);
+						listener.executionFinished(testIdentifier, successful());
+					}
+				});
+			}
+		}
+		finally {
+			executor.shutdown();
+			assertTrue(executor.awaitTermination(30, SECONDS), "Executor was not terminated");
+		}
+
+		assertThat(stringWriter.toString().lines()) //
+				.allSatisfy(line -> assertThat(labelsIn(line)).describedAs("labels in <%s>", line).isLessThan(2)) //
+				.filteredOn(line -> line.contains("uniqueId: ")) //
+				.hasSize(TESTS_PER_THREAD * NUM_THREADS);
+	}
+
 	private VerboseTreePrintingListener listener(StringWriter stringWriter) {
 		return listener(stringWriter, TEST_DESCRIPTOR);
 	}
@@ -225,6 +272,19 @@ class VerboseTreePrintingListenerTests {
 	private static List<Long> reportedDurations(StringWriter stringWriter) {
 		Matcher matcher = DURATION.matcher(stringWriter.toString());
 		return matcher.results().map(result -> Long.valueOf(result.group(1))).toList();
+	}
+
+	private static long labelsIn(String line) {
+		return LABEL.matcher(line).results().count();
+	}
+
+	private static void await(CyclicBarrier barrier) {
+		try {
+			barrier.await();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
