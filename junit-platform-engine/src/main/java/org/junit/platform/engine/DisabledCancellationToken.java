@@ -16,6 +16,7 @@ package org.junit.platform.engine;
  */
 final class DisabledCancellationToken implements CancellationToken {
 
+	static final int temp = 0;
 	static final DisabledCancellationToken INSTANCE = new DisabledCancellationToken();
 
 	private DisabledCancellationToken() {
