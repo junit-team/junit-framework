@@ -22,6 +22,10 @@ dependencies {
 	osgiVerification(libs.openTestReporting.tooling.spi)
 }
 
+backwardCompatibilityChecks {
+	enabled = false // already checked by individual projects
+}
+
 tasks {
 	jar {
 		manifest {

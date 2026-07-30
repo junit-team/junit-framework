@@ -11,3 +11,7 @@ dependencies {
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
 }
+
+backwardCompatibilityChecks {
+	enabled = false // not yet released
+}
