@@ -23,7 +23,7 @@ final class CompositeTestDescriptorVisitor implements TestDescriptor.Visitor {
 
 	static TestDescriptor.Visitor from(TestDescriptor.Visitor... visitors) {
 		Preconditions.notNull(visitors, "visitors must not be null");
-		Preconditions.notEmpty(visitors, "visitors must not be empty");
+		Preconditions.notEmpty(visitors, " visitors must not be empty");
 		Preconditions.containsNoNullElements(visitors, "visitors must not contain any null elements");
 		return visitors.length == 1 ? visitors[0] : new CompositeTestDescriptorVisitor(visitors);
 	}
