@@ -1,4 +1,4 @@
-org.junit.platform.launcher@6.2.0-SNAPSHOT jar:file:///home/mpkorstanje/Projects/github/junit-team/junit-framework/platform-tooling-support-tests/build/normalized-repo/org/junit/platform/junit-platform-launcher/6.2.0-SNAPSHOT/junit-platform-launcher-6.2.0-SNAPSHOT.jar!/module-info.class
+org.junit.platform.launcher@${version} jar:file:.+/junit-platform-launcher-\d.+\.jar..module-info\.class
 exports org.junit.platform.launcher
 exports org.junit.platform.launcher.core
 exports org.junit.platform.launcher.listeners

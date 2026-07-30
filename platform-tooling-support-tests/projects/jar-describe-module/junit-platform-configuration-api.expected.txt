@@ -1,4 +1,4 @@
-org.junit.platform.configuration.api@6.2.0-SNAPSHOT jar:file:///home/mpkorstanje/Projects/github/junit-team/junit-framework/platform-tooling-support-tests/build/normalized-repo/org/junit/platform/junit-platform-configuration-api/6.2.0-SNAPSHOT/junit-platform-configuration-api-6.2.0-SNAPSHOT.jar!/module-info.class
+org.junit.platform.configuration.api@${version} jar:file:.+/junit-platform-configuration-api-\d.+\.jar..module-info\.class
 exports org.junit.platform.configuration.api
 requires java.base mandated
 requires org.apiguardian.api static transitive
