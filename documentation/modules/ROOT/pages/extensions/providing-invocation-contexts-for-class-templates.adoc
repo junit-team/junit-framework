@@ -9,11 +9,27 @@ will only be used for the next invocation of the `{ClassTemplate}`.
 The following example shows how to write a class template as well as how to register
 and implement a `{ClassTemplateInvocationContextProvider}`.
 
+.A class template with an accompanying extension
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
-.A class template with accompanying extension
 ----
 include::example$java/example/ClassTemplateDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ClassTemplateDemo.kt[tags=user_guide]
+----
+--
+====
 
 In this example, the class template will be invoked twice, meaning all test methods in
 the class template will be executed twice. The display names of the invocations will be
@@ -33,9 +49,9 @@ output when using the `ConsoleLauncher` is as follows.
 
 The `{ClassTemplateInvocationContextProvider}` extension API is primarily intended for
 implementing different kinds of tests that rely on repetitive invocation of _all_ test
-methods in a test class albeit in different contexts — for example, with different
+methods in a test class, albeit in different contexts — for example, with different
 parameters, by preparing the test class instance differently, or multiple times without
 modifying the context.
 Please refer to the implementations of
-xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Classes] which uses this extension
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Classes] which use this extension
 point to provide its functionality.

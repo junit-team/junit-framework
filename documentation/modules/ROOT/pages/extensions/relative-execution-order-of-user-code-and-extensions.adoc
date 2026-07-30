@@ -10,7 +10,7 @@ NOTE: See also: xref:writing-tests/test-execution-order.adoc[]
 
 The following diagram illustrates the relative order of user-supplied code and extension
 code. User-supplied test and lifecycle methods are shown in orange, with callback code
-implemented by extensions shown in blue. The grey box denotes the execution of a single
+implemented by extensions shown in blue. The gray box denotes the execution of a single
 test method and will be repeated for every test method in the test class.
 
 [[diagram]]
@@ -65,7 +65,7 @@ extension code executed after all tests of the container are executed
 
 In the simplest case only the actual test method will be executed (step 9); all other
 steps are optional depending on the presence of user code or extension support for the
-corresponding lifecycle callback. For further details on the various lifecycle callbacks
+corresponding lifecycle callback. For further details on the various lifecycle callbacks,
 please consult the respective Javadoc for each annotation and extension.
 
 All invocations of user code methods in the above table can additionally be intercepted
@@ -122,29 +122,97 @@ interactions with the database. All methods imported statically from the `Logger
 log contextual information in order to help us better understand the execution order of
 user-supplied callback methods and callback methods in extensions.
 
-[source,java,indent=0]
 .Extension1
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/callbacks/Extension1.java[tags=user_guide]
 ----
+--
 
-[source,java,indent=0]
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/callbacks/Extension1.kt[tags=user_guide]
+----
+--
+====
+
 .Extension2
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/callbacks/Extension2.java[tags=user_guide]
 ----
+--
 
-[source,java,indent=0]
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/callbacks/Extension2.kt[tags=user_guide]
+----
+--
+====
+
 .AbstractDatabaseTests
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/callbacks/AbstractDatabaseTests.java[tags=user_guide]
 ----
+--
 
-[source,java,indent=0]
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/callbacks/AbstractDatabaseTests.kt[tags=user_guide]
+----
+
+NOTE: For conciseness, this snippet uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
+--
+====
+
 .DatabaseTestsDemo
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/callbacks/DatabaseTestsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/callbacks/DatabaseTestsDemo.kt[tags=user_guide]
+----
+
+NOTE: For conciseness, this snippet assumes that the parent class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
+--
+====
 
 When the `DatabaseTestsDemo` test class is executed, the following is logged.
 
@@ -160,7 +228,7 @@ When the `DatabaseTestsDemo` test class is executed, the following is logged.
     @AfterEach AbstractDatabaseTests.disconnectFromDatabase()
   Extension2.afterEach()
   Extension1.afterEach()
-@BeforeAll DatabaseTestsDemo.afterAll()
+@AfterAll DatabaseTestsDemo.afterAll()
 @AfterAll AbstractDatabaseTests.destroyDatabase()
 ----
 
@@ -200,11 +268,27 @@ are executed.
 * The database connection is closed _before_ deleting the test data, which results in a
   failure to connect to the database.
 
-[source,java,indent=0]
 .BrokenLifecycleMethodConfigDemo
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/callbacks/BrokenLifecycleMethodConfigDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/callbacks/BrokenLifecycleMethodConfigDemo.kt[tags=user_guide]
+----
+--
+====
 
 When the `BrokenLifecycleMethodConfigDemo` test class is executed, the following is logged.
 
