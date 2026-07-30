@@ -38,7 +38,7 @@ eclipseConventions {
 
 tasks {
 	compileJava {
-		options.compilerArgs.add("-Xlint:-module,-processing") // due to qualified exports, not all annotations need to be processed
+		options.compilerArgs.add("-Xlint:-module,-processing") // -module: due to qualified exports, -processing: not all annotations need to be processed
 	}
 	jar {
 		bundle {
