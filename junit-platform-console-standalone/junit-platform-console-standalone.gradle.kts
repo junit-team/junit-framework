@@ -22,10 +22,6 @@ dependencies {
 	osgiVerification(libs.openTestReporting.tooling.spi)
 }
 
-backwardCompatibilityChecks {
-	enabled = false // already checked by individual projects
-}
-
 tasks {
 	jar {
 		manifest {
@@ -58,6 +54,8 @@ tasks {
 		// https://github.com/junit-team/junit-framework/issues/2557
 		// exclude compiled module declarations from any source (e.g. /*, /META-INF/versions/N/*)
 		exclude("**/module-info.class")
+		// TODO: merge meta data files?
+		exclude("META-INF/junit-platform-configuration-metadata.json")
 		// https://github.com/junit-team/junit-framework/issues/761
 		// prevent duplicates, add 3rd-party licenses explicitly
 		exclude("**/COPYRIGHT*")

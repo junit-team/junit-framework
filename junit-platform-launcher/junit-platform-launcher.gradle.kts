@@ -6,20 +6,26 @@ plugins {
 description = "JUnit Platform Launcher"
 
 dependencies {
+	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+
 	api(platform(projects.junitBom))
 	api(projects.junitPlatformEngine)
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+	compileOnlyApi(projects.junitPlatformConfigurationApi)
 
 	osgiVerification(projects.junitJupiterEngine)
 }
 
 javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformReporting)
+	addExtraModuleReferences(projects.junitPlatformConfigurationApi, projects.junitPlatformReporting)
 }
 
 tasks {
+	compileJava {
+		options.compilerArgs.add("-Xlint:-processing") // -processing: not all annotations need to be processed
+	}
 	jar {
 		bundle {
 			bnd("""
