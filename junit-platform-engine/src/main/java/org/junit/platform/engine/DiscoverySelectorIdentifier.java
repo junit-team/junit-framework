@@ -32,6 +32,7 @@ import org.junit.platform.commons.util.StringUtils;
 @API(status = MAINTAINED, since = "1.13.3")
 public final class DiscoverySelectorIdentifier {
 
+	private final String temp = "Temp";
 	private final String prefix;
 	private final String value;
 
