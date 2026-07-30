@@ -11,6 +11,7 @@
 package org.junit.platform.engine;
 
 /**
+ * @author git team (ak)
  * @since 6.0
  */
 final class DisabledCancellationToken implements CancellationToken {
