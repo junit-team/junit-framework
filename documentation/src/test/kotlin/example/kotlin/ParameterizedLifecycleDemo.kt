@@ -8,13 +8,13 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-@file:JvmName("ParameterizedLifecycleDemo")
-
 package example.kotlin
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.AfterParameterizedClassInvocation
 import org.junit.jupiter.params.BeforeParameterizedClassInvocation
@@ -27,29 +27,32 @@ import java.nio.file.Path
 // tag::example[]
 @ParameterizedClass
 @MethodSource("textFiles")
+@TestInstance(PER_CLASS)
 class TextFileTests {
     @Parameter
     lateinit var textFile: TextFile
 
-    companion object {
-        @JvmStatic
-        @BeforeParameterizedClassInvocation
-        fun beforeInvocation(
-            textFile: TextFile,
-            @TempDir tempDir: Path
-        ) { // <1>
-            val filePath = tempDir.resolve(textFile.fileName)
-            textFile.path = Files.writeString(filePath, textFile.content)
-        }
+    fun textFiles(): List<TextFile> =
+        listOf(
+            TextFile("file1", "first content"),
+            TextFile("file2", "second content")
+        )
 
-        @JvmStatic
-        @AfterParameterizedClassInvocation
-        fun afterInvocation(textFile: TextFile) { // <3>
-            val actualContent = Files.readString(textFile.path)
-            assertEquals(textFile.content, actualContent, "Content must not have changed")
-            // Custom cleanup logic, if necessary
-            // File will be deleted automatically by @TempDir support
-        }
+    @BeforeParameterizedClassInvocation
+    fun beforeInvocation(
+        textFile: TextFile,
+        @TempDir tempDir: Path
+    ) { // <1>
+        val filePath = tempDir.resolve(textFile.fileName)
+        textFile.path = Files.writeString(filePath, textFile.content)
+    }
+
+    @AfterParameterizedClassInvocation
+    fun afterInvocation(textFile: TextFile) { // <3>
+        val actualContent = Files.readString(textFile.path)
+        assertEquals(textFile.content, actualContent, "Content must not have changed")
+        // Custom cleanup logic, if necessary
+        // File will be deleted automatically by @TempDir support
     }
 
     @Test
@@ -71,10 +74,4 @@ class TextFile(
 
     override fun toString(): String = fileName
 }
-
-fun textFiles(): List<TextFile> =
-    listOf(
-        TextFile("file1", "first content"),
-        TextFile("file2", "second content")
-    )
 // end::example[]

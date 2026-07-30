@@ -25,6 +25,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestInfo
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.TestReporter
 import org.junit.jupiter.api.extension.AnnotatedElementContext
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -64,6 +66,7 @@ import java.util.function.Supplier
 import java.util.stream.Stream
 
 @Execution(SAME_THREAD)
+@TestInstance(PER_CLASS)
 class ParameterizedTestDemo {
     @BeforeEach
     fun printDisplayName(testInfo: TestInfo) {
@@ -174,6 +177,8 @@ class ParameterizedTestDemo {
     fun testWithExplicitLocalMethodSource(argument: String) {
         assertNotNull(argument)
     }
+
+    fun stringProvider() = sequenceOf("apple", "banana")
     // end::simple_MethodSource_example[]
 
     // tag::simple_MethodSource_without_value_example[]
@@ -182,6 +187,8 @@ class ParameterizedTestDemo {
     fun testWithDefaultLocalMethodSource(argument: String) {
         assertNotNull(argument)
     }
+
+    fun testWithDefaultLocalMethodSource() = sequenceOf("apple", "banana")
     // end::simple_MethodSource_without_value_example[]
 
     // tag::primitive_MethodSource_example[]
@@ -190,6 +197,8 @@ class ParameterizedTestDemo {
     fun testWithRangeMethodSource(argument: Int) {
         assertNotEquals(9, argument)
     }
+
+    fun range() = 10..<20
     // end::primitive_MethodSource_example[]
 
     // tag::multi_arg_MethodSource_example[]
@@ -204,6 +213,12 @@ class ParameterizedTestDemo {
         assertTrue(num in 1..2)
         assertEquals(2, list.size)
     }
+
+    fun stringIntAndListProvider() =
+        sequenceOf(
+            arguments("apple", 1, listOf("a", "b")),
+            arguments("lemon", 2, listOf("x", "y"))
+        )
     // end::multi_arg_MethodSource_example[]
 
     // tag::default_field_FieldSource_example[]
@@ -212,6 +227,8 @@ class ParameterizedTestDemo {
     fun arrayOfFruits(fruit: String) {
         assertFruit(fruit)
     }
+
+    val arrayOfFruits = arrayOf("apple", "banana")
     // end::default_field_FieldSource_example[]
 
     // tag::explicit_field_FieldSource_example[]
@@ -220,6 +237,8 @@ class ParameterizedTestDemo {
     fun singleFieldSource(fruit: String) {
         assertFruit(fruit)
     }
+
+    val listOfFruits = listOf("apple", "banana")
     // end::explicit_field_FieldSource_example[]
 
     // tag::multiple_fields_FieldSource_example[]
@@ -228,6 +247,8 @@ class ParameterizedTestDemo {
     fun multipleFieldSources(fruit: String) {
         assertFruit(fruit)
     }
+
+    val additionalFruits = listOf("cherry", "dewberry")
     // end::multiple_fields_FieldSource_example[]
 
     // tag::named_arguments_FieldSource_example[]
@@ -236,6 +257,14 @@ class ParameterizedTestDemo {
     fun namedArgumentsSupplier(fruit: String) {
         assertFruit(fruit)
     }
+
+    val namedArgumentsSupplier: Supplier<Stream<Arguments>> =
+        Supplier {
+            Stream.of(
+                arguments(named("Apple", "apple")),
+                arguments(named("Banana", "banana"))
+            )
+        }
     // end::named_arguments_FieldSource_example[]
 
     private fun assertFruit(fruit: String) {
@@ -254,6 +283,12 @@ class ParameterizedTestDemo {
         assertTrue(num in 1..2)
         assertEquals(2, list.size)
     }
+
+    var stringIntAndListArguments =
+        listOf(
+            arguments("apple", 1, listOf("a", "b")),
+            arguments("lemon", 2, listOf("x", "y"))
+        )
     // end::multi_arg_FieldSource_example[]
 
     // tag::CsvSource_example[]
@@ -516,6 +551,12 @@ class ParameterizedTestDemo {
     @MethodSource("namedArguments")
     fun testWithNamedArguments(file: File) {
     }
+
+    fun namedArguments() =
+        sequenceOf(
+            arguments(named("An important file", File("path1"))),
+            arguments(named("Another file", File("path2")))
+        )
     // end::named_arguments[]
 
     // tag::named_argument_set[]
@@ -527,6 +568,12 @@ class ParameterizedTestDemo {
         file2: File
     ) {
     }
+
+    val argumentSets =
+        listOf(
+            Arguments.argumentSet("Important files", File("path1"), File("path2")),
+            Arguments.argumentSet("Other files", File("path3"), File("path4"))
+        )
     // end::named_argument_set[]
 
     // tag::repeatable_annotations[]
@@ -537,6 +584,10 @@ class ParameterizedTestDemo {
     fun testWithRepeatedAnnotation(argument: String) {
         assertNotNull(argument)
     }
+
+    fun someProvider() = sequenceOf("foo")
+
+    fun otherProvider() = sequenceOf("bar")
     // end::repeatable_annotations[]
 
     @Disabled("Fails prior to invoking the test method")
@@ -548,77 +599,3 @@ class ParameterizedTestDemo {
     }
     // end::argument_count_validation[]
 }
-
-// tag::stringProvider[]
-fun stringProvider() = sequenceOf("apple", "banana")
-// end::stringProvider[]
-
-// tag::testWithDefaultLocalMethodSource_provider[]
-fun testWithDefaultLocalMethodSource() = sequenceOf("apple", "banana")
-// end::testWithDefaultLocalMethodSource_provider[]
-
-// tag::range[]
-fun range() = 10..<20
-// end::range[]
-
-// tag::stringIntAndListProvider[]
-fun stringIntAndListProvider() =
-    sequenceOf(
-        arguments("apple", 1, listOf("a", "b")),
-        arguments("lemon", 2, listOf("x", "y"))
-    )
-// end::stringIntAndListProvider[]
-
-// tag::arrayOfFruits[]
-val arrayOfFruits = arrayOf("apple", "banana")
-// end::arrayOfFruits[]
-
-// tag::listOfFruits[]
-val listOfFruits = listOf("apple", "banana")
-// end::listOfFruits[]
-
-// tag::additionalFruits[]
-val additionalFruits = listOf("cherry", "dewberry")
-// end::additionalFruits[]
-
-// tag::namedArgumentsSupplier[]
-val namedArgumentsSupplier: Supplier<Stream<Arguments>> =
-    Supplier {
-        Stream.of(
-            arguments(named("Apple", "apple")),
-            arguments(named("Banana", "banana"))
-        )
-    }
-// end::namedArgumentsSupplier[]
-
-// tag::stringIntAndListArguments[]
-var stringIntAndListArguments =
-    listOf(
-        arguments("apple", 1, listOf("a", "b")),
-        arguments("lemon", 2, listOf("x", "y"))
-    )
-// end::stringIntAndListArguments[]
-
-// tag::namedArguments[]
-fun namedArguments() =
-    sequenceOf(
-        arguments(named("An important file", File("path1"))),
-        arguments(named("Another file", File("path2")))
-    )
-// end::namedArguments[]
-
-// tag::argumentSets[]
-val argumentSets =
-    listOf(
-        Arguments.argumentSet("Important files", File("path1"), File("path2")),
-        Arguments.argumentSet("Other files", File("path3"), File("path4"))
-    )
-// end::argumentSets[]
-
-// tag::someProvider[]
-fun someProvider() = sequenceOf("foo")
-// end::someProvider[]
-
-// tag::otherProvider[]
-fun otherProvider() = sequenceOf("bar")
-// end::otherProvider[]

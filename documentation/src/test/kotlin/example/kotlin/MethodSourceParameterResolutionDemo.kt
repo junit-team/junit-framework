@@ -11,6 +11,8 @@
 package example.kotlin
 
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
@@ -19,6 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 
+@TestInstance(PER_CLASS)
 class MethodSourceParameterResolutionDemo {
     // tag::parameter_resolution_MethodSource_example[]
     @JvmField
@@ -30,6 +33,12 @@ class MethodSourceParameterResolutionDemo {
     fun testWithFactoryMethodWithArguments(argument: String) {
         assertTrue(argument.startsWith("2"))
     }
+
+    fun factoryMethodWithArguments(quantity: Int) =
+        sequenceOf(
+            arguments("$quantity apples"),
+            arguments("$quantity lemons")
+        )
 
     class IntegerResolver : ParameterResolver {
         override fun supportsParameter(
@@ -44,11 +53,3 @@ class MethodSourceParameterResolutionDemo {
     }
     // end::parameter_resolution_MethodSource_example[]
 }
-
-// tag::parameter_resolution_factory_MethodSource_example[]
-fun factoryMethodWithArguments(quantity: Int) =
-    sequenceOf(
-        arguments("$quantity apples"),
-        arguments("$quantity lemons")
-    )
-// end::parameter_resolution_factory_MethodSource_example[]
