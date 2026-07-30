@@ -125,7 +125,6 @@ val verifyOSGi = tasks.register("verifyOSGi", Resolve::class) {
 	properties.empty()
 }
 
-// TODO: Fails, for some reason
-//tasks.check {
-//	dependsOn(verifyOSGi)
-//}
+tasks.check {
+	dependsOn(verifyOSGi)
+}
