@@ -15,6 +15,8 @@ dependencies {
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+	// TODO: Marc, why does compileOnlyApi break the Javadoc task?
+	api(projects.junitPlatformConfigurationApi)
 
 	compileOnly(kotlin("stdlib"))
 

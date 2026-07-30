@@ -18,6 +18,8 @@ extra["license"] = License(
 val mavenizedProjects = listOf(
 	projects.junitStart,
 	projects.junitPlatformCommons,
+	projects.junitPlatformConfigurationApi,
+	projects.junitPlatformConfigurationProcessor,
 	projects.junitPlatformConsole,
 	projects.junitPlatformConsoleStandalone,
 	projects.junitPlatformEngine,
