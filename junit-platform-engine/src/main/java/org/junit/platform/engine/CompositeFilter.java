@@ -24,6 +24,7 @@ import org.junit.platform.commons.util.Preconditions;
  * include elements if and only if all of the filters in the specified collection
  * include it.
  *
+ * @author junit team (ka)
  * @since 1.0
  */
 class CompositeFilter<T> implements Filter<T> {
