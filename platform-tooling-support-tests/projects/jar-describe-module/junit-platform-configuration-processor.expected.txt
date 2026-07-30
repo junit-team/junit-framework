@@ -1,6 +1,7 @@
-org.junit.platform.configuration.processor@${version} jar:file:.+/junit-platform-configuration-processor-\d.+\.jar..module-info\.class
+org.junit.platform.configuration.processor@6.2.0-SNAPSHOT jar:file:///home/mpkorstanje/Projects/github/junit-team/junit-framework/platform-tooling-support-tests/build/normalized-repo/org/junit/platform/junit-platform-configuration-processor/6.2.0-SNAPSHOT/junit-platform-configuration-processor-6.2.0-SNAPSHOT.jar!/module-info.class
 requires java.base mandated
 requires java.compiler
+requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
 requires org.junit.platform.configuration.api
 provides javax.annotation.processing.Processor with org.junit.platform.configuration.processor.ConfigurationMetadataAnnotationProcessor

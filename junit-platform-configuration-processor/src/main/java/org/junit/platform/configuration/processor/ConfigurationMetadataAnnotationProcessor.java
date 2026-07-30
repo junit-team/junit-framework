@@ -24,8 +24,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
 
+import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 
+@API(status = API.Status.EXPERIMENTAL)
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationProperty")
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {

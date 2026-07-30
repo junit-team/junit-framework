@@ -13,14 +13,21 @@ package platform.tooling.support.tests;
 import static com.tngtech.archunit.base.DescribedPredicate.and;
 import static com.tngtech.archunit.base.DescribedPredicate.describe;
 import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.ANONYMOUS_CLASSES;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.TOP_LEVEL_CLASSES;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleName;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith;
 import static com.tngtech.archunit.core.domain.JavaMember.Predicates.declaredIn;
+import static com.tngtech.archunit.core.domain.JavaModifier.PUBLIC;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
+import static com.tngtech.archunit.core.domain.properties.HasModifiers.Predicates.modifier;
 import static com.tngtech.archunit.core.domain.properties.HasName.Predicates.name;
 import static com.tngtech.archunit.core.domain.properties.HasName.Predicates.nameContaining;
 import static com.tngtech.archunit.core.domain.properties.HasName.Predicates.nameStartingWith;
 import static com.tngtech.archunit.lang.conditions.ArchConditions.onlyBeAccessedByClassesThat;
 import static com.tngtech.archunit.lang.conditions.ArchPredicates.are;
+import static com.tngtech.archunit.lang.conditions.ArchPredicates.have;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.members;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
@@ -67,18 +74,17 @@ class ArchUnitTests {
 	private final ArchRule allClassesAreInJUnitPackage = classes() //
 			.should().haveNameMatching("org\\.junit\\..+");
 
-	// TODO: ConfigurationMetadataAnnotationProcessor isn't an API for OSGI purposes?
-	//	@SuppressWarnings("unused")
-	//	@ArchTest
-	//	private final ArchRule allPublicTopLevelTypesHaveApiAnnotations = classes() //
-	//			.that(have(modifier(PUBLIC))) //
-	//			.and(TOP_LEVEL_CLASSES) //
-	//			.and(not(ANONYMOUS_CLASSES)) //
-	//			.and(not(describe("are Kotlin SAM type implementations", simpleName("")))) //
-	//			.and(not(describe("are Kotlin-generated classes that contain only top-level functions",
-	//				simpleNameEndingWith("Kt")))) //
-	//			.and(notShadowed()) //
-	//			.should().beAnnotatedWith(API.class);
+	@SuppressWarnings("unused")
+	@ArchTest
+	private final ArchRule allPublicTopLevelTypesHaveApiAnnotations = classes() //
+			.that(have(modifier(PUBLIC))) //
+			.and(TOP_LEVEL_CLASSES) //
+			.and(not(ANONYMOUS_CLASSES)) //
+			.and(not(describe("are Kotlin SAM type implementations", simpleName("")))) //
+			.and(not(describe("are Kotlin-generated classes that contain only top-level functions",
+				simpleNameEndingWith("Kt")))) //
+			.and(notShadowed()) //
+			.should().beAnnotatedWith(API.class);
 
 	@SuppressWarnings("unused")
 	@ArchTest // Consistency of @Documented and @Inherited is checked by the compiler but not for @Retention and @Target
