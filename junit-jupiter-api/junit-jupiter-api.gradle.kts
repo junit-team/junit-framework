@@ -9,6 +9,8 @@ plugins {
 description = "JUnit Jupiter API"
 
 dependencies {
+	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+
 	api(platform(projects.junitBom))
 	api(libs.opentest4j)
 	api(projects.junitPlatformCommons)
@@ -37,7 +39,7 @@ eclipseConventions {
 
 tasks {
 	compileJava {
-		options.compilerArgs.add("-Xlint:-module") // due to qualified exports
+		options.compilerArgs.add("-Xlint:-module,-processing") // due to qualified exports, not all annotations need to be processed
 	}
 	jar {
 		bundle {
