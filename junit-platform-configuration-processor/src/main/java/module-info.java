@@ -9,7 +9,6 @@
  */
 
 module org.junit.platform.configuration.processor {
-	requires static transitive org.apiguardian.api;
 	requires static transitive org.jspecify;
 
 	requires java.compiler;

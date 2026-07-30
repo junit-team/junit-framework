@@ -9,7 +9,6 @@
  */
 
 module org.junit.platform.configuration.api {
-	requires static transitive org.apiguardian.api;
 	requires static transitive org.jspecify;
 
 	exports org.junit.platform.configuration.api;

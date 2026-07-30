@@ -8,6 +8,5 @@ dependencies {
 	api(platform(projects.junitBom))
 	api(projects.junitPlatformConfigurationApi)
 
-	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
 }

@@ -89,6 +89,7 @@ val checkBackwardCompatibility = tasks.register("checkBackwardCompatibility") {
 	dependsOn(roseau)
 }
 
-tasks.check {
-	dependsOn(checkBackwardCompatibility)
-}
+// TODO: Breaks because the configuration-api hasn't been released yet.
+//tasks.check {
+//	dependsOn(checkBackwardCompatibility)
+//}
