@@ -38,5 +38,12 @@
       ],
       "groupName": "@antora/assembler",
     },
+    {
+      matchPackageNames: [
+        'org.graalvm.buildtools.native',
+      ],
+      minimumReleaseAge: '3 days',
+      prCreation: 'not-pending',
+    },
   ],
 }
