@@ -17,6 +17,7 @@ dependencies {
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+	compileOnlyApi(projects.junitPlatformConfigurationApi)
 
 	shadowed(libs.fastcsv)
 

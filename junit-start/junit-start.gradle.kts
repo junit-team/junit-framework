@@ -11,6 +11,7 @@ dependencies {
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
 	compileOnlyApi(projects.junitJupiterEngine)
+	compileOnlyApi(projects.junitPlatformConfigurationApi)
 
 	implementation(projects.junitPlatformLauncher)
 	implementation(projects.junitPlatformConsole)

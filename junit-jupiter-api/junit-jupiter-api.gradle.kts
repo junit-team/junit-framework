@@ -17,8 +17,7 @@ dependencies {
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
-	// TODO: Marc, why does compileOnlyApi break the Javadoc task?
-	api(projects.junitPlatformConfigurationApi)
+	compileOnlyApi(projects.junitPlatformConfigurationApi)
 
 	compileOnly(kotlin("stdlib"))
 
@@ -30,7 +29,7 @@ dependencies {
 }
 
 javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformEngine, projects.junitPlatformLauncher, projects.junitJupiterParams)
+	addExtraModuleReferences(projects.junitPlatformEngine, projects.junitPlatformConfigurationApi, projects.junitPlatformLauncher, projects.junitJupiterParams)
 }
 
 eclipseConventions {

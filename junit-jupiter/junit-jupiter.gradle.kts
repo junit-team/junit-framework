@@ -13,6 +13,7 @@ dependencies {
 
 	compileOnly(libs.apiguardian)
 	compileOnly(libs.jspecify)
+	compileOnly(projects.junitPlatformConfigurationApi)
 
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
