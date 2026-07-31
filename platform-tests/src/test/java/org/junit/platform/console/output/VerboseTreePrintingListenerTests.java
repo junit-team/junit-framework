@@ -51,12 +51,13 @@ class VerboseTreePrintingListenerTests {
 	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(output),
 		ColorPalette.NONE, 16, Theme.ASCII, clock);
 
+	private final TestDescriptor engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
+	private final TestIdentifier engineIdentifier = TestIdentifier.from(engine);
+
 	@Test
 	void executionSkipped() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
-
 		listener.testPlanExecutionStarted(testPlan(engine));
-		listener.executionSkipped(TestIdentifier.from(engine), "Test%ndisabled".formatted());
+		listener.executionSkipped(engineIdentifier, "Test%ndisabled".formatted());
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -73,10 +74,8 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void reportingEntryPublished() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
-
 		listener.testPlanExecutionStarted(testPlan(engine));
-		listener.reportingEntryPublished(TestIdentifier.from(engine), ReportEntry.from("foo", "bar"));
+		listener.reportingEntryPublished(engineIdentifier, ReportEntry.from("foo", "bar"));
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -87,10 +86,8 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void fileEntryPublished() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
-
 		listener.testPlanExecutionStarted(testPlan(engine));
-		listener.fileEntryPublished(TestIdentifier.from(engine), FileEntry.from(Path.of("test.txt"), "text/plain"));
+		listener.fileEntryPublished(engineIdentifier, FileEntry.from(Path.of("test.txt"), "text/plain"));
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -101,13 +98,10 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void executionFinishedWithFailure() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
-		var testIdentifier = TestIdentifier.from(engine);
-
-		listener.testPlanExecutionStarted(testPlan(engine));
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
-		listener.executionStarted(testIdentifier);
-		listener.executionFinished(testIdentifier, failed(new AssertionError("Boom!")));
+		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.executionStarted(engineIdentifier);
+		listener.executionFinished(engineIdentifier, failed(new AssertionError("Boom!")));
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -125,13 +119,10 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void failureMessageWithFormatSpecifier() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
-		var testIdentifier = TestIdentifier.from(engine);
-
 		listener.testPlanExecutionStarted(testPlan(engine));
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
-		listener.executionStarted(testIdentifier);
-		listener.executionFinished(testIdentifier, failed(new AssertionError("%crash")));
+		listener.executionStarted(engineIdentifier);
+		listener.executionFinished(engineIdentifier, failed(new AssertionError("%crash")));
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -148,16 +139,13 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void indentationIsDerivedFromTheNumberOfAncestorsInTheTestPlan() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
 		var container = new TestDescriptorStub(engine.getUniqueId().append("class", "DemoClass"), "DemoClass");
 		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
 		engine.addChild(container);
 		container.addChild(test);
-		var engineIdentifier = TestIdentifier.from(engine);
 		var containerIdentifier = TestIdentifier.from(container);
 		var testIdentifier = TestIdentifier.from(test);
 
-		listener.testPlanExecutionStarted(testPlan(engine));
 		when(clock.instant()).thenReturn( //
 			Instant.EPOCH, // engine started
 			Instant.EPOCH, // container started
@@ -165,6 +153,7 @@ class VerboseTreePrintingListenerTests {
 			Instant.EPOCH.plusMillis(7), // test finished
 			Instant.EPOCH.plusMillis(10), // container finished
 			Instant.EPOCH.plusMillis(15)); // engine finished
+		listener.testPlanExecutionStarted(testPlan(engine));
 		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(containerIdentifier);
 		listener.executionStarted(testIdentifier);
@@ -175,7 +164,10 @@ class VerboseTreePrintingListenerTests {
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
 				.
-				+-- demo-engine
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
 				| +-- DemoClass
 				| | +-- demoTest()
 				| | |      tags: []
@@ -184,13 +176,13 @@ class VerboseTreePrintingListenerTests {
 				| | |  duration: 7 ms
 				| | |    status: [OK] SUCCESSFUL
 				| '-- DemoClass finished after 10 ms.
-				'-- demo-engine finished after 15 ms.
+				|  duration: 15 ms
+				|    status: [OK] SUCCESSFUL
 				""");
 	}
 
 	@Test
 	void indentationIsNotAffectedByOverlappingExecutions() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
 		var first = new TestDescriptorStub(engine.getUniqueId().append("class", "FirstClass"), "FirstClass");
 		var second = new TestDescriptorStub(engine.getUniqueId().append("class", "SecondClass"), "SecondClass");
 		engine.addChild(first);
@@ -198,16 +190,19 @@ class VerboseTreePrintingListenerTests {
 		first.addChild(new TestDescriptorStub(first.getUniqueId().append("method", "firstTest()"), "firstTest()"));
 		second.addChild(new TestDescriptorStub(second.getUniqueId().append("method", "secondTest()"), "secondTest()"));
 
-		listener.testPlanExecutionStarted(testPlan(engine));
 		when(clock.instant()).thenReturn(Instant.EPOCH);
-		listener.executionStarted(TestIdentifier.from(engine));
+		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(TestIdentifier.from(first));
 		listener.executionStarted(TestIdentifier.from(second));
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 2
 				.
-				+-- demo-engine
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
 				| +-- FirstClass
 				| +-- SecondClass
 				""");
@@ -215,7 +210,6 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void reportsItsOwnDurationWhenExecutionsOverlap() {
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
 		var slow = new TestDescriptorStub(engine.getUniqueId().append("method", "slow()"), "slow()");
 		var fast = new TestDescriptorStub(engine.getUniqueId().append("method", "fast()"), "fast()");
 		engine.addChild(slow);
@@ -223,12 +217,14 @@ class VerboseTreePrintingListenerTests {
 		var slowIdentifier = TestIdentifier.from(slow);
 		var fastIdentifier = TestIdentifier.from(fast);
 
-		listener.testPlanExecutionStarted(testPlan(engine));
 		when(clock.instant()).thenReturn( //
-			Instant.EPOCH, // slow started
-			Instant.EPOCH.plusMillis(100), // fast started
-			Instant.EPOCH.plusMillis(300), // fast finished -> 200 ms
-			Instant.EPOCH.plusMillis(700)); // slow finished -> 700 ms
+				Instant.EPOCH, // engine started
+				Instant.EPOCH, // slow started
+				Instant.EPOCH.plusMillis(100), // fast started
+				Instant.EPOCH.plusMillis(300), // fast finished -> 200 ms
+				Instant.EPOCH.plusMillis(700)); // slow finished -> 700 ms
+		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(slowIdentifier);
 		listener.executionStarted(fastIdentifier);
 		listener.executionFinished(fastIdentifier, successful());
@@ -237,6 +233,10 @@ class VerboseTreePrintingListenerTests {
 		assertOutput("""
 				Test plan execution started. Number of static tests: 2
 				.
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
 				| +-- slow()
 				| |      tags: []
 				| |  uniqueId: [engine:demo-engine]/[method:slow()]
@@ -258,7 +258,6 @@ class VerboseTreePrintingListenerTests {
 		final int threadCount = 4;
 		final int testsPerThread = 50;
 
-		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
 		var testDescriptors = IntStream.range(0, testsPerThread * threadCount) //
 				.mapToObj(i -> new TestDescriptorStub(engine.getUniqueId().append("method", "test" + i + "()"),
 					"test" + i + "()")) //
@@ -266,8 +265,9 @@ class VerboseTreePrintingListenerTests {
 		testDescriptors.forEach(engine::addChild);
 		var identifiers = testDescriptors.stream().map(TestIdentifier::from).toList();
 
-		listener.testPlanExecutionStarted(testPlan(engine));
 		when(clock.instant()).thenReturn(Instant.EPOCH);
+		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.executionStarted(engineIdentifier);
 
 		var barrier = new CyclicBarrier(threadCount);
 		try (var executor = Executors.newFixedThreadPool(threadCount)) {
@@ -292,7 +292,7 @@ class VerboseTreePrintingListenerTests {
 				.allSatisfy(line -> assertThat(label.matcher(line).results()) //
 						.describedAs("labels in <%s>", line).hasSizeLessThan(2)) //
 				.filteredOn(line -> line.contains("uniqueId: ")) //
-				.hasSize(testsPerThread * threadCount);
+				.hasSize(testsPerThread * threadCount + 1);
 	}
 
 	private static TestPlan testPlan(TestDescriptor engineDescriptor) {
