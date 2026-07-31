@@ -167,6 +167,52 @@ class VerboseTreePrintingListenerTests {
 	}
 
 	@Test
+	void dynamicTestRegistered() {
+		var container = new TestDescriptorStub(engine.getUniqueId().append("class", "DemoClass"), "DemoClass");
+		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
+		engine.addChild(container);
+		var testPlan = testPlan(engine);
+
+		when(clock.instant()).thenReturn( //
+			Instant.EPOCH, // engine started
+			Instant.EPOCH, // container started
+			Instant.EPOCH, // test started
+			Instant.EPOCH.plusMillis(7), // test finished
+			Instant.EPOCH.plusMillis(10), // container finished
+			Instant.EPOCH.plusMillis(15)); // engine finished
+		listener.testPlanExecutionStarted(testPlan);
+		listener.executionStarted(TestIdentifier.from(engine));
+		listener.executionStarted(TestIdentifier.from(container));
+		container.addChild(test);
+		listener.dynamicTestRegistered(TestIdentifier.from(test));
+		listener.executionStarted(TestIdentifier.from(test));
+		listener.executionFinished(TestIdentifier.from(test), successful());
+		listener.executionFinished(TestIdentifier.from(container), successful());
+		listener.executionFinished(TestIdentifier.from(engine), successful());
+		listener.testPlanExecutionFinished(testPlan);
+
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				+-- %c ool test
+				| +-- DemoClass
+				| |      tags: []
+				| |  uniqueId: [engine:demo-engine]/[class:DemoClass]
+				| |    parent: [engine:demo-engine]
+				| | +-- demoTest() dynamically registered
+				| | +-- demoTest()
+				| | |      tags: []
+				| | |  uniqueId: [engine:demo-engine]/[class:DemoClass]/[method:demoTest()]
+				| | |    parent: [engine:demo-engine]/[class:DemoClass]
+				| | |  duration: 7 ms
+				| | |    status: [OK] SUCCESSFUL
+				| '-- DemoClass finished after 10 ms.
+				'-- %c ool test finished after 15 ms.
+				Test plan execution finished. Number of all tests: 1
+				""");
+	}
+
+	@Test
 	void indentationIsDerivedFromTheNumberOfAncestorsInTheTestPlan() {
 		var container = new TestDescriptorStub(engine.getUniqueId().append("class", "DemoClass"), "DemoClass");
 		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
