@@ -46,7 +46,6 @@ import org.junit.platform.launcher.TestPlan;
  */
 class VerboseTreePrintingListenerTests {
 
-	private static final String EOL = System.lineSeparator();
 	private static final Pattern LABEL = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
 	private static final int NUM_THREADS = 4;
 	private static final int TESTS_PER_THREAD = 50;
@@ -61,7 +60,7 @@ class VerboseTreePrintingListenerTests {
 		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
 		listener.testPlanExecutionStarted(testPlan(engine));
 
-		listener.executionSkipped(TestIdentifier.from(engine), "Test" + EOL + "disabled");
+		listener.executionSkipped(TestIdentifier.from(engine), "Test%ndisabled".formatted());
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
