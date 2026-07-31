@@ -86,14 +86,19 @@ class VerboseTreePrintingListenerTests {
 	void reportingEntryPublished() {
 		var testPlan = testPlan(engine);
 
+		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
 		listener.testPlanExecutionStarted(testPlan);
+		listener.executionStarted(TestIdentifier.from(engine));
 		listener.reportingEntryPublished(TestIdentifier.from(engine), ReportEntry.from("foo", "bar"));
+		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 0
 				.
+				+-- %c ool test
 				\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar']
+				'-- %c ool test finished after 42 ms.
 				Test plan execution finished. Number of all tests: 0
 				""");
 	}
