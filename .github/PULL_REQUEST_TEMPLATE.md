@@ -2,7 +2,7 @@
 
 ---
 
-I hereby agree to the terms of the [JUnit Contributor License Agreement](https://github.com/junit-team/junit-framework/blob/002a0052926ddee57cf90580fa49bc37e5a72427/CONTRIBUTING.md#junit-contributor-license-agreement).
+I Ashish hereby agree to the terms of the [JUnit Contributor License Agreement](https://github.com/junit-team/junit-framework/blob/002a0052926ddee57cf90580fa49bc37e5a72427/CONTRIBUTING.md#junit-contributor-license-agreement).
 
 ---
 
