@@ -16,6 +16,9 @@ import static org.junit.platform.commons.util.ExceptionUtils.readStackTrace;
 import static org.junit.platform.console.output.Style.NONE;
 
 import java.io.PrintWriter;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,16 +41,23 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 	private final PrintWriter out;
 	private final Theme theme;
 	private final ColorPalette colorPalette;
+	private final Clock clock;
 	private final String[] verticals;
-	private final Map<UniqueId, Long> startedMillisByUniqueId = new ConcurrentHashMap<>();
+	private final Map<UniqueId, Instant> startInstantByUniqueId = new ConcurrentHashMap<>();
 
 	private @Nullable TestPlan testPlan;
 
 	public VerboseTreePrintingListener(PrintWriter out, ColorPalette colorPalette, int maxContainerNestingLevel,
 			Theme theme) {
+		this(out, colorPalette, maxContainerNestingLevel, theme, Clock.systemUTC());
+	}
+
+	VerboseTreePrintingListener(PrintWriter out, ColorPalette colorPalette, int maxContainerNestingLevel, Theme theme,
+			Clock clock) {
 		this.out = out;
 		this.colorPalette = colorPalette;
 		this.theme = theme;
+		this.clock = clock;
 
 		// create and populate vertical indentation lookup table, indexed by nesting level
 		this.verticals = new String[Math.max(10, maxContainerNestingLevel) + 1];
@@ -83,7 +93,7 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 
 	@Override
 	public void executionStarted(TestIdentifier testIdentifier) {
-		startedMillisByUniqueId.put(testIdentifier.getUniqueIdObject(), System.currentTimeMillis());
+		startInstantByUniqueId.put(testIdentifier.getUniqueIdObject(), clock.instant());
 		int nestingLevel = nestingLevel(testIdentifier);
 		StringBuilder output = new StringBuilder();
 		appendVerticals(output, nestingLevel, theme.entry());
@@ -100,7 +110,7 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 
 	@Override
 	public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-		long startedMillis = requireNonNull(startedMillisByUniqueId.remove(testIdentifier.getUniqueIdObject()));
+		long durationMillis = durationMillis(testIdentifier);
 		int nestingLevel = nestingLevel(testIdentifier);
 		StringBuilder output = new StringBuilder();
 		testExecutionResult.getThrowable().ifPresent(
@@ -108,10 +118,10 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 		if (testIdentifier.isContainer()) {
 			appendVerticals(output, nestingLevel, theme.end());
 			append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
-			append(output, NONE, " finished after %d ms.%n", System.currentTimeMillis() - startedMillis);
+			append(output, NONE, " finished after %d ms.%n", durationMillis);
 		}
 		else {
-			appendDetail(output, nestingLevel, NONE, "duration", "%d ms%n", System.currentTimeMillis() - startedMillis);
+			appendDetail(output, nestingLevel, NONE, "duration", "%d ms%n", durationMillis);
 			String status = theme.status(testExecutionResult) + " " + testExecutionResult.getStatus();
 			appendDetail(output, nestingLevel, Style.valueOf(testExecutionResult), "status", "%s%n", status);
 		}
@@ -162,6 +172,15 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 		appendDetail(output, nestingLevel, NONE, "parent", "%s%n", testIdentifier.getParentId().orElse("[]"));
 		testIdentifier.getSource().ifPresent(
 			source -> appendDetail(output, nestingLevel, NONE, "source", "%s%n", source));
+	}
+
+	/**
+	 * Determine the elapsed time since the execution of the supplied test
+	 * identifier started.
+	 */
+	private long durationMillis(TestIdentifier testIdentifier) {
+		Instant startInstant = requireNonNull(startInstantByUniqueId.remove(testIdentifier.getUniqueIdObject()));
+		return Duration.between(startInstant, clock.instant()).toMillis();
 	}
 
 	/**

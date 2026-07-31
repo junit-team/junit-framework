@@ -10,27 +10,29 @@
 
 package org.junit.platform.console.output;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.engine.TestExecutionResult.failed;
 import static org.junit.platform.engine.TestExecutionResult.successful;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.dummyOutputDirectoryCreator;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.reporting.FileEntry;
@@ -45,81 +47,107 @@ import org.junit.platform.launcher.TestPlan;
 class VerboseTreePrintingListenerTests {
 
 	private static final String EOL = System.lineSeparator();
-	private static final Pattern DURATION = Pattern.compile("duration: (\\d+) ms");
 	private static final Pattern LABEL = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
 	private static final int NUM_THREADS = 4;
 	private static final int TESTS_PER_THREAD = 50;
 
+	private final Clock clock = mock();
+	private final StringWriter stringWriter = new StringWriter();
+	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(stringWriter),
+		ColorPalette.NONE, 16, Theme.ASCII, clock);
+
 	@Test
 	void executionSkipped() {
-		var stringWriter = new StringWriter();
-		listener(stringWriter).executionSkipped(newTestIdentifier(), "Test" + EOL + "disabled");
-		var lines = lines(stringWriter);
+		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
+		listener.testPlanExecutionStarted(testPlan(engine));
 
-		assertLinesMatch(List.of( //
-			"+-- %c ool test", //
-			"|      tags: []", //
-			"|  uniqueId: [engine:demo-engine]", //
-			"|    parent: []", //
-			"|    reason: Test", //
-			"|              disabled", //
-			"|    status: [S] SKIPPED"), List.of(lines));
+		listener.executionSkipped(TestIdentifier.from(engine), "Test" + EOL + "disabled");
+
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
+				|    reason: Test
+				|              disabled
+				|    status: [S] SKIPPED
+				""");
 	}
 
 	@Test
 	void reportingEntryPublished() {
-		var stringWriter = new StringWriter();
-		listener(stringWriter).reportingEntryPublished(newTestIdentifier(), ReportEntry.from("foo", "bar"));
-		var lines = lines(stringWriter);
+		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
+		listener.testPlanExecutionStarted(testPlan(engine));
+
+		listener.reportingEntryPublished(TestIdentifier.from(engine), ReportEntry.from("foo", "bar"));
 
 		assertLinesMatch(List.of( //
-			"\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar'\\]"), List.of(lines));
+			"Test plan execution started. Number of static tests: 1", //
+			".", //
+			"\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar'\\]"), lines());
 	}
 
 	@Test
 	void fileEntryPublished() {
-		var stringWriter = new StringWriter();
-		listener(stringWriter).fileEntryPublished(newTestIdentifier(),
-			FileEntry.from(Path.of("test.txt"), "text/plain"));
-		var lines = lines(stringWriter);
+		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
+		listener.testPlanExecutionStarted(testPlan(engine));
+
+		listener.fileEntryPublished(TestIdentifier.from(engine), FileEntry.from(Path.of("test.txt"), "text/plain"));
 
 		assertLinesMatch(List.of( //
-			"\\|   reports: FileEntry \\[timestamp = .+, path = test.txt, mediaType = 'text/plain'\\]"),
-			List.of(lines));
+			"Test plan execution started. Number of static tests: 1", //
+			".", //
+			"\\|   reports: FileEntry \\[timestamp = .+, path = test.txt, mediaType = 'text/plain'\\]"), lines());
 	}
 
 	@Test
 	void executionFinishedWithFailure() {
-		var stringWriter = new StringWriter();
-		var listener = listener(stringWriter);
-		var testIdentifier = newTestIdentifier();
+		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
+		listener.testPlanExecutionStarted(testPlan(engine));
+		var testIdentifier = TestIdentifier.from(engine);
+
+		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
+
 		listener.executionStarted(testIdentifier);
-		discardOutput(stringWriter);
 		listener.executionFinished(testIdentifier, failed(new AssertionError("Boom!")));
-		var lines = lines(stringWriter);
 
 		assertLinesMatch(List.of( //
+			"Test plan execution started. Number of static tests: 1", //
+			".", //
+			"+-- %c ool test", //
+			"|      tags: []", //
+			"|  uniqueId: [engine:demo-engine]", //
+			"|    parent: []", //
 			"|    caught: java.lang.AssertionError: Boom!", //
 			">> STACKTRACE >>", //
-			"\\|  duration: \\d+ ms", //
-			"|    status: [X] FAILED"), List.of(lines));
+			"|  duration: 42 ms", //
+			"|    status: [X] FAILED"), lines());
 	}
 
 	@Test
 	void failureMessageWithFormatSpecifier() {
-		var stringWriter = new StringWriter();
-		var listener = listener(stringWriter);
-		var testIdentifier = newTestIdentifier();
+		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
+		listener.testPlanExecutionStarted(testPlan(engine));
+		var testIdentifier = TestIdentifier.from(engine);
+
+		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
+
 		listener.executionStarted(testIdentifier);
-		discardOutput(stringWriter);
 		listener.executionFinished(testIdentifier, failed(new AssertionError("%crash")));
-		var lines = lines(stringWriter);
 
 		assertLinesMatch(List.of( //
+			"Test plan execution started. Number of static tests: 1", //
+			".", //
+			"+-- %c ool test", //
+			"|      tags: []", //
+			"|  uniqueId: [engine:demo-engine]", //
+			"|    parent: []", //
 			"|    caught: java.lang.AssertionError: %crash", //
 			">> STACKTRACE >>", //
-			"\\|  duration: \\d+ ms", //
-			"|    status: [X] FAILED"), List.of(lines));
+			"|  duration: 42 ms", //
+			"|    status: [X] FAILED"), lines());
 	}
 
 	@Test
@@ -129,31 +157,40 @@ class VerboseTreePrintingListenerTests {
 		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
 		engine.addChild(container);
 		container.addChild(test);
-
-		var stringWriter = new StringWriter();
-		var listener = listener(stringWriter, engine);
+		listener.testPlanExecutionStarted(testPlan(engine));
 		var engineIdentifier = TestIdentifier.from(engine);
 		var containerIdentifier = TestIdentifier.from(container);
 		var testIdentifier = TestIdentifier.from(test);
+
+		when(clock.instant()).thenReturn( //
+			Instant.EPOCH, // engine started
+			Instant.EPOCH, // container started
+			Instant.EPOCH, // test started
+			Instant.EPOCH.plusMillis(7), // test finished
+			Instant.EPOCH.plusMillis(10), // container finished
+			Instant.EPOCH.plusMillis(15)); // engine finished
+
 		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(containerIdentifier);
 		listener.executionStarted(testIdentifier);
 		listener.executionFinished(testIdentifier, successful());
 		listener.executionFinished(containerIdentifier, successful());
 		listener.executionFinished(engineIdentifier, successful());
-		var lines = lines(stringWriter);
 
-		assertLinesMatch(List.of( //
-			"+-- demo-engine", //
-			"| +-- DemoClass", //
-			"| | +-- demoTest()", //
-			"| | |      tags: []", //
-			"| | |  uniqueId: [engine:demo-engine]/[class:DemoClass]/[method:demoTest()]", //
-			"| | |    parent: [engine:demo-engine]/[class:DemoClass]", //
-			"\\| \\| \\|  duration: \\d+ ms", //
-			"| | |    status: [OK] SUCCESSFUL", //
-			"\\| '-- DemoClass finished after \\d+ ms\\.", //
-			"'-- demo-engine finished after \\d+ ms\\."), List.of(lines));
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				+-- demo-engine
+				| +-- DemoClass
+				| | +-- demoTest()
+				| | |      tags: []
+				| | |  uniqueId: [engine:demo-engine]/[class:DemoClass]/[method:demoTest()]
+				| | |    parent: [engine:demo-engine]/[class:DemoClass]
+				| | |  duration: 7 ms
+				| | |    status: [OK] SUCCESSFUL
+				| '-- DemoClass finished after 10 ms.
+				'-- demo-engine finished after 15 ms.
+				""");
 	}
 
 	@Test
@@ -165,74 +202,92 @@ class VerboseTreePrintingListenerTests {
 		engine.addChild(second);
 		first.addChild(new TestDescriptorStub(first.getUniqueId().append("method", "firstTest()"), "firstTest()"));
 		second.addChild(new TestDescriptorStub(second.getUniqueId().append("method", "secondTest()"), "secondTest()"));
+		listener.testPlanExecutionStarted(testPlan(engine));
 
-		var stringWriter = new StringWriter();
-		var listener = listener(stringWriter, engine);
+		when(clock.instant()).thenReturn(Instant.EPOCH);
 
 		listener.executionStarted(TestIdentifier.from(engine));
 		listener.executionStarted(TestIdentifier.from(first));
 		listener.executionStarted(TestIdentifier.from(second));
-		var lines = lines(stringWriter);
 
-		assertLinesMatch(List.of( //
-			"+-- demo-engine", //
-			"| +-- FirstClass", //
-			"| +-- SecondClass"), List.of(lines));
+		assertOutput("""
+				Test plan execution started. Number of static tests: 2
+				.
+				+-- demo-engine
+				| +-- FirstClass
+				| +-- SecondClass
+				""");
 	}
 
 	@Test
-	void reportsItsOwnDurationWhenExecutionsOverlap() throws Exception {
+	void reportsItsOwnDurationWhenExecutionsOverlap() {
 		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
 		var slow = new TestDescriptorStub(engine.getUniqueId().append("method", "slow()"), "slow()");
 		var fast = new TestDescriptorStub(engine.getUniqueId().append("method", "fast()"), "fast()");
 		engine.addChild(slow);
 		engine.addChild(fast);
-
-		var stringWriter = new StringWriter();
-		var listener = listener(stringWriter, engine);
+		listener.testPlanExecutionStarted(testPlan(engine));
 		var slowIdentifier = TestIdentifier.from(slow);
 		var fastIdentifier = TestIdentifier.from(fast);
 
+		when(clock.instant()).thenReturn( //
+			Instant.EPOCH, // slow started
+			Instant.EPOCH.plusMillis(100), // fast started
+			Instant.EPOCH.plusMillis(300), // fast finished -> 200 ms
+			Instant.EPOCH.plusMillis(700)); // slow finished -> 700 ms
+
 		listener.executionStarted(slowIdentifier);
-		Thread.sleep(100);
 		listener.executionStarted(fastIdentifier);
 		listener.executionFinished(fastIdentifier, successful());
 		listener.executionFinished(slowIdentifier, successful());
 
-		assertThat(reportedDurations(stringWriter)).hasSize(2).anyMatch(duration -> duration >= 100);
+		assertOutput("""
+				Test plan execution started. Number of static tests: 2
+				.
+				| +-- slow()
+				| |      tags: []
+				| |  uniqueId: [engine:demo-engine]/[method:slow()]
+				| |    parent: [engine:demo-engine]
+				| +-- fast()
+				| |      tags: []
+				| |  uniqueId: [engine:demo-engine]/[method:fast()]
+				| |    parent: [engine:demo-engine]
+				| |  duration: 200 ms
+				| |    status: [OK] SUCCESSFUL
+				| |  duration: 700 ms
+				| |    status: [OK] SUCCESSFUL
+				""");
 	}
 
 	@Test
+	@Timeout(10)
 	void linesAreNotInterleavedWhenExecutionsArePrintedConcurrently() throws Exception {
 		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
-		var identifiers = new ArrayList<TestIdentifier>();
-		for (int i = 0; i < TESTS_PER_THREAD * NUM_THREADS; i++) {
-			var test = new TestDescriptorStub(engine.getUniqueId().append("method", "test" + i + "()"),
-				"test" + i + "()");
-			engine.addChild(test);
-			identifiers.add(TestIdentifier.from(test));
-		}
+		var testDescriptors = IntStream.range(0, TESTS_PER_THREAD * NUM_THREADS) //
+				.mapToObj(i -> new TestDescriptorStub(engine.getUniqueId().append("method", "test" + i + "()"),
+					"test" + i + "()")) //
+				.toList();
+		testDescriptors.forEach(engine::addChild);
+		var identifiers = testDescriptors.stream().map(TestIdentifier::from).toList();
+		listener.testPlanExecutionStarted(testPlan(engine));
 
-		var stringWriter = new StringWriter();
-		var listener = listener(stringWriter, engine);
+		when(clock.instant()).thenReturn(Instant.EPOCH);
+
 		var barrier = new CyclicBarrier(NUM_THREADS);
-		var executor = Executors.newFixedThreadPool(NUM_THREADS);
-		try {
-			for (int thread = 0; thread < NUM_THREADS; thread++) {
-				int offset = thread * TESTS_PER_THREAD;
-				executor.submit(() -> {
-					await(barrier);
-					for (int i = offset; i < offset + TESTS_PER_THREAD; i++) {
-						var testIdentifier = identifiers.get(i);
-						listener.executionStarted(testIdentifier);
-						listener.executionFinished(testIdentifier, successful());
-					}
-				});
+		try (var executor = Executors.newFixedThreadPool(NUM_THREADS)) {
+			var futures = IntStream.range(0, NUM_THREADS) //
+					.mapToObj(thread -> executor.submit(() -> {
+						await(barrier);
+						identifiers.subList(thread * TESTS_PER_THREAD, (thread + 1) * TESTS_PER_THREAD) //
+								.forEach(identifier -> {
+									listener.executionStarted(identifier);
+									listener.executionFinished(identifier, successful());
+								});
+					})) //
+					.toList();
+			for (Future<?> future : futures) {
+				future.get();
 			}
-		}
-		finally {
-			executor.shutdown();
-			assertTrue(executor.awaitTermination(30, SECONDS), "Executor was not terminated");
 		}
 
 		assertThat(stringWriter.toString().lines()) //
@@ -241,37 +296,16 @@ class VerboseTreePrintingListenerTests {
 				.hasSize(TESTS_PER_THREAD * NUM_THREADS);
 	}
 
-	private VerboseTreePrintingListener listener(StringWriter stringWriter) {
-		return listener(stringWriter, TEST_DESCRIPTOR);
+	private static TestPlan testPlan(TestDescriptor engineDescriptor) {
+		return TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryCreator());
 	}
 
-	private VerboseTreePrintingListener listener(StringWriter stringWriter, TestDescriptor engineDescriptor) {
-		var listener = new VerboseTreePrintingListener(new PrintWriter(stringWriter), ColorPalette.NONE, 16,
-			Theme.ASCII);
-		listener.testPlanExecutionStarted(
-			TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryCreator()));
-		discardOutput(stringWriter);
-		return listener;
+	private void assertOutput(String expectedOutput) {
+		assertThat(stringWriter.toString()).isEqualTo(expectedOutput.replace("\n", EOL));
 	}
 
-	private static final TestDescriptor TEST_DESCRIPTOR = new TestDescriptorStub(UniqueId.forEngine("demo-engine"),
-		"%c ool test");
-
-	private static TestIdentifier newTestIdentifier() {
-		return TestIdentifier.from(TEST_DESCRIPTOR);
-	}
-
-	private static void discardOutput(StringWriter stringWriter) {
-		stringWriter.getBuffer().setLength(0);
-	}
-
-	private String[] lines(StringWriter stringWriter) {
-		return stringWriter.toString().split(EOL);
-	}
-
-	private static List<Long> reportedDurations(StringWriter stringWriter) {
-		Matcher matcher = DURATION.matcher(stringWriter.toString());
-		return matcher.results().map(result -> Long.valueOf(result.group(1))).toList();
+	private List<String> lines() {
+		return List.of(stringWriter.toString().split(EOL));
 	}
 
 	private static long labelsIn(String line) {
