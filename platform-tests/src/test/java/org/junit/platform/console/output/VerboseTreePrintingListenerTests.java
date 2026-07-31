@@ -37,6 +37,7 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.reporting.FileEntry;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.fakes.EngineTestDescriptorStub;
 import org.junit.platform.fakes.TestDescriptorStub;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
@@ -51,19 +52,21 @@ class VerboseTreePrintingListenerTests {
 	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(output),
 		ColorPalette.NONE, 16, Theme.ASCII, clock);
 
-	private final TestDescriptor engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "%c ool test");
-	private final TestIdentifier engineIdentifier = TestIdentifier.from(engine);
+	private final TestDescriptor engine = new EngineTestDescriptorStub( //
+		UniqueId.forEngine("demo-engine"), //
+		"%c ool test" //
+	);
 
 	@Test
 	void executionSkipped() {
 		var testPlan = testPlan(engine);
 
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionSkipped(engineIdentifier, "Test%ndisabled".formatted());
+		listener.executionSkipped(TestIdentifier.from(engine), "Test%ndisabled".formatted());
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
-				Test plan execution started. Number of static tests: 1
+				Test plan execution started. Number of static tests: 0
 				.
 				+-- %c ool test
 				|      tags: []
@@ -72,7 +75,7 @@ class VerboseTreePrintingListenerTests {
 				|    reason: Test
 				|              disabled
 				|    status: [S] SKIPPED
-				Test plan execution finished. Number of all tests: 1
+				Test plan execution finished. Number of all tests: 0
 				""");
 	}
 
@@ -81,14 +84,14 @@ class VerboseTreePrintingListenerTests {
 		var testPlan = testPlan(engine);
 
 		listener.testPlanExecutionStarted(testPlan);
-		listener.reportingEntryPublished(engineIdentifier, ReportEntry.from("foo", "bar"));
+		listener.reportingEntryPublished(TestIdentifier.from(engine), ReportEntry.from("foo", "bar"));
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
-				Test plan execution started. Number of static tests: 1
+				Test plan execution started. Number of static tests: 0
 				.
 				\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar']
-				Test plan execution finished. Number of all tests: 1
+				Test plan execution finished. Number of all tests: 0
 				""");
 	}
 
@@ -98,22 +101,18 @@ class VerboseTreePrintingListenerTests {
 
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
-		listener.fileEntryPublished(engineIdentifier, FileEntry.from(Path.of("test.txt"), "text/plain"));
-		listener.executionFinished(engineIdentifier, successful());
+		listener.executionStarted(TestIdentifier.from(engine));
+		listener.fileEntryPublished(TestIdentifier.from(engine), FileEntry.from(Path.of("test.txt"), "text/plain"));
+		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
-				Test plan execution started. Number of static tests: 1
+				Test plan execution started. Number of static tests: 0
 				.
 				+-- %c ool test
-				|      tags: []
-				|  uniqueId: [engine:demo-engine]
-				|    parent: []
 				\\|   reports: FileEntry \\[timestamp = .+, path = test\\.txt, mediaType = 'text/plain']
-				|  duration: 42 ms
-				|    status: [OK] SUCCESSFUL
-				Test plan execution finished. Number of all tests: 1
+				'-- %c ool test finished after 42 ms.
+				Test plan execution finished. Number of all tests: 0
 				""");
 	}
 
@@ -123,22 +122,18 @@ class VerboseTreePrintingListenerTests {
 
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
-		listener.executionFinished(engineIdentifier, failed(new AssertionError("Boom!")));
+		listener.executionStarted(TestIdentifier.from(engine));
+		listener.executionFinished(TestIdentifier.from(engine), failed(new AssertionError("Boom!")));
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
-				Test plan execution started. Number of static tests: 1
+				Test plan execution started. Number of static tests: 0
 				.
 				+-- %c ool test
-				|      tags: []
-				|  uniqueId: [engine:demo-engine]
-				|    parent: []
 				|    caught: java.lang.AssertionError: Boom!
 				>> STACKTRACE >>
-				|  duration: 42 ms
-				|    status: [X] FAILED
-				Test plan execution finished. Number of all tests: 1
+				'-- %c ool test finished after 42 ms.
+				Test plan execution finished. Number of all tests: 0
 				""");
 	}
 
@@ -148,22 +143,18 @@ class VerboseTreePrintingListenerTests {
 
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
-		listener.executionFinished(engineIdentifier, failed(new AssertionError("%crash")));
+		listener.executionStarted(TestIdentifier.from(engine));
+		listener.executionFinished(TestIdentifier.from(engine), failed(new AssertionError("%crash")));
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
-				Test plan execution started. Number of static tests: 1
+				Test plan execution started. Number of static tests: 0
 				.
 				+-- %c ool test
-				|      tags: []
-				|  uniqueId: [engine:demo-engine]
-				|    parent: []
 				|    caught: java.lang.AssertionError: %crash
 				>> STACKTRACE >>
-				|  duration: 42 ms
-				|    status: [X] FAILED
-				Test plan execution finished. Number of all tests: 1
+				'-- %c ool test finished after 42 ms.
+				Test plan execution finished. Number of all tests: 0
 				""");
 	}
 
@@ -171,10 +162,9 @@ class VerboseTreePrintingListenerTests {
 	void indentationIsDerivedFromTheNumberOfAncestorsInTheTestPlan() {
 		var container = new TestDescriptorStub(engine.getUniqueId().append("class", "DemoClass"), "DemoClass");
 		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
+
 		engine.addChild(container);
 		container.addChild(test);
-		var containerIdentifier = TestIdentifier.from(container);
-		var testIdentifier = TestIdentifier.from(test);
 		var testPlan = testPlan(engine);
 
 		when(clock.instant()).thenReturn( //
@@ -185,21 +175,18 @@ class VerboseTreePrintingListenerTests {
 			Instant.EPOCH.plusMillis(10), // container finished
 			Instant.EPOCH.plusMillis(15)); // engine finished
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
-		listener.executionStarted(containerIdentifier);
-		listener.executionStarted(testIdentifier);
-		listener.executionFinished(testIdentifier, successful());
-		listener.executionFinished(containerIdentifier, successful());
-		listener.executionFinished(engineIdentifier, successful());
+		listener.executionStarted(TestIdentifier.from(engine));
+		listener.executionStarted(TestIdentifier.from(container));
+		listener.executionStarted(TestIdentifier.from(test));
+		listener.executionFinished(TestIdentifier.from(test), successful());
+		listener.executionFinished(TestIdentifier.from(container), successful());
+		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
 				.
 				+-- %c ool test
-				|      tags: []
-				|  uniqueId: [engine:demo-engine]
-				|    parent: []
 				| +-- DemoClass
 				| | +-- demoTest()
 				| | |      tags: []
@@ -208,8 +195,7 @@ class VerboseTreePrintingListenerTests {
 				| | |  duration: 7 ms
 				| | |    status: [OK] SUCCESSFUL
 				| '-- DemoClass finished after 10 ms.
-				|  duration: 15 ms
-				|    status: [OK] SUCCESSFUL
+				'-- %c ool test finished after 15 ms.
 				Test plan execution finished. Number of all tests: 1
 				""");
 	}
@@ -224,22 +210,31 @@ class VerboseTreePrintingListenerTests {
 		second.addChild(new TestDescriptorStub(second.getUniqueId().append("method", "secondTest()"), "secondTest()"));
 		var testPlan = testPlan(engine);
 
-		when(clock.instant()).thenReturn(Instant.EPOCH);
+		when(clock.instant()).thenReturn( //
+			Instant.EPOCH, // engine started
+			Instant.EPOCH, // container started
+			Instant.EPOCH, // test started
+			Instant.EPOCH.plusMillis(7), // first test finished
+			Instant.EPOCH.plusMillis(10), // second test finished
+			Instant.EPOCH.plusMillis(15)); // engine finished
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
+		listener.executionStarted(TestIdentifier.from(engine));
 		listener.executionStarted(TestIdentifier.from(first));
 		listener.executionStarted(TestIdentifier.from(second));
+		listener.executionFinished(TestIdentifier.from(first), successful());
+		listener.executionFinished(TestIdentifier.from(second), successful());
+		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 2
 				.
 				+-- %c ool test
-				|      tags: []
-				|  uniqueId: [engine:demo-engine]
-				|    parent: []
 				| +-- FirstClass
 				| +-- SecondClass
+				| '-- FirstClass finished after 7 ms.
+				| '-- SecondClass finished after 10 ms.
+				'-- %c ool test finished after 15 ms.
 				Test plan execution finished. Number of all tests: 2
 				""");
 	}
@@ -250,31 +245,27 @@ class VerboseTreePrintingListenerTests {
 		var fast = new TestDescriptorStub(engine.getUniqueId().append("method", "fast()"), "fast()");
 		engine.addChild(slow);
 		engine.addChild(fast);
-		var slowIdentifier = TestIdentifier.from(slow);
-		var fastIdentifier = TestIdentifier.from(fast);
 		var testPlan = testPlan(engine);
 
 		when(clock.instant()).thenReturn( //
-				Instant.EPOCH, // engine started
-				Instant.EPOCH, // slow started
-				Instant.EPOCH.plusMillis(100), // fast started
-				Instant.EPOCH.plusMillis(300), // fast finished -> 200 ms
-				Instant.EPOCH.plusMillis(700)); // slow finished -> 700 ms
+			Instant.EPOCH, // engine started
+			Instant.EPOCH, // slow started
+			Instant.EPOCH.plusMillis(100), // fast started
+			Instant.EPOCH.plusMillis(300), // fast finished -> 200 ms
+			Instant.EPOCH.plusMillis(700)); // slow finished -> 700 ms
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
-		listener.executionStarted(slowIdentifier);
-		listener.executionStarted(fastIdentifier);
-		listener.executionFinished(fastIdentifier, successful());
-		listener.executionFinished(slowIdentifier, successful());
+		listener.executionStarted(TestIdentifier.from(engine));
+		listener.executionStarted(TestIdentifier.from(slow));
+		listener.executionStarted(TestIdentifier.from(fast));
+		listener.executionFinished(TestIdentifier.from(fast), successful());
+		listener.executionFinished(TestIdentifier.from(slow), successful());
+		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 2
 				.
 				+-- %c ool test
-				|      tags: []
-				|  uniqueId: [engine:demo-engine]
-				|    parent: []
 				| +-- slow()
 				| |      tags: []
 				| |  uniqueId: [engine:demo-engine]/[method:slow()]
@@ -287,6 +278,7 @@ class VerboseTreePrintingListenerTests {
 				| |    status: [OK] SUCCESSFUL
 				| |  duration: 700 ms
 				| |    status: [OK] SUCCESSFUL
+				'-- %c ool test finished after 700 ms.
 				Test plan execution finished. Number of all tests: 2
 				""");
 	}
@@ -307,7 +299,7 @@ class VerboseTreePrintingListenerTests {
 
 		when(clock.instant()).thenReturn(Instant.EPOCH);
 		listener.testPlanExecutionStarted(testPlan);
-		listener.executionStarted(engineIdentifier);
+		listener.executionStarted(TestIdentifier.from(engine));
 
 		var barrier = new CyclicBarrier(threadCount);
 		try (var executor = Executors.newFixedThreadPool(threadCount)) {
@@ -326,7 +318,7 @@ class VerboseTreePrintingListenerTests {
 				future.get();
 			}
 		}
-		listener.executionFinished(engineIdentifier, successful());
+		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
 		var label = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
@@ -334,7 +326,7 @@ class VerboseTreePrintingListenerTests {
 				.allSatisfy(line -> assertThat(label.matcher(line).results()) //
 						.describedAs("labels in <%s>", line).hasSizeLessThan(2)) //
 				.filteredOn(line -> line.contains("uniqueId: ")) //
-				.hasSize(testsPerThread * threadCount + 1);
+				.hasSize(testsPerThread * threadCount);
 	}
 
 	private static TestPlan testPlan(TestDescriptor engineDescriptor) {
