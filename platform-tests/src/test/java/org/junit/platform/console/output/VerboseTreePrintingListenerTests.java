@@ -47,8 +47,8 @@ import org.junit.platform.launcher.TestPlan;
 class VerboseTreePrintingListenerTests {
 
 	private final Clock clock = mock();
-	private final StringWriter stringWriter = new StringWriter();
-	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(stringWriter),
+	private final StringWriter output = new StringWriter();
+	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(output),
 		ColorPalette.NONE, 16, Theme.ASCII, clock);
 
 	@Test
@@ -293,7 +293,7 @@ class VerboseTreePrintingListenerTests {
 		}
 
 		var label = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
-		assertThat(stringWriter.toString().lines()) //
+		assertThat(output.toString().lines()) //
 				.allSatisfy(line -> assertThat(label.matcher(line).results()) //
 						.describedAs("labels in <%s>", line).hasSizeLessThan(2)) //
 				.filteredOn(line -> line.contains("uniqueId: ")) //
@@ -305,7 +305,7 @@ class VerboseTreePrintingListenerTests {
 	}
 
 	private void assertOutput(String expectedOutput) {
-		assertLinesMatch(expectedOutput.lines(), stringWriter.toString().lines());
+		assertLinesMatch(expectedOutput.lines(), output.toString().lines());
 	}
 
 }
