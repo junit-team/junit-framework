@@ -416,7 +416,6 @@ class VerboseTreePrintingListenerTests {
 				|      tags: []
 				|  uniqueId: [engine:demo-engine]
 				|    parent: []
-				'-- %c ool test
 				""");
 	}
 
