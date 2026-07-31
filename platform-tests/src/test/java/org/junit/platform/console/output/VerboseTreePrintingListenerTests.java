@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -278,13 +279,14 @@ class VerboseTreePrintingListenerTests {
 		var barrier = new CyclicBarrier(NUM_THREADS);
 		try (var executor = Executors.newFixedThreadPool(NUM_THREADS)) {
 			var futures = IntStream.range(0, NUM_THREADS) //
-					.mapToObj(thread -> executor.submit(() -> {
-						await(barrier);
+					.mapToObj(thread -> executor.submit((Callable<Void>) () -> {
+						barrier.await();
 						identifiers.subList(thread * TESTS_PER_THREAD, (thread + 1) * TESTS_PER_THREAD) //
 								.forEach(identifier -> {
 									listener.executionStarted(identifier);
 									listener.executionFinished(identifier, successful());
 								});
+						return null;
 					})) //
 					.toList();
 			for (Future<?> future : futures) {
@@ -308,15 +310,6 @@ class VerboseTreePrintingListenerTests {
 
 	private static long labelsIn(String line) {
 		return LABEL.matcher(line).results().count();
-	}
-
-	private static void await(CyclicBarrier barrier) {
-		try {
-			barrier.await();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 }
