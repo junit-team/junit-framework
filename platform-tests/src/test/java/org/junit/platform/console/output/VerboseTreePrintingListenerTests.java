@@ -56,8 +56,11 @@ class VerboseTreePrintingListenerTests {
 
 	@Test
 	void executionSkipped() {
-		listener.testPlanExecutionStarted(testPlan(engine));
+		var testPlan = testPlan(engine);
+
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionSkipped(engineIdentifier, "Test%ndisabled".formatted());
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -69,39 +72,60 @@ class VerboseTreePrintingListenerTests {
 				|    reason: Test
 				|              disabled
 				|    status: [S] SKIPPED
+				Test plan execution finished. Number of all tests: 1
 				""");
 	}
 
 	@Test
 	void reportingEntryPublished() {
-		listener.testPlanExecutionStarted(testPlan(engine));
+		var testPlan = testPlan(engine);
+
+		listener.testPlanExecutionStarted(testPlan);
 		listener.reportingEntryPublished(engineIdentifier, ReportEntry.from("foo", "bar"));
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
 				.
-				\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar'\\]
+				\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar']
+				Test plan execution finished. Number of all tests: 1
 				""");
 	}
 
 	@Test
 	void fileEntryPublished() {
-		listener.testPlanExecutionStarted(testPlan(engine));
+		var testPlan = testPlan(engine);
+
+		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
+		listener.testPlanExecutionStarted(testPlan);
+		listener.executionStarted(engineIdentifier);
 		listener.fileEntryPublished(engineIdentifier, FileEntry.from(Path.of("test.txt"), "text/plain"));
+		listener.executionFinished(engineIdentifier, successful());
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
 				.
-				\\|   reports: FileEntry \\[timestamp = .+, path = test.txt, mediaType = 'text/plain'\\]
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
+				\\|   reports: FileEntry \\[timestamp = .+, path = test\\.txt, mediaType = 'text/plain']
+				|  duration: 42 ms
+				|    status: [OK] SUCCESSFUL
+				Test plan execution finished. Number of all tests: 1
 				""");
 	}
 
 	@Test
 	void executionFinishedWithFailure() {
+		var testPlan = testPlan(engine);
+
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
-		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionStarted(engineIdentifier);
 		listener.executionFinished(engineIdentifier, failed(new AssertionError("Boom!")));
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -114,15 +138,19 @@ class VerboseTreePrintingListenerTests {
 				>> STACKTRACE >>
 				|  duration: 42 ms
 				|    status: [X] FAILED
+				Test plan execution finished. Number of all tests: 1
 				""");
 	}
 
 	@Test
 	void failureMessageWithFormatSpecifier() {
-		listener.testPlanExecutionStarted(testPlan(engine));
+		TestPlan testPlan = testPlan(engine);
+
 		when(clock.instant()).thenReturn(Instant.EPOCH, Instant.EPOCH.plusMillis(42));
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionStarted(engineIdentifier);
 		listener.executionFinished(engineIdentifier, failed(new AssertionError("%crash")));
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -134,7 +162,9 @@ class VerboseTreePrintingListenerTests {
 				|    caught: java.lang.AssertionError: %crash
 				>> STACKTRACE >>
 				|  duration: 42 ms
-				|    status: [X] FAILED""");
+				|    status: [X] FAILED
+				Test plan execution finished. Number of all tests: 1
+				""");
 	}
 
 	@Test
@@ -145,6 +175,7 @@ class VerboseTreePrintingListenerTests {
 		container.addChild(test);
 		var containerIdentifier = TestIdentifier.from(container);
 		var testIdentifier = TestIdentifier.from(test);
+		var testPlan = testPlan(engine);
 
 		when(clock.instant()).thenReturn( //
 			Instant.EPOCH, // engine started
@@ -153,13 +184,14 @@ class VerboseTreePrintingListenerTests {
 			Instant.EPOCH.plusMillis(7), // test finished
 			Instant.EPOCH.plusMillis(10), // container finished
 			Instant.EPOCH.plusMillis(15)); // engine finished
-		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(containerIdentifier);
 		listener.executionStarted(testIdentifier);
 		listener.executionFinished(testIdentifier, successful());
 		listener.executionFinished(containerIdentifier, successful());
 		listener.executionFinished(engineIdentifier, successful());
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 1
@@ -178,6 +210,7 @@ class VerboseTreePrintingListenerTests {
 				| '-- DemoClass finished after 10 ms.
 				|  duration: 15 ms
 				|    status: [OK] SUCCESSFUL
+				Test plan execution finished. Number of all tests: 1
 				""");
 	}
 
@@ -189,12 +222,14 @@ class VerboseTreePrintingListenerTests {
 		engine.addChild(second);
 		first.addChild(new TestDescriptorStub(first.getUniqueId().append("method", "firstTest()"), "firstTest()"));
 		second.addChild(new TestDescriptorStub(second.getUniqueId().append("method", "secondTest()"), "secondTest()"));
+		var testPlan = testPlan(engine);
 
 		when(clock.instant()).thenReturn(Instant.EPOCH);
-		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(TestIdentifier.from(first));
 		listener.executionStarted(TestIdentifier.from(second));
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 2
@@ -205,6 +240,7 @@ class VerboseTreePrintingListenerTests {
 				|    parent: []
 				| +-- FirstClass
 				| +-- SecondClass
+				Test plan execution finished. Number of all tests: 2
 				""");
 	}
 
@@ -216,6 +252,7 @@ class VerboseTreePrintingListenerTests {
 		engine.addChild(fast);
 		var slowIdentifier = TestIdentifier.from(slow);
 		var fastIdentifier = TestIdentifier.from(fast);
+		var testPlan = testPlan(engine);
 
 		when(clock.instant()).thenReturn( //
 				Instant.EPOCH, // engine started
@@ -223,12 +260,13 @@ class VerboseTreePrintingListenerTests {
 				Instant.EPOCH.plusMillis(100), // fast started
 				Instant.EPOCH.plusMillis(300), // fast finished -> 200 ms
 				Instant.EPOCH.plusMillis(700)); // slow finished -> 700 ms
-		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionStarted(engineIdentifier);
 		listener.executionStarted(slowIdentifier);
 		listener.executionStarted(fastIdentifier);
 		listener.executionFinished(fastIdentifier, successful());
 		listener.executionFinished(slowIdentifier, successful());
+		listener.testPlanExecutionFinished(testPlan);
 
 		assertOutput("""
 				Test plan execution started. Number of static tests: 2
@@ -249,6 +287,7 @@ class VerboseTreePrintingListenerTests {
 				| |    status: [OK] SUCCESSFUL
 				| |  duration: 700 ms
 				| |    status: [OK] SUCCESSFUL
+				Test plan execution finished. Number of all tests: 2
 				""");
 	}
 
@@ -264,9 +303,10 @@ class VerboseTreePrintingListenerTests {
 				.toList();
 		testDescriptors.forEach(engine::addChild);
 		var identifiers = testDescriptors.stream().map(TestIdentifier::from).toList();
+		var testPlan = testPlan(engine);
 
 		when(clock.instant()).thenReturn(Instant.EPOCH);
-		listener.testPlanExecutionStarted(testPlan(engine));
+		listener.testPlanExecutionStarted(testPlan);
 		listener.executionStarted(engineIdentifier);
 
 		var barrier = new CyclicBarrier(threadCount);
@@ -286,6 +326,8 @@ class VerboseTreePrintingListenerTests {
 				future.get();
 			}
 		}
+		listener.executionFinished(engineIdentifier, successful());
+		listener.testPlanExecutionFinished(testPlan);
 
 		var label = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
 		assertThat(output.toString().lines()) //
