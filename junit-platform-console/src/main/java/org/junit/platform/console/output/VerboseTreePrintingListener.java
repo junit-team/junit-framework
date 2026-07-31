@@ -99,11 +99,11 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 		if (testIdentifier.isContainer()) {
 			append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
 			append(output, NONE, "%n");
+			print(output);
+			return;
 		}
-		else {
-			append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
-			appendDetails(output, nestingLevel, testIdentifier);
-		}
+		append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
+		appendDetails(output, nestingLevel, testIdentifier);
 		print(output);
 	}
 
