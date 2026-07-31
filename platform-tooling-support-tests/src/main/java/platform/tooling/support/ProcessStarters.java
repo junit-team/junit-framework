@@ -10,6 +10,8 @@
 
 package platform.tooling.support;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -26,7 +28,7 @@ public class ProcessStarters {
 	public static Path currentJdkHome() {
 		var executable = ProcessHandle.current().info().command().map(Path::of).orElseThrow();
 		// path element count is 3 or higher: "<JAVA_HOME>/bin/java[.exe]"
-		return executable.getParent().getParent().toAbsolutePath();
+		return requireNonNull(requireNonNull(executable.getParent()).getParent()).toAbsolutePath();
 	}
 
 	public static ProcessStarter java(Path javaHome) {
