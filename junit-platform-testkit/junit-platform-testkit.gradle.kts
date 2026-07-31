@@ -16,7 +16,3 @@ dependencies {
 	osgiVerification(projects.junitJupiterEngine)
 	osgiVerification(projects.junitPlatformLauncher)
 }
-
-javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformConfigurationApi)
-}

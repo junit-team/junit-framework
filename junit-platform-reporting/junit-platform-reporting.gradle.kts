@@ -26,10 +26,6 @@ dependencies {
 	testFixturesApi(projects.junitJupiterApi)
 }
 
-javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformConfigurationApi)
-}
-
 tasks {
 	shadowJar {
 		listOf("events", "schema").forEach { name ->

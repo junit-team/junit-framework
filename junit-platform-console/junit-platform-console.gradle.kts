@@ -25,10 +25,6 @@ dependencies {
 	osgiVerification(libs.openTestReporting.tooling.spi)
 }
 
-javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformConfigurationApi)
-}
-
 tasks {
 	compileJava {
 		options.compilerArgs.addAll(listOf(

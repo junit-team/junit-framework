@@ -17,9 +17,9 @@ dependencies {
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
-	compileOnlyApi(projects.junitPlatformConfigurationApi)
 
 	compileOnly(kotlin("stdlib"))
+	compileOnly(projects.junitPlatformConfigurationApi)
 
 	testFixturesImplementation(libs.assertj)
 	testFixturesImplementation(testFixtures(projects.junitPlatformCommons))
@@ -29,7 +29,7 @@ dependencies {
 }
 
 javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformEngine, projects.junitPlatformConfigurationApi, projects.junitPlatformLauncher, projects.junitJupiterParams)
+	addExtraModuleReferences(projects.junitPlatformEngine, projects.junitPlatformLauncher, projects.junitJupiterParams)
 }
 
 eclipseConventions {

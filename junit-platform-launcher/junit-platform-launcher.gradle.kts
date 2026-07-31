@@ -13,13 +13,14 @@ dependencies {
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
-	compileOnlyApi(projects.junitPlatformConfigurationApi)
+
+	compileOnly(projects.junitPlatformConfigurationApi)
 
 	osgiVerification(projects.junitJupiterEngine)
 }
 
 javadocConventions {
-	addExtraModuleReferences(projects.junitPlatformConfigurationApi, projects.junitPlatformReporting)
+	addExtraModuleReferences(projects.junitPlatformReporting)
 }
 
 tasks {
