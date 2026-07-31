@@ -622,6 +622,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=simple_MethodSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -648,6 +650,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=simple_MethodSource_without_value_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -672,6 +676,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=primitive_MethodSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -700,6 +706,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=multi_arg_MethodSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -724,6 +732,8 @@ Kotlin::
 --
 [source,kotlin,indent=0]
 ----
+package example.kotlin
+
 include::example$kotlin/example/kotlin/ExternalMethodSourceDemo.kt[tags=external_MethodSource_example]
 ----
 --
@@ -756,6 +766,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/MethodSourceParameterResolutionDemo.kt[tags=parameter_resolution_MethodSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -828,6 +840,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tags=default_field_FieldSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -853,6 +867,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=explicit_field_FieldSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -880,6 +896,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=multiple_fields_FieldSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -908,6 +926,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_arguments_FieldSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -943,6 +963,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=multi_arg_FieldSource_example]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -1358,6 +1380,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=repeatable_annotations]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -1938,6 +1962,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_arguments]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -1982,6 +2008,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedTestDemo.kt[tag=named_argument_set]
 ----
+
+NOTE: For conciseness, this snippet assumes that the enclosing test class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -2170,6 +2198,8 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/ParameterizedLifecycleDemo.kt[tags=example]
 ----
+
+NOTE: For conciseness, this snippet uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 <1> Initialization of the argument _before_ each invocation of the parameterized class

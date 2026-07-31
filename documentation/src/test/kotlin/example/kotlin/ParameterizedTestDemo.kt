@@ -412,9 +412,14 @@ class ParameterizedTestDemo {
 
     // end::implicit_fallback_conversion_example[]
     // tag::implicit_fallback_conversion_example_Book[]
-    class Book(
+    class Book private constructor(
         val title: String
-    )
+    ) {
+        companion object {
+            @JvmStatic
+            fun fromTitle(title: String): Book = Book(title)
+        }
+    }
     // end::implicit_fallback_conversion_example_Book[]
 
     // tag::explicit_conversion_example[]
