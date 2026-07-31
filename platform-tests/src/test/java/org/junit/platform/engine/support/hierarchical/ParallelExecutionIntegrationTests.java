@@ -10,7 +10,7 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -67,6 +67,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.TestReporter;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,6 +95,7 @@ import org.junit.platform.testkit.engine.Events;
  */
 @ParameterizedClass
 @EnumSource(ParallelExecutorServiceType.class)
+@Timeout(value = 5, unit = SECONDS)
 record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorServiceType) {
 
 	@Test
@@ -321,7 +323,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		@BeforeAll
 		static void initialize() {
 			sharedResource = new AtomicInteger();
-			countDownLatch = new CountDownLatch(2);
+			countDownLatch = new CountDownLatch(1);
 		}
 
 		@Test
@@ -1044,37 +1046,20 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		assertEquals(value, sharedResource.get());
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private static int incrementAndBlock(AtomicInteger sharedResource, CountDownLatch countDownLatch)
 			throws InterruptedException {
 		var value = sharedResource.incrementAndGet();
 		countDownLatch.countDown();
-		countDownLatch.await(estimateSimulatedTestDurationInMilliseconds(), MILLISECONDS);
+		countDownLatch.await();
 		return value;
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private static void storeAndBlockAndCheck(AtomicInteger sharedResource, CountDownLatch countDownLatch)
 			throws InterruptedException {
 		var value = sharedResource.get();
 		countDownLatch.countDown();
-		countDownLatch.await(estimateSimulatedTestDurationInMilliseconds(), MILLISECONDS);
+		countDownLatch.await();
 		assertEquals(value, sharedResource.get());
-	}
-
-	/*
-	 * To simulate tests running in parallel tests will modify a shared
-	 * resource, simulate work by waiting, then check if the shared resource was
-	 * not modified by any other thread.
-	 *
-	 * Depending on system performance the simulation of work needs to be longer
-	 * on slower systems to ensure tests can run in parallel.
-	 *
-	 * Currently, CI is known to be slow.
-	 */
-	private static long estimateSimulatedTestDurationInMilliseconds() {
-		var runningInCi = Boolean.parseBoolean(System.getenv("CI"));
-		return runningInCi ? 1000 : 100;
 	}
 
 	@NullMarked
