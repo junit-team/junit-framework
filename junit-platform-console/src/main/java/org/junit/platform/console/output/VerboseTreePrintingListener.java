@@ -20,7 +20,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apiguardian.api.API;
@@ -191,14 +190,9 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 		TestPlan testPlan = requireNonNull(this.testPlan);
 		int nestingLevel = 0;
 		TestIdentifier current = testIdentifier;
-		// roots are the only identifiers without a parent in the test plan, so
-		// getParent(...) does not fail for anything else
-		while (!testPlan.getRoots().contains(current)) {
-			Optional<TestIdentifier> parent = testPlan.getParent(current);
-			if (parent.isEmpty()) {
-				break;
-			}
-			current = parent.get();
+		TestIdentifier parent;
+		while ((parent = testPlan.getParent(current).orElse(null)) != null) {
+			current = parent;
 			nestingLevel++;
 		}
 		return nestingLevel;
