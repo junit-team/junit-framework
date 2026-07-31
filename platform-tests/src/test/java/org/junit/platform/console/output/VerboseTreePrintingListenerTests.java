@@ -337,6 +337,43 @@ class VerboseTreePrintingListenerTests {
 				.hasSize(testsPerThread * threadCount);
 	}
 
+	@Test
+	void listTests() {
+		var container = new TestDescriptorStub(engine.getUniqueId().append("class", "DemoClass"), "DemoClass");
+		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
+		engine.addChild(container);
+		container.addChild(test);
+		var testPlan = testPlan(engine);
+
+		listener.listTests(testPlan);
+
+		assertOutput("""
+				+-- %c ool test
+				| +-- DemoClass
+				| | +-- demoTest()
+				| | |      tags: []
+				| | |  uniqueId: [engine:demo-engine]/[class:DemoClass]/[method:demoTest()]
+				| | |    parent: [engine:demo-engine]/[class:DemoClass]
+				| '-- DemoClass
+				'-- %c ool test
+				""");
+	}
+
+	@Test
+	void listTestsForEngineWithoutTest() {
+		var testPlan = testPlan(engine);
+
+		listener.listTests(testPlan);
+
+		assertOutput("""
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
+				'-- %c ool test
+				""");
+	}
+
 	private static TestPlan testPlan(TestDescriptor engineDescriptor) {
 		return TestPlan.from(true, Set.of(engineDescriptor), mock(), dummyOutputDirectoryCreator());
 	}
