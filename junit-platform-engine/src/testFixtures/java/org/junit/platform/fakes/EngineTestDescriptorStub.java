@@ -14,7 +14,7 @@ import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 
 /**
- * @since 1.4
+ * @since 6.2
  */
 public class EngineTestDescriptorStub extends EngineDescriptor {
 
