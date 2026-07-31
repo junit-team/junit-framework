@@ -25,6 +25,7 @@ import org.junit.platform.commons.util.Preconditions;
  * include it.
  *
  * @since 1.0
+ * @author ak
  */
 class CompositeFilter<T> implements Filter<T> {
 

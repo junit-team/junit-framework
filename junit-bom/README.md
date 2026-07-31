@@ -1,4 +1,4 @@
-# JUnit Bill of Materials (BOM)
+# TEST TEST TEST
 
 This module provides a Bill of Materials POM to ease dependency management using [Maven]
 or [Gradle]. Please refer to the [User Guide] for details.
