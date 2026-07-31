@@ -170,7 +170,6 @@ class VerboseTreePrintingListenerTests {
 	void indentationIsDerivedFromTheNumberOfAncestorsInTheTestPlan() {
 		var container = new TestDescriptorStub(engine.getUniqueId().append("class", "DemoClass"), "DemoClass");
 		var test = new TestDescriptorStub(container.getUniqueId().append("method", "demoTest()"), "demoTest()");
-
 		engine.addChild(container);
 		container.addChild(test);
 		var testPlan = testPlan(engine);
@@ -326,6 +325,7 @@ class VerboseTreePrintingListenerTests {
 				future.get();
 			}
 		}
+
 		listener.executionFinished(TestIdentifier.from(engine), successful());
 		listener.testPlanExecutionFinished(testPlan);
 
