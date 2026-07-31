@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
@@ -83,10 +82,11 @@ class VerboseTreePrintingListenerTests {
 
 		listener.reportingEntryPublished(TestIdentifier.from(engine), ReportEntry.from("foo", "bar"));
 
-		assertLinesMatch(List.of( //
-			"Test plan execution started. Number of static tests: 1", //
-			".", //
-			"\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar'\\]"), lines());
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				\\|   reports: ReportEntry \\[timestamp = .+, foo = 'bar'\\]
+				""");
 	}
 
 	@Test
@@ -96,10 +96,11 @@ class VerboseTreePrintingListenerTests {
 
 		listener.fileEntryPublished(TestIdentifier.from(engine), FileEntry.from(Path.of("test.txt"), "text/plain"));
 
-		assertLinesMatch(List.of( //
-			"Test plan execution started. Number of static tests: 1", //
-			".", //
-			"\\|   reports: FileEntry \\[timestamp = .+, path = test.txt, mediaType = 'text/plain'\\]"), lines());
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				\\|   reports: FileEntry \\[timestamp = .+, path = test.txt, mediaType = 'text/plain'\\]
+				""");
 	}
 
 	@Test
@@ -113,17 +114,18 @@ class VerboseTreePrintingListenerTests {
 		listener.executionStarted(testIdentifier);
 		listener.executionFinished(testIdentifier, failed(new AssertionError("Boom!")));
 
-		assertLinesMatch(List.of( //
-			"Test plan execution started. Number of static tests: 1", //
-			".", //
-			"+-- %c ool test", //
-			"|      tags: []", //
-			"|  uniqueId: [engine:demo-engine]", //
-			"|    parent: []", //
-			"|    caught: java.lang.AssertionError: Boom!", //
-			">> STACKTRACE >>", //
-			"|  duration: 42 ms", //
-			"|    status: [X] FAILED"), lines());
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
+				|    caught: java.lang.AssertionError: Boom!
+				>> STACKTRACE >>
+				|  duration: 42 ms
+				|    status: [X] FAILED
+				""");
 	}
 
 	@Test
@@ -137,17 +139,17 @@ class VerboseTreePrintingListenerTests {
 		listener.executionStarted(testIdentifier);
 		listener.executionFinished(testIdentifier, failed(new AssertionError("%crash")));
 
-		assertLinesMatch(List.of( //
-			"Test plan execution started. Number of static tests: 1", //
-			".", //
-			"+-- %c ool test", //
-			"|      tags: []", //
-			"|  uniqueId: [engine:demo-engine]", //
-			"|    parent: []", //
-			"|    caught: java.lang.AssertionError: %crash", //
-			">> STACKTRACE >>", //
-			"|  duration: 42 ms", //
-			"|    status: [X] FAILED"), lines());
+		assertOutput("""
+				Test plan execution started. Number of static tests: 1
+				.
+				+-- %c ool test
+				|      tags: []
+				|  uniqueId: [engine:demo-engine]
+				|    parent: []
+				|    caught: java.lang.AssertionError: %crash
+				>> STACKTRACE >>
+				|  duration: 42 ms
+				|    status: [X] FAILED""");
 	}
 
 	@Test
@@ -301,11 +303,7 @@ class VerboseTreePrintingListenerTests {
 	}
 
 	private void assertOutput(String expectedOutput) {
-		assertThat(stringWriter.toString()).isEqualTo(expectedOutput.replace("\n", EOL));
-	}
-
-	private List<String> lines() {
-		return List.of(stringWriter.toString().split(EOL));
+		assertLinesMatch(expectedOutput.lines(), stringWriter.toString().lines());
 	}
 
 	private static long labelsIn(String line) {
