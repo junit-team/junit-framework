@@ -179,7 +179,8 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 	 * identifier started.
 	 */
 	private long durationMillis(TestIdentifier testIdentifier) {
-		Instant startInstant = requireNonNull(startInstantByUniqueId.remove(testIdentifier.getUniqueIdObject()));
+		var uniqueId = testIdentifier.getUniqueIdObject();
+		var startInstant = requireNonNull(startInstantByUniqueId.remove(uniqueId));
 		return Duration.between(startInstant, clock.instant()).toMillis();
 	}
 
