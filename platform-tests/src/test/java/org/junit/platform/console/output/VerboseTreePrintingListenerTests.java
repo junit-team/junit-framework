@@ -46,10 +46,6 @@ import org.junit.platform.launcher.TestPlan;
  */
 class VerboseTreePrintingListenerTests {
 
-	private static final Pattern LABEL = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
-	private static final int NUM_THREADS = 4;
-	private static final int TESTS_PER_THREAD = 50;
-
 	private final Clock clock = mock();
 	private final StringWriter stringWriter = new StringWriter();
 	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(stringWriter),
@@ -264,8 +260,11 @@ class VerboseTreePrintingListenerTests {
 	@Test
 	@Timeout(10)
 	void linesAreNotInterleavedWhenExecutionsArePrintedConcurrently() throws Exception {
+		final int threadCount = 4;
+		final int testsPerThread = 50;
+
 		var engine = new TestDescriptorStub(UniqueId.forEngine("demo-engine"), "demo-engine");
-		var testDescriptors = IntStream.range(0, TESTS_PER_THREAD * NUM_THREADS) //
+		var testDescriptors = IntStream.range(0, testsPerThread * threadCount) //
 				.mapToObj(i -> new TestDescriptorStub(engine.getUniqueId().append("method", "test" + i + "()"),
 					"test" + i + "()")) //
 				.toList();
@@ -275,12 +274,12 @@ class VerboseTreePrintingListenerTests {
 
 		when(clock.instant()).thenReturn(Instant.EPOCH);
 
-		var barrier = new CyclicBarrier(NUM_THREADS);
-		try (var executor = Executors.newFixedThreadPool(NUM_THREADS)) {
-			var futures = IntStream.range(0, NUM_THREADS) //
+		var barrier = new CyclicBarrier(threadCount);
+		try (var executor = Executors.newFixedThreadPool(threadCount)) {
+			var futures = IntStream.range(0, threadCount) //
 					.mapToObj(thread -> executor.submit((Callable<Void>) () -> {
 						barrier.await();
-						identifiers.subList(thread * TESTS_PER_THREAD, (thread + 1) * TESTS_PER_THREAD) //
+						identifiers.subList(thread * testsPerThread, (thread + 1) * testsPerThread) //
 								.forEach(identifier -> {
 									listener.executionStarted(identifier);
 									listener.executionFinished(identifier, successful());
@@ -293,10 +292,12 @@ class VerboseTreePrintingListenerTests {
 			}
 		}
 
+		var label = Pattern.compile("(?:tags|uniqueId|parent|source|duration|status): ");
 		assertThat(stringWriter.toString().lines()) //
-				.allSatisfy(line -> assertThat(labelsIn(line)).describedAs("labels in <%s>", line).isLessThan(2)) //
+				.allSatisfy(line -> assertThat(label.matcher(line).results()) //
+						.describedAs("labels in <%s>", line).hasSizeLessThan(2)) //
 				.filteredOn(line -> line.contains("uniqueId: ")) //
-				.hasSize(TESTS_PER_THREAD * NUM_THREADS);
+				.hasSize(testsPerThread * threadCount);
 	}
 
 	private static TestPlan testPlan(TestDescriptor engineDescriptor) {
@@ -305,10 +306,6 @@ class VerboseTreePrintingListenerTests {
 
 	private void assertOutput(String expectedOutput) {
 		assertLinesMatch(expectedOutput.lines(), stringWriter.toString().lines());
-	}
-
-	private static long labelsIn(String line) {
-		return LABEL.matcher(line).results().count();
 	}
 
 }
