@@ -95,13 +95,14 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 		startInstantByUniqueId.put(testIdentifier.getUniqueIdObject(), clock.instant());
 		int nestingLevel = nestingLevel(testIdentifier);
 		StringBuilder output = new StringBuilder();
-		appendVerticals(output, nestingLevel, theme.entry());
 		if (testIdentifier.isContainer()) {
+			appendVerticals(output, nestingLevel, theme.entry());
 			append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
 			append(output, NONE, "%n");
 			print(output);
 			return;
 		}
+		appendVerticals(output, nestingLevel, theme.entry());
 		append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
 		appendDetails(output, nestingLevel, testIdentifier);
 		print(output);
@@ -118,12 +119,12 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 			appendVerticals(output, nestingLevel, theme.end());
 			append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
 			append(output, NONE, " finished after %d ms.%n", durationMillis);
+			print(output);
+			return;
 		}
-		else {
-			appendDetail(output, nestingLevel, NONE, "duration", "%d ms%n", durationMillis);
-			String status = theme.status(testExecutionResult) + " " + testExecutionResult.getStatus();
-			appendDetail(output, nestingLevel, Style.valueOf(testExecutionResult), "status", "%s%n", status);
-		}
+		appendDetail(output, nestingLevel, NONE, "duration", "%d ms%n", durationMillis);
+		String status = theme.status(testExecutionResult) + " " + testExecutionResult.getStatus();
+		appendDetail(output, nestingLevel, Style.valueOf(testExecutionResult), "status", "%s%n", status);
 		print(output);
 	}
 
