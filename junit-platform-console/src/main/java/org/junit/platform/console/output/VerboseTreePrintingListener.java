@@ -188,7 +188,10 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 	 * of its ancestors in the test plan, with test engines being at level 0.
 	 */
 	private int nestingLevel(TestIdentifier testIdentifier) {
-		TestPlan testPlan = requireNonNull(this.testPlan);
+		return nestingLevel(requireNonNull(testPlan), testIdentifier);
+	}
+
+	private int nestingLevel(TestPlan testPlan, TestIdentifier testIdentifier) {
 		int nestingLevel = 0;
 		TestIdentifier current = testIdentifier;
 		TestIdentifier parent;
@@ -254,13 +257,12 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 
 	@Override
 	public void listTests(TestPlan testPlan) {
-		this.testPlan = testPlan;
 		testPlan.accept(new TestPlan.Visitor() {
 			@Override
 			public void preVisitContainer(TestIdentifier testIdentifier) {
 				if (!testPlan.getChildren(testIdentifier).isEmpty()) {
 					StringBuilder output = new StringBuilder();
-					appendVerticals(output, nestingLevel(testIdentifier), theme.entry());
+					appendVerticals(output, nestingLevel(testPlan, testIdentifier), theme.entry());
 					append(output, Style.CONTAINER, " %s", testIdentifier.getDisplayName());
 					append(output, NONE, "%n");
 					print(output);
@@ -270,7 +272,7 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 			@Override
 			public void visit(TestIdentifier testIdentifier) {
 				if (testPlan.getChildren(testIdentifier).isEmpty()) {
-					int nestingLevel = nestingLevel(testIdentifier);
+					int nestingLevel = nestingLevel(testPlan, testIdentifier);
 					StringBuilder output = new StringBuilder();
 					appendVerticals(output, nestingLevel, theme.entry());
 					append(output, Style.valueOf(testIdentifier), " %s%n", testIdentifier.getDisplayName());
@@ -283,7 +285,7 @@ public class VerboseTreePrintingListener implements DetailsPrintingListener {
 			public void postVisitContainer(TestIdentifier testIdentifier) {
 				if (!testPlan.getChildren(testIdentifier).isEmpty()) {
 					StringBuilder output = new StringBuilder();
-					appendVerticals(output, nestingLevel(testIdentifier), theme.end());
+					appendVerticals(output, nestingLevel(testPlan, testIdentifier), theme.end());
 					append(output, Style.CONTAINER, " %s%n", testIdentifier.getDisplayName());
 					print(output);
 				}
