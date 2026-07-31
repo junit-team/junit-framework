@@ -49,9 +49,12 @@ class VerboseTreePrintingListenerTests {
 
 	private final Clock clock = mock();
 	private final StringWriter output = new StringWriter();
-	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener(new PrintWriter(output),
-		ColorPalette.NONE, 16, Theme.ASCII, clock);
-
+	private final VerboseTreePrintingListener listener = new VerboseTreePrintingListener( //
+		new PrintWriter(output), //
+		ColorPalette.NONE, 16, //
+		Theme.ASCII, //
+		clock //
+	);
 	private final TestDescriptor engine = new EngineTestDescriptorStub( //
 		UniqueId.forEngine("demo-engine"), //
 		"%c ool test" //
