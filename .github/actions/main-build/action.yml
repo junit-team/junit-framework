@@ -11,8 +11,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/setup-test-jdk
-    - uses: ./.github/actions/run-gradle
+    - uses: $/.github/actions/setup-test-jdk
+    - uses: $/.github/actions/run-gradle
       with:
         arguments: ${{ inputs.arguments }}
         encryptionKey: ${{ inputs.encryptionKey }}
