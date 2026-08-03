@@ -12,6 +12,9 @@ package org.junit.platform.configuration.processor;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
@@ -19,7 +22,6 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
@@ -28,7 +30,6 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 
 @API(status = API.Status.EXPERIMENTAL)
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationProperty")
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
@@ -41,13 +42,19 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	}
 
 	@Override
+	public SourceVersion getSupportedSourceVersion() {
+		return SourceVersion.latestSupported();
+	}
+
+	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		if (roundEnv.processingOver()) {
 			try {
 				var resource = requireNonNull(environment).getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
 					METADATA_PATH);
-				try (var out = resource.openOutputStream()) {
-					out.write("{}".getBytes(StandardCharsets.UTF_8));
+				try (var out = new PrintWriter(
+					new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), StandardCharsets.UTF_8)))) {
+					out.println("{}");
 				}
 			}
 			catch (Exception ex) {
