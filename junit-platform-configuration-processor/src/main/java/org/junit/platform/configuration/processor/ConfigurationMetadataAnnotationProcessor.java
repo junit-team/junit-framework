@@ -14,7 +14,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
@@ -52,9 +51,9 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 			try {
 				var resource = requireNonNull(environment).getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
 					METADATA_PATH);
-				try (var out = new PrintWriter(
-					new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), StandardCharsets.UTF_8)))) {
-					out.println("{}");
+				try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), StandardCharsets.UTF_8))) {
+					out.write("{}");
+					out.write("\n");
 				}
 			}
 			catch (Exception ex) {
