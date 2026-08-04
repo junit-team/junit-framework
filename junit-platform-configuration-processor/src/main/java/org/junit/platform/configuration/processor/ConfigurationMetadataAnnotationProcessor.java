@@ -51,7 +51,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		return SourceVersion.latestSupported();
 	}
 
-	private ConfigurationMetaData metaData(){
+	private ConfigurationMetaData metaData() {
 		return requireNonNull(metaData);
 	}
 
@@ -79,35 +79,49 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	}
 
 	private void process(RoundEnvironment roundEnv) {
-		roundEnv.getElementsAnnotatedWith(ConfigurationProperty.class).stream()
-				.filter(VariableElement.class::isInstance)
-				.map(VariableElement.class::cast)
-				.map(ConfigurationMetadataAnnotationProcessor::createProperty)
+		roundEnv.getElementsAnnotatedWith(ConfigurationProperty.class).stream() //
+				.filter(VariableElement.class::isInstance) //
+				.map(VariableElement.class::cast) //
+				.map(ConfigurationMetadataAnnotationProcessor::createProperty) //
 				.forEach(element -> metaData().addProperty(element));
 	}
 
-
 	private static ConfigurationMetaData.Property createProperty(VariableElement element) {
-		var propertyName = requireStaticConstantValue(element);
-		return new ConfigurationMetaData.Property(propertyName, null, null, null,
-				null, null);
+		var propertyName = requireConstantStringValue(element);
+		var enclosingTypeElement = getEnclosingTypeElement(element);
+		return new ConfigurationMetaData.Property(propertyName, null, null,
+			enclosingTypeElement.getQualifiedName().toString(), null, null);
 	}
 
+	private static String requireConstantStringValue(VariableElement element) {
+		var enclosingTypeElement = getEnclosingTypeElement(element);
+		Preconditions.condition(isStatic(element), //
+			() -> "Field [%s.%s] must be declared static" //
+					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+		Preconditions.condition(isFinal(element), //
+			() -> "Field [%s.%s] must be declared final" //
+					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+		var constantValue = element.getConstantValue();
+		Preconditions.condition(constantValue instanceof String, //
+			() -> "Field [%s.%s] must have a constant string value" //
+					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+		return (String) constantValue;
+	}
+
+	private static TypeElement getEnclosingTypeElement(VariableElement element) {
+		var enclosingElement = element.getEnclosingElement();
+		Preconditions.condition(enclosingElement instanceof TypeElement, //
+			() -> "[%s] did not have an enclosing type element" //
+					.formatted(element.getSimpleName()));
+		return (TypeElement) enclosingElement;
+	}
 
 	private static boolean isStatic(VariableElement variableElement) {
 		return variableElement.getModifiers().contains(Modifier.STATIC);
 	}
 
-	private static String requireStaticConstantValue(VariableElement element) {
-		Preconditions.condition(isStatic(element),  () -> {
-			var enclosingElement = requireNonNull(element.getEnclosingElement());
-			return "Field [%s.%s] must be declared static".formatted(enclosingElement.getSimpleName(), element.getSimpleName());
-		});
-		var constantValue = element.getConstantValue();
-		Preconditions.condition(constantValue instanceof String,  () -> {
-			var enclosingElement = requireNonNull(element.getEnclosingElement());
-			return "Field [%s.%s] must have a constant value string".formatted(enclosingElement.getSimpleName(), element.getSimpleName());
-		});
-		return (String) constantValue;
+	private static boolean isFinal(VariableElement variableElement) {
+		return variableElement.getModifiers().contains(Modifier.FINAL);
 	}
+
 }

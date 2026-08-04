@@ -17,25 +17,24 @@ import org.jspecify.annotations.Nullable;
 
 class ConfigurationMetaData {
 
-//	private final List<Group> groups = new ArrayList<>();
+	//	private final List<Group> groups = new ArrayList<>();
 	private final List<Property> properties = new ArrayList<>();
-//	private final List<Hint> hints = new ArrayList<>();
+	//	private final List<Hint> hints = new ArrayList<>();
 
-
-	void addProperty(Property property){
+	void addProperty(Property property) {
 		properties.add(property);
 	}
 
-//
-//	record Group( //
-//			String name, //
-//			@Nullable String type, //
-//			@Nullable String description, //
-//			@Nullable String sourceType, //
-//			@Nullable String sourceMethod //
-//	) {
-//
-//	}
+	//
+	//	record Group( //
+	//			String name, //
+	//			@Nullable String type, //
+	//			@Nullable String description, //
+	//			@Nullable String sourceType, //
+	//			@Nullable String sourceMethod //
+	//	) {
+	//
+	//	}
 
 	record Property( //
 			String name, //
@@ -57,24 +56,24 @@ class ConfigurationMetaData {
 
 	}
 
-//	record Hint( //
-//			String name, //
-//			List<ValueHint> values, //
-//			List<ValueProvider> providers //
-//	) {
-//	}
-//
-//	record ValueHint( //
-//			Object value, //
-//			          @Nullable String description //
-//	) {
-//
-//	}
-//
-//	record ValueProvider( //
-//			String name, //
-//			Object parameters //
-//	) {
-//
-//	}
+	//	record Hint( //
+	//			String name, //
+	//			List<ValueHint> values, //
+	//			List<ValueProvider> providers //
+	//	) {
+	//	}
+	//
+	//	record ValueHint( //
+	//			Object value, //
+	//			          @Nullable String description //
+	//	) {
+	//
+	//	}
+	//
+	//	record ValueProvider( //
+	//			String name, //
+	//			Object parameters //
+	//	) {
+	//
+	//	}
 }

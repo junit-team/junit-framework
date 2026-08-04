@@ -20,6 +20,7 @@ import java.nio.file.Path;
 
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.PreconditionViolationException;
@@ -49,23 +50,34 @@ class ConfigurationMetadataAnnotationProcessorTests {
 				""");
 	}
 
-	@Test
-	void configurationPropertyMustBeFinal() {
-		asserPreconditionViolation(() -> compiler.compile(NonFinalConfigurationProperty.class),
-				"Field [NonFinalConfigurationProperty.EXAMPLE_PROPERTY_NAME] must have a constant value string");
-	}
+	@Nested
+	class ConfigurationProperty {
 
-	@Test
-	void configurationPropertyMustBeStatic() {
-		compiler.compile(SimpleConfigurationProperty.class);
-		assertThat(metaData()).isEqualTo("""
-				{}
-				""");
+		@Test
+		void mustBeFinal() {
+			asserPreconditionViolation(() -> compiler.compile(NonFinalConfigurationProperty.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final".formatted(
+					NonFinalConfigurationProperty.class.getName()));
+		}
+
+		@Test
+		void mustBeStatic() {
+			asserPreconditionViolation(() -> compiler.compile(NonStaticConfigurationProperty.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared static".formatted(
+					NonStaticConfigurationProperty.class.getName()));
+		}
+
+		@Test
+		void mustBeString() {
+			asserPreconditionViolation(() -> compiler.compile(NonStringConfigurationProperty.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value".formatted(
+					NonStringConfigurationProperty.class.getName()));
+		}
 	}
 
 	private static void asserPreconditionViolation(ThrowableAssert.ThrowingCallable throwingCallable, String message) {
-		assertThatThrownBy(throwingCallable)
-				.hasRootCauseExactlyInstanceOf(PreconditionViolationException.class)
+		assertThatThrownBy(throwingCallable) //
+				.hasRootCauseExactlyInstanceOf(PreconditionViolationException.class) //
 				.hasRootCauseMessage(message);
 	}
 
