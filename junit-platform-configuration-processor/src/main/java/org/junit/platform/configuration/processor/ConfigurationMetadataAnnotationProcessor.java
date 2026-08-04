@@ -10,11 +10,11 @@
 
 package org.junit.platform.configuration.processor;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -22,22 +22,28 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.tools.StandardLocation;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.configuration.api.ConfigurationProperty;
 
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationProperty")
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
 	private @Nullable ProcessingEnvironment environment;
+	private ConfigurationMetaData metaData;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment environment) {
 		super.init(environment);
 		this.environment = environment;
+		this.metaData = new ConfigurationMetaData();
 	}
 
 	@Override
@@ -45,21 +51,63 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		return SourceVersion.latestSupported();
 	}
 
+	private ConfigurationMetaData metaData(){
+		return requireNonNull(metaData);
+	}
+
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+		process(roundEnv);
 		if (roundEnv.processingOver()) {
-			try {
-				var resource = requireNonNull(environment).getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
-					METADATA_PATH);
-				try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), StandardCharsets.UTF_8))) {
-					out.write("{}");
-					out.write("\n");
-				}
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Failed to write metadata", ex);
-			}
+			writeMetaData();
 		}
 		return false;
+	}
+
+	private void writeMetaData() {
+		try {
+			var resource = requireNonNull(environment).getFiler() //
+					.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
+			try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), UTF_8))) {
+				out.write("{}");
+				out.write("\n");
+			}
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to write metadata", ex);
+		}
+	}
+
+	private void process(RoundEnvironment roundEnv) {
+		roundEnv.getElementsAnnotatedWith(ConfigurationProperty.class).stream()
+				.filter(VariableElement.class::isInstance)
+				.map(VariableElement.class::cast)
+				.map(ConfigurationMetadataAnnotationProcessor::createProperty)
+				.forEach(element -> metaData().addProperty(element));
+	}
+
+
+	private static ConfigurationMetaData.Property createProperty(VariableElement element) {
+		var propertyName = requireStaticConstantValue(element);
+		return new ConfigurationMetaData.Property(propertyName, null, null, null,
+				null, null);
+	}
+
+
+	private static boolean isStatic(VariableElement variableElement) {
+		return variableElement.getModifiers().contains(Modifier.STATIC);
+	}
+
+	private static String requireStaticConstantValue(VariableElement element) {
+		Preconditions.condition(isStatic(element),  () -> {
+			var enclosingElement = requireNonNull(element.getEnclosingElement());
+			return "Field [%s.%s] must be declared static".formatted(enclosingElement.getSimpleName(), element.getSimpleName());
+		});
+		var constantValue = element.getConstantValue();
+		Preconditions.condition(constantValue instanceof String,  () -> {
+			var enclosingElement = requireNonNull(element.getEnclosingElement());
+			return "Field [%s.%s] must have a constant value string".formatted(enclosingElement.getSimpleName(), element.getSimpleName());
+		});
+		return (String) constantValue;
 	}
 }

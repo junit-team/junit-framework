@@ -12,9 +12,9 @@ package org.junit.platform.configuration.processor;
 
 import org.junit.platform.configuration.api.ConfigurationProperty;
 
-final class OneConfigurationProperty {
+final class NonStaticConfigurationProperty {
 
 	@ConfigurationProperty
-	public static String EXAMPLE_PROPERTY_NAME = "org.example.property";
+	public final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

@@ -11,14 +11,18 @@
 package org.junit.platform.configuration.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.platform.commons.PreconditionViolationException;
 
 class ConfigurationMetadataAnnotationProcessorTests {
 
@@ -38,15 +42,40 @@ class ConfigurationMetadataAnnotationProcessorTests {
 	}
 
 	@Test
-	void test() throws IOException {
-		compiler.compile(OneConfigurationProperty.class);
+	void simpleConfigurationProperty() {
+		compiler.compile(SimpleConfigurationProperty.class);
 		assertThat(metaData()).isEqualTo("""
 				{}
 				""");
 	}
 
-	private String metaData() throws IOException {
-		return Files.readString(outputDirectory.resolve(expectedMetadataPath));
+	@Test
+	void configurationPropertyMustBeFinal() {
+		asserPreconditionViolation(() -> compiler.compile(NonFinalConfigurationProperty.class),
+				"Field [NonFinalConfigurationProperty.EXAMPLE_PROPERTY_NAME] must have a constant value string");
+	}
+
+	@Test
+	void configurationPropertyMustBeStatic() {
+		compiler.compile(SimpleConfigurationProperty.class);
+		assertThat(metaData()).isEqualTo("""
+				{}
+				""");
+	}
+
+	private static void asserPreconditionViolation(ThrowableAssert.ThrowingCallable throwingCallable, String message) {
+		assertThatThrownBy(throwingCallable)
+				.hasRootCauseExactlyInstanceOf(PreconditionViolationException.class)
+				.hasRootCauseMessage(message);
+	}
+
+	private String metaData() throws UncheckedIOException {
+		try {
+			return Files.readString(outputDirectory.resolve(expectedMetadataPath));
+		}
+		catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 }
