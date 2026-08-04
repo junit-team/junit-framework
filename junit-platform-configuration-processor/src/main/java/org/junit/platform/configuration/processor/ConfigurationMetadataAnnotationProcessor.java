@@ -37,7 +37,7 @@ import org.junit.platform.configuration.api.ConfigurationProperty;
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
 	private @Nullable ProcessingEnvironment environment;
-	private ConfigurationMetaData metaData;
+	private @Nullable ConfigurationMetaData metaData;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment environment) {
@@ -51,10 +51,6 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		return SourceVersion.latestSupported();
 	}
 
-	private ConfigurationMetaData metaData() {
-		return requireNonNull(metaData);
-	}
-
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		process(roundEnv);
@@ -66,7 +62,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private void writeMetaData() {
 		try {
-			var resource = requireNonNull(environment).getFiler() //
+			var resource = environment().getFiler() //
 					.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
 			try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), UTF_8))) {
 				out.write("{}");
@@ -82,18 +78,44 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		roundEnv.getElementsAnnotatedWith(ConfigurationProperty.class).stream() //
 				.filter(VariableElement.class::isInstance) //
 				.map(VariableElement.class::cast) //
-				.map(ConfigurationMetadataAnnotationProcessor::createProperty) //
+				.map(this::createProperty) //
 				.forEach(element -> metaData().addProperty(element));
 	}
 
-	private static ConfigurationMetaData.Property createProperty(VariableElement element) {
-		var propertyName = requireConstantStringValue(element);
-		var enclosingTypeElement = getEnclosingTypeElement(element);
-		return new ConfigurationMetaData.Property(propertyName, null, null,
-			enclosingTypeElement.getQualifiedName().toString(), null, null);
+	private ConfigurationMetaData.Property createProperty(VariableElement element) {
+		return new ConfigurationMetaData.Property( //
+			processPropertyName(element), //
+			null, // TODO:
+			processDescription(element), //
+			processSourceType(element), //
+			null, // TODO:
+			processDeprecation(element) //
+		);
 	}
 
-	private static String requireConstantStringValue(VariableElement element) {
+	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
+		var deprecated = element.getAnnotation(Deprecated.class);
+		if (deprecated == null) {
+			return null;
+		}
+		return new ConfigurationMetaData.Deprecation("warn", //
+			null, // TODO:
+			null, // TODO:
+			null // TODO:
+		);
+	}
+
+	private @Nullable String processDescription(VariableElement element) {
+		// TODO: Clean up doc comment
+		return environment().getElementUtils().getDocComment(element);
+	}
+
+	private static String processSourceType(VariableElement element) {
+		var enclosingTypeElement = getEnclosingTypeElement(element);
+		return enclosingTypeElement.getQualifiedName().toString();
+	}
+
+	private static String processPropertyName(VariableElement element) {
 		var enclosingTypeElement = getEnclosingTypeElement(element);
 		Preconditions.condition(isStatic(element), //
 			() -> "Field [%s.%s] must be declared static" //
@@ -124,4 +146,11 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		return variableElement.getModifiers().contains(Modifier.FINAL);
 	}
 
+	private ProcessingEnvironment environment() {
+		return requireNonNull(environment);
+	}
+
+	private ConfigurationMetaData metaData() {
+		return requireNonNull(metaData);
+	}
 }

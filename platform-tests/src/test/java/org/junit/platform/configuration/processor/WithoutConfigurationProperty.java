@@ -10,11 +10,6 @@
 
 package org.junit.platform.configuration.processor;
 
-import org.junit.platform.configuration.api.ConfigurationProperty;
-
-final class SimpleConfigurationProperty {
-
-	@ConfigurationProperty
-	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
+final class WithoutConfigurationProperty {
 
 }

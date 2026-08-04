@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,16 +43,50 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		compiler = new TestCompiler(sourceDirectory, outputDirectory, processor);
 	}
 
-	@Test
-	void simpleConfigurationProperty() {
-		compiler.compile(SimpleConfigurationProperty.class);
-		assertThat(metaData()).isEqualTo("""
-				{}
-				""");
-	}
-
 	@Nested
 	class ConfigurationProperty {
+
+		@Test
+		void none() {
+			compiler.compile(WithoutConfigurationProperty.class);
+			assertThat(metaData()).isEmpty();
+		}
+
+		@Test
+		void minimal() {
+			compiler.compile(MinimalConfigurationProperty.class);
+			assertThat(metaData()).contains("""
+					{}
+					""");
+		}
+
+		@Test
+		void documented() {
+			// TODO: Add more complex documentation samples
+			compiler.compile(DocumentedConfigurationProperty.class);
+			assertThat(metaData()).contains("""
+					{}
+					""");
+		}
+
+		@Test
+		void deprecated() {
+			// TODO: Inheritance? Meta?
+			compiler.compile(DeprecatedConfigurationProperty.class);
+			assertThat(metaData()).contains("""
+					{}
+					""");
+		}
+
+		@SuppressWarnings("deprecation")
+		@Test
+		void classDeprecated() {
+			// TODO: Inheritance? Meta?
+			compiler.compile(ClassDeprecatedConfigurationProperty.class);
+			assertThat(metaData()).contains("""
+					{}
+					""");
+		}
 
 		@Test
 		void mustBeFinal() {
@@ -81,9 +116,13 @@ class ConfigurationMetadataAnnotationProcessorTests {
 				.hasRootCauseMessage(message);
 	}
 
-	private String metaData() throws UncheckedIOException {
+	private Optional<String> metaData() throws UncheckedIOException {
 		try {
-			return Files.readString(outputDirectory.resolve(expectedMetadataPath));
+			var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
+			if (!Files.exists(metaDataPath)) {
+				return Optional.empty();
+			}
+			return Optional.of(Files.readString(metaDataPath));
 		}
 		catch (IOException e) {
 			throw new UncheckedIOException(e);
