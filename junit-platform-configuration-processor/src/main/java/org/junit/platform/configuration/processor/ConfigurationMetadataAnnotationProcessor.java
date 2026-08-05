@@ -36,13 +36,11 @@ import org.junit.platform.configuration.api.ConfigurationProperty;
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationProperty")
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
-	private @Nullable ProcessingEnvironment environment;
 	private @Nullable ConfigurationMetaData metaData;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment environment) {
 		super.init(environment);
-		this.environment = environment;
 		this.metaData = new ConfigurationMetaData();
 	}
 
@@ -62,7 +60,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private void writeMetaData() {
 		try {
-			var resource = environment().getFiler() //
+			var resource = processingEnvironment().getFiler() //
 					.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
 			try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), UTF_8))) {
 				out.write("{}");
@@ -107,7 +105,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private @Nullable String processDescription(VariableElement element) {
 		// TODO: Clean up doc comment
-		return environment().getElementUtils().getDocComment(element);
+		return processingEnvironment().getElementUtils().getDocComment(element);
 	}
 
 	private static String processSourceType(VariableElement element) {
@@ -146,8 +144,8 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		return variableElement.getModifiers().contains(Modifier.FINAL);
 	}
 
-	private ProcessingEnvironment environment() {
-		return requireNonNull(environment);
+	private ProcessingEnvironment processingEnvironment() {
+		return requireNonNull(processingEnv);
 	}
 
 	private ConfigurationMetaData metaData() {
