@@ -1,5 +1,6 @@
 plugins {
 	id("junitbuild.java-library-conventions")
+	id("junitbuild.shadow-conventions")
 }
 
 description = "JUnit Platform Configuration Processor"
@@ -11,6 +12,9 @@ dependencies {
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+
+	// TODO: Shade, but it's non trivial.
+	implementation(libs.jackson.databind)
 }
 
 backwardCompatibilityChecks {

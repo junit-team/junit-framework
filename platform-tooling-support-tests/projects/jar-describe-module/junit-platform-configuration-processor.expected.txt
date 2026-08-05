@@ -5,5 +5,6 @@ requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
 requires org.junit.platform.commons
 requires org.junit.platform.configuration.api
+requires tools.jackson.databind
 provides javax.annotation.processing.Processor with org.junit.platform.configuration.processor.ConfigurationMetadataAnnotationProcessor
 contains org.junit.platform.configuration.processor

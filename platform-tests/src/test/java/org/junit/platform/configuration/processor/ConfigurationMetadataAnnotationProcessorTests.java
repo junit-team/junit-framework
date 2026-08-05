@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -32,60 +32,94 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 	final Path sourceDirectory = Path.of("src/test/java");
 
-	@TempDir
-	Path outputDirectory;
-
-	TestCompiler compiler;
-
-	@BeforeEach
-	void setup() {
-		var processor = new ConfigurationMetadataAnnotationProcessor();
-		compiler = new TestCompiler(sourceDirectory, outputDirectory, processor);
-	}
-
 	@Nested
 	class ConfigurationProperty {
+
+		@TempDir
+		Path outputDirectory;
+
+		TestCompiler compiler;
+
+		@BeforeEach
+		void setup() {
+			var processor = new ConfigurationMetadataAnnotationProcessor();
+			compiler = new TestCompiler(sourceDirectory, outputDirectory, processor);
+		}
 
 		@Test
 		void none() {
 			compiler.compile(WithoutConfigurationProperty.class);
-			assertThat(metaData()).isEmpty();
+			var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
+			assertThat(metaDataPath).doesNotExist();
 		}
 
 		@Test
 		void minimal() {
 			compiler.compile(MinimalConfigurationProperty.class);
-			assertThat(metaData()).contains("""
-					{}
-					""");
+			assertThat(metaData()).isEqualToIgnoringWhitespace("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.processor.MinimalConfigurationProperty"
+						}
+					  ]
+					}""");
 		}
 
 		@Test
 		void documented() {
 			// TODO: Add more complex documentation samples
 			compiler.compile(DocumentedConfigurationProperty.class);
-			assertThat(metaData()).contains("""
-					{}
-					""");
+			assertThat(metaData()).isEqualToIgnoringWhitespace("""
+					{
+					  "properties": [
+					    {
+					      "name": "org.example.property",
+					      "description": "A brief description of this property.",
+					      "sourceType": "org.junit.platform.configuration.processor.DocumentedConfigurationProperty"
+					    }
+					  ]
+					}""");
 		}
 
 		@Test
 		void deprecated() {
 			// TODO: Inheritance? Meta?
 			compiler.compile(DeprecatedConfigurationProperty.class);
-			assertThat(metaData()).contains("""
-					{}
-					""");
+			assertThat(metaData()).isEqualToIgnoringWhitespace("""
+					{
+					  "properties": [
+					    {
+					      "name": "org.example.property",
+					      "sourceType": "org.junit.platform.configuration.processor.DeprecatedConfigurationProperty",
+					      "deprecation": {
+					        "level": "warn"
+					      }
+					    }
+					  ]
+					}""");
 		}
 
 		@SuppressWarnings("deprecation")
 		@Test
+		@Disabled("Not yet implemented")
 		void classDeprecated() {
 			// TODO: Inheritance? Meta?
 			compiler.compile(ClassDeprecatedConfigurationProperty.class);
-			assertThat(metaData()).contains("""
-					{}
-					""");
+			assertThat(metaData()).isEqualToIgnoringWhitespace(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "sourceType": "org.junit.platform.configuration.processor.ClassDeprecatedConfigurationProperty",
+							  "deprecation": {
+						        "level": "warn"
+						      }
+							}
+						  ]
+						}""");
 		}
 
 		@Test
@@ -108,25 +142,22 @@ class ConfigurationMetadataAnnotationProcessorTests {
 				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value".formatted(
 					NonStringConfigurationProperty.class.getName()));
 		}
+
+		private String metaData() throws UncheckedIOException {
+			try {
+				var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
+				return Files.readString(metaDataPath);
+			}
+			catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}
 	}
 
 	private static void asserPreconditionViolation(ThrowableAssert.ThrowingCallable throwingCallable, String message) {
 		assertThatThrownBy(throwingCallable) //
 				.hasRootCauseExactlyInstanceOf(PreconditionViolationException.class) //
 				.hasRootCauseMessage(message);
-	}
-
-	private Optional<String> metaData() throws UncheckedIOException {
-		try {
-			var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
-			if (!Files.exists(metaDataPath)) {
-				return Optional.empty();
-			}
-			return Optional.of(Files.readString(metaDataPath));
-		}
-		catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
 	}
 
 }

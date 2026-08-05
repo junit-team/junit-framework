@@ -15,6 +15,7 @@ module org.junit.platform.configuration.processor {
 	requires java.compiler;
 	requires org.junit.platform.configuration.api;
 	requires org.junit.platform.commons;
+	requires tools.jackson.databind;
 
 	provides javax.annotation.processing.Processor with org.junit.platform.configuration.processor.ConfigurationMetadataAnnotationProcessor;
 }

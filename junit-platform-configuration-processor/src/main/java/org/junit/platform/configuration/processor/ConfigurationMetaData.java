@@ -21,6 +21,10 @@ class ConfigurationMetaData {
 	private final List<Property> properties = new ArrayList<>();
 	//	private final List<Hint> hints = new ArrayList<>();
 
+	public List<Property> getProperties() {
+		return properties;
+	}
+
 	void addProperty(Property property) {
 		properties.add(property);
 	}
