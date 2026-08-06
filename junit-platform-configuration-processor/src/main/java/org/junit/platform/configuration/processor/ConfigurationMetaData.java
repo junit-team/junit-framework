@@ -64,13 +64,12 @@ class ConfigurationMetaData {
 	}
 
 	record Deprecation( //
-			Level level, //
+			@Nullable Level level, //
 			@Nullable String reason, //
 			@Nullable String replacement, //
 			@Nullable String since //
 
-
-		) {
+	) {
 
 		enum Level {
 			WARNING("warning"), ERROR("error");

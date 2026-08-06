@@ -97,7 +97,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 			return null;
 		}
 		return new ConfigurationMetaData.Deprecation( //
-			WARNING, //
+			null, //
 			null, // TODO:
 			null, // TODO:
 			null // TODO:

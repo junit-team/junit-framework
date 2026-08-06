@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Group;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Hint;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
@@ -122,7 +123,10 @@ class JsonWriter {
 	private JsonObject toJsonObject(Deprecation deprecation) {
 		var builder = factory.createObjectBuilder();
 
-		builder.add("level", toJsonValue(deprecation.level()));
+		var level = deprecation.level();
+		if (level != null) {
+			builder.add("level", toJsonValue(level));
+		}
 
 		var reason = deprecation.reason();
 		if (reason != null) {
@@ -142,7 +146,7 @@ class JsonWriter {
 		return builder.build();
 	}
 
-	private String toJsonValue(Deprecation.Level level) {
+	private String toJsonValue(Level level) {
 		return level.value();
 	}
 

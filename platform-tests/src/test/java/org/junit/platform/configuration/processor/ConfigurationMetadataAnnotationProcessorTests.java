@@ -88,6 +88,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		@Test
 		void deprecated() {
 			// TODO: Inheritance? Meta?
+			// TODO: Warning level?
 			compiler.compile(DeprecatedConfigurationProperty.class);
 			assertMetaDataIsEqualTo("""
 					{
@@ -95,9 +96,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					    {
 					      "name": "org.example.property",
 					      "sourceType": "org.junit.platform.configuration.processor.DeprecatedConfigurationProperty",
-					      "deprecation": {
-					        "level": "warning"
-					      }
+					      "deprecation": { }
 					    }
 					  ]
 					}""");
@@ -116,9 +115,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 							{
 							  "name": "org.example.property",
 							  "sourceType": "org.junit.platform.configuration.processor.ClassDeprecatedConfigurationProperty",
-							  "deprecation": {
-						        "level": "warn"
-						      }
+							  "deprecation": { }
 							}
 						  ]
 						}""");
