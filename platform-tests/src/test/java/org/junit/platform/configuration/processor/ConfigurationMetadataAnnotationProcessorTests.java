@@ -18,7 +18,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.ThrowableAssert;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -56,7 +58,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		@Test
 		void minimal() {
 			compiler.compile(MinimalConfigurationProperty.class);
-			assertThat(metaData()).isEqualToIgnoringWhitespace("""
+			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 						{
@@ -71,7 +73,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		void documented() {
 			// TODO: Add more complex documentation samples
 			compiler.compile(DocumentedConfigurationProperty.class);
-			assertThat(metaData()).isEqualToIgnoringWhitespace("""
+			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 					    {
@@ -87,7 +89,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		void deprecated() {
 			// TODO: Inheritance? Meta?
 			compiler.compile(DeprecatedConfigurationProperty.class);
-			assertThat(metaData()).isEqualToIgnoringWhitespace("""
+			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 					    {
@@ -107,7 +109,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		void classDeprecated() {
 			// TODO: Inheritance? Meta?
 			compiler.compile(ClassDeprecatedConfigurationProperty.class);
-			assertThat(metaData()).isEqualToIgnoringWhitespace(
+			assertMetaDataIsEqualTo(
 				"""
 						{
 						  "properties": [
@@ -141,6 +143,10 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			asserPreconditionViolation(() -> compiler.compile(NonStringConfigurationProperty.class),
 				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value".formatted(
 					NonStringConfigurationProperty.class.getName()));
+		}
+
+		private AbstractStringAssert<?> assertMetaDataIsEqualTo(@Language("JSON") String json) {
+			return assertThat(metaData()).isEqualToIgnoringWhitespace(json);
 		}
 
 		private String metaData() throws UncheckedIOException {
