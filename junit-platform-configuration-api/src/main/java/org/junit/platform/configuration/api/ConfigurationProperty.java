@@ -21,4 +21,12 @@ import org.apiguardian.api.API;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)
 public @interface ConfigurationProperty {
+
+	/**
+	 * The data type of the property. For example {@link String},
+	 * {@link Integer}, {@link Boolean} or {@link Class}.
+	 *
+	 * @return the data type of the property.
+	 */
+	Class<?> type() default Void.class;
 }

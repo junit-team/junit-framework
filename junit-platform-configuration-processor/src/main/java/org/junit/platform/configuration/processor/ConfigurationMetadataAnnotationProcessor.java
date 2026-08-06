@@ -12,10 +12,10 @@ package org.junit.platform.configuration.processor;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
-import static org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level.WARNING;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
+import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -24,6 +24,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -58,6 +60,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		if (roundEnv.processingOver()) {
 			writeMetaData();
 		}
+		// TODO: Consider setting to true?
 		return false;
 	}
 
@@ -84,8 +87,8 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private ConfigurationMetaData.Property createProperty(VariableElement element) {
 		return new ConfigurationMetaData.Property( //
-			processPropertyName(element), //
-			null, // TODO:
+			processName(element), //
+			processType(element), //
 			processDescription(element), //
 			processSourceType(element), //
 			null, // TODO:
@@ -93,8 +96,22 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		);
 	}
 
+	private @Nullable String processType(VariableElement element) {
+		var configurationProperty = getAnnotation(element, ConfigurationProperty.class);
+		if (configurationProperty == null) {
+			return null;
+		}
+
+		var type = getAnnotationElementValue(configurationProperty, "type");
+		if (Void.class.getName().equals(type)) {
+			return null;
+		}
+
+		return type;
+	}
+
 	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
-		var deprecated = element.getAnnotation(Deprecated.class);
+		var deprecated = getAnnotation(element, Deprecated.class);
 		if (deprecated == null) {
 			return null;
 		}
@@ -104,6 +121,28 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 			null, // TODO:
 			null // TODO:
 		);
+	}
+
+	private @Nullable AnnotationMirror getAnnotation(Element element, Class<? extends Annotation> annotationType) {
+		var annotationTypeName = annotationType.getName();
+		for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
+			if (annotationTypeName.equals(annotation.getAnnotationType().toString())) {
+				return annotation;
+			}
+		}
+		return null;
+	}
+
+	private @Nullable String getAnnotationElementValue(AnnotationMirror annotation, String elementName) {
+		return annotation.getElementValues().entrySet() //
+				.stream() //
+				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
+				.map((element) -> {
+					var value = element.getValue().getValue();
+					return value == null ? null : value.toString();
+				}) //
+				.findFirst() //
+				.orElse(null);
 	}
 
 	private @Nullable String processDescription(VariableElement element) {
@@ -125,12 +164,12 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 				.trim();
 	}
 
-	private static String processSourceType(VariableElement element) {
+	private String processSourceType(VariableElement element) {
 		var enclosingTypeElement = getEnclosingTypeElement(element);
 		return enclosingTypeElement.getQualifiedName().toString();
 	}
 
-	private static String processPropertyName(VariableElement element) {
+	private String processName(VariableElement element) {
 		// TODO: Report preconditions problems with processingEnvironment().getMessager().printMessage() instead.
 		var enclosingTypeElement = getEnclosingTypeElement(element);
 		Preconditions.condition(isStatic(element), //
@@ -146,7 +185,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		return (String) constantValue;
 	}
 
-	private static TypeElement getEnclosingTypeElement(VariableElement element) {
+	private TypeElement getEnclosingTypeElement(VariableElement element) {
 		var enclosingElement = element.getEnclosingElement();
 		Preconditions.condition(enclosingElement instanceof TypeElement, //
 			() -> "[%s] did not have an enclosing type element" //

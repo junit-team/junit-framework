@@ -70,6 +70,21 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void stringType() {
+			compiler.compile(StringTypeConfigurationProperty.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "java.lang.String",
+						  "sourceType": "org.junit.platform.configuration.processor.StringTypeConfigurationProperty"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
 		void documented() {
 			compiler.compile(DocumentedConfigurationProperty.class);
 			assertMetaDataIsEqualTo("""
