@@ -54,6 +54,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		process(roundEnv);
+
 		if (roundEnv.processingOver()) {
 			writeMetaData();
 		}
@@ -130,6 +131,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	}
 
 	private static String processPropertyName(VariableElement element) {
+		// TODO: Report preconditions problems with processingEnvironment().getMessager().printMessage() instead.
 		var enclosingTypeElement = getEnclosingTypeElement(element);
 		Preconditions.condition(isStatic(element), //
 			() -> "Field [%s.%s] must be declared static" //
