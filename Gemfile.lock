@@ -47,7 +47,7 @@ GEM
       prawn (~> 2.2)
     public_suffix (7.0.5)
     rexml (3.4.4)
-    rouge (5.0.0)
+    rouge (5.1.0)
       strscan (~> 3.1)
     ruby-rc4 (0.1.5)
     strscan (3.1.8)
