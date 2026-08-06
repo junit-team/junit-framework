@@ -105,10 +105,17 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	}
 
 	private @Nullable String processDescription(VariableElement element) {
-		// TODO: Clean up doc comment more
-		String docComment = processingEnvironment().getElementUtils().getDocComment(element);
-		return docComment == null ? null : docComment.trim();
+		var docComment = processingEnvironment().getElementUtils().getDocComment(element);
+		if (docComment == null) {
+			return null;
+		}
+		return cleanupDocComment(docComment);
+	}
 
+	private static String cleanupDocComment(String docComment) {
+		return docComment //
+				.replaceAll(": \\{@value}\\.?", ".") //
+				.trim();
 	}
 
 	private static String processSourceType(VariableElement element) {

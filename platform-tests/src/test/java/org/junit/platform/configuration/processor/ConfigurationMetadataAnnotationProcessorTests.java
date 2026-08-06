@@ -71,7 +71,6 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documented() {
-			// TODO: Add more complex documentation samples
 			compiler.compile(DocumentedConfigurationProperty.class);
 			assertMetaDataIsEqualTo("""
 					{
@@ -83,6 +82,22 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					    }
 					  ]
 					}""");
+		}
+
+		@Test
+		void documentedWithAtValue() {
+			compiler.compile(DocumentedWithAtValueConfigurationProperty.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+						    {
+						      "name": "org.example.property",
+						      "description": "A brief description of this property.",
+						      "sourceType": "org.junit.platform.configuration.processor.DocumentedWithAtValueConfigurationProperty"
+						    }
+						  ]
+						}""");
 		}
 
 		@Test
