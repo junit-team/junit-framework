@@ -96,7 +96,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					      "name": "org.example.property",
 					      "sourceType": "org.junit.platform.configuration.processor.DeprecatedConfigurationProperty",
 					      "deprecation": {
-					        "level": "warn"
+					        "level": "warning"
 					      }
 					    }
 					  ]

@@ -122,7 +122,7 @@ class JsonWriter {
 	private JsonObject toJsonObject(Deprecation deprecation) {
 		var builder = factory.createObjectBuilder();
 
-		builder.add("level", deprecation.level());
+		builder.add("level", toJsonValue(deprecation.level()));
 
 		var reason = deprecation.reason();
 		if (reason != null) {
@@ -140,6 +140,10 @@ class JsonWriter {
 		}
 
 		return builder.build();
+	}
+
+	private String toJsonValue(Deprecation.Level level) {
+		return level.value();
 	}
 
 	private JsonObject toJsonObject(Hint hint) {

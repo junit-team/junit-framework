@@ -64,12 +64,27 @@ class ConfigurationMetaData {
 	}
 
 	record Deprecation( //
-			String level, //
+			Level level, //
 			@Nullable String reason, //
 			@Nullable String replacement, //
 			@Nullable String since //
-	) {
 
+
+		) {
+
+		enum Level {
+			WARNING("warning"), ERROR("error");
+
+			private final String value;
+
+			Level(String value) {
+				this.value = value;
+			}
+
+			String value() {
+				return value;
+			}
+		}
 	}
 
 	record Hint( //

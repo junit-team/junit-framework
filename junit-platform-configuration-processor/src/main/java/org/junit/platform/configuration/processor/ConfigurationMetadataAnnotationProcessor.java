@@ -12,6 +12,7 @@ package org.junit.platform.configuration.processor;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level.WARNING;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
@@ -95,7 +96,8 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		if (deprecated == null) {
 			return null;
 		}
-		return new ConfigurationMetaData.Deprecation("warn", //
+		return new ConfigurationMetaData.Deprecation( //
+			WARNING, //
 			null, // TODO:
 			null, // TODO:
 			null // TODO:
