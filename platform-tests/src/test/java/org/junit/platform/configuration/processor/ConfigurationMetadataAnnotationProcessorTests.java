@@ -75,11 +75,11 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
-					    {
-					      "name": "org.example.property",
-					      "description": "A brief description of this property.",
-					      "sourceType": "org.junit.platform.configuration.processor.DocumentedConfigurationProperty"
-					    }
+						{
+						  "name": "org.example.property",
+						  "description": "A brief description of this property.",
+						  "sourceType": "org.junit.platform.configuration.processor.DocumentedConfigurationProperty"
+						}
 					  ]
 					}""");
 		}
@@ -91,11 +91,59 @@ class ConfigurationMetadataAnnotationProcessorTests {
 				"""
 						{
 						  "properties": [
-						    {
-						      "name": "org.example.property",
-						      "description": "A brief description of this property.",
-						      "sourceType": "org.junit.platform.configuration.processor.DocumentedWithAtValueConfigurationProperty"
-						    }
+							{
+							  "name": "org.example.property",
+							  "description": "A brief description of this property.",
+							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithAtValueConfigurationProperty"
+							}
+						  ]
+						}""");
+		}
+
+		@Test
+		void documentedWithMultipleLines() {
+			compiler.compile(DocumentedWithMultiLinesConfigurationProperty.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "description": "A brief multi-line description of this property.",
+							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithMultiLinesConfigurationProperty"
+							}
+						  ]
+						}""");
+		}
+
+		@Test
+		void documentedWithMultipleParagraphs() {
+			compiler.compile(DocumentedWithMultipleParagraphsConfigurationProperty.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "description": "A brief description of this property.",
+							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithMultipleParagraphsConfigurationProperty"
+							}
+						  ]
+						}""");
+		}
+
+		@Test
+		void documentedWithHeader() {
+			compiler.compile(DocumentedWithHeaderConfigurationProperty.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "description": "A brief description of this property.",
+							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithHeaderConfigurationProperty"
+							}
 						  ]
 						}""");
 		}

@@ -17,6 +17,7 @@ import static org.junit.platform.configuration.processor.ConfigurationMetaData.D
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -106,14 +107,19 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private @Nullable String processDescription(VariableElement element) {
 		var docComment = processingEnvironment().getElementUtils().getDocComment(element);
-		if (docComment == null) {
-			return null;
-		}
-		return cleanupDocComment(docComment);
+		return docComment == null ? null : cleanupDocComment(docComment);
 	}
 
 	private static String cleanupDocComment(String docComment) {
-		return docComment //
+		// TODO: Creating patterns over and over is not very efficient
+		var matcher = Pattern.compile("<p>|<h\\d>").matcher(docComment);
+		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
+		return firstParagraph //
+				// Replace newlines with space
+				.replaceAll("[\n\r]", " ") //
+				// Merge multiple spaces
+				.replaceAll(" +", " ") //
+				// Replace the `: {@value}` conventional syntax.
 				.replaceAll(": \\{@value}\\.?", ".") //
 				.trim();
 	}
