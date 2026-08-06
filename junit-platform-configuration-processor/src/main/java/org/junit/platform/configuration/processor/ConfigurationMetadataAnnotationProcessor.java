@@ -10,7 +10,6 @@
 
 package org.junit.platform.configuration.processor;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_ABSENT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -32,9 +31,6 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationProperty;
-
-import tools.jackson.core.StreamWriteFeature;
-import tools.jackson.databind.json.JsonMapper;
 
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationProperty")
@@ -64,17 +60,10 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private void writeMetaData() {
 		try {
-			var mapper = JsonMapper.builder() //
-					.changeDefaultPropertyInclusion(value -> value //
-							.withContentInclusion(NON_ABSENT) //
-							.withValueInclusion(NON_ABSENT) //
-					) //
-					.disable(StreamWriteFeature.AUTO_CLOSE_TARGET) //
-					.build();
 			var resource = processingEnvironment().getFiler() //
 					.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
 			try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), UTF_8))) {
-				mapper.writeValue(out, metaData());
+				new JsonWriter().writeValue(out, metaData());
 			}
 		}
 		catch (Exception ex) {

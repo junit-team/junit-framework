@@ -12,42 +12,54 @@ package org.junit.platform.configuration.processor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
 class ConfigurationMetaData {
 
-	//	private final List<Group> groups = new ArrayList<>();
+	private final List<Group> groups = new ArrayList<>();
 	private final List<Property> properties = new ArrayList<>();
-	//	private final List<Hint> hints = new ArrayList<>();
+	private final List<Hint> hints = new ArrayList<>();
 
-	public List<Property> getProperties() {
+	List<Property> properties() {
 		return properties;
+	}
+
+	List<Group> groups() {
+		return groups;
+	}
+
+	List<Hint> hints() {
+		return hints;
 	}
 
 	void addProperty(Property property) {
 		properties.add(property);
 	}
 
-	//
-	//	record Group( //
-	//			String name, //
-	//			@Nullable String type, //
-	//			@Nullable String description, //
-	//			@Nullable String sourceType, //
-	//			@Nullable String sourceMethod //
-	//	) {
-	//
-	//	}
+	record Group( //
+			String name, //
+			@Nullable String type, //
+			@Nullable String description, //
+			@Nullable String sourceType, //
+			@Nullable String sourceMethod //
+	) {
+
+	}
 
 	record Property( //
 			String name, //
 			@Nullable String type, //
 			@Nullable String description, //
 			@Nullable String sourceType, //
-			@Nullable Object defaultValue, //
+			@Nullable OneOrManyString defaultValue, //
 			@Nullable Deprecation deprecation //
 	) {
+
+	}
+
+	interface OneOrManyString {
 
 	}
 
@@ -60,24 +72,24 @@ class ConfigurationMetaData {
 
 	}
 
-	//	record Hint( //
-	//			String name, //
-	//			List<ValueHint> values, //
-	//			List<ValueProvider> providers //
-	//	) {
-	//	}
-	//
-	//	record ValueHint( //
-	//			Object value, //
-	//			          @Nullable String description //
-	//	) {
-	//
-	//	}
-	//
-	//	record ValueProvider( //
-	//			String name, //
-	//			Object parameters //
-	//	) {
-	//
-	//	}
+	record Hint( //
+			String name, //
+			List<ValueHint> values, //
+			List<ValueProvider> providers //
+	) {
+	}
+
+	record ValueHint( //
+			String value, //
+			@Nullable String description //
+	) {
+
+	}
+
+	record ValueProvider( //
+			String name, //
+			Map<String, String> parameters //
+	) {
+
+	}
 }

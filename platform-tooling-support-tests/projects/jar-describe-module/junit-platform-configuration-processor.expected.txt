@@ -1,10 +1,10 @@
 org.junit.platform.configuration.processor@${version} jar:file:.+/junit-platform-configuration-processor-\d.+\.jar..module-info\.class
+requires jakarta.json
 requires java.base mandated
 requires java.compiler
 requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
 requires org.junit.platform.commons
 requires org.junit.platform.configuration.api
-requires tools.jackson.databind
 provides javax.annotation.processing.Processor with org.junit.platform.configuration.processor.ConfigurationMetadataAnnotationProcessor
 contains org.junit.platform.configuration.processor
