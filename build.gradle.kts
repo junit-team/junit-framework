@@ -2,7 +2,6 @@ import junitbuild.extensions.modularProjects
 
 plugins {
 	id("junitbuild.base-conventions")
-	id("junitbuild.build-metadata")
 	id("junitbuild.checkstyle-nohttp")
 	id("junitbuild.jacoco-aggregation-conventions")
 	id("junitbuild.temp-maven-repo")

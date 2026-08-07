@@ -14,6 +14,7 @@ import junitbuild.javadoc.linkOffline
 import junitbuild.javadoc.moduleSourcePath
 import junitbuild.javadoc.overview
 import junitbuild.javadoc.since
+import junitbuild.metadata.buildMetadata
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import java.nio.file.Files
 import kotlin.io.path.writeLines
@@ -95,7 +96,6 @@ dependencies {
 	standaloneConsoleLauncher(projects.junitPlatformConsoleStandalone)
 }
 
-val buildRevision = rootProject.extra["buildRevision"] as String
 val snapshot = version.isSnapshot()
 val releaseBranch = if (snapshot) "HEAD" else "r${version}"
 val replaceCurrentDocs = buildParameters.documentation.replaceCurrentDocs
@@ -431,9 +431,14 @@ tasks {
 	}
 
 	register("prepareGitHubAttestation", Sync::class) {
+		val buildRevision = project.buildMetadata.map { it.buildRevision.substring(0, 7) }
 		from(attestationClasspath)
 		into(layout.buildDirectory.dir("attestation"))
-		rename("(.*)-SNAPSHOT.jar", "$1-SNAPSHOT+${buildRevision.substring(0, 7)}.jar")
+		rename { fileName ->
+			"(.*)-SNAPSHOT.jar".toRegex().replace(fileName) {
+				"${it.groupValues[1]}-SNAPSHOT+${buildRevision.get()}.jar"
+			}
+		}
 	}
 
 	generateAntoraYml {
