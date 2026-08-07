@@ -25,7 +25,9 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.DisabledOnOpenJ9;
 import org.junit.jupiter.api.io.TempDir;
@@ -79,7 +81,7 @@ class GraalVmStarterTests {
 	@Test
 	@Timeout(value = 1, unit = MINUTES)
 	void reachabilityMetadataContainsRequiredSerializableTypes(@TempDir Path workspace,
-			@FilePrefix("gradle") OutputFiles outputFiles) throws Exception {
+			@FilePrefix("gradle") OutputFiles outputFiles, TestReporter reporter) throws Exception {
 
 		var gradlew = ProcessStarters.gradlew() //
 				.workingDir(copyToWorkspace(Projects.GRAALVM_STARTER, workspace)) //
@@ -95,6 +97,7 @@ class GraalVmStarterTests {
 		assertEquals(0, result.exitCode());
 
 		var agentOutput = workspace.resolve(Path.of("build/native/agent-output/test/reachability-metadata.json"));
+		reporter.publishFile(agentOutput, MediaType.APPLICATION_JSON);
 		assertThat(readSerializableTypes(agentOutput)) //
 				.isEqualTo(readSerializableTypesFromJar());
 	}
