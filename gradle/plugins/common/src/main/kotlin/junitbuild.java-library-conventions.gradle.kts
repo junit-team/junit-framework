@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import junitbuild.extensions.isMavenized
 import junitbuild.extensions.isSnapshot
 import java.time.Instant
 
@@ -12,8 +13,6 @@ plugins {
 	id("junitbuild.java-errorprone-conventions")
 }
 
-@Suppress("UNCHECKED_CAST")
-val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
 val buildTimestamp = rootProject.extra["buildTimestamp"] as Instant
 val buildDate = rootProject.extra["buildDate"] as String
 val buildTime = rootProject.extra["buildTime"] as String
@@ -25,7 +24,7 @@ java {
 	modularity.inferModulePath = true
 }
 
-if (project.path in mavenizedProjects.map { it.path }) {
+if (project.isMavenized) {
 
 	apply(plugin = "junitbuild.javadoc-conventions")
 	apply(plugin = "junitbuild.publishing-conventions")

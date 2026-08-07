@@ -1,5 +1,6 @@
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
+import org.gradle.kotlin.dsl.extra
 
 pluginManagement {
 	includeBuild("gradle/base")
@@ -38,6 +39,18 @@ rootDir.toPath()
 		include(dir.name)
 		project(dir).buildFileName = buildScript.name
 	}
+
+run {
+	val nonMavenizedProjects = setOf(
+		":documentation", ":junit-bom", ":jupiter-tests", ":platform-tests", ":platform-tooling-support-tests"
+	)
+	val mavenizedProjectPaths = rootProject.children.map { it.path }.sorted() - nonMavenizedProjects
+	val modularProjectPaths = mavenizedProjectPaths - ":junit-platform-console-standalone"
+	gradle.lifecycle.beforeProject {
+		extra["mavenizedProjectPaths"] = mavenizedProjectPaths
+		extra["modularProjectPaths"] = modularProjectPaths
+	}
+}
 
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

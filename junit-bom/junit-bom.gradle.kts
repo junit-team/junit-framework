@@ -1,3 +1,6 @@
+import junitbuild.extensions.artifactGroup
+import junitbuild.extensions.mavenizedProjects
+
 plugins {
 	`java-platform`
 	id("junitbuild.publishing-conventions")
@@ -7,15 +10,13 @@ description = "JUnit (Bill of Materials)"
 
 dependencies {
 	constraints {
-		@Suppress("UNCHECKED_CAST")
-		val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
 		val jitPackVersion = buildParameters.jitpack.version
 			.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
 		mavenizedProjects.sortedBy { it.name }
 			.forEach {
 				api(
 					jitPackVersion
-						.map<Any> { version -> "${it.group}:${it.name}:${version}" }
+						.map<Any> { version -> "${it.artifactGroup}:${it.name}:${version}" }
 						.orElse(it)
 				)
 			}

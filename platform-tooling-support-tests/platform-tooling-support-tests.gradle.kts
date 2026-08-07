@@ -1,6 +1,8 @@
 import junitbuild.extensions.capitalized
 import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.javaModuleName
+import junitbuild.extensions.mavenizedProjects
+import junitbuild.extensions.modularProjects
 import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.kotlin.dsl.support.listFilesOrdered
@@ -51,9 +53,6 @@ val mavenDistribution = configurations.dependencyScope("mavenDistribution")
 val mavenDistributionClasspath = configurations.resolvable("mavenDistributionClasspath") {
 	extendsFrom(mavenDistribution.get())
 }
-
-@Suppress("UNCHECKED_CAST")
-val modularProjects = rootProject.extra["modularProjects"] as List<ProjectDependency>
 
 dependencies {
 	implementation(libs.commons.io) {
@@ -109,8 +108,6 @@ val unzipMavenDistribution = tasks.register("unzipMavenDistribution", Sync::clas
 
 val normalizeMavenRepo = tasks.register("normalizeMavenRepo", Sync::class) {
 
-	@Suppress("UNCHECKED_CAST")
-	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
 	val tempRepoDir = rootProject.extra["tempRepoDir"] as File
 	val tempRepoName = rootProject.extra["tempRepoName"] as String
 

@@ -1,3 +1,4 @@
+import junitbuild.extensions.artifactGroup
 import junitbuild.extensions.isSnapshot
 
 plugins {
@@ -8,15 +9,7 @@ plugins {
 	id("junitbuild.license")
 }
 
-group = buildParameters.publishing.group
-	.getOrElse(
-		when {
-			name.startsWith("junit-jupiter") -> "org.junit.jupiter"
-			name.startsWith("junit-platform") -> "org.junit.platform"
-			name.startsWith("junit-vintage") -> "org.junit.vintage"
-			else -> "org.junit"
-		}
-	)
+group = buildParameters.publishing.group.getOrElse(artifactGroup)
 
 val signArtifacts = buildParameters.publishing.signArtifacts.getOrElse(!(project.version.isSnapshot() || buildParameters.ci))
 

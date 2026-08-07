@@ -5,6 +5,8 @@ import junitbuild.exec.RunConsoleLauncher
 import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.isSnapshot
 import junitbuild.extensions.javaModuleName
+import junitbuild.extensions.mavenizedProjects
+import junitbuild.extensions.modularProjects
 import junitbuild.javadoc.GenerateJavadoc
 import junitbuild.javadoc.VersionNumber
 import junitbuild.javadoc.addStylesheet
@@ -23,11 +25,6 @@ plugins {
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.testing-conventions")
 }
-
-@Suppress("UNCHECKED_CAST")
-val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
-@Suppress("UNCHECKED_CAST")
-val modularProjects = rootProject.extra["modularProjects"] as List<ProjectDependency>
 
 // Because we need to set up Javadoc aggregation
 modularProjects.forEach { evaluationDependsOn(it.path) }
