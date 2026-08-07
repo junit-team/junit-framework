@@ -4,6 +4,7 @@ import java.time.Year
 
 plugins {
 	java
+	id("junitbuild.license")
 }
 
 val templates = sourceSets.create("templates")
@@ -14,7 +15,7 @@ dependencies {
 	templatesCompileOnly("junitbuild.base:code-generator-model")
 }
 
-val license = rootProject.extra["license"] as License
+val license = the<License>()
 val rootTargetDir = layout.buildDirectory.dir("generated/sources/jte")
 
 val generateCode = tasks.register("generateCode") {

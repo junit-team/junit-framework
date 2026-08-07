@@ -5,6 +5,7 @@ plugins {
 	signing
 	id("junitbuild.base-conventions")
 	id("junitbuild.build-parameters")
+	id("junitbuild.license")
 }
 
 group = buildParameters.publishing.group
@@ -53,7 +54,7 @@ publishing {
 				}
 				licenses {
 					license {
-						val license = rootProject.extra["license"] as License
+						val license = project.the<License>()
 						name = license.name
 						url = license.url.toString()
 					}
