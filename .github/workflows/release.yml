@@ -70,7 +70,7 @@ jobs:
             --remote-repo-url=${{ env.STAGING_REPO_URL }}
       - name: Generate build provenance attestations
         if: ${{ inputs.dryRun == false }}
-        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: build/repo/**/*.jar
 
@@ -78,42 +78,32 @@ jobs:
     name: Verify consumability
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 1
-          path: junit-framework
-          persist-credentials: false
       - name: Check out examples repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ github.repository_owner }}/junit-examples
           token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_EXAMPLES_REPO }}
           fetch-depth: 1
-          path: junit-examples
           persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           java-version: 25
           distribution: temurin
       - uses: sbt/setup-sbt@bfea3c5f48abd221b04a6df4798aa5eb8b6a2baf # v1.5.6
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
-        working-directory: junit-examples
       - name: Prepare Maven Central user token
-        uses: ./junit-framework/.github/actions/maven-central-user-token
+        uses: $/.github/actions/maven-central-user-token
         with:
           username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       - name: Inject staging repository URL
         run: java src/StagingRepoInjector.java ${STAGING_REPO_URL}
-        working-directory: junit-examples
       - name: Build examples
         run: java src/Builder.java --exclude=junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
-        working-directory: junit-examples
         env:
-          MAVEN_ARGS: --settings ${{ github.workspace }}/junit-examples/src/central-staging-maven-settings.xml --activate-profiles central-staging
+          MAVEN_ARGS: --settings ${{ github.workspace }}/src/central-staging-maven-settings.xml --activate-profiles central-staging
 
   close_github_milestone:
     name: Close GitHub milestone
@@ -201,7 +191,7 @@ jobs:
           token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_EXAMPLES_REPO }}
           persist-credentials: true
       - name: Set up JDK
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           java-version: 25
           distribution: temurin

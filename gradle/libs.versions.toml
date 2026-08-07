@@ -16,14 +16,14 @@ opentest4j = "1.3.0"
 openTestReporting = "0.2.7"
 snapshotTests = "1.11.0"
 surefire = "3.5.6"
-xmlunit = "2.12.0"
+xmlunit = "2.13.0"
 
 [libraries]
 ant = { module = "org.apache.ant:ant", version.ref = "ant" }
 ant-junit = { module = "org.apache.ant:ant-junit", version.ref = "ant" }
 ant-junitlauncher = { module = "org.apache.ant:ant-junitlauncher", version.ref = "ant" }
 apiguardian = { module = "org.apiguardian:apiguardian-api", version.ref = "apiguardian" }
-archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.4.2" }
+archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.5.0" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.11" }
@@ -33,9 +33,10 @@ commons-io = { module = "commons-io:commons-io", version = "2.22.0" }
 error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.30.0" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.50.0" }
 fastcsv = { module = "de.siegmar:fastcsv", version = "4.4.0" }
-groovy = { module = "org.apache.groovy:groovy", version = "5.0.7" }
+groovy = { module = "org.apache.groovy:groovy", version = "5.0.8" }
 groovy2-bom = { module = "org.codehaus.groovy:groovy-bom", version = "2.5.23" }
 hamcrest = { module = "org.hamcrest:hamcrest", version = "3.0" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.5" }
@@ -76,7 +77,7 @@ xmlunit-assertj = { module = "org.xmlunit:xmlunit-assertj3", version.ref = "xmlu
 xmlunit-placeholders = { module = "org.xmlunit:xmlunit-placeholders", version.ref = "xmlunit" }
 xmlunit-jakarta-jaxb-impl = { module = "org.xmlunit:xmlunit-jakarta-jaxb-impl", version.ref = "xmlunit" }
 testingAnnotations = { module = "com.gradle:develocity-testing-annotations", version = "2.0.1" }
-woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.2.1" }
+woodstox = { module = "com.fasterxml.woodstox:woodstox-core", version = "7.2.2" }
 
 # Only declared here so Dependabot knows when to update the referenced versions
 eclipse-platform = { module = "org.eclipse.platform:org.eclipse.platform", version.ref = "eclipse" }
@@ -93,7 +94,7 @@ xmlunit = ["xmlunit-assertj", "xmlunit-placeholders", "xmlunit-jakarta-jaxb-impl
 [plugins]
 bnd = { id = "biz.aQute.bnd", version.ref = "bnd" }
 buildParameters = { id = "org.gradlex.build-parameters", version = "1.4.5" }
-commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.7.0" }
+commonCustomUserData = { id = "com.gradle.common-custom-user-data-gradle-plugin", version = "2.8.0" }
 develocity = { id = "com.gradle.develocity", version = "4.5.0" }
 download = { id = "de.undercouch.download", version = "5.7.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "5.1.0" }
