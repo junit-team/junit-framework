@@ -3,7 +3,7 @@ plugins {
 	id("junitbuild.publishing-conventions")
 }
 
-description = "${rootProject.description} (Bill of Materials)"
+description = "JUnit (Bill of Materials)"
 
 dependencies {
 	constraints {

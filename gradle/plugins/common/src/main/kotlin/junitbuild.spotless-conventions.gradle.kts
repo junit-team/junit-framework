@@ -16,7 +16,7 @@ spotless {
 	pluginManager.withPlugin("java") {
 
 		val license = rootProject.extra["license"] as License
-		val configDir = rootProject.layout.projectDirectory.dir("gradle/config/eclipse")
+		val configDir = layout.settingsDirectory.dir("gradle/config/eclipse")
 		val importOrderConfigFile = configDir.file("junit-eclipse.importorder")
 		val javaFormatterConfigFile = configDir.file("junit-eclipse-formatter-settings.xml")
 
