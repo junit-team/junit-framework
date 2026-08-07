@@ -17,11 +17,14 @@ jobs:
       with:
         fetch-depth: 1
         persist-credentials: false
-    - name: Install GraalVM
-      uses: graalvm/setup-graalvm@5298d94fb55a4f185c602eeac5de1b553882abe2 # v1.6.4
+    - name: Set up GraalVM 21
+      uses: ./.github/actions/setup-graalvm
       with:
-        distribution: graalvm
         java-version: 21
+    - name: Set up GraalVM 25
+      uses: ./.github/actions/setup-graalvm
+      with:
+        java-version: 25
     - name: Build
       uses: ./.github/actions/main-build
       with:
