@@ -2,6 +2,8 @@ import junitbuild.extensions.capitalized
 import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.javaModuleName
 import junitbuild.extensions.mavenizedProjects
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
 import junitbuild.extensions.modularProjects
 import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
@@ -53,6 +55,13 @@ val mavenDistribution = configurations.dependencyScope("mavenDistribution")
 val mavenDistributionClasspath = configurations.resolvable("mavenDistributionClasspath") {
 	extendsFrom(mavenDistribution.get())
 }
+val tempMavenRepo = configurations.dependencyScope("tempMavenRepo")
+val allTempMavenRepos = configurations.resolvable("tempMavenRepoClasspath") {
+	extendsFrom(tempMavenRepo.get())
+	attributes {
+		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
+	}
+}
 
 dependencies {
 	implementation(libs.commons.io) {
@@ -97,6 +106,9 @@ dependencies {
 			isTransitive = false
 		}
 	}
+
+	tempMavenRepo(projects.junitBom)
+	mavenizedProjects.forEach { tempMavenRepo(it) }
 }
 
 val mavenDistributionDir = layout.buildDirectory.dir("maven-distribution")
@@ -107,28 +119,20 @@ val unzipMavenDistribution = tasks.register("unzipMavenDistribution", Sync::clas
 }
 
 val normalizeMavenRepo = tasks.register("normalizeMavenRepo", Sync::class) {
-
-	val tempRepoDir = rootProject.extra["tempRepoDir"] as File
-	val tempRepoName = rootProject.extra["tempRepoName"] as String
-
-	// All maven-aware projects must be published to the local temp repository
-	(mavenizedProjects + projects.junitBom)
-		.map { project -> dependencyProject(project).tasks.named("publishAllPublicationsTo${tempRepoName.capitalized()}Repository") }
-		.forEach { dependsOn(it) }
-
-	from(tempRepoDir) {
+	from(allTempMavenRepos) {
 		exclude("**/maven-metadata.xml*")
 		exclude("**/*.md5")
 		exclude("**/*.sha*")
 		exclude("**/*.module")
 	}
-	from(tempRepoDir) {
+	from(allTempMavenRepos) {
 		include("**/*.module")
 		val regex = "\"(sha\\d+|md5|size)\": (?:\".+\"|\\d+)(,)?".toRegex()
 		filter { line -> regex.replace(line, "\"normalized-$1\": \"normalized-value\"$2") }
 	}
 	rename("(.*\\W)\\d{8}\\.\\d{6}-\\d+(\\W.*)", "$1SNAPSHOT$2")
 	into(layout.buildDirectory.dir("normalized-repo"))
+	duplicatesStrategy = DuplicatesStrategy.FAIL
 }
 
 val archUnit = testing.suites.register("archUnit", JvmTestSuite::class) {

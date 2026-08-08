@@ -1,5 +1,7 @@
 import junitbuild.extensions.artifactGroup
 import junitbuild.extensions.isSnapshot
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
 
 plugins {
 	`maven-publish`
@@ -10,6 +12,25 @@ plugins {
 }
 
 group = buildParameters.publishing.group.getOrElse(artifactGroup)
+
+val tempMavenRepoDir = layout.buildDirectory.dir("temp-maven-repo")
+
+val clearTempMavenRepo = tasks.register<Delete>("clearTempMavenRepo") {
+	delete(tempMavenRepoDir)
+}
+
+tasks.withType<PublishToMavenRepository>().named { it.endsWith("ToTempRepository") }.configureEach {
+	dependsOn(clearTempMavenRepo)
+}
+
+configurations.consumable("tempMavenRepoElements") {
+	attributes {
+		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
+	}
+	outgoing.artifact(tempMavenRepoDir) {
+		builtBy("publishAllPublicationsToTempRepository")
+	}
+}
 
 val signArtifacts = buildParameters.publishing.signArtifacts.getOrElse(!(project.version.isSnapshot() || buildParameters.ci))
 
@@ -24,6 +45,12 @@ tasks.withType<Sign>().configureEach {
 }
 
 publishing {
+	repositories {
+		maven {
+			name = "temp"
+			url = uri(tempMavenRepoDir)
+		}
+	}
 	publications {
 		create<MavenPublication>("maven") {
 			version = buildParameters.jitpack.version
