@@ -2,7 +2,6 @@ import junitbuild.exec.CaptureJavaExecOutput
 import junitbuild.exec.ClasspathSystemPropertyProvider
 import junitbuild.exec.GenerateStandaloneConsoleLauncherShadowedArtifactsFile
 import junitbuild.exec.RunConsoleLauncher
-import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.isSnapshot
 import junitbuild.extensions.javaModuleName
 import junitbuild.extensions.mavenizedProjects
@@ -15,6 +14,7 @@ import junitbuild.javadoc.moduleSourcePath
 import junitbuild.javadoc.overview
 import junitbuild.javadoc.since
 import junitbuild.metadata.buildMetadata
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import java.nio.file.Files
 import kotlin.io.path.writeLines
@@ -26,9 +26,6 @@ plugins {
 	id("junitbuild.kotlin-library-conventions")
 	id("junitbuild.testing-conventions")
 }
-
-// Because we need to set up Javadoc aggregation
-modularProjects.forEach { evaluationDependsOn(it.path) }
 
 javaLibrary {
 	mainJavaVersion = JavaVersion.VERSION_17
@@ -48,11 +45,38 @@ val attestationClasspath = configurations.resolvable("attestationClasspath") {
 	extendsFrom(attestation.get())
 	isTransitive = false
 }
-val allJavadocSinceValues = configurations.dependencyScope("allJavadocSinceValues")
+val javadocSource = configurations.dependencyScope("javadocSource")
 val allJavadocSinceValuesClasspath = configurations.resolvable("allJavadocSinceValuesClasspath") {
-	extendsFrom(allJavadocSinceValues.get())
+	extendsFrom(javadocSource.get())
 	attributes {
 		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named("javadoc-since-values"))
+	}
+}
+val javadocSourcePath = configurations.resolvable("javadocSourcePath") {
+	extendsFrom(javadocSource.get())
+	isTransitive = false
+	attributes {
+		attribute(Category.CATEGORY_ATTRIBUTE, named(Category.VERIFICATION))
+		attribute(VerificationType.VERIFICATION_TYPE_ATTRIBUTE, named(VerificationType.MAIN_SOURCES))
+	}
+}
+val javadocClasspath = configurations.dependencyScope("javadocClasspath")
+val javadocApiClasspath = configurations.resolvable("javadocApiClasspath") {
+	extendsFrom(javadocClasspath.get())
+	attributes {
+		attribute(Usage.USAGE_ATTRIBUTE, named(Usage.JAVA_API))
+		attribute(Category.CATEGORY_ATTRIBUTE, named(Category.LIBRARY))
+		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named(LibraryElements.JAR))
+		attribute(Bundling.BUNDLING_ATTRIBUTE, named(Bundling.EXTERNAL))
+	}
+}
+val javadocRuntimeClasspath = configurations.resolvable("javadocRuntimeClasspath") {
+	extendsFrom(javadocClasspath.get())
+	attributes {
+		attribute(Usage.USAGE_ATTRIBUTE, named(Usage.JAVA_RUNTIME))
+		attribute(Category.CATEGORY_ATTRIBUTE, named(Category.LIBRARY))
+		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named(LibraryElements.JAR))
+		attribute(Bundling.BUNDLING_ATTRIBUTE, named(Bundling.EXTERNAL))
 	}
 }
 val tools = sourceSets.create("tools")
@@ -70,7 +94,16 @@ dependencies {
 	modularProjects.forEach { apiReport(it) }
 	apiReport(libs.openTestReporting.tooling.spi)
 
-	modularProjects.forEach { allJavadocSinceValues(it) }
+	modularProjects.forEach {
+		javadocSource(it)
+		javadocClasspath(it)
+	}
+	javadocClasspath(libs.picocli)
+	javadocClasspath(libs.fastcsv)
+	javadocClasspath(libs.openTestReporting.events)
+	javadocClasspath(libs.kotlinx.coroutines.core)
+	javadocClasspath(kotlin("stdlib"))
+	javadocClasspath(kotlin("reflect"))
 
 	// Pull in all "mavenized projects" to ensure that they are included
 	// in the generation of build provenance attestation.
@@ -317,7 +350,6 @@ tasks {
 	}
 
 	val aggregateJavadocs = register("aggregateJavadocs", GenerateJavadoc::class) {
-		dependsOn(modularProjects.map { dependencyProject(it).tasks.jar })
 		dependsOn(downloadJavadocElementLists, mergeJavadocSinceValues)
 
 		group = "Documentation"
@@ -361,17 +393,17 @@ tasks {
 		modularProjects.forEach { project ->
 			moduleSourcePath(
 					project.javaModuleName,
-					files(dependencyProject(project).sourceSets.named { it.startsWith("main") }.map {
-						it.allJava.sourceDirectories
-					})
+					javadocSourcePath.get().incoming.artifactView {
+						componentFilter { it is ProjectComponentIdentifier && it.projectPath == project.path }
+					}.files
 			)
 		}
 
-		sourceFiles.from(modularProjects.map { project ->
-			files(dependencyProject(project).sourceSets.named { it.startsWith("main") }.map { it.allJava })
+		sourceFiles.from(javadocSourcePath.get().incoming.files.asFileTree.matching {
+			include("**/*.java")
 		})
 
-		classpath.from(modularProjects.map { dependencyProject(it).sourceSets.main.get().compileClasspath })
+		classpath.from(javadocApiClasspath, javadocRuntimeClasspath)
 
 		args.addAll(
 			"--module", modularProjects.joinToString(",") { it.javaModuleName },
