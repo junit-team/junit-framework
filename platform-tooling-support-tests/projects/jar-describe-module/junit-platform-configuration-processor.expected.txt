@@ -1,5 +1,4 @@
 org.junit.platform.configuration.processor@${version} jar:file:.+/junit-platform-configuration-processor-\d.+\.jar..module-info\.class
-requires jakarta.json
 requires java.base mandated
 requires java.compiler
 requires org.apiguardian.api static transitive
