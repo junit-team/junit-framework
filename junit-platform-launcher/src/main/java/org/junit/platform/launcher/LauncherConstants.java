@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
+import org.junit.platform.configuration.api.ConfigurationProperty;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
@@ -44,6 +45,7 @@ public class LauncherConstants {
 	 * @see ReportEntry
 	 * @see TestExecutionListener#reportingEntryPublished(TestIdentifier, ReportEntry)
 	 */
+	@ConfigurationProperty
 	public static final String CAPTURE_STDOUT_PROPERTY_NAME = "junit.platform.output.capture.stdout";
 
 	/**
