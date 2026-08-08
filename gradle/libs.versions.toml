@@ -28,7 +28,7 @@ assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.11" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
-classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.186" }
+classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.187" }
 commons-io = { module = "commons-io:commons-io", version = "2.22.0" }
 error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.30.0" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.50.0" }
