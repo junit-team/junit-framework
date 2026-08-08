@@ -1,4 +1,5 @@
 import junitbuild.extensions.capitalized
+import junitbuild.extensions.mavenizedProjects
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.plugins.ide.eclipse.model.Classpath
@@ -64,8 +65,6 @@ dependencies {
 	}
 
 	// --- Test run-time dependencies ---------------------------------------------
-	@Suppress("UNCHECKED_CAST")
-	val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
 	mavenizedProjects.filter { it.path != projects.junitPlatformConsoleStandalone.path }.forEach {
 		// Add all projects to the classpath for tests using classpath scanning
 		testRuntimeOnly(it)

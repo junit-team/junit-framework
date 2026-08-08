@@ -1,21 +1,48 @@
+import junitbuild.extensions.artifactGroup
 import junitbuild.extensions.isSnapshot
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
+import junitbuild.release.VerifyBinaryArtifactsAreIdentical
 
 plugins {
 	`maven-publish`
 	signing
 	id("junitbuild.base-conventions")
 	id("junitbuild.build-parameters")
+	id("junitbuild.license")
 }
 
-group = buildParameters.publishing.group
-	.getOrElse(
-		when {
-			name.startsWith("junit-jupiter") -> "org.junit.jupiter"
-			name.startsWith("junit-platform") -> "org.junit.platform"
-			name.startsWith("junit-vintage") -> "org.junit.vintage"
-			else -> "org.junit"
-		}
-	)
+group = buildParameters.publishing.group.getOrElse(artifactGroup)
+
+val tempMavenRepoDir = layout.buildDirectory.dir("temp-maven-repo")
+
+val clearTempMavenRepo = tasks.register<Delete>("clearTempMavenRepo") {
+	delete(tempMavenRepoDir)
+}
+
+tasks.withType<PublishToMavenRepository>().named { it.endsWith("ToTempRepository") }.configureEach {
+	dependsOn(clearTempMavenRepo)
+}
+
+configurations.consumable("tempMavenRepoElements") {
+	attributes {
+		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
+		attribute(Category.CATEGORY_ATTRIBUTE, named(TEMP_MAVEN_REPO_ATTRIBUTE_VALUE))
+	}
+	outgoing.artifact(tempMavenRepoDir) {
+		builtBy("publishAllPublicationsToTempRepository")
+	}
+}
+
+// Verify that this project's freshly built artifacts are byte-for-byte identical
+// to the ones already staged in the remote repository. Gated on the `java`
+// plugin since jar-less projects (e.g. the BOM) publish no artifacts to compare.
+pluginManager.withPlugin("java") {
+	tasks.register<VerifyBinaryArtifactsAreIdentical>("verifyArtifactsInStagingRepositoryAreReproducible") {
+		dependsOn("publishAllPublicationsToTempRepository")
+		localRepoDir = tempMavenRepoDir
+	}
+}
 
 val signArtifacts = buildParameters.publishing.signArtifacts.getOrElse(!(project.version.isSnapshot() || buildParameters.ci))
 
@@ -30,6 +57,12 @@ tasks.withType<Sign>().configureEach {
 }
 
 publishing {
+	repositories {
+		maven {
+			name = "temp"
+			url = uri(tempMavenRepoDir)
+		}
+	}
 	publications {
 		create<MavenPublication>("maven") {
 			version = buildParameters.jitpack.version
@@ -53,7 +86,7 @@ publishing {
 				}
 				licenses {
 					license {
-						val license = rootProject.extra["license"] as License
+						val license = project.the<License>()
 						name = license.name
 						url = license.url.toString()
 					}
