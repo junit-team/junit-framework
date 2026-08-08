@@ -29,9 +29,6 @@ private fun toArtifactGroup(name: String) = when {
     else -> "org.junit"
 }
 
-fun Project.dependencyProject(dependency: ProjectDependency) =
-    project(dependency.path)
-
 @Suppress("UNCHECKED_CAST")
 private val Project.mavenizedProjectPaths: List<String>
     get() = extra["mavenizedProjectPaths"] as List<String>

@@ -1,11 +1,11 @@
 import junitbuild.extensions.capitalized
-import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.javaModuleName
 import junitbuild.extensions.mavenizedProjects
 import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
 import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
 import junitbuild.extensions.modularProjects
 import net.ltgt.gradle.errorprone.errorprone
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.kotlin.dsl.support.listFilesOrdered
 
@@ -62,6 +62,15 @@ val allTempMavenRepos = configurations.resolvable("tempMavenRepoClasspath") {
 		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
 	}
 }
+val moduleSourceDirs = configurations.dependencyScope("moduleSourceDirs")
+val moduleSourceDirsPath = configurations.resolvable("moduleSourceDirsPath") {
+	extendsFrom(moduleSourceDirs.get())
+	isTransitive = false
+	attributes {
+		attribute(Category.CATEGORY_ATTRIBUTE, named(Category.VERIFICATION))
+		attribute(VerificationType.VERIFICATION_TYPE_ATTRIBUTE, named(VerificationType.MAIN_SOURCES))
+	}
+}
 
 dependencies {
 	implementation(libs.commons.io) {
@@ -109,6 +118,8 @@ dependencies {
 
 	tempMavenRepo(projects.junitBom)
 	mavenizedProjects.forEach { tempMavenRepo(it) }
+
+	modularProjects.forEach { moduleSourceDirs(it) }
 }
 
 val mavenDistributionDir = layout.buildDirectory.dir("maven-distribution")
@@ -245,8 +256,13 @@ testing.suites.named<JvmTestSuite>("test") {
 
 				systemProperty("junit.modules", modularProjects.map { it.javaModuleName }.joinToString(","))
 
-				modularProjects.forEach {
-					jvmArgumentProviders += ModuleSourcePath(dependencyProject(it))
+				modularProjects.forEach { project ->
+					jvmArgumentProviders += ModuleSourcePath(
+						project.javaModuleName,
+						moduleSourceDirsPath.get().incoming.artifactView {
+							componentFilter { it is ProjectComponentIdentifier && it.projectPath == project.path }
+						}.files
+					)
 				}
 
 				inputs.apply {
@@ -358,13 +374,10 @@ class MavenDistribution(project: Project, sourceTask: TaskProvider<*>, distribut
 	override fun asArguments() = listOf("-DmavenDistribution=${mavenDistribution.get().asFile.absolutePath}")
 }
 
-class ModuleSourcePath(project: Project) : CommandLineArgumentProvider {
-	@Input
-	val moduleName: Property<String> = project.objects.property<String>().value(project.javaModuleName)
-
-	@Internal // already tracked indirectly
-	val dirs: ConfigurableFileCollection = project.objects.fileCollection()
-		.from(project.sourceSets["main"].allJava.sourceDirectories.filter { it.exists() })
-
-	override fun asArguments() = listOf("-Djunit.moduleSourcePath.${moduleName.get()}=${dirs.asPath}")
+class ModuleSourcePath(
+	@get:Input val moduleName: String,
+	@get:Internal val dirs: FileCollection // already tracked indirectly
+) : CommandLineArgumentProvider {
+	override fun asArguments() =
+		listOf("-Djunit.moduleSourcePath.${moduleName}=${dirs.filter { it.exists() }.asPath}")
 }
