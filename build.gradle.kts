@@ -20,7 +20,7 @@ dependencies {
 
 spotless {
 	format("misc") {
-		target("*.gradle.kts", "*/*.gradle.kts", "gradle/plugins/**/*.gradle.kts", "**/.gitignore")
+		target("*.gradle.kts", "*/*.gradle.kts", "gradle/plugins/**/*.gradle.kts")
 		targetExclude("gradle/plugins/**/build/**")
 		leadingSpacesToTabs()
 		trimTrailingWhitespace()
