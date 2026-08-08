@@ -1,11 +1,14 @@
 package junitbuild.metadata
 
+import buildparameters.BuildParametersExtension
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.kotlin.dsl.registerIfAbsent
+import org.gradle.kotlin.dsl.the
 import java.time.Instant
 import java.time.ZoneOffset.UTC
 import java.time.format.DateTimeFormatter
@@ -13,14 +16,20 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoUnit.SECONDS
 import javax.inject.Inject
 
-abstract class BuildMetadata @Inject constructor(providers: ProviderFactory) :
-    BuildService<BuildServiceParameters.None> {
+abstract class BuildMetadata @Inject constructor(private val providers: ProviderFactory) :
+    BuildService<BuildMetadata.Params> {
+
+    interface Params : BuildServiceParameters {
+        // See the 'sourceDateEpoch' build parameter; may be a number of seconds since the epoch
+        // or a formatted date/time. Absent unless overridden, in which case the timestamp is `now`.
+        val sourceDateEpoch: Property<String>
+    }
 
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE.withZone(UTC)
     private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSSZ").withZone(UTC)
 
     val buildTimestamp: Instant by lazy {
-        System.getenv("SOURCE_DATE_EPOCH")?.let { value ->
+        parameters.sourceDateEpoch.orNull?.let { value ->
             value.toLongOrNull()
                 ?.let { Instant.ofEpochSecond(it) }
                 ?: DateTimeFormatterBuilder()
@@ -44,4 +53,9 @@ abstract class BuildMetadata @Inject constructor(providers: ProviderFactory) :
 }
 
 val Project.buildMetadata: Provider<BuildMetadata>
-    get() = gradle.sharedServices.registerIfAbsent("buildMetadata", BuildMetadata::class)
+    get() {
+        val sourceDateEpoch = the<BuildParametersExtension>().sourceDateEpoch
+        return gradle.sharedServices.registerIfAbsent("buildMetadata", BuildMetadata::class) {
+            parameters.sourceDateEpoch.set(sourceDateEpoch)
+        }
+    }
