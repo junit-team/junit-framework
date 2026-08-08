@@ -4,7 +4,7 @@ inputs:
   arguments:
     required: true
     description: Gradle arguments
-    default: :platform-tooling-support-tests:test build eclipse
+    default: :platform-tooling-support-tests:test build
   encryptionKey:
     required: true
     description: Gradle cache encryption key
@@ -21,3 +21,8 @@ runs:
       with:
         name: Open Test Reports (${{ github.job }})
         path: '**/build/reports/open-test-report.html'
+    - shell: bash
+      run: |
+        ./gradlew \
+          -Dorg.gradle.isolated-projects=false \
+          eclipse
