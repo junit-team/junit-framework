@@ -27,6 +27,7 @@ tasks.withType<PublishToMavenRepository>().named { it.endsWith("ToTempRepository
 configurations.consumable("tempMavenRepoElements") {
 	attributes {
 		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
+		attribute(Category.CATEGORY_ATTRIBUTE, named(TEMP_MAVEN_REPO_ATTRIBUTE_VALUE))
 	}
 	outgoing.artifact(tempMavenRepoDir) {
 		builtBy("publishAllPublicationsToTempRepository")
