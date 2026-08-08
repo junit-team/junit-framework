@@ -16,7 +16,7 @@ dependencies {
 			.forEach {
 				api(
 					jitPackVersion
-						.map<Any> { version -> "${it.artifactGroup}:${it.name}:${version}" }
+						.map<Any> { version -> "${buildParameters.publishing.group.getOrElse(it.artifactGroup)}:${it.name}:${version}" }
 						.orElse(it)
 				)
 			}
