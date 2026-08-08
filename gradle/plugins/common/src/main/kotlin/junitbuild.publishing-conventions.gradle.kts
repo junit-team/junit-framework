@@ -2,6 +2,7 @@ import junitbuild.extensions.artifactGroup
 import junitbuild.extensions.isSnapshot
 import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
 import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
+import junitbuild.release.VerifyBinaryArtifactsAreIdentical
 
 plugins {
 	`maven-publish`
@@ -29,6 +30,16 @@ configurations.consumable("tempMavenRepoElements") {
 	}
 	outgoing.artifact(tempMavenRepoDir) {
 		builtBy("publishAllPublicationsToTempRepository")
+	}
+}
+
+// Verify that this project's freshly built artifacts are byte-for-byte identical
+// to the ones already staged in the remote repository. Gated on the `java`
+// plugin since jar-less projects (e.g. the BOM) publish no artifacts to compare.
+pluginManager.withPlugin("java") {
+	tasks.register<VerifyBinaryArtifactsAreIdentical>("verifyArtifactsInStagingRepositoryAreReproducible") {
+		dependsOn("publishAllPublicationsToTempRepository")
+		localRepoDir = tempMavenRepoDir
 	}
 }
 

@@ -4,7 +4,6 @@ plugins {
 	id("junitbuild.base-conventions")
 	id("junitbuild.checkstyle-nohttp")
 	id("junitbuild.jacoco-aggregation-conventions")
-	id("junitbuild.release-verification")
 }
 
 description = "JUnit"
