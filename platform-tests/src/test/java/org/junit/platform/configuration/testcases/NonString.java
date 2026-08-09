@@ -8,13 +8,13 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.configuration.processor;
+package org.junit.platform.configuration.testcases;
 
-import org.junit.platform.configuration.api.ConfigurationProperty;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
-final class NonFinalConfigurationProperty {
+public final class NonString {
 
-	@ConfigurationProperty
-	public static String EXAMPLE_PROPERTY_NAME = "org.example.property";
+	@ConfigurationParameter
+	public static final Boolean EXAMPLE_PROPERTY_NAME = true;
 
 }

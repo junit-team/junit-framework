@@ -34,10 +34,10 @@ import javax.tools.StandardLocation;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
-import org.junit.platform.configuration.api.ConfigurationProperty;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
 @API(status = API.Status.EXPERIMENTAL)
-@SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationProperty")
+@SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
 	private @Nullable ConfigurationMetaData metaData;
@@ -78,7 +78,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	}
 
 	private void process(RoundEnvironment roundEnv) {
-		roundEnv.getElementsAnnotatedWith(ConfigurationProperty.class).stream() //
+		roundEnv.getElementsAnnotatedWith(ConfigurationParameter.class).stream() //
 				.filter(VariableElement.class::isInstance) //
 				.map(VariableElement.class::cast) //
 				.map(this::createProperty) //
@@ -97,12 +97,12 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	}
 
 	private @Nullable String processType(VariableElement element) {
-		var configurationProperty = getAnnotation(element, ConfigurationProperty.class);
-		if (configurationProperty == null) {
+		var parameter = getAnnotation(element, ConfigurationParameter.class);
+		if (parameter == null) {
 			return null;
 		}
 
-		var type = getAnnotationElementValue(configurationProperty, "type");
+		var type = getAnnotationElementValue(parameter, "type");
 		if (Void.class.getName().equals(type)) {
 			return null;
 		}

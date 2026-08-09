@@ -8,13 +8,20 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.configuration.processor;
+package org.junit.platform.configuration.testcases;
 
-import org.junit.platform.configuration.api.ConfigurationProperty;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
-final class MinimalConfigurationProperty {
+public final class DocumentedWithHeader {
 
-	@ConfigurationProperty
+	/**
+	 * A brief description of this property.
+	 *
+	 * <h4>Examples</h4>
+	 *
+	 * Followed by an additional paragraph.
+	 */
+	@ConfigurationParameter
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

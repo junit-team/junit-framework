@@ -8,13 +8,8 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.configuration.processor;
+package org.junit.platform.configuration.testcases;
 
-import org.junit.platform.configuration.api.ConfigurationProperty;
-
-final class NonStaticConfigurationProperty {
-
-	@ConfigurationProperty
-	public final String EXAMPLE_PROPERTY_NAME = "org.example.property";
+public final class Without {
 
 }

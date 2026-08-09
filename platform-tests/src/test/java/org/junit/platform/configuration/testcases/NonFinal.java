@@ -8,14 +8,13 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.configuration.processor;
+package org.junit.platform.configuration.testcases;
 
-import org.junit.platform.configuration.api.ConfigurationProperty;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
-@Deprecated
-final class ClassDeprecatedConfigurationProperty {
+public final class NonFinal {
 
-	@ConfigurationProperty
-	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
+	@ConfigurationParameter
+	public static String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

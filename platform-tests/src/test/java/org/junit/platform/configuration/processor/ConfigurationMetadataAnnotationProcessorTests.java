@@ -27,6 +27,19 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.platform.configuration.testcases.ClassDeprecated;
+import org.junit.platform.configuration.testcases.Documented;
+import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
+import org.junit.platform.configuration.testcases.DocumentedWithHeader;
+import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
+import org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs;
+import org.junit.platform.configuration.testcases.Minimal;
+import org.junit.platform.configuration.testcases.NonFinal;
+import org.junit.platform.configuration.testcases.NonStatic;
+import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.PropertyDeprecated;
+import org.junit.platform.configuration.testcases.StringType;
+import org.junit.platform.configuration.testcases.Without;
 
 class ConfigurationMetadataAnnotationProcessorTests {
 
@@ -50,20 +63,20 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void none() {
-			compiler.compile(WithoutConfigurationProperty.class);
+			compiler.compile(Without.class);
 			var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
 			assertThat(metaDataPath).doesNotExist();
 		}
 
 		@Test
 		void minimal() {
-			compiler.compile(MinimalConfigurationProperty.class);
+			compiler.compile(Minimal.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 						{
 						  "name": "org.example.property",
-						  "sourceType": "org.junit.platform.configuration.processor.MinimalConfigurationProperty"
+						  "sourceType": "org.junit.platform.configuration.testcases.Minimal"
 						}
 					  ]
 					}""");
@@ -71,14 +84,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void stringType() {
-			compiler.compile(StringTypeConfigurationProperty.class);
+			compiler.compile(StringType.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 						{
 						  "name": "org.example.property",
 						  "type": "java.lang.String",
-						  "sourceType": "org.junit.platform.configuration.processor.StringTypeConfigurationProperty"
+						  "sourceType": "org.junit.platform.configuration.testcases.StringType"
 						}
 					  ]
 					}""");
@@ -86,14 +99,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documented() {
-			compiler.compile(DocumentedConfigurationProperty.class);
+			compiler.compile(Documented.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 						{
 						  "name": "org.example.property",
 						  "description": "A brief description of this property.",
-						  "sourceType": "org.junit.platform.configuration.processor.DocumentedConfigurationProperty"
+						  "sourceType": "org.junit.platform.configuration.testcases.Documented"
 						}
 					  ]
 					}""");
@@ -101,79 +114,75 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documentedWithAtValue() {
-			compiler.compile(DocumentedWithAtValueConfigurationProperty.class);
-			assertMetaDataIsEqualTo(
-				"""
+			compiler.compile(DocumentedWithAtValue.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
 						{
-						  "properties": [
-							{
-							  "name": "org.example.property",
-							  "description": "A brief description of this property.",
-							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithAtValueConfigurationProperty"
-							}
-						  ]
-						}""");
+						  "name": "org.example.property",
+						  "description": "A brief description of this property.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtValue"
+						}
+					  ]
+					}""");
 		}
 
 		@Test
 		void documentedWithMultipleLines() {
-			compiler.compile(DocumentedWithMultiLinesConfigurationProperty.class);
-			assertMetaDataIsEqualTo(
-				"""
+			compiler.compile(DocumentedWithMultiLines.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
 						{
-						  "properties": [
-							{
-							  "name": "org.example.property",
-							  "description": "A brief multi-line description of this property.",
-							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithMultiLinesConfigurationProperty"
-							}
-						  ]
-						}""");
+						  "name": "org.example.property",
+						  "description": "A brief multi-line description of this property.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithMultiLines"
+						}
+					  ]
+					}""");
 		}
 
 		@Test
 		void documentedWithMultipleParagraphs() {
-			compiler.compile(DocumentedWithMultipleParagraphsConfigurationProperty.class);
-			assertMetaDataIsEqualTo(
-				"""
+			compiler.compile(DocumentedWithMultipleParagraphs.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
 						{
-						  "properties": [
-							{
-							  "name": "org.example.property",
-							  "description": "A brief description of this property.",
-							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithMultipleParagraphsConfigurationProperty"
-							}
-						  ]
-						}""");
+						  "name": "org.example.property",
+						  "description": "A brief description of this property.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs"
+						}
+					  ]
+					}""");
 		}
 
 		@Test
 		void documentedWithHeader() {
-			compiler.compile(DocumentedWithHeaderConfigurationProperty.class);
-			assertMetaDataIsEqualTo(
-				"""
+			compiler.compile(DocumentedWithHeader.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
 						{
-						  "properties": [
-							{
-							  "name": "org.example.property",
-							  "description": "A brief description of this property.",
-							  "sourceType": "org.junit.platform.configuration.processor.DocumentedWithHeaderConfigurationProperty"
-							}
-						  ]
-						}""");
+						  "name": "org.example.property",
+						  "description": "A brief description of this property.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithHeader"
+						}
+					  ]
+					}""");
 		}
 
 		@Test
 		void deprecated() {
 			// TODO: Inheritance? Meta?
 			// TODO: Warning level?
-			compiler.compile(DeprecatedConfigurationProperty.class);
+			compiler.compile(PropertyDeprecated.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 					    {
 					      "name": "org.example.property",
-					      "sourceType": "org.junit.platform.configuration.processor.DeprecatedConfigurationProperty",
+					      "sourceType": "org.junit.platform.configuration.testcases.PropertyDeprecated",
 					      "deprecation": { }
 					    }
 					  ]
@@ -185,39 +194,36 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		@Disabled("Not yet implemented")
 		void classDeprecated() {
 			// TODO: Inheritance? Meta?
-			compiler.compile(ClassDeprecatedConfigurationProperty.class);
-			assertMetaDataIsEqualTo(
-				"""
+			compiler.compile(ClassDeprecated.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
 						{
-						  "properties": [
-							{
-							  "name": "org.example.property",
-							  "sourceType": "org.junit.platform.configuration.processor.ClassDeprecatedConfigurationProperty",
-							  "deprecation": { }
-							}
-						  ]
-						}""");
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.ClassDeprecated",
+						  "deprecation": { }
+						}
+					  ]
+					}""");
 		}
 
 		@Test
 		void mustBeFinal() {
-			asserPreconditionViolation(() -> compiler.compile(NonFinalConfigurationProperty.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final".formatted(
-					NonFinalConfigurationProperty.class.getName()));
+			asserPreconditionViolation(() -> compiler.compile(NonFinal.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final".formatted(NonFinal.class.getName()));
 		}
 
 		@Test
 		void mustBeStatic() {
-			asserPreconditionViolation(() -> compiler.compile(NonStaticConfigurationProperty.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared static".formatted(
-					NonStaticConfigurationProperty.class.getName()));
+			asserPreconditionViolation(() -> compiler.compile(NonStatic.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared static".formatted(NonStatic.class.getName()));
 		}
 
 		@Test
 		void mustBeString() {
-			asserPreconditionViolation(() -> compiler.compile(NonStringConfigurationProperty.class),
+			asserPreconditionViolation(() -> compiler.compile(NonString.class),
 				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value".formatted(
-					NonStringConfigurationProperty.class.getName()));
+					NonString.class.getName()));
 		}
 
 		private AbstractStringAssert<?> assertMetaDataIsEqualTo(@Language("JSON") String json) {

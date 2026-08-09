@@ -8,8 +8,16 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.platform.configuration.processor;
+package org.junit.platform.configuration.testcases;
 
-final class WithoutConfigurationProperty {
+import org.junit.platform.configuration.api.ConfigurationParameter;
+
+public final class Documented {
+
+	/**
+	 * A brief description of this property.
+	 */
+	@ConfigurationParameter
+	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

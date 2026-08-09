@@ -14,7 +14,7 @@ import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
-import org.junit.platform.configuration.api.ConfigurationProperty;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
 /**
  * Collection of constants related to the {@link VintageTestEngine}.
@@ -35,7 +35,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
-	@ConfigurationProperty
+	@ConfigurationParameter
 	public static final String PARALLEL_EXECUTION_ENABLED = "junit.vintage.execution.parallel.enabled";
 
 	/**

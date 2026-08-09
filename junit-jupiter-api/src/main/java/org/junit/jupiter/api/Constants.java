@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.Extension
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
-import org.junit.platform.configuration.api.ConfigurationProperty;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
 /**
  * Collection of configuration constants for the Jupiter test engine.
@@ -65,7 +65,7 @@ public final class Constants {
 	 *
 	 * <p>Note: A class that matches both an inclusion and exclusion pattern will be excluded.
 	 */
-	@ConfigurationProperty
+	@ConfigurationParameter
 	public static final String EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.include";
 
 	/**

@@ -20,7 +20,7 @@ import org.apiguardian.api.API;
 @API(status = API.Status.EXPERIMENTAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)
-public @interface ConfigurationProperty {
+public @interface ConfigurationParameter {
 
 	/**
 	 * The data type of the property. For example {@link String},
