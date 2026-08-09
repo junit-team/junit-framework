@@ -17,6 +17,9 @@ import java.lang.annotation.Target;
 
 import org.apiguardian.api.API;
 
+/**
+ * Marks a field as a configuration parameter for a test engine.
+ */
 @API(status = API.Status.EXPERIMENTAL)
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)

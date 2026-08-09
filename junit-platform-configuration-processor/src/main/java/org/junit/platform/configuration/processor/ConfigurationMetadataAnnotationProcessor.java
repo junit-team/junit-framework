@@ -36,6 +36,30 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 
+/// Collects all configuration parameters marked with
+/// {@link ConfigurationParameter} into
+/// [Spring Boot Configuration Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html).
+/// This enables IDE's and other tools to process and validate Test Engine
+/// configuration.
+///
+/// <h4>Usage</h4>
+///
+/// <pre>{@code
+/// /**
+///   * A brief multi-line description of
+///   * this property: {@value}.
+///   *
+///   * <p>Followed by an additional paragraph.
+///   */
+///  @ConfigurationProperty
+///  public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
+///
+/// }</pre>
+///
+/// The first paragraph from the doc string used to describe the property. If the
+/// first paragraph ends with {@code : {@value}.} or {@code : {@value}} it will
+/// be replaced with a {@code : {@value}.}.
+///
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
 public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
