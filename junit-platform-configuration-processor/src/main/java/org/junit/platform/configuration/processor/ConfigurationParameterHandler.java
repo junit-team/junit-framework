@@ -55,25 +55,20 @@ final class ConfigurationParameterHandler {
 		);
 	}
 
-	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
-		var parameter = getAnnotationMirror(element, ConfigurationParameter.class);
-		if (parameter == null) {
-			return null;
-		}
-		var deprecation = getAnnotationValue(parameter, "deprecation");
-		if (deprecation != null) {
-			var reason = getStringValue(deprecation, "reason");
-			var replacement = getStringValue(deprecation, "replacement");
-			var since = getStringValue(deprecation, "since");
-			if (reason != null || replacement != null || since != null) {
-				return new ConfigurationMetaData.Deprecation(null, reason, replacement, since);
-			}
-		}
-		// Fallback, look for @Deprecated
-		if (getAnnotationMirror(element, Deprecated.class) != null) {
-			return new ConfigurationMetaData.Deprecation(null, null, null, null);
-		}
-		return null;
+	private String processName(VariableElement element) {
+		// TODO: Report preconditions problems with processingEnvironment().getMessager().printMessage() instead.
+		var enclosingTypeElement = getEnclosingTypeElement(element);
+		Preconditions.condition(isStatic(element), //
+			() -> "Field [%s.%s] must be declared static" //
+					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+		Preconditions.condition(isFinal(element), //
+			() -> "Field [%s.%s] must be declared final" //
+					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+		var constantValue = element.getConstantValue();
+		Preconditions.condition(constantValue instanceof String, //
+			() -> "Field [%s.%s] must have a constant string value" //
+					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+		return (String) constantValue;
 	}
 
 	private @Nullable String processDescription(VariableElement element) {
@@ -100,28 +95,33 @@ final class ConfigurationParameterHandler {
 		return enclosingTypeElement.getQualifiedName().toString();
 	}
 
-	private String processName(VariableElement element) {
-		// TODO: Report preconditions problems with processingEnvironment().getMessager().printMessage() instead.
-		var enclosingTypeElement = getEnclosingTypeElement(element);
-		Preconditions.condition(isStatic(element), //
-			() -> "Field [%s.%s] must be declared static" //
-					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
-		Preconditions.condition(isFinal(element), //
-			() -> "Field [%s.%s] must be declared final" //
-					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
-		var constantValue = element.getConstantValue();
-		Preconditions.condition(constantValue instanceof String, //
-			() -> "Field [%s.%s] must have a constant string value" //
-					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
-		return (String) constantValue;
-	}
-
 	private TypeElement getEnclosingTypeElement(VariableElement element) {
 		var enclosingElement = element.getEnclosingElement();
 		Preconditions.condition(enclosingElement instanceof TypeElement, //
 			() -> "[%s] did not have an enclosing type element" //
 					.formatted(element.getSimpleName()));
 		return (TypeElement) enclosingElement;
+	}
+
+	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
+		var parameter = getAnnotationMirror(element, ConfigurationParameter.class);
+		if (parameter == null) {
+			return null;
+		}
+		var deprecation = getAnnotationValue(parameter, "deprecation");
+		if (deprecation != null) {
+			var reason = getStringValue(deprecation, "reason");
+			var replacement = getStringValue(deprecation, "replacement");
+			var since = getStringValue(deprecation, "since");
+			if (reason != null || replacement != null || since != null) {
+				return new ConfigurationMetaData.Deprecation(null, reason, replacement, since);
+			}
+		}
+		// Fallback, look for @Deprecated
+		if (getAnnotationMirror(element, Deprecated.class) != null) {
+			return new ConfigurationMetaData.Deprecation(null, null, null, null);
+		}
+		return null;
 	}
 
 	private static boolean isStatic(VariableElement variableElement) {
