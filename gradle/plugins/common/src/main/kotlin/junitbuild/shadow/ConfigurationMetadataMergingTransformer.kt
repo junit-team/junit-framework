@@ -40,11 +40,13 @@ abstract class ConfigurationMetadataMergingTransformer @Inject constructor(
             mergedTree = tree
         } else {
             tree.properties().forEach { (name, value) ->
+                value as ArrayNode
                 val existing = merged.get(name)
-                if (existing is ArrayNode && value is ArrayNode) {
-                    existing.addAll(value)
-                } else {
+                if (existing == null) {
                     merged.set(name, value)
+                } else {
+                    existing as ArrayNode
+                    existing.addAll(value)
                 }
             }
         }
