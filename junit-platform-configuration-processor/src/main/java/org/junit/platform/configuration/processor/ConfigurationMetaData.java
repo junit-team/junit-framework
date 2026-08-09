@@ -15,6 +15,9 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+/**
+ * See <a href="https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html">Spring Boot - Specifications - Configuration Metadata - Metadata Format</a>.
+ */
 class ConfigurationMetaData {
 
 	private final List<Property> properties = new ArrayList<>();
@@ -55,7 +58,6 @@ class ConfigurationMetaData {
 			@Nullable String reason, //
 			@Nullable String replacement, //
 			@Nullable String since //
-
 	) {
 
 		enum Level {
