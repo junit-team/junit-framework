@@ -20,12 +20,15 @@ import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecat
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Group;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Hint;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.Many;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.One;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.ValueHint;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.ValueProvider;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -106,11 +109,15 @@ class JsonWriter {
 			builder.add("sourceType", sourceType);
 		}
 
-		// TODO:
-		// var defaultValue = property.defaultValue();
-		// if(defaultValue != null){
-		//	builder.add("defaultValue", toJsonObject(defaultValue));
-		// }
+		var defaultValue = property.defaultValue();
+		if (defaultValue != null) {
+			if (defaultValue instanceof One<String> one) {
+				builder.add("defaultValue", toJsonValue(one));
+			}
+			else if (defaultValue instanceof Many<String> many) {
+				builder.add("defaultValue", toJsonValue(many));
+			}
+		}
 
 		var deprecation = property.deprecation();
 		if (deprecation != null) {
@@ -118,6 +125,14 @@ class JsonWriter {
 		}
 
 		return builder.build();
+	}
+
+	private String toJsonValue(One<String> one) {
+		return one.value();
+	}
+
+	private JsonArrayBuilder toJsonValue(Many<String> many) {
+		return factory.createArrayBuilder(many.values());
 	}
 
 	private JsonObject toJsonObject(Deprecation deprecation) {
@@ -186,12 +201,17 @@ class JsonWriter {
 
 		builder.add("name", valueProvider.name());
 
-		// TODO:
-		// var parameters = valueProvider.parameters();
-		// if (!parameters.isEmpty()) {
-		// 	builder.add("parameters", toJsonObject(parameters));
-		// }
+		var parameters = valueProvider.parameters();
+		if (!parameters.isEmpty()) {
+			builder.add("parameters", toJsonObject(parameters));
+		}
 
+		return builder.build();
+	}
+
+	private JsonObject toJsonObject(Map<String, String> parameters) {
+		var builder = factory.createObjectBuilder();
+		parameters.forEach(builder::add);
 		return builder.build();
 	}
 

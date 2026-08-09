@@ -53,13 +53,21 @@ class ConfigurationMetaData {
 			@Nullable String type, //
 			@Nullable String description, //
 			@Nullable String sourceType, //
-			@Nullable OneOrManyString defaultValue, //
+			@Nullable OneOrMany<String> defaultValue, //
 			@Nullable Deprecation deprecation //
 	) {
 
 	}
 
-	interface OneOrManyString {
+	sealed interface OneOrMany<T> {
+
+		record One<T>(T value) implements OneOrMany<T> {
+
+		}
+
+		record Many<T>(List<T> values) implements OneOrMany<T> {
+
+		}
 
 	}
 
