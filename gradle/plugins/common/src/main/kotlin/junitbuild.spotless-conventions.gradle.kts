@@ -3,6 +3,7 @@ import junitbuild.extensions.requiredVersionFromLibs
 
 plugins {
 	id("com.diffplug.spotless")
+	id("junitbuild.license")
 }
 
 spotless {
@@ -15,8 +16,8 @@ spotless {
 
 	pluginManager.withPlugin("java") {
 
-		val license = rootProject.extra["license"] as License
-		val configDir = rootProject.layout.projectDirectory.dir("gradle/config/eclipse")
+		val license = project.the<License>()
+		val configDir = layout.settingsDirectory.dir("gradle/config/eclipse")
 		val importOrderConfigFile = configDir.file("junit-eclipse.importorder")
 		val javaFormatterConfigFile = configDir.file("junit-eclipse-formatter-settings.xml")
 
@@ -43,7 +44,7 @@ spotless {
 	}
 
 	pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-		val license = rootProject.extra["license"] as License
+		val license = project.the<License>()
 		kotlin {
 			targetExclude("**/src/test/resources/**")
 			ktlint(requiredVersionFromLibs("ktlint"))
@@ -55,7 +56,7 @@ spotless {
 	}
 
 	pluginManager.withPlugin("groovy") {
-		val license = rootProject.extra["license"] as License
+		val license = project.the<License>()
 		groovy {
 			licenseHeaderFile(license.headerFile)
 			trimTrailingWhitespace()

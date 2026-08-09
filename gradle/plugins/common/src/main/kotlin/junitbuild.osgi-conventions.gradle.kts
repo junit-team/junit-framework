@@ -1,6 +1,6 @@
 import aQute.bnd.gradle.BundleTaskExtension
 import aQute.bnd.gradle.Resolve
-import java.time.Instant
+import junitbuild.metadata.buildMetadata
 
 plugins {
 	`java-library`
@@ -14,8 +14,6 @@ val projectDescription = objects.property<String>().convention(provider { projec
 tasks.withType<Jar>().named {
 	it == "jar" || it == "shadowJar"
 }.configureEach {
-
-	val buildTimestamp = rootProject.extra["buildTimestamp"] as Instant
 
 	val importAPIGuardian = "org.apiguardian.*;resolution:=\"optional\""
 		.also { extra["importAPIGuardian"] = it }
@@ -31,7 +29,7 @@ tasks.withType<Jar>().named {
 		// These are bnd instructions necessary for generating OSGi metadata.
 		// We've generalized these so that they are widely applicable limiting
 		// module configurations to special cases.
-		setBnd(
+		setBnd(project.buildMetadata.map {
 			"""
 				# Set the Bundle-SymbolicName to the archiveBaseName.
 				# We don't use the archiveClassifier which Bnd will use
@@ -76,9 +74,9 @@ tasks.withType<Jar>().named {
 				# Issue: https://github.com/junit-team/junit-framework/issues/4733
 				-noimportjava: true
 
-				-reproducible: ${buildTimestamp.epochSecond}
+				-reproducible: ${it.buildTimestamp.epochSecond}
 			"""
-		)
+		})
 
 		// Do the actual work putting OSGi stuff in the jar.
 		doLast(buildAction())

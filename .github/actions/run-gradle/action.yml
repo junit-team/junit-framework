@@ -15,16 +15,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+    - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
       id: setup-gradle-jdk
       with:
         distribution: temurin
         java-version: 25
         check-latest: true
-    - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+    - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
-    - uses: testlens-app/setup-testlens@3f82d2dc6cd5c03f02ce5f7885a21195d85f8d14 # v1.9.3
+    - uses: testlens-app/setup-testlens@d29a2be31512b3aeda3adcef09fbe0d55af90c51 # v1.9.4
       with:
         write-log-files: true
     - shell: bash
