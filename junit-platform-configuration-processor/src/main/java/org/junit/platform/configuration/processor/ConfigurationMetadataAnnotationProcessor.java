@@ -12,11 +12,12 @@ package org.junit.platform.configuration.processor;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValue;
 
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-import java.lang.annotation.Annotation;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -25,9 +26,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -83,7 +81,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		process(roundEnv);
+		processConfigurationParameter(roundEnv);
 
 		if (roundEnv.processingOver()) {
 			writeMetaData();
@@ -107,7 +105,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		}
 	}
 
-	private void process(RoundEnvironment roundEnv) {
+	private void processConfigurationParameter(RoundEnvironment roundEnv) {
 		roundEnv.getElementsAnnotatedWith(ConfigurationParameter.class).stream() //
 				.filter(VariableElement.class::isInstance) //
 				.map(VariableElement.class::cast) //
@@ -126,59 +124,23 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		);
 	}
 
-	private @Nullable String getAnnotationElementStringValue(AnnotationMirror annotation, String elementName) {
-		return annotation.getElementValues().entrySet() //
-				.stream() //
-				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
-				.map(Map.Entry::getValue) //
-				.map(AnnotationValue::getValue) //
-				.filter(String.class::isInstance) //
-				.map(String.class::cast) //
-				.filter(s -> !s.isEmpty()) //
-				.findFirst() //
-				.orElse(null);
-	}
-
-	private @Nullable AnnotationMirror getAnnotationElementAnnotationValue(AnnotationMirror annotation,
-			String elementName) {
-		return annotation.getElementValues().entrySet() //
-				.stream() //
-				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
-				.map(Map.Entry::getValue) //
-				.map(AnnotationValue::getValue) //
-				.filter(AnnotationMirror.class::isInstance) //
-				.map(AnnotationMirror.class::cast) //
-				.findFirst() //
-				.orElse(null);
-	}
-
 	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
-		var parameter = getAnnotation(element, ConfigurationParameter.class);
+		var parameter = getAnnotationMirror(element, ConfigurationParameter.class);
 		if (parameter == null) {
 			return null;
 		}
-		var deprecation = getAnnotationElementAnnotationValue(parameter, "deprecation");
+		var deprecation = getAnnotationValue(parameter, "deprecation");
 		if (deprecation != null) {
-			var reason = getAnnotationElementStringValue(deprecation, "reason");
-			var replacement = getAnnotationElementStringValue(deprecation, "replacement");
-			var since = getAnnotationElementStringValue(deprecation, "since");
+			var reason = getStringValue(deprecation, "reason");
+			var replacement = getStringValue(deprecation, "replacement");
+			var since = getStringValue(deprecation, "since");
 			if (reason != null || replacement != null || since != null) {
 				return new ConfigurationMetaData.Deprecation(null, reason, replacement, since);
 			}
 		}
 		// Fallback, look for @Deprecated
-		if (getAnnotation(element, Deprecated.class) != null) {
+		if (getAnnotationMirror(element, Deprecated.class) != null) {
 			return new ConfigurationMetaData.Deprecation(null, null, null, null);
-		}
-		return null;
-	}
-
-	private @Nullable AnnotationMirror getAnnotation(Element element, Class<? extends Annotation> annotationType) {
-		var annotationTypeName = annotationType.getName();
-		for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
-			if (annotationTypeName.equals(annotation.getAnnotationType().toString())) {
-				return annotation;
-			}
 		}
 		return null;
 	}
