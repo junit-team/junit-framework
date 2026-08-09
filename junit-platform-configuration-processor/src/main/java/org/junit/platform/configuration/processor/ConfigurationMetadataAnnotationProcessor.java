@@ -38,6 +38,8 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 
+import jakarta.json.Json;
+
 /// Collects all configuration parameters marked with
 /// {@link ConfigurationParameter} into [Spring Boot Configuration
 /// Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html)
@@ -95,7 +97,9 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 			var resource = processingEnvironment().getFiler() //
 					.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
 			try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), UTF_8))) {
-				new JsonWriter().writeValue(out, metaData());
+				var converter = new JsonConverter();
+				var value = converter.toJsonObject(metaData());
+				Json.createWriter(out).write(value);
 			}
 		}
 		catch (Exception ex) {

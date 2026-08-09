@@ -10,12 +10,10 @@
 
 package org.junit.platform.configuration.processor;
 
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.Many;
@@ -29,16 +27,11 @@ import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 
-class JsonWriter {
+class JsonConverter {
 	private final Map<String, ?> config = Map.of();
 	private final JsonBuilderFactory factory = Json.createBuilderFactory(config);
 
-	void writeValue(Writer out, ConfigurationMetaData metaData) {
-		var value = toJsonObject(metaData);
-		Json.createWriter(out).write(value);
-	}
-
-	private @Nullable JsonObject toJsonObject(ConfigurationMetaData metaData) {
+	JsonObject toJsonObject(ConfigurationMetaData metaData) {
 		var builder = factory.createObjectBuilder();
 
 		var properties = metaData.properties();
