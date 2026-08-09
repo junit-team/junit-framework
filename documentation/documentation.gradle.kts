@@ -14,7 +14,6 @@ import junitbuild.javadoc.moduleSourcePath
 import junitbuild.javadoc.overview
 import junitbuild.javadoc.since
 import junitbuild.metadata.buildMetadata
-import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import java.nio.file.Files
 import kotlin.io.path.writeLines
