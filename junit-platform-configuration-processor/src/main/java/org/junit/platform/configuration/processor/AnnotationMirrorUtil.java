@@ -20,7 +20,7 @@ import javax.lang.model.element.Element;
 
 import org.jspecify.annotations.Nullable;
 
-class AnnotationMirrorUtil {
+final class AnnotationMirrorUtil {
 
 	private AnnotationMirrorUtil() {
 		/* no-op */

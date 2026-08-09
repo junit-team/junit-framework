@@ -27,7 +27,7 @@ import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 
-class JsonConverter {
+final class JsonConverter {
 	private final Map<String, ?> config = Map.of();
 	private final JsonBuilderFactory factory = Json.createBuilderFactory(config);
 
