@@ -18,7 +18,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +25,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.PreconditionViolationException;
+import org.junit.platform.configuration.testcases.DefaultMultiple;
+import org.junit.platform.configuration.testcases.DefaultMultipleSets;
+import org.junit.platform.configuration.testcases.Defaults;
 import org.junit.platform.configuration.testcases.Deprecation;
 import org.junit.platform.configuration.testcases.DeprecationWithDetails;
 import org.junit.platform.configuration.testcases.Documented;
@@ -37,6 +39,7 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
 
 class ConfigurationMetadataAnnotationProcessorTests {
@@ -192,6 +195,108 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void stringType() {
+			compiler.compile(TypeString.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "java.lang.String",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeString"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void defaultsMultiple() {
+			compiler.compile(DefaultMultiple.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+					    {
+					      "name": "org.example.property",
+					      "type": "java.lang.String",
+					      "sourceType": "org.junit.platform.configuration.testcases.DefaultMultiple",
+					      "defaultValue": "default, another-default"
+					    }
+					  ]
+					}""");
+		}
+
+		@Test
+		void defaults() {
+			compiler.compile(Defaults.class);
+			assertMetaDataIsEqualTo("""
+										{
+					  "properties": [
+					    {
+					      "name": "org.example.shorts",
+					      "type": "java.lang.Short",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "1"
+					    },
+					    {
+					      "name": "org.example.bytes",
+					      "type": "java.lang.Byte",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "42"
+					    },
+					    {
+					      "name": "org.example.ints",
+					      "type": "java.lang.Integer",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "42"
+					    },
+					    {
+					      "name": "org.example.longs",
+					      "type": "java.lang.Long",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "42"
+					    },
+					    {
+					      "name": "org.example.floats",
+					      "type": "java.lang.Float",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "42.0"
+					    },
+					    {
+					      "name": "org.example.doubles",
+					      "type": "java.lang.Double",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "42.0"
+					    },
+					    {
+					      "name": "org.example.chars",
+					      "type": "java.lang.Character",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "4"
+					    },
+					    {
+					      "name": "org.example.booleans",
+					      "type": "java.lang.Boolean",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "true"
+					    },
+					    {
+					      "name": "org.example.strings",
+					      "type": "java.lang.String",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "default"
+					    },
+					    {
+					      "name": "org.example.classes",
+					      "type": "java.lang.Class",
+					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
+					      "defaultValue": "org.junit.platform.configuration.testcases.Defaults.Example"
+					    }
+					  ]
+					}
+					""");
+		}
+
+		@Test
 		void mustBeFinal() {
 			asserPreconditionViolation(() -> compiler.compile(NonFinal.class),
 				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final".formatted(NonFinal.class.getName()));
@@ -210,8 +315,15 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					NonString.class.getName()));
 		}
 
-		private AbstractStringAssert<?> assertMetaDataIsEqualTo(@Language("JSON") String json) {
-			return assertThat(metaData()).isEqualToIgnoringWhitespace(json);
+		@Test
+		void mustHaveExactlyOneSetOfDefaults() {
+			asserPreconditionViolation(() -> compiler.compile(DefaultMultipleSets.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must have exactly one (set of) default value(s)".formatted(
+					DefaultMultipleSets.class.getName()));
+		}
+
+		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {
+			assertThat(metaData()).isEqualToIgnoringWhitespace(json);
 		}
 
 		private String metaData() throws UncheckedIOException {

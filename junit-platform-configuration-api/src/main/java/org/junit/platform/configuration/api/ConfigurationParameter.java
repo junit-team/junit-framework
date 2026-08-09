@@ -30,10 +30,12 @@ public @interface ConfigurationParameter {
 
 	/**
 	 * The type of the data type of the parameter.
+	 * <p>
+	 * If the type is left blank, the type of the default value is used.
 	 *
 	 * @return the signature of the data type of the parameter.
 	 */
-	Class<?>[] type() default Void.class;
+	Class<?> type() default Void.class;
 
 	/**
 	 * The default value used if the parameter is not specified. It can be a

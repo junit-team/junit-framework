@@ -10,17 +10,23 @@
 
 package org.junit.platform.configuration.processor;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 
 import org.jspecify.annotations.Nullable;
 
-final class AnnotationMirrorUtil {
+class AnnotationMirrorUtil {
 
 	private AnnotationMirrorUtil() {
 		/* no-op */
@@ -38,8 +44,7 @@ final class AnnotationMirrorUtil {
 
 	static @Nullable String getStringValue(AnnotationMirror annotation, String elementName) {
 		return findElementBy(annotation, elementName) //
-				.filter(String.class::isInstance) //
-				.map(String.class::cast) //
+				.map(Object::toString) //
 				.filter(s -> !s.isEmpty()) //
 				.orElse(null);
 	}
@@ -55,8 +60,30 @@ final class AnnotationMirrorUtil {
 		return annotation.getElementValues().entrySet() //
 				.stream() //
 				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
-				.map(Map.Entry::getValue) //
+				.map(Entry::getValue) //
 				.map(AnnotationValue::getValue) //
 				.findFirst();
+	}
+
+	static Map<String, List<String>> getStringValuesMap(AnnotationMirror defaults) {
+		return defaults.getElementValues().entrySet() //
+				.stream() //
+				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getStringValues));
+	}
+
+	private static List<String> getStringValues(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
+		if (entry.getValue().getValue() instanceof List<?> values) {
+			return values.stream().filter(AnnotationValue.class::isInstance) //
+					.map(AnnotationValue.class::cast) //
+					.map(AnnotationValue::getValue) //
+					.map(Object::toString) //
+					.filter(s -> !s.isEmpty()) //
+					.toList();
+		}
+		return Collections.emptyList();
+	}
+
+	private static String getSimpleName(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
+		return entry.getKey().getSimpleName().toString();
 	}
 }

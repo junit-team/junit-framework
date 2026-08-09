@@ -35,21 +35,13 @@ final class ConfigurationMetaData {
 			@Nullable String type, //
 			@Nullable String description, //
 			@Nullable String sourceType, //
-			@Nullable OneOrMany<String> defaultValue, //
+			@Nullable CommaSeparatedList<String> defaultValue, //
 			@Nullable Deprecation deprecation //
 	) {
 
 	}
 
-	sealed interface OneOrMany<T> {
-
-		record One<T>(T value) implements OneOrMany<T> {
-
-		}
-
-		record Many<T>(List<T> values) implements OneOrMany<T> {
-
-		}
+	record CommaSeparatedList<T>(List<T> elements) {
 
 	}
 

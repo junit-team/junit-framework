@@ -10,10 +10,13 @@
 
 package org.junit.platform.configuration.processor;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValue;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValuesMap;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.RoundEnvironment;
@@ -25,8 +28,23 @@ import javax.lang.model.util.Elements;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.CommaSeparatedList;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
 
 final class ConfigurationParameterHandler {
+
+	private static final Map<String, String> NAME_TO_TYPE_NAME = Map.of( //
+		"shorts", Short.class.getName(), //
+		"bytes", Byte.class.getName(), //
+		"ints", Integer.class.getName(), //
+		"longs", Long.class.getName(), //
+		"floats", Float.class.getName(), //
+		"doubles", Double.class.getName(), //
+		"chars", Character.class.getName(), //
+		"booleans", Boolean.class.getName(), //
+		"strings", String.class.getName(), //
+		"classes", Class.class.getName() //
+	);
 
 	private final ConfigurationMetaData metaData;
 	private final Elements elementUtils;
@@ -44,15 +62,16 @@ final class ConfigurationParameterHandler {
 				.forEach(metaData::addProperty);
 	}
 
-	private ConfigurationMetaData.Property createProperty(VariableElement element) {
-		return new ConfigurationMetaData.Property( //
-			processName(element), //
-			null, // TODO:
-			processDescription(element), //
-			processSourceType(element), //
-			null, // TODO:
-			processDeprecation(element) //
-		);
+	private Property createProperty(VariableElement element) {
+		var name = processName(element);
+		var description = processDescription(element);
+		var sourceType = processSourceType(element);
+		var defaults = processDefaults(element);
+		var deprecation = processDeprecation(element);
+		var defaultType = defaults == null ? null : defaults.defaultType();
+		var defaultValue = defaults == null ? null : defaults.value();
+		var type = processType(element, defaultType);
+		return new Property(name, type, description, sourceType, defaultValue, deprecation);
 	}
 
 	private String processName(VariableElement element) {
@@ -69,6 +88,20 @@ final class ConfigurationParameterHandler {
 			() -> "Field [%s.%s] must have a constant string value" //
 					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
 		return (String) constantValue;
+	}
+
+	private @Nullable String processType(VariableElement element, @Nullable String defaultType) {
+		var parameter = getAnnotationMirror(element, ConfigurationParameter.class);
+		if (parameter == null) {
+			return defaultType;
+		}
+
+		var type = getStringValue(parameter, "type");
+		if (type == null || type.equals(Void.class.getName())) {
+			return defaultType;
+		}
+
+		return type;
 	}
 
 	private @Nullable String processDescription(VariableElement element) {
@@ -101,6 +134,35 @@ final class ConfigurationParameterHandler {
 			() -> "[%s] did not have an enclosing type element" //
 					.formatted(element.getSimpleName()));
 		return (TypeElement) enclosingElement;
+	}
+
+	private @Nullable Default processDefaults(VariableElement element) {
+		var parameter = getAnnotationMirror(element, ConfigurationParameter.class);
+		if (parameter == null) {
+			return null;
+		}
+
+		var defaults = getAnnotationValue(parameter, "defaultValue");
+		if (defaults == null) {
+			return null;
+		}
+
+		var defaultValues = getStringValuesMap(defaults);
+		Preconditions.condition(defaultValues.size() == 1, () -> {
+			var enclosingTypeElement = getEnclosingTypeElement(element);
+			return "Field [%s.%s] must have exactly one (set of) default value(s)".formatted(enclosingTypeElement,
+				element.getSimpleName());
+		});
+
+		return defaultValues.entrySet().stream() //
+				.map(entry -> new Default( //
+					requireNonNull(NAME_TO_TYPE_NAME.get(entry.getKey())),
+					new CommaSeparatedList<>(entry.getValue()))).findFirst() //
+				.orElse(null);
+	}
+
+	private record Default(String defaultType, CommaSeparatedList<String> value) {
+
 	}
 
 	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {

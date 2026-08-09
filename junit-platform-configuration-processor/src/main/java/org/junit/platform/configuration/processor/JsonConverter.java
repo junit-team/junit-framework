@@ -14,15 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.junit.platform.configuration.processor.ConfigurationMetaData.CommaSeparatedList;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.Many;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.One;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -63,12 +61,7 @@ final class JsonConverter {
 
 		var defaultValue = property.defaultValue();
 		if (defaultValue != null) {
-			if (defaultValue instanceof One<String> one) {
-				builder.add("defaultValue", toJsonValue(one));
-			}
-			else if (defaultValue instanceof Many<String> many) {
-				builder.add("defaultValue", toJsonValue(many));
-			}
+			builder.add("defaultValue", toJsonValue(defaultValue));
 		}
 
 		var deprecation = property.deprecation();
@@ -79,12 +72,8 @@ final class JsonConverter {
 		return builder.build();
 	}
 
-	private String toJsonValue(One<String> one) {
-		return one.value();
-	}
-
-	private JsonArrayBuilder toJsonValue(Many<String> many) {
-		return factory.createArrayBuilder(many.values());
+	private String toJsonValue(CommaSeparatedList<String> values) {
+		return String.join(", ", values.elements());
 	}
 
 	private JsonObject toJsonObject(Deprecation deprecation) {
