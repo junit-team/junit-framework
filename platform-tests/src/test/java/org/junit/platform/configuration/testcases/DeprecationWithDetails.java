@@ -12,10 +12,9 @@ package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
 
-public final class PropertyDeprecated {
+public final class DeprecationWithDetails {
 
-	@Deprecated
-	@ConfigurationParameter
+	@ConfigurationParameter(deprecation = @ConfigurationParameter.Deprecation(reason = "This property was migrated to com.example", replacement = "com.example.property", since = "2.0.0"))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

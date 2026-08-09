@@ -22,12 +22,12 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.PreconditionViolationException;
-import org.junit.platform.configuration.testcases.ClassDeprecated;
+import org.junit.platform.configuration.testcases.Deprecation;
+import org.junit.platform.configuration.testcases.DeprecationWithDetails;
 import org.junit.platform.configuration.testcases.Documented;
 import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
@@ -37,7 +37,6 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
-import org.junit.platform.configuration.testcases.PropertyDeprecated;
 import org.junit.platform.configuration.testcases.Without;
 
 class ConfigurationMetadataAnnotationProcessorTests {
@@ -47,7 +46,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 	final Path sourceDirectory = Path.of("src/test/java");
 
 	@Nested
-	class ConfigurationProperty {
+	class ConfigurationParameter {
 
 		@TempDir
 		Path outputDirectory;
@@ -157,36 +156,37 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
-		void deprecated() {
-			// TODO: Inheritance? Meta?
+		void deprecation() {
+			// TODO: Class level? Inheritance? Meta?
 			// TODO: Warning level?
-			compiler.compile(PropertyDeprecated.class);
+			compiler.compile(Deprecation.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
 					    {
 					      "name": "org.example.property",
-					      "sourceType": "org.junit.platform.configuration.testcases.PropertyDeprecated",
+					      "sourceType": "org.junit.platform.configuration.testcases.Deprecation",
 					      "deprecation": { }
 					    }
 					  ]
 					}""");
 		}
 
-		@SuppressWarnings("deprecation")
 		@Test
-		@Disabled("Not yet implemented")
-		void classDeprecated() {
-			// TODO: Inheritance? Meta?
-			compiler.compile(ClassDeprecated.class);
+		void deprecationWithDetails() {
+			compiler.compile(DeprecationWithDetails.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
-						{
-						  "name": "org.example.property",
-						  "sourceType": "org.junit.platform.configuration.testcases.ClassDeprecated",
-						  "deprecation": { }
-						}
+					    {
+					      "name": "org.example.property",
+					      "sourceType": "org.junit.platform.configuration.testcases.DeprecationWithDetails",
+					      "deprecation": {
+					          "reason": "This property was migrated to com.example",
+					          "replacement": "com.example.property",
+					          "since":"2.0.0"
+					        }
+					    }
 					  ]
 					}""");
 		}

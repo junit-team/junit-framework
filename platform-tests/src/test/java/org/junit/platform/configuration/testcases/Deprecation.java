@@ -12,9 +12,9 @@ package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
 
-@Deprecated
-public final class ClassDeprecated {
+public final class Deprecation {
 
+	@Deprecated
 	@ConfigurationParameter
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 

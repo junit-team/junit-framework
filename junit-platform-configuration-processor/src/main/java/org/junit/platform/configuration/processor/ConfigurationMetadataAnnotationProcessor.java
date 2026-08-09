@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -37,10 +39,10 @@ import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 
 /// Collects all configuration parameters marked with
-/// {@link ConfigurationParameter} into
-/// [Spring Boot Configuration Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html).
-/// This enables IDE's and other tools to process and validate Test Engine
-/// configuration.
+/// {@link ConfigurationParameter} into [Spring Boot Configuration
+/// Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html)
+/// and writes it to {@value #METADATA_PATH}. This enables IDE's and other tools
+/// to process and validate Test Engine configuration.
 ///
 /// <h4>Usage</h4>
 ///
@@ -84,7 +86,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		if (roundEnv.processingOver()) {
 			writeMetaData();
 		}
-		// TODO: Consider setting to true?
+		// See: https://errorprone.info/bugpattern/DoNotClaimAnnotations
 		return false;
 	}
 
@@ -120,17 +122,51 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		);
 	}
 
+	private @Nullable String getAnnotationElementStringValue(AnnotationMirror annotation, String elementName) {
+		return annotation.getElementValues().entrySet() //
+				.stream() //
+				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
+				.map(Map.Entry::getValue) //
+				.map(AnnotationValue::getValue) //
+				.filter(String.class::isInstance) //
+				.map(String.class::cast) //
+				.filter(s -> !s.isEmpty()) //
+				.findFirst() //
+				.orElse(null);
+	}
+
+	private @Nullable AnnotationMirror getAnnotationElementAnnotationValue(AnnotationMirror annotation,
+			String elementName) {
+		return annotation.getElementValues().entrySet() //
+				.stream() //
+				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
+				.map(Map.Entry::getValue) //
+				.map(AnnotationValue::getValue) //
+				.filter(AnnotationMirror.class::isInstance) //
+				.map(AnnotationMirror.class::cast) //
+				.findFirst() //
+				.orElse(null);
+	}
+
 	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
-		var deprecated = getAnnotation(element, Deprecated.class);
-		if (deprecated == null) {
+		var parameter = getAnnotation(element, ConfigurationParameter.class);
+		if (parameter == null) {
 			return null;
 		}
-		return new ConfigurationMetaData.Deprecation( //
-			null, //
-			null, // TODO:
-			null, // TODO:
-			null // TODO:
-		);
+		var deprecation = getAnnotationElementAnnotationValue(parameter, "deprecation");
+		if (deprecation != null) {
+			var reason = getAnnotationElementStringValue(deprecation, "reason");
+			var replacement = getAnnotationElementStringValue(deprecation, "replacement");
+			var since = getAnnotationElementStringValue(deprecation, "since");
+			if (reason != null || replacement != null || since != null) {
+				return new ConfigurationMetaData.Deprecation(null, reason, replacement, since);
+			}
+		}
+		// Fallback, look for @Deprecated
+		if (getAnnotation(element, Deprecated.class) != null) {
+			return new ConfigurationMetaData.Deprecation(null, null, null, null);
+		}
+		return null;
 	}
 
 	private @Nullable AnnotationMirror getAnnotation(Element element, Class<? extends Annotation> annotationType) {
