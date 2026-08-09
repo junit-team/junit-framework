@@ -29,6 +29,21 @@ import org.apiguardian.api.API;
 public @interface ConfigurationParameter {
 
 	/**
+	 * The type of the data type of the parameter.
+	 *
+	 * @return the signature of the data type of the parameter.
+	 */
+	Class<?>[] type() default Void.class;
+
+	/**
+	 * The default value used if the parameter is not specified. It can be a
+	 * list of values if the parameter supports comma separated values.
+	 *
+	 * @return the default values.
+	 */
+	Value defaultValue() default @Value;
+
+	/**
 	 * Specifies that the parameter is deprecated.
 	 *
 	 * @return details about the deprecation.
@@ -59,4 +74,58 @@ public @interface ConfigurationParameter {
 		 */
 		String since() default "";
 	}
+
+	@interface Value {
+
+		/**
+		 * The {@code short} values to use as the defaults; must not be empty.
+		 */
+		short[] shorts() default {};
+
+		/**
+		 * The {@code byte} values to use as the defaults; must not be empty.
+		 */
+		byte[] bytes() default {};
+
+		/**
+		 * The {@code int} values to use as the defaults; must not be empty.
+		 */
+		int[] ints() default {};
+
+		/**
+		 * The {@code long} values to use as the defaults; must not be empty.
+		 */
+		long[] longs() default {};
+
+		/**
+		 * The {@code float} values to use as the defaults; must not be empty.
+		 */
+		float[] floats() default {};
+
+		/**
+		 * The {@code double} values to use as the defaults; must not be empty.
+		 */
+		double[] doubles() default {};
+
+		/**
+		 * The {@code char} values to use as the defaults; must not be empty.
+		 */
+		char[] chars() default {};
+
+		/**
+		 * The {@code boolean} values to use as the defaults; must not be empty.
+		 */
+		boolean[] booleans() default {};
+
+		/**
+		 * The {@link String} values to use as the defaults; must not be empty.
+		 */
+		String[] strings() default {};
+
+		/**
+		 * The {@link Class} values to use as the defaults; must not be empty.
+		 */
+		Class<?>[] classes() default {};
+	}
+
 }
