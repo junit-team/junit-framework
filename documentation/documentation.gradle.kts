@@ -101,6 +101,7 @@ dependencies {
 	javadocClasspath(libs.picocli)
 	javadocClasspath(libs.fastcsv)
 	javadocClasspath(libs.openTestReporting.events)
+	javadocClasspath(libs.jakarta.json.api)
 	javadocClasspath(libs.kotlinx.coroutines.core)
 	javadocClasspath(kotlin("stdlib"))
 	javadocClasspath(kotlin("reflect"))
