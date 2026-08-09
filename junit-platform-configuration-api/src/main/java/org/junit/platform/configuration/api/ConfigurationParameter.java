@@ -22,11 +22,4 @@ import org.apiguardian.api.API;
 @Target(ElementType.FIELD)
 public @interface ConfigurationParameter {
 
-	/**
-	 * The data type of the property. For example {@link String},
-	 * {@link Integer}, {@link Boolean} or {@link Class}.
-	 *
-	 * @return the data type of the property.
-	 */
-	Class<?> type() default Void.class;
 }

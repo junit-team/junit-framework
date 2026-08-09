@@ -88,26 +88,12 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 	private ConfigurationMetaData.Property createProperty(VariableElement element) {
 		return new ConfigurationMetaData.Property( //
 			processName(element), //
-			processType(element), //
+			null, // TODO:
 			processDescription(element), //
 			processSourceType(element), //
 			null, // TODO:
 			processDeprecation(element) //
 		);
-	}
-
-	private @Nullable String processType(VariableElement element) {
-		var parameter = getAnnotation(element, ConfigurationParameter.class);
-		if (parameter == null) {
-			return null;
-		}
-
-		var type = getAnnotationElementValue(parameter, "type");
-		if (Void.class.getName().equals(type)) {
-			return null;
-		}
-
-		return type;
 	}
 
 	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(VariableElement element) {
@@ -131,18 +117,6 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 			}
 		}
 		return null;
-	}
-
-	private @Nullable String getAnnotationElementValue(AnnotationMirror annotation, String elementName) {
-		return annotation.getElementValues().entrySet() //
-				.stream() //
-				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
-				.map((element) -> {
-					var value = element.getValue().getValue();
-					return value == null ? null : value.toString();
-				}) //
-				.findFirst() //
-				.orElse(null);
 	}
 
 	private @Nullable String processDescription(VariableElement element) {

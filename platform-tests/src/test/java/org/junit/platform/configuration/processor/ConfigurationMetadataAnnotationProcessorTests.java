@@ -38,7 +38,6 @@ import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
 import org.junit.platform.configuration.testcases.PropertyDeprecated;
-import org.junit.platform.configuration.testcases.StringType;
 import org.junit.platform.configuration.testcases.Without;
 
 class ConfigurationMetadataAnnotationProcessorTests {
@@ -77,21 +76,6 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						{
 						  "name": "org.example.property",
 						  "sourceType": "org.junit.platform.configuration.testcases.Minimal"
-						}
-					  ]
-					}""");
-		}
-
-		@Test
-		void stringType() {
-			compiler.compile(StringType.class);
-			assertMetaDataIsEqualTo("""
-					{
-					  "properties": [
-						{
-						  "name": "org.example.property",
-						  "type": "java.lang.String",
-						  "sourceType": "org.junit.platform.configuration.testcases.StringType"
 						}
 					  ]
 					}""");
