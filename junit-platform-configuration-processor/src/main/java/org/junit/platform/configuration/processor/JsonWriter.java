@@ -18,13 +18,9 @@ import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Group;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Hint;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.Many;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.OneOrMany.One;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.ValueHint;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.ValueProvider;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -45,48 +41,11 @@ class JsonWriter {
 	private @Nullable JsonObject toJsonObject(ConfigurationMetaData metaData) {
 		var builder = factory.createObjectBuilder();
 
-		var groups = metaData.groups();
-		if (!groups.isEmpty()) {
-			builder.add("groups", toJsonArray(groups, this::toJsonObject));
-		}
-
 		var properties = metaData.properties();
 		if (!properties.isEmpty()) {
 			builder.add("properties", toJsonArray(properties, this::toJsonObject));
 		}
 
-		var hints = metaData.hints();
-		if (!hints.isEmpty()) {
-			builder.add("hints", toJsonArray(hints, this::toJsonObject));
-		}
-
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(Group group) {
-		var builder = factory.createObjectBuilder();
-
-		builder.add("name", group.name());
-
-		var type = group.type();
-		if (type != null) {
-			builder.add("type", type);
-		}
-
-		var description = group.description();
-		if (description != null) {
-			builder.add("description", description);
-		}
-
-		var sourceType = group.sourceType();
-		if (sourceType != null) {
-			builder.add("sourceType", sourceType);
-		}
-
-		var sourceMethod = group.sourceMethod();
-		if (sourceMethod != null) {
-			builder.add("sourceMethod", sourceMethod);
-		}
 		return builder.build();
 	}
 
@@ -163,56 +122,6 @@ class JsonWriter {
 
 	private String toJsonValue(Level level) {
 		return level.value();
-	}
-
-	private JsonObject toJsonObject(Hint hint) {
-		var builder = factory.createObjectBuilder();
-
-		builder.add("name", hint.name());
-
-		var values = hint.values();
-		if (!values.isEmpty()) {
-			builder.add("values", toJsonArray(values, this::toJsonObject));
-		}
-
-		var providers = hint.providers();
-		if (!providers.isEmpty()) {
-			builder.add("providers", toJsonArray(providers, this::toJsonObject));
-		}
-
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(ValueHint valueHint) {
-		var builder = factory.createObjectBuilder();
-
-		builder.add("type", valueHint.value());
-
-		var description = valueHint.description();
-		if (description != null) {
-			builder.add("description", description);
-		}
-
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(ValueProvider valueProvider) {
-		var builder = factory.createObjectBuilder();
-
-		builder.add("name", valueProvider.name());
-
-		var parameters = valueProvider.parameters();
-		if (!parameters.isEmpty()) {
-			builder.add("parameters", toJsonObject(parameters));
-		}
-
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(Map<String, String> parameters) {
-		var builder = factory.createObjectBuilder();
-		parameters.forEach(builder::add);
-		return builder.build();
 	}
 
 	private <T> JsonArray toJsonArray(List<T> properties, Function<T, JsonValue> converter) {
