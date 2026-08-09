@@ -6,7 +6,6 @@ description = "JUnit Platform Configuration API"
 
 dependencies {
 	api(platform(projects.junitBom))
-	api(projects.junitPlatformCommons)
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
@@ -14,4 +13,17 @@ dependencies {
 
 backwardCompatibilityChecks {
 	enabled = false // not yet released
+}
+
+tasks.jar {
+	bundle {
+		bnd(
+			"""
+			Import-Package: \
+				${extra["importAPIGuardian"]},\
+				${extra["importJSpecify"]},\
+				*
+			"""
+		)
+	}
 }
