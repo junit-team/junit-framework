@@ -39,6 +39,7 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
 import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
 
@@ -204,6 +205,22 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "type": "java.lang.String",
 						  "sourceType": "org.junit.platform.configuration.testcases.TypeString"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void enumTypeWithStringDefault() {
+			compiler.compile(TypeEnumWithStringDefault.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault.ExampleEnum",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault",
+						  "defaultValue": "A"
 						}
 					  ]
 					}""");
