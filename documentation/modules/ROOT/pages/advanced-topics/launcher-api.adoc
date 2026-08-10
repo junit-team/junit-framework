@@ -172,7 +172,7 @@ behavior since it's called before the first and after the last test in a launche
 respectively. The scope of a launcher session depends on the used IDE or build tool but
 usually corresponds to the lifecycle of the test JVM. A custom listener that starts an
 HTTP server before executing the first test and stops it after the last test has been
-executed, could look like this:
+executed could look like this:
 
 [tabs]
 ====
@@ -474,7 +474,7 @@ include::example$kotlin/example/kotlin/FirstCustomEngine.kt[tags=user_guide]
 --
 ====
 
-`SecondCustomEngine` follows the same pattern, ensuring that regardless whether it runs
+`SecondCustomEngine` follows the same pattern, ensuring that, regardless whether it runs
 before or after `FirstCustomEngine`, it will use the same socket instance:
 
 [tabs]

@@ -78,7 +78,7 @@ include::example$kotlin/example/kotlin/testkit/EngineTestKitDiscoveryDemo.kt[tag
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Discover the `TestPlan`.
-<4> Assert engine root descriptor has expected display name.
+<4> Assert engine root descriptor has the expected display name.
 <5> Assert no discovery issues were encountered.
 
 [[engine-statistics]]

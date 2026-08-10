@@ -61,7 +61,7 @@ class UsingTheLauncherDemo {
 
         LauncherFactory.openSession().use { session ->
             val launcher = session.launcher
-            // Register one ore more listeners of your choice.
+            // Register one or more listeners of your choice.
             launcher.registerTestExecutionListeners(listener)
             // Discover tests and build a test plan.
             val testPlan = launcher.discover(discoveryRequest)
