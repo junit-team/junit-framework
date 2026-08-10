@@ -76,14 +76,17 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 	}
 
 	@Override
+	@SuppressWarnings("DoNotClaimAnnotations")
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		configurationParameterHandler().process(roundEnv);
 
 		if (roundEnv.processingOver()) {
 			writeMetaData();
 		}
-		// See: https://errorprone.info/bugpattern/DoNotClaimAnnotations
-		return false;
+
+		// Very simple check. Works because this processor only processes
+		// ConfigurationParameter annotations.
+		return !annotations.isEmpty();
 	}
 
 	private void writeMetaData() {
