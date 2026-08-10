@@ -23,11 +23,10 @@ GEM
     hashery (2.1.2)
     matrix (0.4.3)
     pdf-core (0.9.0)
-    pdf-reader (2.15.1)
+    pdf-reader (2.16.0)
       Ascii85 (>= 1.0, < 3.0, != 2.0.0)
       afm (>= 0.2.1, < 2)
       hashery (~> 2.0)
-      ruby-rc4
       ttfunk
     polyglot (0.3.5)
     prawn (2.4.0)
@@ -49,7 +48,6 @@ GEM
     rexml (3.4.4)
     rouge (5.1.0)
       strscan (~> 3.1)
-    ruby-rc4 (0.1.5)
     strscan (3.1.8)
     treetop (1.6.18)
       polyglot (~> 0.3)
