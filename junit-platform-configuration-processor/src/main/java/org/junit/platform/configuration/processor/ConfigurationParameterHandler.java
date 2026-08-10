@@ -14,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValue;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValuesMap;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getValuesMap;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -146,7 +146,7 @@ final class ConfigurationParameterHandler {
 			return null;
 		}
 
-		var defaultValues = getStringValuesMap(defaults);
+		var defaultValues = getValuesMap(defaults);
 		Preconditions.condition(defaultValues.size() == 1, () -> {
 			var enclosingTypeElement = getEnclosingTypeElement(element);
 			return "Field [%s.%s] must have exactly one default value" //
@@ -172,7 +172,7 @@ final class ConfigurationParameterHandler {
 		return new Default(defaultType, defaultValue);
 	}
 
-	private record Default(String defaultType, String value) {
+	private record Default(String defaultType, Object value) {
 
 	}
 

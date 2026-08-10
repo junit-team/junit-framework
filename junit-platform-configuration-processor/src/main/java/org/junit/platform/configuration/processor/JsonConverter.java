@@ -22,6 +22,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 
 final class JsonConverter {
@@ -60,7 +61,7 @@ final class JsonConverter {
 
 		var defaultValue = property.defaultValue();
 		if (defaultValue != null) {
-			builder.add("defaultValue", defaultValue);
+			addObjectValue(builder, "defaultValue", defaultValue);
 		}
 
 		var deprecation = property.deprecation();
@@ -69,6 +70,39 @@ final class JsonConverter {
 		}
 
 		return builder.build();
+	}
+
+	private void addObjectValue(JsonObjectBuilder builder, String name, Object defaultValue) {
+		if (defaultValue instanceof Short v) {
+			builder.add(name, v);
+		}
+		else if (defaultValue instanceof Byte v) {
+			builder.add(name, "%02X".formatted(v));
+		}
+		else if (defaultValue instanceof Integer v) {
+			builder.add(name, v);
+		}
+		else if (defaultValue instanceof Long v) {
+			builder.add(name, v);
+		}
+		else if (defaultValue instanceof Float v) {
+			builder.add(name, v);
+		}
+		else if (defaultValue instanceof Double v) {
+			builder.add(name, v);
+		}
+		else if (defaultValue instanceof Character v) {
+			builder.add(name, String.valueOf(v));
+		}
+		else if (defaultValue instanceof Boolean v) {
+			builder.add(name, v);
+		}
+		else if (defaultValue instanceof String v) {
+			builder.add(name, v);
+		}
+		else {
+			builder.add(name, defaultValue.toString());
+		}
 	}
 
 	private JsonObject toJsonObject(Deprecation deprecation) {

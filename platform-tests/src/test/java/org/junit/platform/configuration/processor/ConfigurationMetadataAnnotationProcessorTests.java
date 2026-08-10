@@ -213,71 +213,70 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		void defaults() {
 			compiler.compile(Defaults.class);
 			assertMetaDataIsEqualTo("""
-										{
-					  "properties": [
-					    {
-					      "name": "org.example.shorts",
-					      "type": "java.lang.Short",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "1"
-					    },
-					    {
-					      "name": "org.example.bytes",
-					      "type": "java.lang.Byte",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "42"
-					    },
-					    {
-					      "name": "org.example.ints",
-					      "type": "java.lang.Integer",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "42"
-					    },
-					    {
-					      "name": "org.example.longs",
-					      "type": "java.lang.Long",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "42"
-					    },
-					    {
-					      "name": "org.example.floats",
-					      "type": "java.lang.Float",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "42.0"
-					    },
-					    {
-					      "name": "org.example.doubles",
-					      "type": "java.lang.Double",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "42.0"
-					    },
-					    {
-					      "name": "org.example.chars",
-					      "type": "java.lang.Character",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "4"
-					    },
-					    {
-					      "name": "org.example.booleans",
-					      "type": "java.lang.Boolean",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "true"
-					    },
-					    {
-					      "name": "org.example.strings",
-					      "type": "java.lang.String",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "default"
-					    },
-					    {
-					      "name": "org.example.classes",
-					      "type": "java.lang.Class",
-					      "sourceType": "org.junit.platform.configuration.testcases.Defaults",
-					      "defaultValue": "org.junit.platform.configuration.testcases.Defaults.Example"
-					    }
-					  ]
-					}
-					""");
+					{
+						"properties": [
+						  {
+							"name": "org.example.shorts",
+							"type": "java.lang.Short",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": 1
+						  },
+						  {
+							"name": "org.example.bytes",
+							"type": "java.lang.Byte",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": "2A"
+						  },
+						  {
+							"name": "org.example.ints",
+							"type": "java.lang.Integer",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": 42
+						  },
+						  {
+							"name": "org.example.longs",
+							"type": "java.lang.Long",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": 42
+						  },
+						  {
+							"name": "org.example.floats",
+							"type": "java.lang.Float",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": 42.0
+						  },
+						  {
+							"name": "org.example.doubles",
+							"type": "java.lang.Double",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": 42.0
+						  },
+						  {
+							"name": "org.example.chars",
+							"type": "java.lang.Character",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": "4"
+						  },
+						  {
+							"name": "org.example.booleans",
+							"type": "java.lang.Boolean",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": true
+						  },
+						  {
+							"name": "org.example.strings",
+							"type": "java.lang.String",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": "default"
+						  },
+						  {
+							"name": "org.example.classes",
+							"type": "java.lang.Class",
+							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
+							"defaultValue": "org.junit.platform.configuration.testcases.Defaults.Example"
+						  }
+						]
+					}""");
 		}
 
 		@Test

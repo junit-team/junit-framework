@@ -65,19 +65,17 @@ class AnnotationMirrorUtil {
 				.findFirst();
 	}
 
-	static Map<String, List<String>> getStringValuesMap(AnnotationMirror defaults) {
+	static Map<String, List<Object>> getValuesMap(AnnotationMirror defaults) {
 		return defaults.getElementValues().entrySet() //
 				.stream() //
-				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getStringValues));
+				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getValues));
 	}
 
-	private static List<String> getStringValues(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
+	private static List<Object> getValues(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
 		if (entry.getValue().getValue() instanceof List<?> values) {
 			return values.stream().filter(AnnotationValue.class::isInstance) //
 					.map(AnnotationValue.class::cast) //
 					.map(AnnotationValue::getValue) //
-					.map(Object::toString) //
-					.filter(s -> !s.isEmpty()) //
 					.toList();
 		}
 		return Collections.emptyList();

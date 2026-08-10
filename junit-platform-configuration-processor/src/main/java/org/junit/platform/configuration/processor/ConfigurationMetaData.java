@@ -35,7 +35,7 @@ final class ConfigurationMetaData {
 			@Nullable String type, //
 			@Nullable String description, //
 			@Nullable String sourceType, //
-			@Nullable String defaultValue, //
+			@Nullable Object defaultValue, //
 			@Nullable Deprecation deprecation //
 	) {
 
