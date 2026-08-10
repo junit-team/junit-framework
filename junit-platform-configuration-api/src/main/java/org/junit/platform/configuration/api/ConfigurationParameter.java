@@ -38,8 +38,8 @@ public @interface ConfigurationParameter {
 	Class<?> type() default Void.class;
 
 	/**
-	 * The default value used if the parameter is not specified. It can be a
-	 * list of values if the parameter supports comma separated values.
+	 * The default value used if the parameter is not specified.
+	 * At most one value may be set.
 	 *
 	 * @return the default values.
 	 */
@@ -77,57 +77,60 @@ public @interface ConfigurationParameter {
 		String since() default "";
 	}
 
+	/**
+	 * The value to use as the default. At most one value may be set.
+	 */
 	@interface Value {
 
 		/**
-		 * The {@code short} values to use as the defaults; must not be empty.
+		 * The {@code short} value to use as the default.
 		 */
-		short[] shorts() default {};
+		short[] shortValue() default {};
 
 		/**
-		 * The {@code byte} values to use as the defaults; must not be empty.
+		 * The {@code byte} value to use as the default.
 		 */
-		byte[] bytes() default {};
+		byte[] byteValue() default {};
 
 		/**
-		 * The {@code int} values to use as the defaults; must not be empty.
+		 * The {@code int} value to use as the default.
 		 */
-		int[] ints() default {};
+		int[] intValue() default {};
 
 		/**
-		 * The {@code long} values to use as the defaults; must not be empty.
+		 * The {@code long} value to use as the default.
 		 */
-		long[] longs() default {};
+		long[] longValue() default {};
 
 		/**
-		 * The {@code float} values to use as the defaults; must not be empty.
+		 * The {@code float} value to use as the default.
 		 */
-		float[] floats() default {};
+		float[] floatValue() default {};
 
 		/**
-		 * The {@code double} values to use as the defaults; must not be empty.
+		 * The {@code double} value to use as the default.
 		 */
-		double[] doubles() default {};
+		double[] doubleValue() default {};
 
 		/**
-		 * The {@code char} values to use as the defaults; must not be empty.
+		 * The {@code char} value to use as the default.
 		 */
-		char[] chars() default {};
+		char[] charValue() default {};
 
 		/**
-		 * The {@code boolean} values to use as the defaults; must not be empty.
+		 * The {@code boolean} value to use as the default.
 		 */
-		boolean[] booleans() default {};
+		boolean[] booleanValue() default {};
 
 		/**
-		 * The {@link String} values to use as the defaults; must not be empty.
+		 * The {@link String} value to use as the default.
 		 */
-		String[] strings() default {};
+		String[] stringValue() default {};
 
 		/**
-		 * The {@link Class} values to use as the defaults; must not be empty.
+		 * The {@link Class} value to use as the default.
 		 */
-		Class<?>[] classes() default {};
+		Class<?>[] classValue() default {};
 	}
 
 }

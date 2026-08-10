@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.junit.platform.configuration.processor.ConfigurationMetaData.CommaSeparatedList;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
@@ -61,7 +60,7 @@ final class JsonConverter {
 
 		var defaultValue = property.defaultValue();
 		if (defaultValue != null) {
-			builder.add("defaultValue", toJsonValue(defaultValue));
+			builder.add("defaultValue", defaultValue);
 		}
 
 		var deprecation = property.deprecation();
@@ -70,10 +69,6 @@ final class JsonConverter {
 		}
 
 		return builder.build();
-	}
-
-	private String toJsonValue(CommaSeparatedList<String> values) {
-		return String.join(", ", values.elements());
 	}
 
 	private JsonObject toJsonObject(Deprecation deprecation) {

@@ -13,9 +13,9 @@ package org.junit.platform.configuration.testcases;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
-public final class DefaultMultiple {
+public final class DefaultMultipleValues {
 
-	@ConfigurationParameter(defaultValue = @Value(strings = { "default", "another-default" }))
+	@ConfigurationParameter(defaultValue = @Value(stringValue = { "default", "another-default" }))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

@@ -13,9 +13,9 @@ package org.junit.platform.configuration.testcases;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
-public final class DefaultMultipleSets {
+public final class DefaultDifferentSets {
 
-	@ConfigurationParameter(defaultValue = @Value(strings = "default", ints = 42))
+	@ConfigurationParameter(defaultValue = @Value(stringValue = "default", intValue = 42))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

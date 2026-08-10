@@ -35,13 +35,9 @@ final class ConfigurationMetaData {
 			@Nullable String type, //
 			@Nullable String description, //
 			@Nullable String sourceType, //
-			@Nullable CommaSeparatedList<String> defaultValue, //
+			@Nullable String defaultValue, //
 			@Nullable Deprecation deprecation //
 	) {
-
-	}
-
-	record CommaSeparatedList<T>(List<T> elements) {
 
 	}
 

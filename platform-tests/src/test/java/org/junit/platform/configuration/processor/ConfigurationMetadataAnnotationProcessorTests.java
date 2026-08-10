@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.PreconditionViolationException;
-import org.junit.platform.configuration.testcases.DefaultMultiple;
-import org.junit.platform.configuration.testcases.DefaultMultipleSets;
+import org.junit.platform.configuration.testcases.DefaultDifferentSets;
+import org.junit.platform.configuration.testcases.DefaultMultipleValues;
 import org.junit.platform.configuration.testcases.Defaults;
 import org.junit.platform.configuration.testcases.Deprecation;
 import org.junit.platform.configuration.testcases.DeprecationWithDetails;
@@ -210,22 +210,6 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
-		void defaultsMultiple() {
-			compiler.compile(DefaultMultiple.class);
-			assertMetaDataIsEqualTo("""
-					{
-					  "properties": [
-					    {
-					      "name": "org.example.property",
-					      "type": "java.lang.String",
-					      "sourceType": "org.junit.platform.configuration.testcases.DefaultMultiple",
-					      "defaultValue": "default, another-default"
-					    }
-					  ]
-					}""");
-		}
-
-		@Test
 		void defaults() {
 			compiler.compile(Defaults.class);
 			assertMetaDataIsEqualTo("""
@@ -299,27 +283,36 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		@Test
 		void mustBeFinal() {
 			asserPreconditionViolation(() -> compiler.compile(NonFinal.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final".formatted(NonFinal.class.getName()));
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final" //
+						.formatted(NonFinal.class.getName()));
 		}
 
 		@Test
 		void mustBeStatic() {
 			asserPreconditionViolation(() -> compiler.compile(NonStatic.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared static".formatted(NonStatic.class.getName()));
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared static" //
+						.formatted(NonStatic.class.getName()));
 		}
 
 		@Test
 		void mustBeString() {
 			asserPreconditionViolation(() -> compiler.compile(NonString.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value".formatted(
-					NonString.class.getName()));
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value" //
+						.formatted(NonString.class.getName()));
 		}
 
 		@Test
 		void mustHaveExactlyOneSetOfDefaults() {
-			asserPreconditionViolation(() -> compiler.compile(DefaultMultipleSets.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must have exactly one (set of) default value(s)".formatted(
-					DefaultMultipleSets.class.getName()));
+			asserPreconditionViolation(() -> compiler.compile(DefaultDifferentSets.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must have exactly one default value" //
+						.formatted(DefaultDifferentSets.class.getName()));
+		}
+
+		@Test
+		void mustHaveExactlyOneDefaultValue() {
+			asserPreconditionViolation(() -> compiler.compile(DefaultMultipleValues.class),
+				"Field [%s.EXAMPLE_PROPERTY_NAME] must have exactly one default value" //
+						.formatted(DefaultMultipleValues.class.getName()));
 		}
 
 		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {

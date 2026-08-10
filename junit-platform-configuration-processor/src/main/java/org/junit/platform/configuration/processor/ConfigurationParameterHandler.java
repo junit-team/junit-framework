@@ -28,22 +28,21 @@ import javax.lang.model.util.Elements;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.CommaSeparatedList;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
 
 final class ConfigurationParameterHandler {
 
 	private static final Map<String, String> NAME_TO_TYPE_NAME = Map.of( //
-		"shorts", Short.class.getName(), //
-		"bytes", Byte.class.getName(), //
-		"ints", Integer.class.getName(), //
-		"longs", Long.class.getName(), //
-		"floats", Float.class.getName(), //
-		"doubles", Double.class.getName(), //
-		"chars", Character.class.getName(), //
-		"booleans", Boolean.class.getName(), //
-		"strings", String.class.getName(), //
-		"classes", Class.class.getName() //
+		"shortValue", Short.class.getName(), //
+		"byteValue", Byte.class.getName(), //
+		"intValue", Integer.class.getName(), //
+		"longValue", Long.class.getName(), //
+		"floatValue", Float.class.getName(), //
+		"doubleValue", Double.class.getName(), //
+		"charValue", Character.class.getName(), //
+		"booleanValue", Boolean.class.getName(), //
+		"stringValue", String.class.getName(), //
+		"classValue", Class.class.getName() //
 	);
 
 	private final ConfigurationMetaData metaData;
@@ -150,18 +149,30 @@ final class ConfigurationParameterHandler {
 		var defaultValues = getStringValuesMap(defaults);
 		Preconditions.condition(defaultValues.size() == 1, () -> {
 			var enclosingTypeElement = getEnclosingTypeElement(element);
-			return "Field [%s.%s] must have exactly one (set of) default value(s)".formatted(enclosingTypeElement,
-				element.getSimpleName());
+			return "Field [%s.%s] must have exactly one default value" //
+					.formatted(enclosingTypeElement, element.getSimpleName());
 		});
 
-		return defaultValues.entrySet().stream() //
-				.map(entry -> new Default( //
-					requireNonNull(NAME_TO_TYPE_NAME.get(entry.getKey())),
-					new CommaSeparatedList<>(entry.getValue()))).findFirst() //
-				.orElse(null);
+		Preconditions.condition(defaultValues.size() == 1, () -> {
+			var enclosingTypeElement = getEnclosingTypeElement(element);
+			return "Field [%s.%s] must have exactly one default value" //
+					.formatted(enclosingTypeElement, element.getSimpleName());
+		});
+
+		var entry = defaultValues.entrySet().iterator().next();
+		var value = entry.getValue();
+		Preconditions.condition(value.size() == 1, () -> {
+			var enclosingTypeElement = getEnclosingTypeElement(element);
+			return "Field [%s.%s] must have exactly one default value" //
+					.formatted(enclosingTypeElement, element.getSimpleName());
+		});
+		var defaultValue = value.get(0);
+		var defaultName = entry.getKey();
+		var defaultType = requireNonNull(NAME_TO_TYPE_NAME.get(defaultName));
+		return new Default(defaultType, defaultValue);
 	}
 
-	private record Default(String defaultType, CommaSeparatedList<String> value) {
+	private record Default(String defaultType, String value) {
 
 	}
 
