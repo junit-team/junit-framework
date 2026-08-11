@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
 /**
  * Collection of constants related to the {@link VintageTestEngine}.
@@ -35,7 +36,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
-	@ConfigurationParameter
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
 	public static final String PARALLEL_EXECUTION_ENABLED = "junit.vintage.execution.parallel.enabled";
 
 	/**
@@ -48,6 +49,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(type = Integer.class)
 	public static final String PARALLEL_POOL_SIZE = "junit.vintage.execution.parallel.pool-size";
 
 	/**
@@ -60,6 +62,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
 
 	/**
@@ -72,6 +75,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
 	public static final String PARALLEL_METHOD_EXECUTION = "junit.vintage.execution.parallel.methods";
 
 	/**
@@ -84,6 +88,7 @@ public final class Constants {
 	 * @since 6.0.1
 	 */
 	@API(status = MAINTAINED, since = "6.0.1")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
 	public static final String DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME = "junit.vintage.discovery.issue.reporting.enabled";
 
 	private Constants() {

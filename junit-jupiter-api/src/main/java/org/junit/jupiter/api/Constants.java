@@ -200,7 +200,7 @@ public final class Constants {
 	 * @see Lifecycle#DEFAULT_LIFECYCLE_PROPERTY_NAME
 	 */
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = Lifecycle.class, defaultValue = @Value(stringValue = "PER_METHOD"))
+	@ConfigurationParameter(type = Lifecycle.class, defaultValue = @Value(stringValue = "per_method"))
 	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
 
 	/**
@@ -218,7 +218,7 @@ public final class Constants {
 	 * @see Execution#DEFAULT_EXECUTION_MODE_PROPERTY_NAME
 	 */
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = ExecutionMode.class, defaultValue = @Value(stringValue = "SAME_THREAD"))
+	@ConfigurationParameter(type = ExecutionMode.class, defaultValue = @Value(stringValue = "same_thread"))
 	public static final String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 
 	/**
@@ -247,7 +247,7 @@ public final class Constants {
 	 */
 	// TODO: ParallelExecutorServiceType is not part of the public API
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(/* type = ParallelExecutorServiceType.class,*/ defaultValue = @Value(stringValue = "FORK_JOIN_POOL"))
+	@ConfigurationParameter(/* type = ParallelExecutorServiceType.class,*/ defaultValue = @Value(stringValue = "fork_join_pool"))
 	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ "executor-service";
 
@@ -261,7 +261,7 @@ public final class Constants {
 	 */
 	// TODO: DefaultParallelExecutionConfigurationStrategy is not part of the public API
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(/* type = DefaultParallelExecutionConfigurationStrategy.class,*/ defaultValue = @Value(stringValue = "DYNAMIC"))
+	@ConfigurationParameter(/* type = DefaultParallelExecutionConfigurationStrategy.class,*/ defaultValue = @Value(stringValue = "dynamic"))
 	public static final String PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "strategy";
 
 	/**
@@ -453,7 +453,7 @@ public final class Constants {
 	 * @see Timeout.ThreadMode
 	 */
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = Timeout.ThreadMode.class, defaultValue = @Value(stringValue = "SAME_THREAD"))
+	@ConfigurationParameter(type = Timeout.ThreadMode.class, defaultValue = @Value(stringValue = "same_thread"))
 	public static final String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
 
 	/**
@@ -473,7 +473,7 @@ public final class Constants {
 	 * @see TempDir#DEFAULT_CLEANUP_MODE_PROPERTY_NAME
 	 */
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = CleanupMode.class, defaultValue = @Value(stringValue = "ALWAYS"))
+	@ConfigurationParameter(type = CleanupMode.class, defaultValue = @Value(stringValue = "always"))
 	public static final String DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME = TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
 
 	/**
@@ -494,7 +494,7 @@ public final class Constants {
 	 * @see org.junit.jupiter.api.extension.TestInstantiationAwareExtension
 	 */
 	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = ExtensionContextScope.class, defaultValue = @Value(stringValue = "DEFAULT"))
+	@ConfigurationParameter(type = ExtensionContextScope.class, defaultValue = @Value(stringValue = "default"))
 	public static final String DEFAULT_TEST_CLASS_INSTANCE_CONSTRUCTION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME = ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
 
 	private Constants() {
