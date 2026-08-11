@@ -64,7 +64,8 @@ final class ConfigurationParameterHandler {
 			return;
 		}
 		if (!(variableElement.getEnclosingElement() instanceof TypeElement enclosingTypeElement)) {
-			messager.printMessage(ERROR, "@ConfigurationParameter annotated element did not have an enclosing type element", element);
+			messager.printMessage(ERROR, "@ConfigurationParameter annotated element did not have an enclosing element",
+				element);
 			return;
 		}
 		var annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
