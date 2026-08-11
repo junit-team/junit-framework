@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 
 import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
@@ -65,14 +66,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void none() {
-			compiler.compile(Without.class);
+			compiler.compileWithoutError(Without.class);
 			var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
 			assertThat(metaDataPath).doesNotExist();
 		}
 
 		@Test
 		void minimal() {
-			compiler.compile(Minimal.class);
+			compiler.compileWithoutError(Minimal.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -86,7 +87,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documented() {
-			compiler.compile(Documented.class);
+			compiler.compileWithoutError(Documented.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -101,7 +102,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documentedWithAtValue() {
-			compiler.compile(DocumentedWithAtValue.class);
+			compiler.compileWithoutError(DocumentedWithAtValue.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -116,7 +117,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documentedWithMultipleLines() {
-			compiler.compile(DocumentedWithMultiLines.class);
+			compiler.compileWithoutError(DocumentedWithMultiLines.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -131,7 +132,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documentedWithMultipleParagraphs() {
-			compiler.compile(DocumentedWithMultipleParagraphs.class);
+			compiler.compileWithoutError(DocumentedWithMultipleParagraphs.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -146,7 +147,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void documentedWithHeader() {
-			compiler.compile(DocumentedWithHeader.class);
+			compiler.compileWithoutError(DocumentedWithHeader.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -163,7 +164,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		void deprecation() {
 			// TODO: Class level? Inheritance? Meta?
 			// TODO: Warning level?
-			compiler.compile(Deprecation.class);
+			compiler.compileWithoutError(Deprecation.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -178,7 +179,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void deprecationWithDetails() {
-			compiler.compile(DeprecationWithDetails.class);
+			compiler.compileWithoutError(DeprecationWithDetails.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -197,7 +198,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void stringType() {
-			compiler.compile(TypeString.class);
+			compiler.compileWithoutError(TypeString.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -212,7 +213,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void enumTypeWithStringDefault() {
-			compiler.compile(TypeEnumWithStringDefault.class);
+			compiler.compileWithoutError(TypeEnumWithStringDefault.class);
 			assertMetaDataIsEqualTo("""
 					{
 					  "properties": [
@@ -228,7 +229,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void defaults() {
-			compiler.compile(Defaults.class);
+			compiler.compileWithoutError(Defaults.class);
 			assertMetaDataIsEqualTo("""
 					{
 						"properties": [
@@ -298,37 +299,45 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void mustBeFinal() {
-			asserPreconditionViolation(() -> compiler.compile(NonFinal.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared final" //
-						.formatted(NonFinal.class.getName()));
+			var result = compiler.compile(NonFinal.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains(
+						"@ConfigurationParameter annotated field must static, final, and have constant string value");
 		}
 
 		@Test
 		void mustBeStatic() {
-			asserPreconditionViolation(() -> compiler.compile(NonStatic.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must be declared static" //
-						.formatted(NonStatic.class.getName()));
+			var result = compiler.compile(NonStatic.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains(
+						"@ConfigurationParameter annotated field must static, final, and have constant string value");
 		}
 
 		@Test
 		void mustBeString() {
-			asserPreconditionViolation(() -> compiler.compile(NonString.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must have a constant string value" //
-						.formatted(NonString.class.getName()));
+			var result = compiler.compile(NonString.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains(
+						"@ConfigurationParameter annotated field must static, final, and have constant string value");
 		}
 
 		@Test
 		void mustHaveExactlyOneSetOfDefaults() {
-			asserPreconditionViolation(() -> compiler.compile(DefaultDifferentSets.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must have exactly one default value" //
-						.formatted(DefaultDifferentSets.class.getName()));
+			var result = compiler.compile(DefaultDifferentSets.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameter must have exactly one default value");
 		}
 
 		@Test
 		void mustHaveExactlyOneDefaultValue() {
-			asserPreconditionViolation(() -> compiler.compile(DefaultMultipleValues.class),
-				"Field [%s.EXAMPLE_PROPERTY_NAME] must have exactly one default value" //
-						.formatted(DefaultMultipleValues.class.getName()));
+			var result = compiler.compile(DefaultMultipleValues.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameter must have exactly one default value");
 		}
 
 		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {

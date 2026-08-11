@@ -14,6 +14,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Set;
 
@@ -67,7 +69,7 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 		super.init(environment);
 		this.metaData = new ConfigurationMetaData();
 		this.configurationParameterHandler = new ConfigurationParameterHandler(metaData,
-			processingEnv.getElementUtils());
+			processingEnv.getElementUtils(), processingEnv.getMessager());
 	}
 
 	@Override
@@ -78,7 +80,7 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 	@Override
 	@SuppressWarnings("DoNotClaimAnnotations")
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		configurationParameterHandler().process(roundEnv);
+		requireNonNull(configurationParameterHandler).process(roundEnv);
 
 		if (roundEnv.processingOver()) {
 			writeMetaData();
@@ -90,29 +92,21 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 	}
 
 	private void writeMetaData() {
-		try {
-			var resource = processingEnvironment().getFiler() //
-					.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
-			try (var out = new BufferedWriter(new OutputStreamWriter(resource.openOutputStream(), UTF_8))) {
-				var converter = new JsonConverter();
-				var value = converter.toJsonObject(metaData());
-				Json.createWriter(out).write(value);
-			}
+		var converter = new JsonConverter();
+		try (var out = new BufferedWriter(new OutputStreamWriter(openOutputStream(), UTF_8))) {
+			var value = converter.toJsonObject(requireNonNull(metaData));
+			Json.createWriter(out).write(value);
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException("Failed to write metadata to [%s]".formatted(METADATA_PATH), ex);
+			var message = "Failed to write metadata to [%s]".formatted(METADATA_PATH);
+			throw new ConfigurationMetadataAnnotationProcessorException(message, ex);
 		}
 	}
 
-	private ConfigurationParameterHandler configurationParameterHandler() {
-		return requireNonNull(configurationParameterHandler);
+	private OutputStream openOutputStream() throws IOException {
+		var filer = requireNonNull(processingEnv).getFiler();
+		var resource = filer.createResource(StandardLocation.CLASS_OUTPUT, "", METADATA_PATH);
+		return resource.openOutputStream();
 	}
 
-	private ProcessingEnvironment processingEnvironment() {
-		return requireNonNull(processingEnv);
-	}
-
-	private ConfigurationMetaData metaData() {
-		return requireNonNull(metaData);
-	}
 }

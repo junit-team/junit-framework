@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.Processor;
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.SimpleJavaFileObject;
@@ -44,7 +45,30 @@ class TestCompiler {
 		this.processor = processor;
 	}
 
-	void compile(Type type) {
+	void compileWithoutError(Type type) {
+		var result = compile(type);
+		var diagnostics = result.diagnostics();
+		if (result.success() && diagnostics.isEmpty()) {
+			return;
+		}
+		fail("""
+				Compilation of %s was not successful.
+
+				Javac output:
+
+				%s
+
+				Diagnostics:
+
+				%s
+				""".formatted(type, //
+			result.additionalOutput(), //
+			diagnostics.stream() //
+					.map(Objects::toString) //
+					.collect(Collectors.joining("\n"))));
+	}
+
+	CompilationResult compile(Type type) {
 		var options = List.of("-d", outputDirectory.toString());
 		var listener = new DiagnosticCollector<>();
 		var additionalOutput = new StringWriter();
@@ -58,22 +82,11 @@ class TestCompiler {
 		);
 		task.setProcessors(Set.of(processor));
 		var result = task.call();
-		if (!result || !listener.getDiagnostics().isEmpty()) {
-			var diagnostics = listener.getDiagnostics().stream() //
-					.map(Objects::toString) //
-					.collect(Collectors.joining("\n"));
-			fail("""
-					Compilation of %s was not successful.
+		return new CompilationResult(result, listener.getDiagnostics(), additionalOutput.toString());
+	}
 
-					Javac output:
+	record CompilationResult(boolean success, List<Diagnostic<?>> diagnostics, String additionalOutput) {
 
-					%s
-
-					Diagnostics:
-
-					%s
-					""".formatted(type, additionalOutput, diagnostics));
-		}
 	}
 
 	private static StandardJavaFileManager fileManagerOf(JavaCompiler compiler, DiagnosticCollector<Object> listener) {

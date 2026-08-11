@@ -10,7 +10,6 @@ description = "JUnit Platform Configuration Processor"
 dependencies {
 	api(platform(projects.junitBom))
 	api(projects.junitPlatformConfigurationApi)
-	api(projects.junitPlatformCommons)
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
@@ -50,6 +49,16 @@ tasks {
 		into(layout.buildDirectory.dir("licenses"))
 	}
 	shadowJar {
+		bundle {
+			bnd(
+				"""
+			Import-Package: \
+				${extra["importAPIGuardian"]},\
+				${extra["importJSpecify"]},\
+				*
+			"""
+			)
+		}
 		relocate("jakarta.json", "org.junit.platform.configuration.processor.shadow.jakarta.json")
 		relocate("org.eclipse.parsson", "org.junit.platform.configuration.processor.shadow.org.eclipse.parsson")
 		exclude("META-INF/LICENSE.md", "META-INF/NOTICE.md")

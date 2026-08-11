@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -27,21 +28,29 @@ import javax.lang.model.util.Elements;
 import org.jspecify.annotations.Nullable;
 
 final class ConfigurationParameterAnnotatedField {
-	private final VariableElement field;
+	private final VariableElement element;
 	private final TypeElement enclosingType;
-	private final AnnotationMirror configurationParameter;
+	private final AnnotationMirror annotationMirror;
 	private final Elements elementUtils;
 
-	ConfigurationParameterAnnotatedField(VariableElement field, Elements elementUtils, TypeElement enclosingType,
-			AnnotationMirror configurationParameter) {
-		this.field = field;
+	ConfigurationParameterAnnotatedField(VariableElement element, Elements elementUtils, TypeElement enclosingType,
+			AnnotationMirror annotationMirror) {
+		this.element = element;
 		this.elementUtils = elementUtils;
 		this.enclosingType = enclosingType;
-		this.configurationParameter = configurationParameter;
+		this.annotationMirror = annotationMirror;
+	}
+
+	Element element() {
+		return element;
+	}
+
+	AnnotationMirror annotationMirror() {
+		return annotationMirror;
 	}
 
 	Map<String, String> deprecationValues() {
-		var deprecation = getAnnotationMirror(configurationParameter, "deprecation");
+		var deprecation = getAnnotationMirror(annotationMirror, "deprecation");
 		if (deprecation == null) {
 			return Collections.emptyMap();
 		}
@@ -49,7 +58,7 @@ final class ConfigurationParameterAnnotatedField {
 	}
 
 	Map<String, List<Object>> defaultValues() {
-		var defaultValue = getAnnotationMirror(configurationParameter, "defaultValue");
+		var defaultValue = getAnnotationMirror(annotationMirror, "defaultValue");
 		if (defaultValue == null) {
 			return Collections.emptyMap();
 		}
@@ -58,33 +67,33 @@ final class ConfigurationParameterAnnotatedField {
 
 	@Nullable
 	String typeValue() {
-		return getStringValuesMap(configurationParameter).get("type");
+		return getStringValuesMap(annotationMirror).get("type");
 	}
 
 	@Nullable
 	Object constantValue() {
-		return field.getConstantValue();
+		return element.getConstantValue();
 	}
 
 	String name() {
-		return "%s.%s".formatted(enclosingType.getQualifiedName(), field.getSimpleName());
+		return "%s.%s".formatted(enclosingType.getQualifiedName(), element.getSimpleName());
 	}
 
 	boolean isStatic() {
-		return field.getModifiers().contains(Modifier.STATIC);
+		return element.getModifiers().contains(Modifier.STATIC);
 	}
 
 	boolean isFinal() {
-		return field.getModifiers().contains(Modifier.FINAL);
+		return element.getModifiers().contains(Modifier.FINAL);
 	}
 
 	boolean isDeprecated() {
-		return getAnnotationMirror(field, Deprecated.class) != null;
+		return getAnnotationMirror(element, Deprecated.class) != null;
 	}
 
 	@Nullable
 	String docComment() {
-		return elementUtils.getDocComment(field);
+		return elementUtils.getDocComment(element);
 	}
 
 	String enclosingTypeName() {

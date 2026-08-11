@@ -11,18 +11,20 @@
 package org.junit.platform.configuration.processor;
 
 import static java.util.Objects.requireNonNull;
+import static javax.tools.Diagnostic.Kind.ERROR;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
@@ -44,33 +46,35 @@ final class ConfigurationParameterHandler {
 
 	private final ConfigurationMetaData metaData;
 	private final Elements elementUtils;
+	private final Messager messager;
 
-	ConfigurationParameterHandler(ConfigurationMetaData metaData, Elements elementUtils) {
+	ConfigurationParameterHandler(ConfigurationMetaData metaData, Elements elementUtils, Messager messager) {
 		this.metaData = metaData;
 		this.elementUtils = elementUtils;
+		this.messager = messager;
 	}
 
 	void process(RoundEnvironment roundEnv) {
-		roundEnv.getElementsAnnotatedWith(ConfigurationParameter.class).stream() //
-				.filter(VariableElement.class::isInstance) //
-				.map(VariableElement.class::cast) //
-				.map(this::createConfigurationParameterAnnotatedField) //
-				.map(this::createProperty) //
-				.forEach(metaData::addProperty);
+		roundEnv.getElementsAnnotatedWith(ConfigurationParameter.class).forEach(this::processElement);
 	}
 
-	private ConfigurationParameterAnnotatedField createConfigurationParameterAnnotatedField(VariableElement element) {
-		var enclosingElement = element.getEnclosingElement();
-		Preconditions.condition(enclosingElement instanceof TypeElement, //
-			() -> "[%s] did not have an enclosing typeValue element".formatted(element.getSimpleName().toString()));
-		var enclosingTypeElement = (TypeElement) enclosingElement;
-		var configurationParameter = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
-		return new ConfigurationParameterAnnotatedField(element, elementUtils, enclosingTypeElement,
-			configurationParameter);
-	}
-
-	private Property createProperty(ConfigurationParameterAnnotatedField field) {
-		var name = processName(field);
+	private void processElement(Element element) {
+		if (!(element instanceof VariableElement variableElement)) {
+			messager.printMessage(ERROR, "@ConfigurationParameter annotated element was not a field", element);
+			return;
+		}
+		if (!(variableElement.getEnclosingElement() instanceof TypeElement enclosingTypeElement)) {
+			messager.printMessage(ERROR, "@ConfigurationParameter annotated element did not have an enclosing type element", element);
+			return;
+		}
+		var annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
+		var field = new ConfigurationParameterAnnotatedField(variableElement, elementUtils, enclosingTypeElement,
+			annotationMirror);
+		if (!field.isStatic() || !field.isFinal() || !(field.constantValue() instanceof String name)) {
+			messager.printMessage(ERROR,
+				"@ConfigurationParameter annotated field must static, final, and have constant string value", element);
+			return;
+		}
 		var description = processDescription(field);
 		var sourceType = processSourceType(field);
 		var defaults = processDefaults(field);
@@ -78,19 +82,8 @@ final class ConfigurationParameterHandler {
 		var defaultType = defaults == null ? null : defaults.defaultType();
 		var defaultValue = defaults == null ? null : defaults.value();
 		var type = processType(field, defaultType);
-		return new Property(name, type, description, sourceType, defaultValue, deprecation);
-	}
-
-	private String processName(ConfigurationParameterAnnotatedField field) {
-		// TODO: Report preconditions problems with processingEnvironment().getMessager().printMessage() instead.
-		Preconditions.condition(field.isStatic(), //
-			() -> "Field [%s] must be declared static".formatted(field.name()));
-		Preconditions.condition(field.isFinal(), //
-			() -> "Field [%s] must be declared final".formatted(field.name()));
-		var constantValue = field.constantValue();
-		Preconditions.condition(constantValue instanceof String, //
-			() -> "Field [%s] must have a constant string value".formatted(field.name()));
-		return (String) constantValue;
+		var property = new Property(name, type, description, sourceType, defaultValue, deprecation);
+		metaData.addProperty(property);
 	}
 
 	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {
@@ -104,6 +97,7 @@ final class ConfigurationParameterHandler {
 			return null;
 		}
 		// TODO: Creating patterns over and over is not very efficient
+		// TODO: Handle {@link ...}, check how does Spring do that?
 		var matcher = Pattern.compile("<p>|<h\\d>").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
 		return firstParagraph //
@@ -125,18 +119,19 @@ final class ConfigurationParameterHandler {
 		if (defaultValues.isEmpty()) {
 			return null;
 		}
-
-		Preconditions.condition(defaultValues.size() == 1, //
-			() -> "Field [%s] must have exactly one default value".formatted(field.name()));
-
-		Preconditions.condition(defaultValues.size() == 1, //
-			() -> "Field [%s] must have exactly one default value".formatted(field.name()));
-
+		if (defaultValues.size() != 1) {
+			messager.printMessage(ERROR, "@ConfigurationParameter must have exactly one default value", field.element(),
+				field.annotationMirror());
+		}
 		var entry = defaultValues.entrySet().iterator().next();
 		var value = entry.getValue();
-		Preconditions.condition(value.size() == 1, //
-			() -> "Field [%s] must have exactly one default value".formatted(field.name()));
-
+		if (value.isEmpty()) {
+			return null;
+		}
+		if (value.size() != 1) {
+			messager.printMessage(ERROR, "@ConfigurationParameter must have exactly one default value", field.element(),
+				field.annotationMirror());
+		}
 		var defaultValue = value.get(0);
 		var defaultName = entry.getKey();
 		var defaultType = requireNonNull(NAME_TO_TYPE_NAME.get(defaultName));

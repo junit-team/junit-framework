@@ -50,7 +50,6 @@ module org.junit.platform.commons {
 			org.junit.jupiter.migrationsupport,
 			org.junit.jupiter.params,
 			org.junit.platform.console,
-			org.junit.platform.configuration.processor,
 			org.junit.platform.engine,
 			org.junit.platform.launcher,
 			org.junit.platform.reporting,
