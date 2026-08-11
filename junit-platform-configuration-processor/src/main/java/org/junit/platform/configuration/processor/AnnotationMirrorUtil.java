@@ -32,14 +32,12 @@ class AnnotationMirrorUtil {
 		/* no-op */
 	}
 
-	static @Nullable AnnotationMirror getAnnotationMirror(Element element, Class<? extends Annotation> annotationType) {
+	static AnnotationMirror getAnnotationMirror(Element element, Class<? extends Annotation> annotationType) {
 		var annotationTypeName = annotationType.getName();
-		for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
-			if (annotationTypeName.equals(annotation.getAnnotationType().toString())) {
-				return annotation;
-			}
-		}
-		return null;
+		return element.getAnnotationMirrors().stream() //
+				.filter(annotation -> annotationTypeName.equals(annotation.getAnnotationType().toString())) //
+				.findFirst() //
+				.orElseThrow();
 	}
 
 	static @Nullable String getStringValue(AnnotationMirror annotation, String elementName) {
