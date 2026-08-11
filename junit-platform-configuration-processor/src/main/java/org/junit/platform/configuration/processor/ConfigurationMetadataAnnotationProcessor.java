@@ -32,12 +32,12 @@ import org.jspecify.annotations.Nullable;
 
 import jakarta.json.Json;
 
-/// Collects all configuration parameters marked with
-/// {@link org.junit.platform.configuration.api.ConfigurationParameter} into
-/// [Spring Boot Configuration
+/// Writes all configuration parameters marked with
+/// {@link org.junit.platform.configuration.api.ConfigurationParameter} to
+/// {@value #METADATA_PATH} in [Spring Boot's Configuration
 /// Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html)
-/// and writes it to {@value #METADATA_PATH}. This enables IDE's and other tools
-/// to process and validate Test Engine configuration.
+/// format. This enables IDEs and other tools to process and validate Test Engine
+/// configuration.
 ///
 /// <h4>Usage</h4>
 ///
@@ -53,9 +53,9 @@ import jakarta.json.Json;
 ///
 /// }</pre>
 ///
-/// The first paragraph from the doc string used to describe the property. If the
-/// first paragraph ends with {@code : {@value}.} or {@code : {@value}} it will
-/// be replaced with a {@code : {@value}.}.
+/// The first paragraph from the doc string will be used to describe the
+/// property. If the first paragraph ends with {@code : {@value}.} or
+/// {@code : {@value}} it will be replaced with a {@code : {@value}.}.
 ///
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
