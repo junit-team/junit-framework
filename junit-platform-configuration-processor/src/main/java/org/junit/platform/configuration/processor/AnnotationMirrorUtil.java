@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -32,51 +31,52 @@ class AnnotationMirrorUtil {
 		/* no-op */
 	}
 
-	static AnnotationMirror getAnnotationMirror(Element element, Class<? extends Annotation> annotationType) {
-		var annotationTypeName = annotationType.getName();
+	static @Nullable AnnotationMirror getAnnotationMirror(Element element, Class<? extends Annotation> annotationType) {
+		var elementName = annotationType.getName();
 		return element.getAnnotationMirrors().stream() //
-				.filter(annotation -> annotationTypeName.equals(annotation.getAnnotationType().toString())) //
+				.filter(annotation -> elementName.equals(annotation.getAnnotationType().toString())) //
 				.findFirst() //
-				.orElseThrow();
-	}
-
-	static @Nullable String getStringValue(AnnotationMirror annotation, String elementName) {
-		return findElementBy(annotation, elementName) //
-				.map(Object::toString) //
-				.filter(s -> !s.isEmpty()) //
 				.orElse(null);
 	}
 
-	static @Nullable AnnotationMirror getAnnotationValue(AnnotationMirror annotation, String elementName) {
-		return findElementBy(annotation, elementName) //
+	static @Nullable AnnotationMirror getAnnotationMirror(AnnotationMirror annotation, String elementName) {
+		return annotation.getElementValues().entrySet() //
+				.stream() //
+				.filter(element -> elementName.equals(element.getKey().getSimpleName().toString())) //
+				.map(Entry::getValue) //
+				.map(AnnotationValue::getValue) //
+				.findFirst() //
 				.filter(AnnotationMirror.class::isInstance) //
 				.map(AnnotationMirror.class::cast) //
 				.orElse(null);
 	}
 
-	private static Optional<Object> findElementBy(AnnotationMirror annotation, String elementName) {
+	static Map<String, List<Object>> getValuesMap(AnnotationMirror annotation) {
 		return annotation.getElementValues().entrySet() //
-				.stream() //
-				.filter((element) -> element.getKey().getSimpleName().toString().equals(elementName)) //
-				.map(Entry::getValue) //
-				.map(AnnotationValue::getValue) //
-				.findFirst();
-	}
-
-	static Map<String, List<Object>> getValuesMap(AnnotationMirror defaults) {
-		return defaults.getElementValues().entrySet() //
 				.stream() //
 				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getValues));
 	}
 
+	static Map<String, String> getStringValuesMap(AnnotationMirror annotation) {
+		return annotation.getElementValues().entrySet() //
+				.stream() //
+				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getStringValue));
+	}
+
 	private static List<Object> getValues(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
 		if (entry.getValue().getValue() instanceof List<?> values) {
-			return values.stream().filter(AnnotationValue.class::isInstance) //
+			return values.stream() //
+					.filter(AnnotationValue.class::isInstance) //
 					.map(AnnotationValue.class::cast) //
 					.map(AnnotationValue::getValue) //
 					.toList();
 		}
 		return Collections.emptyList();
+	}
+
+	private static String getStringValue(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
+		Object value = entry.getValue().getValue();
+		return value.toString();
 	}
 
 	private static String getSimpleName(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {

@@ -12,16 +12,11 @@ package org.junit.platform.configuration.processor;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValue;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getValuesMap;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
@@ -29,6 +24,7 @@ import javax.lang.model.util.Elements;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
 
 final class ConfigurationParameterHandler {
@@ -58,63 +54,55 @@ final class ConfigurationParameterHandler {
 		roundEnv.getElementsAnnotatedWith(ConfigurationParameter.class).stream() //
 				.filter(VariableElement.class::isInstance) //
 				.map(VariableElement.class::cast) //
-				.map(element -> new ProcessingContext( //
-					element, //
-					getEnclosingTypeElement(element), //
-					getAnnotationMirror(element, ConfigurationParameter.class))) //
+				.map(this::createConfigurationParameterAnnotatedField) //
 				.map(this::createProperty) //
 				.forEach(metaData::addProperty);
 	}
 
-	private record ProcessingContext(VariableElement element, TypeElement enclosingType,
-			AnnotationMirror annotationMirror) {
-
+	private ConfigurationParameterAnnotatedField createConfigurationParameterAnnotatedField(VariableElement element) {
+		var enclosingElement = element.getEnclosingElement();
+		Preconditions.condition(enclosingElement instanceof TypeElement, //
+			() -> "[%s] did not have an enclosing typeValue element".formatted(element.getSimpleName().toString()));
+		var enclosingTypeElement = (TypeElement) enclosingElement;
+		var configurationParameter = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
+		return new ConfigurationParameterAnnotatedField(element, elementUtils, enclosingTypeElement,
+			configurationParameter);
 	}
 
-	private Property createProperty(ProcessingContext context) {
-		var name = processName(context);
-		var description = processDescription(context);
-		var sourceType = processSourceType(context);
-		var defaults = processDefaults(context);
-		var deprecation = processDeprecation(context);
+	private Property createProperty(ConfigurationParameterAnnotatedField field) {
+		var name = processName(field);
+		var description = processDescription(field);
+		var sourceType = processSourceType(field);
+		var defaults = processDefaults(field);
+		var deprecation = processDeprecation(field);
 		var defaultType = defaults == null ? null : defaults.defaultType();
 		var defaultValue = defaults == null ? null : defaults.value();
-		var type = processType(context, defaultType);
+		var type = processType(field, defaultType);
 		return new Property(name, type, description, sourceType, defaultValue, deprecation);
 	}
 
-	private String processName(ProcessingContext context) {
+	private String processName(ConfigurationParameterAnnotatedField field) {
 		// TODO: Report preconditions problems with processingEnvironment().getMessager().printMessage() instead.
-		var enclosingTypeElement = context.enclosingType();
-		var element = context.element();
-		Preconditions.condition(isStatic(element), //
-			() -> "Field [%s.%s] must be declared static" //
-					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
-		Preconditions.condition(isFinal(element), //
-			() -> "Field [%s.%s] must be declared final" //
-					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
-		var constantValue = element.getConstantValue();
+		Preconditions.condition(field.isStatic(), //
+			() -> "Field [%s] must be declared static".formatted(field.name()));
+		Preconditions.condition(field.isFinal(), //
+			() -> "Field [%s] must be declared final".formatted(field.name()));
+		var constantValue = field.constantValue();
 		Preconditions.condition(constantValue instanceof String, //
-			() -> "Field [%s.%s] must have a constant string value" //
-					.formatted(enclosingTypeElement.getQualifiedName(), element.getSimpleName()));
+			() -> "Field [%s] must have a constant string value".formatted(field.name()));
 		return (String) constantValue;
 	}
 
-	private @Nullable String processType(ProcessingContext context, @Nullable String defaultType) {
-		var parameter = context.annotationMirror();
-		var type = getStringValue(parameter, "type");
-		if (type == null || type.equals(Void.class.getName())) {
-			return defaultType;
+	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {
+		var type = field.typeValue();
+		return type == null ? defaultType : type;
+	}
+
+	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
+		var docComment = field.docComment();
+		if (docComment == null) {
+			return null;
 		}
-		return type;
-	}
-
-	private @Nullable String processDescription(ProcessingContext context) {
-		var docComment = elementUtils.getDocComment(context.element());
-		return docComment == null ? null : cleanupDocComment(docComment);
-	}
-
-	private static String cleanupDocComment(String docComment) {
 		// TODO: Creating patterns over and over is not very efficient
 		var matcher = Pattern.compile("<p>|<h\\d>").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
@@ -128,40 +116,26 @@ final class ConfigurationParameterHandler {
 				.trim();
 	}
 
-	private String processSourceType(ProcessingContext context) {
-		return context.enclosingType().getQualifiedName().toString();
+	private String processSourceType(ConfigurationParameterAnnotatedField field) {
+		return field.enclosingTypeName();
 	}
 
-	private TypeElement getEnclosingTypeElement(VariableElement element) {
-		var enclosingElement = element.getEnclosingElement();
-		Preconditions.condition(enclosingElement instanceof TypeElement, //
-			() -> "[%s] did not have an enclosing type element" //
-					.formatted(element.getSimpleName()));
-		return (TypeElement) enclosingElement;
-	}
-
-	private @Nullable Default processDefaults(ProcessingContext context) {
-		var element = context.element();
-		var parameter = context.annotationMirror();
-		var defaults = getAnnotationValue(parameter, "defaultValue");
-		if (defaults == null) {
+	private @Nullable Default processDefaults(ConfigurationParameterAnnotatedField field) {
+		var defaultValues = field.defaultValues();
+		if (defaultValues.isEmpty()) {
 			return null;
 		}
 
-		var defaultValues = getValuesMap(defaults);
 		Preconditions.condition(defaultValues.size() == 1, //
-			() -> "Field [%s.%s] must have exactly one default value" //
-					.formatted(context.enclosingType(), element.getSimpleName()));
+			() -> "Field [%s] must have exactly one default value".formatted(field.name()));
 
 		Preconditions.condition(defaultValues.size() == 1, //
-			() -> "Field [%s.%s] must have exactly one default value" //
-					.formatted(context.enclosingType(), element.getSimpleName()));
+			() -> "Field [%s] must have exactly one default value".formatted(field.name()));
 
 		var entry = defaultValues.entrySet().iterator().next();
 		var value = entry.getValue();
 		Preconditions.condition(value.size() == 1, //
-			() -> "Field [%s.%s] must have exactly one default value" //
-					.formatted(context.enclosingType(), element.getSimpleName()));
+			() -> "Field [%s] must have exactly one default value".formatted(field.name()));
 
 		var defaultValue = value.get(0);
 		var defaultName = entry.getKey();
@@ -173,28 +147,16 @@ final class ConfigurationParameterHandler {
 
 	}
 
-	private ConfigurationMetaData.@Nullable Deprecation processDeprecation(ProcessingContext context) {
-		var deprecation = getAnnotationValue(context.annotationMirror(), "deprecation");
-		if (deprecation != null) {
-			var reason = getStringValue(deprecation, "reason");
-			var replacement = getStringValue(deprecation, "replacement");
-			var since = getStringValue(deprecation, "since");
-			if (reason != null || replacement != null || since != null) {
-				return new ConfigurationMetaData.Deprecation(null, reason, replacement, since);
-			}
+	private @Nullable Deprecation processDeprecation(ConfigurationParameterAnnotatedField field) {
+		var values = field.deprecationValues();
+		if (!values.isEmpty()) {
+			return new Deprecation(null, values.get("reason"), values.get("replacement"), values.get("since"));
 		}
 		// Fallback, look for @Deprecated
-		if (getAnnotationMirror(context.element(), Deprecated.class) != null) {
-			return new ConfigurationMetaData.Deprecation(null, null, null, null);
+		if (field.isDeprecated()) {
+			return new Deprecation(null, null, null, null);
 		}
 		return null;
 	}
 
-	private static boolean isStatic(VariableElement variableElement) {
-		return variableElement.getModifiers().contains(Modifier.STATIC);
-	}
-
-	private static boolean isFinal(VariableElement variableElement) {
-		return variableElement.getModifiers().contains(Modifier.FINAL);
-	}
 }
