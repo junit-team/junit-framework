@@ -24,11 +24,12 @@ class EngineTestKitSkippedMethodDemo {
     fun verifyJupiterMethodWasSkipped() {
         val methodName = "skippedTest"
 
-        val testEvents = EngineTestKit // <5>
-            .engine("junit-jupiter") // <1>
-            .selectors(selectMethod(ExampleTestCase::class.java, methodName)) // <2>
-            .execute() // <3>
-            .testEvents() // <4>
+        val testEvents = // <5>
+            EngineTestKit
+                .engine("junit-jupiter") // <1>
+                .selectors(selectMethod(ExampleTestCase::class.java, methodName)) // <2>
+                .execute() // <3>
+                .testEvents() // <4>
 
         testEvents.assertStatistics { stats -> stats.skipped(1) } // <6>
 

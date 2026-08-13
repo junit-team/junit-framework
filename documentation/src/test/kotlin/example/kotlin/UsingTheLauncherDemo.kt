@@ -166,7 +166,8 @@ class UsingTheLauncherDemo {
                 .build() // <1>
 
         val executionRequest =
-            LauncherExecutionRequestBuilder.request(discoveryRequest) // <2>
+            LauncherExecutionRequestBuilder
+                .request(discoveryRequest) // <2>
                 .cancellationToken(cancellationToken) // <3>
                 .listeners(failFastListener) // <4>
                 .build()

@@ -35,7 +35,12 @@ class EngineTestKitStatisticsDemo {
             .execute() // <3>
             .testEvents() // <6>
             .assertStatistics { stats ->
-                stats.skipped(1).started(3).succeeded(1).aborted(1).failed(1) // <7>
+                stats // <7>
+                    .skipped(1)
+                    .started(3)
+                    .succeeded(1)
+                    .aborted(1)
+                    .failed(1)
             }
     }
 }

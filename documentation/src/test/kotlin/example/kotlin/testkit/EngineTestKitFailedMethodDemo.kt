@@ -29,7 +29,9 @@ class EngineTestKitFailedMethodDemo {
             .selectors(selectClass(ExampleTestCase::class.java)) // <2>
             .execute() // <3>
             .testEvents() // <4>
-            .assertThatEvents().haveExactly(1, // <5>
+            .assertThatEvents()
+            .haveExactly(
+                1, // <5>
                 event(
                     test("failingTest"),
                     finishedWithFailure(

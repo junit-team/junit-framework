@@ -36,7 +36,13 @@ class GlobalSetupTeardownListener : LauncherSessionListener {
                     }
                     // tag::user_guide[]
                     val store = session.store // <1>
-                    store.computeIfAbsent(Namespace.GLOBAL, "httpServer") { _ -> // <2>
+                    // end::user_guide[]
+                    // @formatter:off
+                    // tag::user_guide[]
+                    store.computeIfAbsent(Namespace.GLOBAL, "httpServer") { // <2>
+                        // end::user_guide[]
+                        // @formatter:on
+                        // tag::user_guide[]
                         val address = InetSocketAddress(getLoopbackAddress(), 0)
                         val server: HttpServer =
                             try {
