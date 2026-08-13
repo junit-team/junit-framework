@@ -69,4 +69,4 @@ urls:
   latest_version_segment_strategy: redirect:from
 ui:
   bundle:
-    url: https://github.com/junit-team/antora-ui/releases/download/20260813-105825/ui-bundle.zip
+    url: https://github.com/junit-team/antora-ui/releases/download/20260813-111129/ui-bundle.zip
