@@ -69,6 +69,4 @@ urls:
   latest_version_segment_strategy: redirect:from
 ui:
   bundle:
-    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
-    snapshot: true
-  supplemental_files: ./supplemental-ui
+    url: https://github.com/junit-team/antora-ui/releases/download/20260813-105825/ui-bundle.zip
