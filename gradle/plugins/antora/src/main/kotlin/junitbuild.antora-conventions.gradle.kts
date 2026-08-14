@@ -49,16 +49,9 @@ val generateAntoraPlaybook = tasks.register("generateAntoraPlaybook", Copy::clas
 
 node {
 	download = buildParameters.antora.downloadNode
-	version = providers.fileContents(layout.projectDirectory.file(".tool-versions")).asText.map {
-		it.substringAfter("nodejs").trim()
-	}
+	// renovate: datasource=node-version depName=node versioning=node
+	version = "24.19.0"
 	workDir = layout.settingsDirectory.dir(".gradle/nodejs")
-}
-
-tasks.nodeSetup {
-	if (buildParameters.antora.downloadNode) {
-		notCompatibleWithConfigurationCache("https://github.com/node-gradle/gradle-node-plugin/issues/350")
-	}
 }
 
 tasks.npmInstall {

@@ -22,10 +22,26 @@ to build your `LauncherDiscoveryRequest`, you must use one of the `discover()` o
 The following test class written using JUnit Jupiter will be used in subsequent examples.
 
 [[engine-ExampleTestCase]]
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/ExampleTestCase.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ExampleTestCase.kt[tags=user_guide]
+----
+--
+====
 
 For the sake of brevity, the following sections demonstrate how to test JUnit's own
 `JupiterTestEngine` whose unique engine ID is `"junit-jupiter"`. If you want to test your
@@ -39,14 +55,30 @@ may test your own `TestEngine` by supplying an instance of it to the
 The following test demonstrates how to verify that a `TestPlan` was discovered as expected
 by the JUnit Jupiter `TestEngine`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/testkit/EngineTestKitDiscoveryDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/testkit/EngineTestKitDiscoveryDemo.kt[tags=user_guide]
+----
+--
+====
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Discover the `TestPlan`.
-<4> Assert engine root descriptor has expected display name.
+<4> Assert engine root descriptor has the expected display name.
 <5> Assert no discovery issues were encountered.
 
 [[engine-statistics]]
@@ -57,10 +89,26 @@ against events fired during the execution of a `TestPlan`. The following tests d
 how to assert statistics for _containers_ and _tests_ in the JUnit Jupiter `TestEngine`.
 For details on what statistics are available, consult the Javadoc for `{EventStatistics}`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/testkit/EngineTestKitStatisticsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/testkit/EngineTestKitStatisticsDemo.kt[tags=user_guide]
+----
+--
+====
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
@@ -94,10 +142,26 @@ For details on what _conditions_ are available for use with AssertJ assertions a
 events, consult the Javadoc for `{EventConditions}`.
 ====
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/testkit/EngineTestKitSkippedMethodDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/testkit/EngineTestKitSkippedMethodDemo.kt[tags=user_guide]
+----
+--
+====
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the `skippedTest()` method in the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
@@ -117,10 +181,26 @@ events and execution results, consult the Javadoc for `{EventConditions}` and
 `{TestExecutionResultConditions}`, respectively.
 ====
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/testkit/EngineTestKitFailedMethodDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/testkit/EngineTestKitFailedMethodDemo.kt[tags=user_guide]
+----
+--
+====
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.
@@ -147,10 +227,26 @@ If you want to do a _partial_ match _with_ or _without_ ordering requirements, y
 the methods `assertEventsMatchLooselyInOrder()` and `assertEventsMatchLoosely()`,
 respectively.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/testkit/EngineTestKitAllEventsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/testkit/EngineTestKitAllEventsDemo.kt[tags=user_guide]
+----
+--
+====
 <1> Select the JUnit Jupiter `TestEngine`.
 <2> Select the <<engine-ExampleTestCase, `ExampleTestCase`>> test class.
 <3> Execute the `TestPlan`.

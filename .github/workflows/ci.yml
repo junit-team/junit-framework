@@ -74,7 +74,7 @@ jobs:
       - name: Determine overall status
         env:
           STATUS: ${{ join(needs.*.result, ',') }}
-          FAILURE: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'cancelled') }}
+          FAILURE: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: |
           if [ "$FAILURE" = "true" ]; then
             exit 1
