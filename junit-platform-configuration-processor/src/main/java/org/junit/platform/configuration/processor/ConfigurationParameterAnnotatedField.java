@@ -75,10 +75,6 @@ final class ConfigurationParameterAnnotatedField {
 		return element.getConstantValue();
 	}
 
-	String name() {
-		return "%s.%s".formatted(enclosingType.getQualifiedName(), element.getSimpleName());
-	}
-
 	boolean isStatic() {
 		return element.getModifiers().contains(Modifier.STATIC);
 	}

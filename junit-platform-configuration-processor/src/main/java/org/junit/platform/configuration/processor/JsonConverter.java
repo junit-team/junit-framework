@@ -101,7 +101,8 @@ final class JsonConverter {
 			builder.add(name, v);
 		}
 		else {
-			builder.add(name, defaultValue.toString());
+			throw new IllegalArgumentException(
+				"Field [%s] should be a convertable primitive but was %s".formatted(name, defaultValue.getClass()));
 		}
 	}
 
