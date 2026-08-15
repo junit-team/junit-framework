@@ -22,14 +22,9 @@ public class ConstantTests {
 	void constantsAreConsistent() {
 		assertThat(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME);
-		assertThat(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_DEFAULT).isEqualTo(
-			ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_DEFAULT);
 
 		assertThat(Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME);
-
-		assertThat(Constants.PARALLEL_CONFIG_STRATEGY_DEFAULT).isEqualTo(
-			DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_DEFAULT);
 
 		assertThat(Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME);
@@ -38,15 +33,11 @@ public class ConstantTests {
 					+ DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME);
 		assertThat(Constants.PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_SATURATE_PROPERTY_NAME);
-		assertThat(Constants.PARALLEL_CONFIG_FIXED_SATURATE_DEFAULT).isEqualTo(
-			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_SATURATE_DEFAULT);
 
 		assertThat(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME);
 		assertThat(Constants.PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_CUSTOM_CLASS_PROPERTY_NAME);
-		assertThat(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT).isEqualTo(
-			DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_DEFAULT);
 
 		assertThat(Constants.DEACTIVATE_ALL_CONDITIONS_PATTERN).isEqualTo(ClassNamePatternFilterUtils.ALL_PATTERN);
 		assertThat(Constants.INCLUDE_ALL_EXTENSIONS_PATTERN).isEqualTo(ClassNamePatternFilterUtils.ALL_PATTERN);

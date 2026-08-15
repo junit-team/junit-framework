@@ -30,6 +30,10 @@ import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * Collection of configuration constants for the Jupiter test engine.
@@ -260,12 +264,6 @@ public final class Constants {
 	public static final String PARALLEL_CONFIG_PREFIX = "junit.jupiter.execution.parallel.config.";
 
 	/**
-	 * Default value for {@value #PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_DEFAULT = "fork_join_pool";
-
-	/**
 	 * Property name used to determine the desired parallel executor service
 	 * type: {@value}
 	 *
@@ -273,17 +271,9 @@ public final class Constants {
 	 * ignoring case.
 	 *
 	 */
-	// TODO: Move PARALLEL_CONFIG_EXECUTOR_SERVICE_DEFAULT to ParallelExecutorServiceType
-	// TODO: ParallelExecutorServiceType is not part of the public API
-	@ConfigurationParameter(/* type = ParallelExecutorServiceType.class,*/ defaultValue = @Value(stringValue = PARALLEL_CONFIG_EXECUTOR_SERVICE_DEFAULT))
+	@ConfigurationParameter(type = ParallelExecutorServiceType.class, defaultValue = @Value(stringValue = ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_DEFAULT))
 	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ "executor-service";
-
-	/**
-	 * Default value for {@value #PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final String PARALLEL_CONFIG_STRATEGY_DEFAULT = "dynamic";
 
 	/**
 	 * Property name used to select the parallel execution configuration
@@ -293,9 +283,7 @@ public final class Constants {
 	 * {@code custom}.
 	 *
 	 */
-	// TODO: Move PARALLEL_CONFIG_STRATEGY_DEFAULT to ParallelExecutorServiceType
-	// TODO: DefaultParallelExecutionConfigurationStrategy is not part of the public API
-	@ConfigurationParameter(/* type = DefaultParallelExecutionConfigurationStrategy.class,*/ defaultValue = @Value(stringValue = PARALLEL_CONFIG_STRATEGY_DEFAULT))
+	@ConfigurationParameter(type = DefaultParallelExecutionConfigurationStrategy.class, defaultValue = @Value(stringValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_DEFAULT))
 	public static final String PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "strategy";
 
 	/**
@@ -323,12 +311,6 @@ public final class Constants {
 			+ "fixed.max-pool-size";
 
 	/**
-	 * Default value for {@value #PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final boolean PARALLEL_CONFIG_FIXED_SATURATE_DEFAULT = true;
-
-	/**
 	 * Property name used to disable saturation of the underlying fork-join pool
 	 * for the {@code fixed} configuration strategy: {@value}
 	 *
@@ -339,14 +321,8 @@ public final class Constants {
 	 * <p>Value must either {@code true} or {@code false}; defaults to {@code true}.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_CONFIG_FIXED_SATURATE_DEFAULT))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_SATURATE_DEFAULT))
 	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.saturate";
-
-	/**
-	 * Default value for {@value #PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final double PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT = 1.0;
 
 	/**
 	 * Property name used to set the factor to be multiplied with the number of
@@ -356,7 +332,7 @@ public final class Constants {
 	 * <p>Value must be a positive decimal number; defaults to {@code 1}.
 	 *
 	 */
-	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT))
+	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_DEFAULT))
 	public static final String PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "dynamic.factor";
 
 	/**
@@ -365,8 +341,7 @@ public final class Constants {
 	 * {@value}
 	 *
 	 */
-	// TODO: ParallelExecutionConfigurationStrategy is not part of the public API
-	@ConfigurationParameter /*( type = ParallelExecutionConfigurationStrategy.class)*/
+	@ConfigurationParameter(type = ParallelExecutionConfigurationStrategy.class)
 	public static final String PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "custom.class";
 
 	/**
