@@ -15,7 +15,6 @@ dependencies {
 	compileOnlyApi(libs.jspecify)
 
 	shadowed(libs.jakarta.json.api)
-	// TODO: Check if shadowed artifact is standalone
 	shadowed(libs.jakarta.json.implementation)
 }
 
