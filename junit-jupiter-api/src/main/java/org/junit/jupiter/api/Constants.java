@@ -42,7 +42,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter;
 public final class Constants {
 
 	/**
-	 * TODO:
+	 * Default value for {@value #EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final String INCLUDE_ALL_EXTENSIONS_PATTERN = "*";
@@ -120,7 +120,7 @@ public final class Constants {
 	public static final String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT = false;
@@ -136,7 +136,7 @@ public final class Constants {
 	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT = true;
@@ -204,7 +204,7 @@ public final class Constants {
 	public static final String DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME = DisplayNameGenerator.DEFAULT_GENERATOR_PROPERTY_NAME;
 
 	/**
-	 * TODO:
+	 * Default value for {@value #EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_DEFAULT = false;
@@ -228,7 +228,7 @@ public final class Constants {
 	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
 
 	/**
-	 * TODO:
+	 * Default value for {@value #PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
@@ -319,7 +319,7 @@ public final class Constants {
 			+ "fixed.max-pool-size";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean PARALLEL_CONFIG_FIXED_SATURATE_DEFAULT = true;
@@ -339,7 +339,7 @@ public final class Constants {
 	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.saturate";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final double PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT = 1.0;
