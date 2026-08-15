@@ -33,7 +33,7 @@ import org.junit.platform.engine.reporting.ReportEntry;
 public class LauncherConstants {
 
 	/**
-	 * TODO:
+	 * Default value for {@value #CAPTURE_STDOUT_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean CAPTURE_STDOUT_DEFAULT = false;
@@ -57,7 +57,7 @@ public class LauncherConstants {
 	public static final String CAPTURE_STDOUT_PROPERTY_NAME = "junit.platform.output.capture.stdout";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #CAPTURE_STDERR_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean CAPTURE_STDERR_DEFAULT = false;
@@ -82,7 +82,7 @@ public class LauncherConstants {
 
 	/**
 	 * Default maximum number of bytes for buffering to use per thread and
-	 * output type if output capturing is enabled.
+	 * output type if output capturing is enabled is {@value}.
 	 *
 	 * @see #CAPTURE_MAX_BUFFER_PROPERTY_NAME
 	 */
@@ -171,7 +171,7 @@ public class LauncherConstants {
 	public static final String DEACTIVATE_ALL_LISTENERS_PATTERN = ClassNamePatternFilterUtils.ALL_PATTERN;
 
 	/**
-	 * TODO:
+	 * Default value for {@value #ENABLE_LAUNCHER_INTERCEPTORS} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT = false;
@@ -195,7 +195,7 @@ public class LauncherConstants {
 	public static final String ENABLE_LAUNCHER_INTERCEPTORS = "junit.platform.launcher.interceptors.enabled";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #DRY_RUN_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean DRY_RUN_DEFAULT = false;
@@ -218,7 +218,7 @@ public class LauncherConstants {
 	public static final String DRY_RUN_PROPERTY_NAME = "junit.platform.execution.dryRun.enabled";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean STACKTRACE_PRUNING_ENABLED_DEFAULT = true;
@@ -317,7 +317,7 @@ public class LauncherConstants {
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #MEMORY_CLEANUP_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean MEMORY_CLEANUP_ENABLED_DEFAULT = false;
