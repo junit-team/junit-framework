@@ -28,7 +28,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 public final class Constants {
 
 	/**
-	 * TODO:
+	 * Default value for {@value #PARALLEL_EXECUTION_ENABLED} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
@@ -59,7 +59,7 @@ public final class Constants {
 	public static final String PARALLEL_POOL_SIZE = "junit.vintage.execution.parallel.pool-size";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #PARALLEL_CLASS_EXECUTION} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean PARALLEL_CLASS_EXECUTION_DEFAULT = false;
@@ -78,7 +78,7 @@ public final class Constants {
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #PARALLEL_METHOD_EXECUTION} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean PARALLEL_METHOD_EXECUTION_DEFAULT = false;
@@ -97,7 +97,7 @@ public final class Constants {
 	public static final String PARALLEL_METHOD_EXECUTION = "junit.vintage.execution.parallel.methods";
 
 	/**
-	 * TODO:
+	 * Default value for {@value #DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2.0")
 	public static final boolean DISCOVERY_ISSUE_REPORTING_ENABLED_DEFAULT = true;
