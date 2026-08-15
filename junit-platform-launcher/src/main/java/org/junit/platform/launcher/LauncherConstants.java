@@ -266,6 +266,12 @@ public class LauncherConstants {
 	public static final String OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER = "{uniqueNumber}";
 
 	/**
+	 * Default value for {@value #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT = "error";
+
+	/**
 	 * Property name used to configure the critical severity of issues
 	 * encountered during test discovery.
 	 *
@@ -282,15 +288,14 @@ public class LauncherConstants {
 	 * {@link org.junit.platform.engine.DiscoveryIssue.Severity Severity},
 	 * ignoring case.
 	 *
-	 * <p>If not specified, the default is "error" which corresponds to
+	 * <p>If not specified, the default is {@value #CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT} which corresponds to
 	 * {@code Severity.ERROR)}.
 	 *
 	 * @since 1.13
 	 * @see org.junit.platform.engine.DiscoveryIssue.Severity
 	 */
-	// TODO: Reference enum values as strings?
 	@API(status = EXPERIMENTAL, since = "6.0")
-	@ConfigurationParameter(type = Severity.class, defaultValue = @Value(stringValue = "error"))
+	@ConfigurationParameter(type = Severity.class, defaultValue = @Value(stringValue = CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT))
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
 
 	/**
@@ -312,8 +317,7 @@ public class LauncherConstants {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	// TODO: LauncherPhase is not part of the public API
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(/*type = LauncherPhase.class,*/ defaultValue = @Value(stringValue = "discovery"))
+	@ConfigurationParameter /*(type = LauncherPhase.class)*/
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	/**

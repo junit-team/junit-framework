@@ -116,6 +116,12 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	private static final int KEEP_ALIVE_SECONDS = 30;
 
 	/**
+	 * Default value for {@value #CONFIG_STRATEGY_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final String CONFIG_STRATEGY_DEFAULT = "dynamic";
+
+	/**
 	 * Property name used to determine the desired configuration strategy.
 	 *
 	 * <p>Value must be one of {@code dynamic}, {@code fixed}, or
@@ -233,8 +239,20 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	}
 
 	static ParallelExecutionConfigurationStrategy getStrategy(ConfigurationParameters configurationParameters) {
-		return valueOf(
-			configurationParameters.get(CONFIG_STRATEGY_PROPERTY_NAME).orElse("dynamic").toUpperCase(Locale.ROOT));
+		return configurationParameters.get(CONFIG_STRATEGY_PROPERTY_NAME, value -> {
+			try {
+				return valueOf(value.toUpperCase(Locale.ROOT));
+			}
+			catch (Exception e) {
+				throw new JUnitException(
+					"Invalid ParallelExecutionConfigurationStrategy '%s' set via the '%s' configuration parameter.".formatted(
+						value, CONFIG_STRATEGY_PROPERTY_NAME));
+			}
+		}).orElseGet(DefaultParallelExecutionConfigurationStrategy::getDefaultParallelExecutionConfigurationStrategy);
+	}
+
+	private static DefaultParallelExecutionConfigurationStrategy getDefaultParallelExecutionConfigurationStrategy() {
+		return valueOf(CONFIG_STRATEGY_DEFAULT.toUpperCase(Locale.ROOT));
 	}
 
 }

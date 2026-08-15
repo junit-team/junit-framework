@@ -22,9 +22,14 @@ public class ConstantTests {
 	void constantsAreConsistent() {
 		assertThat(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME);
+		assertThat(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_DEFAULT).isEqualTo(
+			ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_DEFAULT);
 
 		assertThat(Constants.PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME);
+
+		assertThat(Constants.PARALLEL_CONFIG_STRATEGY_DEFAULT).isEqualTo(
+			DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_DEFAULT);
 
 		assertThat(Constants.PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME);

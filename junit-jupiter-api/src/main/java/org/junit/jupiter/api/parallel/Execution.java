@@ -62,6 +62,12 @@ import org.junit.jupiter.api.TestInstance;
 public @interface Execution {
 
 	/**
+	 * Default value for {@value #DEFAULT_EXECUTION_MODE_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	String DEFAULT_EXECUTION_MODE_DEFAULT = "same_thread";
+
+	/**
 	 * Property name used to set the default test execution mode: {@value}
 	 *
 	 * <p>This setting is only effective if parallel execution is enabled.
@@ -71,7 +77,7 @@ public @interface Execution {
 	 * <p>Supported values include names of enum constants defined in
 	 * {@link ExecutionMode}, ignoring case.
 	 *
-	 * <p>If not specified, the default is "same_thread" which corresponds to
+	 * <p>If not specified, the default is {@link #DEFAULT_EXECUTION_MODE_DEFAULT} which corresponds to
 	 * {@code @Execution(ExecutionMode.SAME_THREAD)}.
 	 *
 	 * @since 5.4
