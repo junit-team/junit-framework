@@ -22,6 +22,7 @@ import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.launcher.core.LauncherPhase;
 
 /**
  * Collection of constants related to {@link Launcher}.
@@ -316,8 +317,7 @@ public class LauncherConstants {
 	 * @see #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
-	// TODO: LauncherPhase is not part of the public API
-	@ConfigurationParameter /*(type = LauncherPhase.class)*/
+	@ConfigurationParameter(type = LauncherPhase.class)
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	/**
