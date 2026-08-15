@@ -46,7 +46,7 @@ public class ConstantTests {
 		assertThat(Constants.PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ DefaultParallelExecutionConfigurationStrategy.CONFIG_CUSTOM_CLASS_PROPERTY_NAME);
 		assertThat(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT).isEqualTo(
-			DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_DEFAULT.doubleValue());
+			DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_DEFAULT);
 
 		assertThat(Constants.DEACTIVATE_ALL_CONDITIONS_PATTERN).isEqualTo(ClassNamePatternFilterUtils.ALL_PATTERN);
 		assertThat(Constants.INCLUDE_ALL_EXTENSIONS_PATTERN).isEqualTo(ClassNamePatternFilterUtils.ALL_PATTERN);
