@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.config;
 
 import static java.util.function.Predicate.isEqual;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.jupiter.api.Constants.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
@@ -24,11 +25,15 @@ import static org.junit.jupiter.api.Constants.DEFAULT_TEST_CLASS_INSTANCE_CONSTR
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.INCLUDE_ALL_EXTENSIONS_PATTERN;
 import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.engine.config.FilteringConfigurationParameterConverter.exclude;
@@ -147,7 +152,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	private String getExtensionAutoDetectionIncludePattern() {
 		return configurationParameters.get(EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME) //
-				.orElse(ClassNamePatternFilterUtils.ALL_PATTERN);
+				.orElse(INCLUDE_ALL_EXTENSIONS_PATTERN);
 	}
 
 	private String getExtensionAutoDetectionExcludePattern() {
@@ -168,22 +173,26 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	@Override
 	public boolean isParallelExecutionEnabled() {
-		return configurationParameters.getBoolean(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME).orElse(false);
+		return configurationParameters.getBoolean(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME) //
+				.orElse(PARALLEL_EXECUTION_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public boolean isClosingStoredAutoCloseablesEnabled() {
-		return configurationParameters.getBoolean(CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME).orElse(true);
+		return configurationParameters.getBoolean(CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME) //
+				.orElse(CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public boolean isExtensionAutoDetectionEnabled() {
-		return configurationParameters.getBoolean(EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME).orElse(false);
+		return configurationParameters.getBoolean(EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME) //
+				.orElse(EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public boolean isThreadDumpOnTimeoutEnabled() {
-		return configurationParameters.getBoolean(EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME).orElse(false);
+		return configurationParameters.getBoolean(EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME) //
+				.orElse(EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_DEFAULT);
 	}
 
 	@Override

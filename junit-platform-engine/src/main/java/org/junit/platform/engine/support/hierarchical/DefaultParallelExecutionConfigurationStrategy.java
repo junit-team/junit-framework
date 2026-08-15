@@ -48,7 +48,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 				Integer::valueOf).orElse(parallelism + 256);
 
 			boolean saturate = configurationParameters.get(CONFIG_FIXED_SATURATE_PROPERTY_NAME,
-				Boolean::valueOf).orElse(true);
+				Boolean::valueOf).orElse(CONFIG_FIXED_SATURATE_DEFAULT);
 
 			return new DefaultParallelExecutionConfiguration(parallelism, parallelism, maxPoolSize, parallelism,
 				KEEP_ALIVE_SECONDS, __ -> saturate);
@@ -64,7 +64,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
 			BigDecimal factor = configurationParameters.get(CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME,
-				BigDecimal::new).orElse(BigDecimal.ONE);
+				BigDecimal::new).orElse(CONFIG_DYNAMIC_FACTOR_DEFAULT);
 
 			Preconditions.condition(factor.compareTo(BigDecimal.ZERO) > 0,
 				() -> "Factor '%s' specified via configuration parameter '%s' must be greater than 0".formatted(factor,
@@ -148,6 +148,12 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	public static final String CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = "fixed.max-pool-size";
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean CONFIG_FIXED_SATURATE_DEFAULT = true;
+
+	/**
 	 * Property name used to disable saturation of the underlying fork-join pool
 	 * for the {@link #FIXED} configuration strategy.
 	 *
@@ -162,6 +168,12 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String CONFIG_FIXED_SATURATE_PROPERTY_NAME = "fixed.saturate";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final BigDecimal CONFIG_DYNAMIC_FACTOR_DEFAULT = BigDecimal.ONE;
 
 	/**
 	 * Property name of the factor used to determine the desired parallelism for the

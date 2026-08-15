@@ -12,6 +12,7 @@ package org.junit.jupiter.api;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
@@ -39,6 +40,12 @@ import org.junit.platform.configuration.api.ConfigurationParameter;
  */
 @API(status = STABLE, since = "6.1")
 public final class Constants {
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final String INCLUDE_ALL_EXTENSIONS_PATTERN = "*";
 
 	/**
 	 * Property name used to include patterns for auto-detecting extensions: {@value}
@@ -73,8 +80,7 @@ public final class Constants {
 	 *
 	 * <p>Note: A class that matches both an inclusion and exclusion pattern will be excluded.
 	 */
-	// TODO: ClassNamePatternFilterUtils.ALL_PATTERN isn't part of the public API
-	@ConfigurationParameter(defaultValue = @Value(stringValue = "*"))
+	@ConfigurationParameter(defaultValue = @Value(stringValue = INCLUDE_ALL_EXTENSIONS_PATTERN))
 	public static final String EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.include";
 
 	/**
@@ -114,14 +120,26 @@ public final class Constants {
 	public static final String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to enable auto-detection and registration of extensions via
 	 * Java's {@link java.util.ServiceLoader} mechanism: {@value}
 	 *
 	 * <p>The default behavior is not to perform auto-detection.
 	 */
 	// TODO: Handle @link references.
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to enable auto-closing of {@link AutoCloseable} instances: {@value}
@@ -129,7 +147,7 @@ public final class Constants {
 	 * <p>By default, auto-closing is enabled.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT))
 	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 
 	/**
@@ -186,12 +204,18 @@ public final class Constants {
 	public static final String DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME = DisplayNameGenerator.DEFAULT_GENERATOR_PROPERTY_NAME;
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to enable dumping the stack of all
 	 * {@linkplain Thread threads} to {@code System.out} when a timeout has occurred: {@value}
 	 *
 	 * <p>This behavior is disabled by default.
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME = PreInterruptCallback.THREAD_DUMP_ENABLED_PROPERTY_NAME;
 
 	/**
@@ -204,12 +228,18 @@ public final class Constants {
 	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to enable parallel test execution: {@value}
 	 *
 	 * <p>By default, tests are executed sequentially in a single thread.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
 
 	/**
@@ -289,6 +319,12 @@ public final class Constants {
 			+ "fixed.max-pool-size";
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean PARALLEL_CONFIG_FIXED_SATURATE_DEFAULT = true;
+
+	/**
 	 * Property name used to disable saturation of the underlying fork-join pool
 	 * for the {@code fixed} configuration strategy: {@value}
 	 *
@@ -299,8 +335,14 @@ public final class Constants {
 	 * <p>Value must either {@code true} or {@code false}; defaults to {@code true}.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_CONFIG_FIXED_SATURATE_DEFAULT))
 	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.saturate";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final double PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT = 1.0;
 
 	/**
 	 * Property name used to set the factor to be multiplied with the number of
@@ -310,7 +352,7 @@ public final class Constants {
 	 * <p>Value must be a positive decimal number; defaults to {@code 1}.
 	 *
 	 */
-	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = 1.0))
+	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = PARALLEL_CONFIG_DYNAMIC_FACTOR_DEFAULT))
 	public static final String PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "dynamic.factor";
 
 	/**
