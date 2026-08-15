@@ -33,6 +33,12 @@ import org.junit.platform.engine.reporting.ReportEntry;
 public class LauncherConstants {
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean CAPTURE_STDOUT_DEFAULT = false;
+
+	/**
 	 * Property name used to enable capturing output to {@link System#out}:
 	 * {@value}
 	 *
@@ -47,8 +53,14 @@ public class LauncherConstants {
 	 * @see ReportEntry
 	 * @see TestExecutionListener#reportingEntryPublished(TestIdentifier, ReportEntry)
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = CAPTURE_STDOUT_DEFAULT))
 	public static final String CAPTURE_STDOUT_PROPERTY_NAME = "junit.platform.output.capture.stdout";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean CAPTURE_STDERR_DEFAULT = false;
 
 	/**
 	 * Property name used to enable capturing output to {@link System#err}:
@@ -65,7 +77,7 @@ public class LauncherConstants {
 	 * @see ReportEntry
 	 * @see TestExecutionListener#reportingEntryPublished(TestIdentifier, ReportEntry)
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = CAPTURE_STDERR_DEFAULT))
 	public static final String CAPTURE_STDERR_PROPERTY_NAME = "junit.platform.output.capture.stderr";
 
 	/**
@@ -159,6 +171,12 @@ public class LauncherConstants {
 	public static final String DEACTIVATE_ALL_LISTENERS_PATTERN = ClassNamePatternFilterUtils.ALL_PATTERN;
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT = false;
+
+	/**
 	 * Property name used to enable support for
 	 * {@link LauncherInterceptor} instances to be registered via the
 	 * {@link java.util.ServiceLoader ServiceLoader} mechanism: {@value}
@@ -173,8 +191,14 @@ public class LauncherConstants {
 	 * @see LauncherInterceptor
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT))
 	public static final String ENABLE_LAUNCHER_INTERCEPTORS = "junit.platform.launcher.interceptors.enabled";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean DRY_RUN_DEFAULT = false;
 
 	/**
 	 * Property name used to enable dry-run mode for test execution.
@@ -190,8 +214,14 @@ public class LauncherConstants {
 	 * <p>Value must be either {@code true} or {@code false}; defaults to {@code false}.
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DRY_RUN_DEFAULT))
 	public static final String DRY_RUN_PROPERTY_NAME = "junit.platform.execution.dryRun.enabled";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean STACKTRACE_PRUNING_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to enable or disable stack trace pruning.
@@ -201,7 +231,7 @@ public class LauncherConstants {
 	 * @see org.junit.platform.launcher.core.EngineExecutionOrchestrator
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = STACKTRACE_PRUNING_ENABLED_DEFAULT))
 	public static final String STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME = "junit.platform.stacktrace.pruning.enabled";
 
 	/**
@@ -258,6 +288,7 @@ public class LauncherConstants {
 	 * @since 1.13
 	 * @see org.junit.platform.engine.DiscoveryIssue.Severity
 	 */
+	// TODO: Reference enum values as strings?
 	@API(status = EXPERIMENTAL, since = "6.0")
 	@ConfigurationParameter(type = Severity.class, defaultValue = @Value(stringValue = "error"))
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
@@ -286,6 +317,12 @@ public class LauncherConstants {
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean MEMORY_CLEANUP_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to enable the <em>experimental</em> memory cleanup
 	 * mode.
 	 *
@@ -309,7 +346,7 @@ public class LauncherConstants {
 	 * @see #MEMORY_CLEANUP_EXCLUDED_ENGINES_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = MEMORY_CLEANUP_ENABLED_DEFAULT))
 	public static final String MEMORY_CLEANUP_ENABLED_PROPERTY_NAME = "junit.platform.execution.memory.cleanup.enabled";
 
 	/**
