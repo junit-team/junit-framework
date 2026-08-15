@@ -28,6 +28,12 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 public final class Constants {
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to indicate whether parallel execution is enabled for the JUnit Vintage engine: {@value}
 	 *
 	 * <p>Set this property to {@code true} to enable parallel execution of tests.
@@ -36,7 +42,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_EXECUTION_ENABLED = "junit.vintage.execution.parallel.enabled";
 
 	/**
@@ -53,6 +59,12 @@ public final class Constants {
 	public static final String PARALLEL_POOL_SIZE = "junit.vintage.execution.parallel.pool-size";
 
 	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean PARALLEL_CLASS_EXECUTION_DEFAULT = false;
+
+	/**
 	 * Property name used to indicate whether parallel execution is enabled for test classes in the
 	 * JUnit Vintage engine: {@value}
 	 *
@@ -62,8 +74,14 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean PARALLEL_METHOD_EXECUTION_DEFAULT = false;
 
 	/**
 	 * Property name used to indicate whether parallel execution is enabled for test methods in the
@@ -75,8 +93,14 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_METHOD_EXECUTION_DEFAULT))
 	public static final String PARALLEL_METHOD_EXECUTION = "junit.vintage.execution.parallel.methods";
+
+	/**
+	 * TODO:
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean DISCOVERY_ISSUE_REPORTING_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to configure whether the JUnit Vintage engine should
@@ -88,7 +112,7 @@ public final class Constants {
 	 * @since 6.0.1
 	 */
 	@API(status = MAINTAINED, since = "6.0.1")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DISCOVERY_ISSUE_REPORTING_ENABLED_DEFAULT))
 	public static final String DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME = "junit.vintage.discovery.issue.reporting.enabled";
 
 	private Constants() {
