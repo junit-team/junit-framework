@@ -350,8 +350,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -359,8 +358,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -369,8 +367,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -379,8 +376,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -389,8 +385,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -398,8 +393,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -408,8 +402,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -418,8 +411,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -428,8 +420,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -438,8 +429,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -447,8 +437,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#TIMEOUT_MODE_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter(/*type = TimeoutDuration.class,*/ defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
+	@ConfigurationParameter(defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
 	public static final String TIMEOUT_MODE_PROPERTY_NAME = Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 
 	/**
