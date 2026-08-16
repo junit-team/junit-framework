@@ -32,6 +32,7 @@ import org.junit.platform.configuration.testcases.Defaults;
 import org.junit.platform.configuration.testcases.Deprecation;
 import org.junit.platform.configuration.testcases.DeprecationWithDetails;
 import org.junit.platform.configuration.testcases.Documented;
+import org.junit.platform.configuration.testcases.DocumentedWithAtSee;
 import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
@@ -155,6 +156,21 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "description": "A brief description of this property.",
 						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithHeader"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documentedWithAtSee() {
+			compiler.compileWithoutError(DocumentedWithAtSee.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "description": "A brief description of this property.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtSee"
 						}
 					  ]
 					}""");

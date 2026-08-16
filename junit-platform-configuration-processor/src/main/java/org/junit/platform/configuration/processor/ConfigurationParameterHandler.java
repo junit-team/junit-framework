@@ -85,7 +85,7 @@ final class ConfigurationParameterHandler {
 		}
 		// TODO: Creating patterns over and over is not very efficient
 		// TODO: Handle {@link ...}, {@linkplain ...}, check how does Spring do that?
-		var matcher = Pattern.compile("<p>|<h\\d>").matcher(docComment);
+		var matcher = Pattern.compile("<p>|<h\\d>|[^{]@[a-z]+").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
 		return firstParagraph //
 				// Replace newlines with space
