@@ -11,7 +11,6 @@
 package org.junit.platform.configuration.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -19,13 +18,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
-import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.configuration.testcases.DefaultDifferentSets;
 import org.junit.platform.configuration.testcases.DefaultMultipleValues;
 import org.junit.platform.configuration.testcases.Defaults;
@@ -205,7 +202,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					      "deprecation": {
 					          "reason": "This property was migrated to com.example",
 					          "replacement": "com.example.property",
-					          "since":"2.0.0"
+					          "since": "2.0.0"
 					        }
 					    }
 					  ]
@@ -357,7 +354,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {
-			assertThat(metaData()).isEqualToIgnoringWhitespace(json);
+			assertThat(metaData()).isEqualToNormalizingWhitespace(json);
 		}
 
 		private String metaData() throws UncheckedIOException {
@@ -369,12 +366,6 @@ class ConfigurationMetadataAnnotationProcessorTests {
 				throw new UncheckedIOException(e);
 			}
 		}
-	}
-
-	private static void asserPreconditionViolation(ThrowableAssert.ThrowingCallable throwingCallable, String message) {
-		assertThatThrownBy(throwingCallable) //
-				.hasRootCauseExactlyInstanceOf(PreconditionViolationException.class) //
-				.hasRootCauseMessage(message);
 	}
 
 }

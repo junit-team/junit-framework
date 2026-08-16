@@ -53,7 +53,15 @@ class MavenJunitPlatformConfigurationProcessorTests {
 		assertTrue(output.contains("[INFO] BUILD SUCCESS"));
 
 		var metaData = workspace.resolve("target/classes/META-INF/junit-platform-configuration-metadata.json");
-		assertThat(metaData).exists().content().isEqualTo("""
-				{"properties":[{"name":"org.example.property","sourceType":"org.example.Constants"}]}""");
+		assertThat(metaData).exists().content().isEqualToNormalizingWhitespace("""
+				{
+				   "properties": [
+				       {
+						   "name": "org.example.property",
+						   "sourceType": "org.example.Constants"
+					   }
+				   ]
+				}
+				""");
 	}
 }
