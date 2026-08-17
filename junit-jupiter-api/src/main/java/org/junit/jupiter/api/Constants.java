@@ -135,7 +135,6 @@ public final class Constants {
 	 *
 	 * <p>The default behavior is not to perform auto-detection.
 	 */
-	// TODO: Handle @link references.
 	@ConfigurationParameter(defaultValue = @Value(booleanValue = EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
 
