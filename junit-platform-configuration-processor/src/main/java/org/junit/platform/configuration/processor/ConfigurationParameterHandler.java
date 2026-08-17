@@ -83,8 +83,6 @@ final class ConfigurationParameterHandler {
 		if (docComment == null) {
 			return null;
 		}
-		// TODO: Creating patterns over and over is not very efficient
-		// TODO: Handle {@link ...}, {@linkplain ...}, check how does Spring do that?
 		var matcher = Pattern.compile("<p>|<h\\d>|[^{]@[a-z]+").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
 		return firstParagraph //
@@ -94,6 +92,12 @@ final class ConfigurationParameterHandler {
 				.replaceAll(" +", " ") //
 				// Replace the `: {@value}` conventional syntax.
 				.replaceAll(": \\{@value}\\.?", ".") //
+				// Replace the `{@code example}` syntax.
+				.replaceAll("\\{@code (.+?)}", "$1") //
+				// Replace the `{@link(plain) reference}` syntax.
+				.replaceAll("\\{@link(?:plain)? ([^ ]+?)}", "$1") //
+				// Replace the `{@link(plain) reference plain}` syntax.
+				.replaceAll("\\{@link(?:plain)? [^ ]+ (.+?)}", "$1") //
 				.trim();
 	}
 

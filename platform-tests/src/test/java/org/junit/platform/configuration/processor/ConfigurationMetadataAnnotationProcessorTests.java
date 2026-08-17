@@ -29,6 +29,9 @@ import org.junit.platform.configuration.testcases.Defaults;
 import org.junit.platform.configuration.testcases.Deprecation;
 import org.junit.platform.configuration.testcases.DeprecationWithDetails;
 import org.junit.platform.configuration.testcases.Documented;
+import org.junit.platform.configuration.testcases.DocumentedWithAtCode;
+import org.junit.platform.configuration.testcases.DocumentedWithAtLink;
+import org.junit.platform.configuration.testcases.DocumentedWithAtLinkPlain;
 import org.junit.platform.configuration.testcases.DocumentedWithAtSee;
 import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
@@ -171,6 +174,52 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						}
 					  ]
 					}""");
+		}
+
+		@Test
+		void documentedWithAtCode() {
+			compiler.compileWithoutError(DocumentedWithAtCode.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "description": "Some example code in the first paragraph.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtCode"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documentedWithAtLink() {
+			compiler.compileWithoutError(DocumentedWithAtLink.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "description": "Some DocumentedWithAtLink and document with at link in the first paragraph.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtLink"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documentedWithAtLinkPlain() {
+			compiler.compileWithoutError(DocumentedWithAtLinkPlain.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "description": "Some document with at linkplain and DocumentedWithAtLinkPlain in the first paragraph.",
+							  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtLinkPlain"
+							}
+						  ]
+						}""");
 		}
 
 		@Test
