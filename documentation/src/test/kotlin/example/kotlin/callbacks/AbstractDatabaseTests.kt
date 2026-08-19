@@ -16,18 +16,11 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 
 /**
  * Abstract base class for tests that use the database.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractDatabaseTests {
-    @BeforeAll
-    fun createDatabase() {
-        beforeAllMethod("${AbstractDatabaseTests::class.simpleName}.createDatabase()")
-    }
-
     @BeforeEach
     fun connectToDatabase() {
         beforeEachMethod("${AbstractDatabaseTests::class.simpleName}.connectToDatabase()")
@@ -38,9 +31,18 @@ abstract class AbstractDatabaseTests {
         afterEachMethod("${AbstractDatabaseTests::class.simpleName}.disconnectFromDatabase()")
     }
 
-    @AfterAll
-    fun destroyDatabase() {
-        afterAllMethod("${AbstractDatabaseTests::class.simpleName}.destroyDatabase()")
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun createDatabase() {
+            beforeAllMethod("${AbstractDatabaseTests::class.simpleName}.createDatabase()")
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun destroyDatabase() {
+            afterAllMethod("${AbstractDatabaseTests::class.simpleName}.destroyDatabase()")
+        }
     }
 }
 // end::user_guide[]

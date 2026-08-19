@@ -26,11 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith
  */
 @ExtendWith(Extension1::class, Extension2::class)
 class DatabaseTestsDemo : AbstractDatabaseTests() {
-    @BeforeAll
-    fun beforeAll() {
-        beforeAllMethod("${javaClass.simpleName}.beforeAll()")
-    }
-
     @BeforeEach
     fun insertTestDataIntoDatabase() {
         beforeEachMethod("${javaClass.simpleName}.insertTestDataIntoDatabase()")
@@ -46,9 +41,18 @@ class DatabaseTestsDemo : AbstractDatabaseTests() {
         afterEachMethod("${javaClass.simpleName}.deleteTestDataFromDatabase()")
     }
 
-    @AfterAll
-    fun afterAll() {
-        afterAllMethod("${javaClass.simpleName}.afterAll()")
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun beforeAll() {
+            beforeAllMethod("${DatabaseTestsDemo::class.simpleName}.beforeAll()")
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun afterAll() {
+            afterAllMethod("${DatabaseTestsDemo::class.simpleName}.afterAll()")
+        }
     }
 }
 // end::user_guide[]

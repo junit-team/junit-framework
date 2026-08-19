@@ -185,8 +185,6 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/callbacks/AbstractDatabaseTests.kt[tags=user_guide]
 ----
-
-NOTE: For conciseness, this snippet uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
@@ -209,8 +207,6 @@ Kotlin::
 ----
 include::example$kotlin/example/kotlin/callbacks/DatabaseTestsDemo.kt[tags=user_guide]
 ----
-
-NOTE: For conciseness, this snippet assumes that the parent class uses the `PER_CLASS` xref:writing-tests/test-instance-lifecycle.adoc[].
 --
 ====
 
