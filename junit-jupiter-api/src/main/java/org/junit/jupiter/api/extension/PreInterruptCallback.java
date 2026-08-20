@@ -32,6 +32,12 @@ import org.apiguardian.api.API;
 public interface PreInterruptCallback extends Extension {
 
 	/**
+	 * Default value for {@value #THREAD_DUMP_ENABLED_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	boolean THREAD_DUMP_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to enable dumping the stack of all
 	 * {@linkplain Thread threads} to {@code System.out} when a timeout has occurred.
 	 *

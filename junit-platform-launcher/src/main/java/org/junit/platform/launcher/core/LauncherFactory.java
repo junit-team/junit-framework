@@ -13,6 +13,7 @@ package org.junit.platform.launcher.core;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.launcher.LauncherConstants.DEACTIVATE_LISTENERS_PATTERN_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.ENABLE_LAUNCHER_INTERCEPTORS;
+import static org.junit.platform.launcher.LauncherConstants.ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -150,7 +151,8 @@ public class LauncherFactory {
 	private static List<LauncherInterceptor> collectLauncherInterceptors(
 			LauncherConfigurationParameters configurationParameters) {
 		List<LauncherInterceptor> interceptors = new ArrayList<>();
-		if (configurationParameters.getBoolean(ENABLE_LAUNCHER_INTERCEPTORS).orElse(false)) {
+		if (configurationParameters.getBoolean(ENABLE_LAUNCHER_INTERCEPTORS) //
+				.orElse(ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT)) {
 			ServiceLoaderRegistry.load(LauncherInterceptor.class).forEach(interceptors::add);
 		}
 		interceptors.add(ClasspathAlignmentCheckingLauncherInterceptor.INSTANCE);
