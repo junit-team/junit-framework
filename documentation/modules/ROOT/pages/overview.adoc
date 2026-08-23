@@ -70,6 +70,7 @@ corresponding sections of this User Guide, organized by topic.
 
 * xref:writing-tests/intro.adoc[Writing Tests in JUnit Jupiter]
 * xref:migrating-from-junit4.adoc[Migrating from JUnit 4 to JUnit Jupiter]
+* xref:migrating-to-junit7.adoc[Migrating to JUnit 7]
 * xref:running-tests/intro.adoc[]
 * xref:extensions/overview.adoc[Extension Model for JUnit Jupiter]
 * Advanced Topics

@@ -331,7 +331,7 @@ class ParameterizedInvocationNameFormatterTests {
 	class QuotedTextTests {
 
 		@ParameterizedTest
-		@CsvSource(delimiterString = "->", textBlock = """
+		@CsvSource(delimiterString = "->", value = """
 				'Jane Smith' -> 'Jane Smith'
 				\\           -> \\\\
 				"            -> \\"
@@ -352,7 +352,7 @@ class ParameterizedInvocationNameFormatterTests {
 		}
 
 		@ParameterizedTest
-		@CsvSource(quoteCharacter = '"', delimiterString = "->", textBlock = """
+		@CsvSource(quoteCharacter = '"', delimiterString = "->", value = """
 				X        -> X
 				\\       -> \\\\
 				'        -> \\'

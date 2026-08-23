@@ -1,0 +1,15 @@
+= Migrating to JUnit 7
+
+This page describes changes that require attention when migrating from JUnit 6 to JUnit 7.
+
+[[csv-source]]
+== `@CsvSource`
+
+Before upgrading to JUnit 7, upgrade to the latest JUnit 6.x release and run your test
+suite. JUnit 6.x rejects CSV records in `@CsvSource.value[]` that begin with the configured
+comment character. This check prevents a comment from silently removing a test case when
+the suite is upgraded to JUnit 7.
+
+In JUnit 7, comment records in `@CsvSource.value[]` are ignored, and the `textBlock`
+attribute is deprecated for removal. Use the `value` attribute for both regular strings and
+text blocks instead.

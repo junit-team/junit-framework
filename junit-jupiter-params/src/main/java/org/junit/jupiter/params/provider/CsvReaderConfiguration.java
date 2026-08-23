@@ -42,8 +42,7 @@ record CsvReaderConfiguration( //
 		validateValueAndTextBlock(csvSource);
 		Preconditions.condition(csvSource.value().length > 0, () -> "@CsvSource must be declared with `value`");
 		return validate(csvSource, new CsvReaderConfiguration( //
-			// Comments in CsvSource.value are rejected manually.
-			CommentStrategy.READ,
+			CommentStrategy.SKIP,
 			// For CsvSource.value we manually process the header.
 			false, //
 			csvSource.commentCharacter(), //
@@ -57,6 +56,7 @@ record CsvReaderConfiguration( //
 		));
 	}
 
+	@SuppressWarnings("removal")
 	static CsvReaderConfiguration fromTextBlockCsvSource(CsvSource csvSource) {
 		validateValueAndTextBlock(csvSource);
 		Preconditions.condition(!csvSource.textBlock().isEmpty(),
@@ -90,6 +90,7 @@ record CsvReaderConfiguration( //
 		));
 	}
 
+	@SuppressWarnings("removal")
 	private static void validateValueAndTextBlock(CsvSource csvSource) {
 		var values = csvSource.value();
 		Preconditions.condition(values.length > 0 ^ !csvSource.textBlock().isEmpty(),

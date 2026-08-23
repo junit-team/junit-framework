@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params.provider;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -27,7 +28,7 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
 /**
  * {@code @CsvSource} is a {@linkplain Repeatable repeatable}
  * {@link ArgumentsSource} which reads comma-separated values (CSV) from one
- * or more CSV records supplied via the {@link #value} attribute or
+ * or more CSV records supplied via the {@link #value} attribute or the deprecated
  * {@link #textBlock} attribute.
  *
  * <p>The supplied values will be provided as arguments to the annotated
@@ -91,10 +92,10 @@ public @interface CsvSource {
 	 * The CSV records to use as the source of arguments; must not be empty.
 	 *
 	 * <p>Defaults to an empty array. You therefore must supply CSV content
-	 * via this attribute or the {@link #textBlock} attribute.
+	 * via this attribute or the deprecated {@link #textBlock} attribute.
 	 *
-	 * <p>Each value corresponds to a record in a CSV file and will be split using
-	 * the specified {@link #delimiter} or {@link #delimiterString}. Note that
+	 * <p>Each value corresponds to a CSV document and will be split into one or more records
+	 * using the specified {@link #delimiter} or {@link #delimiterString}. Note that
 	 * the first value may optionally be used to supply CSV headers (see
 	 * {@link #useHeadersInDisplayName}). Moreover, each specified value must
 	 * not be blank.
@@ -115,8 +116,8 @@ public @interface CsvSource {
 	 * <h4>Text Blocks</h4>
 	 *
 	 * <p>If <em>text block</em> syntax is supported by your programming language,
-	 * you may also declare your CSV content as a textblock. Note that unlike
-	 * {@link #textBlock()} {@code value} does not support comments.
+	 * you may also declare your CSV content as a text block. Lines beginning with the
+	 * configured {@link #commentCharacter} are ignored.
 	 *
 	 * <p>When using text blocks each value corresponds to a CSV document and
 	 * will be split using the specified {@link #delimiter} or
@@ -166,11 +167,9 @@ public @interface CsvSource {
 	 * Note that the first record may optionally be used to supply CSV headers (see
 	 * {@link #useHeadersInDisplayName}).
 	 *
-	 * <p>In contrast to CSV records supplied via {@link #value}, a text block
-	 * can contain comments. Any line beginning with a {@link #commentCharacter}
-	 * will be treated as a comment and ignored. Note that there is one exception
-	 * to this rule: if the comment character appears within a quoted field,
-	 * it loses its special meaning.
+	 * <p>Lines beginning with a {@link #commentCharacter} will be treated as comments
+	 * and ignored. Note that there is one exception to this rule: if the comment
+	 * character appears within a quoted field, it loses its special meaning.
 	 *
 	 * <p>The comment character must be the first character on the line without
 	 * any leading whitespace. It is therefore recommended that the closing text block
@@ -200,10 +199,12 @@ public @interface CsvSource {
 	 * }</pre>
 	 *
 	 * @since 5.8.1
+	 * @deprecated Use {@link #value()} instead. This attribute will be removed in JUnit 7.
 	 * @see #value
 	 * @see #quoteCharacter
 	 */
-	@API(status = STABLE, since = "5.10")
+	@Deprecated(since = "7.0", forRemoval = true)
+	@API(status = DEPRECATED, since = "7.0")
 	String textBlock() default "";
 
 	/**

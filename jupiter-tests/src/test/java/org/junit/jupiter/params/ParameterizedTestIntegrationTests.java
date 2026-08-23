@@ -132,6 +132,7 @@ import org.opentest4j.TestAbortedException;
 /**
  * @since 5.0
  */
+@SuppressWarnings("removal")
 class ParameterizedTestIntegrationTests extends AbstractJupiterTestEngineTests {
 
 	private final Locale originalLocale = Locale.getDefault(Locale.Category.FORMAT);

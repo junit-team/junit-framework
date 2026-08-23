@@ -29,6 +29,7 @@ import org.junit.platform.commons.JUnitException;
 /**
  * @since 5.0
  */
+@SuppressWarnings("removal")
 class CsvArgumentsProviderTests {
 
 	@Test
@@ -405,12 +406,23 @@ class CsvArgumentsProviderTests {
 	}
 
 	@Test
-	void rejectCommentCharacterWhenUsingValueAttribute() {
-		var annotation = csvSource("#foo", "#bar,baz", "baz,#quux");
+	void ignoresCommentCharacterWhenUsingValueAttribute() {
+		var annotation = csvSource("#foo", "#bar,baz", "baz,#quux", "'#quoted', #comment");
 
-		assertPreconditionViolationFor(() -> provideArguments(annotation).findAny())//
-				.withMessageStartingWith(
-					"Comments may not be used when using @CsvSourve.value. Either change the comment character to something other than [#] or enclose the field in [']");
+		assertThat(provideArguments(annotation)).containsExactly(//
+				array("baz", "#quux"), //
+				array("#quoted", "#comment"));
+	}
+
+	@Test
+	void ignoresCommentCharacterWhenUsingValueTextBlock() {
+		var annotation = csvSource().lines("""
+				#foo
+				bar, #baz
+				'#bar', baz
+				""").build();
+
+		assertThat(provideArguments(annotation)).containsExactly(array("bar", "#baz"), array("#bar", "baz"));
 	}
 
 	@Test
@@ -504,7 +516,7 @@ class CsvArgumentsProviderTests {
 	@Test
 	void supportsCsvHeadersWhenUsingValueAttribute() {
 		var annotation = csvSource().useHeadersInDisplayName(true)//
-				.lines("FRUIT, RANK", "apple, 1", "banana, 2").build();
+				.lines("# A comment before the headers", "FRUIT, RANK", "apple, 1", "banana, 2").build();
 
 		assertThat(headersToValues(annotation)).containsExactly(//
 			array("FRUIT = apple", "RANK = 1"), //

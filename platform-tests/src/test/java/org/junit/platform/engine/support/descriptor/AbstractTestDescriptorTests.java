@@ -171,7 +171,7 @@ class AbstractTestDescriptorTests implements TestDescriptorOrderChildrenTests {
 
 	@ParameterizedTest(name = "{0} \u27A1 {1}")
 	// NOTE: "\uFFFD" is the Unicode replacement character: �
-	@CsvSource(delimiterString = "->", textBlock = """
+	@CsvSource(delimiterString = "->", value = """
 			'carriage \r return'           -> 'carriage <CR> return'
 			'line \n feed'                 -> 'line <LF> feed'
 			'form \f feed'                 -> 'form \uFFFD feed'

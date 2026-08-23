@@ -98,6 +98,7 @@ abstract class MockCsvAnnotationBuilder<A extends Annotation, B extends MockCsvA
 
 	// -------------------------------------------------------------------------
 
+	@SuppressWarnings("removal")
 	static class MockCsvSourceBuilder extends MockCsvAnnotationBuilder<CsvSource, MockCsvSourceBuilder> {
 
 		private String[] lines = new String[0];
