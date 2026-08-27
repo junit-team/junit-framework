@@ -20,6 +20,9 @@ public class ConstantTests {
 
 	@Test
 	void constantsAreConsistent() {
+		assertThat(Constants.PARALLEL_EXECUTION_REACTIVE_PROPERTY_NAME) //
+				.isEqualTo("junit.jupiter.execution.parallel.reactive.enabled");
+
 		assertThat(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME).isEqualTo(Constants.PARALLEL_CONFIG_PREFIX
 				+ ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME);
 

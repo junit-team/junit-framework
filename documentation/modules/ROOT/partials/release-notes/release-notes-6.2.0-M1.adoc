@@ -41,6 +41,12 @@ repository on GitHub.
 * `ConsoleLauncher` with `--details=verbose` now reports on each test atomically and
   indents its output correctly when tests are executed in parallel. Previously, the
   reported output from different tests could interleave.
+* New `*Async` methods were added to the hierarchical execution SPI. The
+  `org.junit.platform.engine.support.hierarchical` package now offers
+  `AsyncTestExecution`, a non-blocking `ReactiveResourceGate`
+  (`ResourceLock#acquireAsync()`), and `submitAsync`/`invokeAllAsync` on
+  `HierarchicalTestExecutorService`, enabling reactive (e.g. `CompletionStage`-based)
+  test execution without parking threads.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
@@ -71,6 +77,38 @@ repository on GitHub.
   and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
+* A `@Test` method may now return type:https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CompletionStage.html[`CompletionStage`]
+  (or a `CompletableFuture` or `Future`). The test is considered finished only once
+  the returned signal completes, and `@Timeout` applies to the entire asynchronous
+  work rather than only the synchronous method call. Lifecycle methods
+  (`@BeforeAll`, `@AfterAll`, `@BeforeEach`, `@AfterEach`) may also return such a signal, whose
+  completion is awaited before the next phase proceeds. See
+  xref:writing-tests/test-classes-and-methods.adoc#async-test-methods[Test Methods].
+* New `AsyncInvocationInterceptor` API that allows `Extension`s to intercept test, lifecycle, and
+  dynamic-test invocations without blocking a thread while the intercepted method performs
+  asynchronous work. The legacy `InvocationInterceptor` remains fully supported and is
+  automatically adapted to the asynchronous invocation pipeline.* New experimental `EarlyExtension` SPI and
+  `AsyncReturnValueHandler` extension API that let the engine recognize user-defined asynchronous
+  return types (for example a `MyPromise<T>`) and await them by mapping the returned value to a
+  `CompletionStage`. A handler can be registered globally via the `ServiceLoader` (auto-detection) or
+  on a test method/class via `@ExtendWith`, including through a composed indirection annotation.
+  See xref:writing-tests/test-classes-and-methods.adoc#custom-async-return-types[Custom Asynchronous Return Types].
+* `@Timeout` now applies to the whole asynchronous duration of a test method that returns a
+  `CompletionStage`/`CompletableFuture`/`Future`: the awaited body is bounded via
+  `CompletableFuture.orTimeout`, and for `SEPARATE_THREAD` the completing thread is interrupted on
+  expiry where possible (falling back to a non-preemptive timeout otherwise, so a timed-out test is
+  never reported as passed).
+* New experimental *reactive execution lane*: when `junit.jupiter.execution.parallel.reactive.enabled=true`
+  is set alongside `junit.jupiter.execution.parallel.enabled=true`, the thread-based parallel lane
+  schedules nodes cooperatively via `CompletionStage` composition, so waits on concurrency permits and
+  resource locks hand off the worker thread instead of parking it.
+* New experimental *standalone cooperative lane*: `junit.jupiter.execution.reactive.enabled=true`
+  enables cooperative execution without requiring the thread-based parallel feature or any thread
+  configuration. An async-returning test method (`CompletionStage`/`CompletableFuture`/`Future`) is
+  implicitly `CONCURRENT` and overlaps with other async tests without a dedicated thread, while
+  synchronous/`void` test methods are implicitly `SAME_THREAD` and run sequentially in discovery
+  order. An explicit `@Execution` always wins. See
+  xref:writing-tests/parallel-execution.adoc#config-reactive-execution[Reactive Execution].
 
 
 [[v6.2.0-M1-junit-vintage]]

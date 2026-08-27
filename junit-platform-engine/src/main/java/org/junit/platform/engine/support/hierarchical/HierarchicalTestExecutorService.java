@@ -14,10 +14,15 @@ import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.List;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.support.hierarchical.Node.ExecutionMode;
@@ -74,6 +79,57 @@ public interface HierarchicalTestExecutorService extends AutoCloseable {
 	void invokeAll(List<? extends TestTask> testTasks);
 
 	/**
+	 * Asynchronous variant of {@link #submit(TestTask)}.
+	 *
+	 * <p>The returned {@link CompletionStage} is used purely as a promise that
+	 * the task's execution has finished; its payload is intentionally ignored.
+	 *
+	 * <p>The default implementation bridges the (blocking)
+	 * {@link #submit(TestTask)} method into the reactive world. Implementations
+	 * that are fully non-blocking are encouraged to override this method.
+	 *
+	 * @param testTask the test task to be executed; never {@code null}
+	 * @return a completion stage signaling termination of the task's execution;
+	 * never {@code null}
+	 * @throws org.junit.platform.commons.PreconditionViolationException if
+	 * {@code testTask} is {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> submitAsync(TestTask testTask) {
+		Preconditions.notNull(testTask, "testTask must not be null");
+		return AsyncTestExecution.synchronous(() -> {
+			var future = submit(testTask);
+			syncJoin(future);
+		});
+	}
+
+	/**
+	 * Asynchronous variant of {@link #invokeAll(List)}.
+	 *
+	 * <p>The returned {@link CompletionStage} is used purely as a promise that
+	 * all supplied tasks have finished; its payload is intentionally ignored.
+	 *
+	 * <p>The default implementation bridges the (blocking)
+	 * {@link #invokeAll(List)} method into the reactive world. Implementations
+	 * that are fully non-blocking are encouraged to override this method.
+	 *
+	 * @param testTasks the test tasks to be executed; never {@code null}
+	 * @return a completion stage signaling termination of all supplied tasks;
+	 * never {@code null}
+	 * @throws org.junit.platform.commons.PreconditionViolationException if
+	 * {@code testTasks} is {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> invokeAllAsync(List<? extends TestTask> testTasks) {
+		Preconditions.notNull(testTasks, "testTasks must not be null");
+		return AsyncTestExecution.synchronous(() -> {
+			invokeAll(testTasks);
+		});
+	}
+
+	/**
 	 * Close this service and let it perform any required cleanup work.
 	 *
 	 * <p>For example, thread-based implementations should usually close their
@@ -81,6 +137,26 @@ public interface HierarchicalTestExecutorService extends AutoCloseable {
 	 */
 	@Override
 	void close();
+
+	/**
+	 * Block until the supplied {@code future} completes, rethrowing a completed
+	 * execution exception as a runtime exception.
+	 *
+	 * @param future the future to wait for
+	 */
+	private static void syncJoin(Future<?> future) {
+		try {
+			future.get();
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new JUnitException("Interrupted while waiting for task to complete", e);
+		}
+		catch (ExecutionException e) {
+			UnrecoverableExceptions.rethrowIfUnrecoverable(e.getCause());
+			throw new JUnitException("Task failed", e.getCause());
+		}
+	}
 
 	/**
 	 * An executable task that represents a single test or container.
@@ -93,16 +169,35 @@ public interface HierarchicalTestExecutorService extends AutoCloseable {
 		ExecutionMode getExecutionMode();
 
 		/**
-		 * Get the {@linkplain ResourceLock resource lock} of this task.
-		 */
+			 * Get the {@linkplain ResourceLock resource lock} of this task.
+			 */
 		ResourceLock getResourceLock();
+
+		/**
+		 * Asynchronous variant of {@link #execute()}.
+		 *
+		 * <p>The returned {@link CompletionStage} is used purely as a promise that
+		 * the task's execution has finished; its payload is intentionally ignored.
+		 *
+		 * <p>The default implementation bridges the blocking {@link #execute()}
+		 * method into the reactive world. A fully asynchronous executor service may
+		 * supply a reactive task via an alternative mechanism.
+		 *
+		 * @return a completion stage signaling termination of this task; never
+		 * {@code null}
+		 * @since 6.2
+		 */
+		@API(status = EXPERIMENTAL, since = "6.2")
+		default CompletionStage<?> executeAsync() {
+			return AsyncTestExecution.synchronous(this::execute);
+		}
 
 		/**
 		 * Get the {@linkplain TestDescriptor test descriptor} of this task.
 		 *
 		 * @throws UnsupportedOperationException if not supported for this TestTask implementation
-		 * @since 6.0
-		 */
+			 * @since 6.0
+			 */
 		@API(status = EXPERIMENTAL, since = "6.0")
 		default TestDescriptor getTestDescriptor() {
 			throw new UnsupportedOperationException();

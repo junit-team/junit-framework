@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.api.extension.TestInstances;
 import org.junit.jupiter.api.parallel.ResourceLocksProvider;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -48,7 +49,13 @@ public class ClassTestDescriptor extends ClassBasedTestDescriptor {
 	public static final String SEGMENT_TYPE = "class";
 
 	public ClassTestDescriptor(UniqueId uniqueId, Class<?> testClass, JupiterConfiguration configuration) {
-		super(uniqueId, testClass, createDisplayNameSupplierForClass(testClass, configuration), configuration);
+		this(uniqueId, testClass, configuration, List.of());
+	}
+
+	public ClassTestDescriptor(UniqueId uniqueId, Class<?> testClass, JupiterConfiguration configuration,
+			List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		super(uniqueId, testClass, createDisplayNameSupplierForClass(testClass, configuration), configuration,
+			asyncReturnValueHandlers);
 	}
 
 	private ClassTestDescriptor(UniqueId uniqueId, Class<?> testClass, String displayName,

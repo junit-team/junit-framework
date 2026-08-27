@@ -148,6 +148,15 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 		return registry;
 	}
 
+	/**
+	 * Create a new empty registry that does not contain any extensions.
+	 *
+	 * @return a new, empty {@code MutableExtensionRegistry}; never {@code null}
+	 */
+	public static MutableExtensionRegistry createEmptyRegistry() {
+		return new MutableExtensionRegistry();
+	}
+
 	private final Set<Class<? extends Extension>> registeredExtensionTypes;
 	private final List<Entry> registeredExtensions;
 	private final Map<Class<?>, LateInitExtensions> lateInitExtensions;
