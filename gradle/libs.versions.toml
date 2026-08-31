@@ -104,7 +104,7 @@ jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.4.10" }
 nmcp-settings = { id = "com.gradleup.nmcp.settings", version = "1.6.1" }
 node = { id = "com.github.node-gradle.node", version = "7.1.0" }
-nullaway = { id = "net.ltgt.nullaway", version = "3.1.0" }
+nullaway = { id = "net.ltgt.nullaway", version = "3.2.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.5.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
 spotless = { id = "com.diffplug.spotless", version = "8.10.0" }
