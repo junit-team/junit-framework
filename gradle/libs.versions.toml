@@ -102,7 +102,7 @@ foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.4.10" }
-nmcp-settings = { id = "com.gradleup.nmcp.settings", version = "1.6.1" }
+nmcp-settings = { id = "com.gradleup.nmcp.settings", version = "1.6.2" }
 node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.2.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.5.0" }
