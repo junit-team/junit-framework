@@ -15,6 +15,8 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.jspecify.annotations.Nullable;
+
 public class TestLauncherInterceptor1 implements LauncherInterceptor {
 
 	public static final String CLASSLOADER_NAME = "interceptor-loader";
@@ -30,7 +32,7 @@ public class TestLauncherInterceptor1 implements LauncherInterceptor {
 	}
 
 	@Override
-	public <T> T intercept(Invocation<T> invocation) {
+	public <T extends @Nullable Object> T intercept(Invocation<T> invocation) {
 		return invocation.proceed();
 	}
 

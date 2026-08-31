@@ -345,7 +345,7 @@ class InvocationInterceptorTests extends AbstractJupiterTestEngineTests {
 		}
 
 		@Override
-		public <T> T interceptTestFactoryMethod(Invocation<T> invocation,
+		public <T extends @Nullable Object> T interceptTestFactoryMethod(Invocation<T> invocation,
 				ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext)
 				throws Throwable {
 			assertEquals(testClass, invocationContext.getTargetClass());
