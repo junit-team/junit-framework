@@ -119,8 +119,10 @@ for user-supplied _lifecycle methods_ (see xref:writing-tests/definitions.adoc[]
 The following examples demonstrate this behavior. Please note that the examples do not
 actually do anything realistic. Instead, they mimic common scenarios for testing
 interactions with the database. All methods imported statically from the `Logger` class
-log contextual information in order to help us better understand the execution order of
+log contextual information to help better understand the execution order of
 user-supplied callback methods and callback methods in extensions.
+In Kotlin examples, the corresponding methods are top-level functions in the same package
+and therefore don't require imports.
 
 .Extension1
 [tabs]
