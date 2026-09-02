@@ -45,6 +45,12 @@ import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
 import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
 
+/**
+ * The dependencies of platform-tests depend on the
+ * {@link ConfigurationMetadataAnnotationProcessor}. As a consequence, it is
+ * likely that building the project will find problems with the processor
+ * before this test does.
+ */
 class ConfigurationMetadataAnnotationProcessorTests {
 
 	final String expectedMetadataPath = "META-INF/junit-platform-configuration-metadata.json";
