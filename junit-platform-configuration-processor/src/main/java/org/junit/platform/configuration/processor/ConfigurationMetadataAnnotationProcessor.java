@@ -54,7 +54,9 @@ import jakarta.json.stream.JsonGenerator;
 ///
 /// The first paragraph from the doc string will be used to describe the
 /// property. If the first paragraph ends with {@code : {@value}.} or
-/// {@code : {@value}} it will be replaced with a {@code : {@value}.}.
+/// {@code : {@value}} it will be replaced with {@code .}. Likewise
+/// {@code {@code}} and {@code {@link}} tags are replaced with plain
+/// text versions.
 ///
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")

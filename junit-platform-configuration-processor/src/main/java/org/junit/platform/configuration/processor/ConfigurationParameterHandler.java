@@ -83,6 +83,7 @@ final class ConfigurationParameterHandler {
 		if (docComment == null) {
 			return null;
 		}
+		// matches either a new paragraph, header or Javadoc tag without content (e.g. @see).
 		var matcher = Pattern.compile("<p>|<h\\d>|[^{]@[a-z]+").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
 		return firstParagraph //
