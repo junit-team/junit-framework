@@ -251,7 +251,7 @@ public class KitchenSinkExtension implements
 	}
 
 	@Override
-	public <T> T interceptTestFactoryMethod(Invocation<T> invocation,
+	public <T extends @Nullable Object> T interceptTestFactoryMethod(Invocation<T> invocation,
 			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
 		return InvocationInterceptor.super.interceptTestFactoryMethod(invocation, invocationContext, extensionContext);
 	}
