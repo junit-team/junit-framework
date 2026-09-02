@@ -230,8 +230,6 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 		@Test
 		void deprecation() {
-			// TODO: Class level? Inheritance? Meta?
-			// TODO: Warning level?
 			compiler.compileWithoutError(Deprecation.class);
 			assertMetaDataIsEqualTo("""
 					{
