@@ -11,7 +11,6 @@
 package org.junit.platform.configuration.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -19,19 +18,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
-import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.configuration.testcases.DefaultDifferentSets;
 import org.junit.platform.configuration.testcases.DefaultMultipleValues;
 import org.junit.platform.configuration.testcases.Defaults;
 import org.junit.platform.configuration.testcases.Deprecation;
 import org.junit.platform.configuration.testcases.DeprecationWithDetails;
 import org.junit.platform.configuration.testcases.Documented;
+import org.junit.platform.configuration.testcases.DocumentedWithAtCode;
+import org.junit.platform.configuration.testcases.DocumentedWithAtLink;
+import org.junit.platform.configuration.testcases.DocumentedWithAtLinkPlain;
+import org.junit.platform.configuration.testcases.DocumentedWithAtSee;
 import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
@@ -44,6 +45,12 @@ import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
 import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
 
+/**
+ * The dependencies of platform-tests depend on the
+ * {@link ConfigurationMetadataAnnotationProcessor}. As a consequence, it is
+ * likely that building the project will find problems with the processor
+ * before this test does.
+ */
 class ConfigurationMetadataAnnotationProcessorTests {
 
 	final String expectedMetadataPath = "META-INF/junit-platform-configuration-metadata.json";
@@ -161,9 +168,68 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void documentedWithAtSee() {
+			compiler.compileWithoutError(DocumentedWithAtSee.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "description": "A brief description of this property.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtSee"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documentedWithAtCode() {
+			compiler.compileWithoutError(DocumentedWithAtCode.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "description": "Some example code in the first paragraph.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtCode"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documentedWithAtLink() {
+			compiler.compileWithoutError(DocumentedWithAtLink.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "description": "Some DocumentedWithAtLink and document with at link in the first paragraph.",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtLink"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documentedWithAtLinkPlain() {
+			compiler.compileWithoutError(DocumentedWithAtLinkPlain.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "description": "Some document with at linkplain and DocumentedWithAtLinkPlain in the first paragraph.",
+							  "sourceType": "org.junit.platform.configuration.testcases.DocumentedWithAtLinkPlain"
+							}
+						  ]
+						}""");
+		}
+
+		@Test
 		void deprecation() {
-			// TODO: Class level? Inheritance? Meta?
-			// TODO: Warning level?
 			compiler.compileWithoutError(Deprecation.class);
 			assertMetaDataIsEqualTo("""
 					{
@@ -189,7 +255,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					      "deprecation": {
 					          "reason": "This property was migrated to com.example",
 					          "replacement": "com.example.property",
-					          "since":"2.0.0"
+					          "since": "2.0.0"
 					        }
 					    }
 					  ]
@@ -341,7 +407,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {
-			assertThat(metaData()).isEqualToIgnoringWhitespace(json);
+			assertThat(metaData()).isEqualToNormalizingWhitespace(json);
 		}
 
 		private String metaData() throws UncheckedIOException {
@@ -353,12 +419,6 @@ class ConfigurationMetadataAnnotationProcessorTests {
 				throw new UncheckedIOException(e);
 			}
 		}
-	}
-
-	private static void asserPreconditionViolation(ThrowableAssert.ThrowingCallable throwingCallable, String message) {
-		assertThatThrownBy(throwingCallable) //
-				.hasRootCauseExactlyInstanceOf(PreconditionViolationException.class) //
-				.hasRootCauseMessage(message);
 	}
 
 }

@@ -20,6 +20,7 @@ dependencies {
 
 	compileOnly(kotlin("stdlib"))
 	compileOnly(projects.junitPlatformConfigurationApi)
+	compileOnly(projects.junitPlatformEngine)
 
 	testFixturesImplementation(libs.assertj)
 	testFixturesImplementation(testFixtures(projects.junitPlatformCommons))

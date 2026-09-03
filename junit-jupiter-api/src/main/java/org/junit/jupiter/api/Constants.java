@@ -12,6 +12,7 @@ package org.junit.jupiter.api;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
@@ -29,6 +30,10 @@ import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * Collection of configuration constants for the Jupiter test engine.
@@ -39,6 +44,12 @@ import org.junit.platform.configuration.api.ConfigurationParameter;
  */
 @API(status = STABLE, since = "6.1")
 public final class Constants {
+
+	/**
+	 * Default value for {@value #EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final String INCLUDE_ALL_EXTENSIONS_PATTERN = "*";
 
 	/**
 	 * Property name used to include patterns for auto-detecting extensions: {@value}
@@ -73,8 +84,7 @@ public final class Constants {
 	 *
 	 * <p>Note: A class that matches both an inclusion and exclusion pattern will be excluded.
 	 */
-	// TODO: ClassNamePatternFilterUtils.ALL_PATTERN isn't part of the public API
-	@ConfigurationParameter(defaultValue = @Value(stringValue = "*"))
+	@ConfigurationParameter(defaultValue = @Value(stringValue = INCLUDE_ALL_EXTENSIONS_PATTERN))
 	public static final String EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.include";
 
 	/**
@@ -114,14 +124,25 @@ public final class Constants {
 	public static final String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 
 	/**
+	 * Default value for {@value #EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT = false;
+
+	/**
 	 * Property name used to enable auto-detection and registration of extensions via
 	 * Java's {@link java.util.ServiceLoader} mechanism: {@value}
 	 *
 	 * <p>The default behavior is not to perform auto-detection.
 	 */
-	// TODO: Handle @link references.
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
+
+	/**
+	 * Default value for {@value #CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to enable auto-closing of {@link AutoCloseable} instances: {@value}
@@ -129,7 +150,7 @@ public final class Constants {
 	 * <p>By default, auto-closing is enabled.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT))
 	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 
 	/**
@@ -191,7 +212,7 @@ public final class Constants {
 	 *
 	 * <p>This behavior is disabled by default.
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PreInterruptCallback.THREAD_DUMP_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME = PreInterruptCallback.THREAD_DUMP_ENABLED_PROPERTY_NAME;
 
 	/**
@@ -199,9 +220,14 @@ public final class Constants {
 	 *
 	 * @see Lifecycle#DEFAULT_LIFECYCLE_PROPERTY_NAME
 	 */
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = Lifecycle.class, defaultValue = @Value(stringValue = "per_method"))
+	@ConfigurationParameter(type = Lifecycle.class, defaultValue = @Value(stringValue = Lifecycle.DEFAULT_LIFECYCLE_PATTERN_DEFAULT))
 	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
+
+	/**
+	 * Default value for {@value #PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
 
 	/**
 	 * Property name used to enable parallel test execution: {@value}
@@ -209,7 +235,7 @@ public final class Constants {
 	 * <p>By default, tests are executed sequentially in a single thread.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = false))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
 
 	/**
@@ -217,8 +243,7 @@ public final class Constants {
 	 *
 	 * @see Execution#DEFAULT_EXECUTION_MODE_PROPERTY_NAME
 	 */
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = ExecutionMode.class, defaultValue = @Value(stringValue = "same_thread"))
+	@ConfigurationParameter(type = ExecutionMode.class, defaultValue = @Value(stringValue = Execution.DEFAULT_EXECUTION_MODE_DEFAULT))
 	public static final String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 
 	/**
@@ -245,9 +270,7 @@ public final class Constants {
 	 * ignoring case.
 	 *
 	 */
-	// TODO: ParallelExecutorServiceType is not part of the public API
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(/* type = ParallelExecutorServiceType.class,*/ defaultValue = @Value(stringValue = "fork_join_pool"))
+	@ConfigurationParameter(type = ParallelExecutorServiceType.class, defaultValue = @Value(stringValue = ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_DEFAULT))
 	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ "executor-service";
 
@@ -259,9 +282,7 @@ public final class Constants {
 	 * {@code custom}.
 	 *
 	 */
-	// TODO: DefaultParallelExecutionConfigurationStrategy is not part of the public API
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(/* type = DefaultParallelExecutionConfigurationStrategy.class,*/ defaultValue = @Value(stringValue = "dynamic"))
+	@ConfigurationParameter(type = DefaultParallelExecutionConfigurationStrategy.class, defaultValue = @Value(stringValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_DEFAULT))
 	public static final String PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "strategy";
 
 	/**
@@ -299,7 +320,7 @@ public final class Constants {
 	 * <p>Value must either {@code true} or {@code false}; defaults to {@code true}.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = true))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_SATURATE_DEFAULT))
 	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.saturate";
 
 	/**
@@ -310,7 +331,7 @@ public final class Constants {
 	 * <p>Value must be a positive decimal number; defaults to {@code 1}.
 	 *
 	 */
-	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = 1.0))
+	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_DEFAULT))
 	public static final String PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "dynamic.factor";
 
 	/**
@@ -319,8 +340,7 @@ public final class Constants {
 	 * {@value}
 	 *
 	 */
-	// TODO: ParallelExecutionConfigurationStrategy is not part of the public API
-	@ConfigurationParameter /*( type = ParallelExecutionConfigurationStrategy.class)*/
+	@ConfigurationParameter(type = ParallelExecutionConfigurationStrategy.class)
 	public static final String PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "custom.class";
 
 	/**
@@ -329,8 +349,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -338,8 +357,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -348,8 +366,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -358,8 +375,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -368,8 +384,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -377,8 +392,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -387,8 +401,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -397,8 +410,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -407,8 +419,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -417,8 +428,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(type = String.class)
 	public static final String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -426,8 +436,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#TIMEOUT_MODE_PROPERTY_NAME
 	 */
-	// TODO: TimeoutDuration is not part of the public API
-	@ConfigurationParameter /*(type = TimeoutDuration.class)*/
+	@ConfigurationParameter(defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
 	public static final String TIMEOUT_MODE_PROPERTY_NAME = Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 
 	/**
@@ -452,8 +461,7 @@ public final class Constants {
 	 * @see Timeout
 	 * @see Timeout.ThreadMode
 	 */
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = Timeout.ThreadMode.class, defaultValue = @Value(stringValue = "same_thread"))
+	@ConfigurationParameter(type = Timeout.ThreadMode.class, defaultValue = @Value(stringValue = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT))
 	public static final String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
 
 	/**
@@ -472,8 +480,7 @@ public final class Constants {
 	 *
 	 * @see TempDir#DEFAULT_CLEANUP_MODE_PROPERTY_NAME
 	 */
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = CleanupMode.class, defaultValue = @Value(stringValue = "always"))
+	@ConfigurationParameter(type = CleanupMode.class, defaultValue = @Value(stringValue = TempDir.DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT))
 	public static final String DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME = TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
 
 	/**
@@ -493,8 +500,7 @@ public final class Constants {
 	 *
 	 * @see org.junit.jupiter.api.extension.TestInstantiationAwareExtension
 	 */
-	// TODO: Reference enum values as strings?
-	@ConfigurationParameter(type = ExtensionContextScope.class, defaultValue = @Value(stringValue = "default"))
+	@ConfigurationParameter(type = ExtensionContextScope.class, defaultValue = @Value(stringValue = ExtensionContextScope.DEFAULT_SCOPE_DEFAULT))
 	public static final String DEFAULT_TEST_CLASS_INSTANCE_CONSTRUCTION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME = ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
 
 	private Constants() {

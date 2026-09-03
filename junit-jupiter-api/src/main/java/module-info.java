@@ -22,6 +22,7 @@ module org.junit.jupiter.api {
 	requires transitive org.opentest4j;
 
 	requires static org.junit.platform.configuration.api;
+	requires static org.junit.platform.engine;
 	requires static kotlin.stdlib;
 
 	exports org.junit.jupiter.api;

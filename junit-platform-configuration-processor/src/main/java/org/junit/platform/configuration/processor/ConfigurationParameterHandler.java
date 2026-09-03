@@ -14,7 +14,6 @@ import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
@@ -30,19 +29,6 @@ import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecat
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
 
 final class ConfigurationParameterHandler {
-
-	private static final Map<String, String> NAME_TO_TYPE_NAME = Map.of( //
-		"shortValue", Short.class.getName(), //
-		"byteValue", Byte.class.getName(), //
-		"intValue", Integer.class.getName(), //
-		"longValue", Long.class.getName(), //
-		"floatValue", Float.class.getName(), //
-		"doubleValue", Double.class.getName(), //
-		"charValue", Character.class.getName(), //
-		"booleanValue", Boolean.class.getName(), //
-		"stringValue", String.class.getName(), //
-		"classValue", Class.class.getName() //
-	);
 
 	private final ConfigurationMetaData metaData;
 	private final Elements elementUtils;
@@ -97,9 +83,8 @@ final class ConfigurationParameterHandler {
 		if (docComment == null) {
 			return null;
 		}
-		// TODO: Creating patterns over and over is not very efficient
-		// TODO: Handle {@link ...}, check how does Spring do that?
-		var matcher = Pattern.compile("<p>|<h\\d>").matcher(docComment);
+		// matches either a new paragraph, header or Javadoc tag without content (e.g. @see).
+		var matcher = Pattern.compile("<p>|<h\\d>|[^{]@[a-z]+").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
 		return firstParagraph //
 				// Replace newlines with space
@@ -108,6 +93,12 @@ final class ConfigurationParameterHandler {
 				.replaceAll(" +", " ") //
 				// Replace the `: {@value}` conventional syntax.
 				.replaceAll(": \\{@value}\\.?", ".") //
+				// Replace the `{@code example}` syntax.
+				.replaceAll("\\{@code (.+?)}", "$1") //
+				// Replace the `{@link(plain) reference}` syntax.
+				.replaceAll("\\{@link(?:plain)? ([^ ]+?)}", "$1") //
+				// Replace the `{@link(plain) reference plain}` syntax.
+				.replaceAll("\\{@link(?:plain)? [^ ]+ (.+?)}", "$1") //
 				.trim();
 	}
 
@@ -125,18 +116,26 @@ final class ConfigurationParameterHandler {
 				field.annotationMirror());
 		}
 		var entry = defaultValues.entrySet().iterator().next();
-		var value = entry.getValue();
-		if (value.isEmpty()) {
-			return null;
-		}
-		if (value.size() != 1) {
+		var values = entry.getValue();
+		if (values.size() != 1) {
 			messager.printMessage(ERROR, "@ConfigurationParameter must have exactly one default value", field.element(),
 				field.annotationMirror());
 		}
-		var defaultValue = value.get(0);
-		var defaultName = entry.getKey();
-		var defaultType = requireNonNull(NAME_TO_TYPE_NAME.get(defaultName));
-		return new Default(defaultType, defaultValue);
+		var key = entry.getKey();
+		var value = values.get(0);
+		return switch (key) {
+			case "shortValue" -> new Default(Short.class.getName(), value);
+			case "byteValue" -> new Default(Byte.class.getName(), value);
+			case "intValue" -> new Default(Integer.class.getName(), value);
+			case "longValue" -> new Default(Long.class.getName(), value);
+			case "floatValue" -> new Default(Float.class.getName(), value);
+			case "doubleValue" -> new Default(Double.class.getName(), value);
+			case "charValue" -> new Default(Character.class.getName(), value);
+			case "booleanValue" -> new Default(Boolean.class.getName(), value);
+			case "stringValue" -> new Default(String.class.getName(), value);
+			case "classValue" -> new Default(Class.class.getName(), value.toString());
+			default -> throw new IllegalStateException("Unexpected value: " + key);
+		};
 	}
 
 	private record Default(String defaultType, Object value) {

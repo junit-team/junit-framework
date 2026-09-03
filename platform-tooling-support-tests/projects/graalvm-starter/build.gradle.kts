@@ -47,6 +47,7 @@ graalvmNative {
 	}
 	binaries {
 		named("test") {
+			buildArgs.add("-Ob") // quick build mode, see https://www.graalvm.org/latest/reference-manual/native-image/optimizations-and-performance/
 			buildArgs.add("-H:+ReportExceptionStackTraces")
 			if (jdkVersion <= 21) { // no longer necessary on higher versions, see https://github.com/graalvm/native-build-tools/pull/693
 				val classNames = initializeAtBuildTime.values.flatten()

@@ -10,13 +10,11 @@
 
 package org.junit.platform.configuration.processor;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -31,6 +29,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 
 import jakarta.json.Json;
+import jakarta.json.stream.JsonGenerator;
 
 /// Writes all configuration parameters marked with
 /// {@link org.junit.platform.configuration.api.ConfigurationParameter} to
@@ -55,7 +54,9 @@ import jakarta.json.Json;
 ///
 /// The first paragraph from the doc string will be used to describe the
 /// property. If the first paragraph ends with {@code : {@value}.} or
-/// {@code : {@value}} it will be replaced with a {@code : {@value}.}.
+/// {@code : {@value}} it will be replaced with {@code .}. Likewise
+/// {@code {@code}} and {@code {@link}} tags are replaced with plain
+/// text versions.
 ///
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
@@ -93,9 +94,14 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 
 	private void writeMetaData() {
 		var converter = new JsonConverter();
-		try (var out = new BufferedWriter(new OutputStreamWriter(openOutputStream(), UTF_8))) {
-			var value = converter.toJsonObject(requireNonNull(metaData));
-			Json.createWriter(out).write(value);
+		var config = Map.of(JsonGenerator.PRETTY_PRINTING, true);
+		var writerFactory = Json.createWriterFactory(config);
+
+		try (var out = openOutputStream()) {
+			var writer = writerFactory.createWriter(out);
+			writer.write(converter.toJsonObject(requireNonNull(metaData)));
+			// Json writer doesn't add a trailing new line.
+			out.write('\n');
 		}
 		catch (Exception ex) {
 			var message = "Failed to write metadata to [%s]".formatted(METADATA_PATH);

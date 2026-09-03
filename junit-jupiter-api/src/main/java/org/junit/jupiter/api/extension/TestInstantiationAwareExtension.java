@@ -174,14 +174,18 @@ public interface TestInstantiationAwareExtension extends Extension {
 		TEST_METHOD;
 
 		/**
+		 * Default value for {@value #DEFAULT_SCOPE_PROPERTY_NAME} is {@value}.
+		 */
+		@API(status = MAINTAINED, since = "6.2.0")
+		public static final String DEFAULT_SCOPE_DEFAULT = "default";
+
+		/**
 		 * Property name used to set the default extension context scope: {@value}
 		 *
 		 * <h4>Supported Values</h4>
 		 *
 		 * <p>Supported values include names of enum constants defined in this
-		 * class, ignoring case.
-		 *
-		 * @see #DEFAULT
+		 * class, ignoring case. Defaults to {@value #DEFAULT_SCOPE_DEFAULT}.
 		 */
 		public static final String DEFAULT_SCOPE_PROPERTY_NAME = "junit.jupiter.extensions.testinstantiation.extensioncontextscope.default";
 

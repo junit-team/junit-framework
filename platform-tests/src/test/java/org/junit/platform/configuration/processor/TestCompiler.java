@@ -35,7 +35,6 @@ import javax.tools.ToolProvider;
 class TestCompiler {
 
 	private final Path sourceDirectory;
-	// TODO: Use an in memory solution, faster
 	private final Path outputDirectory;
 	private final Processor processor;
 
