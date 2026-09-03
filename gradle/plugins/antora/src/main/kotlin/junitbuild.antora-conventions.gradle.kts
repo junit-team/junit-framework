@@ -50,7 +50,7 @@ val generateAntoraPlaybook = tasks.register("generateAntoraPlaybook", Copy::clas
 node {
 	download = buildParameters.antora.downloadNode
 	// renovate: datasource=node-version depName=node versioning=node
-	version = "24.19.0"
+	version = "24.20.0"
 	workDir = layout.settingsDirectory.dir(".gradle/nodejs")
 }
 
