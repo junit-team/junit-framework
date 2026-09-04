@@ -33,7 +33,7 @@ include::example$kotlin/example/kotlin/exception/IgnoreIOExceptionExtension.kt[t
 ====
 
 Another example shows how to record the state of an application under test exactly at
-the point of an unexpected exception being thrown during setup and cleanup. Note that unlike
+the point where an unexpected exception is thrown during setup and cleanup. Note that unlike
 relying on lifecycle callbacks, which may or may not be executed depending on the test
 status, this solution guarantees execution immediately after failing `@BeforeAll`,
 `@BeforeEach`, `@AfterEach` or `@AfterAll`.

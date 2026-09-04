@@ -52,6 +52,6 @@ implementing different kinds of tests that rely on repetitive invocation of _all
 methods in a test class, albeit in different contexts — for example, with different
 parameters, by preparing the test class instance differently, or multiple times without
 modifying the context.
-Please refer to the implementations of
-xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Classes] which use this extension
+Please refer to the implementation of
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Classes] which uses this extension
 point to provide its functionality.
