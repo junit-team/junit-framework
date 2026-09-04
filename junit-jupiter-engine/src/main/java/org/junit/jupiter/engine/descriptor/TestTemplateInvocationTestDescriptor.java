@@ -21,10 +21,12 @@ import java.util.function.UnaryOperator;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.AsyncInvocationInterceptor;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
+import org.junit.jupiter.engine.execution.AsyncInterceptingExecutableInvoker.AsyncVoidMethodInterceptorCall;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall.VoidMethodInterceptorCall;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
@@ -43,6 +45,7 @@ public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescript
 
 	public static final String SEGMENT_TYPE = "test-template-invocation";
 	private static final VoidMethodInterceptorCall interceptorCall = InvocationInterceptor::interceptTestTemplateMethod;
+	private static final AsyncVoidMethodInterceptorCall asyncInterceptorCall = AsyncInvocationInterceptor::interceptTestTemplateMethodAsync;
 
 	private @Nullable TestTemplateInvocationContext invocationContext;
 
@@ -51,7 +54,7 @@ public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescript
 	TestTemplateInvocationTestDescriptor(UniqueId uniqueId, Class<?> testClass, Method templateMethod,
 			TestTemplateInvocationContext invocationContext, int index, JupiterConfiguration configuration) {
 		super(uniqueId, invocationContext.getDisplayName(index), testClass, templateMethod, configuration,
-			interceptorCall);
+			interceptorCall, asyncInterceptorCall);
 		this.invocationContext = invocationContext;
 		this.index = index;
 	}

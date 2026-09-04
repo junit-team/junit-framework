@@ -10,6 +10,7 @@
 
 package org.junit.platform.commons.util;
 
+import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import org.apiguardian.api.API;
@@ -42,6 +43,17 @@ public final class UnrecoverableExceptions {
 	}
 
 	/**
+	 * Determine whether the supplied {@link Throwable exception} is
+	 * <em>unrecoverable</em>.
+	 *
+	 * @param exception the exception to check; may be {@code null}
+	 * @return {@code true} if the supplied {@code exception} is unrecoverable
+	 */
+	public static boolean isUnrecoverable(@Nullable Throwable exception) {
+		return exception instanceof OutOfMemoryError;
+	}
+
+	/**
 	 * Rethrow the supplied {@link Throwable exception} if it is
 	 * <em>unrecoverable</em>.
 	 *
@@ -49,8 +61,10 @@ public final class UnrecoverableExceptions {
 	 * method does nothing.
 	 */
 	public static void rethrowIfUnrecoverable(@Nullable Throwable exception) {
-		if (exception instanceof OutOfMemoryError) {
-			throw ExceptionUtils.throwAsUncheckedException(exception);
+		if (isUnrecoverable(exception)) {
+			// NullAway cannot refine the nullability of the parameter, so we
+			// use the implicit non-null argument of an unrecoverable exception.
+			throw ExceptionUtils.throwAsUncheckedException(requireNonNull(exception));
 		}
 	}
 

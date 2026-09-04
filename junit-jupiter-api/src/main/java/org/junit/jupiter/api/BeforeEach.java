@@ -28,8 +28,10 @@ import org.apiguardian.api.API;
  *
  * <h2>Method Signatures</h2>
  *
- * <p>{@code @BeforeEach} methods must have a {@code void} return type and must
- * not be {@code static}. In addition, {@code @BeforeEach} methods may optionally
+ * <p>{@code @BeforeEach} methods must have a {@code void} return type, or return
+ * a {@link java.util.concurrent.CompletionStage}/{@link java.util.concurrent.CompletableFuture}/
+ * {@link java.util.concurrent.Future} whose completion is awaited before the associated test is
+ * executed, and must not be {@code static}. In addition, {@code @BeforeEach} methods may optionally
  * declare parameters to be resolved by
  * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers}.
  *

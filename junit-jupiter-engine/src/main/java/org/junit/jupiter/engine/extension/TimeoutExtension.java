@@ -16,11 +16,17 @@ import static org.junit.jupiter.api.extension.PreInterruptCallback.THREAD_DUMP_E
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Timeout.ThreadMode;
+import org.junit.jupiter.api.extension.AsyncInvocationInterceptor;
+import org.junit.jupiter.api.extension.AsyncInvocationInterceptor.AsyncInvocation;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -33,7 +39,8 @@ import org.junit.platform.commons.util.ReflectionUtils;
 /**
  * @since 5.5
  */
-class TimeoutExtension implements BeforeAllCallback, BeforeEachCallback, InvocationInterceptor {
+class TimeoutExtension
+		implements BeforeAllCallback, BeforeEachCallback, InvocationInterceptor, AsyncInvocationInterceptor {
 
 	private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(Timeout.class);
 	private static final String TESTABLE_METHOD_TIMEOUT_KEY = "testable_method_timeout_from_annotation";
@@ -117,6 +124,139 @@ class TimeoutExtension implements BeforeAllCallback, BeforeEachCallback, Invocat
 
 		interceptLifecycleMethod(invocation, invocationContext, extensionContext,
 			TimeoutConfiguration::getDefaultAfterAllMethodTimeout);
+	}
+
+	// --- Asynchronous interceptor methods ---------------------------------
+
+	@Override
+	public CompletionStage<Void> interceptBeforeAllMethodAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return interceptAsync(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultBeforeAllMethodTimeout,
+			readTimeoutFromAnnotation(Optional.of(invocationContext.getExecutable())));
+	}
+
+	@Override
+	public CompletionStage<Void> interceptBeforeEachMethodAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return interceptAsync(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultBeforeEachMethodTimeout,
+			readTimeoutFromAnnotation(Optional.of(invocationContext.getExecutable())));
+	}
+
+	@Override
+	public CompletionStage<Void> interceptTestMethodAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		TimeoutDuration explicitTimeout = extensionContext.getStore(NAMESPACE).get(TESTABLE_METHOD_TIMEOUT_KEY,
+			TimeoutDuration.class);
+		return interceptAsync(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultTestMethodTimeout, Optional.ofNullable(explicitTimeout));
+	}
+
+	@Override
+	public CompletionStage<Void> interceptTestTemplateMethodAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		TimeoutDuration explicitTimeout = extensionContext.getStore(NAMESPACE).get(TESTABLE_METHOD_TIMEOUT_KEY,
+			TimeoutDuration.class);
+		return interceptAsync(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultTestTemplateMethodTimeout, Optional.ofNullable(explicitTimeout));
+	}
+
+	@Override
+	public <T extends @Nullable Object> CompletionStage<T> interceptTestFactoryMethodAsync(
+			AsyncInvocation<T> invocation, ReflectiveInvocationContext<Method> invocationContext,
+			ExtensionContext extensionContext) {
+		TimeoutDuration explicitTimeout = extensionContext.getStore(NAMESPACE).get(TESTABLE_METHOD_TIMEOUT_KEY,
+			TimeoutDuration.class);
+		return interceptAsyncResult(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultTestFactoryMethodTimeout, Optional.ofNullable(explicitTimeout));
+	}
+
+	@Override
+	public CompletionStage<Void> interceptAfterEachMethodAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return interceptAsync(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultAfterEachMethodTimeout,
+			readTimeoutFromAnnotation(Optional.of(invocationContext.getExecutable())));
+	}
+
+	@Override
+	public CompletionStage<Void> interceptAfterAllMethodAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return interceptAsync(invocation, invocationContext, extensionContext,
+			TimeoutConfiguration::getDefaultAfterAllMethodTimeout,
+			readTimeoutFromAnnotation(Optional.of(invocationContext.getExecutable())));
+	}
+
+	@SuppressWarnings("UnusedVariable")
+	private CompletionStage<Void> interceptAsync(AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext,
+			TimeoutProvider defaultTimeoutProvider, Optional<TimeoutDuration> explicitTimeout) {
+		return interceptAsync(invocation.proceedAsync(), extensionContext, defaultTimeoutProvider, explicitTimeout);
+	}
+
+	private <T extends @Nullable Object> CompletionStage<T> interceptAsync(CompletionStage<T> base,
+			ExtensionContext extensionContext, TimeoutProvider defaultTimeoutProvider,
+			Optional<TimeoutDuration> explicitTimeout) {
+		TimeoutConfiguration timeoutConfiguration = getGlobalTimeoutConfiguration(extensionContext);
+		if (timeoutConfiguration.isTimeoutDisabled()) {
+			return base;
+		}
+		TimeoutDuration timeout = explicitTimeout.orElseGet(
+			() -> getDefaultTimeout(defaultTimeoutProvider, timeoutConfiguration));
+		if (timeout == null) {
+			return base;
+		}
+		var threadMode = resolveTimeoutThreadMode(extensionContext, timeoutConfiguration);
+		return applyTimeout(base, timeout, threadMode);
+	}
+
+	@SuppressWarnings("UnusedVariable")
+	private <T extends @Nullable Object> CompletionStage<T> interceptAsyncResult(AsyncInvocation<T> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext,
+			TimeoutProvider defaultTimeoutProvider, Optional<TimeoutDuration> explicitTimeout) {
+		return interceptAsync(invocation.proceedAsync(), extensionContext, defaultTimeoutProvider, explicitTimeout);
+	}
+
+	/**
+	 * Apply {@code orTimeout} to the supplied stage. For {@link ThreadMode#SEPARATE_THREAD} the
+	 * thread completing the original stage is interrupted when the timeout fires; if the async work
+	 * is not interruptible (e.g. its stage is already complete), the timeout still fires and the
+	 * timed-out invocation is reported as failed, never as successful.
+	 */
+	@SuppressWarnings({ "FutureReturnValueIgnored", "UnusedVariable" })
+	private <T extends @Nullable Object> CompletionStage<T> applyTimeout(CompletionStage<T> base,
+			TimeoutDuration timeout, ThreadMode threadMode) {
+		long millis = timeout.toDuration().toMillis();
+		CompletableFuture<T> future = base.toCompletableFuture();
+		if (threadMode == ThreadMode.SEPARATE_THREAD) {
+			var completingThread = new java.util.concurrent.atomic.AtomicReference<Thread>();
+			future.whenComplete((___, throwable) -> completingThread.set(Thread.currentThread()));
+			CompletableFuture<T> raced = future.orTimeout(millis, TimeUnit.MILLISECONDS);
+			raced.whenComplete((value, throwable) -> {
+				if (containsTimeout(throwable)) {
+					// Best-effort interruption of the thread finishing the async
+					// work. If the body is not thread-bound (interruption lost),
+					// the timed-out invocation is still reported as failed; the
+					// late-arriving success never flips it to passed.
+					Thread thread = completingThread.get();
+					if (thread != null && !thread.equals(Thread.currentThread())) {
+						thread.interrupt();
+					}
+				}
+			});
+			return raced;
+		}
+		return future.orTimeout(millis, TimeUnit.MILLISECONDS);
+	}
+
+	private static boolean containsTimeout(Throwable throwable) {
+		for (Throwable current = throwable; current != null; current = current.getCause()) {
+			if (current instanceof TimeoutException) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void interceptLifecycleMethod(Invocation<@Nullable Void> invocation,

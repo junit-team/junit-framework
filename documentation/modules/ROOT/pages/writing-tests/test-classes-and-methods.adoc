@@ -2,9 +2,9 @@
 
 Test methods and lifecycle methods may be declared locally within the current test class,
 inherited from superclasses, or inherited from interfaces (see
-xref:writing-tests/test-interfaces-and-default-methods.adoc[]). In addition, test methods and
-lifecycle methods must not be `abstract` and must not return a value (except `@TestFactory`
-methods which are required to return a value).
+xref:writing-tests/test-interfaces-and-default-methods.adoc[]). In addition, they must not be
+`abstract` and must not return a value (except xref:#async-test-methods[asynchronous return types]
+and `@TestFactory` methods which are required to return a value).
 
 [NOTE]
 .Class and method visibility
@@ -105,3 +105,126 @@ to support skipping delays during tests and gain control over virtual time and d
 ----
 include::example$kotlin/example/KotlinCoroutinesRunTestDemo.kt[tags=user_guide]
 ----
+
+[[async-test-methods]]
+== Asynchronous Test Methods
+
+In Java, a `@Test` method may return a
+https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CompletionStage.html[`CompletionStage`]
+-- for example a
+https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CompletableFuture.html[`CompletableFuture`]
+or a
+https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Future.html[`Future`].
+
+The test is only considered finished once the returned asynchronously-completable signal completes:
+
+[source,java,indent=0]
+.A test method that completes asynchronously
+----
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
+import java.util.concurrent.CompletionStage;
+
+@Test
+CompletionStage<?> myTest() {
+    // ... start asynchronous work ...
+    return completedFuture("done");
+}
+----
+
+The payload of the returned signal is ignored; only its completion is awaited. If the signal
+completes exceptionally, the test is reported as failed with the corresponding throwable.
+
+NOTE: `@Timeout` -- and any other `InterceptingExecutableInvoker`-based interceptor -- applies to
+the _entire_ asynchronous work, not merely the synchronous call that returns the
+`CompletionStage`. See xref:writing-tests/timeouts.adoc[Testing Timeouts].
+
+As an alternative to returning a `CompletionStage`, you may write a `suspend` function as shown in
+xref:#kotlin-coroutines[Kotlin Coroutines], which JUnit internally executes via `runBlocking`.
+
+Lifecycle methods -- `@BeforeAll`, `@AfterAll`, `@BeforeEach`, and `@AfterEach` -- may likewise
+return a `CompletionStage` (or `CompletableFuture`/`Future`). Their completion is awaited before the
+next phase proceeds, so ordering is preserved: the test body only runs after the `@BeforeEach`
+stage completes, and the test result is only reported after the `@AfterEach` stage completes.
+
+[source,java,indent=0]
+.A lifecycle method that completes asynchronously
+----
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
+import java.util.concurrent.CompletionStage;
+
+@BeforeEach
+CompletionStage<?> setUp() {
+    // ... start asynchronous setup ...
+    return completedFuture(null);
+}
+----
+
+As with test methods, `@Timeout` on a lifecycle method applies to the entire asynchronous work, not
+merely the synchronous call that returns the `CompletionStage`.
+
+[#custom-async-return-types]
+=== Custom Asynchronous Return Types
+
+By default only the JRE types `CompletionStage` and `Future` are recognized as asynchronously-completable
+return types. If you use a custom promise-like type (for example a `MyPromise<T>`), you can teach the
+engine to recognize and await it by implementing the experimental {AsyncReturnValueHandler} `Extension`
+SPI:
+
+[source,java,indent=0]
+.A handler that maps a custom promise-like type to a CompletionStage
+----
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.concurrent.CompletionStage;
+
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
+
+class MyAsyncReturnValueHandler implements AsyncReturnValueHandler {
+
+    @Override
+    public boolean supports(Type genericReturnType, AnnotatedElement annotatedElement) {
+        if (genericReturnType instanceof ParameterizedType parameterizedType) {
+            return MyPromise.class.isAssignableFrom((Class<?>) parameterizedType.getRawType());
+        }
+        return MyPromise.class == genericReturnType;
+    }
+
+    @Override
+    public CompletionStage<?> toCompletionStage(Object returnedValue) {
+        return ((MyPromise<?>) returnedValue).asCompletionStage();
+    }
+}
+----
+
+A handler can be registered in one of two ways:
+
+* _Globally_ via the `ServiceLoader` mechanism (that is, listed under
+  `META-INF/services/org.junit.jupiter.api.extension.Extension`), in which case it applies to all
+  tests and is loaded during discovery as an attribute:auto-detected[] extension.
+* _Scoped_ to a test method or class via `@ExtendWith(MyAsyncReturnValueHandler.class)`, or through a
+  composed indirection annotation, for example:
+
+[source,java,indent=0]
+.A composed indirection annotation for a custom return type
+----
+@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@ExtendWith(MyAsyncReturnValueHandler.class)
+@interface MapMyPromise {
+}
+
+@Test
+@MapMyPromise
+MyPromise<?> myTest() {
+    return MyPromise.completed("done");
+}
+----
+
+NOTE: A handler must be recognizable _during discovery_ in order for the engine to classify a method
+with a custom return type as a test. This is the case for a globally (via the `ServiceLoader`)
+registered handler and for a handler registered on the test method or class via `{ExtendWith}`. A
+handler registered only through a `@RegisterExtension` field is not visible during discovery, so a
+test method whose return type is recognized only that way is rejected and not executed.

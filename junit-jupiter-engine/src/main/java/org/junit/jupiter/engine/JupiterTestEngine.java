@@ -23,6 +23,7 @@ import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.discovery.DiscoverySelectorResolver;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.execution.LauncherStoreFacade;
+import org.junit.jupiter.engine.extension.EarlyExtensionRegistry;
 import org.junit.jupiter.engine.support.JupiterThrowableCollectorFactory;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
@@ -71,7 +72,9 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 		JupiterConfiguration configuration = new CachingJupiterConfiguration(
 			new DefaultJupiterConfiguration(discoveryRequest.getConfigurationParameters(),
 				discoveryRequest.getOutputDirectoryCreator(), issueReporter));
-		JupiterEngineDescriptor engineDescriptor = new JupiterEngineDescriptor(uniqueId, configuration);
+		EarlyExtensionRegistry earlyExtensionRegistry = EarlyExtensionRegistry.create(configuration);
+		JupiterEngineDescriptor engineDescriptor = new JupiterEngineDescriptor(uniqueId, configuration,
+			earlyExtensionRegistry);
 		DiscoverySelectorResolver.resolveSelectors(discoveryRequest, engineDescriptor, issueReporter);
 		return engineDescriptor;
 	}
@@ -79,7 +82,35 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 	@Override
 	protected HierarchicalTestExecutorService createExecutorService(ExecutionRequest request) {
 		JupiterConfiguration configuration = getJupiterConfiguration(request);
-		if (configuration.isParallelExecutionEnabled()) {
+		boolean parallelEnabled = configuration.isParallelExecutionEnabled();
+		boolean parallelReactive = request.getConfigurationParameters() //
+				.getBoolean(Constants.PARALLEL_EXECUTION_REACTIVE_PROPERTY_NAME) //
+				.orElse(false);
+		boolean standaloneReactive = request.getConfigurationParameters() //
+				.getBoolean(Constants.JUPITER_EXECUTION_REACTIVE_PROPERTY_NAME) //
+				.orElse(false);
+
+		if (parallelEnabled && parallelReactive) {
+			// Path A: classic thread-based parallelism, run cooperatively. The
+			// full parallel-execution contract (@Execution, @ResourceLock,
+			// concurrency limits) is honored; the lane just avoids parking a
+			// thread while an asynchronous test body is awaited.
+			// Option A (a fully non-blocking lane from the top of the hierarchy
+			// down) would be preferable, but is intentionally deferred here to
+			// limit the impact of this first round.
+			var prefixedParameters = new PrefixedConfigurationParameters(request.getConfigurationParameters(),
+				Constants.PARALLEL_CONFIG_PREFIX);
+			return ParallelHierarchicalTestExecutorServiceFactory.createReactive(prefixedParameters);
+		}
+		if (standaloneReactive) {
+			// Path B: standalone cooperative execution lane, independent of the
+			// thread-based parallel feature. Async-returning test methods overlap
+			// cooperatively without a dedicated thread; synchronous methods keep
+			// running sequentially in discovery order. No thread configuration is
+			// required -- concurrency comes from the methods' returned contexts.
+			return ParallelHierarchicalTestExecutorServiceFactory.createReactive();
+		}
+		if (parallelEnabled) {
 			return ParallelHierarchicalTestExecutorServiceFactory.create(new PrefixedConfigurationParameters(
 				request.getConfigurationParameters(), Constants.PARALLEL_CONFIG_PREFIX));
 		}
