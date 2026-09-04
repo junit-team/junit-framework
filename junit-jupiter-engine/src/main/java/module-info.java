@@ -28,6 +28,7 @@ module org.junit.jupiter.engine {
 	requires org.opentest4j;
 
 	uses org.junit.jupiter.api.extension.Extension;
+	uses org.junit.jupiter.api.extension.TestMethodReturnValueHandler;
 
 	provides org.junit.platform.engine.TestEngine
 			with org.junit.jupiter.engine.JupiterTestEngine;
