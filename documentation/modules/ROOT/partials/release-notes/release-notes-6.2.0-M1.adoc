@@ -44,7 +44,7 @@ repository on GitHub.
 * Test Engine authors can use the
   `@org.junit.platform.configuration.api.ConfigurationParameter` annotation together
   with the `junit-platform-configuration-processor` to generate configuration
-  metadata files in the format of link:https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html[Spring Boots Configuration Metadata]
+  metadata files in the format of {SpringBootConfigurationMetadata}.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
