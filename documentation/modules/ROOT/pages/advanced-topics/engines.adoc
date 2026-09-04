@@ -147,3 +147,27 @@ be used as a `Predicate` or `Consumer`. Please refer to the implementations of t
 
 Moreover, xref:advanced-topics/testkit.adoc#engine-discovery[Engine Test Kit] provides a way to write tests for
 reported discovery issues.
+
+[[configuration-parameters]]
+== Configuration Parameters overview
+
+To assist IDEs with code completion test engines may generate machine-readable overview
+of configuration parameters by annotating their configuration parameters with
+`{PlatformConfigurationParameter}`.
+
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
+----
+include::example$java/example/ConfigurationParametersDemo.java[tags=user_guide]
+----
+--
+====
+
+Processing the annotations with `junit-platform-configuration-processor` will produce
+a `junit-platform-configuration-metadata.json` in the format of
+{SpringBootConfigurationMetadata}.
+

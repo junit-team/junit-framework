@@ -109,7 +109,10 @@ dependencies {
 	// in the generation of build provenance attestation.
 	mavenizedProjects.forEach { attestation(it) }
 
+	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+
 	testImplementation(projects.junitJupiterMigrationsupport)
+	testImplementation(projects.junitPlatformConfigurationApi)
 	testImplementation(projects.junitPlatformConsole)
 	testImplementation(projects.junitPlatformSuite)
 	testImplementation(projects.junitPlatformTestkit)
