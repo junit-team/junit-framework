@@ -20,6 +20,7 @@
 module org.junit.vintage.engine {
 
 	requires static org.apiguardian.api;
+	requires static org.junit.platform.configuration.api;
 	requires static transitive org.jspecify;
 
 	requires junit; // 4

@@ -12,6 +12,7 @@ package org.junit.jupiter.engine.config;
 
 import static java.util.function.Predicate.isEqual;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.jupiter.api.Constants.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
@@ -24,13 +25,15 @@ import static org.junit.jupiter.api.Constants.DEFAULT_TEST_CLASS_INSTANCE_CONSTR
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.INCLUDE_ALL_EXTENSIONS_PATTERN;
 import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
+import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
-import static org.junit.jupiter.api.io.CleanupMode.ALWAYS;
 import static org.junit.jupiter.engine.config.FilteringConfigurationParameterConverter.exclude;
 import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.FORK_JOIN_POOL;
 import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.WORKER_THREAD_POOL;
@@ -49,10 +52,13 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.api.extension.PreInterruptCallback;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 import org.junit.jupiter.api.io.CleanupMode;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
+import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.commons.util.Preconditions;
@@ -75,10 +81,10 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 		"junit.jupiter.params.arguments.conversion.locale.format" //
 	);
 
-	private static final ConfigurationParameterConverter<ExecutionMode> executionModeConverter = //
+	private static final EnumConfigurationParameterConverter<ExecutionMode> executionModeConverter = //
 		new EnumConfigurationParameterConverter<>(ExecutionMode.class, "parallel execution mode");
 
-	private static final ConfigurationParameterConverter<Lifecycle> lifecycleConverter = //
+	private static final EnumConfigurationParameterConverter<Lifecycle> lifecycleConverter = //
 		new EnumConfigurationParameterConverter<>(Lifecycle.class, "test instance lifecycle mode");
 
 	private static final ConfigurationParameterConverter<DisplayNameGenerator> displayNameGeneratorConverter = //
@@ -92,7 +98,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 		exclude(isEqual(ClassOrderer.Default.class.getName()),
 			new InstantiatingConfigurationParameterConverter<>(ClassOrderer.class, "class orderer"));
 
-	private static final ConfigurationParameterConverter<CleanupMode> cleanupModeConverter = //
+	private static final EnumConfigurationParameterConverter<CleanupMode> cleanupModeConverter = //
 		new EnumConfigurationParameterConverter<>(CleanupMode.class, "cleanup mode");
 
 	private static final InstantiatingConfigurationParameterConverter<TempDirFactory> tempDirFactoryConverter = //
@@ -101,7 +107,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	private static final InstantiatingConfigurationParameterConverter<TempDirDeletionStrategy> tempDirDeletionStrategyConverter = //
 		new InstantiatingConfigurationParameterConverter<>(TempDirDeletionStrategy.class, "temp dir deletion strategy");
 
-	private static final ConfigurationParameterConverter<ExtensionContextScope> extensionContextScopeConverter = //
+	private static final EnumConfigurationParameterConverter<ExtensionContextScope> extensionContextScopeConverter = //
 		new EnumConfigurationParameterConverter<>(ExtensionContextScope.class, "extension context scope");
 
 	private final ConfigurationParameters configurationParameters;
@@ -147,7 +153,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	private String getExtensionAutoDetectionIncludePattern() {
 		return configurationParameters.get(EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME) //
-				.orElse(ClassNamePatternFilterUtils.ALL_PATTERN);
+				.orElse(INCLUDE_ALL_EXTENSIONS_PATTERN);
 	}
 
 	private String getExtensionAutoDetectionExcludePattern() {
@@ -168,28 +174,32 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	@Override
 	public boolean isParallelExecutionEnabled() {
-		return configurationParameters.getBoolean(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME).orElse(false);
+		return configurationParameters.getBoolean(PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME) //
+				.orElse(PARALLEL_EXECUTION_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public boolean isClosingStoredAutoCloseablesEnabled() {
-		return configurationParameters.getBoolean(CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME).orElse(true);
+		return configurationParameters.getBoolean(CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME) //
+				.orElse(CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public boolean isExtensionAutoDetectionEnabled() {
-		return configurationParameters.getBoolean(EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME).orElse(false);
+		return configurationParameters.getBoolean(EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME) //
+				.orElse(EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public boolean isThreadDumpOnTimeoutEnabled() {
-		return configurationParameters.getBoolean(EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME).orElse(false);
+		return configurationParameters.getBoolean(EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME) //
+				.orElse(PreInterruptCallback.THREAD_DUMP_ENABLED_DEFAULT);
 	}
 
 	@Override
 	public ExecutionMode getDefaultExecutionMode() {
 		return executionModeConverter.getOrDefault(configurationParameters, DEFAULT_EXECUTION_MODE_PROPERTY_NAME,
-			ExecutionMode.SAME_THREAD);
+			Execution.DEFAULT_EXECUTION_MODE_DEFAULT);
 	}
 
 	@Override
@@ -201,7 +211,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	@Override
 	public Lifecycle getDefaultTestInstanceLifecycle() {
 		return lifecycleConverter.getOrDefault(configurationParameters, DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME,
-			Lifecycle.PER_METHOD);
+			Lifecycle.DEFAULT_LIFECYCLE_PATTERN_DEFAULT);
 	}
 
 	@Override
@@ -229,7 +239,7 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	@Override
 	public CleanupMode getDefaultTempDirCleanupMode() {
 		return cleanupModeConverter.getOrDefault(configurationParameters, DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME,
-			ALWAYS);
+			TempDir.DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT);
 	}
 
 	@Override
@@ -246,12 +256,11 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 		return () -> supplier.get().orElse(TempDirDeletionStrategy.Standard.INSTANCE);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public ExtensionContextScope getDefaultTestInstantiationExtensionContextScope() {
 		return extensionContextScopeConverter.getOrDefault(configurationParameters,
 			DEFAULT_TEST_CLASS_INSTANCE_CONSTRUCTION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME,
-			ExtensionContextScope.DEFAULT);
+			ExtensionContextScope.DEFAULT_SCOPE_DEFAULT);
 	}
 
 	@Override

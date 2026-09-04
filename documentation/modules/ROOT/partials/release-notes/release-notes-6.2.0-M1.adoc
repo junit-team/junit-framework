@@ -41,6 +41,10 @@ repository on GitHub.
 * `ConsoleLauncher` with `--details=verbose` now reports on each test atomically and
   indents its output correctly when tests are executed in parallel. Previously, the
   reported output from different tests could interleave.
+* Test Engine authors can use the
+  `@org.junit.platform.configuration.api.ConfigurationParameter` annotation together
+  with the `junit-platform-configuration-processor` to generate configuration
+  metadata files in the format of {SpringBootConfigurationMetadata}.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
