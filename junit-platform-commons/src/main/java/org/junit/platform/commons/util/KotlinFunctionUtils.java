@@ -41,7 +41,7 @@ class KotlinFunctionUtils {
 
 	static Class<?> getReturnType(Method method) {
 		var returnType = getJavaClass(getJvmErasure(getKotlinFunction(method).getReturnType()));
-		if (Unit.class.equals(returnType)) {
+		if (Unit.class.getName().equals(returnType.getName())) {
 			return void.class;
 		}
 		return returnType;
