@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,6 +46,20 @@ class OutputDirTests {
 				.hasParent(cwd.resolve("build")) //
 				.extracting(it -> it.getFileName().toString(), as(STRING)) //
 				.matches("junit-\\d+");
+	}
+
+	@Test
+	void getOutputDirExpandsEachPlaceholderIndividuallyAndPreservesLiteralText() {
+		var placeholder = LauncherConstants.OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER;
+		var customDir = cwd.resolve("build").resolve("junit-" + placeholder + "-" + placeholder + "-$literal");
+
+		var outputDir = OutputDir.create(Optional.of(customDir.toAbsolutePath().toString())).toPath();
+
+		var fileName = outputDir.getFileName().toString();
+		assertThat(outputDir).exists().hasParent(cwd.resolve("build"));
+		assertThat(fileName).matches("junit-\\d+-\\d+-\\$literal");
+		assertThat(Pattern.compile("\\d+").matcher(fileName).results().map(MatchResult::group)) //
+				.doesNotHaveDuplicates();
 	}
 
 	@Test
