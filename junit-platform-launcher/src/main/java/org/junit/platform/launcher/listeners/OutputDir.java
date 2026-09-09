@@ -80,12 +80,8 @@ public class OutputDir {
 	}
 
 	private static String expandPlaceholders(String customDir, SecureRandom random) {
-		String customPath = customDir;
-		while (customPath.contains(OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER)) {
-			customPath = OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER_PATTERN.matcher(customPath) //
-					.replaceFirst(String.valueOf(positiveLong(random)));
-		}
-		return customPath;
+		return OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER_PATTERN.matcher(customDir) //
+				.replaceAll(__ -> String.valueOf(positiveLong(random)));
 	}
 
 	private final Path path;
