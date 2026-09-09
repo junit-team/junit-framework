@@ -81,7 +81,7 @@ public class OutputDir {
 
 	private static String expandPlaceholders(String customDir, SecureRandom random) {
 		return OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER_PATTERN.matcher(customDir) //
-				.replaceAll(__ -> String.valueOf(positiveLong(random)));
+				.replaceAll(_ -> String.valueOf(positiveLong(random)));
 	}
 
 	private final Path path;
