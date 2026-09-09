@@ -47,15 +47,16 @@ public class OutputDir {
 		}
 	}
 
-	/**
-	 * Package private for testing purposes.
-	 */
-	static OutputDir createSafely(Optional<String> customDir, Supplier<Path> currentWorkingDir) throws IOException {
+	private static OutputDir createSafely(Optional<String> customDir, Supplier<Path> currentWorkingDir)
+			throws IOException {
 		return createSafely(customDir, currentWorkingDir, new SecureRandom());
 	}
 
-	private static OutputDir createSafely(Optional<String> customDir, Supplier<Path> currentWorkingDir,
-			SecureRandom random) throws IOException {
+	/**
+	 * Package private for testing purposes.
+	 */
+	static OutputDir createSafely(Optional<String> customDir, Supplier<Path> currentWorkingDir, SecureRandom random)
+			throws IOException {
 		Path cwd = currentWorkingDir.get().toAbsolutePath();
 		Path outputDir;
 
