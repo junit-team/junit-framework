@@ -19,7 +19,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
@@ -98,13 +97,24 @@ class AssertLinesMatch {
 
 			// simple case: both list are equally sized, compare them line-by-line
 			if (expectedSize == actualSize) {
-				if (IntStream.range(0, expectedSize).allMatch(i -> matches(expectedLines.get(i), actualLines.get(i)))) {
+				if (matchesLineByLine()) {
 					return;
 				}
 				// else fall-through to "with fast-forward" matching
 			}
 
 			assertLinesMatchWithFastForward();
+		}
+
+		private boolean matchesLineByLine() {
+			var expectedIterator = expectedLines.iterator();
+			var actualIterator = actualLines.iterator();
+			while (expectedIterator.hasNext()) {
+				if (!matches(expectedIterator.next(), actualIterator.next())) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		void assertLinesMatchWithFastForward() {
