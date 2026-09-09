@@ -109,10 +109,10 @@ dependencies {
 	// in the generation of build provenance attestation.
 	mavenizedProjects.forEach { attestation(it) }
 
-	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+	testAnnotationProcessor(projects.junitPlatformConfigurationProcessor)
 
+	testCompileOnly(projects.junitPlatformConfigurationApi)
 	testImplementation(projects.junitJupiterMigrationsupport)
-	testImplementation(projects.junitPlatformConfigurationApi)
 	testImplementation(projects.junitPlatformConsole)
 	testImplementation(projects.junitPlatformSuite)
 	testImplementation(projects.junitPlatformTestkit)
@@ -228,6 +228,10 @@ tasks {
 
 	named<JavaCompile>(tools.compileJavaTaskName) {
 		options.release.set(25)
+	}
+
+	compileTestJava {
+		options.compilerArgs.add("-Xlint:-module,-processing") // -module: due to qualified exports, -processing: not all annotations need to be processed
 	}
 
 	named<Checkstyle>("checkstyleTools") {

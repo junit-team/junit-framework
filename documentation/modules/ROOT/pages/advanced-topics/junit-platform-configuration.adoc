@@ -1,0 +1,27 @@
+= Documenting Configuration Parameters
+
+Authors of test engines and JUnit Jupiter extensions may generate a machine-readable
+overview of configuration parameters by annotating their configuration parameters
+with `{PlatformConfigurationParameter}` from the `junit-platform-configuration-api`
+artifact.
+
+Processing the annotations with `junit-platform-configuration-processor` will produce a
+`junit-platform-configuration-metadata.json` file in the format of
+{SpringBootConfigurationMetadata}. This file can then be used to generate documentation
+or provide code-completion by IDEs.
+
+.A small example
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
+----
+include::example$java/example/ConfigurationParametersDemo.java[tags=user_guide]
+----
+--
+====
+
+The first paragraph from the doc string will be used to describe the property. If the
+first paragraph contains Javadoc tags these will be sensibly replaced.
