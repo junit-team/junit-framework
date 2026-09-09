@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 import static org.junit.jupiter.api.timeout.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
 
@@ -71,10 +72,19 @@ class AssertTimeoutPreemptively {
 			@Nullable Supplier<@Nullable String> messageSupplier, @Nullable Throwable cause, @Nullable Thread thread) {
 		return assertionFailure() //
 				.message(messageSupplier) //
-				.reason("execution timed out after " + timeout.toMillis() + " ms") //
+				.reason("execution timed out after %s".formatted(formatDuration(timeout))) //
 				.cause(cause) //
 				.trimStacktrace(Assertions.class) //
 				.build();
+	}
+
+	private static String formatDuration(Duration duration) {
+		long milliseconds = duration.toMillis();
+		long nanoFraction = duration.toNanos() - MILLISECONDS.toNanos(milliseconds);
+		if (nanoFraction == 0) {
+			return "%d ms".formatted(milliseconds);
+		}
+		return "%d.%06d ms".formatted(milliseconds, nanoFraction);
 	}
 
 	private AssertTimeoutPreemptively() {

@@ -157,6 +157,18 @@ class AssertTimeoutPreemptivelyAssertionsTests {
 	}
 
 	@Test
+	void assertNanosecondTimeoutForSupplier() {
+		AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> {
+			assertTimeoutPreemptively(Duration.ofNanos(1), () -> {
+				Thread.sleep(1000);
+				return "Tempus Fugit";
+			});
+		});
+
+		assertMessageEquals(error, "execution timed out after 0.000001 ms");
+	}
+
+	@Test
 	void assertTimeoutPreemptivelyWithMessageForSupplierThatCompletesAfterTheTimeout() {
 		AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> {
 			assertTimeoutPreemptively(PREEMPTIVE_TIMEOUT, () -> {

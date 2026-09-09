@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.engine.extension;
 
+import static org.junit.jupiter.api.timeout.TimeoutUtils.isRepresentableInNanos;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -32,6 +34,9 @@ record TimeoutDuration(long value, TimeUnit unit) {
 		Preconditions.condition(value > 0, () -> "timeout duration must be a positive number: " + value);
 		this.value = value;
 		this.unit = Preconditions.notNull(unit, "timeout unit must not be null");
+		Preconditions.condition(isRepresentableInNanos(toDuration()), //
+			() -> "timeout duration must be less than approximately 292 years (2^63 nanoseconds): %s" //
+					.formatted(toString()));
 	}
 
 	@Override
