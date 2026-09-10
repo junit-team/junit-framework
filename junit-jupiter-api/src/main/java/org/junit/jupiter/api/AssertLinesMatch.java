@@ -95,18 +95,20 @@ class AssertLinesMatch {
 				fail("expected %d lines, but only got %d", expectedSize, actualSize);
 			}
 
-			// simple case: both list are equally sized, compare them line-by-line
-			if (expectedSize == actualSize) {
-				if (matchesLineByLine()) {
-					return;
-				}
-				// else fall-through to "with fast-forward" matching
+			// simple case: if both lists are equally sized, compare them line-by-line
+			if (matchesLineByLine()) {
+				return;
 			}
+			// else fall-through to "with fast-forward" matching
 
 			assertLinesMatchWithFastForward();
 		}
 
 		private boolean matchesLineByLine() {
+			// only equally sized lists can match line-by-line
+			if (expectedLines.size() != actualLines.size()) {
+				return false;
+			}
 			var expectedIterator = expectedLines.iterator();
 			var actualIterator = actualLines.iterator();
 			while (expectedIterator.hasNext()) {
