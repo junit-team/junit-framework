@@ -36,6 +36,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.api.extension.ClassTemplateInvocationContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor;
@@ -46,6 +47,7 @@ import org.junit.jupiter.engine.descriptor.Filterable;
 import org.junit.jupiter.engine.descriptor.NestedClassTestDescriptor;
 import org.junit.jupiter.engine.descriptor.TestClassAware;
 import org.junit.jupiter.engine.discovery.predicates.TestClassPredicates;
+import org.junit.jupiter.engine.extension.EarlyExtensionRegistry;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.commons.util.ReflectionUtils.CycleErrorHandling;
@@ -72,13 +74,15 @@ class ClassSelectorResolver implements SelectorResolver {
 	private final JupiterConfiguration configuration;
 	private final TestClassPredicates predicates;
 	private final DiscoveryIssueReporter issueReporter;
+	private final List<AsyncReturnValueHandler> asyncReturnValueHandlers;
 
 	ClassSelectorResolver(Predicate<String> classNameFilter, JupiterConfiguration configuration,
-			DiscoveryIssueReporter issueReporter) {
+			EarlyExtensionRegistry earlyExtensionRegistry, DiscoveryIssueReporter issueReporter) {
 		this.classNameFilter = classNameFilter;
 		this.configuration = configuration;
-		this.predicates = new TestClassPredicates(issueReporter);
+		this.predicates = new TestClassPredicates(issueReporter, earlyExtensionRegistry);
 		this.issueReporter = issueReporter;
+		this.asyncReturnValueHandlers = earlyExtensionRegistry.getAsyncReturnValueHandlers();
 	}
 
 	@Override
@@ -239,7 +243,7 @@ class ClassSelectorResolver implements SelectorResolver {
 	private ClassTestDescriptor newClassTestDescriptor(TestDescriptor parent, Class<?> testClass) {
 		return new ClassTestDescriptor(
 			parent.getUniqueId().append(ClassTestDescriptor.SEGMENT_TYPE, testClass.getName()), testClass,
-			configuration);
+			configuration, asyncReturnValueHandlers);
 	}
 
 	private ClassBasedTestDescriptor newMemberClassTestDescriptor(TestDescriptor parent, Class<?> testClass) {
@@ -257,7 +261,8 @@ class ClassSelectorResolver implements SelectorResolver {
 	private NestedClassTestDescriptor newNestedClassTestDescriptor(TestDescriptor parent, Class<?> testClass) {
 		UniqueId uniqueId = parent.getUniqueId().append(NestedClassTestDescriptor.SEGMENT_TYPE,
 			testClass.getSimpleName());
-		return new NestedClassTestDescriptor(uniqueId, testClass, () -> getEnclosingTestClasses(parent), configuration);
+		return new NestedClassTestDescriptor(uniqueId, testClass, () -> getEnclosingTestClasses(parent), configuration,
+			asyncReturnValueHandlers);
 	}
 
 	private ClassTemplateTestDescriptor newClassTemplateTestDescriptor(TestDescriptor parent, String segmentType,

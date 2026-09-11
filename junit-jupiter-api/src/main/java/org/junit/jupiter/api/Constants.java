@@ -192,6 +192,35 @@ public final class Constants {
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
 
 	/**
+	 * Property name used to enable the reactive (cooperative) execution lane:
+	 * {@value}
+	 *
+	 * <p>When enabled alongside {@link #PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME},
+	 * the engine schedules nodes cooperatively via completion stages instead of
+	 * one thread per in-flight node. By default this is disabled.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	public static final String PARALLEL_EXECUTION_REACTIVE_PROPERTY_NAME = "junit.jupiter.execution.parallel.reactive.enabled";
+
+	/**
+	 * Property name used to enable the standalone cooperative execution lane:
+	 * {@value}
+	 *
+	 * <p>Unlike {@link #PARALLEL_EXECUTION_REACTIVE_PROPERTY_NAME}, this does not
+	 * require {@link #PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME} to be enabled: it
+	 * activates the cooperative (reactive) lane so that test methods returning an
+	 * asynchronous completion signal overlap without a dedicated thread, while
+	 * synchronous test methods keep running sequentially in discovery order. By
+	 * default this is disabled.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	public static final String JUPITER_EXECUTION_REACTIVE_PROPERTY_NAME = "junit.jupiter.execution.reactive.enabled";
+
+	/**
 	 * Property name used to set the default test execution mode: {@value}
 	 *
 	 * @see Execution#DEFAULT_EXECUTION_MODE_PROPERTY_NAME

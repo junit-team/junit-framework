@@ -12,8 +12,11 @@ package org.junit.jupiter.engine.discovery.predicates;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
 
+import java.util.List;
+
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 
 /**
@@ -25,7 +28,13 @@ import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 public class IsTestMethod extends IsTestableMethod {
 
 	public IsTestMethod(DiscoveryIssueReporter issueReporter) {
-		super(Test.class, IsTestableMethod::hasVoidReturnType, issueReporter);
+		this(issueReporter, List.of());
+	}
+
+	public IsTestMethod(DiscoveryIssueReporter issueReporter, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		super(Test.class,
+			(annotationType, reporter) -> hasVoidReturnType(annotationType, reporter, asyncReturnValueHandlers),
+			issueReporter);
 	}
 
 }

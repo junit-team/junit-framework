@@ -19,6 +19,10 @@ import static org.junit.jupiter.engine.support.JupiterThrowableCollectorFactory.
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -26,6 +30,8 @@ import org.apiguardian.api.API;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.AsyncInvocationInterceptor;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -37,12 +43,16 @@ import org.junit.jupiter.api.extension.TestInstances;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.AfterEachMethodAdapter;
+import org.junit.jupiter.engine.execution.AsyncInterceptingExecutableInvoker;
+import org.junit.jupiter.engine.execution.AsyncInterceptingExecutableInvoker.AsyncVoidMethodInterceptorCall;
 import org.junit.jupiter.engine.execution.BeforeEachMethodAdapter;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall.VoidMethodInterceptorCall;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
+import org.junit.jupiter.engine.support.AsyncReturnTypeSupport;
+import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
@@ -72,13 +82,17 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 
 	public static final String SEGMENT_TYPE = "method";
 	private static final InterceptingExecutableInvoker executableInvoker = new InterceptingExecutableInvoker();
+	private static final AsyncInterceptingExecutableInvoker asyncExecutableInvoker = new AsyncInterceptingExecutableInvoker();
 	private static final VoidMethodInterceptorCall defaultInterceptorCall = InvocationInterceptor::interceptTestMethod;
+	private static final AsyncVoidMethodInterceptorCall defaultAsyncInterceptorCall = AsyncInvocationInterceptor::interceptTestMethodAsync;
 	private final VoidMethodInterceptorCall interceptorCall;
+	private final AsyncVoidMethodInterceptorCall asyncInterceptorCall;
 
 	public TestMethodTestDescriptor(UniqueId uniqueId, Class<?> testClass, Method testMethod,
 			Supplier<List<Class<?>>> enclosingInstanceTypes, JupiterConfiguration configuration) {
 		super(uniqueId, testClass, testMethod, enclosingInstanceTypes, configuration);
 		this.interceptorCall = defaultInterceptorCall;
+		this.asyncInterceptorCall = defaultAsyncInterceptorCall;
 	}
 
 	TestMethodTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
@@ -88,8 +102,15 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 
 	TestMethodTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
 			JupiterConfiguration configuration, VoidMethodInterceptorCall interceptorCall) {
+		this(uniqueId, displayName, testClass, testMethod, configuration, interceptorCall, defaultAsyncInterceptorCall);
+	}
+
+	TestMethodTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
+			JupiterConfiguration configuration, VoidMethodInterceptorCall interceptorCall,
+			AsyncVoidMethodInterceptorCall asyncInterceptorCall) {
 		super(uniqueId, displayName, testClass, testMethod, configuration);
 		this.interceptorCall = interceptorCall;
+		this.asyncInterceptorCall = asyncInterceptorCall;
 	}
 
 	// --- JupiterTestDescriptor -----------------------------------------------
@@ -167,6 +188,88 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 	}
 
 	@Override
+	public CompletionStage<JupiterEngineExecutionContext> executeAsync(JupiterEngineExecutionContext context,
+			DynamicTestExecutor dynamicTestExecutor) {
+		if (!isSupportedAsyncReturnType(context.getExtensionRegistry())) {
+			// Preserve the exact blocking behavior for test methods that do not
+			// return an asynchronous completion signal.
+			return CompletableFuture.completedFuture(execute(context, dynamicTestExecutor));
+		}
+		return executeAsyncTest(context);
+	}
+
+	private boolean isSupportedAsyncReturnType(ExtensionRegistry extensionRegistry) {
+		return AsyncReturnTypeSupport.isSupported(getTestMethod(),
+			extensionRegistry.getExtensions(AsyncReturnValueHandler.class));
+	}
+
+	/**
+	 * Execute a test method that returns an asynchronous completion signal
+	 * without blocking a thread while the asynchronous work is pending. The
+	 * {@code before} lifecycle and callback phases still run synchronously
+	 * (collecting failures into the shared collector); the test method's async
+	 * body and the {@code after} phases are composed into the returned stage.
+	 */
+	private CompletionStage<JupiterEngineExecutionContext> executeAsyncTest(JupiterEngineExecutionContext context) {
+		ThrowableCollector throwableCollector = context.getThrowableCollector();
+
+		invokeBeforeEachCallbacks(context);
+
+		CompletionStage<Void> testStage = CompletableFuture.completedFuture(null);
+		if (throwableCollector.isEmpty()) {
+			invokeBeforeEachMethods(context);
+			if (throwableCollector.isEmpty()) {
+				invokeBeforeTestExecutionCallbacks(context);
+				if (throwableCollector.isEmpty()) {
+					testStage = invokeTestMethodAsync(context);
+				}
+			}
+		}
+
+		return testStage //
+				.handle((___, throwable) -> {
+					if (throwable != null && throwableCollector.isEmpty()) {
+						throwableCollector.execute(() -> ExceptionUtils.throwAsUncheckedException(unwrap(throwable)));
+					}
+					invokeAfterTestExecutionCallbacks(context);
+					invokeAfterEachMethods(context);
+					return null;
+				}) //
+				.thenApply(__ -> {
+					invokeAfterEachCallbacks(context);
+					return context;
+				});
+	}
+
+	private CompletionStage<Void> invokeTestMethodAsync(JupiterEngineExecutionContext context) {
+		ExtensionContext extensionContext = context.getExtensionContext();
+		Object instance = extensionContext.getRequiredTestInstance();
+		Method testMethod = getTestMethod();
+		final ExtensionRegistry registry = context.getExtensionRegistry();
+
+		return asyncExecutableInvoker.interceptMethodAsync(testMethod, instance, extensionContext, registry,
+			this.asyncInterceptorCall) //
+				.<Void> handle((___, throwable) -> {
+					if (throwable == null) {
+						return null;
+					}
+					Throwable root = unwrap(throwable);
+					UnrecoverableExceptions.rethrowIfUnrecoverable(root);
+					invokeTestExecutionExceptionHandlers(registry, extensionContext, root);
+					return null;
+				});
+	}
+
+	private static Throwable unwrap(Throwable throwable) {
+		Throwable current = throwable;
+		while ((current instanceof CompletionException || current instanceof ExecutionException)
+				&& current.getCause() != null) {
+			current = current.getCause();
+		}
+		return current;
+	}
+
+	@Override
 	public void cleanUp(JupiterEngineExecutionContext context) throws Exception {
 		if (isPerMethodLifecycle(context) && context.getExtensionContext().getTestInstance().isPresent()) {
 			invokeTestInstancePreDestroyCallbacks(context);
@@ -216,14 +319,24 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 			try {
 				Method testMethod = getTestMethod();
 				Object instance = extensionContext.getRequiredTestInstance();
-				executableInvoker.invokeVoid(testMethod, instance, extensionContext, context.getExtensionRegistry(),
-					interceptorCall);
+				invokeTestMethodInternally(context, extensionContext, testMethod, instance);
 			}
 			catch (Throwable throwable) {
 				UnrecoverableExceptions.rethrowIfUnrecoverable(throwable);
 				invokeTestExecutionExceptionHandlers(context.getExtensionRegistry(), extensionContext, throwable);
 			}
 		});
+	}
+
+	private void invokeTestMethodInternally(JupiterEngineExecutionContext context, ExtensionContext extensionContext,
+			Method testMethod, Object instance) {
+		// Invoke the test method through the usual interceptor chain. If the
+		// method returns an asynchronous completion signal, its completion is
+		// awaited within the chain (so interceptors such as @Timeout cover the
+		// asynchronous work), and an exceptional completion is recorded as the
+		// test's failure.
+		executableInvoker.invokeAndAwait(testMethod, instance, extensionContext, context.getExtensionRegistry(),
+			interceptorCall);
 	}
 
 	private void invokeTestExecutionExceptionHandlers(ExtensionRegistry registry, ExtensionContext context,

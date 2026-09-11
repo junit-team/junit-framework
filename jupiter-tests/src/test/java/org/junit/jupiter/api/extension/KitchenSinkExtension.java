@@ -10,9 +10,12 @@
 
 package org.junit.jupiter.api.extension;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
@@ -66,7 +69,11 @@ public class KitchenSinkExtension implements
 	// Miscellaneous
 	TestWatcher,
 	InvocationInterceptor,
-	PreInterruptCallback
+	AsyncInvocationInterceptor,
+	PreInterruptCallback,
+
+	// Custom asynchronous return types
+	AsyncReturnValueHandler
 
 // @formatter:on
 {
@@ -280,11 +287,95 @@ public class KitchenSinkExtension implements
 		InvocationInterceptor.super.interceptAfterAllMethod(invocation, invocationContext, extensionContext);
 	}
 
+	// --- Asynchronous invocation interception
+
+	@Override
+	public <T> CompletionStage<T> interceptTestClassConstructorAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<T> invocation,
+			ReflectiveInvocationContext<Constructor<T>> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptTestClassConstructorAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptBeforeAllMethodAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptBeforeAllMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptBeforeEachMethodAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptBeforeEachMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptTestMethodAsync(AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptTestMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public <T extends @Nullable Object> CompletionStage<T> interceptTestFactoryMethodAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<T> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptTestFactoryMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptTestTemplateMethodAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptTestTemplateMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptDynamicTestAsync(AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			DynamicTestInvocationContext invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptDynamicTestAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptAfterEachMethodAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptAfterEachMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
+	@Override
+	public CompletionStage<Void> interceptAfterAllMethodAsync(
+			AsyncInvocationInterceptor.AsyncInvocation<Void> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) {
+		return AsyncInvocationInterceptor.super.interceptAfterAllMethodAsync(invocation, invocationContext,
+			extensionContext);
+	}
+
 	// --- PreInterruptCallback ------------------------------------------------
 
 	@Override
 	public void beforeThreadInterrupt(PreInterruptContext preInterruptContext, ExtensionContext extensionContext)
 			throws Exception {
 
+	}
+
+	// --- AsyncReturnValueHandler ---------------------------------------------
+
+	@Override
+	public boolean supports(Type genericReturnType, @Nullable AnnotatedElement annotatedElement) {
+		return false;
+	}
+
+	@Override
+	public CompletionStage<?> toCompletionStage(Object returnedValue) {
+		throw new UnsupportedOperationException();
 	}
 }

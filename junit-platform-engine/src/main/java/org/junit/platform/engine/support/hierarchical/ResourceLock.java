@@ -15,8 +15,10 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 
 import org.apiguardian.api.API;
+import org.junit.platform.commons.JUnitException;
 
 /**
  * A lock for a one or more resources.
@@ -47,6 +49,36 @@ public interface ResourceLock extends AutoCloseable {
 	 * while waiting to acquire this lock
 	 */
 	ResourceLock acquire() throws InterruptedException;
+
+	/**
+	 * Asynchronous variant of {@link #acquire()}.
+	 *
+	 * <p>The returned {@link CompletionStage} is used purely as a promise that
+	 * this lock has been acquired; its payload is intentionally ignored. Callers
+	 * MUST {@linkplain #release() release} the lock exactly once once the stage
+	 * completes.
+	 *
+	 * <p>The default implementation bridges the (blocking) {@link #acquire()}
+	 * method into the reactive world. Implementations with a non-blocking
+	 * acquisition strategy (e.g. a {@link ReactiveResourceGate}) are encouraged
+	 * to override this method so that no thread is parked while waiting.
+	 *
+	 * @return a completion stage signaling that this lock has been acquired;
+	 * never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> acquireAsync() {
+		return AsyncTestExecution.bridge(() -> {
+			try {
+				acquire();
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new JUnitException("Interrupted while acquiring resource lock", e);
+			}
+		});
+	}
 
 	/**
 	 * Release this resource lock.

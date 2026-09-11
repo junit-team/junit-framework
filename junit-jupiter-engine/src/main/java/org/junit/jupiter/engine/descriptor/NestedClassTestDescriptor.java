@@ -24,6 +24,7 @@ import java.util.function.UnaryOperator;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.api.extension.TestInstances;
 import org.junit.jupiter.api.parallel.ResourceLocksProvider;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -51,13 +52,20 @@ public class NestedClassTestDescriptor extends ClassBasedTestDescriptor {
 
 	public NestedClassTestDescriptor(UniqueId uniqueId, Class<?> testClass,
 			Supplier<List<Class<?>>> enclosingInstanceTypes, JupiterConfiguration configuration) {
+		this(uniqueId, testClass, enclosingInstanceTypes, configuration, List.of());
+	}
+
+	public NestedClassTestDescriptor(UniqueId uniqueId, Class<?> testClass,
+			Supplier<List<Class<?>>> enclosingInstanceTypes, JupiterConfiguration configuration,
+			List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 		super(uniqueId, testClass,
-			createDisplayNameSupplierForNestedClass(enclosingInstanceTypes, testClass, configuration), configuration);
+			createDisplayNameSupplierForNestedClass(enclosingInstanceTypes, testClass, configuration), configuration,
+			asyncReturnValueHandlers);
 	}
 
 	private NestedClassTestDescriptor(UniqueId uniqueId, Class<?> testClass, String displayName,
-			JupiterConfiguration configuration) {
-		super(uniqueId, testClass, displayName, configuration);
+			JupiterConfiguration configuration, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		super(uniqueId, testClass, displayName, configuration, asyncReturnValueHandlers);
 	}
 
 	// --- JupiterTestDescriptor -----------------------------------------------
@@ -65,7 +73,7 @@ public class NestedClassTestDescriptor extends ClassBasedTestDescriptor {
 	@Override
 	protected NestedClassTestDescriptor withUniqueId(UnaryOperator<UniqueId> uniqueIdTransformer) {
 		return new NestedClassTestDescriptor(uniqueIdTransformer.apply(getUniqueId()), getTestClass(), getDisplayName(),
-			configuration);
+			configuration, this.asyncReturnValueHandlers);
 	}
 
 	// --- TestDescriptor ------------------------------------------------------

@@ -192,6 +192,7 @@ asciidoc:
     BeforeAllCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/BeforeAllCallback.html[BeforeAllCallback]'
     BeforeClassTemplateInvocationCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/BeforeClassTemplateInvocationCallback.html[BeforeClassTemplateInvocationCallback]'
     BeforeEachCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/BeforeEachCallback.html[BeforeEachCallback]'
+    AsyncReturnValueHandler: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/AsyncReturnValueHandler.html[AsyncReturnValueHandler]'
     BeforeTestExecutionCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/BeforeTestExecutionCallback.html[BeforeTestExecutionCallback]'
     ClassTemplateInvocationContext: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/ClassTemplateInvocationContext.html[ClassTemplateInvocationContext]'
     ClassTemplateInvocationContextProvider: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/ClassTemplateInvocationContextProvider.html[ClassTemplateInvocationContextProvider]'

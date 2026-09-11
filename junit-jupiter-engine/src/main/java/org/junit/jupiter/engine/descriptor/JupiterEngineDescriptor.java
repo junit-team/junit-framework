@@ -17,6 +17,7 @@ import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
+import org.junit.jupiter.engine.extension.EarlyExtensionRegistry;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.UniqueId;
@@ -31,14 +32,30 @@ public class JupiterEngineDescriptor extends EngineDescriptor implements Node<Ju
 
 	public static final String ENGINE_ID = "junit-jupiter";
 	private final JupiterConfiguration configuration;
+	private final EarlyExtensionRegistry earlyExtensionRegistry;
 
 	public JupiterEngineDescriptor(UniqueId uniqueId, JupiterConfiguration configuration) {
+		this(uniqueId, configuration, EarlyExtensionRegistry.empty());
+	}
+
+	public JupiterEngineDescriptor(UniqueId uniqueId, JupiterConfiguration configuration,
+			EarlyExtensionRegistry earlyExtensionRegistry) {
 		super(uniqueId, "JUnit Jupiter");
 		this.configuration = configuration;
+		this.earlyExtensionRegistry = earlyExtensionRegistry;
 	}
 
 	public JupiterConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	/**
+	 * Returns the {@link EarlyExtensionRegistry} created during discovery.
+	 *
+	 * @return the early extension registry; never {@code null}
+	 */
+	public EarlyExtensionRegistry getEarlyExtensionRegistry() {
+		return earlyExtensionRegistry;
 	}
 
 	@Override

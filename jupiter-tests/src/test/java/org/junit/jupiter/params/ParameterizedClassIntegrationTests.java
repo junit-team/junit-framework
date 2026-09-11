@@ -682,7 +682,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 					.isEqualTo(Severity.ERROR);
 			assertThat(issue.message()) //
 					.isEqualTo(
-						"@BeforeParameterizedClassInvocation method 'static int %s.beforeParameterizedClassInvocation()' must not return a value.",
+						"@BeforeParameterizedClassInvocation method 'static int %s.beforeParameterizedClassInvocation()' must return void or an async-completable return type (CompletionStage, CompletableFuture, or Future).",
 						NonVoidLifecycleMethodTestCase.class.getName());
 			assertThat(issue.source()) //
 					.containsInstanceOf(org.junit.platform.engine.support.descriptor.MethodSource.class);

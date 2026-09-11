@@ -30,9 +30,11 @@ import java.util.function.Supplier;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.api.parallel.ResourceLocksProvider;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
+import org.junit.jupiter.engine.support.AsyncReturnTypeSupport;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -74,6 +76,21 @@ public abstract class MethodBasedTestDescriptor extends JupiterTestDescriptor
 
 	public final Method getTestMethod() {
 		return this.methodInfo.testMethod;
+	}
+
+	// --- Node ----------------------------------------------------------------
+
+	@Override
+	protected ExecutionMode getDefaultExecutionMode() {
+		if (AsyncReturnTypeSupport.isFullySupported(getTestMethod().getReturnType())) {
+			// If a test method returns an asynchronously-completable signal, it
+			// is implicitly eligible to run concurrently with other tests: the
+			// cooperative (reactive) execution lane can overlap it with other
+			// async tests without parking a dedicated thread. An explicit
+			// @Execution mode (on the method or an ancestor) always wins.
+			return ExecutionMode.CONCURRENT;
+		}
+		return super.getDefaultExecutionMode();
 	}
 
 	// --- TestDescriptor ------------------------------------------------------

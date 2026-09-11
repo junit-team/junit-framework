@@ -35,8 +35,10 @@ import org.apiguardian.api.API;
  *
  * <h2>Method Signatures</h2>
  *
- * <p>{@code @AfterAll} methods must have a {@code void} return type and must
- * be {@code static} unless the test class is annotated with
+ * <p>{@code @AfterAll} methods must have a {@code void} return type, or return
+ * a {@link java.util.concurrent.CompletionStage}/{@link java.util.concurrent.CompletableFuture}/
+ * {@link java.util.concurrent.Future} whose completion is awaited before the test class is
+ * reported as finished, and must be {@code static} unless the test class is annotated with
  * {@link TestInstance @TestInstance(Lifecycle.PER_CLASS)}. In addition,
  * {@code @AfterAll} methods may optionally declare parameters to be resolved by
  * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers}.
