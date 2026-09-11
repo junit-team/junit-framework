@@ -14,6 +14,8 @@ import static org.junit.jupiter.engine.support.MethodReflectionUtils.getReturnTy
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.support.ModifierSupport.isNotAbstract;
 
+import org.junit.jupiter.engine.support.MethodReflectionUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.function.BiFunction;
@@ -65,7 +67,9 @@ abstract class IsTestableMethod implements Predicate<Method> {
 
 	protected static Condition<Method> hasVoidReturnType(Class<? extends Annotation> annotationType,
 			DiscoveryIssueReporter issueReporter) {
-		return issueReporter.createReportingCondition(method -> getReturnType(method) == void.class,
+		return issueReporter.createReportingCondition(
+			method -> getReturnType(method) == void.class
+					|| MethodReflectionUtils.hasReturnValueHandler(method),
 			method -> createIssue(annotationType, method, "must not return a value"));
 	}
 

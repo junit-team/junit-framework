@@ -1,0 +1,71 @@
+= Test Method Return Value Handling
+
+`{TestMethodReturnValueHandler}` defines an extension point that allows `@Test` methods
+to return non-void types. By default, JUnit Jupiter requires `@Test` methods to return
+`void`. A registered `TestMethodReturnValueHandler` relaxes this requirement for return
+types it supports.
+
+[[registration]]
+== Registration
+
+Implementations are discovered via Java's `{ServiceLoader}` mechanism and must be
+registered in a file named
+`META-INF/services/org.junit.jupiter.api.extension.TestMethodReturnValueHandler` on the
+classpath.
+
+[[how-it-works]]
+== How It Works
+
+A `TestMethodReturnValueHandler` has two responsibilities:
+
+1. **Declare supported return types** via `supportsReturnType(Class<?>)` — during
+   discovery, JUnit calls this method to decide whether a non-void `@Test` method should
+   be accepted.
+
+2. **Execute the test method** via `execute(Invocation<Object>, ExtensionContext)` — at
+   execution time, the handler receives an `{InvocationInterceptor}.Invocation` that wraps
+   the test method call. The handler must call `invocation.proceed()` to invoke the test
+   and obtain the return value. It is then responsible for processing the result — for
+   example, subscribing to a reactive type and awaiting completion.
+
+Because the handler controls _when_ `proceed()` is called, it can set up a custom
+execution context beforehand — for example, running the test on a specific thread or
+executor.
+
+[[example]]
+== Example
+
+The following handler adds support for `@Test` methods that return `CompletableFuture`:
+
+[source,java,indent=0]
+----
+public class CompletableFutureHandler implements TestMethodReturnValueHandler {
+
+    @Override
+    public boolean supportsReturnType(Class<?> returnType) {
+        return CompletableFuture.class.isAssignableFrom(returnType);
+    }
+
+    @Override
+    public void execute(InvocationInterceptor.Invocation<Object> invocation,
+            ExtensionContext context) throws Throwable {
+        Object result = invocation.proceed();
+        if (result != null) {
+            ((CompletableFuture<?>) result).get(30, TimeUnit.SECONDS);
+        }
+    }
+}
+----
+
+With this handler registered, the following test is discovered and executed:
+
+[source,java,indent=0]
+----
+@Test
+CompletableFuture<String> asyncTest() {
+    return CompletableFuture.supplyAsync(() -> {
+        // test logic
+        return "result";
+    });
+}
+----

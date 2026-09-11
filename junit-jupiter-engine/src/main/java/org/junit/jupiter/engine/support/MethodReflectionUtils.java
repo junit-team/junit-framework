@@ -21,14 +21,40 @@ import static org.junit.platform.commons.util.KotlinReflectionUtils.isKotlinType
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ServiceLoader;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.extension.TestMethodReturnValueHandler;
 import org.junit.platform.commons.support.ReflectionSupport;
+import org.junit.platform.commons.util.ClassLoaderUtils;
 import org.junit.platform.commons.util.KotlinReflectionUtils;
 
 @API(status = INTERNAL, since = "6.0")
 public class MethodReflectionUtils {
+
+	private static List<TestMethodReturnValueHandler> getReturnValueHandlers() {
+		return ServiceLoader //
+				.load(TestMethodReturnValueHandler.class, ClassLoaderUtils.getDefaultClassLoader()) //
+				.stream() //
+				.map(ServiceLoader.Provider::get) //
+				.toList();
+	}
+
+	public static boolean hasReturnValueHandler(Method method) {
+		Class<?> returnType = method.getReturnType();
+		return returnType != void.class
+				&& getReturnValueHandlers().stream().anyMatch(h -> h.supportsReturnType(returnType));
+	}
+
+	public static @Nullable TestMethodReturnValueHandler findReturnValueHandler(Method method) {
+		Class<?> returnType = method.getReturnType();
+		return getReturnValueHandlers().stream() //
+				.filter(h -> h.supportsReturnType(returnType)) //
+				.findFirst() //
+				.orElse(null);
+	}
 
 	public static Class<?> getReturnType(Method method) {
 		return isKotlinSuspendingFunction(method) //

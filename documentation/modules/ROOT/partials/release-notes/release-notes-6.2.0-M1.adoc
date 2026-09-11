@@ -71,6 +71,11 @@ repository on GitHub.
   and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
+* Added `TestMethodReturnValueHandler` extension point that allows `@Test` methods to
+  return non-void types. Handlers are discovered via Java's `ServiceLoader` mechanism and
+  can control test method invocation — for example, to execute the test on a specific
+  thread or executor and then process the return value (e.g. awaiting a reactive type).
+  See xref:extensions/test-method-return-value-handling.adoc[] for details.
 
 
 [[v6.2.0-M1-junit-vintage]]
