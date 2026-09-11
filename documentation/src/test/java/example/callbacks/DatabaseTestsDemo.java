@@ -12,6 +12,7 @@ package example.callbacks;
 
 // tag::user_guide[]
 
+import static example.callbacks.Logger.afterAllMethod;
 import static example.callbacks.Logger.afterEachMethod;
 import static example.callbacks.Logger.beforeAllMethod;
 import static example.callbacks.Logger.beforeEachMethod;
@@ -54,7 +55,7 @@ class DatabaseTestsDemo extends AbstractDatabaseTests {
 
 	@AfterAll
 	static void afterAll() {
-		beforeAllMethod(DatabaseTestsDemo.class.getSimpleName() + ".afterAll()");
+		afterAllMethod(DatabaseTestsDemo.class.getSimpleName() + ".afterAll()");
 	}
 
 }
