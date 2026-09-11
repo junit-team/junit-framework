@@ -6,6 +6,7 @@ import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.trackOperationSystemAsInput
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.internal.os.OperatingSystem
 import java.io.IOException
@@ -80,6 +81,11 @@ tasks.withType<Test>().configureEach {
 	testLogging {
 		events = setOf(FAILED)
 		exceptionFormat = FULL
+
+		info {
+			events = TestLogEvent.entries.toSet()
+			showStandardStreams = true
+		}
 	}
 	develocity {
 		testRetry {

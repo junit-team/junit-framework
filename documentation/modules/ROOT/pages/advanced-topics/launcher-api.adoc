@@ -26,15 +26,47 @@ methods in previous versions of JUnit.
 
 Usage Example:
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherForDiscoveryDemo.java[tags=imports]
 ----
+--
 
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherForDiscoveryDemo.kt[tags=imports]
+----
+--
+====
+
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherForDiscoveryDemo.java[tags=discovery]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherForDiscoveryDemo.kt[tags=discovery]
+----
+--
+====
 
 You can select classes, methods, and all classes in a package or even search for all tests
 in the class-path or module-path. Discovery takes place across all participating test
@@ -62,10 +94,26 @@ phase or create a new request. Test progress and reporting can be achieved by re
 one or more `{TestExecutionListener}` implementations with the `Launcher` as in the
 following example.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherDemo.java[tags=execution]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherDemo.kt[tags=execution]
+----
+--
+====
 
 There is no return value for the `execute()` method, but you can use a
 `TestExecutionListener` to aggregate the results. For examples see the
@@ -124,8 +172,13 @@ behavior since it's called before the first and after the last test in a launche
 respectively. The scope of a launcher session depends on the used IDE or build tool but
 usually corresponds to the lifecycle of the test JVM. A custom listener that starts an
 HTTP server before executing the first test and stops it after the last test has been
-executed, could look like this:
+executed could look like this:
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 .src/test/java/example/session/GlobalSetupTeardownListener.java
 ----
@@ -133,6 +186,20 @@ package example.session;
 
 include::example$java/example/session/GlobalSetupTeardownListener.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+.src/test/kotlin/example/kotlin/session/GlobalSetupTeardownListener.kt
+----
+package example.kotlin.session
+
+include::example$kotlin/example/kotlin/session/GlobalSetupTeardownListener.kt[tags=user_guide]
+----
+--
+====
 <1> Get the store from the launcher session
 <2> Lazily create the HTTP server and put it into the store
 <3> Start the HTTP server
@@ -140,6 +207,11 @@ include::example$java/example/session/GlobalSetupTeardownListener.java[tags=user
 It uses a wrapper class to ensure the server is stopped when the launcher session is
 closed:
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 .src/test/java/example/session/CloseableHttpServer.java
 ----
@@ -147,6 +219,20 @@ package example.session;
 
 include::example$java/example/session/CloseableHttpServer.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+.src/test/kotlin/example/kotlin/session/CloseableHttpServer.kt
+----
+package example.kotlin.session
+
+include::example$kotlin/example/kotlin/session/CloseableHttpServer.kt[tags=user_guide]
+----
+--
+====
 <1> The `close()` method is called when the launcher session is closed
 <2> Stop the HTTP server
 
@@ -164,6 +250,11 @@ include::example$resources/META-INF/services/org.junit.platform.launcher.Launche
 
 You can now use the resource from your test:
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 .src/test/java/example/session/HttpTests.java
 ----
@@ -171,6 +262,20 @@ package example.session;
 
 include::example$java/example/session/HttpTests.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+.src/test/kotlin/example/kotlin/session/HttpTests.kt
+----
+package example.kotlin.session
+
+include::example$kotlin/example/kotlin/session/HttpTests.kt[tags=user_guide]
+----
+--
+====
 <1> Retrieve the HTTP server instance from the store
 <2> Get the host string directly from the injected HTTP server instance
 <3> Get the port number directly from the injected HTTP server instance
@@ -199,10 +304,26 @@ supplied in the `LauncherDiscoveryRequest` that is passed to the `{Launcher}`.
 A typical use case is to create a custom interceptor to replace the `ClassLoader` used by
 the JUnit Platform to load test classes and engine implementations.
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 ----
 include::example$java/example/CustomLauncherInterceptor.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+----
+include::example$kotlin/example/kotlin/CustomLauncherInterceptor.kt[tags=user_guide]
+----
+--
+====
 
 [[launcher-discovery-listeners-custom]]
 == Registering a LauncherDiscoveryListener
@@ -283,10 +404,26 @@ engines and listeners, you may create an instance of `{LauncherConfig}` and supp
 the `{LauncherFactory}`. Typically, an instance of `LauncherConfig` is created via the
 built-in fluent _builder_ API, as demonstrated in the following example.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherDemo.java[tags=launcherConfig]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherDemo.kt[tags=launcherConfig]
+----
+--
+====
 
 [[dry-run-mode]]
 == Dry-Run Mode
@@ -316,18 +453,50 @@ The following example demonstrates two custom test engines sharing a `ServerSock
 resource. `FirstCustomEngine` attempts to retrieve an existing `ServerSocket` from the
 global store or creates a new one if it doesn't exist:
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 ----
 include::example$java/example/FirstCustomEngine.java[tags=user_guide]
 ----
+--
 
-`SecondCustomEngine` follows the same pattern, ensuring that regardless whether it runs
+Kotlin::
++
+--
+[source,kotlin]
+----
+include::example$kotlin/example/kotlin/FirstCustomEngine.kt[tags=user_guide]
+----
+--
+====
+
+`SecondCustomEngine` follows the same pattern, ensuring that, regardless whether it runs
 before or after `FirstCustomEngine`, it will use the same socket instance:
 
+[tabs]
+====
+Java::
++
+--
 [source,java]
 ----
 include::example$java/example/SecondCustomEngine.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin]
+----
+include::example$kotlin/example/kotlin/SecondCustomEngine.kt[tags=user_guide]
+----
+--
+====
 
 TIP: In this case, the `ServerSocket` can be stored directly in the global store while
 ensuring since it gets closed because it implements `AutoCloseable`. If you need to use a
@@ -338,10 +507,26 @@ resource is closed properly when the test run is finished.
 For illustration, the following test verifies that both engines are sharing the same
 `ServerSocket` instance and that it's closed after `Launcher.execute()` returns:
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/sharedresources/SharedResourceDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/sharedresources/SharedResourceDemo.kt[tags=user_guide]
+----
+--
+====
 
 By using the Platform's `{NamespacedHierarchicalStore}` API with shared namespaces in this
 way, test engines can coordinate resource creation and sharing without direct dependencies
@@ -361,10 +546,26 @@ part of the `{LauncherExecutionRequest}`.
 For example, implementing a listener that cancels test execution after the first test
 failed can be achieved as follows.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-direct]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherDemo.kt[tags=cancellation-direct]
+----
+--
+====
 <1> Create a `{CancellationToken}`
 <2> Implement a `{TestExecutionListener}` that calls `cancel()` when a test fails
 <3> Register the cancellation token
@@ -396,10 +597,26 @@ Rather than building a `{LauncherExecutionRequest}` by starting with a
 `{LauncherDiscoveryRequestBuilder}` and calling `forExecution()`, you can create a
 `{LauncherExecutionRequestBuilder}` from a previously built `{LauncherDiscoveryRequest}`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-discovery-request]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherDemo.kt[tags=cancellation-discovery-request]
+----
+--
+====
 <1> Build a `{LauncherDiscoveryRequest}`
 <2> Create a `{LauncherExecutionRequestBuilder}` with it
 <3> Register the cancellation token
@@ -412,10 +629,26 @@ include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-discov
 Alternatively, a `{LauncherExecutionRequestBuilder}` can be created from a previously
 discovered `{TestPlan}`.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/UsingTheLauncherDemo.java[tags=cancellation-test-plan]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/UsingTheLauncherDemo.kt[tags=cancellation-test-plan]
+----
+--
+====
 <1> Build a `{LauncherDiscoveryRequest}`
 <2> Discover a `{TestPlan}` via `Launcher.discover`
 <3> Create a `{LauncherExecutionRequestBuilder}` with it

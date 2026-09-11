@@ -24,7 +24,7 @@ dependencies {
 
 checkstyle {
 	toolVersion = requiredVersionFromLibs("checkstyle")
-	configDirectory = rootProject.layout.projectDirectory.dir("gradle/config/checkstyle")
+	configDirectory = layout.settingsDirectory.dir("gradle/config/checkstyle")
 }
 
 tasks.check {

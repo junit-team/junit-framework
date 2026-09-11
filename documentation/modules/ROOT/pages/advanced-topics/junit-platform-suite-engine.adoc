@@ -39,10 +39,26 @@ Annotate a class with `@Suite` to have it marked as a test suite on the JUnit Pl
 seen in the following example, selector and filter annotations can be used to control the
 contents of the suite.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/SuiteDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/SuiteDemo.kt[tags=user_guide]
+----
+--
+====
 
 .Additional Configuration Options
 NOTE: There are numerous configuration options for discovering and filtering tests in a
@@ -55,10 +71,26 @@ list of supported annotations and further details.
 `@Suite`-annotated class. They will be executed before and after all tests of the test
 suite, respectively.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/BeforeAndAfterSuiteDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/BeforeAndAfterSuiteDemo.kt[tags=user_guide]
+----
+--
+====
 
 [[duplicate-test-execution]]
 == Duplicate Test Execution

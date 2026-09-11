@@ -1,0 +1,8 @@
+{
+  "reflection": [
+    {
+      "type": "org.junit.platform.engine.UniqueId$SerializedForm",
+      "serializable": true
+    }
+  ]
+}

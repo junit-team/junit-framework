@@ -1,3 +1,4 @@
+import junitbuild.extensions.isMavenized
 import org.gradle.api.attributes.LibraryElements.CLASSES
 import org.gradle.api.attributes.LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE
 
@@ -6,9 +7,6 @@ plugins {
 	id("junitbuild.build-parameters")
 	id("junitbuild.jacoco-conventions")
 }
-
-@Suppress("UNCHECKED_CAST")
-val mavenizedProjects = rootProject.extra["mavenizedProjects"] as List<ProjectDependency>
 
 tasks.withType<Test>().configureEach {
 	configure<JacocoTaskExtension> {
@@ -19,7 +17,7 @@ tasks.withType<Test>().configureEach {
 val codeCoverageClassesJar = tasks.register("codeCoverageClassesJar", Jar::class) {
 	from(tasks.jar.map { zipTree(it.archiveFile) })
 	archiveClassifier = "jacoco"
-	enabled = project.path in mavenizedProjects.map { it.path }
+	enabled = project.isMavenized
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 

@@ -38,6 +38,9 @@ repository on GitHub.
   added variants that use an exception class as a value rather than a type parameter.
   This is to primarily to address the current issue/s when trying to use
   `@ParameterizedTest` that produces exceptions as values.
+* `ConsoleLauncher` with `--details=verbose` now reports on each test atomically and
+  indents its output correctly when tests are executed in parallel. Previously, the
+  reported output from different tests could interleave.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter

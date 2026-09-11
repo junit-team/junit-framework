@@ -10,6 +10,7 @@
 
 package org.junit.vintage.engine.execution;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,13 +32,14 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.discovery.ClassSelector;
@@ -56,9 +58,10 @@ import org.junit.vintage.engine.samples.junit4.JUnit4ParallelMethodsTestCase;
 class ParallelExecutionIntegrationTests {
 
 	@Test
+	@Timeout(value = 5, unit = SECONDS)
 	void executesTestClassesInParallel(TestReporter reporter) {
 		JUnit4ParallelClassesTestCase.AbstractBlockingTestCase.threadNames.clear();
-		JUnit4ParallelClassesTestCase.AbstractBlockingTestCase.countDownLatch = new CountDownLatch(3);
+		JUnit4ParallelClassesTestCase.AbstractBlockingTestCase.cyclicBarrier = new CyclicBarrier(3);
 
 		var events = executeInParallelSuccessfully(3, true, false, FirstClassTestCase.class, SecondClassTestCase.class,
 			ThirdClassTestCase.class).list();
@@ -79,9 +82,10 @@ class ParallelExecutionIntegrationTests {
 	}
 
 	@Test
+	@Timeout(value = 5, unit = SECONDS)
 	void executesTestMethodsInParallel(TestReporter reporter) {
 		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.threadNames.clear();
-		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.countDownLatch = new CountDownLatch(3);
+		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.cyclicBarrier = new CyclicBarrier(3);
 
 		var events = executeInParallelSuccessfully(3, false, true, FirstMethodTestCase.class).list();
 
@@ -101,11 +105,12 @@ class ParallelExecutionIntegrationTests {
 	}
 
 	@Test
+	@Timeout(value = 5, unit = SECONDS)
 	void executesTestClassesAndMethodsInParallel(TestReporter reporter) {
 		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.threadNames.clear();
-		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.countDownLatch = new CountDownLatch(9);
+		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.cyclicBarrier = new CyclicBarrier(9);
 
-		var events = executeInParallelSuccessfully(3, true, true, FirstMethodTestCase.class, SecondMethodTestCase.class,
+		var events = executeInParallelSuccessfully(9, true, true, FirstMethodTestCase.class, SecondMethodTestCase.class,
 			ThirdMethodTestCase.class).list();
 
 		var startedClassesTimestamps = getTimestampsFor(events, event(container(SEGMENT_TYPE_RUNNER), started()));
@@ -127,13 +132,14 @@ class ParallelExecutionIntegrationTests {
 		assertThat(startedMethodsTimestamps).hasSize(9);
 		assertThat(finishedMethodsTimestamps).hasSize(9);
 
-		assertThat(threadNames).hasSize(3);
+		assertThat(threadNames).hasSize(9);
 	}
 
 	@Test
+	@Timeout(value = 5, unit = SECONDS)
 	void executesInParallelWhenNoScopeIsDefined(@TrackLogRecords LogRecordListener listener) {
 		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.threadNames.clear();
-		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.countDownLatch = new CountDownLatch(9);
+		JUnit4ParallelMethodsTestCase.AbstractBlockingTestCase.cyclicBarrier = new CyclicBarrier(1);
 		execute(3, false, false, FirstMethodTestCase.class, SecondMethodTestCase.class, ThirdMethodTestCase.class);
 
 		// @formatter:off

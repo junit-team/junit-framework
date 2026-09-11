@@ -5,10 +5,26 @@ used to filter xref:running-tests/intro.adoc[test discovery and execution]. Plea
 xref:running-tests/tags.adoc[] section for more information about tag support in the JUnit
 Platform.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/TaggingDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TaggingDemo.kt[tags=user_guide]
+----
+--
+====
 
 TIP: See xref:writing-tests/annotations.adoc#annotations[Meta-Annotations and Composed Annotations] for examples demonstrating how to create
 custom annotations for tags.
