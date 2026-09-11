@@ -386,7 +386,8 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		var configurationParameters = Map.of(//
 			PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true", //
 			DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent", //
-			RANDOM_SEED_PROPERTY_NAME, seed //
+			RANDOM_SEED_PROPERTY_NAME, seed, //
+			"junit.jupiter.execution.order.random.seed.log.frequency", "always" //
 		);
 
 		// @formatter:off
