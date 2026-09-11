@@ -13,6 +13,7 @@ package platform.tooling.support.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.parallel.ResourceLockTarget.CHILDREN;
 import static platform.tooling.support.Projects.copyToWorkspace;
 import static platform.tooling.support.tests.XmlAssertions.verifyContainsExpectedStartedOpenTestReport;
 
@@ -24,6 +25,7 @@ import de.skuzzle.test.snapshots.junit5.EnableSnapshotTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessResult;
 import org.opentest4j.TestAbortedException;
@@ -38,6 +40,8 @@ import platform.tooling.support.Projects;
  * @since 1.3
  */
 @EnableSnapshotTests
+// Workaround for https://github.com/skuzzle/snapshot-tests/issues/110
+@ResourceLock(value = "GradleStarterTests > SnapshotTests", target = CHILDREN)
 //@SnapshotTestOptions(alwaysPersistActualResult = true)
 class GradleStarterTests {
 
