@@ -19,7 +19,6 @@ import static org.junit.platform.configuration.api.ConfigurationParameter.Value;
 import java.math.BigDecimal;
 
 import org.apiguardian.api.API;
-import org.junit.jupiter.api.DisplayNameGenerator.Standard;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.PreInterruptCallback;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
@@ -124,25 +123,13 @@ public final class Constants {
 	public static final String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 
 	/**
-	 * Default value for {@value #EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final boolean EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT = false;
-
-	/**
 	 * Property name used to enable auto-detection and registration of extensions via
 	 * Java's {@link java.util.ServiceLoader} mechanism: {@value}
 	 *
 	 * <p>The default behavior is not to perform auto-detection.
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = Defaults.EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
-
-	/**
-	 * Default value for {@value #CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final boolean CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to enable auto-closing of {@link AutoCloseable} instances: {@value}
@@ -150,7 +137,7 @@ public final class Constants {
 	 * <p>By default, auto-closing is enabled.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = Defaults.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT))
 	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 
 	/**
@@ -203,7 +190,7 @@ public final class Constants {
 	 *
 	 * @see DisplayNameGenerator#DEFAULT_GENERATOR_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = DisplayNameGenerator.class, defaultValue = @Value(classValue = Standard.class))
+	@ConfigurationParameter(type = DisplayNameGenerator.class, defaultValue = @Value(classValue = DisplayNameGenerator.Standard.class))
 	public static final String DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME = DisplayNameGenerator.DEFAULT_GENERATOR_PROPERTY_NAME;
 
 	/**
@@ -224,18 +211,12 @@ public final class Constants {
 	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
 
 	/**
-	 * Default value for {@value #PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME} is {@value}.
-	 */
-	@API(status = MAINTAINED, since = "6.2.0")
-	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
-
-	/**
 	 * Property name used to enable parallel test execution: {@value}
 	 *
 	 * <p>By default, tests are executed sequentially in a single thread.
 	 *
 	 */
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = Defaults.PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
 
 	/**
