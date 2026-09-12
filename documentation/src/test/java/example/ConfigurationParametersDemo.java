@@ -10,15 +10,13 @@
 
 package example;
 
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
+// tag::user_guide[]
 public class ConfigurationParametersDemo {
 
-	enum ExecutionMode {
-		FIXED, DYNAMIC, CUSTOM
-	}
-	// tag::user_guide[]
 	/**
 	 * Property name used to set the default test execution mode: {@value}.
 	 * <p>
@@ -27,5 +25,5 @@ public class ConfigurationParametersDemo {
 	 */
 	@ConfigurationParameter(type = ExecutionMode.class, defaultValue = @Value(stringValue = "fixed"))
 	public static final String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = "org.example.execution-mode";
-	// end::user_guide[]
 }
+// end::user_guide[]
