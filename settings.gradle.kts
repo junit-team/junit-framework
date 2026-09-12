@@ -13,7 +13,7 @@ plugins {
 	// Add the Kotlin plugin to the classpath to avoid classloader issues due
 	// to included builds (see https://github.com/gradle/gradle/issues/31278).
 	// Renovate will keep the version in sync with libs.versions.toml.
-	id("org.jetbrains.kotlin.jvm") version "2.4.10" apply false
+	id("org.jetbrains.kotlin.jvm") version "2.4.20" apply false
 }
 
 dependencyResolutionManagement {

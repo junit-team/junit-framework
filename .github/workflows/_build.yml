@@ -90,3 +90,9 @@ jobs:
           antora
           -Pantora.downloadNode=false
           -Dscan.tag.Documentation
+    - name: Upload Antora Site
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: antora-site
+        path: documentation/build/antora-site

@@ -492,3 +492,13 @@ programmatically via `@RegisterExtension` or `@ExtendWith` on fields in a subcla
 NOTE: A specific extension implementation can only be registered once for a given
 extension context and its parent contexts. Consequently, any attempt to register a
 duplicate extension implementation will be ignored.
+
+[[registration-instances]]
+== Extension Instances and State
+
+You should not make any assumptions about when or how often the JUnit Platform instantiates
+a registered extension. In particular, a single extension instance is typically reused
+across multiple tests, so an extension should be _stateless_. Any state that needs to be
+kept between invocations should be stored in the `{ExtensionContext_Store}` rather than in
+instance fields, so that it is scoped correctly and does not leak between tests. See
+xref:extensions/keeping-state-in-extensions.adoc[Keeping State in Extensions] for details.
