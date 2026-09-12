@@ -74,3 +74,13 @@ Examples:
   `org.example.MyCustomImpl`.
 - `org.example.MyCustomImpl, org.example.TheirCustomImpl`: matches candidate classes whose
   FQCN is exactly `org.example.MyCustomImpl` or `org.example.TheirCustomImpl`.
+
+[[reference]]
+== Reference
+
+The following lists enumerate the configuration parameters supported by the JUnit Platform,
+Jupiter, and Vintage.
+
+NOTE: Third-party JUnit Platform test engines and JUnit Jupiter extensions may provide additional configuration parameters.
+
+include::partial$configuration-parameters-lists.adoc[]
