@@ -22,6 +22,8 @@ final class ConfigurationMetaData {
 
 	private final List<Property> properties = new ArrayList<>();
 
+	private final List<Hint> hints = new ArrayList<>();
+
 	List<Property> properties() {
 		return properties;
 	}
@@ -63,4 +65,25 @@ final class ConfigurationMetaData {
 		}
 	}
 
+	record Hint(
+			String name,
+			List<ValueHint> values,
+			List<ValueProvider> providers
+	) {
+
+	}
+
+	record ValueHint(
+			String value,
+		 	String description
+	){
+
+	}
+
+	record ValueProvider(
+			String name,
+			Object parameters
+	){
+
+	}
 }
