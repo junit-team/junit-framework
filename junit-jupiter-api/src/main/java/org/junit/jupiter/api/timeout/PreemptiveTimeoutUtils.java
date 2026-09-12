@@ -12,6 +12,7 @@ package org.junit.jupiter.api.timeout;
 
 import static java.util.Objects.requireNonNullElse;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.jupiter.api.timeout.TimeoutUtils.isRepresentableInNanos;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.io.Serial;
@@ -32,6 +33,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * Internal utilities for executing code with a preemptive timeout.
@@ -60,6 +62,11 @@ public class PreemptiveTimeoutUtils {
 	public static <T extends @Nullable Object, E extends Throwable> T executeWithPreemptiveTimeout(Duration timeout,
 			ThrowingSupplier<T> supplier, @Nullable Supplier<@Nullable String> messageSupplier,
 			TimeoutFailureFactory<E> failureFactory) throws E {
+
+		Preconditions.notNull(timeout, "timeout must not be null");
+		Preconditions.condition(!timeout.isNegative() && !timeout.isZero(), () -> "timeout must be positive");
+		Preconditions.condition(isRepresentableInNanos(timeout),
+			() -> "timeout must be less than approximately 292 years (2^63 nanoseconds)");
 
 		AtomicReference<@Nullable Thread> threadReference = new AtomicReference<>();
 		ExecutorService executorService = Executors.newSingleThreadExecutor(new TimeoutThreadFactory());
@@ -92,7 +99,7 @@ public class PreemptiveTimeoutUtils {
 			Supplier<@Nullable Thread> threadSupplier, TimeoutFailureFactory<E> failureFactory)
 			throws E, RuntimeException {
 		try {
-			return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+			return future.get(timeout.toNanos(), TimeUnit.NANOSECONDS);
 		}
 		catch (TimeoutException ex) {
 			Thread thread = threadSupplier.get();

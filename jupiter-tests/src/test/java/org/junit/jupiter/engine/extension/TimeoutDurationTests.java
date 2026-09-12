@@ -10,10 +10,16 @@
 
 package org.junit.jupiter.engine.extension;
 
+import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
+import java.time.Duration;
+
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -38,6 +44,31 @@ class TimeoutDurationTests {
 				.isNotEqualTo("foo") //
 				.isNotEqualTo(new TimeoutDuration(2, SECONDS)) //
 				.isNotEqualTo(new TimeoutDuration(1, MINUTES));
+	}
+
+	@Nested
+	class Preconditions {
+
+		@Test
+		void positiveDuration() {
+			assertPreconditionViolationFor(() -> new TimeoutDuration(0, SECONDS)).withMessage(
+				"timeout duration must be a positive number: 0");
+			assertPreconditionViolationFor(() -> new TimeoutDuration(-1, SECONDS)).withMessage(
+				"timeout duration must be a positive number: -1");
+		}
+
+		@Test
+		@SuppressWarnings("DataFlowIssue")
+		void nonNullUnit() {
+			assertPreconditionViolationNotNullFor("timeout unit", () -> new TimeoutDuration(1, null));
+		}
+
+		@Test
+		void representableInNanos() {
+			var maxNanoRepresentableDays = Duration.ofNanos(Long.MAX_VALUE).toDays();
+			assertPreconditionViolationFor(() -> new TimeoutDuration(maxNanoRepresentableDays + 1, DAYS)).withMessage(
+				"timeout duration must be less than approximately 292 years (2^63 nanoseconds): 106752 days");
+		}
 	}
 
 }

@@ -11,13 +11,17 @@
 package org.junit.jupiter.api;
 
 import static java.time.Duration.ofMillis;
+import static java.time.Duration.ofNanos;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageEquals;
+import static org.junit.jupiter.api.AssertionTestUtils.assertMessageMatches;
 import static org.junit.jupiter.api.AssertionTestUtils.assertMessageStartsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationNotNullFor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -50,16 +54,17 @@ class AssertTimeoutAssertionsTests {
 
 	@Test
 	void assertTimeoutForExecutableThatThrowsAnException() {
-		RuntimeException exception = assertThrows(RuntimeException.class, () -> assertTimeout(ofMillis(500), () -> {
-			throw new RuntimeException("not this time");
-		}));
+		RuntimeException exception = assertThrows(RuntimeException.class,
+			() -> assertTimeout(ofMillis(500), (Executable) () -> {
+				throw new RuntimeException("not this time");
+			}));
 		assertMessageEquals(exception, "not this time");
 	}
 
 	@Test
 	void assertTimeoutForExecutableThatThrowsAnAssertionFailedError() {
 		AssertionFailedError exception = assertThrows(AssertionFailedError.class,
-			() -> assertTimeout(ofMillis(500), () -> fail("enigma")));
+			() -> assertTimeout(ofMillis(500), (Executable) () -> fail("enigma")));
 		assertMessageEquals(exception, "enigma");
 	}
 
@@ -67,7 +72,14 @@ class AssertTimeoutAssertionsTests {
 	void assertTimeoutForExecutableThatCompletesAfterTheTimeout() {
 		AssertionFailedError error = assertThrows(AssertionFailedError.class,
 			() -> assertTimeout(ofMillis(10), this::nap));
-		assertMessageStartsWith(error, "execution exceeded timeout of 10 ms by");
+		assertMessageMatches(error, "execution exceeded timeout of 10 ms by \\d{2}\\d* ms");
+	}
+
+	@Test
+	void assertTimeoutForExecutableThatCompletesAfterTheNanoTimeout() {
+		AssertionFailedError error = assertThrows(AssertionFailedError.class,
+			() -> assertTimeout(ofNanos(999999), this::nap));
+		assertMessageMatches(error, "execution exceeded timeout of 0\\.999999 ms by \\d{2}\\d*\\.\\d{6} ms");
 	}
 
 	@Test
@@ -82,6 +94,32 @@ class AssertTimeoutAssertionsTests {
 		AssertionFailedError error = assertThrows(AssertionFailedError.class,
 			() -> assertTimeout(ofMillis(10), this::nap, () -> "Tempus" + " " + "Fugit"));
 		assertMessageStartsWith(error, "Tempus Fugit ==> execution exceeded timeout of 10 ms by");
+	}
+
+	@Nested
+	class ExecutablePreconditions {
+
+		@Test
+		@SuppressWarnings("DataFlowIssue")
+		void nonNullDuration() {
+			assertPreconditionViolationNotNullFor("timeout",
+				() -> assertTimeout(null, (Executable) () -> fail("enigma")));
+		}
+
+		@Test
+		void positiveDuration() {
+			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(-1), (Executable) () -> fail("enigma"))) //
+					.withMessage("timeout must be positive");
+			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(0), (Executable) () -> fail("enigma"))) //
+					.withMessage("timeout must be positive");
+		}
+
+		@Test
+		void timeoutrepresentableInNanos() {
+			assertPreconditionViolationFor(
+				() -> assertTimeout(ofNanos(Long.MAX_VALUE).plusNanos(1), (Executable) () -> fail("enigma"))) //
+						.withMessage("timeout must be less than approximately 292 years (2^63 nanoseconds)");
+		}
 	}
 
 	// --- supplier ------------------------------------------------------------
@@ -124,7 +162,18 @@ class AssertTimeoutAssertionsTests {
 				return "Tempus Fugit";
 			});
 		});
-		assertMessageStartsWith(error, "execution exceeded timeout of 10 ms by");
+		assertMessageMatches(error, "execution exceeded timeout of 10 ms by \\d{2}\\d* ms");
+	}
+
+	@Test
+	void assertTimeoutForSupplierThatCompletesAfterTheNanoTimeout() {
+		AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> {
+			assertTimeout(ofNanos(1), () -> {
+				nap();
+				return "Tempus Fugit";
+			});
+		});
+		assertMessageMatches(error, "execution exceeded timeout of 0\\.000001 ms by \\d{2}\\d*\\.\\d{6} ms");
 	}
 
 	@Test
@@ -158,6 +207,31 @@ class AssertTimeoutAssertionsTests {
 		do {
 			Thread.sleep(100);
 		} while (System.nanoTime() - start < 100_000_000L);
+	}
+
+	@Nested
+	class SupplierPreconditions {
+
+		@Test
+		@SuppressWarnings("DataFlowIssue")
+		void nonNullDuration() {
+			assertPreconditionViolationNotNullFor("timeout", () -> assertTimeout(null, () -> fail("enigma")));
+		}
+
+		@Test
+		void positiveDuration() {
+			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(-1), () -> fail("enigma"))) //
+					.withMessage("timeout must be positive");
+			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(0), () -> fail("enigma"))) //
+					.withMessage("timeout must be positive");
+		}
+
+		@Test
+		void timeoutRepresentableInNanos() {
+			assertPreconditionViolationFor(
+				() -> assertTimeout(ofNanos(Long.MAX_VALUE).plusNanos(1), () -> fail("enigma"))) //
+						.withMessage("timeout must be less than approximately 292 years (2^63 nanoseconds)");
+		}
 	}
 
 }

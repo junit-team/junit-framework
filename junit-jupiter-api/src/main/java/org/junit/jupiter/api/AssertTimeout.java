@@ -10,7 +10,9 @@
 
 package org.junit.jupiter.api;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
+import static org.junit.jupiter.api.timeout.TimeoutUtils.isRepresentableInNanos;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.time.Duration;
@@ -19,6 +21,7 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.function.ThrowingSupplier;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * {@code AssertTimeout} is a collection of utility methods that support asserting
@@ -66,8 +69,12 @@ class AssertTimeout {
 
 	private static <T extends @Nullable Object> T assertTimeout(Duration timeout, ThrowingSupplier<T> supplier,
 			@Nullable Object messageOrSupplier) {
-		long timeoutInMillis = timeout.toMillis();
-		long start = System.currentTimeMillis();
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(!timeout.isNegative() && !timeout.isZero(), () -> "timeout must be positive");
+		Preconditions.condition(isRepresentableInNanos(timeout),
+			() -> "timeout must be less than approximately 292 years (2^63 nanoseconds)");
+
+		long start = System.nanoTime();
 		T result;
 		try {
 			result = supplier.get();
@@ -75,17 +82,34 @@ class AssertTimeout {
 		catch (Throwable ex) {
 			throw throwAsUncheckedException(ex);
 		}
-
-		long timeElapsed = System.currentTimeMillis() - start;
-		if (timeElapsed > timeoutInMillis) {
+		// Creates a false positive if the tests runs for more than 292 years.
+		var timeElapsed = Duration.ofNanos(System.nanoTime() - start);
+		if (timeElapsed.compareTo(timeout) > 0) {
 			assertionFailure() //
 					.message(messageOrSupplier) //
-					.reason("execution exceeded timeout of " + timeoutInMillis + " ms by "
-							+ (timeElapsed - timeoutInMillis) + " ms") //
+					.reason(createExecutionExceededTimeoutMessage(timeout, timeElapsed)) //
 					.trimStacktrace(Assertions.class) //
 					.buildAndThrow();
 		}
 		return result;
+	}
+
+	private static String createExecutionExceededTimeoutMessage(Duration timeout, Duration timeElapsed) {
+		var significantNanoFraction = timeout.toNanos() - MILLISECONDS.toNanos(timeout.toMillis()) != 0;
+		var timeoutExceeded = timeElapsed.minus(timeout);
+		boolean timeoutExceededOnlyByNanoSeconds = timeoutExceeded.toMillis() == 0;
+		return "execution exceeded timeout of %s by %s" //
+				.formatted(formatDuration(timeout, significantNanoFraction), //
+					formatDuration(timeoutExceeded, significantNanoFraction || timeoutExceededOnlyByNanoSeconds));
+	}
+
+	private static String formatDuration(Duration duration, boolean includeNanoSeconds) {
+		long milliseconds = duration.toMillis();
+		if (!includeNanoSeconds) {
+			return "%d ms".formatted(milliseconds);
+		}
+		long nanoFraction = duration.toNanosPart() - MILLISECONDS.toNanos(milliseconds);
+		return "%d.%06d ms".formatted(milliseconds, nanoFraction);
 	}
 
 }
