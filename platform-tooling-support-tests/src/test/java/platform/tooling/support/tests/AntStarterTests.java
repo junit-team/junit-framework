@@ -12,6 +12,7 @@ package platform.tooling.support.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
+import static org.junit.jupiter.api.parallel.ResourceLockTarget.CHILDREN;
 import static platform.tooling.support.Projects.copyToWorkspace;
 import static platform.tooling.support.tests.XmlAssertions.verifyContainsExpectedStartedOpenTestReport;
 
@@ -25,6 +26,7 @@ import org.apache.tools.ant.Main;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.platform.tests.process.OutputFiles;
 
 import platform.tooling.support.FilePrefix;
@@ -35,6 +37,8 @@ import platform.tooling.support.Projects;
  * @since 1.3
  */
 @EnableSnapshotTests
+// Workaround for https://github.com/skuzzle/snapshot-tests/issues/110
+@ResourceLock(value = "AntStarterTests > SnapshotTests", target = CHILDREN)
 //@SnapshotTestOptions(alwaysPersistActualResult = true)
 class AntStarterTests {
 

@@ -64,7 +64,7 @@ See xref:advanced-topics/junit-platform-reporting.adoc[] for details.
 [[recorder]]
 == Flight Recorder Support
 
-The JUnit Platform provides opt-in support for generating Flight Recorder events.
+The JUnit Platform Launcher provides support for generating Flight Recorder events.
 https://openjdk.java.net/jeps/328[JEP 328] describes the Java Flight Recorder (JFR) as
 follows.
 

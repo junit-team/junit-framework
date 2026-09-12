@@ -61,7 +61,7 @@ public class PreemptiveTimeoutUtils {
 			ThrowingSupplier<T> supplier, @Nullable Supplier<@Nullable String> messageSupplier,
 			TimeoutFailureFactory<E> failureFactory) throws E {
 
-		AtomicReference<Thread> threadReference = new AtomicReference<>();
+		AtomicReference<@Nullable Thread> threadReference = new AtomicReference<>();
 		ExecutorService executorService = Executors.newSingleThreadExecutor(new TimeoutThreadFactory());
 
 		try {
@@ -75,7 +75,7 @@ public class PreemptiveTimeoutUtils {
 	}
 
 	private static <T extends @Nullable Object> Future<T> submitTask(ThrowingSupplier<T> supplier,
-			AtomicReference<Thread> threadReference, ExecutorService executorService) {
+			AtomicReference<@Nullable Thread> threadReference, ExecutorService executorService) {
 		return executorService.submit(() -> {
 			try {
 				threadReference.set(Thread.currentThread());

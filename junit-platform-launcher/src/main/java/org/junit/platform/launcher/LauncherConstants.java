@@ -253,8 +253,8 @@ public class LauncherConstants {
 	public static final String OUTPUT_DIR_PROPERTY_NAME = "junit.platform.reporting.output.dir";
 
 	/**
-	 * Placeholder for use in {@link #OUTPUT_DIR_PROPERTY_NAME} that will be
-	 * replaced with a unique number.
+	 * Placeholder for use in {@link #OUTPUT_DIR_PROPERTY_NAME}. Each instance
+	 * will be replaced with a randomly chosen number.
 	 *
 	 * <p>This can be used to create a unique output directory for each test
 	 * run. For example, if multiple forks are used, each fork can be configured
