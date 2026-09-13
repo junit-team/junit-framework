@@ -287,7 +287,20 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "type": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault.ExampleEnum",
 						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault",
-						  "defaultValue": "A"
+						  "defaultValue": "a"
+						}
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "a"
+							  },
+							  {
+								  "value": "b"
+							  }
+						  ]
 						}
 					  ]
 					}""");
@@ -359,7 +372,31 @@ class ConfigurationMetadataAnnotationProcessorTests {
 							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
 							"defaultValue": "org.junit.platform.configuration.testcases.Defaults.Example"
 						  }
-						]
+						],
+						"hints": [
+						  {
+							  "name": "org.example.booleans",
+							  "values": [
+								  {
+									  "value": true
+								  },
+								  {
+									  "value": false
+								  }
+							  ]
+						  },
+						  {
+							  "name": "org.example.classes",
+							  "providers": [
+								  {
+									  "name": "class-reference",
+									  "parameters": {
+										  "target": "org.junit.platform.configuration.testcases.Defaults.Example"
+									  }
+								  }
+							  ]
+						  }
+					  ]
 					}""");
 		}
 

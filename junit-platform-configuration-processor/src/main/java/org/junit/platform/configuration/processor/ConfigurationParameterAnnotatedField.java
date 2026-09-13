@@ -16,14 +16,21 @@ import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.ge
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 import org.jspecify.annotations.Nullable;
 
@@ -32,13 +39,15 @@ final class ConfigurationParameterAnnotatedField {
 	private final TypeElement enclosingType;
 	private final AnnotationMirror annotationMirror;
 	private final Elements elementUtils;
+	private final Types typeUtils;
 
 	ConfigurationParameterAnnotatedField(VariableElement element, Elements elementUtils, TypeElement enclosingType,
-			AnnotationMirror annotationMirror) {
+			AnnotationMirror annotationMirror, Types typeUtils) {
 		this.element = element;
 		this.elementUtils = elementUtils;
 		this.enclosingType = enclosingType;
 		this.annotationMirror = annotationMirror;
+		this.typeUtils = typeUtils;
 	}
 
 	Element element() {
@@ -63,6 +72,27 @@ final class ConfigurationParameterAnnotatedField {
 			return Collections.emptyMap();
 		}
 		return getValuesMap(defaultValue);
+	}
+
+	@Nullable
+	List<String> typeEnumValues() {
+		// TODO: Refactor
+		for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
+			if (entry.getKey().getSimpleName().toString().equals("type")) {
+				AnnotationValue value = entry.getValue();
+				TypeMirror typeMirror = (TypeMirror) value.getValue();
+				TypeElement typeElement = (TypeElement) typeUtils.asElement(typeMirror);
+				if (typeElement.getKind() == ElementKind.ENUM) {
+					return typeElement.getEnclosedElements().stream() //
+							.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
+							.map(Element::getSimpleName) //
+							.map(Objects::toString) //
+							// TODO: Also get description
+							.map(s -> s.toLowerCase(Locale.ROOT)).toList();
+				}
+			}
+		}
+		return null;
 	}
 
 	@Nullable
