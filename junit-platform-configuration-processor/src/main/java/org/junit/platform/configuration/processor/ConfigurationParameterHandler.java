@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
@@ -22,22 +23,29 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.Hint;
 import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.ValueHint;
+import org.junit.platform.configuration.processor.ConfigurationMetaData.ValueProvider;
 
 final class ConfigurationParameterHandler {
 
 	private final ConfigurationMetaData metaData;
 	private final Elements elementUtils;
 	private final Messager messager;
+	private final Types typeUtils;
 
-	ConfigurationParameterHandler(ConfigurationMetaData metaData, Elements elementUtils, Messager messager) {
+	ConfigurationParameterHandler(ConfigurationMetaData metaData, Elements elementUtils, Messager messager,
+			Types typeUtils) {
 		this.metaData = metaData;
 		this.elementUtils = elementUtils;
 		this.messager = messager;
+		this.typeUtils = typeUtils;
 	}
 
 	void process(RoundEnvironment roundEnv) {
@@ -56,7 +64,7 @@ final class ConfigurationParameterHandler {
 		}
 		var annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
 		var field = new ConfigurationParameterAnnotatedField(variableElement, elementUtils, enclosingTypeElement,
-			annotationMirror);
+			annotationMirror, typeUtils);
 		if (!field.isStatic() || !field.isFinal() || !(field.constantValue() instanceof String name)) {
 			messager.printMessage(ERROR,
 				"@ConfigurationParameter annotated field must static, final, and have constant string value", element);
@@ -71,6 +79,27 @@ final class ConfigurationParameterHandler {
 		var type = processType(field, defaultType);
 		var property = new Property(name, type, description, sourceType, defaultValue, deprecation);
 		metaData.addProperty(property);
+
+		// TODO: Refactor
+		List<ValueHint> values = null;
+		List<ValueProvider> providers = null;
+
+		var typeEnumValues = field.typeEnumValues();
+		if (typeEnumValues != null) {
+			values = typeEnumValues.stream().map(s -> new ValueHint(s, null)).toList();
+		}
+		else if (Class.class.getName().equals(defaultType) && defaultValue != null) {
+			providers = List.of(
+				new ValueProvider("class-reference", new ConfigurationMetaData.Parameters(defaultValue.toString())));
+		}
+		else if (Boolean.class.getName().equals(defaultType) && defaultValue != null) {
+			values = List.of(new ValueHint(true, null), new ValueHint(false, null));
+		}
+
+		if (values != null || providers != null) {
+			var hint = new Hint(name, values, providers);
+			metaData.addHint(hint);
+		}
 	}
 
 	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {

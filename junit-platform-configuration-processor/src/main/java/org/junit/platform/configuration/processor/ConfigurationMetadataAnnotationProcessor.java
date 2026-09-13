@@ -70,7 +70,7 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 		super.init(environment);
 		this.metaData = new ConfigurationMetaData();
 		this.configurationParameterHandler = new ConfigurationParameterHandler(metaData,
-			processingEnv.getElementUtils(), processingEnv.getMessager());
+			processingEnv.getElementUtils(), processingEnv.getMessager(), processingEnv.getTypeUtils());
 	}
 
 	@Override
