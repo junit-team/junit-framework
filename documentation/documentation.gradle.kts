@@ -505,6 +505,6 @@ tasks {
 	}
 
 	generateAntoraResources {
-		dependsOn(generateAsciidocInputs, fixJavadoc)
+		dependsOn(generateAsciidocInputs, fixJavadoc, compileTestJava)
 	}
 }

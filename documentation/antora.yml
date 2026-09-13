@@ -17,6 +17,8 @@ ext:
       into: modules/ROOT/attachments/api
     - dir: ./src/test
       into: modules/ROOT/examples
+    - dir: ./build/classes/java/test/META-INF
+      into: modules/ROOT/examples
     - dir: ./build/generated/asciidoc
       clean: true
       into: modules/ROOT/partials

@@ -20,16 +20,7 @@ or provide code-completion by IDEs. An example is shown below.
 [subs=attributes+]
 .A minimal `META-INF/junit-platform-configuration-metadata.json`
 ----
-{
-  "properties": [
-	{
-	  "name": "org.example.execution-mode",
-      "description": "Property name used to set the default test execution mode.",
-	  "sourceType": "example.ConfigurationParametersDemo",
-      "defaultValue": "fixed"
-	}
-  ]
-}
+include::example$junit-platform-configuration-metadata.json[]
 ----
 
 The first paragraph from the java documentation will be used to describe the property. If
