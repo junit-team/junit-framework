@@ -10,8 +10,9 @@
 
 package org.junit.jupiter.api;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
+import static org.junit.jupiter.api.DurationUtils.formatDurationInMs;
+import static org.junit.jupiter.api.DurationUtils.hasSignificantNanoFraction;
 import static org.junit.jupiter.api.timeout.TimeoutUtils.isRepresentableInNanos;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
@@ -95,21 +96,13 @@ class AssertTimeout {
 	}
 
 	private static String createExecutionExceededTimeoutMessage(Duration timeout, Duration timeElapsed) {
-		var significantNanoFraction = timeout.toNanos() - MILLISECONDS.toNanos(timeout.toMillis()) != 0;
+		var timeoutHasSignificantNanoFraction = hasSignificantNanoFraction(timeout);
 		var timeoutExceeded = timeElapsed.minus(timeout);
 		boolean timeoutExceededOnlyByNanoSeconds = timeoutExceeded.toMillis() == 0;
 		return "execution exceeded timeout of %s by %s" //
-				.formatted(formatDuration(timeout, significantNanoFraction), //
-					formatDuration(timeoutExceeded, significantNanoFraction || timeoutExceededOnlyByNanoSeconds));
-	}
-
-	private static String formatDuration(Duration duration, boolean includeNanoSeconds) {
-		long milliseconds = duration.toMillis();
-		if (!includeNanoSeconds) {
-			return "%d ms".formatted(milliseconds);
-		}
-		long nanoFraction = duration.toNanos() - MILLISECONDS.toNanos(milliseconds);
-		return "%d.%06d ms".formatted(milliseconds, nanoFraction);
+				.formatted(formatDurationInMs(timeout, timeoutHasSignificantNanoFraction), //
+					formatDurationInMs(timeoutExceeded,
+						timeoutHasSignificantNanoFraction || timeoutExceededOnlyByNanoSeconds));
 	}
 
 }
