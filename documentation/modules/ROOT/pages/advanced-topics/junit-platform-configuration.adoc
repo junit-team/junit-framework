@@ -1,0 +1,36 @@
+= Documenting Configuration Parameters
+
+Authors of test engines and JUnit Jupiter extensions may generate a machine-readable
+overview of configuration parameters by annotating their configuration parameters
+with `{PlatformConfigurationParameter}` from the `junit-platform-configuration-api`
+artifact.
+
+[source,java,indent=0]
+.A small example
+----
+include::example$java/example/ConfigurationParametersDemo.java[tags=user_guide]
+----
+
+Processing the annotations with `junit-platform-configuration-processor` will produce a
+`META-INF/junit-platform-configuration-metadata.json` file in the format of
+{SpringBootConfigurationMetadata}. This file can then be used to generate documentation
+or provide code-completion by IDEs. An example is shown below.
+
+[source,json,indent=0]
+[subs=attributes+]
+.A minimal `META-INF/junit-platform-configuration-metadata.json`
+----
+{
+  "properties": [
+	{
+	  "name": "org.example.execution-mode",
+      "description": "Property name used to set the default test execution mode.",
+	  "sourceType": "example.ConfigurationParametersDemo",
+      "defaultValue": "fixed"
+	}
+  ]
+}
+----
+
+The first paragraph from the java documentation will be used to describe the property. If
+the first paragraph contains Javadoc tags these will be sensibly replaced.

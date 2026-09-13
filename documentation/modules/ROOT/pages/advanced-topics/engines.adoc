@@ -128,6 +128,8 @@ compatibility with build tools and IDEs:
   report already started `TestDescriptors` as aborted in case they have not been executed
   completely. If a `TestEngine` supports cancellation, it should clean up any resources
   that it has created just like if execution had finished regularly.
+* A `TestEngine` _may_ xref:advanced-topics/junit-platform-configuration.adoc[document its configuration parameters]
+  in `META-INF/junit-platform-configuration-metadata.json`.
 
 [[discovery-issues]]
 == Reporting Discovery Issues

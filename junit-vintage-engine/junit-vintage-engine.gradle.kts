@@ -9,12 +9,16 @@ plugins {
 description = "JUnit Vintage Engine"
 
 dependencies {
+	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+
 	api(platform(projects.junitBom))
 	api(projects.junitPlatformEngine)
 	api(libs.junit4)
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+
+	compileOnly(projects.junitPlatformConfigurationApi)
 
 	testFixturesApi(platform(libs.groovy2.bom))
 	testFixturesApi(libs.spock1)
@@ -33,7 +37,7 @@ dependencies {
 
 tasks {
 	compileJava {
-		options.compilerArgs.add("-Xlint:-requires-automatic") // JUnit 4
+		options.compilerArgs.add("-Xlint:-requires-automatic,-processing") // -requires-automatic: JUnit 4, -module: due to qualified exports, -processing: not all annotations need to be processed
 	}
 	compileTestFixturesGroovy {
 		javaLauncher = project.javaToolchains.launcherFor {

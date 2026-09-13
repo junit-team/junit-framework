@@ -60,6 +60,7 @@
 ** xref:advanced-topics/testkit.adoc[]
 ** xref:advanced-topics/launcher-api.adoc[]
 ** xref:advanced-topics/engines.adoc[]
+** xref:advanced-topics/junit-platform-configuration.adoc[]
 * xref:api-evolution.adoc[]
 * xref:release-notes.adoc[]
 * xref:appendix.adoc[]

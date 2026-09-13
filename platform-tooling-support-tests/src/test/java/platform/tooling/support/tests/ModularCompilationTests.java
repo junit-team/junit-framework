@@ -56,7 +56,9 @@ class ModularCompilationTests {
 				.addArguments("--add-modules", "org.opentest4j.reporting.events") //
 				.addArguments("--add-reads", "org.junit.platform.reporting=org.opentest4j.reporting.events") //
 				.addArguments("--add-modules", "de.siegmar.fastcsv") //
-				.addArguments("--add-reads", "org.junit.jupiter.params=de.siegmar.fastcsv")
+				.addArguments("--add-reads", "org.junit.jupiter.params=de.siegmar.fastcsv") //
+				.addArguments("--add-modules", "jakarta.json") //
+				.addArguments("--add-reads", "org.junit.platform.configuration.processor=jakarta.json")
 				// modules to compile
 				.addArguments("--module", String.join(",", moduleNames)) //
 				.redirectOutput(javacOutputFiles) //

@@ -10,6 +10,7 @@ dependencies {
 	implementation("junitbuild.base:build-parameters")
 	implementation(projects.backwardCompatibility)
 	implementation(projects.javadoc)
+	implementation(libs.jackson.databind)
 	implementation(libs.plugins.kotlin.markerCoordinates)
 	implementation(libs.plugins.bnd.markerCoordinates)
 	implementation(libs.plugins.develocity.markerCoordinates)

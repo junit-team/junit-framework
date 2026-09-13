@@ -41,6 +41,11 @@ repository on GitHub.
 * `ConsoleLauncher` with `--details=verbose` now reports on each test atomically and
   indents its output correctly when tests are executed in parallel. Previously, the
   reported output from different tests could interleave.
+* Test Engine and Jupiter Extension authors may generate a machine-readable overview
+  of configuration parameters. See
+  xref:advanced-topics/junit-platform-configuration.adoc[Documenting Configuration
+  Parameters] for more information.
+* Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
@@ -71,7 +76,7 @@ repository on GitHub.
   and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
-
+* Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage
@@ -89,4 +94,4 @@ repository on GitHub.
 [[v6.2.0-M1-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* Vintage configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`

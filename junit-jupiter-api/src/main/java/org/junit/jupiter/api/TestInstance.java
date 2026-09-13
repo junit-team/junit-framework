@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api;
 
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -107,6 +108,12 @@ public @interface TestInstance {
 		PER_METHOD;
 
 		/**
+		 * Default value for {@value #DEFAULT_LIFECYCLE_PROPERTY_NAME} is {@value}.
+		 */
+		@API(status = MAINTAINED, since = "6.2.0")
+		public static final String DEFAULT_LIFECYCLE_PATTERN_DEFAULT = "per_method";
+
+		/**
 		 * Property name used to set the default test instance lifecycle mode:
 		 * {@value}
 		 *
@@ -115,7 +122,7 @@ public @interface TestInstance {
 		 * <p>Supported values include names of enum constants defined in
 		 * {@link org.junit.jupiter.api.TestInstance.Lifecycle}, ignoring case.
 		 *
-		 * <p>If not specified, the default is "per_method" which corresponds to
+		 * <p>If not specified, the default is {@value #DEFAULT_LIFECYCLE_PATTERN_DEFAULT} which corresponds to
 		 * {@code @TestInstance(Lifecycle.PER_METHOD)}.
 		 *
 		 * @since 5.0

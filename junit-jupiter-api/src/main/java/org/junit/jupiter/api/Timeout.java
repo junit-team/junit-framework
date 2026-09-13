@@ -298,25 +298,37 @@ public @interface Timeout {
 	String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = "junit.jupiter.execution.timeout.afterall.method.default";
 
 	/**
+	 * Default value for {@value #TIMEOUT_MODE_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	String TIMEOUT_MODE_DEFAULT = "enabled";
+
+	/**
 	 * Property name used to configure whether timeouts are applied to tests:
 	 * {@value}.
 	 *
 	 * <p>The value of this property will be used to toggle whether
 	 * {@link Timeout @Timeout} is applied to tests.</p>
 	 *
-	 * <h4>Supported timeout mode values (case insensitive):</h4>
+	 * <h4>Supported timeout mode values (case-insensitive):</h4>
 	 * <ul>
-	 * <li>{@code ENABLED}: enables timeouts
-	 * <li>{@code DISABLED}: disables timeouts
-	 * <li>{@code DISABLED_ON_DEBUG}: disables timeouts while debugging
+	 * <li>{@code enabled}: enables timeouts
+	 * <li>{@code disabled}: disables timeouts
+	 * <li>{@code disabled_on_debug}: disables timeouts while debugging
 	 * </ul>
 	 *
-	 * <p>If not specified, the default is {@code ENABLED}.
+	 * <p>If not specified, the default is {@value #TIMEOUT_MODE_DEFAULT}.
 	 *
 	 * @since 5.6
 	 */
 	@API(status = STABLE, since = "5.9")
 	String TIMEOUT_MODE_PROPERTY_NAME = "junit.jupiter.execution.timeout.mode";
+
+	/**
+	 * Default value for {@value #DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "same_thread";
 
 	/**
 	 * Property name used to set the default thread mode for all testable and
@@ -326,9 +338,9 @@ public @interface Timeout {
 	 * {@link Timeout @Timeout} annotation present on the method or on an
 	 * enclosing test class (for testable methods).
 	 *
-	 * <p>The supported values are {@code SAME_THREAD} or
-	 * {@code SEPARATE_THREAD}, ignoring case. If none is provided,
-	 * {@code SAME_THREAD} is used as default.
+	 * <p>The supported values are {@code same_thread} or
+	 * {@code separate_thread}, ignoring case. If none is provided,
+	 * {@value #DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT} is used as default.
 	 *
 	 * @since 5.9
 	 * @see #threadMode()

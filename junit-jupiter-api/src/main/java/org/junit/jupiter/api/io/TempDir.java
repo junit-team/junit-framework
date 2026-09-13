@@ -133,12 +133,18 @@ public @interface TempDir {
 	Class<? extends TempDirFactory> factory() default TempDirFactory.class;
 
 	/**
+	 * Default value for {@value #DEFAULT_CLEANUP_MODE_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	String DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT = "always";
+
+	/**
 	 * Property name used to configure the default {@link CleanupMode}: {@value}
 	 *
 	 * <p>Supported values include names of enum constants defined in
 	 * {@link CleanupMode}, ignoring case.
 	 *
-	 * <p>If this configuration parameter is not set, {@link CleanupMode#ALWAYS}
+	 * <p>If this configuration parameter is not set, {@value #DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT}
 	 * will be used as the default.
 	 *
 	 * @since 5.9

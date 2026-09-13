@@ -12,7 +12,9 @@ package org.junit.platform.launcher.core;
 
 import static org.junit.platform.launcher.LauncherConstants.CAPTURE_MAX_BUFFER_DEFAULT;
 import static org.junit.platform.launcher.LauncherConstants.CAPTURE_MAX_BUFFER_PROPERTY_NAME;
+import static org.junit.platform.launcher.LauncherConstants.CAPTURE_STDERR_DEFAULT;
 import static org.junit.platform.launcher.LauncherConstants.CAPTURE_STDERR_PROPERTY_NAME;
+import static org.junit.platform.launcher.LauncherConstants.CAPTURE_STDOUT_DEFAULT;
 import static org.junit.platform.launcher.LauncherConstants.CAPTURE_STDOUT_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STDERR_REPORT_ENTRY_KEY;
 import static org.junit.platform.launcher.LauncherConstants.STDOUT_REPORT_ENTRY_KEY;
@@ -42,8 +44,10 @@ class StreamInterceptingTestExecutionListener implements EagerTestExecutionListe
 	static Optional<StreamInterceptingTestExecutionListener> create(ConfigurationParameters configurationParameters,
 			BiConsumer<TestIdentifier, ReportEntry> reporter) {
 
-		boolean captureStdout = configurationParameters.getBoolean(CAPTURE_STDOUT_PROPERTY_NAME).orElse(false);
-		boolean captureStderr = configurationParameters.getBoolean(CAPTURE_STDERR_PROPERTY_NAME).orElse(false);
+		boolean captureStdout = configurationParameters.getBoolean(CAPTURE_STDOUT_PROPERTY_NAME) //
+				.orElse(CAPTURE_STDOUT_DEFAULT);
+		boolean captureStderr = configurationParameters.getBoolean(CAPTURE_STDERR_PROPERTY_NAME) //
+				.orElse(CAPTURE_STDERR_DEFAULT);
 		if (!captureStdout && !captureStderr) {
 			return Optional.empty();
 		}

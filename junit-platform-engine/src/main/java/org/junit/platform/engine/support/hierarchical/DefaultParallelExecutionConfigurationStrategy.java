@@ -48,7 +48,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 				Integer::valueOf).orElse(parallelism + 256);
 
 			boolean saturate = configurationParameters.get(CONFIG_FIXED_SATURATE_PROPERTY_NAME,
-				Boolean::valueOf).orElse(true);
+				Boolean::valueOf).orElse(CONFIG_FIXED_SATURATE_DEFAULT);
 
 			return new DefaultParallelExecutionConfiguration(parallelism, parallelism, maxPoolSize, parallelism,
 				KEEP_ALIVE_SECONDS, __ -> saturate);
@@ -64,7 +64,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
 			BigDecimal factor = configurationParameters.get(CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME,
-				BigDecimal::new).orElse(BigDecimal.ONE);
+				BigDecimal::new).orElse(BigDecimal.valueOf(CONFIG_DYNAMIC_FACTOR_DEFAULT));
 
 			Preconditions.condition(factor.compareTo(BigDecimal.ZERO) > 0,
 				() -> "Factor '%s' specified via configuration parameter '%s' must be greater than 0".formatted(factor,
@@ -116,6 +116,12 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	private static final int KEEP_ALIVE_SECONDS = 30;
 
 	/**
+	 * Default value for {@value #CONFIG_STRATEGY_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final String CONFIG_STRATEGY_DEFAULT = "dynamic";
+
+	/**
 	 * Property name used to determine the desired configuration strategy.
 	 *
 	 * <p>Value must be one of {@code dynamic}, {@code fixed}, or
@@ -148,6 +154,12 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	public static final String CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = "fixed.max-pool-size";
 
 	/**
+	 * Default value for {@value #CONFIG_FIXED_SATURATE_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final boolean CONFIG_FIXED_SATURATE_DEFAULT = true;
+
+	/**
 	 * Property name used to disable saturation of the underlying fork-join pool
 	 * for the {@link #FIXED} configuration strategy.
 	 *
@@ -162,6 +174,12 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String CONFIG_FIXED_SATURATE_PROPERTY_NAME = "fixed.saturate";
+
+	/**
+	 * Default value for {@value #CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2.0")
+	public static final double CONFIG_DYNAMIC_FACTOR_DEFAULT = 1.0;
 
 	/**
 	 * Property name of the factor used to determine the desired parallelism for the
@@ -221,8 +239,20 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	}
 
 	static ParallelExecutionConfigurationStrategy getStrategy(ConfigurationParameters configurationParameters) {
-		return valueOf(
-			configurationParameters.get(CONFIG_STRATEGY_PROPERTY_NAME).orElse("dynamic").toUpperCase(Locale.ROOT));
+		return configurationParameters.get(CONFIG_STRATEGY_PROPERTY_NAME, value -> {
+			try {
+				return valueOf(value.toUpperCase(Locale.ROOT));
+			}
+			catch (Exception e) {
+				throw new JUnitException(
+					"Invalid ParallelExecutionConfigurationStrategy '%s' set via the '%s' configuration parameter.".formatted(
+						value, CONFIG_STRATEGY_PROPERTY_NAME));
+			}
+		}).orElseGet(DefaultParallelExecutionConfigurationStrategy::getDefaultParallelExecutionConfigurationStrategy);
+	}
+
+	private static DefaultParallelExecutionConfigurationStrategy getDefaultParallelExecutionConfigurationStrategy() {
+		return valueOf(CONFIG_STRATEGY_DEFAULT.toUpperCase(Locale.ROOT));
 	}
 
 }

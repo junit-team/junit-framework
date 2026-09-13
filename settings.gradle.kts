@@ -50,6 +50,8 @@ run {
 	includeProject("junit-jupiter-migrationsupport", mavenized = true, modular = true)
 	includeProject("junit-jupiter-params", mavenized = true, modular = true)
 	includeProject("junit-platform-commons", mavenized = true, modular = true)
+	includeProject("junit-platform-configuration-api", mavenized = true, modular = true)
+	includeProject("junit-platform-configuration-processor", mavenized = true, modular = true)
 	includeProject("junit-platform-console", mavenized = true, modular = true)
 	includeProject("junit-platform-console-standalone", mavenized = true)
 	includeProject("junit-platform-engine", mavenized = true, modular = true)

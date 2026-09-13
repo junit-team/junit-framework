@@ -10,12 +10,14 @@
 
 package org.junit.platform.launcher.core;
 
+import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.launcher.LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -25,7 +27,8 @@ import org.junit.platform.engine.ConfigurationParameters;
  *
  * @since 1.13
  */
-enum LauncherPhase {
+@API(status = INTERNAL, since = "1.13")
+public enum LauncherPhase {
 
 	DISCOVERY, EXECUTION;
 
@@ -45,6 +48,6 @@ enum LauncherPhase {
 
 	@Override
 	public String toString() {
-		return name().toLowerCase(Locale.ENGLISH);
+		return name().toLowerCase(Locale.ROOT);
 	}
 }
