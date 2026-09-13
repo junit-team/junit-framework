@@ -108,7 +108,7 @@ class AssertTimeout {
 		if (!includeNanoSeconds) {
 			return "%d ms".formatted(milliseconds);
 		}
-		long nanoFraction = duration.toNanosPart() - MILLISECONDS.toNanos(milliseconds);
+		long nanoFraction = duration.toNanos() - MILLISECONDS.toNanos(milliseconds);
 		return "%d.%06d ms".formatted(milliseconds, nanoFraction);
 	}
 
