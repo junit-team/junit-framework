@@ -28,8 +28,16 @@ final class ConfigurationMetadata {
 		return properties;
 	}
 
+	public List<Hint> hints() {
+		return hints;
+	}
+
 	void addProperty(Property property) {
 		properties.add(property);
+	}
+
+	void addHint(Hint hint) {
+		hints.add(hint);
 	}
 
 	record Property( //
@@ -51,25 +59,31 @@ final class ConfigurationMetadata {
 
 	}
 
-	record Hint(
-			String name,
-			List<ValueHint> values,
-			List<ValueProvider> providers
+	record Hint( //
+			String name, //
+			@Nullable List<ValueHint> values, //
+			@Nullable List<ValueProvider> providers //
 	) {
 
 	}
 
-	record ValueHint(
-			String value,
-		 	String description
-	){
+	record ValueHint( //
+			Object value, //
+			@Nullable String description //
+	) {
 
 	}
 
-	record ValueProvider(
-			String name,
-			Object parameters
-	){
+	record ValueProvider( //
+			String name, //
+			@Nullable Parameters parameters //
+	) {
+
+	}
+
+	record Parameters( //
+			String target //
+	) {
 
 	}
 }
