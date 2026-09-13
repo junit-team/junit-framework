@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.engine.extension;
 
-import static org.junit.jupiter.api.timeout.TimeoutUtils.isRepresentableInNanos;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -31,16 +31,26 @@ record TimeoutDuration(long value, TimeUnit unit) {
 	}
 
 	TimeoutDuration(long value, TimeUnit unit) {
+		Preconditions.notNull(unit, "timeout unit must not be null");
 		Preconditions.condition(value > 0, () -> "timeout duration must be a positive number: " + value);
+		long maxRepresentableValue = maxRepresentableValueFor(unit);
+		Preconditions.condition(value <= maxRepresentableValue, //
+			() -> "timeout duration must be less than approximately %s (2^63 nanoseconds): %s" //
+					.formatted(formatTimeoutDuration(maxRepresentableValue, unit), formatTimeoutDuration(value, unit)));
 		this.value = value;
-		this.unit = Preconditions.notNull(unit, "timeout unit must not be null");
-		Preconditions.condition(isRepresentableInNanos(toDuration()), //
-			() -> "timeout duration must be less than approximately 292 years (2^63 nanoseconds): %s" //
-					.formatted(toString()));
+		this.unit = unit;
+	}
+
+	private static long maxRepresentableValueFor(TimeUnit unit) {
+		return unit.convert(Long.MAX_VALUE, NANOSECONDS);
 	}
 
 	@Override
 	public String toString() {
+		return formatTimeoutDuration(value, unit);
+	}
+
+	private static String formatTimeoutDuration(long value, TimeUnit unit) {
 		String label = unit.name().toLowerCase(Locale.ROOT);
 		if (value == 1 && label.endsWith("s")) {
 			label = label.substring(0, label.length() - 1);
