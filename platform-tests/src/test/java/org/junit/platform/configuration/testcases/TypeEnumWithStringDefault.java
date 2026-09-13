@@ -15,7 +15,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
 public final class TypeEnumWithStringDefault {
 
-	@ConfigurationParameter(type = ExampleEnum.class, defaultValue = @Value(stringValue = "A"))
+	@ConfigurationParameter(type = ExampleEnum.class, defaultValue = @Value(stringValue = "a"))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 	enum ExampleEnum {
