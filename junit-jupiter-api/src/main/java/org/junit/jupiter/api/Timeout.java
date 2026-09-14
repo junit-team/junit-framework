@@ -75,6 +75,9 @@ import org.apiguardian.api.API;
  * {@code <number> [ns|μs|ms|s|m|h|d]}. The space between the number and the
  * unit may be omitted. Specifying no unit is equivalent to using seconds.
  *
+ * <p>The timeout must be positive and less than approximately 292 years
+ * (2^63 nanoseconds).
+ *
  * <table class="plain">
  * <caption>Timeout configuration via configuration parameter vs. annotation</caption>
  * <tr><th> Value         </th><th> Equivalent annotation                             </th></tr>
