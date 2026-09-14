@@ -11,9 +11,9 @@
 package org.junit.jupiter.api;
 
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
-import static org.junit.jupiter.api.DurationUtils.formatDurationInMs;
-import static org.junit.jupiter.api.DurationUtils.hasSignificantNanoFraction;
-import static org.junit.jupiter.api.timeout.TimeoutUtils.isRepresentableInNanos;
+import static org.junit.jupiter.api.timeout.DurationUtils.formatDurationInMs;
+import static org.junit.jupiter.api.timeout.DurationUtils.hasSignificantNanoFraction;
+import static org.junit.jupiter.api.timeout.DurationUtils.isPositiveAndRepresentableInNanos;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.time.Duration;
@@ -37,10 +37,18 @@ class AssertTimeout {
 	}
 
 	static void assertTimeout(Duration timeout, Executable executable) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(executable, () -> "executable must not be null");
 		assertTimeout(timeout, executable, (String) null);
 	}
 
 	static void assertTimeout(Duration timeout, Executable executable, @Nullable String message) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(executable, () -> "executable must not be null");
 		AssertTimeout.<@Nullable Object> assertTimeout(timeout, () -> {
 			executable.execute();
 			return null;
@@ -48,6 +56,10 @@ class AssertTimeout {
 	}
 
 	static void assertTimeout(Duration timeout, Executable executable, Supplier<@Nullable String> messageSupplier) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(executable, () -> "executable must not be null");
 		AssertTimeout.<@Nullable Object> assertTimeout(timeout, () -> {
 			executable.execute();
 			return null;
@@ -55,25 +67,33 @@ class AssertTimeout {
 	}
 
 	static <T extends @Nullable Object> T assertTimeout(Duration timeout, ThrowingSupplier<T> supplier) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(supplier, () -> "supplier must not be null");
 		return assertTimeout(timeout, supplier, (Object) null);
 	}
 
 	static <T extends @Nullable Object> T assertTimeout(Duration timeout, ThrowingSupplier<T> supplier,
 			@Nullable String message) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(supplier, () -> "supplier must not be null");
 		return assertTimeout(timeout, supplier, (Object) message);
 	}
 
 	static <T extends @Nullable Object> T assertTimeout(Duration timeout, ThrowingSupplier<T> supplier,
 			Supplier<@Nullable String> messageSupplier) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(supplier, () -> "supplier must not be null");
 		return assertTimeout(timeout, supplier, (Object) messageSupplier);
 	}
 
 	private static <T extends @Nullable Object> T assertTimeout(Duration timeout, ThrowingSupplier<T> supplier,
 			@Nullable Object messageOrSupplier) {
-		Preconditions.notNull(timeout, () -> "timeout must not be null");
-		Preconditions.condition(!timeout.isNegative() && !timeout.isZero(), () -> "timeout must be positive");
-		Preconditions.condition(isRepresentableInNanos(timeout),
-			() -> "timeout must be less than approximately 292 years (2^63 nanoseconds)");
 
 		long start = System.nanoTime();
 		T result;

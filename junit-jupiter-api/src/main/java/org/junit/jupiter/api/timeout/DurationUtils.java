@@ -8,23 +8,42 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-package org.junit.jupiter.api;
+package org.junit.jupiter.api.timeout;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.time.Duration;
 
-final class DurationUtils {
+import org.apiguardian.api.API;
+
+/**
+ * Internal utilities for working with durations.
+ *
+ * @since 6.0
+ */
+@API(status = INTERNAL, since = "6.2")
+public final class DurationUtils {
+
+	private static final Duration MAX_NANO_DURATION = Duration.ofNanos(Long.MAX_VALUE);
 
 	private DurationUtils() {
 		/* no-op */
 	}
 
-	static String formatDurationInFractionalMs(Duration duration) {
+	public static boolean isPositiveAndRepresentableInNanos(Duration duration) {
+		return isPositive(duration) && duration.compareTo(MAX_NANO_DURATION) <= 0;
+	}
+
+	private static boolean isPositive(Duration timeout) {
+		return !timeout.isNegative() && !timeout.isZero();
+	}
+
+	public static String formatDurationInFractionalMs(Duration duration) {
 		return formatDurationInMs(duration, hasSignificantNanoFraction(duration));
 	}
 
-	static String formatDurationInMs(Duration duration, boolean includeNanoSecondFraction) {
+	public static String formatDurationInMs(Duration duration, boolean includeNanoSecondFraction) {
 		long milliseconds = duration.toMillis();
 		if (!includeNanoSecondFraction) {
 			return "%d ms".formatted(milliseconds);
@@ -33,12 +52,11 @@ final class DurationUtils {
 		return "%d.%06d ms".formatted(milliseconds, nanoFraction);
 	}
 
-	static boolean hasSignificantNanoFraction(Duration timeout) {
+	public static boolean hasSignificantNanoFraction(Duration timeout) {
 		return nanoFraction(timeout) != 0;
 	}
 
 	private static long nanoFraction(Duration timeout) {
 		return timeout.toNanos() - MILLISECONDS.toNanos(timeout.toMillis());
 	}
-
 }

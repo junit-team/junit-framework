@@ -30,15 +30,12 @@ record TimeoutDuration(long value, TimeUnit unit) {
 		return new TimeoutDuration(timeout.value(), timeout.unit());
 	}
 
-	TimeoutDuration(long value, TimeUnit unit) {
+	TimeoutDuration {
 		Preconditions.notNull(unit, "timeout unit must not be null");
-		Preconditions.condition(value > 0, () -> "timeout duration must be a positive number: " + value);
 		long maxRepresentableValue = maxRepresentableValueFor(unit);
-		Preconditions.condition(value <= maxRepresentableValue, //
-			() -> "timeout duration must be less than approximately %s (2^63 nanoseconds): %s" //
+		Preconditions.condition(value > 0 && value <= maxRepresentableValue, //
+			() -> "timeout duration must be a positive number less than approximately %s (2^63 nanoseconds): %s" //
 					.formatted(formatTimeoutDuration(maxRepresentableValue, unit), formatTimeoutDuration(value, unit)));
-		this.value = value;
-		this.unit = unit;
 	}
 
 	private static long maxRepresentableValueFor(TimeUnit unit) {

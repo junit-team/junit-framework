@@ -109,16 +109,17 @@ class AssertTimeoutAssertionsTests {
 		@Test
 		void positiveDuration() {
 			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(-1), (Executable) () -> fail("enigma"))) //
-					.withMessage("timeout must be positive");
+					.withMessage("timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(0), (Executable) () -> fail("enigma"))) //
-					.withMessage("timeout must be positive");
+					.withMessage("timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 		}
 
 		@Test
 		void timeoutrepresentableInNanos() {
 			assertPreconditionViolationFor(
 				() -> assertTimeout(ofNanos(Long.MAX_VALUE).plusNanos(1), (Executable) () -> fail("enigma"))) //
-						.withMessage("timeout must be less than approximately 292 years (2^63 nanoseconds)");
+						.withMessage(
+							"timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 		}
 	}
 
@@ -221,16 +222,17 @@ class AssertTimeoutAssertionsTests {
 		@Test
 		void positiveDuration() {
 			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(-1), () -> fail("enigma"))) //
-					.withMessage("timeout must be positive");
+					.withMessage("timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 			assertPreconditionViolationFor(() -> assertTimeout(ofNanos(0), () -> fail("enigma"))) //
-					.withMessage("timeout must be positive");
+					.withMessage("timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 		}
 
 		@Test
 		void timeoutRepresentableInNanos() {
 			assertPreconditionViolationFor(
 				() -> assertTimeout(ofNanos(Long.MAX_VALUE).plusNanos(1), () -> fail("enigma"))) //
-						.withMessage("timeout must be less than approximately 292 years (2^63 nanoseconds)");
+						.withMessage(
+							"timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 		}
 	}
 

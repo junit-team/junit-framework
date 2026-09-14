@@ -56,9 +56,9 @@ class TimeoutDurationTests {
 		@Test
 		void positiveDuration() {
 			assertPreconditionViolationFor(() -> new TimeoutDuration(0, SECONDS)).withMessage(
-				"timeout duration must be a positive number: 0");
+				"timeout duration must be a positive number less than approximately 9223372036 seconds (2^63 nanoseconds): 0 seconds");
 			assertPreconditionViolationFor(() -> new TimeoutDuration(-1, SECONDS)).withMessage(
-				"timeout duration must be a positive number: -1");
+				"timeout duration must be a positive number less than approximately 9223372036 seconds (2^63 nanoseconds): -1 seconds");
 		}
 
 		@Test
@@ -74,27 +74,27 @@ class TimeoutDurationTests {
 			var maxNanoRepresentableDays = maxRepresentableDuration.toDays();
 			assertPreconditionViolationFor(() -> new TimeoutDuration(maxNanoRepresentableDays + 1, DAYS)) //
 					.withMessage(
-						"timeout duration must be less than approximately 106751 days (2^63 nanoseconds): 106752 days");
+						"timeout duration must be a positive number less than approximately 106751 days (2^63 nanoseconds): 106752 days");
 
 			var maxNanoRepresentableHours = maxRepresentableDuration.toHours();
 			assertPreconditionViolationFor(() -> new TimeoutDuration(maxNanoRepresentableHours + 1, HOURS)) //
 					.withMessage(
-						"timeout duration must be less than approximately 2562047 hours (2^63 nanoseconds): 2562048 hours");
+						"timeout duration must be a positive number less than approximately 2562047 hours (2^63 nanoseconds): 2562048 hours");
 
 			var maxNanoRepresentableMinutes = maxRepresentableDuration.toMinutes();
 			assertPreconditionViolationFor(() -> new TimeoutDuration(maxNanoRepresentableMinutes + 1, MINUTES)) //
 					.withMessage(
-						"timeout duration must be less than approximately 153722867 minutes (2^63 nanoseconds): 153722868 minutes");
+						"timeout duration must be a positive number less than approximately 153722867 minutes (2^63 nanoseconds): 153722868 minutes");
 
 			var maxNanoRepresentableSeconds = maxRepresentableDuration.toSeconds();
 			assertPreconditionViolationFor(() -> new TimeoutDuration(maxNanoRepresentableSeconds + 1, SECONDS)) //
 					.withMessage(
-						"timeout duration must be less than approximately 9223372036 seconds (2^63 nanoseconds): 9223372037 seconds");
+						"timeout duration must be a positive number less than approximately 9223372036 seconds (2^63 nanoseconds): 9223372037 seconds");
 
 			var maxNanoRepresentableMillis = maxRepresentableDuration.toMillis();
 			assertPreconditionViolationFor(() -> new TimeoutDuration(maxNanoRepresentableMillis + 1, MILLISECONDS)) //
 					.withMessage(
-						"timeout duration must be less than approximately 9223372036854 milliseconds (2^63 nanoseconds): 9223372036855 milliseconds");
+						"timeout duration must be a positive number less than approximately 9223372036854 milliseconds (2^63 nanoseconds): 9223372036855 milliseconds");
 
 			var maxNanoRepresentableNanos = maxRepresentableDuration.toNanos();
 			assertDoesNotThrow(() -> new TimeoutDuration(maxNanoRepresentableNanos, NANOSECONDS));
