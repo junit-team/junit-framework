@@ -76,7 +76,7 @@ final class JsonConverter {
 			builder.add(name, v);
 		}
 		else if (defaultValue instanceof Byte v) {
-			builder.add(name, "%02X".formatted(v));
+			builder.add(name, (int) v);
 		}
 		else if (defaultValue instanceof Integer v) {
 			builder.add(name, v);

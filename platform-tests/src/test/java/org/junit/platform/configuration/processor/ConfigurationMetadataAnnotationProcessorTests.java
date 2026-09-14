@@ -309,7 +309,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 							"name": "org.example.bytes",
 							"type": "java.lang.Byte",
 							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
-							"defaultValue": "2A"
+							"defaultValue": 42
 						  },
 						  {
 							"name": "org.example.ints",
