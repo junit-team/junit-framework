@@ -10,7 +10,6 @@
 
 package example;
 
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
@@ -27,3 +26,7 @@ public class ConfigurationParametersDemo {
 	public static final String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = "org.example.execution-mode";
 }
 // end::user_guide[]
+
+enum ExecutionMode {
+	FIXED, DYNAMIC, CUSTOM;
+}
