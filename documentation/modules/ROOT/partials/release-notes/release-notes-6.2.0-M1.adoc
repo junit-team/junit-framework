@@ -43,7 +43,7 @@ repository on GitHub.
   reported output from different tests could interleave.
 * Test Engine and Jupiter Extension authors may generate a machine-readable overview
   of configuration parameters. See
-  xref:advanced-topics/junit-platform-configuration.adoc[Documenting Configuration
+  xref:advanced-topics/configuration-parameter-documentation.adoc[Documenting Configuration
   Parameters] for more information.
 * Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 
