@@ -114,12 +114,14 @@ final class ConfigurationParameterHandler {
 		if (defaultValues.size() != 1) {
 			messager.printMessage(ERROR, "@ConfigurationParameter must have exactly one default value", field.element(),
 				field.annotationMirror());
+			return null;
 		}
 		var entry = defaultValues.entrySet().iterator().next();
 		var values = entry.getValue();
 		if (values.size() != 1) {
 			messager.printMessage(ERROR, "@ConfigurationParameter must have exactly one default value", field.element(),
 				field.annotationMirror());
+			return null;
 		}
 		var key = entry.getKey();
 		var value = values.get(0);
