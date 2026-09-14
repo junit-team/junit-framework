@@ -135,7 +135,7 @@ public @interface TempDir {
 	/**
 	 * Default value for {@value #DEFAULT_CLEANUP_MODE_PROPERTY_NAME} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	String DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT = "always";
 
 	/**

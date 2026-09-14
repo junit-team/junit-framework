@@ -30,7 +30,7 @@ public final class Constants {
 	/**
 	 * Default value for {@value #PARALLEL_EXECUTION_ENABLED} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
 
 	/**
@@ -61,7 +61,7 @@ public final class Constants {
 	/**
 	 * Default value for {@value #PARALLEL_CLASS_EXECUTION} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean PARALLEL_CLASS_EXECUTION_DEFAULT = false;
 
 	/**
@@ -80,7 +80,7 @@ public final class Constants {
 	/**
 	 * Default value for {@value #PARALLEL_METHOD_EXECUTION} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean PARALLEL_METHOD_EXECUTION_DEFAULT = false;
 
 	/**
@@ -99,7 +99,7 @@ public final class Constants {
 	/**
 	 * Default value for {@value #DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean DISCOVERY_ISSUE_REPORTING_ENABLED_DEFAULT = true;
 
 	/**

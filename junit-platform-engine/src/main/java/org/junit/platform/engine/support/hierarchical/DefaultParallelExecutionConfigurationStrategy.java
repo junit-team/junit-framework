@@ -118,7 +118,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	/**
 	 * Default value for {@value #CONFIG_STRATEGY_PROPERTY_NAME} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final String CONFIG_STRATEGY_DEFAULT = "dynamic";
 
 	/**
@@ -156,7 +156,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	/**
 	 * Default value for {@value #CONFIG_FIXED_SATURATE_PROPERTY_NAME} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean CONFIG_FIXED_SATURATE_DEFAULT = true;
 
 	/**
@@ -178,7 +178,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	/**
 	 * Default value for {@value #CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final double CONFIG_DYNAMIC_FACTOR_DEFAULT = 1.0;
 
 	/**

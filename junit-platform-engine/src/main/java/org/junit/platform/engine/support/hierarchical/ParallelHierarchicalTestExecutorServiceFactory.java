@@ -35,7 +35,7 @@ public final class ParallelHierarchicalTestExecutorServiceFactory {
 	/**
 	 * Default value for {@value #EXECUTOR_SERVICE_PROPERTY_NAME} is {@value}.
 	 */
-	@API(status = MAINTAINED, since = "6.2.0")
+	@API(status = MAINTAINED, since = "6.2")
 	public static final String EXECUTOR_SERVICE_DEFAULT = "fork_join_pool";
 
 	/**

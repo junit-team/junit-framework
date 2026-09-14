@@ -176,7 +176,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 		/**
 		 * Default value for {@value #DEFAULT_SCOPE_PROPERTY_NAME} is {@value}.
 		 */
-		@API(status = MAINTAINED, since = "6.2.0")
+		@API(status = MAINTAINED, since = "6.2")
 		public static final String DEFAULT_SCOPE_DEFAULT = "default";
 
 		/**
