@@ -145,11 +145,11 @@ final class ConfigurationParameterHandler {
 	private @Nullable Deprecation processDeprecation(ConfigurationParameterAnnotatedField field) {
 		var values = field.deprecationValues();
 		if (!values.isEmpty()) {
-			return new Deprecation(null, values.get("reason"), values.get("replacement"), values.get("since"));
+			return new Deprecation(values.get("reason"), values.get("replacement"), values.get("since"));
 		}
 		// Fallback, look for @Deprecated
 		if (field.isDeprecated()) {
-			return new Deprecation(null, null, null, null);
+			return new Deprecation(null, null, null);
 		}
 		return null;
 	}

@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation;
-import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation.Level;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Property;
 
 import jakarta.json.Json;
@@ -109,11 +108,6 @@ final class JsonConverter {
 	private JsonObject toJsonObject(Deprecation deprecation) {
 		var builder = factory.createObjectBuilder();
 
-		var level = deprecation.level();
-		if (level != null) {
-			builder.add("level", toJsonValue(level));
-		}
-
 		var reason = deprecation.reason();
 		if (reason != null) {
 			builder.add("reason", reason);
@@ -130,10 +124,6 @@ final class JsonConverter {
 		}
 
 		return builder.build();
-	}
-
-	private String toJsonValue(Level level) {
-		return level.value();
 	}
 
 	private <T> JsonArray toJsonArray(List<T> properties, Function<T, JsonValue> converter) {
