@@ -239,16 +239,9 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	}
 
 	static ParallelExecutionConfigurationStrategy getStrategy(ConfigurationParameters configurationParameters) {
-		return configurationParameters.get(CONFIG_STRATEGY_PROPERTY_NAME, value -> {
-			try {
-				return valueOf(value.toUpperCase(Locale.ROOT));
-			}
-			catch (Exception e) {
-				throw new JUnitException(
-					"Invalid ParallelExecutionConfigurationStrategy '%s' set via the '%s' configuration parameter.".formatted(
-						value, CONFIG_STRATEGY_PROPERTY_NAME));
-			}
-		}).orElseGet(DefaultParallelExecutionConfigurationStrategy::getDefaultParallelExecutionConfigurationStrategy);
+		return configurationParameters.get(CONFIG_STRATEGY_PROPERTY_NAME,
+			value -> valueOf(value.toUpperCase(Locale.ROOT))).orElseGet(
+				DefaultParallelExecutionConfigurationStrategy::getDefaultParallelExecutionConfigurationStrategy);
 	}
 
 	private static DefaultParallelExecutionConfigurationStrategy getDefaultParallelExecutionConfigurationStrategy() {
