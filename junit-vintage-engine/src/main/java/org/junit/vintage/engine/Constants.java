@@ -74,7 +74,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
-	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_CLASS_EXECUTION_DEFAULT))
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
 
 	/**
