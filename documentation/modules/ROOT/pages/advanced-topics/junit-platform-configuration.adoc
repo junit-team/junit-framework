@@ -14,7 +14,7 @@ include::example$java/example/ConfigurationParametersDemo.java[tags=user_guide]
 Processing the annotations with `junit-platform-configuration-processor` will produce a
 `META-INF/junit-platform-configuration-metadata.json` file in the format of
 {SpringBootConfigurationMetadata}. This file can then be used to generate documentation
-or provide code-completion by IDEs. An example is shown below.
+or provide code completion by IDEs. An example is shown below.
 
 [source,json,indent=0]
 [subs=attributes+]
