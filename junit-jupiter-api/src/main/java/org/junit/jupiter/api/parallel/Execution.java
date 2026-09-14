@@ -77,7 +77,7 @@ public @interface Execution {
 	 * <p>Supported values include names of enum constants defined in
 	 * {@link ExecutionMode}, ignoring case.
 	 *
-	 * <p>If not specified, the default is {@link #DEFAULT_EXECUTION_MODE_DEFAULT} which corresponds to
+	 * <p>If not specified, the default is {@value #DEFAULT_EXECUTION_MODE_DEFAULT} which corresponds to
 	 * {@code @Execution(ExecutionMode.SAME_THREAD)}.
 	 *
 	 * @since 5.4
