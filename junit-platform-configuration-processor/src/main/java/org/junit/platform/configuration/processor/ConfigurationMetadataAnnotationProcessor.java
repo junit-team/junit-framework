@@ -62,13 +62,13 @@ import jakarta.json.stream.JsonGenerator;
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
 public final class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
-	private @Nullable ConfigurationMetaData metaData;
+	private @Nullable ConfigurationMetadata metaData;
 	private @Nullable ConfigurationParameterHandler configurationParameterHandler;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment environment) {
 		super.init(environment);
-		this.metaData = new ConfigurationMetaData();
+		this.metaData = new ConfigurationMetadata();
 		this.configurationParameterHandler = new ConfigurationParameterHandler(metaData,
 			processingEnv.getElementUtils(), processingEnv.getMessager());
 	}

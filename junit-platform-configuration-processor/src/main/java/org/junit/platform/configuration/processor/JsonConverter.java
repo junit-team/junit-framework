@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation.Level;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation.Level;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Property;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -29,7 +29,7 @@ final class JsonConverter {
 	private final Map<String, ?> config = Map.of();
 	private final JsonBuilderFactory factory = Json.createBuilderFactory(config);
 
-	JsonObject toJsonObject(ConfigurationMetaData metaData) {
+	JsonObject toJsonObject(ConfigurationMetadata metaData) {
 		var builder = factory.createObjectBuilder();
 
 		var properties = metaData.properties();

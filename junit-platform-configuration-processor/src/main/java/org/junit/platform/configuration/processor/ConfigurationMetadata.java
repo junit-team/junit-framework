@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * See <a href="https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html">Spring Boot - Specifications - Configuration Metadata - Metadata Format</a>.
  */
-final class ConfigurationMetaData {
+final class ConfigurationMetadata {
 
 	private final List<Property> properties = new ArrayList<>();
 

@@ -25,16 +25,16 @@ import javax.lang.model.util.Elements;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.api.ConfigurationParameter;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Deprecation;
-import org.junit.platform.configuration.processor.ConfigurationMetaData.Property;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Property;
 
 final class ConfigurationParameterHandler {
 
-	private final ConfigurationMetaData metaData;
+	private final ConfigurationMetadata metaData;
 	private final Elements elementUtils;
 	private final Messager messager;
 
-	ConfigurationParameterHandler(ConfigurationMetaData metaData, Elements elementUtils, Messager messager) {
+	ConfigurationParameterHandler(ConfigurationMetadata metaData, Elements elementUtils, Messager messager) {
 		this.metaData = metaData;
 		this.elementUtils = elementUtils;
 		this.messager = messager;
