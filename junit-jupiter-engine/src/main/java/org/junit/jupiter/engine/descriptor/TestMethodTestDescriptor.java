@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -30,7 +31,9 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
+import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler;
+import org.junit.jupiter.api.extension.TestMethodReturnValueHandler;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.TestInstancePreDestroyCallback;
 import org.junit.jupiter.api.extension.TestInstances;
@@ -39,10 +42,12 @@ import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.AfterEachMethodAdapter;
 import org.junit.jupiter.engine.execution.BeforeEachMethodAdapter;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker;
+import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall;
 import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.ReflectiveInterceptorCall.VoidMethodInterceptorCall;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
+import org.junit.jupiter.engine.support.MethodReflectionUtils;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
@@ -216,14 +221,48 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 			try {
 				Method testMethod = getTestMethod();
 				Object instance = extensionContext.getRequiredTestInstance();
-				executableInvoker.invokeVoid(testMethod, instance, extensionContext, context.getExtensionRegistry(),
-					interceptorCall);
+				TestMethodReturnValueHandler handler = MethodReflectionUtils.findReturnValueHandler(testMethod);
+				if (handler != null) {
+					handler.execute(invokeTestMethodCapturingResult(testMethod, instance,
+						extensionContext, context.getExtensionRegistry()), extensionContext);
+				}
+				else {
+					executableInvoker.invokeVoid(testMethod, instance, extensionContext,
+						context.getExtensionRegistry(), interceptorCall);
+				}
 			}
 			catch (Throwable throwable) {
 				UnrecoverableExceptions.rethrowIfUnrecoverable(throwable);
 				invokeTestExecutionExceptionHandlers(context.getExtensionRegistry(), extensionContext, throwable);
 			}
 		});
+	}
+
+	@SuppressWarnings("NullAway")
+	private InvocationInterceptor.Invocation<Object> invokeTestMethodCapturingResult(Method testMethod, Object instance,
+			ExtensionContext extensionContext, ExtensionRegistry extensionRegistry) {
+		return () -> executableInvoker.<@Nullable Object> invoke(testMethod, instance,
+			extensionContext, extensionRegistry, returnValueCapturingInterceptorCall());
+	}
+
+	@SuppressWarnings("NullAway")
+	private static ReflectiveInterceptorCall<Method, @Nullable Object> returnValueCapturingInterceptorCall() {
+		return (interceptor, invocation, invocationContext, extensionContext) -> {
+			Object[] resultHolder = new Object[1];
+			interceptor.interceptTestMethod(new InvocationInterceptor.Invocation<@Nullable Void>() {
+				@Override
+				public @Nullable Void proceed() throws Throwable {
+					resultHolder[0] = invocation.proceed();
+					return null;
+				}
+
+				@Override
+				public void skip() {
+					invocation.skip();
+				}
+			}, invocationContext, extensionContext);
+			return resultHolder[0];
+		};
 	}
 
 	private void invokeTestExecutionExceptionHandlers(ExtensionRegistry registry, ExtensionContext context,

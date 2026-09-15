@@ -49,6 +49,7 @@
 ** xref:extensions/exception-handling.adoc[]
 ** xref:extensions/pre-interrupt-callback.adoc[]
 ** xref:extensions/intercepting-invocations.adoc[]
+** xref:extensions/test-method-return-value-handling.adoc[]
 ** xref:extensions/providing-invocation-contexts-for-class-templates.adoc[]
 ** xref:extensions/providing-invocation-contexts-for-test-templates.adoc[]
 ** xref:extensions/keeping-state-in-extensions.adoc[]

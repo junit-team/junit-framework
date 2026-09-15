@@ -212,6 +212,7 @@ asciidoc:
     TestInstancePreDestroyCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestInstancePreDestroyCallback.html[TestInstancePreDestroyCallback]'
     TestTemplateInvocationContext: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestTemplateInvocationContext.html[TestTemplateInvocationContext]'
     TestTemplateInvocationContextProvider: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestTemplateInvocationContextProvider.html[TestTemplateInvocationContextProvider]'
+    TestMethodReturnValueHandler: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestMethodReturnValueHandler.html[TestMethodReturnValueHandler]'
     TestWatcher: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestWatcher.html[TestWatcher]'
     PreInterruptCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/PreInterruptCallback.html[PreInterruptCallback]'
     # Jupiter Conditions
