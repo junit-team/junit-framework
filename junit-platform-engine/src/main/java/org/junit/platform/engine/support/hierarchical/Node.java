@@ -17,10 +17,12 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.ToStringBuilder;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.TestDescriptor;
@@ -49,6 +51,26 @@ public interface Node<C extends EngineExecutionContext> {
 	}
 
 	/**
+	 * Asynchronous variant of {@link #prepare(EngineExecutionContext)}.
+	 *
+	 * <p>The result is used purely as a promise that the preparation has
+	 * finished; the {@code CompletionStage} payload is intentionally ignored.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #prepare(EngineExecutionContext)} method, bridging it into the
+	 * reactive world.
+	 *
+	 * @param context the context to prepare
+	 * @return a completion stage signaling termination of the preparation;
+	 * never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> prepareAsync(C context) {
+		return AsyncTestExecution.synchronous(() -> prepare(context));
+	}
+
+	/**
 	 * Clean up the supplied {@code context} after execution.
 	 *
 	 * <p>The default implementation does nothing.
@@ -61,6 +83,26 @@ public interface Node<C extends EngineExecutionContext> {
 	}
 
 	/**
+	 * Asynchronous variant of {@link #cleanUp(EngineExecutionContext)}.
+	 *
+	 * <p>The result is used purely as a promise that the cleanup has finished;
+	 * the {@code CompletionStage} payload is intentionally ignored.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #cleanUp(EngineExecutionContext)} method, bridging it into the
+	 * reactive world.
+	 *
+	 * @param context the context to clean up
+	 * @return a completion stage signaling termination of the cleanup; never
+	 * {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> cleanUpAsync(C context) {
+		return AsyncTestExecution.synchronous(() -> cleanUp(context));
+	}
+
+	/**
 	 * Determine if the execution of the supplied {@code context} should be
 	 * <em>skipped</em>.
 	 *
@@ -68,6 +110,28 @@ public interface Node<C extends EngineExecutionContext> {
 	 */
 	default SkipResult shouldBeSkipped(C context) throws Exception {
 		return SkipResult.doNotSkip();
+	}
+
+	/**
+	 * Asynchronous variant of {@link #shouldBeSkipped(EngineExecutionContext)}.
+	 *
+	 * <p>The result is used purely as a promise that the decision has been
+	 * made; the {@code CompletionStage} payload is intentionally ignored (it is
+	 * never a skip result). Use the (blocking) {@link #shouldBeSkipped} method
+	 * to inspect the actual skip decision.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #shouldBeSkipped(EngineExecutionContext)} method, bridging it into
+	 * the reactive world.
+	 *
+	 * @param context the context to inspect
+	 * @return a completion stage signaling that a skip decision has been made;
+	 * never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> shouldBeSkippedAsync(C context) {
+		return AsyncTestExecution.synchronous(() -> shouldBeSkipped(context));
 	}
 
 	/**
@@ -86,6 +150,29 @@ public interface Node<C extends EngineExecutionContext> {
 	 */
 	default C before(C context) throws Exception {
 		return context;
+	}
+
+	/**
+	 * Asynchronous variant of {@link #before(EngineExecutionContext)}.
+	 *
+	 * <p>The result is used purely as a promise that the before-behavior has
+	 * finished; the {@code CompletionStage} payload is intentionally ignored.
+	 * The produced context is carried by the (blocking)
+	 * {@link #before(EngineExecutionContext)} method which the default
+	 * implementation invokes.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #before(EngineExecutionContext)} method, bridging it into the
+	 * reactive world.
+	 *
+	 * @param context the context to execute in
+	 * @return a completion stage providing the context to use for children of
+	 * this node; never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<C> beforeAsync(C context) {
+		return AsyncTestExecution.synchronousResult(() -> before(context));
 	}
 
 	/**
@@ -111,6 +198,29 @@ public interface Node<C extends EngineExecutionContext> {
 	}
 
 	/**
+	 * Asynchronous variant of
+	 * {@link #execute(EngineExecutionContext, DynamicTestExecutor)}.
+	 *
+	 * <p>The produced context is carried by the (blocking)
+	 * {@link #execute(EngineExecutionContext, DynamicTestExecutor)} method which
+	 * the default implementation invokes.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #execute(EngineExecutionContext, DynamicTestExecutor)} method,
+	 * bridging it into the reactive world.
+	 *
+	 * @param context the context to execute in
+	 * @param dynamicTestExecutor a mechanism to register additional test tasks
+	 * @return a completion stage providing the context to use for the node's
+	 * after-behavior; never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<C> executeAsync(C context, DynamicTestExecutor dynamicTestExecutor) {
+		return AsyncTestExecution.synchronousResult(() -> execute(context, dynamicTestExecutor));
+	}
+
+	/**
 	 * Execute the <em>after</em> behavior of this node.
 	 *
 	 * <p>This method will be called once <em>after</em> {@linkplain #execute
@@ -126,6 +236,26 @@ public interface Node<C extends EngineExecutionContext> {
 	}
 
 	/**
+	 * Asynchronous variant of {@link #after(EngineExecutionContext)}.
+	 *
+	 * <p>The result is used purely as a promise that the after-behavior has
+	 * finished; the {@code CompletionStage} payload is intentionally ignored.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #after(EngineExecutionContext)} method, bridging it into the
+	 * reactive world.
+	 *
+	 * @param context the context to execute in
+	 * @return a completion stage signaling termination of the after-behavior;
+	 * never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> afterAsync(C context) {
+		return AsyncTestExecution.synchronous(() -> after(context));
+	}
+
+	/**
 	 * Wraps around the invocation of {@link #before(EngineExecutionContext)},
 	 * {@link #execute(EngineExecutionContext, DynamicTestExecutor)}, and
 	 * {@link #after(EngineExecutionContext)}.
@@ -137,6 +267,27 @@ public interface Node<C extends EngineExecutionContext> {
 	@API(status = STABLE, since = "1.10")
 	default void around(C context, Invocation<C> invocation) throws Exception {
 		invocation.invoke(context);
+	}
+
+	/**
+	 * Asynchronous variant of {@link #around(EngineExecutionContext, Invocation)}.
+	 *
+	 * <p>The result is used purely as a promise that the around-behavior has
+	 * finished; the {@code CompletionStage} payload is intentionally ignored.
+	 *
+	 * <p>The default implementation delegates to the (blocking)
+	 * {@link #around(EngineExecutionContext, Invocation)} method, bridging it
+	 * into the reactive world.
+	 *
+	 * @param context the context to execute in
+	 * @param invocation the wrapped invocation (must be invoked exactly once)
+	 * @return a completion stage signaling termination of the around-behavior;
+	 * never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default CompletionStage<?> aroundAsync(C context, Invocation<C> invocation) {
+		return AsyncTestExecution.synchronous(() -> around(context, invocation));
 	}
 
 	/**
@@ -334,6 +485,33 @@ public interface Node<C extends EngineExecutionContext> {
 		 * @throws InterruptedException if interrupted while waiting
 		 */
 		void awaitFinished() throws InterruptedException;
+
+		/**
+		 * Asynchronous variant of {@link #awaitFinished()}.
+		 *
+		 * <p>The returned {@link CompletionStage} is used purely as a promise
+		 * that all submitted dynamic tests have finished; its payload is
+		 * intentionally ignored.
+		 *
+		 * <p>The default implementation bridges the (blocking)
+		 * {@link #awaitFinished()} method into the reactive world.
+		 *
+		 * @return a completion stage signaling that all dynamic tests have
+		 * finished; never {@code null}
+		 * @since 6.2
+		 */
+		@API(status = EXPERIMENTAL, since = "6.2")
+		default CompletionStage<?> awaitFinishedAsync() {
+			return AsyncTestExecution.synchronous(() -> {
+				try {
+					awaitFinished();
+				}
+				catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new JUnitException("Interrupted while waiting for dynamic tests to finish", e);
+				}
+			});
+		}
 	}
 
 	/**

@@ -90,6 +90,54 @@ public final class ParallelHierarchicalTestExecutorServiceFactory {
 		};
 	}
 
+	/**
+	 * Create a reactive {@link HierarchicalTestExecutorService} with the given
+	 * maximum parallelism.
+	 *
+	 * <p>The reactive service coordinates concurrency and resource-lock waits
+	 * through completion stages rather than parked threads. Note: currently the
+	 * service still parks a worker while the body of a node runs; a fully
+	 * non-blocking execution lane from the top of the hierarchy down (option
+	 * "A") would be preferable but is intentionally deferred to limit the
+	 * impact of this first round.
+	 *
+	 * @param parallelism the maximum number of nodes executed concurrently
+	 * @return a new reactive {@link HierarchicalTestExecutorService}; never
+	 * {@code null}
+	 */
+	public static HierarchicalTestExecutorService createReactive(int parallelism) {
+		return new ReactiveHierarchicalTestExecutorService(parallelism);
+	}
+
+	/**
+	 * Create a reactive {@link HierarchicalTestExecutorService} for the
+	 * standalone cooperative lane, without any thread configuration.
+	 *
+	 * <p>Concurrency comes from the asynchronous test methods' own returned
+	 * contexts; a small trigger pool starts each async body. Container and
+	 * synchronous/non-async nodes run in discovery order.
+	 *
+	 * @return a new reactive {@link HierarchicalTestExecutorService}; never
+	 * {@code null}
+	 */
+	public static HierarchicalTestExecutorService createReactive() {
+		return new ReactiveHierarchicalTestExecutorService();
+	}
+
+	/**
+	 * Create a reactive {@link HierarchicalTestExecutorService} with the
+	 * parallelism derived from the supplied {@link ConfigurationParameters}.
+	 *
+	 * @param configurationParameters the configuration parameters to read the
+	 * parallelism from
+	 * @return a new reactive {@link HierarchicalTestExecutorService}; never
+	 * {@code null}
+	 */
+	public static HierarchicalTestExecutorService createReactive(ConfigurationParameters configurationParameters) {
+		var configuration = DefaultParallelExecutionConfigurationStrategy.toConfiguration(configurationParameters);
+		return createReactive(configuration.getParallelism());
+	}
+
 	private ParallelHierarchicalTestExecutorServiceFactory() {
 	}
 

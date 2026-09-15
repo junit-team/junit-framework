@@ -27,7 +27,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.api.extension.ClassTemplateInvocationLifecycleMethod;
+import org.junit.jupiter.engine.support.AsyncReturnTypeSupport;
 import org.junit.platform.commons.support.HierarchyTraversalMode;
 import org.junit.platform.commons.support.ModifierSupport;
 import org.junit.platform.engine.DiscoveryIssue;
@@ -49,24 +51,44 @@ final class LifecycleMethodUtils {
 
 	static List<Method> findBeforeAllMethods(Class<?> testClass, boolean requireStatic,
 			DiscoveryIssueReporter issueReporter) {
+		return findBeforeAllMethods(testClass, requireStatic, issueReporter, List.of());
+	}
+
+	static List<Method> findBeforeAllMethods(Class<?> testClass, boolean requireStatic,
+			DiscoveryIssueReporter issueReporter, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 		return findMethodsAndCheckStatic(testClass, requireStatic, BeforeAll.class, HierarchyTraversalMode.TOP_DOWN,
-			issueReporter);
+			issueReporter, asyncReturnValueHandlers);
 	}
 
 	static List<Method> findAfterAllMethods(Class<?> testClass, boolean requireStatic,
 			DiscoveryIssueReporter issueReporter) {
+		return findAfterAllMethods(testClass, requireStatic, issueReporter, List.of());
+	}
+
+	static List<Method> findAfterAllMethods(Class<?> testClass, boolean requireStatic,
+			DiscoveryIssueReporter issueReporter, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 		return findMethodsAndCheckStatic(testClass, requireStatic, AfterAll.class, HierarchyTraversalMode.BOTTOM_UP,
-			issueReporter);
+			issueReporter, asyncReturnValueHandlers);
 	}
 
 	static List<Method> findBeforeEachMethods(Class<?> testClass, DiscoveryIssueReporter issueReporter) {
-		return findMethodsAndCheckNonStatic(testClass, BeforeEach.class, HierarchyTraversalMode.TOP_DOWN,
-			issueReporter);
+		return findBeforeEachMethods(testClass, issueReporter, List.of());
+	}
+
+	static List<Method> findBeforeEachMethods(Class<?> testClass, DiscoveryIssueReporter issueReporter,
+			List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		return findMethodsAndCheckNonStatic(testClass, BeforeEach.class, HierarchyTraversalMode.TOP_DOWN, issueReporter,
+			asyncReturnValueHandlers);
 	}
 
 	static List<Method> findAfterEachMethods(Class<?> testClass, DiscoveryIssueReporter issueReporter) {
-		return findMethodsAndCheckNonStatic(testClass, AfterEach.class, HierarchyTraversalMode.BOTTOM_UP,
-			issueReporter);
+		return findAfterEachMethods(testClass, issueReporter, List.of());
+	}
+
+	static List<Method> findAfterEachMethods(Class<?> testClass, DiscoveryIssueReporter issueReporter,
+			List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		return findMethodsAndCheckNonStatic(testClass, AfterEach.class, HierarchyTraversalMode.BOTTOM_UP, issueReporter,
+			asyncReturnValueHandlers);
 	}
 
 	static void validateNoClassTemplateInvocationLifecycleMethodsAreDeclared(Class<?> testClass,
@@ -88,7 +110,7 @@ final class LifecycleMethodUtils {
 		findAllClassTemplateInvocationLifecycleMethods(testClass) //
 				.forEach(isNotPrivateError(issueReporter) //
 						.and(returnsPrimitiveVoid(issueReporter,
-							LifecycleMethodUtils::classTemplateInvocationLifecycleMethodAnnotationName)) //
+							LifecycleMethodUtils::classTemplateInvocationLifecycleMethodAnnotationName, List.of())) //
 						.and(requireStatic
 								? isStatic(issueReporter,
 									LifecycleMethodUtils::classTemplateInvocationLifecycleMethodAnnotationName)
@@ -108,31 +130,32 @@ final class LifecycleMethodUtils {
 
 	private static List<Method> findMethodsAndCheckStatic(Class<?> testClass, boolean requireStatic,
 			Class<? extends Annotation> annotationType, HierarchyTraversalMode traversalMode,
-			DiscoveryIssueReporter issueReporter) {
+			DiscoveryIssueReporter issueReporter, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 
 		Condition<Method> additionalCondition = requireStatic
 				? isStatic(issueReporter, __ -> annotationType.getSimpleName())
 				: alwaysSatisfied();
 		return findMethodsAndCheckVoidReturnType(testClass, annotationType, traversalMode, issueReporter,
-			additionalCondition);
+			additionalCondition, asyncReturnValueHandlers);
 	}
 
 	private static List<Method> findMethodsAndCheckNonStatic(Class<?> testClass,
 			Class<? extends Annotation> annotationType, HierarchyTraversalMode traversalMode,
-			DiscoveryIssueReporter issueReporter) {
+			DiscoveryIssueReporter issueReporter, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 
 		return findMethodsAndCheckVoidReturnType(testClass, annotationType, traversalMode, issueReporter,
-			isNotStatic(issueReporter, __ -> annotationType.getSimpleName()));
+			isNotStatic(issueReporter, __ -> annotationType.getSimpleName()), asyncReturnValueHandlers);
 	}
 
 	private static List<Method> findMethodsAndCheckVoidReturnType(Class<?> testClass,
 			Class<? extends Annotation> annotationType, HierarchyTraversalMode traversalMode,
-			DiscoveryIssueReporter issueReporter, Condition<? super Method> additionalCondition) {
+			DiscoveryIssueReporter issueReporter, Condition<? super Method> additionalCondition,
+			List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 
 		return findAnnotatedMethods(testClass, annotationType, traversalMode).stream() //
 				.peek(isNotPrivateWarning(issueReporter, annotationType::getSimpleName).toConsumer()) //
-				.filter(returnsPrimitiveVoid(issueReporter, __ -> annotationType.getSimpleName()).and(
-					additionalCondition).toPredicate()) //
+				.filter(returnsPrimitiveVoid(issueReporter, __ -> annotationType.getSimpleName(),
+					asyncReturnValueHandlers).and(additionalCondition).toPredicate()) //
 				.toList();
 	}
 
@@ -172,12 +195,22 @@ final class LifecycleMethodUtils {
 	}
 
 	private static Condition<Method> returnsPrimitiveVoid(DiscoveryIssueReporter issueReporter,
-			Function<Method, String> annotationNameProvider) {
-		return issueReporter.createReportingCondition(method -> getReturnType(method) == void.class, method -> {
-			String message = "@%s method '%s' must not return a value.".formatted(annotationNameProvider.apply(method),
-				method.toGenericString());
-			return createIssue(Severity.ERROR, message, method);
-		});
+			Function<Method, String> annotationNameProvider, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		return issueReporter.createReportingCondition(
+			method -> hasVoidOrAsyncReturnType(method, asyncReturnValueHandlers), method -> {
+				String message = ("@%s method '%s' must return void or an async-completable return type "
+						+ "(CompletionStage, CompletableFuture, or Future).").formatted(
+							annotationNameProvider.apply(method), method.toGenericString());
+				return createIssue(Severity.ERROR, message, method);
+			});
+	}
+
+	private static boolean hasVoidOrAsyncReturnType(Method method,
+			List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
+		if (getReturnType(method) == void.class) {
+			return true;
+		}
+		return AsyncReturnTypeSupport.isSupported(method, asyncReturnValueHandlers);
 	}
 
 	private static String classTemplateInvocationLifecycleMethodAnnotationName(Method method) {

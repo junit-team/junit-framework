@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -106,19 +108,8 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 	public void execute() {
 		try {
 			throwableCollector = taskContext.throwableCollectorFactory().create();
-			if (!taskContext.cancellationToken().isCancellationRequested()) {
-				prepare();
-			}
-			if (throwableCollector.isEmpty()) {
-				throwableCollector.execute(() -> skipResult = checkWhetherSkipped());
-			}
-			if (throwableCollector.isEmpty() && !requiredSkipResult().isSkipped()) {
-				executeRecursively();
-			}
-			if (context != null) {
-				cleanUp();
-			}
-			reportCompletion();
+			Outcome<C> outcome = awaitRecursively(executeAsync());
+			UnrecoverableExceptions.rethrowIfUnrecoverable(outcome.unrecoverable());
 		}
 		finally {
 			// Ensure that the 'interrupted status' flag for the current thread
@@ -140,6 +131,53 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		context = null;
 	}
 
+	/**
+	 * Execute this task reactively.
+	 *
+	 * <p>This method drives the node's {@linkplain Node#prepareAsync prepare},
+	 * skip check, and {@link #executeRecursivelyAsync() recursive execution}
+	 * behavior via {@link CompletionStage} composition so that a suspending node
+	 * does not park a platform thread.
+	 *
+	 * <p>Note: it would be preferable to drive the whole hierarchy from the top
+	 * down without any intermediate blocking (option "A"), but that is
+	 * intentionally deferred here to limit the impact of this first round.
+	 *
+	 * @return a completion stage carrying this node's {@link Outcome}; never
+	 * {@code null}
+	 * @since 6.2
+	 */
+	@Override
+	public CompletionStage<Outcome<C>> executeAsync() {
+		if (throwableCollector == null) {
+			throwableCollector = taskContext.throwableCollectorFactory().create();
+		}
+		if (!taskContext.cancellationToken().isCancellationRequested()) {
+			prepare();
+		}
+		if (requiredThrowableCollector().isEmpty()) {
+			requiredThrowableCollector().execute(() -> skipResult = checkWhetherSkipped());
+		}
+		CompletionStage<Outcome<C>> flow;
+		if (requiredThrowableCollector().isEmpty() && !requiredSkipResult().isSkipped()) {
+			taskContext.listener().executionStarted(testDescriptor);
+			started = true;
+			flow = executeRecursivelyAsync();
+		}
+		else {
+			flow = completedFuture(Outcome.continued(context));
+		}
+		return flow.thenApply(outcome -> {
+			if (context != null && outcome.unrecoverable() == null) {
+				cleanUp();
+			}
+			if (outcome.unrecoverable() == null) {
+				reportCompletion();
+			}
+			return outcome;
+		});
+	}
+
 	private void prepare() {
 		requiredThrowableCollector().execute(() -> context = node.prepare(requireNonNull(parentContext)));
 
@@ -154,38 +192,189 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 				: node.shouldBeSkipped(requiredContext());
 	}
 
-	private void executeRecursively() {
-		taskContext.listener().executionStarted(testDescriptor);
-		started = true;
+	/**
+	 * Execute the recursive part of this task reactively, producing an
+	 * {@link Outcome} that bubbles unrecoverable errors to the caller.
+	 *
+	 * @return a completion stage carrying this subtree's {@link Outcome}; never
+	 * {@code null}
+	 */
+	private CompletionStage<Outcome<C>> executeRecursivelyAsync() {
+		return runRecursivelyAsync();
+	}
 
-		var throwableCollector = requiredThrowableCollector();
-
-		throwableCollector.execute(() -> {
-			node.around(requiredContext(), ctx -> {
-				context = ctx;
-				throwableCollector.execute(() -> {
-					// @formatter:off
-					List<NodeTestTask<C>> children = testDescriptor.getChildren().stream()
-							.map(descriptor -> new NodeTestTask<C>(taskContext, descriptor))
-							.collect(toCollection(ArrayList::new));
-					// @formatter:on
-
-					context = node.before(requiredContext());
-
-					final DynamicTestExecutor dynamicTestExecutor = new DefaultDynamicTestExecutor();
-					context = node.execute(requiredContext(), dynamicTestExecutor);
-
-					if (!children.isEmpty()) {
-						children.forEach(child -> child.setParentContext(context));
-						taskContext.executorService().invokeAll(children);
+	/**
+	 * Run the before/execute/children/dynamic-test/{@code after} phases
+	 * reactively, producing an {@link Outcome} that bubbles unrecoverable
+	 * errors to the caller. Recoverable failures are aggregated in the shared
+	 * {@link ThrowableCollector}, honoring the collect-all semantics of the
+	 * blocking implementation.
+	 *
+	 * @return a completion stage carrying this subtree's {@link Outcome}; never
+	 * {@code null}
+	 */
+	private CompletionStage<Outcome<C>> runRecursivelyAsync() {
+		return node.beforeAsync(requiredContext()) //
+				.<Outcome<C>> handle((newContext, throwable) -> {
+					if (throwable != null) {
+						return toOutcome(throwable);
 					}
-
-					throwableCollector.execute(dynamicTestExecutor::awaitFinished);
+					context = newContext;
+					return Outcome.continued(newContext);
+				}) //
+				.thenCompose(outcome -> {
+					if (outcome.unrecoverable() != null) {
+						return completedFuture(outcome);
+					}
+					if (outcome.failureOccurred()) {
+						return runAfterAsync(outcome);
+					}
+					return executeBodyThenChildrenThenAwaitAsync() //
+							.thenCompose(bodyOutcome -> {
+								if (bodyOutcome.unrecoverable() != null) {
+									return completedFuture(bodyOutcome);
+								}
+								return runAfterAsync(bodyOutcome);
+							});
 				});
+	}
 
-				throwableCollector.execute(() -> node.after(requiredContext()));
-			});
-		});
+	/**
+	 * Execute the node's body, run its children, then await the dynamic-test
+	 * executor, honoring the blocking implementation's control flow and
+	 * aggregating recoverable failures into the collector.
+	 */
+	private CompletionStage<Outcome<C>> executeBodyThenChildrenThenAwaitAsync() {
+		final DefaultDynamicTestExecutor dynamicTestExecutor = new DefaultDynamicTestExecutor();
+
+		return node.executeAsync(requiredContext(), dynamicTestExecutor) //
+				.<Outcome<C>> handle((newContext, throwable) -> {
+					if (throwable != null) {
+						return toOutcome(throwable);
+					}
+					context = newContext;
+					return Outcome.continued(newContext);
+				}) //
+				.thenCompose(outcome -> {
+					if (outcome.unrecoverable() != null || outcome.failureOccurred()) {
+						return completedFuture(outcome);
+					}
+					List<NodeTestTask<C>> children = testDescriptor.getChildren().stream() //
+							.map(descriptor -> new NodeTestTask<C>(taskContext, descriptor)) //
+							.collect(toCollection(ArrayList::new));
+					if (children.isEmpty()) {
+						return completedFuture(outcome).thenCompose(o -> awaitDynamicFinished(dynamicTestExecutor, o));
+					}
+					children.forEach(child -> child.setParentContext(outcome.context()));
+					return taskContext.executorService().invokeAllAsync(children) //
+							.<Outcome<C>> handle((___, throwable) -> {
+								if (throwable != null) {
+									return toOutcome(throwable);
+								}
+								return outcome;
+							}) //
+							.thenCompose(o -> {
+								if (o.unrecoverable() != null || o.failureOccurred()) {
+									return completedFuture(o);
+								}
+								return awaitDynamicFinished(dynamicTestExecutor, outcome);
+							});
+				});
+	}
+
+	private CompletionStage<Outcome<C>> awaitDynamicFinished(DefaultDynamicTestExecutor dynamicTestExecutor,
+			Outcome<C> outcome) {
+		return dynamicTestExecutor.awaitFinishedAsync() //
+				.<Outcome<C>> handle((___, throwable) -> {
+					if (throwable != null) {
+						return toOutcome(throwable);
+					}
+					return outcome;
+				});
+	}
+
+	private CompletionStage<Outcome<C>> runAfterAsync(Outcome<C> outcome) {
+		return node.afterAsync(requiredContext()) //
+				.<Outcome<C>> handle((___, throwable) -> {
+					if (throwable != null) {
+						return toOutcome(throwable);
+					}
+					return outcome;
+				});
+	}
+
+	/**
+	 * Convert a throwable obtained from an asynchronous phase into an
+	 * {@link Outcome}: recoverable throwables are aggregated in the collector
+	 * and reported as a failure that does not abort the subtree, while
+	 * unrecoverable throwables (e.g. {@link OutOfMemoryError}) are bubbled to
+	 * the caller.
+	 */
+	private Outcome<C> toOutcome(Throwable throwable) {
+		Throwable root = unwrap(throwable);
+		if (UnrecoverableExceptions.isUnrecoverable(root)) {
+			return Outcome.errored(root);
+		}
+		requiredThrowableCollector().execute(() -> ExceptionUtils.throwAsUncheckedException(root));
+		return Outcome.failedRecoverably();
+	}
+
+	/**
+	 * Unwrap {@link CompletionException}s and {@link ExecutionException}s to
+	 * their root cause.
+	 */
+	private static Throwable unwrap(Throwable throwable) {
+		Throwable current = throwable;
+		while ((current instanceof CompletionException || current instanceof ExecutionException)
+				&& current.getCause() != null) {
+			current = current.getCause();
+		}
+		return current;
+	}
+
+	/**
+	 * A value that carries the outcome of an asynchronous phase. Recoverable
+	 * failures are aggregated in the {@link ThrowableCollector} and only signal
+	 * {@link #failureOccurred()}; unrecoverable errors (e.g.
+	 * {@link OutOfMemoryError}) are carried in {@link #unrecoverable()} so they
+	 * can be rethrown by the root caller.
+	 *
+	 * @param context the context produced by the phase, if the phase continued
+	 * @param unrecoverable the unrecoverable error to bubble, if any
+	 * @param failureOccurred whether a recoverable failure was aggregated
+	 * @param <C> the context type
+	 */
+	record Outcome<C>(@Nullable C context, @Nullable Throwable unrecoverable, boolean failureOccurred) {
+
+		static <C> Outcome<C> continued(@Nullable C context) {
+			return new Outcome<>(context, null, false);
+		}
+
+		static <C> Outcome<C> failedRecoverably() {
+			return new Outcome<>(null, null, true);
+		}
+
+		static <C> Outcome<C> errored(Throwable unrecoverable) {
+			return new Outcome<>(null, unrecoverable, false);
+		}
+	}
+
+	/**
+	 * Block the calling thread until the supplied stage has completed, returning
+	 * its {@link Outcome}. A stage that fails with an unrecoverable cause is
+	 * rethrown synchronously as the same instance.
+	 *
+	 * @param stage the stage to await
+	 * @return the completed stage's {@link Outcome}
+	 */
+	private Outcome<C> awaitRecursively(CompletionStage<Outcome<C>> stage) {
+		try {
+			return stage.toCompletableFuture().join();
+		}
+		catch (CompletionException ex) {
+			UnrecoverableExceptions.rethrowIfUnrecoverable(ex.getCause());
+			throw ex;
+		}
 	}
 
 	private void cleanUp() {
@@ -284,6 +473,20 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 					throw ExceptionUtils.throwAsUncheckedException(requireNonNullElse(e.getCause(), e));
 				}
 			}
+		}
+
+		/**
+		 * Asynchronous variant of {@link #awaitFinished()}, used by the
+		 * reactive driver. Dynamic-test execution itself is still scheduled on
+		 * the executor thread pool, so this currently bridges the blocking
+		 * wait; it does not block when no dynamic tests were registered.
+		 *
+		 * @return a completion stage signaling that all registered dynamic test
+		 * tasks have finished; never {@code null}
+		 */
+		@Override
+		public CompletionStage<?> awaitFinishedAsync() {
+			return AsyncTestExecution.synchronous(this::awaitFinished);
 		}
 	}
 

@@ -21,6 +21,8 @@ import static org.junit.platform.commons.util.FunctionUtils.where;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.AfterAll;
@@ -52,7 +54,7 @@ class LifecycleMethodUtilsTests {
 
 		var methodSource = MethodSource.from(TestCaseWithInvalidLifecycleMethods.class.getDeclaredMethod("cc"));
 		var notVoidIssue = DiscoveryIssue.builder(Severity.ERROR,
-			"@BeforeAll method 'private java.lang.Double org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.cc()' must not return a value.") //
+			"@BeforeAll method 'private java.lang.Double org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.cc()' must return void or an async-completable return type (CompletionStage, CompletableFuture, or Future).") //
 				.source(methodSource) //
 				.build();
 		var notStaticIssue = DiscoveryIssue.builder(Severity.ERROR,
@@ -73,7 +75,7 @@ class LifecycleMethodUtilsTests {
 
 		var methodSource = MethodSource.from(TestCaseWithInvalidLifecycleMethods.class.getDeclaredMethod("dd"));
 		var notVoidIssue = DiscoveryIssue.builder(Severity.ERROR,
-			"@AfterAll method 'private java.lang.String org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.dd()' must not return a value.") //
+			"@AfterAll method 'private java.lang.String org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.dd()' must return void or an async-completable return type (CompletionStage, CompletableFuture, or Future).") //
 				.source(methodSource) //
 				.build();
 		var notStaticIssue = DiscoveryIssue.builder(Severity.ERROR,
@@ -94,7 +96,7 @@ class LifecycleMethodUtilsTests {
 
 		var methodSource = MethodSource.from(TestCaseWithInvalidLifecycleMethods.class.getDeclaredMethod("aa"));
 		var notVoidIssue = DiscoveryIssue.builder(Severity.ERROR,
-			"@BeforeEach method 'private java.lang.String org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.aa()' must not return a value.") //
+			"@BeforeEach method 'private java.lang.String org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.aa()' must return void or an async-completable return type (CompletionStage, CompletableFuture, or Future).") //
 				.source(methodSource) //
 				.build();
 		var privateIssue = DiscoveryIssue.builder(Severity.WARNING,
@@ -111,7 +113,7 @@ class LifecycleMethodUtilsTests {
 
 		var methodSource = MethodSource.from(TestCaseWithInvalidLifecycleMethods.class.getDeclaredMethod("bb"));
 		var notVoidIssue = DiscoveryIssue.builder(Severity.ERROR,
-			"@AfterEach method 'private int org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.bb()' must not return a value.") //
+			"@AfterEach method 'private int org.junit.jupiter.engine.descriptor.TestCaseWithInvalidLifecycleMethods.bb()' must return void or an async-completable return type (CompletionStage, CompletableFuture, or Future).") //
 				.source(methodSource) //
 				.build();
 		var privateIssue = DiscoveryIssue.builder(Severity.WARNING,
@@ -187,6 +189,26 @@ class LifecycleMethodUtilsTests {
 		List<Method> methods = findAfterAllMethods(TestCaseWithLifecyclePerClass.class, false, issueReporter);
 
 		assertThat(namesOf(methods)).containsExactlyInAnyOrder("seven", "eight");
+	}
+
+	@Test
+	void findBeforeEachAndAfterEachMethodsWithAsyncReturnTypes() {
+		List<Method> methods = new ArrayList<>();
+		methods.addAll(findBeforeEachMethods(TestCaseWithAsyncLifecycleMethods.class, issueReporter));
+		methods.addAll(findAfterEachMethods(TestCaseWithAsyncLifecycleMethods.class, issueReporter));
+
+		assertThat(namesOf(methods)).containsExactlyInAnyOrder("asyncBeforeEach", "asyncAfterEach");
+		assertThat(discoveryIssues).isEmpty();
+	}
+
+	@Test
+	void findBeforeAllAndAfterAllMethodsWithAsyncReturnTypes() {
+		List<Method> methods = new ArrayList<>();
+		methods.addAll(findBeforeAllMethods(TestCaseWithAsyncLifecycleMethods.class, true, issueReporter));
+		methods.addAll(findAfterAllMethods(TestCaseWithAsyncLifecycleMethods.class, true, issueReporter));
+
+		assertThat(namesOf(methods)).containsExactlyInAnyOrder("asyncBeforeAll", "asyncAfterAll");
+		assertThat(discoveryIssues).isEmpty();
 	}
 
 	private static List<String> namesOf(List<Method> methods) {
@@ -273,6 +295,30 @@ class TestCaseWithInvalidLifecycleMethods {
 	@AfterAll
 	private String dd() {
 		return "";
+	}
+
+}
+
+class TestCaseWithAsyncLifecycleMethods {
+
+	@BeforeAll
+	static CompletionStage<?> asyncBeforeAll() {
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@AfterAll
+	static CompletionStage<?> asyncAfterAll() {
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@BeforeEach
+	CompletionStage<?> asyncBeforeEach() {
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@AfterEach
+	CompletionStage<?> asyncAfterEach() {
+		return CompletableFuture.completedFuture(null);
 	}
 
 }

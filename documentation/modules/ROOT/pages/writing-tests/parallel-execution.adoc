@@ -180,6 +180,63 @@ WARNING: Using `worker_thread_pool` is currently an _experimental_ feature. You'
 to give it a try and provide feedback to the JUnit team so they can improve and eventually
 xref:api-evolution.adoc[promote] this feature.
 
+[[config-reactive-execution]]
+=== Reactive Execution
+
+The _reactive_ (cooperative) execution lane schedules nodes by composing `CompletionStage`s instead
+of parking a thread for every in-flight node. This works together with the
+xref:writing-tests/test-classes-and-methods.adoc#async-test-methods[asynchronous test methods] and the
+`AsyncInvocationInterceptor` extension API so that an asynchronous test body can run without holding
+a platform thread for its entire duration: the worker only _triggers_ the async body and is freed
+while it is awaited.
+
+There are two ways to enable the reactive lane; they are distinct and the choice has implications
+for how your tests run: cooperative execution of existing thread-based parallelism, or a standalone
+cooperative lane.
+
+==== Cooperative execution of thread-based parallelism
+
+Enable the classic thread-based parallel-execution feature _and_ ask it to run cooperatively:
+
+[source,java]
+----
+junit.jupiter.execution.parallel.enabled = true
+junit.jupiter.execution.parallel.reactive.enabled = true
+----
+
+Implications:
+
+* The full parallel-execution contract applies: `@Execution`, `@ResourceLock`, concurrency permits,
+  and the strategy-based parallelism (from `junit.jupiter.execution.parallel.config.*`).
+* Children are still gated by their resolved execution mode (`CONCURRENT` vs `SAME_THREAD`).
+* The only difference from the normal thread-pool lane is that a thread is not parked while an
+  async test method's `CompletionStage` is pending.
+
+==== Standalone cooperative lane (no thread configuration)
+
+Enable the cooperative lane independently of the thread-based parallel feature:
+
+[source,java]
+----
+junit.jupiter.execution.reactive.enabled = true
+----
+
+Implications:
+
+* No parallel-execution contract is involved and no thread configuration is required. Concurrency
+  comes from the async test methods' own returned contexts (for example the common ForkJoin pool
+  behind `CompletableFuture.supplyAsync`); a small internal trigger pool (at most 4 threads) only
+  starts each async body and is shut down when the run completes.
+* Execution mode is resolved per test as follows:
+  **explicit** `@Execution` on the method or an ancestor always wins; **otherwise** a test method
+  that returns an asynchronous completion signal (`CompletionStage`, `CompletableFuture`, or
+  `Future`) is treated as `CONCURRENT`, while a synchronous or `void` test method is treated as
+  `SAME_THREAD` and keeps running sequentially in discovery order.
+* `@ResourceLock` and concurrency-permit semantics of the thread-based lane do not apply here.
+
+Both modes are opt-in and currently _experimental_. `junit.jupiter.execution.parallel.reactive.enabled`
+requires `parallel.enabled = true`; `junit.jupiter.execution.reactive.enabled` does not.
+
 [[config-strategies]]
 === Strategies
 
