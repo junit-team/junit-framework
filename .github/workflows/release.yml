@@ -88,7 +88,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          java-version: 25
+          java-version: 25.0.4+101.0.LTS
           distribution: temurin
       - uses: sbt/setup-sbt@82da71df4e122282484a99a8d70096bc2369dbd8 # v1.5.9
       - name: Update JUnit dependencies in examples
@@ -193,7 +193,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          java-version: 25
+          java-version: 25.0.4+101.0.LTS
           distribution: temurin
       - uses: sbt/setup-sbt@82da71df4e122282484a99a8d70096bc2369dbd8 # v1.5.9
       - name: Update JUnit dependencies in examples
