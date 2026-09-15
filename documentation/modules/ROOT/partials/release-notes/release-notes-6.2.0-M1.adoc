@@ -62,7 +62,9 @@ repository on GitHub.
   quotes.
 * When using `@CsvSource.value[]` the `commentCharacter` must be distinct from both
   `delimiter` and `quoteCharacter`.
-
+* When the timeout provided to `assertTimeout`, `assertTimeoutPreemptively` and test
+  methods annotated with `@Timeout` is not a positive value less than 2^63^ nanoseconds
+  (approximately 292 years) a `PreconditionViolationException` is thrown.
 
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
@@ -71,7 +73,8 @@ repository on GitHub.
   and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
-
+* The `assertTimeout`, `assertTimeoutPreemptively` and methods annotated with `@Timeout`
+  now measure the execution time with sub-millisecond precision.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage
