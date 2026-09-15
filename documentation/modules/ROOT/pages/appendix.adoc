@@ -54,6 +54,10 @@ xref:running-tests/build-support.adoc#gradle-bom[Gradle].
     Common APIs and support utilities for the JUnit Platform. Any API annotated with
     `@API(status = INTERNAL)` is intended solely for usage within the JUnit framework
     itself. _Any usage of internal APIs by external parties is not supported!_
+  `junit-platform-configuration-api`::
+    Annotations for documenting configuration parameters for test engines and JUnit Jupiter extensions.
+  `junit-platform-configuration-processor`::
+    Annotations processor to generate a machine-readable overview of configuration parameters.
   `junit-platform-console`::
     Support for discovering and executing tests on the JUnit Platform from the console.
     See xref:running-tests/console-launcher.adoc[] for details.

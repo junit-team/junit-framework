@@ -33,6 +33,7 @@ val woodstoxRuntimeClasspath = configurations.resolvable("woodstoxRuntimeClasspa
 dependencies {
 	// --- Things we are testing --------------------------------------------------
 	testImplementation(projects.junitPlatformCommons)
+	testImplementation(projects.junitPlatformConfigurationProcessor)
 	testImplementation(projects.junitPlatformConsole)
 	testImplementation(projects.junitPlatformEngine)
 	testImplementation(projects.junitPlatformLauncher)

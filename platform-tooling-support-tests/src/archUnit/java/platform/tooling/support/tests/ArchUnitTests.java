@@ -183,7 +183,8 @@ class ArchUnitTests {
 	@ArchTest
 	void avoidJavaUtilLogging(JavaClasses classes) {
 		// LoggerFactory.java:80 -> sets field LoggerFactory$DelegatingLogger.julLogger
-		var subset = classes.that(are(not(name("org.junit.platform.commons.logging.LoggerFactory$DelegatingLogger"))));
+		var subset = classes.that(are(not(
+			name("org.junit.platform.commons.logging.LoggerFactory$DelegatingLogger").or(nameContaining(".shadow.")))));
 		GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING.check(subset);
 	}
 

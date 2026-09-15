@@ -92,6 +92,7 @@ dependencies {
 	thirdPartyJars(libs.apiguardian)
 	thirdPartyJars(libs.fastcsv)
 	thirdPartyJars(libs.hamcrest)
+	thirdPartyJars(libs.jakarta.json.api)
 	thirdPartyJars(libs.jimfs)
 	thirdPartyJars(libs.jspecify)
 	thirdPartyJars(kotlin("stdlib"))

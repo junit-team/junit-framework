@@ -59,10 +59,12 @@ public class VintageExecutor {
 		this.engineDescriptor = engineDescriptor;
 		this.engineExecutionListener = engineExecutionListener;
 		this.configurationParameters = configurationParameters;
-		this.parallelExecutionEnabled = configurationParameters.getBoolean(Constants.PARALLEL_EXECUTION_ENABLED).orElse(
-			false);
-		this.classes = configurationParameters.getBoolean(Constants.PARALLEL_CLASS_EXECUTION).orElse(false);
-		this.methods = configurationParameters.getBoolean(Constants.PARALLEL_METHOD_EXECUTION).orElse(false);
+		this.parallelExecutionEnabled = configurationParameters.getBoolean(Constants.PARALLEL_EXECUTION_ENABLED) //
+				.orElse(Constants.PARALLEL_EXECUTION_ENABLED_DEFAULT);
+		this.classes = configurationParameters.getBoolean(Constants.PARALLEL_CLASS_EXECUTION) //
+				.orElse(Constants.PARALLEL_CLASS_EXECUTION_DEFAULT);
+		this.methods = configurationParameters.getBoolean(Constants.PARALLEL_METHOD_EXECUTION) //
+				.orElse(Constants.PARALLEL_METHOD_EXECUTION_DEFAULT);
 	}
 
 	public void executeAllChildren(CancellationToken cancellationToken) {

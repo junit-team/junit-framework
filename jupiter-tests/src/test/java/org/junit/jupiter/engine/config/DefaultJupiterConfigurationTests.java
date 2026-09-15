@@ -39,6 +39,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.io.CleanupMode;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.engine.descriptor.CustomDisplayNameGenerator;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -150,6 +151,16 @@ class DefaultJupiterConfigurationTests {
 		Supplier<TempDirFactory> supplier = configuration.getDefaultTempDirFactorySupplier();
 
 		assertThat(supplier.get()).isSameAs(TempDirFactory.Standard.INSTANCE);
+	}
+
+	@Test
+	void shouldGetStandardAsDefaultTempDirDeletionStrategyWithoutConfigParamSet() {
+		var configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
+			dummyOutputDirectoryCreator(), mock());
+
+		var defaultTempDirDeletionStrategySupplier = configuration.getDefaultTempDirDeletionStrategySupplier();
+
+		assertThat(defaultTempDirDeletionStrategySupplier.get()).isInstanceOf(TempDirDeletionStrategy.Standard.class);
 	}
 
 	@Test
