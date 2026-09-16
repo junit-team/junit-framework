@@ -270,7 +270,7 @@ public class LauncherConstants {
 	 * Default value for {@value #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT = "error";
+	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT = "ERROR";
 
 	/**
 	 * Property name used to configure the critical severity of issues

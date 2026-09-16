@@ -119,13 +119,15 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	 * Default value for {@value #CONFIG_STRATEGY_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	public static final String CONFIG_STRATEGY_DEFAULT = "dynamic";
+	public static final String CONFIG_STRATEGY_DEFAULT = "DYNAMIC";
 
 	/**
 	 * Property name used to determine the desired configuration strategy.
 	 *
-	 * <p>Value must be one of {@code dynamic}, {@code fixed}, or
-	 * {@code custom}.
+	 * <p>Value must be one names of enum constants defined in
+	 * {@linkplain DefaultParallelExecutionConfigurationStrategy this class},
+	 * ignoring case. If not specified, the default is
+	 * {@value CONFIG_STRATEGY_DEFAULT}.
 	 */
 	public static final String CONFIG_STRATEGY_PROPERTY_NAME = "strategy";
 

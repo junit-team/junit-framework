@@ -147,7 +147,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 
 		/**
 		 * The extension should receive an {@link ExtensionContext} for the
-		 * the <em>default</em> scope.
+		 * <em>default</em> scope.
 		 *
 		 * <p>The default scope is determined by the configuration parameter
 		 * {@link #DEFAULT_SCOPE_PROPERTY_NAME}. If not specified, extensions
@@ -177,7 +177,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 		 * Default value for {@value #DEFAULT_SCOPE_PROPERTY_NAME} is {@value}.
 		 */
 		@API(status = MAINTAINED, since = "6.2")
-		public static final String DEFAULT_SCOPE_DEFAULT = "default";
+		public static final String DEFAULT_SCOPE_DEFAULT = "DEFAULT";
 
 		/**
 		 * Property name used to set the default extension context scope: {@value}

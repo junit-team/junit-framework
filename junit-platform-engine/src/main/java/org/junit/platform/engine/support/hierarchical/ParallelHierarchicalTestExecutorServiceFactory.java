@@ -36,16 +36,15 @@ public final class ParallelHierarchicalTestExecutorServiceFactory {
 	 * Default value for {@value #EXECUTOR_SERVICE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	public static final String EXECUTOR_SERVICE_DEFAULT = "fork_join_pool";
+	public static final String EXECUTOR_SERVICE_DEFAULT = "FORK_JOIN_POOL";
 
 	/**
 	 * Property name used to determine the desired
 	 * {@link ParallelExecutorServiceType ParallelExecutorServiceType}.
 	 *
-	 * <p>Value must be
-	 * {@link ParallelExecutorServiceType#FORK_JOIN_POOL fork_join_pool} or
-	 * {@link ParallelExecutorServiceType#WORKER_THREAD_POOL worker_thread_pool},
-	 * ignoring case.
+	 * <p>Value must be one names of enum constants defined in
+	 * {@link ParallelExecutorServiceType}, ignoring case. If not
+	 * specified, the default is {@value #EXECUTOR_SERVICE_DEFAULT}
 	 */
 	public static final String EXECUTOR_SERVICE_PROPERTY_NAME = "executor-service";
 

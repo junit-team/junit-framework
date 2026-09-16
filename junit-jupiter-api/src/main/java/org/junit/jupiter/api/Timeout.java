@@ -301,7 +301,7 @@ public @interface Timeout {
 	 * Default value for {@value #TIMEOUT_MODE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	String TIMEOUT_MODE_DEFAULT = "enabled";
+	String TIMEOUT_MODE_DEFAULT = "ENABLED";
 
 	/**
 	 * Property name used to configure whether timeouts are applied to tests:
@@ -310,14 +310,9 @@ public @interface Timeout {
 	 * <p>The value of this property will be used to toggle whether
 	 * {@link Timeout @Timeout} is applied to tests.</p>
 	 *
-	 * <h4>Supported timeout mode values (case-insensitive):</h4>
-	 * <ul>
-	 * <li>{@code enabled}: enables timeouts
-	 * <li>{@code disabled}: disables timeouts
-	 * <li>{@code disabled_on_debug}: disables timeouts while debugging
-	 * </ul>
-	 *
-	 * <p>If not specified, the default is {@value #TIMEOUT_MODE_DEFAULT}.
+	 * <p>Value must be one names of enum constants defined in
+	 *  {@link ThreadMode}, ignoring case. If not specified, the default is
+	 *  {@value #TIMEOUT_MODE_DEFAULT}.
 	 *
 	 * @since 5.6
 	 */
@@ -328,7 +323,7 @@ public @interface Timeout {
 	 * Default value for {@value #DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "same_thread";
+	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "SAME_THREAD";
 
 	/**
 	 * Property name used to set the default thread mode for all testable and
@@ -338,9 +333,9 @@ public @interface Timeout {
 	 * {@link Timeout @Timeout} annotation present on the method or on an
 	 * enclosing test class (for testable methods).
 	 *
-	 * <p>The supported values are {@code same_thread} or
-	 * {@code separate_thread}, ignoring case. If none is provided,
-	 * {@value #DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT} is used as default.
+	 * <p>Value must be one names of enum constants defined in
+	 * {@link ThreadMode}, ignoring case. If not specified, the default is
+	 * {@value DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT}.
 	 *
 	 * @since 5.9
 	 * @see #threadMode()

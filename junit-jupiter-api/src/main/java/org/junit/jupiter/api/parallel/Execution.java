@@ -65,7 +65,7 @@ public @interface Execution {
 	 * Default value for {@value #DEFAULT_EXECUTION_MODE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	String DEFAULT_EXECUTION_MODE_DEFAULT = "same_thread";
+	String DEFAULT_EXECUTION_MODE_DEFAULT = "SAME_THREAD";
 
 	/**
 	 * Property name used to set the default test execution mode: {@value}
