@@ -16,9 +16,7 @@ import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.ge
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -75,8 +73,7 @@ final class ConfigurationParameterAnnotatedField {
 	}
 
 	@Nullable
-	List<String> typeEnumValues() {
-		// TODO: Refactor
+	List<ReferencedTypeEnumValue> typeEnumValues() {
 		for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
 			if (entry.getKey().getSimpleName().toString().equals("type")) {
 				AnnotationValue value = entry.getValue();
@@ -85,14 +82,16 @@ final class ConfigurationParameterAnnotatedField {
 				if (typeElement.getKind() == ElementKind.ENUM) {
 					return typeElement.getEnclosedElements().stream() //
 							.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
-							.map(Element::getSimpleName) //
-							.map(Objects::toString) //
-							// TODO: Also get description
-							.map(s -> s.toLowerCase(Locale.ROOT)).toList();
+							.map(element -> new ReferencedTypeEnumValue(element.getSimpleName().toString(),
+								elementUtils.getDocComment(element))).toList();
 				}
 			}
 		}
 		return null;
+	}
+
+	record ReferencedTypeEnumValue(String simpleName, String docComment) {
+
 	}
 
 	@Nullable

@@ -86,7 +86,9 @@ final class ConfigurationParameterHandler {
 
 		var typeEnumValues = field.typeEnumValues();
 		if (typeEnumValues != null) {
-			values = typeEnumValues.stream().map(s -> new ValueHint(s, null)).toList();
+			values = typeEnumValues.stream() //
+					.map(s -> new ValueHint(s.simpleName(), extractFirstPragraph(s.docComment()))) //
+					.toList();
 		}
 		else if (Class.class.getName().equals(defaultType) && defaultValue != null) {
 			providers = List.of(
@@ -109,6 +111,10 @@ final class ConfigurationParameterHandler {
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
 		var docComment = field.docComment();
+		return extractFirstPragraph(docComment);
+	}
+
+	private static @Nullable String extractFirstPragraph(@Nullable String docComment) {
 		if (docComment == null) {
 			return null;
 		}

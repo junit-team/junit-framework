@@ -41,6 +41,8 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeEnum;
+import org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues;
 import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
 import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
@@ -278,6 +280,34 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void enumType() {
+			compiler.compileWithoutError(TypeEnum.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeEnum.ExampleEnum",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnum"
+						}
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "A"
+							  },
+							  {
+								  "value": "B"
+							  }
+						  ]
+						}
+					  ]
+					}""");
+		}
+
+		@Test
 		void enumTypeWithStringDefault() {
 			compiler.compileWithoutError(TypeEnumWithStringDefault.class);
 			assertMetaDataIsEqualTo("""
@@ -287,7 +317,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "type": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault.ExampleEnum",
 						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault",
-						  "defaultValue": "a"
+						  "defaultValue": "A"
 						}
 					  ],
 					  "hints": [
@@ -295,10 +325,41 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "values": [
 							  {
-								  "value": "a"
+								  "value": "A"
 							  },
 							  {
-								  "value": "b"
+								  "value": "B"
+							  }
+						  ]
+						}
+					  ]
+					}""");
+		}
+
+
+		@Test
+		void enumTypeWithDocumentedEnumValues() {
+			compiler.compileWithoutError(TypeEnumWithDocumentedEnumValues.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues.ExampleEnum",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues"
+						}
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "A",
+								  "description": "A is the first option."
+							  },
+							  {
+								  "value": "B",
+								  "description": "B is the second option."
 							  }
 						  ]
 						}
