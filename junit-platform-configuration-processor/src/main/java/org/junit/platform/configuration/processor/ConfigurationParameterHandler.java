@@ -89,70 +89,12 @@ final class ConfigurationParameterHandler {
 		}
 	}
 
-	private @Nullable Hint processHint(String name, ConfigurationParameterAnnotatedField field,
-			@Nullable Default defaults) {
-		var typeElement = field.typeTypeElement();
-		if (typeElement != null) {
-			var typeElementKind = typeElement.getKind();
-			var typeElementName = typeElement.getQualifiedName().toString();
-			if (typeElementKind == ElementKind.ENUM) {
-				return new Hint(name, processEnumValues(typeElement), null);
-			}
-			if (typeElementKind == ElementKind.INTERFACE) {
-				var parameters = new Parameters(typeElementName);
-				var valueprovider = new ValueProvider("class-reference", parameters);
-				return new Hint(name, null, List.of(valueprovider));
-			}
-			if (Boolean.class.getName().equals(typeElementName)) {
-				return new Hint(name, processBooleanValues(), null);
-			}
-		}
-		if (defaults == null) {
-			return null;
-		}
-		var defaultType = defaults.defaultType();
-		if (Boolean.class.getName().equals(defaultType)) {
-			return new Hint(name, processBooleanValues(), null);
-		}
-
-		if (Class.class.getName().equals(defaultType)) {
-			if (typeElement == null) {
-				messager.printMessage(ERROR,
-					"@ConfigurationParameter must declare a type when the default value is a classValue",
-					field.element());
-				return null;
-			}
-		}
-
-		return null;
-	}
-
-	private static List<ValueHint> processBooleanValues() {
-		var values = List.of( //
-			new ValueHint(true, null), //
-			new ValueHint(false, null) //
-		);
-		return values;
-	}
-
-	private List<ValueHint> processEnumValues(TypeElement typeElement) {
-		return typeElement.getEnclosedElements().stream() //
-				.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
-				.map(
-					element -> new ValueHint(element.getSimpleName().toString(), processDescription(element))).toList();
-	}
-
 	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {
 		var value = field.typeTypeElement();
 		if (value == null) {
 			return defaultType;
 		}
 		return value.getQualifiedName().toString();
-	}
-
-	private @Nullable String processDescription(Element element) {
-		var docComment = elementUtils.getDocComment(element);
-		return extractFirstParagraph(docComment);
 	}
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
@@ -237,4 +179,72 @@ final class ConfigurationParameterHandler {
 		return null;
 	}
 
+	private @Nullable Hint processHint(String name, ConfigurationParameterAnnotatedField field,
+			@Nullable Default defaults) {
+
+		// Derive hint from ConfigurationParameter.type value
+		var typeElement = field.typeTypeElement();
+		if (typeElement != null) {
+			var typeElementKind = typeElement.getKind();
+			var typeElementName = typeElement.getQualifiedName().toString();
+			if (typeElementKind == ElementKind.ENUM) {
+				return new Hint(name, processEnumValues(typeElement), null);
+			}
+			// It is not possible to determine hints for abstract classes
+			if (typeElementKind == ElementKind.INTERFACE) {
+				return new Hint(name, null, processClassValues(typeElementName));
+			}
+			if (Boolean.class.getName().equals(typeElementName)) {
+				return new Hint(name, processBooleanValues(), null);
+			}
+		}
+
+		// Derive hints from ConfigurationParameter.defaultValue if available.
+		if (defaults == null) {
+			return null;
+		}
+		var defaultType = defaults.defaultType();
+		if (Boolean.class.getName().equals(defaultType)) {
+			return new Hint(name, processBooleanValues(), null);
+		}
+		if (Class.class.getName().equals(defaultType)) {
+			if (typeElement == null) {
+				messager.printMessage(ERROR,
+					"@ConfigurationParameter must declare a type when the default value is a classValue",
+					field.element());
+				return null;
+			}
+			// TODO: Works for abstract classes, but only when there is a default.
+			// TODO: Consider limiting the allowed type values to primitives, enums and interfaces.
+			var typeElementName = typeElement.getQualifiedName().toString();
+			return new Hint(name, null, processClassValues(typeElementName));
+		}
+
+		return null;
+	}
+
+	private static List<ValueProvider> processClassValues(String typeElementName) {
+		var parameters = new Parameters(typeElementName);
+		var valueprovider = new ValueProvider("class-reference", parameters);
+		return List.of(valueprovider);
+	}
+
+	private static List<ValueHint> processBooleanValues() {
+		return List.of( //
+			new ValueHint(true, null), //
+			new ValueHint(false, null) //
+		);
+	}
+
+	private List<ValueHint> processEnumValues(TypeElement typeElement) {
+		return typeElement.getEnclosedElements().stream() //
+				.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
+				.map(
+					element -> new ValueHint(element.getSimpleName().toString(), processDescription(element))).toList();
+	}
+
+	private @Nullable String processDescription(Element element) {
+		var docComment = elementUtils.getDocComment(element);
+		return extractFirstParagraph(docComment);
+	}
 }

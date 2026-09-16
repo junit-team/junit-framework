@@ -42,10 +42,13 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass;
 import org.junit.platform.configuration.testcases.TypeClass;
 import org.junit.platform.configuration.testcases.TypeEnum;
 import org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues;
 import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
+import org.junit.platform.configuration.testcases.TypeInterface;
+import org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass;
 import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
 
@@ -292,6 +295,94 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					  	}
 					  ]
 					}""");
+		}
+
+		@Test
+		void classTypeAbstractWithDefaultClass() {
+			compiler.compileWithoutError(TypeAbstractClassWithDefaultClass.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+							"properties": [
+							  {
+								"name": "org.example.classes",
+								"type": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example",
+								"sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass",
+								"defaultValue": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Default"
+							  }
+							],
+							"hints": [
+							 {
+								 "name": "org.example.classes",
+								 "providers": [
+									 {
+										 "name": "class-reference",
+										 "parameters": {
+											 "target": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example"
+										 }
+									 }
+								 ]
+							 }
+						  ]
+						}""");
+		}
+
+		@Test
+		void interfaceType() {
+			compiler.compileWithoutError(TypeInterface.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeInterface.Example",
+						  "sourceType": "org.junit.platform.configuration.TypeInterface.TypeClass"
+						}
+					  ],
+					  "hints": [
+					  	{
+					  	  "name": "org.example.property",
+					  	  "providers": [
+					  		  {
+					  			  "name": "class-reference",
+					  			  "parameters": {
+					  				  "target": "org.junit.platform.configuration.testcases.TypeClass.Example"
+					  			  }
+					  		  }
+					  	  ]
+					  	}
+					  ]
+					}""");
+		}
+
+		@Test
+		void interfaceTypeWithDefaultClass() {
+			compiler.compileWithoutError(TypeInterfaceWithDefaultClass.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+							"properties": [
+							  {
+								"name": "org.example.classes",
+								"type": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Example",
+								"sourceType": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass",
+								"defaultValue": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Default"
+							  }
+							],
+							"hints": [
+							 {
+								 "name": "org.example.classes",
+								 "providers": [
+									 {
+										 "name": "class-reference",
+										 "parameters": {
+											 "target": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Example"
+										 }
+									 }
+								 ]
+							 }
+						  ]
+						}""");
 		}
 
 		@Test
