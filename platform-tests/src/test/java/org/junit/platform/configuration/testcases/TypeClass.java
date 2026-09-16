@@ -12,21 +12,12 @@ package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
 
-public final class TypeEnumWithDocumentedEnumValues {
+public final class TypeClass {
 
-	@ConfigurationParameter(type = ExampleEnum.class)
+	@ConfigurationParameter(type = Example.class)
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
-	enum ExampleEnum {
-		/**
-		 * A is the first option.
-		 */
-		A,
-		/**
-		 * B is the second option.
-		 *
-		 * <p>Best used when option A failed.
-		 */
-		B
+	interface Example {
+
 	}
 }

@@ -11,22 +11,15 @@
 package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
-public final class TypeEnumWithDocumentedEnumValues {
+public final class DefaultClassWithoutType {
 
-	@ConfigurationParameter(type = ExampleEnum.class)
-	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
+	@ConfigurationParameter(defaultValue = @Value(classValue = Default.class))
+	public static final String CLASSES_PROPERTY_NAME = "org.example.classes";
 
-	enum ExampleEnum {
-		/**
-		 * A is the first option.
-		 */
-		A,
-		/**
-		 * B is the second option.
-		 *
-		 * <p>Best used when option A failed.
-		 */
-		B
+	private static class Default {
+
 	}
+
 }

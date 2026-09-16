@@ -11,7 +11,6 @@
 package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
-import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
 public final class TypeEnum {
 

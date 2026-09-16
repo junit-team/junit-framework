@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
@@ -29,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Hint;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Parameters;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Property;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.ValueHint;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.ValueProvider;
@@ -67,7 +69,8 @@ final class ConfigurationParameterHandler {
 			annotationMirror, typeUtils);
 		if (!field.isStatic() || !field.isFinal() || !(field.constantValue() instanceof String name)) {
 			messager.printMessage(ERROR,
-				"@ConfigurationParameter annotated field must static, final, and have constant string value", element);
+				"@ConfigurationParameter annotated field must be static, final, and have constant string value",
+				element);
 			return;
 		}
 		var description = processDescription(field);
@@ -80,41 +83,84 @@ final class ConfigurationParameterHandler {
 		var property = new Property(name, type, description, sourceType, defaultValue, deprecation);
 		metaData.addProperty(property);
 
-		// TODO: Refactor
-		List<ValueHint> values = null;
-		List<ValueProvider> providers = null;
-
-		var typeEnumValues = field.typeEnumValues();
-		if (typeEnumValues != null) {
-			values = typeEnumValues.stream() //
-					.map(s -> new ValueHint(s.simpleName(), extractFirstPragraph(s.docComment()))) //
-					.toList();
-		}
-		else if (Class.class.getName().equals(defaultType) && defaultValue != null) {
-			providers = List.of(
-				new ValueProvider("class-reference", new ConfigurationMetadata.Parameters(defaultValue.toString())));
-		}
-		else if (Boolean.class.getName().equals(defaultType) && defaultValue != null) {
-			values = List.of(new ValueHint(true, null), new ValueHint(false, null));
-		}
-
-		if (values != null || providers != null) {
-			var hint = new Hint(name, values, providers);
+		var hint = processHint(name, field, defaults);
+		if (hint != null) {
 			metaData.addHint(hint);
 		}
 	}
 
+	private @Nullable Hint processHint(String name, ConfigurationParameterAnnotatedField field,
+			@Nullable Default defaults) {
+		var typeElement = field.typeTypeElement();
+		if (typeElement != null) {
+			var typeElementKind = typeElement.getKind();
+			var typeElementName = typeElement.getQualifiedName().toString();
+			if (typeElementKind == ElementKind.ENUM) {
+				return new Hint(name, processEnumValues(typeElement), null);
+			}
+			if (typeElementKind == ElementKind.INTERFACE) {
+				var parameters = new Parameters(typeElementName);
+				var valueprovider = new ValueProvider("class-reference", parameters);
+				return new Hint(name, null, List.of(valueprovider));
+			}
+			if (Boolean.class.getName().equals(typeElementName)) {
+				return new Hint(name, processBooleanValues(), null);
+			}
+		}
+		if (defaults == null) {
+			return null;
+		}
+		var defaultType = defaults.defaultType();
+		if (Boolean.class.getName().equals(defaultType)) {
+			return new Hint(name, processBooleanValues(), null);
+		}
+
+		if (Class.class.getName().equals(defaultType)) {
+			if (typeElement == null) {
+				messager.printMessage(ERROR,
+					"@ConfigurationParameter must declare a type when the default value is a classValue",
+					field.element());
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	private static List<ValueHint> processBooleanValues() {
+		var values = List.of( //
+			new ValueHint(true, null), //
+			new ValueHint(false, null) //
+		);
+		return values;
+	}
+
+	private List<ValueHint> processEnumValues(TypeElement typeElement) {
+		return typeElement.getEnclosedElements().stream() //
+				.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
+				.map(
+					element -> new ValueHint(element.getSimpleName().toString(), processDescription(element))).toList();
+	}
+
 	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {
-		var type = field.typeValue();
-		return type == null ? defaultType : type;
+		var value = field.typeTypeElement();
+		if (value == null) {
+			return defaultType;
+		}
+		return value.getQualifiedName().toString();
+	}
+
+	private @Nullable String processDescription(Element element) {
+		var docComment = elementUtils.getDocComment(element);
+		return extractFirstParagraph(docComment);
 	}
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
 		var docComment = field.docComment();
-		return extractFirstPragraph(docComment);
+		return extractFirstParagraph(docComment);
 	}
 
-	private static @Nullable String extractFirstPragraph(@Nullable String docComment) {
+	private static @Nullable String extractFirstParagraph(@Nullable String docComment) {
 		if (docComment == null) {
 			return null;
 		}

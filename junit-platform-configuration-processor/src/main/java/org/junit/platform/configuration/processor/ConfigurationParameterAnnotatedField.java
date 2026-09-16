@@ -11,6 +11,7 @@
 package org.junit.platform.configuration.processor;
 
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValuesMap;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getValuesMap;
 
@@ -19,10 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -73,30 +71,14 @@ final class ConfigurationParameterAnnotatedField {
 	}
 
 	@Nullable
-	List<ReferencedTypeEnumValue> typeEnumValues() {
-		for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
-			if (entry.getKey().getSimpleName().toString().equals("type")) {
-				AnnotationValue value = entry.getValue();
-				TypeMirror typeMirror = (TypeMirror) value.getValue();
-				TypeElement typeElement = (TypeElement) typeUtils.asElement(typeMirror);
-				if (typeElement.getKind() == ElementKind.ENUM) {
-					return typeElement.getEnclosedElements().stream() //
-							.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
-							.map(element -> new ReferencedTypeEnumValue(element.getSimpleName().toString(),
-								elementUtils.getDocComment(element))).toList();
-				}
-			}
+	TypeElement typeTypeElement() {
+		var value = getAnnotationValue(annotationMirror, "type");
+		if (value == null) {
+			return null;
 		}
-		return null;
-	}
 
-	record ReferencedTypeEnumValue(String simpleName, String docComment) {
-
-	}
-
-	@Nullable
-	String typeValue() {
-		return getStringValuesMap(annotationMirror).get("type");
+		var typeMirror = (TypeMirror) value.getValue();
+		return (TypeElement) typeUtils.asElement(typeMirror);
 	}
 
 	@Nullable

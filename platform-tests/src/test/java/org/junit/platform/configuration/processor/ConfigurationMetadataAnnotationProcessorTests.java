@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.platform.configuration.testcases.DefaultClassWithoutType;
 import org.junit.platform.configuration.testcases.DefaultDifferentSets;
 import org.junit.platform.configuration.testcases.DefaultMultipleValues;
 import org.junit.platform.configuration.testcases.Defaults;
@@ -41,6 +42,7 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeClass;
 import org.junit.platform.configuration.testcases.TypeEnum;
 import org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues;
 import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
@@ -265,6 +267,34 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void classType() {
+			compiler.compileWithoutError(TypeClass.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeClass.Example",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeClass"
+						}
+					  ],
+					  "hints": [
+					  	{
+					  	  "name": "org.example.property",
+					  	  "providers": [
+					  		  {
+					  			  "name": "class-reference",
+					  			  "parameters": {
+					  				  "target": "org.junit.platform.configuration.testcases.TypeClass.Example"
+					  			  }
+					  		  }
+					  	  ]
+					  	}
+					  ]
+					}""");
+		}
+
+		@Test
 		void stringType() {
 			compiler.compileWithoutError(TypeString.class);
 			assertMetaDataIsEqualTo("""
@@ -336,35 +366,35 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					}""");
 		}
 
-
 		@Test
 		void enumTypeWithDocumentedEnumValues() {
 			compiler.compileWithoutError(TypeEnumWithDocumentedEnumValues.class);
-			assertMetaDataIsEqualTo("""
-					{
-					  "properties": [
+			assertMetaDataIsEqualTo(
+				"""
 						{
-						  "name": "org.example.property",
-						  "type": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues.ExampleEnum",
-						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues"
-						}
-					  ],
-					  "hints": [
-						{
-						  "name": "org.example.property",
-						  "values": [
-							  {
-								  "value": "A",
-								  "description": "A is the first option."
-							  },
-							  {
-								  "value": "B",
-								  "description": "B is the second option."
-							  }
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues.ExampleEnum",
+							  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues"
+							}
+						  ],
+						  "hints": [
+							{
+							  "name": "org.example.property",
+							  "values": [
+								  {
+									  "value": "A",
+									  "description": "A is the first option."
+								  },
+								  {
+									  "value": "B",
+									  "description": "B is the second option."
+								  }
+							  ]
+							}
 						  ]
-						}
-					  ]
-					}""");
+						}""");
 		}
 
 		@Test
@@ -429,9 +459,9 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  },
 						  {
 							"name": "org.example.classes",
-							"type": "java.lang.Class",
+							"type": "org.junit.platform.configuration.testcases.Defaults.Example",
 							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
-							"defaultValue": "org.junit.platform.configuration.testcases.Defaults.Example"
+							"defaultValue": "org.junit.platform.configuration.testcases.Defaults.Default"
 						  }
 						],
 						"hints": [
@@ -446,17 +476,17 @@ class ConfigurationMetadataAnnotationProcessorTests {
 								  }
 							  ]
 						  },
-						  {
-							  "name": "org.example.classes",
-							  "providers": [
-								  {
-									  "name": "class-reference",
-									  "parameters": {
-										  "target": "org.junit.platform.configuration.testcases.Defaults.Example"
-									  }
-								  }
-							  ]
-						  }
+						 {
+							 "name": "org.example.classes",
+							 "providers": [
+								 {
+									 "name": "class-reference",
+									 "parameters": {
+										 "target": "org.junit.platform.configuration.testcases.Defaults.Example"
+									 }
+								 }
+							 ]
+						 }
 					  ]
 					}""");
 		}
@@ -467,7 +497,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains(
-						"@ConfigurationParameter annotated field must static, final, and have constant string value");
+						"@ConfigurationParameter annotated field must be static, final, and have constant string value");
 		}
 
 		@Test
@@ -476,7 +506,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains(
-						"@ConfigurationParameter annotated field must static, final, and have constant string value");
+						"@ConfigurationParameter annotated field must be static, final, and have constant string value");
 		}
 
 		@Test
@@ -485,7 +515,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains(
-						"@ConfigurationParameter annotated field must static, final, and have constant string value");
+						"@ConfigurationParameter annotated field must be static, final, and have constant string value");
 		}
 
 		@Test
@@ -502,6 +532,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains("@ConfigurationParameter must have exactly one default value");
+		}
+
+		@Test
+		void mustHaveTypeWhenDefaultValueIsClass() {
+			var result = compiler.compile(DefaultClassWithoutType.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameter must declare a type when the default value is a classValue");
 		}
 
 		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {

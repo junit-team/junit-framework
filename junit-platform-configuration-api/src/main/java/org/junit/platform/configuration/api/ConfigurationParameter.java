@@ -129,6 +129,9 @@ public @interface ConfigurationParameter {
 
 		/**
 		 * The {@link Class} value to use as the default.
+		 *
+		 * <p>When the default is a class value, the {@link ConfigurationParameter#type()}
+		 * should also be set.
 		 */
 		Class<?>[] classValue() default {};
 	}
