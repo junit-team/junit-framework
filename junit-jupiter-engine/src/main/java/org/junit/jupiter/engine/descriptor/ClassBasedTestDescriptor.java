@@ -41,6 +41,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -92,6 +93,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 	private static final InterceptingExecutableInvoker executableInvoker = new InterceptingExecutableInvoker();
 
 	protected final ClassInfo classInfo;
+	protected final List<AsyncReturnValueHandler> asyncReturnValueHandlers;
 
 	private @Nullable LifecycleMethods lifecycleMethods;
 
@@ -99,18 +101,30 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 
 	ClassBasedTestDescriptor(UniqueId uniqueId, Class<?> testClass, Supplier<String> displayNameSupplier,
 			JupiterConfiguration configuration) {
+		this(uniqueId, testClass, displayNameSupplier, configuration, List.of());
+	}
+
+	ClassBasedTestDescriptor(UniqueId uniqueId, Class<?> testClass, Supplier<String> displayNameSupplier,
+			JupiterConfiguration configuration, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 		super(uniqueId, testClass, displayNameSupplier, ClassSource.from(testClass), configuration);
 
+		this.asyncReturnValueHandlers = asyncReturnValueHandlers;
 		this.classInfo = new ClassInfo(testClass, configuration);
-		this.lifecycleMethods = new LifecycleMethods(this.classInfo);
+		this.lifecycleMethods = new LifecycleMethods(this.classInfo, this.asyncReturnValueHandlers);
 	}
 
 	ClassBasedTestDescriptor(UniqueId uniqueId, Class<?> testClass, String displayName,
 			JupiterConfiguration configuration) {
+		this(uniqueId, testClass, displayName, configuration, List.of());
+	}
+
+	ClassBasedTestDescriptor(UniqueId uniqueId, Class<?> testClass, String displayName,
+			JupiterConfiguration configuration, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 		super(uniqueId, displayName, ClassSource.from(testClass), configuration);
 
+		this.asyncReturnValueHandlers = asyncReturnValueHandlers;
 		this.classInfo = new ClassInfo(testClass, configuration);
-		this.lifecycleMethods = new LifecycleMethods(this.classInfo);
+		this.lifecycleMethods = new LifecycleMethods(this.classInfo, this.asyncReturnValueHandlers);
 	}
 
 	// --- TestClassAware ------------------------------------------------------
@@ -446,7 +460,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 		for (Method method : requireLifecycleMethods().beforeAll) {
 			throwableCollector.execute(() -> {
 				try {
-					executableInvoker.invokeVoid(method, testInstance, extensionContext, registry,
+					executableInvoker.invokeAndAwait(method, testInstance, extensionContext, registry,
 						InvocationInterceptor::interceptBeforeAllMethod);
 				}
 				catch (Throwable throwable) {
@@ -474,7 +488,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 
 		requireLifecycleMethods().afterAll.forEach(method -> throwableCollector.execute(() -> {
 			try {
-				executableInvoker.invokeVoid(method, testInstance, extensionContext, registry,
+				executableInvoker.invokeAndAwait(method, testInstance, extensionContext, registry,
 					InvocationInterceptor::interceptAfterAllMethod);
 			}
 			catch (Throwable throwable) {
@@ -547,7 +561,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 		Object target = testInstances.findInstance(getTestClass()).orElseThrow(
 			() -> new JUnitException("Failed to find instance for method: " + method.toGenericString()));
 
-		executableInvoker.invokeVoid(method, target, context, registry, interceptorCall);
+		executableInvoker.invokeAndAwait(method, target, context, registry, interceptorCall);
 	}
 
 	private LifecycleMethods requireLifecycleMethods() {
@@ -588,14 +602,14 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 		private final List<Method> beforeEach;
 		private final List<Method> afterEach;
 
-		LifecycleMethods(ClassInfo classInfo) {
+		LifecycleMethods(ClassInfo classInfo, List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 			Class<?> testClass = classInfo.testClass;
 			boolean requireStatic = classInfo.lifecycle == Lifecycle.PER_METHOD;
 			DiscoveryIssueReporter issueReporter = DiscoveryIssueReporter.collecting(discoveryIssues);
-			this.beforeAll = findBeforeAllMethods(testClass, requireStatic, issueReporter);
-			this.afterAll = findAfterAllMethods(testClass, requireStatic, issueReporter);
-			this.beforeEach = findBeforeEachMethods(testClass, issueReporter);
-			this.afterEach = findAfterEachMethods(testClass, issueReporter);
+			this.beforeAll = findBeforeAllMethods(testClass, requireStatic, issueReporter, asyncReturnValueHandlers);
+			this.afterAll = findAfterAllMethods(testClass, requireStatic, issueReporter, asyncReturnValueHandlers);
+			this.beforeEach = findBeforeEachMethods(testClass, issueReporter, asyncReturnValueHandlers);
+			this.afterEach = findAfterEachMethods(testClass, issueReporter, asyncReturnValueHandlers);
 		}
 	}
 

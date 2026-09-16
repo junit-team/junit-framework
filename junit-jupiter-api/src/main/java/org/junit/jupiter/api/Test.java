@@ -26,7 +26,9 @@ import org.junit.platform.commons.annotation.Testable;
  * method.
  *
  * <p>{@code @Test} methods must not be {@code private} or {@code static} and
- * must not return a value.
+ * either return {@code void} or an async-completable
+ * {@link java.util.concurrent.CompletionStage}/{@link java.util.concurrent.CompletableFuture}/
+ * {@link java.util.concurrent.Future}, whose completion is awaited to determine the test's outcome.
  *
  * <p>{@code @Test} methods may optionally declare parameters to be resolved by
  * {@link org.junit.jupiter.api.extension.ParameterResolver ParameterResolvers}.

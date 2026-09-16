@@ -23,6 +23,7 @@ import static org.junit.platform.commons.util.ReflectionUtils.isNestedClassPrese
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -30,6 +31,8 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.ClassTemplate;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
+import org.junit.jupiter.engine.extension.EarlyExtensionRegistry;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.commons.util.ReflectionUtils.CycleErrorHandling;
 import org.junit.platform.engine.DiscoveryIssue;
@@ -61,9 +64,14 @@ public class TestClassPredicates {
 	private final Condition<Class<?>> isValidStandaloneTestClass;
 
 	public TestClassPredicates(DiscoveryIssueReporter issueReporter) {
-		this.isTestOrTestFactoryOrTestTemplateMethod = new IsTestMethod(issueReporter) //
+		this(issueReporter, EarlyExtensionRegistry.empty());
+	}
+
+	public TestClassPredicates(DiscoveryIssueReporter issueReporter, EarlyExtensionRegistry earlyExtensionRegistry) {
+		List<AsyncReturnValueHandler> asyncReturnValueHandlers = earlyExtensionRegistry.getAsyncReturnValueHandlers();
+		this.isTestOrTestFactoryOrTestTemplateMethod = new IsTestMethod(issueReporter, asyncReturnValueHandlers) //
 				.or(new IsTestFactoryMethod(issueReporter)) //
-				.or(new IsTestTemplateMethod(issueReporter));
+				.or(new IsTestTemplateMethod(issueReporter, asyncReturnValueHandlers));
 		this.isNotPrivateUnlessAbstractNestedClass = isNotPrivateUnlessAbstract("@Nested", issueReporter);
 		this.isInnerNestedClass = isInner(issueReporter);
 		this.isValidStandaloneTestClass = isNotPrivateUnlessAbstract("Test", issueReporter) //
