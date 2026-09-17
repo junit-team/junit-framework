@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.engine.extension;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -28,14 +30,24 @@ record TimeoutDuration(long value, TimeUnit unit) {
 		return new TimeoutDuration(timeout.value(), timeout.unit());
 	}
 
-	TimeoutDuration(long value, TimeUnit unit) {
-		Preconditions.condition(value > 0, () -> "timeout duration must be a positive number: " + value);
-		this.value = value;
-		this.unit = Preconditions.notNull(unit, "timeout unit must not be null");
+	TimeoutDuration {
+		Preconditions.notNull(unit, "timeout unit must not be null");
+		long maxRepresentableValue = maxRepresentableValueFor(unit);
+		Preconditions.condition(value > 0 && value <= maxRepresentableValue, //
+			() -> "timeout duration must be a positive number less than approximately %s (2^63 nanoseconds): %s" //
+					.formatted(formatTimeoutDuration(maxRepresentableValue, unit), formatTimeoutDuration(value, unit)));
+	}
+
+	private static long maxRepresentableValueFor(TimeUnit unit) {
+		return unit.convert(Long.MAX_VALUE, NANOSECONDS);
 	}
 
 	@Override
 	public String toString() {
+		return formatTimeoutDuration(value, unit);
+	}
+
+	private static String formatTimeoutDuration(long value, TimeUnit unit) {
 		String label = unit.name().toLowerCase(Locale.ROOT);
 		if (value == 1 && label.endsWith("s")) {
 			label = label.substring(0, label.length() - 1);

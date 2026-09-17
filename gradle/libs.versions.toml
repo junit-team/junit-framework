@@ -4,7 +4,7 @@ apiguardian = "1.1.2"
 assertj = "3.27.7"
 bnd = "7.4.0"
 checkstyle = "14.1.0"
-eclipse = "4.40.0"
+eclipse = "4.41.0"
 jackson = "3.2.2"
 jacoco = "0.8.15"
 jmh = "1.37"
@@ -26,7 +26,7 @@ apiguardian = { module = "org.apiguardian:apiguardian-api", version.ref = "apigu
 archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.5.0" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
-byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.13" }
+byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.14" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
 classgraph = { module = "io.github.classgraph:classgraph", version = "4.8.195" }
 commons-io = { module = "commons-io:commons-io", version = "2.22.0" }
@@ -70,7 +70,7 @@ openTestReporting-events = { module = "org.opentest4j.reporting:open-test-report
 openTestReporting-tooling-core = { module = "org.opentest4j.reporting:open-test-reporting-tooling-core", version.ref = "openTestReporting" }
 openTestReporting-tooling-spi = { module = "org.opentest4j.reporting:open-test-reporting-tooling-spi", version.ref = "openTestReporting" }
 picocli = { module = "info.picocli:picocli", version = "4.7.7" }
-roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.6.0" }
+roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.7.0" }
 slf4j-julBinding = { module = "org.slf4j:slf4j-jdk14", version = "2.0.19" }
 snapshotTests-junit5 = { module = "de.skuzzle.test:snapshot-tests-junit5", version.ref = "snapshotTests" }
 snapshotTests-xml = { module = "de.skuzzle.test:snapshot-tests-xml", version.ref = "snapshotTests" }

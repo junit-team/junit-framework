@@ -17,16 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.junit.jupiter.api.timeout.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
+import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.opentest4j.AssertionFailedError;
 
-class PreemptiveTimeoutUtilsTest {
+class PreemptiveDurationUtilsTest {
 
 	private static final Duration PREEMPTIVE_TIMEOUT = ofMillis(WINDOWS.isCurrentOs() ? 1000 : 100);
 	private static final PreemptiveTimeoutUtils.TimeoutFailureFactory<TimeoutException> TIMEOUT_EXCEPTION_FACTORY = (__,
@@ -74,6 +76,39 @@ class PreemptiveTimeoutUtilsTest {
 		catch (InterruptedException ignore) {
 			// ignore
 		}
+	}
+
+	@Nested
+	class Preconditions {
+
+		@Test
+		void positiveDuration() {
+			assertPreconditionViolationFor( //
+				() -> PreemptiveTimeoutUtils.executeWithPreemptiveTimeout(Duration.ofNanos(-1), //
+					() -> fail("enigma"), //
+					() -> "Tempus Fugit", TIMEOUT_EXCEPTION_FACTORY)) //
+							.withMessage(
+								"timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+
+			assertPreconditionViolationFor( //
+				() -> PreemptiveTimeoutUtils.executeWithPreemptiveTimeout(Duration.ofNanos(0), //
+					() -> fail("enigma"), //
+					() -> "Tempus Fugit", TIMEOUT_EXCEPTION_FACTORY)) //
+							.withMessage(
+								"timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+
+		}
+
+		@Test
+		void timeoutRepresentableInNanos() {
+			assertPreconditionViolationFor( //
+				() -> PreemptiveTimeoutUtils.executeWithPreemptiveTimeout(Duration.ofNanos(Long.MAX_VALUE).plusNanos(1),
+					() -> fail("enigma"), //
+					() -> "Tempus Fugit", TIMEOUT_EXCEPTION_FACTORY)) //
+							.withMessage(
+								"timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		}
+
 	}
 
 }

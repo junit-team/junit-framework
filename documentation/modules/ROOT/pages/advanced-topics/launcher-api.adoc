@@ -159,7 +159,7 @@ registered with `LauncherSession` (unless automatic registration is disabled.)
 The following build tools and IDEs are known to provide full support for `LauncherSession`:
 
 * Gradle 4.6 and later
-* Maven Surefire/Failsafe 3.0.0-M6 and later
+* Maven Surefire/Failsafe 3.5.4 and later
 * IntelliJ IDEA 2017.3 and later
 
 Other tools might also work but have not been tested explicitly.
