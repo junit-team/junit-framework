@@ -417,7 +417,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#TIMEOUT_MODE_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
+	@ConfigurationParameter(type = Timeout.TimeoutMode.class, defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
 	public static final String TIMEOUT_MODE_PROPERTY_NAME = Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 
 	/**
