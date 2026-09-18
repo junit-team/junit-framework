@@ -78,7 +78,7 @@ public class KotlinReflectionUtils {
 		if (!method.isSynthetic() && kotlinCoroutineContinuation != null && isKotlinType(method.getDeclaringClass())) {
 			int parameterCount = method.getParameterCount();
 			return parameterCount > 0 //
-					&& method.getParameterTypes()[parameterCount - 1] == kotlinCoroutineContinuation;
+					&&  kotlinCoroutineContinuation.getName().equals(method.getParameterTypes()[parameterCount - 1].getName());
 		}
 		return false;
 	}
@@ -127,8 +127,21 @@ public class KotlinReflectionUtils {
 
 	@API(status = INTERNAL, since = "6.1")
 	public static boolean isKotlinType(Class<?> clazz) {
-		return kotlinMetadata != null //
-				&& clazz.getDeclaredAnnotation(kotlinMetadata) != null;
+		if (kotlinMetadata == null) {
+			return false;
+		}
+
+		if (clazz.getClassLoader().equals(kotlinMetadata.getClassLoader())) {
+			return clazz.getDeclaredAnnotation(kotlinMetadata) != null;
+		} else {
+			try {
+				@SuppressWarnings("unchecked") Class<? extends Annotation> kotlinMetadataFromProperCL = (Class<? extends Annotation>) Class.forName(kotlinMetadata.getName(), false, clazz.getClassLoader());
+				return clazz.getDeclaredAnnotation(kotlinMetadataFromProperCL) != null;
+			}
+			catch (Exception ignored) {
+				return false;
+			}
+		}
 	}
 
 	@API(status = INTERNAL, since = "6.1")
