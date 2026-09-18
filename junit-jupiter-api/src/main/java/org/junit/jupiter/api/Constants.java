@@ -254,7 +254,8 @@ public final class Constants {
 	 *
 	 */
 	@ConfigurationParameter(type = ParallelExecutorServiceType.class, defaultValue = @Value(stringValue = ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_DEFAULT))
-	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "executor-service";
+	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+			+ "executor-service";
 
 	/**
 	 * Property name used to select the parallel execution configuration
@@ -275,7 +276,8 @@ public final class Constants {
 	 *
 	 */
 	@ConfigurationParameter(type = Integer.class)
-	public static final String PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.parallelism";
+	public static final String PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+			+ "fixed.parallelism";
 
 	/**
 	 * Property name used to configure the maximum pool size of the underlying
@@ -287,7 +289,8 @@ public final class Constants {
 	 *
 	 */
 	@ConfigurationParameter(type = Integer.class)
-	public static final String PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.max-pool-size";
+	public static final String PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
+			+ "fixed.max-pool-size";
 
 	/**
 	 * Property name used to disable saturation of the underlying fork-join pool

@@ -16,11 +16,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
 
 public final class HintsWithPermitsAdditionalValues {
 
-	@ConfigurationParameter(hints = @Hints(permitsAdditionalValues = true, value = { //
-			@Hint(value = "ns"), //
-			@Hint(value = "μs"), //
-			@Hint(value = "ms") //
-	}))
+	@ConfigurationParameter(hints = @Hints(permitsAdditionalValues = true, value = @Hint(value = "42 ns")))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }

@@ -106,4 +106,10 @@ final class ConfigurationParameterAnnotatedField {
 	String enclosingTypeName() {
 		return enclosingType.getQualifiedName().toString();
 	}
+
+	@Nullable
+	AnnotationMirror hints() {
+		return getAnnotationMirror(annotationMirror, "hints");
+	}
+
 }

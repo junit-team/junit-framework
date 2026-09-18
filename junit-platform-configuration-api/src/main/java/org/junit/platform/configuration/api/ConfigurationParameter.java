@@ -163,15 +163,16 @@ public @interface ConfigurationParameter {
 	}
 
 	@interface Hint {
-		/**
-		 * A short description of the value.
-		 */
-		String description() default "";
 
 		/**
 		 * A valid value for the configuration parameter.
 		 */
 		String value() default "";
+
+		/**
+		 * A short description of the value.
+		 */
+		String description() default "";
 
 	}
 }

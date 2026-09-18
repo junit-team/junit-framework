@@ -10,15 +10,20 @@
 
 package org.junit.platform.configuration.processor;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirrorList;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -182,6 +187,11 @@ final class ConfigurationParameterHandler {
 	private @Nullable Hint processHint(String name, ConfigurationParameterAnnotatedField field,
 			@Nullable Default defaults) {
 
+		// Derive hint from ConfigurationParameter.hints value
+		var hints = field.hints();
+		if (hints != null) {
+			return new Hint(name, processHintValues(hints), processPermitsAdditionalValues(hints));
+		}
 		// Derive hint from ConfigurationParameter.type value
 		var typeElement = field.typeTypeElement();
 		if (typeElement != null) {
@@ -217,6 +227,26 @@ final class ConfigurationParameterHandler {
 		}
 
 		return null;
+	}
+
+	private @Nullable List<ValueProvider> processPermitsAdditionalValues(AnnotationMirror hints) {
+		var permitsAdditionalValues = getAnnotationValue(hints, "permitsAdditionalValues");
+		if (permitsAdditionalValues == null || !TRUE.equals(permitsAdditionalValues.getValue())) {
+			return null;
+		}
+		return List.of(new ValueProvider("any", null));
+	}
+
+	private List<ValueHint> processHintValues(AnnotationMirror hints) {
+		var hintValues = getAnnotationMirrorList(hints, "value");
+		if (hintValues == null) {
+			return Collections.emptyList();
+		}
+		return hintValues.stream() //
+				.map(AnnotationMirrorUtil::getStringValuesMap) //
+				.filter(map -> map.get("value") != null) //
+				.map(map -> new ValueHint(map.get("value"), map.get("description"))) //
+				.toList();
 	}
 
 	private static List<ValueProvider> processClassValues(String typeElementName) {

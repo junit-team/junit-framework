@@ -16,9 +16,9 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
 public final class Hints {
 
 	@ConfigurationParameter(hints = @ConfigurationParameter.Hints({ //
-			@Hint(value = "ns"), //
-			@Hint(value = "μs"), //
-			@Hint(value = "ms") //
+			@Hint(value = "42 ns"), //
+			@Hint(value = "42 μs"), //
+			@Hint(value = "42 ms") //
 	}))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 

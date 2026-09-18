@@ -38,6 +38,9 @@ import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
 import org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs;
+import org.junit.platform.configuration.testcases.Hints;
+import org.junit.platform.configuration.testcases.HintsWithDescription;
+import org.junit.platform.configuration.testcases.HintsWithPermitsAdditionalValues;
 import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
@@ -598,6 +601,90 @@ class ConfigurationMetadataAnnotationProcessorTests {
 								 }
 							 ]
 						 }
+					  ]
+					}""");
+		}
+
+		@Test
+		void hints() {
+			compiler.compileWithoutError(Hints.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.Hints"
+					  }
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								 "value": "42 ns"
+							  },
+							  {
+								  "value": "42 μs"
+							  },
+							  {
+								  "value": "42 ms"
+							  }
+						  ]
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void hintsWithDescription() {
+			compiler.compileWithoutError(HintsWithDescription.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.HintsWithDescription"
+					  }
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								 "value": "42 ns",
+								  "description": "a timeout in nano seconds"
+							  }
+						  ]
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void hintsWithPermitsAdditionalValues() {
+			compiler.compileWithoutError(HintsWithPermitsAdditionalValues.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.HintsWithPermitsAdditionalValues"
+					  }
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "42 ns"
+							  }
+						  ],
+						  "providers": [
+							  {
+								  "name": "any"
+							  }
+						  ]
+						}
 					  ]
 					}""");
 		}

@@ -16,11 +16,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
 
 public final class HintsWithDescription {
 
-	@ConfigurationParameter(hints = @Hints({ //
-			@Hint(value = "100 ns", description = "a timeout in nano seconds"), //
-			@Hint(value = "100 μs", description = "a timeout in micro seconds"), //
-			@Hint(value = "100 ms", description = "a timeout in milli seconds") //
-	}))
+	@ConfigurationParameter(hints = @Hints(@Hint(value = "42 ns", description = "a timeout in nano seconds")))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
 }
