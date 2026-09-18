@@ -46,6 +46,8 @@ repository on GitHub.
   xref:advanced-topics/configuration-parameter-documentation.adoc[Documenting Configuration
   Parameters] for more information.
 * Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+* Test engines using the `ParallelHierarchicalTestExecutorServiceFactory` now use the
+  `WORKER_THREAD_POOL` executor service by default.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
@@ -81,6 +83,8 @@ repository on GitHub.
 * The `assertTimeout`, `assertTimeoutPreemptively` and methods annotated with `@Timeout`
   now measure the execution time with sub-millisecond precision.
 * Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+* The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
+  now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage

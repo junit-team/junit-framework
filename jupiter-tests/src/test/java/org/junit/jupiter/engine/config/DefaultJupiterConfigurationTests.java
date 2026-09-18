@@ -46,7 +46,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
-import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 import org.junit.platform.launcher.core.ConfigurationParametersFactoryForTests;
@@ -185,22 +184,6 @@ class DefaultJupiterConfigurationTests {
 			dummyOutputDirectoryCreator(), DiscoveryIssueReporter.collecting(issues)).getDefaultTestInstanceLifecycle();
 
 		assertThat(issues).isEmpty();
-	}
-
-	@Test
-	void asksUsersToTryWorkerThreadPoolHierarchicalExecutorServiceIfParallelExecutionIsEnabled() {
-		var parameters = Map.of(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, true);
-		List<DiscoveryIssue> issues = new ArrayList<>();
-
-		new DefaultJupiterConfiguration(configurationParameters(parameters), dummyOutputDirectoryCreator(),
-			DiscoveryIssueReporter.collecting(issues)).getDefaultTestInstanceLifecycle();
-
-		assertThat(issues).containsExactly(DiscoveryIssue.create(Severity.INFO, """
-				Parallel test execution is enabled but the default ForkJoinPool-based executor service will be used. \
-				Please give the new implementation based on a regular thread pool a try by setting the \
-				'junit.jupiter.execution.parallel.config.executor-service' configuration parameter to \
-				'WORKER_THREAD_POOL' and report any issues to the JUnit team. Alternatively, set the configuration \
-				parameter to 'FORK_JOIN_POOL' to hide this message and keep using the original implementation."""));
 	}
 
 	private void assertDefaultConfigParam(@Nullable String configValue, Lifecycle expected) {
