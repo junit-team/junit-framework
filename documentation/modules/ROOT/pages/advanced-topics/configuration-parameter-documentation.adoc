@@ -2,8 +2,8 @@
 
 Authors of test engines and JUnit Jupiter extensions may generate a machine-readable
 overview of configuration parameters by annotating their configuration parameters
-with `{PlatformConfigurationParameter}` from the `junit-platform-configuration-api`
-artifact.
+with `{PlatformConfigurationParameter}` from the
+`org.junit.platform:junit-platform-configuration-api` artifact.
 
 [source,java,indent=0]
 .A small example
@@ -11,9 +11,9 @@ artifact.
 include::example$java/example/ConfigurationParametersDemo.java[tags=user_guide]
 ----
 
-Processing the annotations with `junit-platform-configuration-processor` will produce a
-`META-INF/junit-platform-configuration-metadata.json` file in the format of
-{SpringBootConfigurationMetadata}. This file can then be used to generate documentation
+Processing the annotations with `org.junit.platform:junit-platform-configuration-processor`
+will produce a `META-INF/junit-platform-configuration-metadata.json` file in the format
+of {SpringBootConfigurationMetadata}. This file can then be used to generate documentation
 or provide code completion by IDEs. An example is shown below.
 
 [source,json,indent=0]

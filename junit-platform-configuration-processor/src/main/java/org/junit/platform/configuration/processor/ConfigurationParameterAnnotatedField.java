@@ -11,7 +11,6 @@
 package org.junit.platform.configuration.processor;
 
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValuesMap;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getValuesMap;
 
@@ -24,9 +23,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 import org.jspecify.annotations.Nullable;
 
@@ -35,15 +32,13 @@ final class ConfigurationParameterAnnotatedField {
 	private final TypeElement enclosingType;
 	private final AnnotationMirror annotationMirror;
 	private final Elements elementUtils;
-	private final Types typeUtils;
 
 	ConfigurationParameterAnnotatedField(VariableElement element, Elements elementUtils, TypeElement enclosingType,
-			AnnotationMirror annotationMirror, Types typeUtils) {
+			AnnotationMirror annotationMirror) {
 		this.element = element;
 		this.elementUtils = elementUtils;
 		this.enclosingType = enclosingType;
 		this.annotationMirror = annotationMirror;
-		this.typeUtils = typeUtils;
 	}
 
 	Element element() {
@@ -71,14 +66,8 @@ final class ConfigurationParameterAnnotatedField {
 	}
 
 	@Nullable
-	TypeElement typeTypeElement() {
-		var value = getAnnotationValue(annotationMirror, "type");
-		if (value == null) {
-			return null;
-		}
-
-		var typeMirror = (TypeMirror) value.getValue();
-		return (TypeElement) typeUtils.asElement(typeMirror);
+	String typeValue() {
+		return getStringValuesMap(annotationMirror).get("type");
 	}
 
 	@Nullable

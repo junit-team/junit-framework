@@ -15,11 +15,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation;
-import org.junit.platform.configuration.processor.ConfigurationMetadata.Hint;
-import org.junit.platform.configuration.processor.ConfigurationMetadata.Parameters;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Property;
-import org.junit.platform.configuration.processor.ConfigurationMetadata.ValueHint;
-import org.junit.platform.configuration.processor.ConfigurationMetadata.ValueProvider;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -38,10 +34,6 @@ final class JsonConverter {
 		var properties = metaData.properties();
 		if (!properties.isEmpty()) {
 			builder.add("properties", toJsonArray(properties, this::toJsonObject));
-		}
-		var hints = metaData.hints();
-		if (!hints.isEmpty()) {
-			builder.add("hints", toJsonArray(hints, this::toJsonObject));
 		}
 
 		return builder.build();
@@ -79,77 +71,6 @@ final class JsonConverter {
 		return builder.build();
 	}
 
-	private JsonObject toJsonObject(Deprecation deprecation) {
-		var builder = factory.createObjectBuilder();
-
-		var reason = deprecation.reason();
-		if (reason != null) {
-			builder.add("reason", reason);
-		}
-
-		var replacement = deprecation.replacement();
-		if (replacement != null) {
-			builder.add("replacement", replacement);
-		}
-
-		var since = deprecation.since();
-		if (since != null) {
-			builder.add("since", since);
-		}
-
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(Hint hint) {
-		var builder = factory.createObjectBuilder();
-		builder.add("name", hint.name());
-
-		var values = hint.values();
-		if (values != null) {
-			builder.add("values", toJsonArray(values, this::toJsonObject));
-		}
-
-		var providers = hint.providers();
-		if (providers != null) {
-			builder.add("providers", toJsonArray(providers, this::toJsonObject));
-		}
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(ValueHint valueHint) {
-		var builder = factory.createObjectBuilder();
-		addObjectValue(builder, "value", valueHint.value());
-
-		var description = valueHint.description();
-		if (description != null) {
-			builder.add("description", description);
-		}
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(ValueProvider valueProvider) {
-		var builder = factory.createObjectBuilder();
-		builder.add("name", valueProvider.name());
-
-		var parameters = valueProvider.parameters();
-		if (parameters != null) {
-			builder.add("parameters", toJsonObject(parameters));
-		}
-		return builder.build();
-	}
-
-	private JsonObject toJsonObject(Parameters parameters) {
-		var builder = factory.createObjectBuilder();
-		builder.add("target", parameters.target());
-		return builder.build();
-	}
-
-	private <T> JsonArray toJsonArray(List<T> properties, Function<T, JsonValue> converter) {
-		var builder = factory.createArrayBuilder();
-		properties.forEach(element -> builder.add(converter.apply(element)));
-		return builder.build();
-	}
-
 	private void addObjectValue(JsonObjectBuilder builder, String name, Object defaultValue) {
 		if (defaultValue instanceof Short v) {
 			builder.add(name, v);
@@ -184,4 +105,30 @@ final class JsonConverter {
 		}
 	}
 
+	private JsonObject toJsonObject(Deprecation deprecation) {
+		var builder = factory.createObjectBuilder();
+
+		var reason = deprecation.reason();
+		if (reason != null) {
+			builder.add("reason", reason);
+		}
+
+		var replacement = deprecation.replacement();
+		if (replacement != null) {
+			builder.add("replacement", replacement);
+		}
+
+		var since = deprecation.since();
+		if (since != null) {
+			builder.add("since", since);
+		}
+
+		return builder.build();
+	}
+
+	private <T> JsonArray toJsonArray(List<T> properties, Function<T, JsonValue> converter) {
+		var builder = factory.createArrayBuilder();
+		properties.forEach(element -> builder.add(converter.apply(element)));
+		return builder.build();
+	}
 }

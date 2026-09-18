@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 import org.apiguardian.api.API;
 
 /**
- * Marks a field as a configuration parameter for a test engine.
+ * Marks a field as a configuration parameter.
  * <p>
  * This annotation should be used to facilitate the automated
  * generation of documentation.
@@ -129,9 +129,6 @@ public @interface ConfigurationParameter {
 
 		/**
 		 * The {@link Class} value to use as the default.
-		 *
-		 * <p>When the default is a class value, the {@link ConfigurationParameter#type()}
-		 * should also be set.
 		 */
 		Class<?>[] classValue() default {};
 	}

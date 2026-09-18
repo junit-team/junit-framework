@@ -8,6 +8,9 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
+/**
+ * Annotations for documenting configuration parameters.
+ */
 module org.junit.platform.configuration.api {
 	requires static transitive org.jspecify;
 	requires static transitive org.apiguardian.api;
