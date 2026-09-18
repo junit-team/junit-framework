@@ -51,6 +51,15 @@ class AnnotationMirrorUtil {
 				.orElse(null);
 	}
 
+	static @Nullable AnnotationValue getAnnotationValue(AnnotationMirror annotation, String name) {
+		for (var entry : annotation.getElementValues().entrySet()) {
+			if (entry.getKey().getSimpleName().toString().equals(name)) {
+				return entry.getValue();
+			}
+		}
+		return null;
+	}
+
 	static Map<String, List<Object>> getValuesMap(AnnotationMirror annotation) {
 		return annotation.getElementValues().entrySet() //
 				.stream() //
