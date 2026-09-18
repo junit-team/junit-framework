@@ -42,6 +42,7 @@ import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeAbstractClass;
 import org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass;
 import org.junit.platform.configuration.testcases.TypeClass;
 import org.junit.platform.configuration.testcases.TypeEnum;
@@ -305,25 +306,12 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						{
 							"properties": [
 							  {
-								"name": "org.example.classes",
+								"name": "org.example.property",
 								"type": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example",
 								"sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass",
 								"defaultValue": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Default"
 							  }
-							],
-							"hints": [
-							 {
-								 "name": "org.example.classes",
-								 "providers": [
-									 {
-										 "name": "class-reference",
-										 "parameters": {
-											 "target": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example"
-										 }
-									 }
-								 ]
-							 }
-						  ]
+							]
 						}""");
 		}
 
@@ -336,7 +324,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						{
 						  "name": "org.example.property",
 						  "type": "org.junit.platform.configuration.testcases.TypeInterface.Example",
-						  "sourceType": "org.junit.platform.configuration.TypeInterface.TypeClass"
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeInterface"
 						}
 					  ],
 					  "hints": [
@@ -346,7 +334,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					  		  {
 					  			  "name": "class-reference",
 					  			  "parameters": {
-					  				  "target": "org.junit.platform.configuration.testcases.TypeClass.Example"
+					  				  "target": "org.junit.platform.configuration.testcases.TypeInterface.Example"
 					  			  }
 					  		  }
 					  	  ]
@@ -363,7 +351,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						{
 							"properties": [
 							  {
-								"name": "org.example.classes",
+								"name": "org.example.property",
 								"type": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Example",
 								"sourceType": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass",
 								"defaultValue": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Default"
@@ -371,7 +359,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 							],
 							"hints": [
 							 {
-								 "name": "org.example.classes",
+								 "name": "org.example.property",
 								 "providers": [
 									 {
 										 "name": "class-reference",
@@ -398,6 +386,38 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						}
 					  ]
 					}""");
+		}
+
+		@Test
+		void abstractType() {
+			compiler.compileWithoutError(TypeAbstractClass.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeAbstractClass.Example",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClass"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void abstractTypeWithDefaultClassDoesNotGenerateHints() {
+			compiler.compileWithoutError(TypeAbstractClassWithDefaultClass.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example",
+							  "sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass",
+							  "defaultValue": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Default"
+							}
+						  ]
+						}""");
 		}
 
 		@Test

@@ -214,10 +214,6 @@ final class ConfigurationParameterHandler {
 					field.element());
 				return null;
 			}
-			// TODO: Works for abstract classes, but only when there is a default.
-			// TODO: Consider limiting the allowed type values to primitives, enums and interfaces.
-			var typeElementName = typeElement.getQualifiedName().toString();
-			return new Hint(name, null, processClassValues(typeElementName));
 		}
 
 		return null;

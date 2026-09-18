@@ -15,7 +15,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter;
 public final class TypeInterface {
 
 	@ConfigurationParameter(type = Example.class)
-	public static final String CLASSES_PROPERTY_NAME = "org.example.classes";
+	public static final String CLASSES_PROPERTY_NAME = "org.example.property";
 
 	private interface Example {
 

@@ -16,7 +16,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 public final class TypeInterfaceWithDefaultClass {
 
 	@ConfigurationParameter(type = Example.class, defaultValue = @Value(classValue = Default.class))
-	public static final String CLASSES_PROPERTY_NAME = "org.example.classes";
+	public static final String CLASSES_PROPERTY_NAME = "org.example.property";
 
 	private interface Example {
 

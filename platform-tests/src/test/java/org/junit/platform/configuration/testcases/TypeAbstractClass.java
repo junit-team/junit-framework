@@ -11,15 +11,13 @@
 package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
-import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
-public final class DefaultClassWithoutType {
+public final class TypeAbstractClass {
 
-	@ConfigurationParameter(defaultValue = @Value(classValue = Default.class))
+	@ConfigurationParameter(type = Example.class)
 	public static final String CLASSES_PROPERTY_NAME = "org.example.property";
 
-	private static class Default {
+	private static abstract class Example {
 
 	}
-
 }
