@@ -31,37 +31,10 @@ import org.jspecify.annotations.Nullable;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 
-/// Writes all configuration parameters marked with
-/// {@link org.junit.platform.configuration.api.ConfigurationParameter} to
-/// {@value #METADATA_PATH} in [Spring Boot's Configuration
-/// Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html)
-/// format. This enables IDEs and other tools to process and validate Test Engine
-/// configuration.
-///
-/// <h4>Usage</h4>
-///
-/// <pre>{@code
-/// /**
-///   * A brief multi-line description of
-///   * this property: {@value}.
-///   *
-///   * <p>Followed by an additional paragraph.
-///   */
-///  @ConfigurationParameter
-///  public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
-///
-/// }</pre>
-///
-/// The first paragraph from the doc string will be used to describe the
-/// property. If the first paragraph ends with {@code : {@value}.} or
-/// {@code : {@value}} it will be replaced with {@code .}. Likewise
-/// {@code {@code}} and {@code {@link}} tags are replaced with plain
-/// text versions.
-///
 @API(status = API.Status.EXPERIMENTAL)
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
 public final class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
-	private static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
+	public static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
 	private @Nullable ConfigurationMetadata metaData;
 	private @Nullable ConfigurationParameterHandler configurationParameterHandler;
 
