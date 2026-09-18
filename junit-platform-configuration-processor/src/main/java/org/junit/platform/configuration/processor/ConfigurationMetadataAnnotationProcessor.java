@@ -47,7 +47,7 @@ import jakarta.json.stream.JsonGenerator;
 ///   *
 ///   * <p>Followed by an additional paragraph.
 ///   */
-///  @ConfigurationProperty
+///  @ConfigurationParameter
 ///  public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 ///
 /// }</pre>
