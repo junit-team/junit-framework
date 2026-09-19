@@ -52,6 +52,15 @@ public @interface ConfigurationParameter {
 	 */
 	Deprecation deprecation() default @Deprecation;
 
+	/**
+	 * Hints for valid values for the parameter.
+	 * <p>
+	 * Can be omitted when {@link #type()} is an enum or interface.
+	 *
+	 * @return hints for valid values about the parameter.
+	 */
+	Hints hints() default @Hints;
+
 	@interface Deprecation {
 		/**
 		 * A brief description of why the parameter was deprecated.
@@ -129,8 +138,41 @@ public @interface ConfigurationParameter {
 
 		/**
 		 * The {@link Class} value to use as the default.
+		 *
+		 * <p>When the default is a class value, the {@link ConfigurationParameter#type()}
+		 * should also be set.
 		 */
 		Class<?>[] classValue() default {};
 	}
 
+	@interface Hints {
+		/**
+		 * Valid values for the value of the parameter.
+		 *
+		 * @return valid values for the value of the parameter.
+		 */
+		Hint[] value() default {};
+
+		/**
+		 * Returns true if values other than the provided hints are allowed.
+		 * By default, is assumed the hints are exhaustive.
+		 *
+		 * @return true if values other than the provided hints are allowed.
+		 */
+		boolean permitsAdditionalValues() default false;
+	}
+
+	@interface Hint {
+
+		/**
+		 * A valid value for the configuration parameter.
+		 */
+		String value() default "";
+
+		/**
+		 * A short description of the value.
+		 */
+		String description() default "";
+
+	}
 }

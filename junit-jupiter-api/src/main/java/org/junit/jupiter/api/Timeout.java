@@ -314,7 +314,7 @@ public @interface Timeout {
 	 * {@link Timeout @Timeout} is applied to tests.</p>
 	 *
 	 * <p>Value must be one names of enum constants defined in
-	 *  {@link ThreadMode}, ignoring case. If not specified, the default is
+	 *  {@link TimeoutMode}, ignoring case. If not specified, the default is
 	 *  {@value #TIMEOUT_MODE_DEFAULT}.
 	 *
 	 * @since 5.6
@@ -398,6 +398,22 @@ public @interface Timeout {
 		 * Javadoc for a discussion of possible undesirable side effects.
 		 */
 		SEPARATE_THREAD,
+	}
+
+	@API(status = STABLE, since = "6.2")
+	enum TimeoutMode {
+		/**
+		 * Timeouts are applied to tests.
+		 */
+		ENABLED,
+		/**
+		 * Timeouts are not applied to tests.
+		 */
+		DISABLED,
+		/**
+		 * Timeouts are not applied to tests when the JVM is started in debug mode.
+		 */
+		DISABLED_ON_DEBUG
 	}
 
 }
