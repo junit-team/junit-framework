@@ -41,7 +41,7 @@ class ClassTemplateDemo {
     class MyClassTemplateInvocationContextProvider : ClassTemplateInvocationContextProvider {
         override fun supportsClassTemplate(context: ExtensionContext) = true
 
-        override fun provideClassTemplateInvocationContexts(context: ExtensionContext): Stream<ClassTemplateInvocationContext> =
+        override fun provideClassTemplateInvocationContexts(context: ExtensionContext) =
             Stream.of(invocationContext("apple"), invocationContext("banana"))
 
         private fun invocationContext(parameter: String) =

@@ -34,7 +34,7 @@ class TestTemplateDemo {
     class MyTestTemplateInvocationContextProvider : TestTemplateInvocationContextProvider {
         override fun supportsTestTemplate(context: ExtensionContext) = true
 
-        override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> =
+        override fun provideTestTemplateInvocationContexts(context: ExtensionContext) =
             Stream.of(invocationContext("apple"), invocationContext("banana"))
 
         private fun invocationContext(parameter: String) =
