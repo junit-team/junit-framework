@@ -90,7 +90,7 @@ jobs:
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@82da71df4e122282484a99a8d70096bc2369dbd8 # v1.5.9
+      - uses: sbt/setup-sbt@ce95da69b39609ea153bad087708da5f37366897 # v1.5.10
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Prepare Maven Central user token
@@ -195,7 +195,7 @@ jobs:
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@82da71df4e122282484a99a8d70096bc2369dbd8 # v1.5.9
+      - uses: sbt/setup-sbt@ce95da69b39609ea153bad087708da5f37366897 # v1.5.10
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Build examples
