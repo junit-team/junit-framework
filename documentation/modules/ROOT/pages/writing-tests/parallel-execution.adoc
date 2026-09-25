@@ -167,7 +167,7 @@ configuration parameter to one of the following options:
 `worker_thread_pool` (default)::
 Use an executor service that is backed by a `ThreadPoolExecutor`. The
 executor service tries to maintain the desired parallelism but does
-not compensate for test or production code uses blocking API in the JDK.
+not compensate for test or production code using blocking APIs in the JDK.
 
 `fork_join_pool`::
 Use an executor service that is backed by a `ForkJoinPool` from the JDK. This will cause
