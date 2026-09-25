@@ -21,6 +21,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,11 +29,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 
 /**
  * @since 1.0
  */
 final class CloseablePath implements Closeable {
+
+	private static final Logger logger = LoggerFactory.getLogger(CloseablePath.class);
 
 	private static final String FILE_URI_SCHEME = "file";
 	static final String JAR_URI_SCHEME = "jar";
@@ -83,6 +88,17 @@ final class CloseablePath implements Closeable {
 			// fall back to the original URI
 		}
 		URI key = realJarUri;
+
+		var fileSystems = Set.copyOf(MANAGED_FILE_SYSTEMS.keySet());
+		String message = """
+				classloader = %s
+				jarUri = %s
+				realJarUri = %s
+				filesystems = %s
+				""".formatted(
+						CloseablePath.class.getClassLoader(), jarUri, realJarUri, fileSystems);
+		logger.warn(() -> message);
+
 		ManagedFileSystem managedFileSystem = MANAGED_FILE_SYSTEMS.compute(key,
 			(__, oldValue) -> oldValue == null ? new ManagedFileSystem(jarUri, fileSystemProvider) : oldValue.retain());
 		Path path = pathProvider.apply(managedFileSystem.fileSystem);
