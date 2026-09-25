@@ -29,6 +29,8 @@ import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
 import org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy;
 import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
 import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
@@ -330,7 +332,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -338,7 +349,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -347,7 +367,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -356,7 +385,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -365,7 +403,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -373,7 +420,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -382,7 +438,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -391,7 +456,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -400,7 +474,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -409,7 +492,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(type = String.class)
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42   ", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s ", description = "A duration in seconds"), //
+			@Hint(value = "42 m ", description = "A duration in minutes"), //
+			@Hint(value = "42 h ", description = "A duration in hours"), //
+			@Hint(value = "42 d ", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -417,7 +509,7 @@ public final class Constants {
 	 *
 	 * @see Timeout#TIMEOUT_MODE_PROPERTY_NAME
 	 */
-	@ConfigurationParameter(defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
+	@ConfigurationParameter(type = Timeout.TimeoutMode.class, defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
 	public static final String TIMEOUT_MODE_PROPERTY_NAME = Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 
 	/**

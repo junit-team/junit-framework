@@ -51,6 +51,28 @@ class AnnotationMirrorUtil {
 				.orElse(null);
 	}
 
+	static @Nullable AnnotationValue getAnnotationValue(AnnotationMirror annotation, String name) {
+		for (var entry : annotation.getElementValues().entrySet()) {
+			if (entry.getKey().getSimpleName().toString().equals(name)) {
+				return entry.getValue();
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	static @Nullable List<AnnotationMirror> getAnnotationMirrorList(AnnotationMirror annotation, String name) {
+		for (var entry : annotation.getElementValues().entrySet()) {
+			if (entry.getKey().getSimpleName().toString().equals(name)) {
+				var value = entry.getValue().getValue();
+				if (value instanceof List<?> list) {
+					return (List<AnnotationMirror>) list;
+				}
+			}
+		}
+		return null;
+	}
+
 	static Map<String, List<Object>> getValuesMap(AnnotationMirror annotation) {
 		return annotation.getElementValues().entrySet() //
 				.stream() //

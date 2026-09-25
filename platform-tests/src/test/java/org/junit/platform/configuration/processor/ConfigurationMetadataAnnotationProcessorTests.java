@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.platform.configuration.testcases.DefaultClassWithoutType;
 import org.junit.platform.configuration.testcases.DefaultDifferentSets;
 import org.junit.platform.configuration.testcases.DefaultMultipleValues;
 import org.junit.platform.configuration.testcases.Defaults;
@@ -37,11 +38,21 @@ import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
 import org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs;
+import org.junit.platform.configuration.testcases.Hints;
+import org.junit.platform.configuration.testcases.HintsWithDescription;
+import org.junit.platform.configuration.testcases.HintsWithPermitsAdditionalValues;
 import org.junit.platform.configuration.testcases.Minimal;
 import org.junit.platform.configuration.testcases.NonFinal;
 import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
+import org.junit.platform.configuration.testcases.TypeAbstractClass;
+import org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass;
+import org.junit.platform.configuration.testcases.TypeClass;
+import org.junit.platform.configuration.testcases.TypeEnum;
+import org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues;
 import org.junit.platform.configuration.testcases.TypeEnumWithStringDefault;
+import org.junit.platform.configuration.testcases.TypeInterface;
+import org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass;
 import org.junit.platform.configuration.testcases.TypeString;
 import org.junit.platform.configuration.testcases.Without;
 
@@ -263,6 +274,109 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void classType() {
+			compiler.compileWithoutError(TypeClass.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeClass.Example",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeClass"
+						}
+					  ],
+					  "hints": [
+					  	{
+					  	  "name": "org.example.property",
+					  	  "providers": [
+					  		  {
+					  			  "name": "class-reference",
+					  			  "parameters": {
+					  				  "target": "org.junit.platform.configuration.testcases.TypeClass.Example"
+					  			  }
+					  		  }
+					  	  ]
+					  	}
+					  ]
+					}""");
+		}
+
+		@Test
+		void classTypeAbstractWithDefaultClass() {
+			compiler.compileWithoutError(TypeAbstractClassWithDefaultClass.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+							"properties": [
+							  {
+								"name": "org.example.property",
+								"type": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example",
+								"sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass",
+								"defaultValue": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Default"
+							  }
+							]
+						}""");
+		}
+
+		@Test
+		void interfaceType() {
+			compiler.compileWithoutError(TypeInterface.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeInterface.Example",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeInterface"
+						}
+					  ],
+					  "hints": [
+					  	{
+					  	  "name": "org.example.property",
+					  	  "providers": [
+					  		  {
+					  			  "name": "class-reference",
+					  			  "parameters": {
+					  				  "target": "org.junit.platform.configuration.testcases.TypeInterface.Example"
+					  			  }
+					  		  }
+					  	  ]
+					  	}
+					  ]
+					}""");
+		}
+
+		@Test
+		void interfaceTypeWithDefaultClass() {
+			compiler.compileWithoutError(TypeInterfaceWithDefaultClass.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+							"properties": [
+							  {
+								"name": "org.example.property",
+								"type": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Example",
+								"sourceType": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass",
+								"defaultValue": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Default"
+							  }
+							],
+							"hints": [
+							 {
+								 "name": "org.example.property",
+								 "providers": [
+									 {
+										 "name": "class-reference",
+										 "parameters": {
+											 "target": "org.junit.platform.configuration.testcases.TypeInterfaceWithDefaultClass.Example"
+										 }
+									 }
+								 ]
+							 }
+						  ]
+						}""");
+		}
+
+		@Test
 		void stringType() {
 			compiler.compileWithoutError(TypeString.class);
 			assertMetaDataIsEqualTo("""
@@ -272,6 +386,66 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "type": "java.lang.String",
 						  "sourceType": "org.junit.platform.configuration.testcases.TypeString"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void abstractType() {
+			compiler.compileWithoutError(TypeAbstractClass.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeAbstractClass.Example",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClass"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void abstractTypeWithDefaultClassDoesNotGenerateHints() {
+			compiler.compileWithoutError(TypeAbstractClassWithDefaultClass.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Example",
+							  "sourceType": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass",
+							  "defaultValue": "org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass.Default"
+							}
+						  ]
+						}""");
+		}
+
+		@Test
+		void enumType() {
+			compiler.compileWithoutError(TypeEnum.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "org.junit.platform.configuration.testcases.TypeEnum.ExampleEnum",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnum"
+						}
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "A"
+							  },
+							  {
+								  "value": "B"
+							  }
+						  ]
 						}
 					  ]
 					}""");
@@ -289,8 +463,52 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault",
 						  "defaultValue": "A"
 						}
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "A"
+							  },
+							  {
+								  "value": "B"
+							  }
+						  ]
+						}
 					  ]
 					}""");
+		}
+
+		@Test
+		void enumTypeWithDocumentedEnumValues() {
+			compiler.compileWithoutError(TypeEnumWithDocumentedEnumValues.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues.ExampleEnum",
+							  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues"
+							}
+						  ],
+						  "hints": [
+							{
+							  "name": "org.example.property",
+							  "values": [
+								  {
+									  "value": "A",
+									  "description": "A is the first option."
+								  },
+								  {
+									  "value": "B",
+									  "description": "B is the second option."
+								  }
+							  ]
+							}
+						  ]
+						}""");
 		}
 
 		@Test
@@ -355,11 +573,119 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  },
 						  {
 							"name": "org.example.classes",
-							"type": "java.lang.Class",
+							"type": "org.junit.platform.configuration.testcases.Defaults.Example",
 							"sourceType": "org.junit.platform.configuration.testcases.Defaults",
-							"defaultValue": "org.junit.platform.configuration.testcases.Defaults.Example"
+							"defaultValue": "org.junit.platform.configuration.testcases.Defaults.Default"
 						  }
-						]
+						],
+						"hints": [
+						  {
+							  "name": "org.example.booleans",
+							  "values": [
+								  {
+									  "value": true
+								  },
+								  {
+									  "value": false
+								  }
+							  ]
+						  },
+						 {
+							 "name": "org.example.classes",
+							 "providers": [
+								 {
+									 "name": "class-reference",
+									 "parameters": {
+										 "target": "org.junit.platform.configuration.testcases.Defaults.Example"
+									 }
+								 }
+							 ]
+						 }
+					  ]
+					}""");
+		}
+
+		@Test
+		void hints() {
+			compiler.compileWithoutError(Hints.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.Hints"
+					  }
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								 "value": "42 ns"
+							  },
+							  {
+								  "value": "42 μs"
+							  },
+							  {
+								  "value": "42 ms"
+							  }
+						  ]
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void hintsWithDescription() {
+			compiler.compileWithoutError(HintsWithDescription.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.HintsWithDescription"
+					  }
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								 "value": "42 ns",
+								  "description": "a timeout in nano seconds"
+							  }
+						  ]
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void hintsWithPermitsAdditionalValues() {
+			compiler.compileWithoutError(HintsWithPermitsAdditionalValues.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.HintsWithPermitsAdditionalValues"
+					  }
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							  {
+								  "value": "42 ns"
+							  }
+						  ],
+						  "providers": [
+							  {
+								  "name": "any"
+							  }
+						  ]
+						}
+					  ]
 					}""");
 		}
 
@@ -369,7 +695,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains(
-						"@ConfigurationParameter annotated field must static, final, and have constant string value");
+						"@ConfigurationParameter annotated field must be static, final, and have constant string value");
 		}
 
 		@Test
@@ -378,7 +704,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains(
-						"@ConfigurationParameter annotated field must static, final, and have constant string value");
+						"@ConfigurationParameter annotated field must be static, final, and have constant string value");
 		}
 
 		@Test
@@ -387,7 +713,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains(
-						"@ConfigurationParameter annotated field must static, final, and have constant string value");
+						"@ConfigurationParameter annotated field must be static, final, and have constant string value");
 		}
 
 		@Test
@@ -404,6 +730,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			assertThat(result.diagnostics()) //
 					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
 					.contains("@ConfigurationParameter must have exactly one default value");
+		}
+
+		@Test
+		void mustHaveTypeWhenDefaultValueIsClass() {
+			var result = compiler.compile(DefaultClassWithoutType.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameter must declare a type when the default value is a classValue");
 		}
 
 		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {

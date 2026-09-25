@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Timeout.ThreadMode;
+import org.junit.jupiter.api.Timeout.TimeoutMode;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.EnumConfigurationParameterConverter;
 import org.junit.platform.commons.logging.Logger;
@@ -53,7 +54,7 @@ class TimeoutConfiguration {
 		this.extensionContext = extensionContext;
 		this.timeoutDisabled = new EnumConfigurationParameterConverter<>(TimeoutMode.class, "timeout mode") //
 				.get(extensionContext, TIMEOUT_MODE_PROPERTY_NAME) //
-				.map(TimeoutMode::isTimeoutDisabled) //
+				.map(TimeoutConfiguration::isTimeoutDisabled) //
 				.orElse(false);
 	}
 
@@ -138,30 +139,12 @@ class TimeoutConfiguration {
 				.get(extensionContext, DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME);
 	}
 
-	private enum TimeoutMode {
-
-		ENABLED {
-			@Override
-			boolean isTimeoutDisabled() {
-				return false;
-			}
-		},
-
-		DISABLED {
-			@Override
-			boolean isTimeoutDisabled() {
-				return true;
-			}
-		},
-
-		DISABLED_ON_DEBUG {
-			@Override
-			boolean isTimeoutDisabled() {
-				return RuntimeUtils.isDebugMode();
-			}
+	private static boolean isTimeoutDisabled(TimeoutMode timeoutMode) {
+		return switch (timeoutMode) {
+			case ENABLED -> false;
+			case DISABLED -> true;
+			case DISABLED_ON_DEBUG -> RuntimeUtils.isDebugMode();
 		};
-
-		abstract boolean isTimeoutDisabled();
 	}
 
 }
