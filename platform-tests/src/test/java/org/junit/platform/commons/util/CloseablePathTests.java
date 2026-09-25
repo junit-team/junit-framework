@@ -12,6 +12,7 @@ package org.junit.platform.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.junit.platform.commons.util.CloseablePath.JAR_URI_SCHEME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,6 +25,8 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,8 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.test.ConcurrencyTestingUtils;
 import org.junit.platform.commons.util.CloseablePath.FileSystemProvider;
 import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCollector;
@@ -121,6 +126,22 @@ class CloseablePathTests {
 		path2.close();
 		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri),
 			"FileSystem should have been closed");
+	}
+
+	@Test
+	@DisabledOnOs(WINDOWS)
+	void supportsSymlinkedJarsPointingToSameJar(@TempDir Path tempDir) throws Exception {
+		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
+		var a = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
+		var b = Files.createSymbolicLink(tempDir.resolve("b.jar"), original);
+
+		var pathA = CloseablePath.create(a.toUri());
+		paths.add(pathA);
+		var pathB = CloseablePath.create(b.toUri());
+		paths.add(pathB);
+
+		pathA.close();
+		assertDoesNotThrow(() -> Files.walk(pathB.getPath()).close(), "FileSystem should still be open");
 	}
 
 	private static void closeAll(List<CloseablePath> paths) {

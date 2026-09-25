@@ -18,6 +18,7 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,11 +72,22 @@ final class CloseablePath implements Closeable {
 
 	private static CloseablePath createForJarFileSystem(URI jarUri, Function<FileSystem, Path> pathProvider,
 			FileSystemProvider fileSystemProvider) {
-		ManagedFileSystem managedFileSystem = MANAGED_FILE_SYSTEMS.compute(jarUri,
+		URI realJarUri = jarUri;
+		try {
+			URI fileUri = new URI(jarUri.getRawSchemeSpecificPart());
+			if (FILE_URI_SCHEME.equals(fileUri.getScheme())) {
+				realJarUri = new URI(JAR_URI_SCHEME + ':' + Path.of(fileUri).toRealPath().toUri());
+			}
+		}
+		catch (URISyntaxException | IOException | IllegalArgumentException | FileSystemNotFoundException ignored) {
+			// fall back to the original URI
+		}
+		URI key = realJarUri;
+		ManagedFileSystem managedFileSystem = MANAGED_FILE_SYSTEMS.compute(key,
 			(__, oldValue) -> oldValue == null ? new ManagedFileSystem(jarUri, fileSystemProvider) : oldValue.retain());
 		Path path = pathProvider.apply(managedFileSystem.fileSystem);
 		return new CloseablePath(path,
-			() -> MANAGED_FILE_SYSTEMS.compute(jarUri, (__, ___) -> managedFileSystem.release()));
+			() -> MANAGED_FILE_SYSTEMS.compute(key, (__, ___) -> managedFileSystem.release()));
 	}
 
 	private CloseablePath(Path path, Closeable delegate) {
