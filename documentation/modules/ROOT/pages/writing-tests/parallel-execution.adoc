@@ -165,9 +165,9 @@ is used be setting the `junit.jupiter.execution.parallel.config.executor-service
 configuration parameter to one of the following options:
 
 `worker_thread_pool` (default)::
-Use an executor service that is backed by a regular thread pool and does not create
-additional threads if test or production code uses `ForkJoinPool` or calls a blocking
-API in the JDK.
+Use an executor service that is backed by a `ThreadPoolExecutor`. The
+executor service tries to maintain the desired parallelism but does
+not compensate for test or production code uses blocking API in the JDK.
 
 `fork_join_pool`::
 Use an executor service that is backed by a `ForkJoinPool` from the JDK. This will cause
