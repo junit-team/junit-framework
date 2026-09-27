@@ -74,10 +74,8 @@ final class CloseablePath implements Closeable {
 			FileSystemProvider fileSystemProvider) {
 		URI realJarUri = jarUri;
 		try {
-			URI fileUri = new URI(jarUri.getRawSchemeSpecificPart());
-			if (FILE_URI_SCHEME.equals(fileUri.getScheme())) {
-				realJarUri = new URI(JAR_URI_SCHEME + ':' + Path.of(fileUri).toRealPath().toUri());
-			}
+			Path abs = Path.of(new URI(jarUri.getRawSchemeSpecificPart())).toAbsolutePath();
+			realJarUri = new URI(JAR_URI_SCHEME + ':' + abs.toRealPath().toUri());
 		}
 		catch (URISyntaxException | IOException | IllegalArgumentException | FileSystemNotFoundException ignored) {
 			// fall back to the original URI
