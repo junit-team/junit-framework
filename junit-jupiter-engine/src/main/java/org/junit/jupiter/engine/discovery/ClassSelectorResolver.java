@@ -11,14 +11,12 @@
 package org.junit.jupiter.engine.discovery;
 
 import static java.util.Collections.emptyList;
-import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.engine.descriptor.NestedClassTestDescriptor.getEnclosingTestClasses;
 import static org.junit.jupiter.engine.discovery.predicates.TestClassPredicates.NestedClassInvalidityReason.NOT_INNER;
 import static org.junit.platform.commons.support.HierarchyTraversalMode.TOP_DOWN;
 import static org.junit.platform.commons.support.ReflectionSupport.findMethods;
-import static org.junit.platform.commons.util.FunctionUtils.where;
 import static org.junit.platform.commons.util.ReflectionUtils.isInnerClass;
 import static org.junit.platform.commons.util.ReflectionUtils.isNotAbstract;
 import static org.junit.platform.commons.util.ReflectionUtils.streamNestedClasses;
@@ -205,15 +203,15 @@ class ClassSelectorResolver implements SelectorResolver {
 			Predicate<? super Class<?>> condition,
 			BiFunction<TestDescriptor, Class<?>, ClassBasedTestDescriptor> factory) {
 
-		String simpleClassName = uniqueId.getLastSegment().getValue();
 		return toResolution(context.addToParent(() -> selectUniqueId(uniqueId.removeLastSegment()), parent -> {
-			Class<?> parentTestClass = ((TestClassAware) parent).getTestClass();
-			return ReflectionSupport.findNestedClasses(parentTestClass,
-				this.predicates.isAnnotatedWithNestedAndValid.and(
-					where(Class::getSimpleName, isEqual(simpleClassName)))).stream() //
-					.findFirst() //
-					.filter(condition) //
-					.map(testClass -> factory.apply(parent, testClass));
+			var className = uniqueId.getLastSegment().getValue();
+			var parentTestClass = ((TestClassAware) parent).getTestClass();
+			var testClass = className.contains("$") //
+					? ReflectionSupport.tryToLoadClass(className)
+					: ReflectionSupport.tryToLoadClass("%s$%s".formatted(parentTestClass.getName(), className));
+			return testClass.toOptional() //
+					.filter(predicates.isAnnotatedWithNestedAndValid.and(condition)) //
+					.map(loadedTestClass -> factory.apply(parent, loadedTestClass));
 		}));
 	}
 
@@ -255,8 +253,11 @@ class ClassSelectorResolver implements SelectorResolver {
 	}
 
 	private NestedClassTestDescriptor newNestedClassTestDescriptor(TestDescriptor parent, Class<?> testClass) {
-		UniqueId uniqueId = parent.getUniqueId().append(NestedClassTestDescriptor.SEGMENT_TYPE,
-			testClass.getSimpleName());
+		var parentTestClass = ((TestClassAware) parent).getTestClass();
+		var value = parentTestClass.equals(testClass.getEnclosingClass()) //
+				? testClass.getSimpleName() //
+				: testClass.getName();
+		var uniqueId = parent.getUniqueId().append(NestedClassTestDescriptor.SEGMENT_TYPE, value);
 		return new NestedClassTestDescriptor(uniqueId, testClass, () -> getEnclosingTestClasses(parent), configuration);
 	}
 
