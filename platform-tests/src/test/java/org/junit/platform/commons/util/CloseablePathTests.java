@@ -160,6 +160,12 @@ class CloseablePathTests {
 		paths.add(pathB);
 
 		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+
+		// Path a and b both resolve to the same file system so we know they
+		// have the same cache key in ClosablePath. Now we check that
+		// ZipFileSystemProvider stored the file system created for a with the
+		// absolute real path. This implies that ClosablePath uses the same
+		// cache key as ZipFileSystemProvider.
 		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
 		assertThat(createdFileSystem.toString()).isEqualTo(withSymlink.toString());
 	}
@@ -178,6 +184,12 @@ class CloseablePathTests {
 		paths.add(pathB);
 
 		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+
+		// Path a and b both resolve to the same file system so we know they
+		// have the same cache key in ClosablePath. Now we check that
+		// ZipFileSystemProvider stored the file system created for a with the
+		// absolute real path. This implies that ClosablePath uses the same
+		// cache key as ZipFileSystemProvider.
 		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
 		assertThat(createdFileSystem.toString()).isEqualTo(withSpecialNames.toString());
 	}
