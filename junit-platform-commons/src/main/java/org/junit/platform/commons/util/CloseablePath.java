@@ -72,20 +72,25 @@ final class CloseablePath implements Closeable {
 
 	private static CloseablePath createForJarFileSystem(URI jarUri, Function<FileSystem, Path> pathProvider,
 			FileSystemProvider fileSystemProvider) {
-		URI realJarUri = jarUri;
-		try {
-			Path abs = Path.of(new URI(jarUri.getRawSchemeSpecificPart())).toAbsolutePath();
-			realJarUri = new URI(JAR_URI_SCHEME + ':' + abs.toRealPath().toUri());
-		}
-		catch (URISyntaxException | IOException | IllegalArgumentException | FileSystemNotFoundException ignored) {
-			// fall back to the original URI
-		}
-		URI key = realJarUri;
-		ManagedFileSystem managedFileSystem = MANAGED_FILE_SYSTEMS.compute(key,
+		// Matches the keys used in ZipFileSystemProvider.filesystems
+		var realJarUri = resolveJarUri(jarUri);
+		ManagedFileSystem managedFileSystem = MANAGED_FILE_SYSTEMS.compute(realJarUri,
 			(__, oldValue) -> oldValue == null ? new ManagedFileSystem(jarUri, fileSystemProvider) : oldValue.retain());
 		Path path = pathProvider.apply(managedFileSystem.fileSystem);
 		return new CloseablePath(path,
-			() -> MANAGED_FILE_SYSTEMS.compute(key, (__, ___) -> managedFileSystem.release()));
+			() -> MANAGED_FILE_SYSTEMS.compute(realJarUri, (__, ___) -> managedFileSystem.release()));
+	}
+
+	private static URI resolveJarUri(URI jarUri) {
+		try {
+			var spec = jarUri.getRawSchemeSpecificPart();
+			var realPath = Path.of(new URI(spec)).toAbsolutePath().toRealPath();
+			return new URI(JAR_URI_SCHEME + ':' + realPath.toUri());
+		}
+		catch (URISyntaxException | IOException | IllegalArgumentException | FileSystemNotFoundException ignored) {
+			// fall back to the original URI
+			return jarUri;
+		}
 	}
 
 	private CloseablePath(Path path, Closeable delegate) {
