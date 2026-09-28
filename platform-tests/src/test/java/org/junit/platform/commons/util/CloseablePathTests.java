@@ -51,7 +51,7 @@ class CloseablePathTests {
 	@BeforeEach
 	void createUris() throws Exception {
 		uri = getClass().getResource("/jartest.jar").toURI();
-		jarUri = URI.create(JAR_URI_SCHEME + ':' + uri);
+		jarUri = URI.create(JAR_URI_SCHEME + ':' + Path.of(uri).toAbsolutePath().toRealPath().toUri());
 	}
 
 	@AfterEach
@@ -141,19 +141,25 @@ class CloseablePathTests {
 		var pathB = CloseablePath.create(b.toUri());
 		paths.add(pathB);
 
+		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+		assertThat(pathA.getPath().getFileSystem().toString()).isEqualTo(original.toString());
+
 		pathA.close();
 		assertDoesNotThrow(() -> Files.walk(pathB.getPath()).close(), "FileSystem should still be open");
 	}
 
 	@Test
 	@DisabledOnOs(WINDOWS)
-	void resolvesSymlinkedPathsIdenticallyToZipFileSystemProvider(@TempDir Path tempDir) throws Exception {
+	void resolvesSymlinkedPaths(@TempDir Path tempDir) throws Exception {
 		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
 		var withSymlink = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
 		var jarUri = URI.create("jar:" + withSymlink.toUri() + "!/");
 		var closeablePath = CloseablePath.create(jarUri);
 		paths.add(closeablePath);
-		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(FileSystems.getFileSystem(jarUri));
+
+		var expectedFileSystem = FileSystems.getFileSystem(URI.create("jar:" + original.toUri()));
+		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(expectedFileSystem);
+		assertThat(closeablePath.getPath().getFileSystem().toString()).isEqualTo(original.toString());
 	}
 
 	@Test
@@ -166,7 +172,10 @@ class CloseablePathTests {
 		var jarUri = URI.create("jar:" + withSpecialNames.toUri() + "!/");
 		var closeablePath = CloseablePath.create(jarUri);
 		paths.add(closeablePath);
-		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(FileSystems.getFileSystem(jarUri));
+
+		var expectedFileSystem = FileSystems.getFileSystem(URI.create("jar:" + original.toUri()));
+		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(expectedFileSystem);
+		assertThat(closeablePath.getPath().getFileSystem().toString()).isEqualTo(original.toString());
 	}
 
 	private static void closeAll(List<CloseablePath> paths) {

@@ -75,7 +75,8 @@ final class CloseablePath implements Closeable {
 		// Matches the keys used in ZipFileSystemProvider.filesystems
 		var realJarUri = resolveJarUri(jarUri);
 		ManagedFileSystem managedFileSystem = MANAGED_FILE_SYSTEMS.compute(realJarUri,
-			(__, oldValue) -> oldValue == null ? new ManagedFileSystem(jarUri, fileSystemProvider) : oldValue.retain());
+			(__, oldValue) -> oldValue == null ? new ManagedFileSystem(realJarUri, fileSystemProvider)
+					: oldValue.retain());
 		Path path = pathProvider.apply(managedFileSystem.fileSystem);
 		return new CloseablePath(path,
 			() -> MANAGED_FILE_SYSTEMS.compute(realJarUri, (__, ___) -> managedFileSystem.release()));
