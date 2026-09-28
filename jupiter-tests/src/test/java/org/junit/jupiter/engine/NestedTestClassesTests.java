@@ -182,9 +182,9 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 	void deeplyNestedInheritedMethodsAreExecutedWhenSelectedViaUniqueId() {
 		var selectors = List.of( //
 			selectUniqueId(
-				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner1]/[nested-class:org.junit.jupiter.engine.NestedTestClassesTests$AbstractSuperClass$NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"),
+				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner1]/[fq-nested-class:org.junit.jupiter.engine.NestedTestClassesTests$AbstractSuperClass$NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"),
 			selectUniqueId(
-				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner2]/[nested-class:org.junit.jupiter.engine.NestedTestClassesTests$AbstractSuperClass$NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"));
+				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner2]/[fq-nested-class:org.junit.jupiter.engine.NestedTestClassesTests$AbstractSuperClass$NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"));
 
 		var executionResults = executeTests(request -> request //
 				.selectors(selectors) //
@@ -317,27 +317,33 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 				.selectors(selectClass(TestCaseWithSameNameNesting.class)) //
 				.build();
 		var engineDescriptor = discoverTestsWithoutIssues(request);
-		assertThat(engineDescriptor.getDescendants()).hasSize(7);
+		assertThat(engineDescriptor.getDescendants()).hasSize(9);
+		assertAll(engineDescriptor.getDescendants().stream() //
+				.map(TestDescriptor::getUniqueId) //
+				.map(uniqueId -> () -> discoverTestsWithoutIssues(
+					defaultRequest().selectors(selectUniqueId(uniqueId)).build())));
 
 		var executionResults = executeTests(request);
 		executionResults.containerEvents() //
 				.assertStatistics(stats -> stats //
-						.finished(4).succeeded(4)) //
+						.finished(5).succeeded(5)) //
 				.assertThatEvents() //
 				.haveExactly(2, engine()) //
 				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.class))) //
 				.haveExactly(2, source(ClassSource.from(TestCaseWithNesting.NestedTestCase.class))) //
-				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.NestedTestCase.class)));
+				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.NestedTestCase.class))) //
+				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.$.class)));
 		executionResults.testEvents() //
 				.assertStatistics(stats -> stats //
-						.finished(4).succeeded(2).failed(1).aborted(1)) //
+						.finished(5).succeeded(3).failed(1).aborted(1)) //
 				.assertThatEvents() //
 				.haveExactly(2, methodSource(TestCaseWithSameNameNesting.class,
 					TestCaseWithNesting.class.getDeclaredMethod("someTest"))) //
 				.haveExactly(2, methodSource(TestCaseWithNesting.NestedTestCase.class.getDeclaredMethod("successful"))) //
 				.haveExactly(2, methodSource(TestCaseWithNesting.NestedTestCase.class.getDeclaredMethod("failing"))) //
 				.haveExactly(2,
-					methodSource(TestCaseWithSameNameNesting.NestedTestCase.class.getDeclaredMethod("aborted")));
+					methodSource(TestCaseWithSameNameNesting.NestedTestCase.class.getDeclaredMethod("aborted"))) //
+				.haveExactly(2, methodSource(TestCaseWithSameNameNesting.$.class.getDeclaredMethod("test")));
 	}
 
 	private static Condition<Event> methodSource(Method method) {
@@ -575,6 +581,14 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 			@Test
 			void aborted() {
 				abort();
+			}
+		}
+
+		@Nested
+		class $ {
+
+			@Test
+			void test() {
 			}
 		}
 	}

@@ -51,7 +51,8 @@ import org.junit.platform.engine.support.hierarchical.Node;
 public class ClassTemplateTestDescriptor extends ClassBasedTestDescriptor implements Filterable {
 
 	public static final String STANDALONE_CLASS_SEGMENT_TYPE = "class-template";
-	public static final String NESTED_CLASS_SEGMENT_TYPE = "nested-class-template";
+	public static final String SIMPLE_NESTED_CLASS_SEGMENT_TYPE = "nested-class-template";
+	public static final String FULLY_QUALIFIED_NESTED_CLASS_SEGMENT_TYPE = "fq-nested-class-template";
 
 	private final Map<Integer, Collection<? extends TestDescriptor>> childrenPrototypesByIndex = new HashMap<>();
 	private final List<TestDescriptor> childrenPrototypes = new ArrayList<>();

@@ -142,9 +142,9 @@ class ClassSelectorResolver implements SelectorResolver {
 			case ClassTemplateTestDescriptor.STANDALONE_CLASS_SEGMENT_TYPE -> //
 					resolveStandaloneClassUniqueId(context, lastSegment, this.predicates.isAnnotatedWithClassTemplate,
 						this::newClassTemplateTestDescriptor);
-			case NestedClassTestDescriptor.SEGMENT_TYPE -> //
+			case NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE, NestedClassTestDescriptor.FULLY_QUALIFIED_NAME_SEGMENT_TYPE -> //
 					resolveNestedClassUniqueId(context, uniqueId, __ -> true, this::newNestedClassTestDescriptor);
-			case ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE -> //
+			case ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, ClassTemplateTestDescriptor.FULLY_QUALIFIED_NESTED_CLASS_SEGMENT_TYPE -> //
 					resolveNestedClassUniqueId(context, uniqueId, this.predicates.isAnnotatedWithClassTemplate,
 						this::newNestedClassTemplateTestDescriptor);
 			case ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE -> {
@@ -205,13 +205,16 @@ class ClassSelectorResolver implements SelectorResolver {
 
 		return toResolution(context.addToParent(() -> selectUniqueId(uniqueId.removeLastSegment()), parent -> {
 			var className = uniqueId.getLastSegment().getValue();
-			var parentTestClass = ((TestClassAware) parent).getTestClass();
-			var testClass = className.contains("$") //
-					? ReflectionSupport.tryToLoadClass(className)
-					: ReflectionSupport.tryToLoadClass("%s$%s".formatted(parentTestClass.getName(), className));
-			return testClass.toOptional() //
+			var segmentType = uniqueId.getLastSegment().getType();
+			if (segmentType.equals(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE)
+					|| segmentType.equals(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE)) {
+				var parentTestClass = ((TestClassAware) parent).getTestClass();
+				className = "%s$%s".formatted(parentTestClass.getName(), className);
+			}
+			return ReflectionSupport.tryToLoadClass(className) //
+					.toOptional() //
 					.filter(predicates.isAnnotatedWithNestedAndValid.and(condition)) //
-					.map(loadedTestClass -> factory.apply(parent, loadedTestClass));
+					.map(testClass -> factory.apply(parent, testClass));
 		}));
 	}
 
@@ -248,17 +251,26 @@ class ClassSelectorResolver implements SelectorResolver {
 
 	private ClassTemplateTestDescriptor newNestedClassTemplateTestDescriptor(TestDescriptor parent,
 			Class<?> testClass) {
-		return newClassTemplateTestDescriptor(parent, ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE,
-			newNestedClassTestDescriptor(parent, testClass));
+		var delegate = newNestedClassTestDescriptor(parent, testClass);
+		var lastSegment = delegate.getUniqueId().getLastSegment();
+		var segmentType = lastSegment.getType().equals(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE) //
+				? ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE //
+				: ClassTemplateTestDescriptor.FULLY_QUALIFIED_NESTED_CLASS_SEGMENT_TYPE;
+		return newClassTemplateTestDescriptor(parent, segmentType, delegate);
 	}
 
 	private NestedClassTestDescriptor newNestedClassTestDescriptor(TestDescriptor parent, Class<?> testClass) {
-		var parentTestClass = ((TestClassAware) parent).getTestClass();
-		var value = parentTestClass.equals(testClass.getEnclosingClass()) //
-				? testClass.getSimpleName() //
-				: testClass.getName();
-		var uniqueId = parent.getUniqueId().append(NestedClassTestDescriptor.SEGMENT_TYPE, value);
+		var uniqueId = toNestedClassUniqueId(parent, testClass);
 		return new NestedClassTestDescriptor(uniqueId, testClass, () -> getEnclosingTestClasses(parent), configuration);
+	}
+
+	private static UniqueId toNestedClassUniqueId(TestDescriptor parent, Class<?> testClass) {
+		var parentTestClass = ((TestClassAware) parent).getTestClass();
+		var parentUniqueId = parent.getUniqueId();
+		if (parentTestClass.equals(testClass.getEnclosingClass())) {
+			return parentUniqueId.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE, testClass.getSimpleName());
+		}
+		return parentUniqueId.append(NestedClassTestDescriptor.FULLY_QUALIFIED_NAME_SEGMENT_TYPE, testClass.getName());
 	}
 
 	private ClassTemplateTestDescriptor newClassTemplateTestDescriptor(TestDescriptor parent, String segmentType,
