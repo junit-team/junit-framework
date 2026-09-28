@@ -10,6 +10,7 @@
 
 package org.junit.platform.commons.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
@@ -142,6 +143,30 @@ class CloseablePathTests {
 
 		pathA.close();
 		assertDoesNotThrow(() -> Files.walk(pathB.getPath()).close(), "FileSystem should still be open");
+	}
+
+	@Test
+	@DisabledOnOs(WINDOWS)
+	void resolvesSymlinkedPathsIdenticallyToZipFileSystemProvider(@TempDir Path tempDir) throws Exception {
+		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
+		var withSymlink = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
+		var jarUri = URI.create("jar:" + withSymlink.toUri() + "!/");
+		var closeablePath = CloseablePath.create(jarUri);
+		paths.add(closeablePath);
+		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(FileSystems.getFileSystem(jarUri));
+	}
+
+	@Test
+	@DisabledOnOs(WINDOWS)
+	void resolvesSpecialNameIdenticallyToZipFileSystemProvider(@TempDir Path tempDir) throws Exception {
+		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
+		// Creates a path like `/tmp/junit-12345689/../junit-12345689/original.jar
+		var withSpecialNames = Path.of(tempDir.toString(), "..", tempDir.getFileName().toString(),
+			original.getFileName().toString());
+		var jarUri = URI.create("jar:" + withSpecialNames.toUri() + "!/");
+		var closeablePath = CloseablePath.create(jarUri);
+		paths.add(closeablePath);
+		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(FileSystems.getFileSystem(jarUri));
 	}
 
 	private static void closeAll(List<CloseablePath> paths) {

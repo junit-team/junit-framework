@@ -84,6 +84,7 @@ final class CloseablePath implements Closeable {
 	private static URI resolveJarUri(URI jarUri) {
 		try {
 			var spec = jarUri.getRawSchemeSpecificPart();
+			// ZipFileSystemProvider uses both toAbsolutePath and toRealPath
 			var realPath = Path.of(new URI(spec)).toAbsolutePath().toRealPath();
 			return new URI(JAR_URI_SCHEME + ':' + realPath.toUri());
 		}
