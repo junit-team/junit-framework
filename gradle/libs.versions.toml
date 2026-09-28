@@ -23,7 +23,7 @@ ant = { module = "org.apache.ant:ant", version.ref = "ant" }
 ant-junit = { module = "org.apache.ant:ant-junit", version.ref = "ant" }
 ant-junitlauncher = { module = "org.apache.ant:ant-junitlauncher", version.ref = "ant" }
 apiguardian = { module = "org.apiguardian:apiguardian-api", version.ref = "apiguardian" }
-archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.5.0" }
+archunit = { module = "com.tngtech.archunit:archunit-junit5", version = "1.5.1" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.14" }
@@ -63,7 +63,7 @@ mockito-bom = { module = "org.mockito:mockito-bom", version = "5.24.0" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 nohttp-checkstyle = { module = "io.spring.nohttp:nohttp-checkstyle", version = "0.0.11" }
-nullaway = { module = "com.uber.nullaway:nullaway", version = "0.14.1" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.14.2" }
 opentest4j = { module = "org.opentest4j:opentest4j", version.ref = "opentest4j" }
 openTestReporting-cli = { module = "org.opentest4j.reporting:open-test-reporting-cli", version.ref = "openTestReporting" }
 openTestReporting-events = { module = "org.opentest4j.reporting:open-test-reporting-events", version.ref = "openTestReporting" }
@@ -109,5 +109,5 @@ node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.2.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.7.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.2" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.3" }
 spring-antora = { id = "io.spring.antora.generate-antora-yml", version = "0.0.1" }
