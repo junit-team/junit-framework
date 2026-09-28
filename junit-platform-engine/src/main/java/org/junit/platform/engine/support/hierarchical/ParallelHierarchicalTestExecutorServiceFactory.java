@@ -10,7 +10,6 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import java.util.Locale;
@@ -36,7 +35,7 @@ public final class ParallelHierarchicalTestExecutorServiceFactory {
 	 * Default value for {@value #EXECUTOR_SERVICE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	public static final String EXECUTOR_SERVICE_DEFAULT = "FORK_JOIN_POOL";
+	public static final String EXECUTOR_SERVICE_DEFAULT = "WORKER_THREAD_POOL";
 
 	/**
 	 * Property name used to determine the desired
@@ -117,7 +116,7 @@ public final class ParallelHierarchicalTestExecutorServiceFactory {
 		 * Indicates that {@link WorkerThreadPoolHierarchicalTestExecutorService}
 		 * should be used.
 		 */
-		@API(status = EXPERIMENTAL, since = "6.1")
+		@API(status = MAINTAINED, since = "6.2")
 		WORKER_THREAD_POOL;
 
 		private static ParallelExecutorServiceType parse(String value) {

@@ -29,14 +29,11 @@ import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_EXCLUDE_P
 import static org.junit.jupiter.api.Constants.EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.INCLUDE_ALL_EXTENSIONS_PATTERN;
-import static org.junit.jupiter.api.Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME;
 import static org.junit.jupiter.api.Defaults.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Defaults.EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT;
 import static org.junit.jupiter.api.Defaults.PARALLEL_EXECUTION_ENABLED_DEFAULT;
 import static org.junit.jupiter.engine.config.FilteringConfigurationParameterConverter.exclude;
-import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.FORK_JOIN_POOL;
-import static org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType.WORKER_THREAD_POOL;
 
 import java.util.List;
 import java.util.Optional;
@@ -129,17 +126,6 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 							Please remove it from your configuration.""".formatted(key));
 					issueReporter.reportIssue(warning);
 				}));
-		if (isParallelExecutionEnabled()
-				&& configurationParameters.get(PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME).isEmpty()) {
-			var info = DiscoveryIssue.create(Severity.INFO,
-				"Parallel test execution is enabled but the default ForkJoinPool-based executor service will be used. "
-						+ "Please give the new implementation based on a regular thread pool a try by setting the '"
-						+ PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME + "' configuration parameter to '"
-						+ WORKER_THREAD_POOL + "' and report any issues to the JUnit team. "
-						+ "Alternatively, set the configuration parameter to '" + FORK_JOIN_POOL
-						+ "' to hide this message and keep using the original implementation.");
-			issueReporter.reportIssue(info);
-		}
 	}
 
 	@Override

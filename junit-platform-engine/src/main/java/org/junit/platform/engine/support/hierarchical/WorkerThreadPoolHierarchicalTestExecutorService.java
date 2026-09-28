@@ -15,7 +15,7 @@ import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
@@ -67,7 +67,7 @@ import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestEx
  * @see ParallelExecutorServiceType#WORKER_THREAD_POOL
  * @see DefaultParallelExecutionConfigurationStrategy
  */
-@API(status = EXPERIMENTAL, since = "6.1")
+@API(status = MAINTAINED, since = "6.2")
 public final class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	/*

@@ -10,8 +10,10 @@
 
 package org.junit.platform.commons.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.junit.platform.commons.util.CloseablePath.JAR_URI_SCHEME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,13 +26,18 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.commons.test.ConcurrencyTestingUtils;
 import org.junit.platform.commons.util.CloseablePath.FileSystemProvider;
 import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCollector;
@@ -121,6 +128,74 @@ class CloseablePathTests {
 		path2.close();
 		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri),
 			"FileSystem should have been closed");
+	}
+
+	@Test
+	@DisabledOnOs(WINDOWS)
+	void supportsSymlinkedJarsPointingToSameJar(@TempDir Path tempDir) throws Exception {
+		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
+		var a = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
+		var b = Files.createSymbolicLink(tempDir.resolve("b.jar"), original);
+
+		var pathA = CloseablePath.create(a.toUri());
+		paths.add(pathA);
+		var pathB = CloseablePath.create(b.toUri());
+		paths.add(pathB);
+
+		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+
+		pathA.close();
+		assertDoesNotThrow(() -> Files.walk(pathB.getPath()).close(), "FileSystem should still be open");
+	}
+
+	@Test
+	@DisabledOnOs(WINDOWS)
+	void resolvesSymlinkedPaths(@TempDir Path tempDir) throws Exception {
+		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
+		var withSymlink = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
+
+		var pathA = CloseablePath.create(jarUri(withSymlink));
+		paths.add(pathA);
+		var pathB = CloseablePath.create(jarUri(original));
+		paths.add(pathB);
+
+		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+
+		// Path a and b both resolve to the same file system so we know they
+		// have the same cache key in ClosablePath. Now we check that
+		// ZipFileSystemProvider stored the file system created for a with the
+		// absolute real path. This implies that ClosablePath uses the same
+		// cache key as ZipFileSystemProvider.
+		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
+		assertThat(createdFileSystem.toString()).isEqualTo(withSymlink.toString());
+	}
+
+	@Test
+	@DisabledOnOs(WINDOWS)
+	void resolvesSpecialNameIdenticallyToZipFileSystemProvider(@TempDir Path tempDir) throws Exception {
+		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
+		// Creates a path like `/tmp/junit-12345689/../junit-12345689/original.jar
+		var withSpecialNames = Path.of(tempDir.toString(), "..", tempDir.getFileName().toString(),
+			original.getFileName().toString());
+
+		var pathA = CloseablePath.create(jarUri(withSpecialNames));
+		paths.add(pathA);
+		var pathB = CloseablePath.create(jarUri(original));
+		paths.add(pathB);
+
+		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+
+		// Path a and b both resolve to the same file system so we know they
+		// have the same cache key in ClosablePath. Now we check that
+		// ZipFileSystemProvider stored the file system created for a with the
+		// absolute real path. This implies that ClosablePath uses the same
+		// cache key as ZipFileSystemProvider.
+		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
+		assertThat(createdFileSystem.toString()).isEqualTo(withSpecialNames.toString());
+	}
+
+	private static @NonNull URI jarUri(Path withSpecialNames) {
+		return URI.create("jar:" + withSpecialNames.toUri() + "!/");
 	}
 
 	private static void closeAll(List<CloseablePath> paths) {

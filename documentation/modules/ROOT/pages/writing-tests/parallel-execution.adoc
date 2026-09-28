@@ -164,21 +164,17 @@ concurrently. You can configure which implementation of `HierarchicalTestExecuto
 is used be setting the `junit.jupiter.execution.parallel.config.executor-service`
 configuration parameter to one of the following options:
 
-`fork_join_pool` (default)::
+`worker_thread_pool` (default)::
+Use an executor service that is backed by a `ThreadPoolExecutor`. The
+executor service tries to maintain the desired parallelism but does
+not compensate for test or production code using blocking APIs in the JDK.
+
+`fork_join_pool`::
 Use an executor service that is backed by a `ForkJoinPool` from the JDK. This will cause
 tests to be executed in a `ForkJoinWorkerThread`. In some cases, usages of
 `ForkJoinPool` in test or production code or calls to blocking JDK APIs may cause the
 number of concurrently executing tests to increase. To avoid this situation, please use
 `worker_thread_pool`.
-
-`worker_thread_pool` (experimental)::
-Use an executor service that is backed by a regular thread pool and does not create
-additional threads if test or production code uses `ForkJoinPool` or calls a blocking
-API in the JDK.
-
-WARNING: Using `worker_thread_pool` is currently an _experimental_ feature. You're invited
-to give it a try and provide feedback to the JUnit team so they can improve and eventually
-xref:api-evolution.adoc[promote] this feature.
 
 [[config-strategies]]
 === Strategies
@@ -241,7 +237,7 @@ xref:running-tests/configuration-parameters.adoc[] for details on how to set suc
 
 `junit.jupiter.execution.parallel.config.executor-service=fork_join_pool|worker_thread_pool`::
   Type of `HierarchicalTestExecutorService` to use for parallel execution (defaults to
-  `fork_join_pool`).
+  `worker_thread_pool`).
 
 `junit.jupiter.execution.parallel.config.strategy=dynamic|fixed|custom`::
   Execution strategy for desired parallelism, maximum pool size, etc. (defaults to `dynamic`).
