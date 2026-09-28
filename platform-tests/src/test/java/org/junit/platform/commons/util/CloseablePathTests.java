@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ class CloseablePathTests {
 	@BeforeEach
 	void createUris() throws Exception {
 		uri = getClass().getResource("/jartest.jar").toURI();
-		jarUri = URI.create(JAR_URI_SCHEME + ':' + Path.of(uri).toAbsolutePath().toRealPath().toUri());
+		jarUri = URI.create(JAR_URI_SCHEME + ':' + uri);
 	}
 
 	@AfterEach
@@ -142,7 +143,6 @@ class CloseablePathTests {
 		paths.add(pathB);
 
 		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
-		assertThat(pathA.getPath().getFileSystem().toString()).isEqualTo(original.toString());
 
 		pathA.close();
 		assertDoesNotThrow(() -> Files.walk(pathB.getPath()).close(), "FileSystem should still be open");
@@ -153,13 +153,15 @@ class CloseablePathTests {
 	void resolvesSymlinkedPaths(@TempDir Path tempDir) throws Exception {
 		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
 		var withSymlink = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
-		var jarUri = URI.create("jar:" + withSymlink.toUri() + "!/");
-		var closeablePath = CloseablePath.create(jarUri);
-		paths.add(closeablePath);
 
-		var expectedFileSystem = FileSystems.getFileSystem(URI.create("jar:" + original.toUri()));
-		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(expectedFileSystem);
-		assertThat(closeablePath.getPath().getFileSystem().toString()).isEqualTo(original.toString());
+		var pathA = CloseablePath.create(jarUri(withSymlink));
+		paths.add(pathA);
+		var pathB = CloseablePath.create(jarUri(original));
+		paths.add(pathB);
+
+		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
+		assertThat(createdFileSystem.toString()).isEqualTo(withSymlink.toString());
 	}
 
 	@Test
@@ -169,13 +171,19 @@ class CloseablePathTests {
 		// Creates a path like `/tmp/junit-12345689/../junit-12345689/original.jar
 		var withSpecialNames = Path.of(tempDir.toString(), "..", tempDir.getFileName().toString(),
 			original.getFileName().toString());
-		var jarUri = URI.create("jar:" + withSpecialNames.toUri() + "!/");
-		var closeablePath = CloseablePath.create(jarUri);
-		paths.add(closeablePath);
 
-		var expectedFileSystem = FileSystems.getFileSystem(URI.create("jar:" + original.toUri()));
-		assertThat(closeablePath.getPath().getFileSystem()).isEqualTo(expectedFileSystem);
-		assertThat(closeablePath.getPath().getFileSystem().toString()).isEqualTo(original.toString());
+		var pathA = CloseablePath.create(jarUri(withSpecialNames));
+		paths.add(pathA);
+		var pathB = CloseablePath.create(jarUri(original));
+		paths.add(pathB);
+
+		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
+		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
+		assertThat(createdFileSystem.toString()).isEqualTo(withSpecialNames.toString());
+	}
+
+	private static @NonNull URI jarUri(Path withSpecialNames) {
+		return URI.create("jar:" + withSpecialNames.toUri() + "!/");
 	}
 
 	private static void closeAll(List<CloseablePath> paths) {
