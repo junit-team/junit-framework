@@ -304,7 +304,7 @@ public @interface Timeout {
 	 * Default value for {@value #TIMEOUT_MODE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	String TIMEOUT_MODE_DEFAULT = "ENABLED";
+	String TIMEOUT_MODE_DEFAULT = "enabled";
 
 	/**
 	 * Property name used to configure whether timeouts are applied to tests:
@@ -326,7 +326,7 @@ public @interface Timeout {
 	 * Default value for {@value #DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "SAME_THREAD";
+	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "same_thread";
 
 	/**
 	 * Property name used to set the default thread mode for all testable and

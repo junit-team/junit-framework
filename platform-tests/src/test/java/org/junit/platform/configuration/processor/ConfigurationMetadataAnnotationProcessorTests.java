@@ -440,10 +440,10 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "values": [
 							  {
-								  "value": "A"
+								  "value": "a"
 							  },
 							  {
-								  "value": "B"
+								  "value": "b"
 							  }
 						  ]
 						}
@@ -461,7 +461,7 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "type": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault.ExampleEnum",
 						  "sourceType": "org.junit.platform.configuration.testcases.TypeEnumWithStringDefault",
-						  "defaultValue": "A"
+						  "defaultValue": "a"
 						}
 					  ],
 					  "hints": [
@@ -469,10 +469,10 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						  "name": "org.example.property",
 						  "values": [
 							  {
-								  "value": "A"
+								  "value": "a"
 							  },
 							  {
-								  "value": "B"
+								  "value": "b"
 							  }
 						  ]
 						}
@@ -498,11 +498,11 @@ class ConfigurationMetadataAnnotationProcessorTests {
 							  "name": "org.example.property",
 							  "values": [
 								  {
-									  "value": "A",
+									  "value": "a",
 									  "description": "A is the first option."
 								  },
 								  {
-									  "value": "B",
+									  "value": "b",
 									  "description": "B is the second option."
 								  }
 							  ]

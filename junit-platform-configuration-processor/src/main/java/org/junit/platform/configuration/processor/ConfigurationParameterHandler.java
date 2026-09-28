@@ -19,6 +19,7 @@ import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.ge
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
@@ -265,8 +266,17 @@ final class ConfigurationParameterHandler {
 	private List<ValueHint> processEnumValues(TypeElement typeElement) {
 		return typeElement.getEnclosedElements().stream() //
 				.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
-				.map(
-					element -> new ValueHint(element.getSimpleName().toString(), processDescription(element))).toList();
+				.map(element -> {
+					var enumValueName = processEnumValue(element);
+					var description = processDescription(element);
+					return new ValueHint(enumValueName, description);
+				}) //
+				.toList();
+	}
+
+	private static String processEnumValue(Element element) {
+		var simpleName = element.getSimpleName();
+		return simpleName.toString().toLowerCase(Locale.ROOT);
 	}
 
 	private @Nullable String processDescription(Element element) {

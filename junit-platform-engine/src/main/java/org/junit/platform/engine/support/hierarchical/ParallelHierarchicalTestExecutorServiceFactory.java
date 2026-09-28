@@ -35,7 +35,7 @@ public final class ParallelHierarchicalTestExecutorServiceFactory {
 	 * Default value for {@value #EXECUTOR_SERVICE_PROPERTY_NAME} is {@value}.
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	public static final String EXECUTOR_SERVICE_DEFAULT = "WORKER_THREAD_POOL";
+	public static final String EXECUTOR_SERVICE_DEFAULT = "worker_thread_pool";
 
 	/**
 	 * Property name used to determine the desired
