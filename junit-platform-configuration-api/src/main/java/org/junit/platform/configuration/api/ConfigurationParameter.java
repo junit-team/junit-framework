@@ -54,8 +54,6 @@ public @interface ConfigurationParameter {
 
 	/**
 	 * Hints for valid values for the parameter.
-	 * <p>
-	 * Can be omitted when {@link #type()} is an enum or interface.
 	 *
 	 * @return hints for valid values about the parameter.
 	 */
@@ -151,13 +149,16 @@ public @interface ConfigurationParameter {
 		/**
 		 * Valid values for the value of the parameter.
 		 *
+		 * <p>Can be omitted when {@link #type()} is an enum or interface.
+		 * These are <em>implied hints</em>.
+		 *
 		 * @return valid values for the value of the parameter.
 		 */
 		Hint[] value() default {};
 
 		/**
-		 * Returns true if values other than the provided hints are allowed.
-		 * By default, is assumed the hints are exhaustive.
+		 * Returns true if values other than the provided or <em>implied hints</em> are
+		 * allowed. By default, it is assumed the hints are exhaustive.
 		 *
 		 * @return true if values other than the provided hints are allowed.
 		 */
