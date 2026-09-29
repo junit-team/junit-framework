@@ -12,6 +12,8 @@ package org.junit.platform.configuration.processor;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -180,7 +182,7 @@ final class ConfigurationParameterHandler {
 			@Nullable Default defaults) {
 
 		// Derive hint from ConfigurationParameter.hints value
-		if (!field.hints().isEmpty()) {
+		if (!field.hintsValue().isEmpty()) {
 			return new Hint(name, processHintValues(field), processPermitsAdditionalValues(field));
 		}
 		// Derive hint from ConfigurationParameter.type value
@@ -190,14 +192,17 @@ final class ConfigurationParameterHandler {
 			var typeElementKind = typeElement.getKind();
 			var typeElementName = typeElement.getQualifiedName().toString();
 			if (typeElementKind == ElementKind.ENUM) {
-				return new Hint(name, processEnumValues(typeElement), null);
+				return new Hint(name, processEnumValues(typeElement), processPermitsAdditionalValues(field));
 			}
 			// It is not possible to determine hints for abstract classes
 			if (typeElementKind == ElementKind.INTERFACE) {
-				return new Hint(name, null, processClassValues(typeElementName));
+				var providers = new ArrayList<ValueProvider>();
+				providers.addAll(processClassValues(typeElementName));
+				providers.addAll(processPermitsAdditionalValues(field));
+				return new Hint(name, null, providers);
 			}
 			if (Boolean.class.getName().equals(typeElementName)) {
-				return new Hint(name, processBooleanValues(), null);
+				return new Hint(name, processBooleanValues(), processPermitsAdditionalValues(field));
 			}
 		}
 
@@ -221,10 +226,10 @@ final class ConfigurationParameterHandler {
 		return null;
 	}
 
-	private @Nullable List<ValueProvider> processPermitsAdditionalValues(ConfigurationParameterAnnotatedField field) {
+	private List<ValueProvider> processPermitsAdditionalValues(ConfigurationParameterAnnotatedField field) {
 		var permitsAdditionalValues = field.hintsPermitsAdditionalValues();
 		if (!permitsAdditionalValues) {
-			return null;
+			return Collections.emptyList();
 		}
 		return List.of(new ValueProvider("any", null));
 	}

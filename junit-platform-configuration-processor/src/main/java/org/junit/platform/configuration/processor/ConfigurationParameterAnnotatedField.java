@@ -90,7 +90,7 @@ final class ConfigurationParameterAnnotatedField {
 	}
 
 	@SuppressWarnings("unchecked")
-	Map<String, Object> hints() {
+	private Map<String, Object> hints() {
 		return (Map<String, Object>) values().getOrDefault("hints", Collections.emptyMap());
 	}
 

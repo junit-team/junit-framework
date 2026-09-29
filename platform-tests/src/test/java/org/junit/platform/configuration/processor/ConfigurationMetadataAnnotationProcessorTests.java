@@ -39,6 +39,9 @@ import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
 import org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs;
 import org.junit.platform.configuration.testcases.Hints;
+import org.junit.platform.configuration.testcases.HintsTypeBooleanWithPermitsAdditionalValues;
+import org.junit.platform.configuration.testcases.HintsTypeEnumWithPermitsAdditionalValues;
+import org.junit.platform.configuration.testcases.HintsTypeInterfaceWithPermitsAdditionalValues;
 import org.junit.platform.configuration.testcases.HintsWithDescription;
 import org.junit.platform.configuration.testcases.HintsWithPermitsAdditionalValues;
 import org.junit.platform.configuration.testcases.Minimal;
@@ -716,6 +719,106 @@ class ConfigurationMetadataAnnotationProcessorTests {
 						}
 					  ]
 					}""");
+		}
+
+		@Test
+		void hintsTypeBooleanWithPermitsAdditionalValues() {
+			compiler.compileWithoutError(HintsTypeBooleanWithPermitsAdditionalValues.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "java.lang.Boolean",
+							  "sourceType": "org.junit.platform.configuration.testcases.HintsTypeBooleanWithPermitsAdditionalValues"
+							}
+						  ],
+						  "hints": [
+							{
+							  "name": "org.example.property",
+							  "values": [
+								{
+								  "value": true
+								},
+								{
+								  "value": false
+								}
+							  ],
+							  "providers": [
+								{
+								  "name": "any"
+								}
+							  ]
+							}
+						  ]
+						}""");
+		}
+
+		@Test
+		void hintsTypeEnumWithPermitsAdditionalValues() {
+			compiler.compileWithoutError(HintsTypeEnumWithPermitsAdditionalValues.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "org.junit.platform.configuration.testcases.HintsTypeEnumWithPermitsAdditionalValues.ExampleEnum",
+							  "sourceType": "org.junit.platform.configuration.testcases.HintsTypeEnumWithPermitsAdditionalValues"
+						  }
+						  ],
+						  "hints": [
+							{
+							  "name": "org.example.property",
+							  "values": [
+								  {
+									  "value": "a"
+								  },
+								  {
+									  "value": "b"
+								  }
+							  ],
+							  "providers": [
+								  {
+									  "name": "any"
+								  }
+							  ]
+							}
+						  ]
+						}""");
+		}
+
+		@Test
+		void hintsTypeInterfaceWithPermitsAdditionalValues() {
+			compiler.compileWithoutError(HintsTypeInterfaceWithPermitsAdditionalValues.class);
+			assertMetaDataIsEqualTo(
+				"""
+						{
+						  "properties": [
+							{
+							  "name": "org.example.property",
+							  "type": "org.junit.platform.configuration.testcases.HintsTypeInterfaceWithPermitsAdditionalValues.Example",
+							  "sourceType": "org.junit.platform.configuration.testcases.HintsTypeInterfaceWithPermitsAdditionalValues"
+							}
+						  ],
+						  "hints": [
+							{
+							  "name": "org.example.property",
+							  "providers": [
+								{
+									"name": "class-reference",
+									"parameters": {
+									  "target": "org.junit.platform.configuration.testcases.HintsTypeInterfaceWithPermitsAdditionalValues.Example"
+									}
+								},
+								{
+								  "name": "any"
+								}
+							  ]
+							}
+						  ]
+						}""");
 		}
 
 		@Test

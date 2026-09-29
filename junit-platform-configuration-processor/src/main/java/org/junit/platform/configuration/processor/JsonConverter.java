@@ -105,12 +105,12 @@ final class JsonConverter {
 		builder.add("name", hint.name());
 
 		var values = hint.values();
-		if (values != null) {
+		if (values != null && !values.isEmpty()) {
 			builder.add("values", toJsonArray(values, this::toJsonObject));
 		}
 
 		var providers = hint.providers();
-		if (providers != null) {
+		if (providers != null && !providers.isEmpty()) {
 			builder.add("providers", toJsonArray(providers, this::toJsonObject));
 		}
 		return builder.build();
