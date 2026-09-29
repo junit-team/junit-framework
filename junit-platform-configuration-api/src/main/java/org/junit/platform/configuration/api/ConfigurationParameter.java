@@ -62,6 +62,7 @@ public @interface ConfigurationParameter {
 	Hints hints() default @Hints;
 
 	@interface Deprecation {
+
 		/**
 		 * A brief description of why the parameter was deprecated.
 		 * <p>
@@ -146,6 +147,7 @@ public @interface ConfigurationParameter {
 	}
 
 	@interface Hints {
+
 		/**
 		 * Valid values for the value of the parameter.
 		 *
