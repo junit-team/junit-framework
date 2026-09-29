@@ -53,7 +53,7 @@ class NodeTreeWalker {
 	private void walk(@Nullable TestDescriptor globalLockDescriptor, TestDescriptor testDescriptor,
 			NodeExecutionAdvisor advisor) {
 
-		if (globalLockDescriptor != null && advisor.getResourceLock(globalLockDescriptor) == globalReadWriteLock) {
+		if (globalLockDescriptor != null && isGlobalReadWriteLock(globalLockDescriptor, advisor)) {
 			// Global read-write lock is already being enforced, so no additional locks are needed
 			return;
 		}
@@ -107,6 +107,11 @@ class NodeTreeWalker {
 				advisor.useResourceLock(testDescriptor, lockManager.getLockForResources(allResources));
 			}
 		}
+	}
+
+	@SuppressWarnings("ReferenceEquality")
+	private boolean isGlobalReadWriteLock(TestDescriptor globalLockDescriptor, NodeExecutionAdvisor advisor) {
+		return advisor.getResourceLock(globalLockDescriptor) == globalReadWriteLock;
 	}
 
 	private void forceDescendantExecutionModeRecursively(NodeExecutionAdvisor advisor, TestDescriptor testDescriptor) {

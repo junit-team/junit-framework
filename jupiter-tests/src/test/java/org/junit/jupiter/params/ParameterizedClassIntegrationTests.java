@@ -634,7 +634,7 @@ public class ParameterizedClassIntegrationTests extends AbstractJupiterTestEngin
 	class LifecycleMethods {
 
 		@ParameterizedTest
-		@CsvSource(textBlock = """
+		@CsvSource("""
 				NonStaticBeforeLifecycleMethodTestCase, @BeforeParameterizedClassInvocation, beforeParameterizedClassInvocation
 				NonStaticAfterLifecycleMethodTestCase,  @AfterParameterizedClassInvocation,  afterParameterizedClassInvocation
 				""")

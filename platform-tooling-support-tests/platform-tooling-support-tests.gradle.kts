@@ -1,11 +1,13 @@
-import com.gradle.develocity.agent.gradle.internal.test.TestDistributionConfigurationInternal
 import junitbuild.extensions.capitalized
-import junitbuild.extensions.dependencyProject
 import junitbuild.extensions.javaModuleName
+import junitbuild.extensions.mavenizedProjects
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
+import junitbuild.extensions.modularProjects
 import net.ltgt.gradle.errorprone.errorprone
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.kotlin.dsl.support.listFilesOrdered
-import java.time.Duration
 
 plugins {
 	id("junitbuild.build-parameters")
@@ -53,14 +55,28 @@ val mavenDistribution = configurations.dependencyScope("mavenDistribution")
 val mavenDistributionClasspath = configurations.resolvable("mavenDistributionClasspath") {
 	extendsFrom(mavenDistribution.get())
 }
-
-val modularProjects: List<Project> by rootProject
+val tempMavenRepo = configurations.dependencyScope("tempMavenRepo")
+val allTempMavenRepos = configurations.resolvable("tempMavenRepoClasspath") {
+	extendsFrom(tempMavenRepo.get())
+	attributes {
+		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
+	}
+}
+val moduleSourceDirs = configurations.dependencyScope("moduleSourceDirs")
+val moduleSourceDirsPath = configurations.resolvable("moduleSourceDirsPath") {
+	extendsFrom(moduleSourceDirs.get())
+	isTransitive = false
+	attributes {
+		attribute(Category.CATEGORY_ATTRIBUTE, named(Category.VERIFICATION))
+		attribute(VerificationType.VERIFICATION_TYPE_ATTRIBUTE, named(VerificationType.MAIN_SOURCES))
+	}
+}
 
 dependencies {
 	implementation(libs.commons.io) {
 		because("moving/deleting directory trees")
 	}
-	implementation(projects.platformTests) {
+	api(projects.platformTests) {
 		capabilities {
 			requireFeature("process-starter")
 		}
@@ -76,6 +92,7 @@ dependencies {
 	thirdPartyJars(libs.apiguardian)
 	thirdPartyJars(libs.fastcsv)
 	thirdPartyJars(libs.hamcrest)
+	thirdPartyJars(libs.jakarta.json.api)
 	thirdPartyJars(libs.jimfs)
 	thirdPartyJars(libs.jspecify)
 	thirdPartyJars(kotlin("stdlib"))
@@ -99,42 +116,38 @@ dependencies {
 			isTransitive = false
 		}
 	}
+
+	tempMavenRepo(projects.junitBom)
+	mavenizedProjects.forEach { tempMavenRepo(it) }
+
+	modularProjects.forEach { moduleSourceDirs(it) }
 }
 
 val mavenDistributionDir = layout.buildDirectory.dir("maven-distribution")
 
-val unzipMavenDistribution by tasks.registering(Sync::class) {
+val unzipMavenDistribution = tasks.register("unzipMavenDistribution", Sync::class) {
 	from(zipTree(mavenDistributionClasspath.flatMap { d -> d.elements.map { e -> e.single() } }))
 	into(mavenDistributionDir)
 }
 
-val normalizeMavenRepo by tasks.registering(Sync::class) {
-
-	val mavenizedProjects: List<Project> by rootProject
-	val tempRepoDir: File by rootProject
-	val tempRepoName: String by rootProject
-
-	// All maven-aware projects must be published to the local temp repository
-	(mavenizedProjects + dependencyProject(projects.junitBom))
-		.map { project -> project.tasks.named("publishAllPublicationsTo${tempRepoName.capitalized()}Repository") }
-		.forEach { dependsOn(it) }
-
-	from(tempRepoDir) {
+val normalizeMavenRepo = tasks.register("normalizeMavenRepo", Sync::class) {
+	from(allTempMavenRepos) {
 		exclude("**/maven-metadata.xml*")
 		exclude("**/*.md5")
 		exclude("**/*.sha*")
 		exclude("**/*.module")
 	}
-	from(tempRepoDir) {
+	from(allTempMavenRepos) {
 		include("**/*.module")
 		val regex = "\"(sha\\d+|md5|size)\": (?:\".+\"|\\d+)(,)?".toRegex()
 		filter { line -> regex.replace(line, "\"normalized-$1\": \"normalized-value\"$2") }
 	}
 	rename("(.*\\W)\\d{8}\\.\\d{6}-\\d+(\\W.*)", "$1SNAPSHOT$2")
 	into(layout.buildDirectory.dir("normalized-repo"))
+	duplicatesStrategy = DuplicatesStrategy.FAIL
 }
 
-val archUnit by testing.suites.registering(JvmTestSuite::class) {
+val archUnit = testing.suites.register("archUnit", JvmTestSuite::class) {
 	dependencies {
 		implementation(libs.archunit) {
 			because("checking the architecture")
@@ -170,21 +183,51 @@ val archUnit by testing.suites.registering(JvmTestSuite::class) {
 	}
 }
 
+val graalVmTest = testing.suites.register("graalVmTest", JvmTestSuite::class) {
+	dependencies {
+		implementation(project())
+		implementation(projects.junitJupiter)
+		implementation(testFixtures(projects.junitJupiterApi))
+		implementation(libs.assertj)
+		implementation(libs.jackson.databind) {
+			because("parsing GraalVM reachability metadata")
+		}
+		runtimeOnly(projects.junitPlatformLauncher)
+		runtimeOnly(projects.junitPlatformReporting)
+		runtimeOnly(libs.openTestReporting.events)
+		runtimeOnly.bundle(libs.bundles.log4j)
+	}
+
+	targets {
+		all {
+			testTask.configure {
+				configureToolingSupportTests()
+				val graalVmHomePattern = "GRAALVM_\\d+_HOME".toRegex()
+				val graalVmHomePresent = providers.environmentVariablesPrefixedBy("GRAALVM_")
+					.map { it.keys.any { name -> name.matches(graalVmHomePattern) } }
+				onlyIf("a GRAALVM_<version>_HOME environment variable is set") { graalVmHomePresent.get() }
+			}
+		}
+	}
+}
+
 tasks.compileJava {
 	options.errorprone {
 		disableAllChecks = true
 	}
 }
 
-tasks.named<Checkstyle>("checkstyle${archUnit.name.capitalized()}").configure {
-	config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleTest.xml"))
+listOf(archUnit, graalVmTest).forEach { suite ->
+	tasks.named<Checkstyle>("checkstyle${suite.name.capitalized()}").configure {
+		config = resources.text.fromFile(checkstyle.configDirectory.file("checkstyleTest.xml"))
+	}
 }
 
 tasks.check {
-	dependsOn(archUnit)
+	dependsOn(archUnit, graalVmTest)
 }
 
-val test by testing.suites.getting(JvmTestSuite::class) {
+testing.suites.named<JvmTestSuite>("test") {
 	dependencies {
 		implementation(libs.bndlib) {
 			because("parsing OSGi metadata")
@@ -206,18 +249,7 @@ val test by testing.suites.getting(JvmTestSuite::class) {
 		all {
 			testTask.configure {
 				shouldRunAfter(archUnit)
-
-				// Opt-out via system property: '-Dplatform.tooling.support.tests.enabled=false'
-				enabled = System.getProperty("platform.tooling.support.tests.enabled")?.toBoolean() ?: true
-
-				// The following if-block is necessary since Gradle will otherwise
-				// always publish all mavenizedProjects even if this "test" task
-				// is not executed.
-				if (enabled) {
-					dependsOn(normalizeMavenRepo)
-					jvmArgumentProviders += MavenRepo(project, normalizeMavenRepo.map { it.destinationDir })
-				}
-				environment.remove("JAVA_TOOL_OPTIONS")
+				configureToolingSupportTests()
 
 				jvmArgumentProviders += JarPath(project, thirdPartyJarsClasspath.get(), "thirdPartyJars")
 				jvmArgumentProviders += JarPath(project, antJarsClasspath.get(), "antJars")
@@ -225,43 +257,59 @@ val test by testing.suites.getting(JvmTestSuite::class) {
 
 				systemProperty("junit.modules", modularProjects.map { it.javaModuleName }.joinToString(","))
 
-				jvmArgumentProviders += CommandLineArgumentProvider {
-					modularProjects.map { "-Djunit.moduleSourcePath.${it.javaModuleName}=${it.sourceSets["main"].allJava.sourceDirectories.filter { it.exists() }.asPath}" }
+				modularProjects.forEach { project ->
+					jvmArgumentProviders += ModuleSourcePath(
+						project.javaModuleName,
+						moduleSourceDirsPath.get().incoming.artifactView {
+							componentFilter { it is ProjectComponentIdentifier && it.projectPath == project.path }
+						}.files
+					)
 				}
 
 				inputs.apply {
-					dir("projects").withPathSensitivity(RELATIVE)
-					file("${rootDir}/gradle.properties").withPathSensitivity(RELATIVE)
-					file("${rootDir}/settings.gradle.kts").withPathSensitivity(RELATIVE)
-					file("${rootDir}/gradlew").withPathSensitivity(RELATIVE)
-					file("${rootDir}/gradlew.bat").withPathSensitivity(RELATIVE)
-					dir("${rootDir}/gradle/wrapper").withPathSensitivity(RELATIVE)
 					dir("${rootDir}/documentation/src/main").withPathSensitivity(RELATIVE)
 					dir("${rootDir}/documentation/src/test").withPathSensitivity(RELATIVE)
 				}
 
-				// Disable capturing output since parallel execution is enabled and output of
-				// external processes happens on non-test threads which can't reliably be
-				// attributed to the test that started the process.
-				systemProperty("junit.platform.output.capture.stdout", "false")
-				systemProperty("junit.platform.output.capture.stderr", "false")
-
-				develocity {
-					testDistribution {
-						requirements.add("jdk=17")
-						this as TestDistributionConfigurationInternal
-						preferredMaxDuration = Duration.ofMillis(500)
-					}
-				}
-
 				jvmArgumentProviders += JavaHomeDir(project, 17, develocity.testDistribution.enabled)
-
-				val gradleJavaVersion = JavaVersion.current().majorVersion.toInt()
-				jvmArgumentProviders += JavaHomeDir(project, gradleJavaVersion, develocity.testDistribution.enabled)
-				systemProperty("gradle.java.version", gradleJavaVersion)
 			}
 		}
 	}
+}
+
+fun Test.configureToolingSupportTests() {
+	// Opt-out via system property: '-Dplatform.tooling.support.tests.enabled=false'
+	enabled = System.getProperty("platform.tooling.support.tests.enabled")?.toBoolean() ?: true
+
+	// The following if-block is necessary since Gradle will otherwise
+	// always publish all mavenizedProjects even if this test task
+	// is not executed.
+	if (enabled) {
+		dependsOn(normalizeMavenRepo)
+		jvmArgumentProviders += MavenRepo(project, normalizeMavenRepo.map { it.destinationDir })
+	}
+	environment.remove("JAVA_TOOL_OPTIONS")
+
+	inputs.apply {
+		dir("projects").withPathSensitivity(RELATIVE)
+		file("${rootDir}/gradle.properties").withPathSensitivity(RELATIVE)
+		file("${rootDir}/settings.gradle.kts").withPathSensitivity(RELATIVE)
+		file("${rootDir}/gradlew").withPathSensitivity(RELATIVE)
+		file("${rootDir}/gradlew.bat").withPathSensitivity(RELATIVE)
+		dir("${rootDir}/gradle/wrapper").withPathSensitivity(RELATIVE)
+	}
+
+	// Disable capturing output since parallel execution is enabled and output of
+	// external processes happens on non-test threads which can't reliably be
+	// attributed to the test that started the process.
+	systemProperty("junit.platform.output.capture.stdout", "false")
+	systemProperty("junit.platform.output.capture.stderr", "false")
+
+	systemProperty("junit.moduleDirectories", modularProjects.map { it.name }.joinToString(","))
+
+	val gradleJavaVersion = JavaVersion.current().majorVersion.toInt()
+	jvmArgumentProviders += JavaHomeDir(project, gradleJavaVersion, develocity.testDistribution.enabled)
+	systemProperty("gradle.java.version", gradleJavaVersion)
 }
 
 class MavenRepo(project: Project, @get:Internal val repoDir: Provider<File>) : CommandLineArgumentProvider {
@@ -325,4 +373,12 @@ class MavenDistribution(project: Project, sourceTask: TaskProvider<*>, distribut
 		.fileProvider(project.files(distributionDir).builtBy(sourceTask).elements.map { it.single().asFile.listFilesOrdered().single() })
 
 	override fun asArguments() = listOf("-DmavenDistribution=${mavenDistribution.get().asFile.absolutePath}")
+}
+
+class ModuleSourcePath(
+	@get:Input val moduleName: String,
+	@get:Internal val dirs: FileCollection // already tracked indirectly
+) : CommandLineArgumentProvider {
+	override fun asArguments() =
+		listOf("-Djunit.moduleSourcePath.${moduleName}=${dirs.filter { it.exists() }.asPath}")
 }

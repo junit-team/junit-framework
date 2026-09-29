@@ -10,12 +10,14 @@
 
 package org.junit.platform.launcher;
 
+import org.jspecify.annotations.Nullable;
+
 public class TestLauncherInterceptor2 implements LauncherInterceptor {
 
 	public static boolean INTERCEPTING;
 
 	@Override
-	public <T> T intercept(Invocation<T> invocation) {
+	public <T extends @Nullable Object> T intercept(Invocation<T> invocation) {
 		INTERCEPTING = true;
 		try {
 			return invocation.proceed();

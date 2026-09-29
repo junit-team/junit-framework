@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
  Source: https://svn.jenkins-ci.org/trunk/hudson/dtkit/dtkit-format/dtkit-junit-model/src/main/resources/com/thalesgroup/dtkit/junit/model/xsd/junit-4.xsd
- 
+
  This file available under the terms of the MIT License as follows:
- 
+
  *******************************************************************************
  * Copyright (c) 2010 Thales Corporate Services SAS                             *
  *                                                                              *

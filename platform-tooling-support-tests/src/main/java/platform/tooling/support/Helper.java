@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -45,18 +43,7 @@ public class Helper {
 	}
 
 	public static List<String> loadModuleDirectoryNames() {
-		var moduleLinePattern = Pattern.compile("include\\(\"(.+)\"\\)");
-		try (var stream = Files.lines(SETTINGS_GRADLE)) {
-			return stream.map(moduleLinePattern::matcher) //
-					.filter(Matcher::matches) //
-					.map(matcher -> matcher.group(1)) //
-					.filter(name -> name.startsWith("junit-")) //
-					.filter(name -> !"junit-bom".equals(name)) //
-					.filter(name -> !"junit-platform-console-standalone".equals(name)).toList();
-		}
-		catch (Exception e) {
-			throw new AssertionError("loading module directory names failed: " + SETTINGS_GRADLE);
-		}
+		return Stream.of(System.getProperty("junit.moduleDirectories").split(",")).sorted().toList();
 	}
 
 	public static Optional<Path> getJavaHome(int version) {

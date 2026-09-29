@@ -332,7 +332,7 @@ class CollectionUtilsTests {
 	class ReverseOrderIteration {
 
 		@ParameterizedTest
-		@CsvSource(delimiter = '|', nullValues = "N/A", textBlock = """
+		@CsvSource(delimiter = '|', nullValues = "N/A", value = """
 				        foo,bar,baz | baz,bar,foo
 				        foo,bar     | bar,foo
 				        foo         | foo

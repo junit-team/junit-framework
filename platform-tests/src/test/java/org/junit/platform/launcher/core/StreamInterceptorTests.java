@@ -12,6 +12,7 @@ package org.junit.platform.launcher.core;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -37,8 +38,9 @@ class StreamInterceptorTests {
 
 	@Test
 	void interceptsWriteOperationsToStreamPerThread() {
-		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream,
-			3).orElseThrow(RuntimeException::new);
+		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream, 3);
+		assertNotNull(streamInterceptor);
+
 		// @formatter:off
 		IntStream.range(0, 1000)
 				.parallel()
@@ -53,8 +55,8 @@ class StreamInterceptorTests {
 	void unregisterRestoresOriginalStream() {
 		var originalStream = targetStream;
 
-		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream,
-			3).orElseThrow(RuntimeException::new);
+		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream, 3);
+		assertNotNull(streamInterceptor);
 		assertSame(streamInterceptor, targetStream);
 
 		streamInterceptor.unregister();
@@ -65,8 +67,8 @@ class StreamInterceptorTests {
 	void writeForwardsOperationsToOriginalStream() throws Exception {
 		var originalStream = targetStream;
 
-		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream,
-			2).orElseThrow(RuntimeException::new);
+		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream, 2);
+		assertNotNull(streamInterceptor);
 		assertNotSame(originalStream, targetStream);
 
 		targetStream.write('a');
@@ -77,8 +79,8 @@ class StreamInterceptorTests {
 
 	@Test
 	void handlesNestedCaptures() {
-		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream,
-			100).orElseThrow(RuntimeException::new);
+		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream, 100);
+		assertNotNull(streamInterceptor);
 
 		String outermost, inner, innermost;
 
@@ -107,8 +109,8 @@ class StreamInterceptorTests {
 
 	@Test
 	void capturesOutputFromNonTestThreads() throws Exception {
-		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream,
-			100).orElseThrow(RuntimeException::new);
+		streamInterceptor = StreamInterceptor.register(targetStream, newStream -> this.targetStream = newStream, 100);
+		assertNotNull(streamInterceptor);
 
 		streamInterceptor.capture();
 		var thread = new Thread(() -> targetStream.println("from non-test thread"));

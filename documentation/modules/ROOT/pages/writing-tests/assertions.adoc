@@ -65,10 +65,26 @@ you can statically import methods such as `assertThat()`, `assertThatException()
 from `org.assertj.core.api.Assertions` and then use them in tests like in the
 `assertWithAssertJ()` method below.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/AssertJAssertionsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/AssertJAssertionsDemo.kt[tags=user_guide]
+----
+--
+====
 
 [TIP]
 .Excluding Jupiter’s Assertions From a Project’s Classpath

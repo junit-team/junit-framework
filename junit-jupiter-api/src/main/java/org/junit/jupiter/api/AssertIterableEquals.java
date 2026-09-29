@@ -56,6 +56,7 @@ class AssertIterableEquals {
 		assertIterableEquals(expected, actual, indexes, messageOrSupplier, new LinkedHashMap<>());
 	}
 
+	@SuppressWarnings("ReferenceEquality")
 	private static void assertIterableEquals(@Nullable Iterable<?> expected, @Nullable Iterable<?> actual,
 			Deque<Integer> indexes, @Nullable Object messageOrSupplier, Map<Pair, Status> investigatedElements) {
 

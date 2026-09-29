@@ -603,14 +603,12 @@ class DefaultLauncherTests {
 	}
 
 	@Test
-	void thirdPartyEngineUsingReservedEngineIdPrefixEmitsWarning(@TrackLogRecords LogRecordListener listener) {
+	void thirdPartyEngineUsingReservedEngineIdPrefixEmitsDiscoveryIssue() {
 		var id = "junit-using-reserved-prefix";
 		var launcher = createLauncher(new TestEngineStub(id));
-		launcher.discover(request().build());
-		assertThat(listener.stream(EngineIdValidator.class, Level.WARNING).map(LogRecord::getMessage)) //
-				.containsExactly(
-					"Third-party TestEngine implementations are forbidden to use the reserved 'junit-' prefix for their ID: '"
-							+ id + "'");
+		var exception = assertThrows(DiscoveryIssueException.class, () -> launcher.discover(request().build()));
+		assertThat(exception).hasMessageContaining(
+			"[WARNING] Third-party TestEngine implementations are forbidden to use the reserved 'junit-' prefix for their ID");
 	}
 
 	@Test

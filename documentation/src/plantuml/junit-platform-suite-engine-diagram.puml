@@ -21,7 +21,7 @@ object "Tests in package B"
 "JUnit Platform" --> "Suite Test Engine": forwards request
 
 "Suite Test Engine" --> "@Suite annotated class A"
-"@Suite annotated class A" --> "JUnit Platform (A)" 
+"@Suite annotated class A" --> "JUnit Platform (A)"
 "JUnit Platform (A)" --> "Jupiter Test Engine (A)"
 "Jupiter Test Engine (A)"  --> "Tests in package A"
 

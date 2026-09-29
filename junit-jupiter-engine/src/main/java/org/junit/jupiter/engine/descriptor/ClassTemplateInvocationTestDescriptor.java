@@ -171,6 +171,7 @@ public class ClassTemplateInvocationTestDescriptor extends JupiterTestDescriptor
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public void after(JupiterEngineExecutionContext context) throws Exception {
 
 		ThrowableCollector throwableCollector = context.getThrowableCollector();

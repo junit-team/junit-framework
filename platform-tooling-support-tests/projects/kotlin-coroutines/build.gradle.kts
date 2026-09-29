@@ -1,8 +1,8 @@
 plugins {
-	kotlin("jvm") version "2.3.21"
+	kotlin("jvm") version "2.4.20"
 }
 
-val junitVersion: String by project
+val junitVersion = providers.gradleProperty("junitVersion").orNull
 
 repositories {
 	maven { url = uri(file(System.getProperty("maven.repo"))) }
@@ -18,7 +18,7 @@ dependencies {
 	}
 
 	if (!project.hasProperty("withoutKotlinxCoroutines")) {
-		testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+		testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
 	}
 }
 

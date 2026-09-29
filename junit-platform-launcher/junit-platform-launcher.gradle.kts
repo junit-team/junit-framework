@@ -6,11 +6,15 @@ plugins {
 description = "JUnit Platform Launcher"
 
 dependencies {
+	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+
 	api(platform(projects.junitBom))
 	api(projects.junitPlatformEngine)
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+
+	compileOnly(projects.junitPlatformConfigurationApi)
 
 	osgiVerification(projects.junitJupiterEngine)
 }
@@ -20,23 +24,22 @@ javadocConventions {
 }
 
 tasks {
+	compileJava {
+		options.compilerArgs.add("-Xlint:-processing") // -processing: not all annotations need to be processed
+	}
 	jar {
 		bundle {
-			val importAPIGuardian: String by extra
-			val importJSpecify: String by extra
-			val importCommonsLogging: String by extra
-			val version = project.version
 			bnd("""
 				Import-Package: \
-					${importAPIGuardian},\
-					${importJSpecify},\
-					${importCommonsLogging},\
+					${extra["importAPIGuardian"]},\
+					${extra["importJSpecify"]},\
+					${extra["importCommonsLogging"]},\
 					jdk.jfr;resolution:="optional",\
 					*
 				Provide-Capability:\
 					org.junit.platform.launcher;\
 						org.junit.platform.launcher='junit-platform-launcher';\
-						version:Version="${'$'}{version_cleanup;${version}}"
+						version:Version="${'$'}{version_cleanup;${project.version}}"
 			""")
 		}
 	}

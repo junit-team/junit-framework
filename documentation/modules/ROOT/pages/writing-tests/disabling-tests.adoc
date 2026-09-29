@@ -15,17 +15,49 @@ such as `@BeforeAll` methods, `@AfterAll` methods, and corresponding extension A
 
 Here's a `@Disabled` test class.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DisabledClassDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DisabledClassDemo.kt[tags=user_guide]
+----
+--
+====
 
 And here's a test class that contains a `@Disabled` test method.
 
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
 ----
 include::example$java/example/DisabledTestsDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DisabledTestsDemo.kt[tags=user_guide]
+----
+--
+====
 
 [TIP]
 ====

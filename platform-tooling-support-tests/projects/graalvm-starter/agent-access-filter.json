@@ -1,0 +1,10 @@
+{
+  "rules": [
+    {
+      "excludeClasses": "**"
+    },
+    {
+      "includeClasses": "org.junit.**"
+    }
+  ]
+}

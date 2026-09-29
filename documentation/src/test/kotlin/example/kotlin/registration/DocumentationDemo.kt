@@ -26,11 +26,9 @@ class DocumentationDemo {
         // use this.docs ...
     }
 
-    companion object {
-        fun lookUpDocsDir(): Path? {
-            // return path to docs dir
-            return null
-        }
+    private fun lookUpDocsDir(): Path? {
+        // return path to docs dir
+        return null
     }
 }
 // end::user_guide[]

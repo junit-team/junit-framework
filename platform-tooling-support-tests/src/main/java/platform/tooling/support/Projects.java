@@ -1,0 +1,45 @@
+/*
+ * Copyright 2015-2026 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
+
+package platform.tooling.support;
+
+import java.io.IOException;
+import java.nio.file.Path;
+
+import org.apache.commons.io.file.PathUtils;
+
+public class Projects {
+
+	public static final String GRAALVM_STARTER = "graalvm-starter";
+	public static final String GRADLE_KOTLIN_EXTENSIONS = "gradle-kotlin-extensions";
+	public static final String GRADLE_MISSING_ENGINE = "gradle-missing-engine";
+	public static final String JAR_DESCRIBE_MODULE = "jar-describe-module";
+	public static final String JUNIT_START = "junit-start";
+	public static final String JUPITER_STARTER = "jupiter-starter";
+	public static final String KOTLIN_COROUTINES = "kotlin-coroutines";
+	public static final String MAVEN_SUREFIRE_COMPATIBILITY = "maven-surefire-compatibility";
+	public static final String MAVEN_JUNIT_PLATFORM_CONFIGURATION_PROCESSOR = "maven-junit-platform-configuration-processor";
+	public static final String MEMORY_CLEANUP = "memory-cleanup";
+	public static final String REFLECTION_TESTS = "reflection-tests";
+	public static final String STANDALONE = "standalone";
+	public static final String VINTAGE = "vintage";
+
+	private Projects() {
+	}
+
+	public static Path copyToWorkspace(String project, Path workspace) throws IOException {
+		PathUtils.copyDirectory(getSourceDirectory(project), workspace);
+		return workspace;
+	}
+
+	public static Path getSourceDirectory(String project) {
+		return Path.of("projects").resolve(project);
+	}
+}

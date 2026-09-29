@@ -1,21 +1,25 @@
+import junitbuild.extensions.artifactGroup
+import junitbuild.extensions.mavenizedProjects
+
 plugins {
 	`java-platform`
 	id("junitbuild.publishing-conventions")
 }
 
-description = "${rootProject.description} (Bill of Materials)"
+description = "JUnit (Bill of Materials)"
 
 dependencies {
 	constraints {
-		val mavenizedProjects: List<Project> by rootProject.extra
-		mavenizedProjects.sorted()
-				.filter { it.name != "junit-platform-console-standalone" }
-				.forEach {
-					val version = buildParameters.jitpack.version
-						.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
-						.getOrElse(it.version.toString())
-					api("${it.group}:${it.name}:${version}")
-				}
+		val jitPackVersion = buildParameters.jitpack.version
+			.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
+		mavenizedProjects.sortedBy { it.name }
+			.forEach {
+				api(
+					jitPackVersion
+						.map<Any> { version -> "${buildParameters.publishing.group.getOrElse(it.artifactGroup)}:${it.name}:${version}" }
+						.orElse(it)
+				)
+			}
 	}
 }
 

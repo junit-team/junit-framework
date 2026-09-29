@@ -29,7 +29,6 @@ import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 
 import example.TempDirectoryDemo.InMemoryTempDirDemo.JimfsTempDirFactory;
-import example.util.ListWriter;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
@@ -46,9 +45,9 @@ class TempDirectoryDemo {
 	void writeItemsToFile(@TempDir Path tempDir) throws IOException {
 		Path file = tempDir.resolve("test.txt");
 
-		new ListWriter(file).write("a", "b", "c");
+		Files.write(file, List.of("a", "b", "c"));
 
-		assertEquals(List.of("a,b,c"), Files.readAllLines(file));
+		assertEquals(List.of("a", "b", "c"), Files.readAllLines(file));
 	}
 	// end::user_guide_parameter_injection[]
 
@@ -56,12 +55,12 @@ class TempDirectoryDemo {
 	@Test
 	void copyFileFromSourceToTarget(@TempDir Path source, @TempDir Path target) throws IOException {
 		Path sourceFile = source.resolve("test.txt");
-		new ListWriter(sourceFile).write("a", "b", "c");
+		Files.write(sourceFile, List.of("a", "b", "c"));
 
 		Path targetFile = Files.copy(sourceFile, target.resolve("test.txt"));
 
 		assertNotEquals(sourceFile, targetFile);
-		assertEquals(List.of("a,b,c"), Files.readAllLines(targetFile));
+		assertEquals(List.of("a", "b", "c"), Files.readAllLines(targetFile));
 	}
 	// end::user_guide_multiple_directories[]
 
@@ -76,9 +75,9 @@ class TempDirectoryDemo {
 		void writeItemsToFile() throws IOException {
 			Path file = sharedTempDir.resolve("test.txt");
 
-			new ListWriter(file).write("a", "b", "c");
+			Files.write(file, List.of("a", "b", "c"));
 
-			assertEquals(List.of("a,b,c"), Files.readAllLines(file));
+			assertEquals(List.of("a", "b", "c"), Files.readAllLines(file));
 		}
 
 		@Test

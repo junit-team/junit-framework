@@ -15,7 +15,6 @@ import static org.junit.jupiter.engine.execution.ParameterResolutionUtils.resolv
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -42,16 +41,14 @@ public class DefaultExecutableInvoker implements ExecutableInvoker {
 	@Override
 	public <T> T invoke(Constructor<T> constructor, @Nullable Object outerInstance) {
 		@Nullable
-		Object[] arguments = resolveParameters(constructor, Optional.empty(), Optional.ofNullable(outerInstance),
-			extensionContext, extensionRegistry);
+		Object[] arguments = resolveParameters(constructor, null, outerInstance, extensionContext, extensionRegistry);
 		return ReflectionUtils.newInstance(constructor, arguments);
 	}
 
 	@Override
 	public @Nullable Object invoke(Method method, @Nullable Object target) {
 		@Nullable
-		Object[] arguments = resolveParameters(method, Optional.ofNullable(target), extensionContext,
-			extensionRegistry);
+		Object[] arguments = resolveParameters(method, target, extensionContext, extensionRegistry);
 		return MethodReflectionUtils.invoke(method, target, arguments);
 	}
 

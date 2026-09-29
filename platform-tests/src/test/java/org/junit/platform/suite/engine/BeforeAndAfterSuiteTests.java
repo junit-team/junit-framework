@@ -16,7 +16,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.suite.engine.SuiteEngineDescriptor.ENGINE_ID;
-import static org.junit.platform.testkit.engine.EventConditions.container;
+import static org.junit.platform.suite.engine.SuiteEventConditions.suite;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
@@ -113,7 +113,7 @@ public class BeforeAndAfterSuiteTests {
 				.assertStatistics(stats -> stats.started(2).finished(2).succeeded(1).failed(1))
 				.assertThatEvents()
 				.haveExactly(1, event(
-						container(FailingBeforeSuite.class),
+						suite(FailingBeforeSuite.class),
 						finishedWithFailure(instanceOf(RuntimeException.class),
 								message("Exception thrown by @BeforeSuite method"))));
 
@@ -132,7 +132,7 @@ public class BeforeAndAfterSuiteTests {
 				.assertStatistics(stats -> stats.started(7).finished(7).succeeded(5).failed(2))
 				.assertThatEvents()
 				.haveExactly(1, event(
-						container(FailingAfterSuite.class),
+						suite(FailingAfterSuite.class),
 						finishedWithFailure(instanceOf(RuntimeException.class),
 								message("Exception thrown by @AfterSuite method"))));
 
@@ -153,7 +153,7 @@ public class BeforeAndAfterSuiteTests {
 				.assertStatistics(stats -> stats.started(2).finished(2).succeeded(1).failed(1))
 				.assertThatEvents()
 				.haveExactly(1, event(
-						container(FailingBeforeAndAfterSuite.class),
+						suite(FailingBeforeAndAfterSuite.class),
 						finishedWithFailure(instanceOf(RuntimeException.class),
 								message("Exception thrown by @BeforeSuite method"),
 								suppressed(0, instanceOf(RuntimeException.class),
@@ -174,7 +174,7 @@ public class BeforeAndAfterSuiteTests {
 				.assertStatistics(stats -> stats.started(2).finished(2).succeeded(1).failed(1))
 				.assertThatEvents()
 				.haveExactly(1, event(
-						container(SeveralFailingBeforeAndAfterSuite.class),
+						suite(SeveralFailingBeforeAndAfterSuite.class),
 						finishedWithFailure(instanceOf(RuntimeException.class),
 								message("Exception thrown by @BeforeSuite method"),
 								suppressed(0, instanceOf(RuntimeException.class),

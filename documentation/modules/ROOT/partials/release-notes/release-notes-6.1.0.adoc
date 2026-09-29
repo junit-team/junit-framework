@@ -1,68 +1,20 @@
 [[v6.1.0]]
 == 6.1.0
 
-*Date of Release:* ❓
+*Date of Release:* May 19, 2026
 
-*Scope:* ❓
+*Scope:*
 
-For a complete list of all _closed_ issues and pull requests for this release, consult the
-link:{junit-framework-repo}+/milestone/119?closed=1+[6.1.0] milestone page in the JUnit
-repository on GitHub.
+* New `@DefaultLocale` and `@DefaultTimeZone` built-in extensions
+* New built-in extension for clearing/setting/restoring system properties
+* Configurable deletion strategy for `@TempDir` that allows ignoring failures
+* New `org.junit.start` module for usage in compact source files
+* Execution mode configuration support for dynamic tests and containers
+* Improved stack trace pruning for assertion failures
+* New `org.junit.jupiter.api.Constants` class for referencing configuration parameters
+* Improvements to legacy XML reports for parameterized test classes
+* New parallel test executor implementation
+* New experimental memory cleanup mode for large test suites
 
-
-[[v6.1.0-junit-platform]]
-=== JUnit Platform
-
-[[v6.1.0-junit-platform-bug-fixes]]
-==== Bug Fixes
-
-* `AbstractTestDescriptor.getChildren()` now returns immutable set of children rather than a
-  merely unmodifiable set.
-
-[[v6.1.0-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.1.0-junit-platform-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
-
-[[v6.1.0-junit-jupiter]]
-=== JUnit Jupiter
-
-[[v6.1.0-junit-jupiter-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.1.0-junit-jupiter-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.1.0-junit-jupiter-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
-
-[[v6.1.0-junit-vintage]]
-=== JUnit Vintage
-
-[[v6.1.0-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.1.0-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v6.1.0-junit-vintage-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
+For complete details consult the
+https://docs.junit.org/6.1.0/release-notes.html[6.1.0 Release Notes] online.

@@ -54,6 +54,7 @@ import org.junit.platform.commons.annotation.Testable;
  * Alternatively, consider using tags to select specific groups of tests.
  *
  * @since 1.8
+ * @see Disabled
  * @see Select
  * @see SelectClasses
  * @see SelectClasspathResource

@@ -13,11 +13,13 @@ package org.junit.platform.suite.engine;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TemporaryClasspathExecutor.withAdditionalClasspathRoot;
+import static org.junit.platform.engine.DiscoveryIssue.Severity.INFO;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.TagFilter.excludeTags;
 import static org.junit.platform.launcher.core.OutputDirectoryCreators.hierarchicalOutputDirectoryCreator;
 import static org.junit.platform.suite.engine.SuiteEngineDescriptor.ENGINE_ID;
+import static org.junit.platform.suite.engine.SuiteEventConditions.suite;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.displayName;
 import static org.junit.platform.testkit.engine.EventConditions.engine;
@@ -35,15 +37,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
 import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
@@ -67,12 +72,16 @@ import org.junit.platform.suite.engine.testcases.DynamicTestsTestCase;
 import org.junit.platform.suite.engine.testcases.ErroneousTestCase;
 import org.junit.platform.suite.engine.testcases.JUnit4TestsTestCase;
 import org.junit.platform.suite.engine.testcases.MultipleTestsTestCase;
+import org.junit.platform.suite.engine.testcases.SingleFailingTestTestCase;
 import org.junit.platform.suite.engine.testcases.SingleTestTestCase;
+import org.junit.platform.suite.engine.testcases.SingleTestWithTestReporterTestCase;
 import org.junit.platform.suite.engine.testcases.TaggedTestTestCase;
 import org.junit.platform.suite.engine.testsuites.AbstractSuite;
 import org.junit.platform.suite.engine.testsuites.BlankSuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.ConfigurationSuite;
 import org.junit.platform.suite.engine.testsuites.CyclicSuite;
+import org.junit.platform.suite.engine.testsuites.DisabledSuite;
+import org.junit.platform.suite.engine.testsuites.DisabledWithReasonSuite;
 import org.junit.platform.suite.engine.testsuites.DynamicSuite;
 import org.junit.platform.suite.engine.testsuites.EmptyCyclicSuite;
 import org.junit.platform.suite.engine.testsuites.EmptyDynamicTestSuite;
@@ -80,7 +89,9 @@ import org.junit.platform.suite.engine.testsuites.EmptyDynamicTestWithFailIfNoTe
 import org.junit.platform.suite.engine.testsuites.EmptyTestCaseSuite;
 import org.junit.platform.suite.engine.testsuites.EmptyTestCaseWithFailIfNoTestFalseSuite;
 import org.junit.platform.suite.engine.testsuites.ErroneousTestSuite;
+import org.junit.platform.suite.engine.testsuites.FailingSuite;
 import org.junit.platform.suite.engine.testsuites.InheritedSuite;
+import org.junit.platform.suite.engine.testsuites.JupiterDisabledSuite;
 import org.junit.platform.suite.engine.testsuites.MultiEngineSuite;
 import org.junit.platform.suite.engine.testsuites.MultipleSuite;
 import org.junit.platform.suite.engine.testsuites.NestedSuite;
@@ -88,6 +99,7 @@ import org.junit.platform.suite.engine.testsuites.SelectByIdentifierSuite;
 import org.junit.platform.suite.engine.testsuites.SelectClassesSuite;
 import org.junit.platform.suite.engine.testsuites.SelectMethodsSuite;
 import org.junit.platform.suite.engine.testsuites.SelectorProcessingErrorTestSuite;
+import org.junit.platform.suite.engine.testsuites.SingleTestWithTestReporterSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteDisplayNameSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteSuite;
 import org.junit.platform.suite.engine.testsuites.SuiteWithErroneousTestSuite;
@@ -107,18 +119,17 @@ class SuiteEngineTests {
 	@ValueSource(classes = { SelectClassesSuite.class, InheritedSuite.class })
 	void selectClasses(Class<?> suiteClass) {
 		// @formatter:off
-		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(suiteClass))
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+		var testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(suiteClass));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(suiteClass.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(suiteClass), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -134,8 +145,9 @@ class SuiteEngineTests {
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(SelectMethodsSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(MultipleTestsTestCase.class.getName(), "test()"), finishedSuccessfully()))
 				.doNotHave(event(test(MultipleTestsTestCase.class.getName(), "test2()")));
 		// @formatter:on
@@ -298,8 +310,9 @@ class SuiteEngineTests {
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectClass(DynamicSuite.class))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(DynamicSuite.class), finishedSuccessfully()))
 				.haveExactly(2, event(test(DynamicTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -309,12 +322,11 @@ class SuiteEngineTests {
 		// @formatter:off
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectClass(SuiteSuite.class))
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SuiteSuite.class.getName()), finishedSuccessfully()))
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SuiteSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -326,18 +338,19 @@ class SuiteEngineTests {
 				.selectors(
 						selectClass(SelectClassesSuite.class),
 						selectClass(MultipleSuite.class)
-				)
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+				);
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()));
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
+				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
 
@@ -349,18 +362,19 @@ class SuiteEngineTests {
 				.selectors(
 						selectClass(SelectClassesSuite.class),
 						selectClass(MultipleSuite.class)
-				)
-				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+				);
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.isEmpty();
 
 		testKit
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()));
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
+				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
 
@@ -369,13 +383,12 @@ class SuiteEngineTests {
 		// @formatter:off
 		UniqueId uniqId = UniqueId.forEngine(ENGINE_ID)
 				.append(SuiteTestDescriptor.SEGMENT_TYPE, SelectClassesSuite.class.getName());
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectUniqueId(uniqId));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectUniqueId(uniqId))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -392,9 +405,9 @@ class SuiteEngineTests {
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -408,9 +421,9 @@ class SuiteEngineTests {
 		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -424,16 +437,15 @@ class SuiteEngineTests {
 				.append(ClassTestDescriptor.SEGMENT_TYPE, MultipleTestsTestCase.class.getName())
 				.append(TestMethodTestDescriptor.SEGMENT_TYPE, "test()");
 
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+		EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectUniqueId(uniqueId))
-				.selectors(selectClass(SelectClassesSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+				.selectors(selectClass(SelectClassesSuite.class))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectClassesSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectClassesSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()))
-				.haveExactly(1, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -457,9 +469,9 @@ class SuiteEngineTests {
 				.selectors(selectUniqueId(uniqueId))
 				.selectors(selectUniqueId(uniqueId2))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(2, event(test(MultipleSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(MultipleSuite.class), finishedSuccessfully()))
 				.haveExactly(2, event(test(MultipleTestsTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -485,8 +497,9 @@ class SuiteEngineTests {
 					selectUniqueId(uniqueId2)
 				)
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(ConfigurationSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(ConfigurationSuite.class.getName(), "test1()"), finishedSuccessfully()))
 				.haveExactly(1, event(test(ConfigurationSuite.class.getName(), "test2()"), finishedSuccessfully()));
 		// @formatter:on
@@ -499,7 +512,7 @@ class SuiteEngineTests {
 				.filter(MethodSource.class::isInstance)
 				.map(MethodSource.class::cast)
 				.filter(classSource -> SingleTestTestCase.class.equals(classSource.getJavaClass()))
-				.map(classSource -> FilterResult.excluded("Was a test in SimpleTest"))
+				.map(_ -> FilterResult.excluded("Was a test in SimpleTest"))
 				.orElseGet(() -> FilterResult.included("Was not a test in SimpleTest"));
 
 		EngineTestKit.engine(ENGINE_ID)
@@ -520,7 +533,7 @@ class SuiteEngineTests {
 				.execute()
 				.containerEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(container(EmptyTestCaseSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
+				.haveExactly(1, event(suite(EmptyTestCaseSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
 		// @formatter:on
 	}
 
@@ -544,7 +557,7 @@ class SuiteEngineTests {
 				.execute()
 				.containerEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(container(EmptyDynamicTestSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
+				.haveExactly(1, event(suite(EmptyDynamicTestSuite.class), finishedWithFailure(instanceOf(NoTestsDiscoveredException.class))));
 		// @formatter:on
 	}
 
@@ -556,7 +569,7 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
-				.haveAtLeastOne(event(container(EmptyDynamicTestWithFailIfNoTestFalseSuite.class), finishedSuccessfully()));
+				.haveAtLeastOne(event(suite(EmptyDynamicTestWithFailIfNoTestFalseSuite.class), finishedSuccessfully()));
 		// @formatter:on
 	}
 
@@ -584,13 +597,12 @@ class SuiteEngineTests {
 				.append(SuiteTestDescriptor.SEGMENT_TYPE, CyclicSuite.class.getName());
 		var message = "The suite configuration of [%s] resulted in a cycle [%s] and will not be discovered a second time."
 				.formatted(CyclicSuite.class.getName(), expectedUniqueId);
-		var issue = DiscoveryIssue.builder(Severity.INFO, message)
+		var issue = DiscoveryIssue.builder(INFO, message)
 				.source(ClassSource.from(CyclicSuite.class))
 				.build();
 
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
+		var testKit = EngineTestKit.engine(ENGINE_ID)
 				.selectors(selectClass(CyclicSuite.class));
-			var testKit = builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
 
 		assertThat(testKit.discover().getDiscoveryIssues())
 				.containsExactly(issue);
@@ -599,6 +611,7 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(CyclicSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -611,7 +624,7 @@ class SuiteEngineTests {
 				.execute()
 				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(container(EmptyCyclicSuite.class), finishedWithFailure(message(
+				.haveExactly(1, event(suite(EmptyCyclicSuite.class), finishedWithFailure(message(
 						"Suite [org.junit.platform.suite.engine.testsuites.EmptyCyclicSuite] did not discover any tests"
 				))));
 		// @formatter:on
@@ -620,26 +633,48 @@ class SuiteEngineTests {
 	@Test
 	void threePartCyclicSuite() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(ThreePartCyclicSuite.PartA.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(ThreePartCyclicSuite.PartA.class))
 				.execute()
 				.allEvents()
 				.assertThatEvents()
+				.haveExactly(1, event(suite(ThreePartCyclicSuite.PartA.class), finishedSuccessfully()))
+				.haveExactly(1, event(suite(ThreePartCyclicSuite.PartB.class), finishedSuccessfully()))
+				.haveExactly(1, event(suite(ThreePartCyclicSuite.PartC.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
 
 	@Test
+	void failingSuite(@TrackLogRecords LogRecordListener listener) {
+		// @formatter:off
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(FailingSuite.class));
+
+		assertThat(testKit.discover().getDiscoveryIssues())
+				.isEmpty();
+
+		testKit
+				.execute()
+				.allEvents()
+				.assertThatEvents()
+				.haveExactly(1, event(suite(FailingSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(test(SingleFailingTestTestCase.class.getName()),finishedWithFailure()));
+		// @formatter:on
+
+		// Warnings from failing listeners.
+		assertThat(listener.stream(Level.WARNING)).isEmpty();
+	}
+
+	@Test
 	void selectByIdentifier() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SelectByIdentifierSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SelectByIdentifierSuite.class))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SelectByIdentifierSuite.class.getName()), finishedSuccessfully()))
+				.haveExactly(1, event(suite(SelectByIdentifierSuite.class), finishedSuccessfully()))
 				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 	}
@@ -647,13 +682,14 @@ class SuiteEngineTests {
 	@Test
 	void passesOutputDirectoryCreatorToEnginesInSuite() {
 		// @formatter:off
-		EngineTestKit.Builder builder = EngineTestKit.engine(ENGINE_ID)
-				.selectors(selectClass(SelectClassesSuite.class));
-			builder.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
+		EngineTestKit.engine(ENGINE_ID)
+				.selectors(selectClass(SingleTestWithTestReporterSuite.class))
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir))
 				.execute()
-				.testEvents()
+				.allEvents()
 				.assertThatEvents()
-				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
+				.haveExactly(1, event(suite(SingleTestWithTestReporterSuite.class), finishedSuccessfully()))
+				.haveExactly(1, event(test(SingleTestWithTestReporterTestCase.class.getName()), finishedSuccessfully()));
 		// @formatter:on
 
 		assertThat(outputDir).isDirectoryRecursivelyContaining("glob:**/test.txt");
@@ -738,9 +774,9 @@ class SuiteEngineTests {
 			results.allEvents() //
 					.assertStatistics(stats -> stats.started(3).succeeded(2).aborted(1).skipped(2)) //
 					.assertEventsMatchLooselyInOrder( //
-						event(container(CancellingSuite.class), started()), //
+						event(suite(CancellingSuite.class), started()), //
 						event(container(SingleTestTestCase.class), skippedWithReason("Execution cancelled")), //
-						event(container(CancellingSuite.class), finishedSuccessfully()), //
+						event(suite(CancellingSuite.class), finishedSuccessfully()), //
 						event(container(SelectMethodsSuite.class), skippedWithReason("Execution cancelled")) //
 					);
 		}
@@ -760,8 +796,10 @@ class SuiteEngineTests {
 			var results = testKit.execute();
 
 			results.allEvents().assertThatEvents() //
-					.haveExactly(1, event(container(SingleTestTestCase.class),
-						skippedWithReason("Execution cancelled"))).haveExactly(0, event(test(), started()));
+					.haveExactly(1, event(suite(CancellingSuite.class), finishedSuccessfully())) //
+					.haveExactly(1, //
+						event(container(SingleTestTestCase.class), skippedWithReason("Execution cancelled"))) //
+					.haveExactly(0, event(test(), started()));
 
 			assertThat(CancellingSuite.afterCalled) //
 					.describedAs("@AfterSuite method was called") //
@@ -804,6 +842,56 @@ class SuiteEngineTests {
 				.noneMatch(issue -> issue.message().contains("@SuiteDisplayName"));
 	}
 
+	@Test
+	void disabledSuite() {
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID) //
+				.selectors(selectClass(DisabledSuite.class)) //
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir)); //
+
+		assertThat(testKit.discover().getDiscoveryIssues())//
+				.isEmpty();
+
+		testKit.execute() //
+				.allEvents() //
+				.assertThatEvents() //
+				.haveExactly(1, event(suite(DisabledSuite.class), //
+					skippedWithReason(DisabledSuite.class + " is @Disabled")));
+	}
+
+	@Test
+	void disabledSuiteWithReason() {
+		EngineTestKit.Builder testKit = EngineTestKit.engine(ENGINE_ID).selectors(
+			selectClass(DisabledWithReasonSuite.class)) //
+				.outputDirectoryCreator(hierarchicalOutputDirectoryCreator(outputDir));
+
+		assertThat(testKit.discover().getDiscoveryIssues()).isEmpty();
+
+		testKit.execute() //
+				.allEvents() //
+				.assertThatEvents() //
+				.haveExactly(1, event(suite(DisabledWithReasonSuite.class), //
+					skippedWithReason("for testing purposes")));
+	}
+
+	@Test
+	void usingJupiterDisabledReportsAnIssue() {
+		var testKit = EngineTestKit.engine(ENGINE_ID).selectors(
+			selectClass(JupiterDisabledSuite.class)).outputDirectoryCreator(
+				hierarchicalOutputDirectoryCreator(outputDir));
+
+		var expectedIssue = DiscoveryIssue.create(INFO,
+			("The suite [%s] was annotated with [org.junit.jupiter.api.Disabled] which does *not* disable the suite. "
+					+ "Did you mean to use [org.junit.platform.suite.api.Disabled]?") //
+							.formatted(JupiterDisabledSuite.class));
+		assertThat(testKit.discover().getDiscoveryIssues()).contains(expectedIssue);
+
+		testKit.execute() //
+				.allEvents() //
+				.assertThatEvents() //
+				.haveExactly(1, event(suite(JupiterDisabledSuite.class), finishedSuccessfully())) //
+				.haveExactly(1, event(test(SingleTestTestCase.class.getName()), finishedSuccessfully()));
+	}
+
 	// -----------------------------------------------------------------------------------------------------------------
 
 	static class CancellingSuite extends SelectClassesSuite {
@@ -833,11 +921,13 @@ class SuiteEngineTests {
 	private static class PrivateSuite {
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	@Suite
 	@SelectClasses(names = "org.junit.platform.suite.engine.testcases.SingleTestTestCase")
 	abstract class AbstractInnerSuite {
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	@Suite
 	@SelectClasses(names = "org.junit.platform.suite.engine.testcases.SingleTestTestCase")
 	class InnerSuite {

@@ -9,12 +9,16 @@ plugins {
 description = "JUnit Vintage Engine"
 
 dependencies {
+	annotationProcessor(projects.junitPlatformConfigurationProcessor)
+
 	api(platform(projects.junitBom))
 	api(projects.junitPlatformEngine)
 	api(libs.junit4)
 
 	compileOnlyApi(libs.apiguardian)
 	compileOnlyApi(libs.jspecify)
+
+	compileOnly(projects.junitPlatformConfigurationApi)
 
 	testFixturesApi(platform(libs.groovy2.bom))
 	testFixturesApi(libs.spock1)
@@ -33,7 +37,7 @@ dependencies {
 
 tasks {
 	compileJava {
-		options.compilerArgs.add("-Xlint:-requires-automatic") // JUnit 4
+		options.compilerArgs.add("-Xlint:-requires-automatic,-processing") // -requires-automatic: JUnit 4, -module: due to qualified exports, -processing: not all annotations need to be processed
 	}
 	compileTestFixturesGroovy {
 		javaLauncher = project.javaToolchains.launcherFor {
@@ -45,15 +49,12 @@ tasks {
 		bundle {
 			val junit4Min = libs.versions.junit4Min.get()
 			val version = project.version
-			val importAPIGuardian: String by extra
-			val importJSpecify: String by extra
-			val importCommonsLogging: String by extra
 			bnd("""
 				# Import JUnit4 packages with a version
 				Import-Package: \
-					${importAPIGuardian},\
-					${importJSpecify},\
-					${importCommonsLogging},\
+					${extra["importAPIGuardian"]},\
+					${extra["importJSpecify"]},\
+					${extra["importCommonsLogging"]},\
 					junit.runner;version="[${junit4Min},5)",\
 					org.junit;version="[${junit4Min},5)",\
 					org.junit.experimental.categories;version="[${junit4Min},5)",\
@@ -73,8 +74,8 @@ tasks {
 			""")
 		}
 	}
-	val testWithoutJUnit4 by registering(Test::class) {
-		val test by testing.suites.existing(JvmTestSuite::class)
+	val testWithoutJUnit4 = register("testWithoutJUnit4", Test::class) {
+		val test = testing.suites.named<JvmTestSuite>("test")
 		(options as JUnitPlatformOptions).apply {
 			includeTags("missing-junit4")
 		}

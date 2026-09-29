@@ -5,3 +5,5 @@ rules:
       - main.yml
   secrets-outside-env:
     disable: true
+  secrets-inherit:
+    disable: true

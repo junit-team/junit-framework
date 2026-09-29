@@ -219,7 +219,7 @@ class ParameterizedInvocationNameFormatterTests {
 	}
 
 	@ParameterizedTest(name = "{0}")
-	@CsvSource(delimiter = '|', textBlock = """
+	@CsvSource(delimiter = '|', value = """
 			US | 42.23 is positive on 2019 Jan 13 at 12:34:56
 			DE | 42,23 is positive on 13.01.2019 at 12:34:56
 			""")

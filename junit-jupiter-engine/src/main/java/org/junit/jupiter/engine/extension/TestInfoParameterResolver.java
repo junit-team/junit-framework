@@ -48,14 +48,14 @@ class TestInfoParameterResolver implements ParameterResolver {
 
 		private final String displayName;
 		private final Set<String> tags;
-		private final Optional<Class<?>> testClass;
-		private final Optional<Method> testMethod;
+		private final @Nullable Class<?> testClass;
+		private final @Nullable Method testMethod;
 
 		DefaultTestInfo(ExtensionContext extensionContext) {
 			this.displayName = extensionContext.getDisplayName();
 			this.tags = extensionContext.getTags();
-			this.testClass = extensionContext.getTestClass();
-			this.testMethod = extensionContext.getTestMethod();
+			this.testClass = extensionContext.getTestClass().orElse(null);
+			this.testMethod = extensionContext.getTestMethod().orElse(null);
 		}
 
 		@Override
@@ -70,12 +70,12 @@ class TestInfoParameterResolver implements ParameterResolver {
 
 		@Override
 		public Optional<Class<?>> getTestClass() {
-			return this.testClass;
+			return Optional.ofNullable(this.testClass);
 		}
 
 		@Override
 		public Optional<Method> getTestMethod() {
-			return this.testMethod;
+			return Optional.ofNullable(this.testMethod);
 		}
 
 		@Override
@@ -84,15 +84,10 @@ class TestInfoParameterResolver implements ParameterResolver {
 			return new ToStringBuilder(this)
 					.append("displayName", this.displayName)
 					.append("tags", this.tags)
-					.append("testClass", nullSafeGet(this.testClass))
-					.append("testMethod", nullSafeGet(this.testMethod))
+					.append("testClass", this.testClass)
+					.append("testMethod", this.testMethod)
 					.toString();
 			// @formatter:on
-		}
-
-		@SuppressWarnings({ "OptionalAssignedToNull", "NullableOptional" })
-		private static @Nullable Object nullSafeGet(@Nullable Optional<?> optional) {
-			return optional != null ? optional.orElse(null) : null;
 		}
 
 	}

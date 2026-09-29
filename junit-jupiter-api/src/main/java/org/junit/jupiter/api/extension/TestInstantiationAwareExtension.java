@@ -147,7 +147,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 
 		/**
 		 * The extension should receive an {@link ExtensionContext} for the
-		 * the <em>default</em> scope.
+		 * <em>default</em> scope.
 		 *
 		 * <p>The default scope is determined by the configuration parameter
 		 * {@link #DEFAULT_SCOPE_PROPERTY_NAME}. If not specified, extensions
@@ -174,14 +174,18 @@ public interface TestInstantiationAwareExtension extends Extension {
 		TEST_METHOD;
 
 		/**
+		 * Default value for {@value #DEFAULT_SCOPE_PROPERTY_NAME} is {@value}.
+		 */
+		@API(status = MAINTAINED, since = "6.2")
+		public static final String DEFAULT_SCOPE_DEFAULT = "DEFAULT";
+
+		/**
 		 * Property name used to set the default extension context scope: {@value}
 		 *
 		 * <h4>Supported Values</h4>
 		 *
 		 * <p>Supported values include names of enum constants defined in this
-		 * class, ignoring case.
-		 *
-		 * @see #DEFAULT
+		 * class, ignoring case. Defaults to {@value #DEFAULT_SCOPE_DEFAULT}.
 		 */
 		public static final String DEFAULT_SCOPE_PROPERTY_NAME = "junit.jupiter.extensions.testinstantiation.extensioncontextscope.default";
 

@@ -1,5 +1,6 @@
 import junitbuild.extensions.withArchiveOperations
 import junitbuild.java.WriteArtifactsFile
+import junitbuild.shadow.ConfigurationMetadataMergingTransformer
 
 plugins {
 	id("junitbuild.java-library-conventions")
@@ -33,11 +34,11 @@ tasks {
 			attributes("Main-Class" to "org.junit.platform.console.ConsoleLauncher")
 		}
 	}
-	val shadowedArtifactsFile by registering(WriteArtifactsFile::class) {
+	val shadowedArtifactsFile = register("shadowedArtifactsFile", WriteArtifactsFile::class) {
 		from(configurations.shadowedClasspath)
 		outputFile = layout.buildDirectory.file("shadowed-artifacts")
 	}
-	val extractThirdPartyLicenses by registering(Sync::class) {
+	val extractThirdPartyLicenses = register("extractThirdPartyLicenses", Sync::class) {
 		from(withArchiveOperations { ops -> configurations.shadowedClasspath.flatMap { it.elements }.map { it.map(ops::zipTree) } })
 		into(layout.buildDirectory.dir("thirdPartyLicenses"))
 		include("LICENSE.txt")
@@ -58,6 +59,9 @@ tasks {
 		// https://github.com/junit-team/junit-framework/issues/2557
 		// exclude compiled module declarations from any source (e.g. /*, /META-INF/versions/N/*)
 		exclude("**/module-info.class")
+		transform(ConfigurationMetadataMergingTransformer::class.java) {
+			resource = "META-INF/junit-platform-configuration-metadata.json"
+		}
 		// https://github.com/junit-team/junit-framework/issues/761
 		// prevent duplicates, add 3rd-party licenses explicitly
 		exclude("**/COPYRIGHT*")
@@ -71,13 +75,11 @@ tasks {
 		}
 
 		bundle {
-			val importAPIGuardian: String by extra
-			val importJSpecify: String by extra
 			bnd("""
 				# Customize the imports because this is an aggregate jar
 				Import-Package: \
-					$importAPIGuardian,\
-					$importJSpecify,\
+					${extra["importAPIGuardian"]},\
+					${extra["importJSpecify"]},\
 					kotlin.*;resolution:="optional",\
 					kotlinx.*;resolution:="optional",\
 					*

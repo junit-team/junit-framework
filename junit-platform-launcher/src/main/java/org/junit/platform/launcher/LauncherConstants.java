@@ -16,8 +16,13 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
+import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Value;
+import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineDiscoveryRequest;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.launcher.core.LauncherPhase;
 
 /**
  * Collection of constants related to {@link Launcher}.
@@ -27,6 +32,12 @@ import org.junit.platform.engine.reporting.ReportEntry;
  */
 @API(status = STABLE, since = "1.7")
 public class LauncherConstants {
+
+	/**
+	 * Default value for {@value #CAPTURE_STDOUT_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean CAPTURE_STDOUT_DEFAULT = false;
 
 	/**
 	 * Property name used to enable capturing output to {@link System#out}:
@@ -43,7 +54,14 @@ public class LauncherConstants {
 	 * @see ReportEntry
 	 * @see TestExecutionListener#reportingEntryPublished(TestIdentifier, ReportEntry)
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = CAPTURE_STDOUT_DEFAULT))
 	public static final String CAPTURE_STDOUT_PROPERTY_NAME = "junit.platform.output.capture.stdout";
+
+	/**
+	 * Default value for {@value #CAPTURE_STDERR_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean CAPTURE_STDERR_DEFAULT = false;
 
 	/**
 	 * Property name used to enable capturing output to {@link System#err}:
@@ -60,7 +78,16 @@ public class LauncherConstants {
 	 * @see ReportEntry
 	 * @see TestExecutionListener#reportingEntryPublished(TestIdentifier, ReportEntry)
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = CAPTURE_STDERR_DEFAULT))
 	public static final String CAPTURE_STDERR_PROPERTY_NAME = "junit.platform.output.capture.stderr";
+
+	/**
+	 * Default maximum number of bytes for buffering to use per thread and
+	 * output type if output capturing is enabled is {@value}.
+	 *
+	 * @see #CAPTURE_MAX_BUFFER_PROPERTY_NAME
+	 */
+	public static final int CAPTURE_MAX_BUFFER_DEFAULT = 4 * 1024 * 1024;
 
 	/**
 	 * Property name used to configure the maximum number of bytes for buffering
@@ -71,15 +98,8 @@ public class LauncherConstants {
 	 *
 	 * @see #CAPTURE_MAX_BUFFER_DEFAULT
 	 */
+	@ConfigurationParameter(defaultValue = @Value(intValue = CAPTURE_MAX_BUFFER_DEFAULT))
 	public static final String CAPTURE_MAX_BUFFER_PROPERTY_NAME = "junit.platform.output.capture.maxBuffer";
-
-	/**
-	 * Default maximum number of bytes for buffering to use per thread and
-	 * output type if output capturing is enabled.
-	 *
-	 * @see #CAPTURE_MAX_BUFFER_PROPERTY_NAME
-	 */
-	public static final int CAPTURE_MAX_BUFFER_DEFAULT = 4 * 1024 * 1024;
 
 	/**
 	 * Key used to publish captured output to {@link System#out} as part of a
@@ -138,6 +158,7 @@ public class LauncherConstants {
 	 * @see #DEACTIVATE_ALL_LISTENERS_PATTERN
 	 * @see org.junit.platform.launcher.TestExecutionListener
 	 */
+	@ConfigurationParameter(type = String.class)
 	public static final String DEACTIVATE_LISTENERS_PATTERN_PROPERTY_NAME = "junit.platform.execution.listeners.deactivate";
 
 	/**
@@ -149,6 +170,12 @@ public class LauncherConstants {
 	 * @see org.junit.platform.launcher.TestExecutionListener
 	 */
 	public static final String DEACTIVATE_ALL_LISTENERS_PATTERN = ClassNamePatternFilterUtils.ALL_PATTERN;
+
+	/**
+	 * Default value for {@value #ENABLE_LAUNCHER_INTERCEPTORS} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT = false;
 
 	/**
 	 * Property name used to enable support for
@@ -165,7 +192,14 @@ public class LauncherConstants {
 	 * @see LauncherInterceptor
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT))
 	public static final String ENABLE_LAUNCHER_INTERCEPTORS = "junit.platform.launcher.interceptors.enabled";
+
+	/**
+	 * Default value for {@value #DRY_RUN_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean DRY_RUN_DEFAULT = false;
 
 	/**
 	 * Property name used to enable dry-run mode for test execution.
@@ -181,7 +215,14 @@ public class LauncherConstants {
 	 * <p>Value must be either {@code true} or {@code false}; defaults to {@code false}.
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DRY_RUN_DEFAULT))
 	public static final String DRY_RUN_PROPERTY_NAME = "junit.platform.execution.dryRun.enabled";
+
+	/**
+	 * Default value for {@value #STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean STACKTRACE_PRUNING_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to enable or disable stack trace pruning.
@@ -191,6 +232,7 @@ public class LauncherConstants {
 	 * @see org.junit.platform.launcher.core.EngineExecutionOrchestrator
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = STACKTRACE_PRUNING_ENABLED_DEFAULT))
 	public static final String STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME = "junit.platform.stacktrace.pruning.enabled";
 
 	/**
@@ -207,11 +249,12 @@ public class LauncherConstants {
 	 * @see TestPlan#getOutputDirectoryCreator()
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
+	@ConfigurationParameter(type = String.class)
 	public static final String OUTPUT_DIR_PROPERTY_NAME = "junit.platform.reporting.output.dir";
 
 	/**
-	 * Placeholder for use in {@link #OUTPUT_DIR_PROPERTY_NAME} that will be
-	 * replaced with a unique number.
+	 * Placeholder for use in {@link #OUTPUT_DIR_PROPERTY_NAME}. Each instance
+	 * will be replaced with a randomly chosen number.
 	 *
 	 * <p>This can be used to create a unique output directory for each test
 	 * run. For example, if multiple forks are used, each fork can be configured
@@ -222,6 +265,12 @@ public class LauncherConstants {
 	 */
 	@API(status = MAINTAINED, since = "1.13.3")
 	public static final String OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER = "{uniqueNumber}";
+
+	/**
+	 * Default value for {@value #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT = "ERROR";
 
 	/**
 	 * Property name used to configure the critical severity of issues
@@ -240,13 +289,14 @@ public class LauncherConstants {
 	 * {@link org.junit.platform.engine.DiscoveryIssue.Severity Severity},
 	 * ignoring case.
 	 *
-	 * <p>If not specified, the default is "error" which corresponds to
+	 * <p>If not specified, the default is {@value #CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT} which corresponds to
 	 * {@code Severity.ERROR)}.
 	 *
 	 * @since 1.13
 	 * @see org.junit.platform.engine.DiscoveryIssue.Severity
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
+	@ConfigurationParameter(type = Severity.class, defaultValue = @Value(stringValue = CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT))
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
 
 	/**
@@ -267,7 +317,14 @@ public class LauncherConstants {
 	 * @see #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
+	@ConfigurationParameter(type = LauncherPhase.class)
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
+
+	/**
+	 * Default value for {@value #MEMORY_CLEANUP_ENABLED_PROPERTY_NAME} is {@value}.
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean MEMORY_CLEANUP_ENABLED_DEFAULT = false;
 
 	/**
 	 * Property name used to enable the <em>experimental</em> memory cleanup
@@ -290,9 +347,34 @@ public class LauncherConstants {
 	 * maintainers of the affected listeners or engines.
 	 *
 	 * @since 6.1
+	 * @see #MEMORY_CLEANUP_EXCLUDED_ENGINES_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = MEMORY_CLEANUP_ENABLED_DEFAULT))
 	public static final String MEMORY_CLEANUP_ENABLED_PROPERTY_NAME = "junit.platform.execution.memory.cleanup.enabled";
+
+	/**
+	 * Property name used to configure which test engines should be excluded from
+	 * memory cleanup in case it's enabled.
+	 *
+	 * <p>If set, value must be a comma-separated list of test engine IDs.
+	 * If an engine is excluded, it's {@link TestIdentifier TestIdentifiers}
+	 * will still be removed from the {@link TestPlan} but it's
+	 * {@link TestDescriptor TestDescriptors} will not be removed from their
+	 * parents by calling {@link TestDescriptor#removeFromHierarchy()}.
+	 *
+	 * <p>This can be useful to work around performance issues with specific engines
+	 * when memory cleanup is enabled. For example, to exclude the Vintage engine:
+	 * {@code junit-vintage}.
+	 *
+	 * <p>If not specified, all engines are subject to memory cleanup when enabled.
+	 *
+	 * @since 6.1.1
+	 * @see #MEMORY_CLEANUP_ENABLED_PROPERTY_NAME
+	 */
+	@API(status = EXPERIMENTAL, since = "6.1.1")
+	@ConfigurationParameter(type = String.class)
+	public static final String MEMORY_CLEANUP_EXCLUDED_ENGINES_PROPERTY_NAME = "junit.platform.execution.memory.cleanup.engines.excluded";
 
 	private LauncherConstants() {
 		/* no-op */

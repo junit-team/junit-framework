@@ -292,8 +292,7 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 		private final Class<?> testClass;
 		private final Function<Object, ? extends Extension> initializer;
 
-		@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-		private Optional<Extension> extension = Optional.empty();
+		private @Nullable Extension extension;
 
 		LateInitEntry(Class<?> testClass, Function<Object, ? extends Extension> initializer) {
 			this.testClass = testClass;
@@ -302,7 +301,7 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 
 		@Override
 		public Optional<Extension> getExtension() {
-			return extension;
+			return Optional.ofNullable(extension);
 		}
 
 		private Class<?> getTestClass() {
@@ -310,12 +309,12 @@ public class MutableExtensionRegistry implements ExtensionRegistry, ExtensionReg
 		}
 
 		void initialize(Object testInstance) {
-			Preconditions.condition(extension.isEmpty(), "Extension already initialized");
-			extension = Optional.of(initializer.apply(testInstance));
+			Preconditions.condition(extension == null, "Extension already initialized");
+			extension = initializer.apply(testInstance);
 		}
 
 		LateInitEntry copy() {
-			Preconditions.condition(extension.isEmpty(), "Extension already initialized");
+			Preconditions.condition(extension == null, "Extension already initialized");
 			return new LateInitEntry(testClass, initializer);
 		}
 	}

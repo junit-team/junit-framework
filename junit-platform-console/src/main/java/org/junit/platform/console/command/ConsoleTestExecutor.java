@@ -165,15 +165,14 @@ public class ConsoleTestExecutor {
 		launcher.execute(executionRequest);
 	}
 
-	private Optional<ClassLoader> createCustomClassLoader() {
+	private @Nullable CustomClassLoader createCustomClassLoader() {
 		List<Path> additionalClasspathEntries = discoveryOptions.getExistingAdditionalClasspathEntries();
 		if (!additionalClasspathEntries.isEmpty()) {
 			URL[] urls = additionalClasspathEntries.stream().map(this::toURL).toArray(URL[]::new);
 			ClassLoader parentClassLoader = ClassLoaderUtils.getDefaultClassLoader();
-			ClassLoader customClassLoader = URLClassLoader.newInstance(urls, parentClassLoader);
-			return Optional.of(customClassLoader);
+			return new CustomClassLoader(URLClassLoader.newInstance(urls, parentClassLoader));
 		}
-		return Optional.empty();
+		return null;
 	}
 
 	private URL toURL(Path path) {

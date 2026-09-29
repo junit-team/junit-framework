@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.function.Supplier;
+import java.util.concurrent.TimeoutException;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
@@ -25,30 +25,24 @@ import org.junit.platform.commons.util.UnrecoverableExceptions;
  */
 class SameThreadTimeoutInvocation<T extends @Nullable Object> implements Invocation<T> {
 
-	private final Invocation<T> delegate;
-	private final TimeoutDuration timeout;
+	private final TimeoutInvocationParameters<T> parameters;
 	private final ScheduledExecutorService executor;
-	private final Supplier<String> descriptionSupplier;
-	private final PreInterruptCallbackInvocation preInterruptCallback;
 
-	SameThreadTimeoutInvocation(Invocation<T> delegate, TimeoutDuration timeout, ScheduledExecutorService executor,
-			Supplier<String> descriptionSupplier, PreInterruptCallbackInvocation preInterruptCallback) {
-		this.delegate = delegate;
-		this.timeout = timeout;
+	SameThreadTimeoutInvocation(TimeoutInvocationParameters<T> parameters, ScheduledExecutorService executor) {
+		this.parameters = parameters;
 		this.executor = executor;
-		this.descriptionSupplier = descriptionSupplier;
-		this.preInterruptCallback = preInterruptCallback;
 	}
 
 	@SuppressWarnings("NullAway")
 	@Override
 	public T proceed() throws Throwable {
-		InterruptTask interruptTask = new InterruptTask(Thread.currentThread(), preInterruptCallback);
+		InterruptTask interruptTask = new InterruptTask(Thread.currentThread(), parameters.preInterruptCallback());
+		var timeout = parameters.timeout();
 		ScheduledFuture<?> future = executor.schedule(interruptTask, timeout.value(), timeout.unit());
 		Throwable failure = null;
 		T result = null;
 		try {
-			result = delegate.proceed();
+			result = parameters.invocation().proceed();
 		}
 		catch (Throwable t) {
 			UnrecoverableExceptions.rethrowIfUnrecoverable(t);
@@ -61,7 +55,7 @@ class SameThreadTimeoutInvocation<T extends @Nullable Object> implements Invocat
 			}
 			if (interruptTask.executed) {
 				Thread.interrupted();
-				failure = TimeoutExceptionFactory.create(descriptionSupplier.get(), timeout, failure);
+				failure = newTimeoutException(failure);
 				interruptTask.attachSuppressedExceptions(failure);
 			}
 		}
@@ -69,6 +63,11 @@ class SameThreadTimeoutInvocation<T extends @Nullable Object> implements Invocat
 			throw failure;
 		}
 		return result;
+	}
+
+	private TimeoutException newTimeoutException(@Nullable Throwable failure) {
+		return TimeoutExceptionFactory.create(parameters.descriptionSupplier().get(), parameters.timeout(),
+			parameters.threadDumpEnabled(), failure);
 	}
 
 	static class InterruptTask implements Runnable {

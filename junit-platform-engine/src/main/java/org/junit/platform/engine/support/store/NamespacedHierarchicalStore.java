@@ -10,7 +10,7 @@
 
 package org.junit.platform.engine.support.store;
 
-import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
@@ -658,7 +658,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			}
 		}
 
-		private static final Comparator<EvaluatedValue<?>> REVERSE_INSERT_ORDER = comparing(
+		private static final Comparator<EvaluatedValue<?>> REVERSE_INSERT_ORDER = comparingInt(
 			(EvaluatedValue<?> it) -> it.order).reversed();
 
 		private void close(CloseAction<N> closeAction) throws Throwable {

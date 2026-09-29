@@ -1,0 +1,106 @@
+[[v6.2.0-M1]]
+== 6.2.0-M1
+
+*Date of Release:* ❓
+
+*Scope:* ❓
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/107?closed=1+[6.2.0-M1] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v6.2.0-M1-junit-platform]]
+=== JUnit Platform
+
+[[v6.2.0-M1-junit-platform-bug-fixes]]
+==== Bug Fixes
+
+* When scanning the classpath, the resolved path is used to cache an open jar file system
+  rather than a (potential) symlink.
+
+[[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.2.0-M1-junit-platform-new-features-and-improvements]]
+==== New Features and Improvements
+
+* When using `ConsoleLauncher` with the `-cp`/`--classpath` option, it now creates a
+  custom `ClassLoader` that does _not_ implement `AutoCloseable` to avoid accidentally
+  closing it in test code which can lead to test failures that are hard to diagnose.
+* When using a third-party engine that uses the `junit-` prefix a discovery issue is
+  emitted.
+* `junit-platform-console-standalone` is now part of the `junit-bom`
+* `@org.junit.platform.suite.api.Disabled` can be used annotate a `@Suite`-annotated
+  class. If so annotated, the suite will not be executed.
+* The `org.junit.jupiter.api.assertThrows` Kotlin API and its related functions have
+  added variants that use an exception class as a value rather than a type parameter.
+  This is to primarily to address the current issue/s when trying to use
+  `@ParameterizedTest` that produces exceptions as values.
+* `ConsoleLauncher` with `--details=verbose` now reports on each test atomically and
+  indents its output correctly when tests are executed in parallel. Previously, the
+  reported output from different tests could interleave.
+* Test Engine and Jupiter Extension authors may generate a machine-readable overview
+  of configuration parameters. See
+  xref:advanced-topics/configuration-parameter-documentation.adoc[Documenting Configuration
+  Parameters] for more information.
+* Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+* Test engines using the `ParallelHierarchicalTestExecutorServiceFactory` now use the
+  `WORKER_THREAD_POOL` executor service by default.
+
+[[v6.2.0-M1-junit-jupiter]]
+=== JUnit Jupiter
+
+[[v6.2.0-M1-junit-jupiter-bug-fixes]]
+==== Bug Fixes
+
+* The `junit.jupiter.params.displayname.argument.maxlength` configuration parameter is
+  now validated and rejected with a clear error when set to a non-positive value instead
+  of causing parameterized tests to fail with an internal exception.
+* The elements of `@CsvSource.value[]` are now treated as individual CSV documents. This
+  prevents unfinished quotes in one document from affecting another.
+
+[[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* When using `@CsvSource.value[]` CSV records starting with a comment character cause the
+  test to fail. Either change `commentCharacter` to something else or enclose the field in
+  quotes.
+* When using `@CsvSource.value[]` the `commentCharacter` must be distinct from both
+  `delimiter` and `quoteCharacter`.
+* When the timeout provided to `assertTimeout`, `assertTimeoutPreemptively` and test
+  methods annotated with `@Timeout` is not a positive value less than 2^63^ nanoseconds
+  (approximately 292 years) a `PreconditionViolationException` is thrown.
+
+[[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
+==== New Features and Improvements
+
+* Added `OS.NETBSD` and `OS.DRAGONFLYBSD` enum constants for use with `@EnabledOnOs`
+  and `@DisabledOnOs`.
+* Failures caused by `@Timeout` expirations now include a hint about enabling
+  xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
+* The `assertTimeout`, `assertTimeoutPreemptively` and methods annotated with `@Timeout`
+  now measure the execution time with sub-millisecond precision.
+* Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+* The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
+  now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
+
+[[v6.2.0-M1-junit-vintage]]
+=== JUnit Vintage
+
+[[v6.2.0-M1-junit-vintage-bug-fixes]]
+==== Bug Fixes
+
+* ❓
+
+[[v6.2.0-M1-junit-vintage-deprecations-and-breaking-changes]]
+==== Deprecations and Breaking Changes
+
+* ❓
+
+[[v6.2.0-M1-junit-vintage-new-features-and-improvements]]
+==== New Features and Improvements
+
+* Vintage configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`

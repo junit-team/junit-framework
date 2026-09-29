@@ -103,6 +103,7 @@ class AssertLinesMatchAssertionsTests {
 	}
 
 	@Test
+	@SuppressWarnings("NullAway")
 	void assertLinesMatchWithNullElementsFails() {
 		var list = List.of("1", "2", "3");
 		var withNullElement = Arrays.asList("1", null, "3"); // List.of() doesn't permit null values.

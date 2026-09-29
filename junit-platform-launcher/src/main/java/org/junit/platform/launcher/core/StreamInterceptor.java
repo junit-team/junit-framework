@@ -15,7 +15,6 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
@@ -35,22 +34,22 @@ class StreamInterceptor extends PrintStream {
 	private final ThreadLocal<RewindableByteArrayOutputStream> output = ThreadLocal.withInitial(
 		RewindableByteArrayOutputStream::new);
 
-	static Optional<StreamInterceptor> registerStdout(int maxNumberOfBytesPerThread) {
+	static @Nullable StreamInterceptor registerStdout(int maxNumberOfBytesPerThread) {
 		return register(System.out, System::setOut, maxNumberOfBytesPerThread);
 	}
 
-	static Optional<StreamInterceptor> registerStderr(int maxNumberOfBytesPerThread) {
+	static @Nullable StreamInterceptor registerStderr(int maxNumberOfBytesPerThread) {
 		return register(System.err, System::setErr, maxNumberOfBytesPerThread);
 	}
 
-	static Optional<StreamInterceptor> register(PrintStream originalStream, Consumer<PrintStream> streamSetter,
+	static @Nullable StreamInterceptor register(PrintStream originalStream, Consumer<PrintStream> streamSetter,
 			int maxNumberOfBytesPerThread) {
 		if (originalStream instanceof StreamInterceptor) {
-			return Optional.empty();
+			return null;
 		}
 		StreamInterceptor interceptor = new StreamInterceptor(originalStream, streamSetter, maxNumberOfBytesPerThread);
 		streamSetter.accept(interceptor);
-		return Optional.of(interceptor);
+		return interceptor;
 	}
 
 	private StreamInterceptor(PrintStream originalStream, Consumer<PrintStream> unregisterAction,

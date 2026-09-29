@@ -3,9 +3,28 @@
   extends: [
     'github>junit-team/renovate-config',
   ],
+  platformAutomerge: true,
   baseBranchPatterns: [
     'main',
     'docs-site'
+  ],
+  customManagers: [
+    {
+      customType: 'regex',
+      managerFilePatterns: ['/\\.gradle\\.kts$/'],
+      matchStrings: [
+        '// renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+?)(?: versioning=(?<versioning>\\S+))?\\n\\s*\\w+ = "(?<currentValue>[^"]+)"',
+      ],
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: ['/antora-playbook\\.yml$/'],
+      matchStrings: [
+        'url: https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>[^/]+)/',
+      ],
+      datasourceTemplate: 'github-releases',
+      versioningTemplate: 'regex:^(?<major>\\d{4})(?<minor>\\d{2})(?<patch>\\d{2})-(?<build>\\d+)$',
+    },
   ],
   packageRules: [
     {
@@ -36,6 +55,18 @@
         '@antora/pdf-extension',
       ],
       "groupName": "@antora/assembler",
+    },
+    {
+      matchManagers: 'gradle-wrapper',
+      ignoreUnstable: false,
+      allowedVersions: '/^\\d+(\\.\\d+)+(-rc-\\d+)?$/',
+    },
+    {
+      matchDepNames: [
+        'org.graalvm.buildtools.native',
+      ],
+      minimumReleaseAge: '3 days',
+      prCreation: 'not-pending',
     },
   ],
 }

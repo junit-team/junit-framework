@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  workflow_call:
+
+permissions: {}
+
+env:
+  DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 1
+        persist-credentials: false
+    - name: Set up GraalVM 21
+      uses: ./.github/actions/setup-graalvm
+      with:
+        java-version: 21
+    - name: Set up GraalVM 25
+      uses: ./.github/actions/setup-graalvm
+      with:
+        java-version: 25
+    - name: Build
+      uses: ./.github/actions/main-build
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        arguments: >-
+          :platform-tooling-support-tests:graalVmTest
+          :platform-tooling-support-tests:test
+          build
+          jacocoRootReport
+    - name: Upload to Codecov.io
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  Windows:
+    runs-on: windows-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 1
+        persist-credentials: false
+    - name: Build
+      uses: ./.github/actions/main-build
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+  macOS:
+    runs-on: macos-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 1
+        persist-credentials: false
+    - name: Build
+      uses: ./.github/actions/main-build
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+  documentation:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 1
+        persist-credentials: false
+    - name: Install Graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install graphviz
+    - name: Install Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: documentation/.tool-versions
+    - name: Build Documentation
+      uses: ./.github/actions/run-gradle
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        arguments: >-
+          antora
+          -Pantora.downloadNode=false
+          -Dscan.tag.Documentation
+    - name: Upload Antora Site
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: antora-site
+        path: documentation/build/antora-site

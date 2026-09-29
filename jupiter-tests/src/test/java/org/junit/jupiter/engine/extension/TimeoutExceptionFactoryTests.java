@@ -34,20 +34,21 @@ class TimeoutExceptionFactoryTests {
 	@Test
 	@DisplayName("creates exception with method signature and timeout")
 	void createExceptionWithMethodSignatureTimeout() {
-		TimeoutException exception = create(methodSignature, tenMillisDuration);
+		TimeoutException exception = create(methodSignature, tenMillisDuration, false, null);
 
 		assertThat(exception) //
-				.hasMessage("test() timed out after 10 milliseconds") //
+				.hasMessage(
+					"test() timed out after 10 milliseconds (to enable thread dumps, set the 'junit.jupiter.execution.timeout.threaddump.enabled' configuration parameter to 'true')") //
 				.hasNoSuppressedExceptions();
 	}
 
 	@Test
 	@DisplayName("creates exception with method signature, timeout and throwable")
 	void createExceptionWithMethodSignatureTimeoutAndThrowable() {
-		TimeoutException exception = create(methodSignature, tenMillisDuration, suppressedException);
+		TimeoutException exception = create(methodSignature, tenMillisDuration, true, suppressedException);
 
 		assertThat(exception) //
-				.hasMessage("test() timed out after 10 milliseconds") //
+				.hasMessage("test() timed out after 10 milliseconds (see thread dump printed to System.out)") //
 				.hasSuppressedException(suppressedException);
 	}
 
@@ -59,14 +60,14 @@ class TimeoutExceptionFactoryTests {
 		@Test
 		@DisplayName("method signature is null")
 		void methodSignatureIsNull() {
-			assertThatThrownBy(() -> create(null, tenMillisDuration, suppressedException)) //
+			assertThatThrownBy(() -> create(null, tenMillisDuration, false, suppressedException)) //
 					.hasMessage("method signature must not be null");
 		}
 
 		@Test
 		@DisplayName("method timeout duration is null")
 		void timeoutDurationIsnull() {
-			assertThatThrownBy(() -> create(methodSignature, null, suppressedException)) //
+			assertThatThrownBy(() -> create(methodSignature, null, false, suppressedException)) //
 					.hasMessage("timeout duration must not be null");
 		}
 	}

@@ -3,6 +3,7 @@ requires java.base mandated
 requires junit
 requires org.apiguardian.api static
 requires org.jspecify static transitive
+requires org.junit.platform.configuration.api static
 requires org.junit.platform.engine
 provides org.junit.platform.engine.TestEngine with org.junit.vintage.engine.VintageTestEngine
 contains org.junit.vintage.engine

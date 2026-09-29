@@ -13,6 +13,7 @@
 package org.junit.jupiter.api
 
 import org.apiguardian.api.API
+import org.apiguardian.api.API.Status.EXPERIMENTAL
 import org.apiguardian.api.API.Status.MAINTAINED
 import org.apiguardian.api.API.Status.STABLE
 import org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure
@@ -24,6 +25,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind.AT_MOST_ONCE
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
 import kotlin.contracts.contract
+import kotlin.reflect.KClass
 
 /**
  * @see Assertions.fail
@@ -288,6 +290,40 @@ inline fun <reified T : Throwable> assertThrows(executable: () -> Unit): T {
 /**
  * Example usage:
  * ```kotlin
+ * val exception = assertThrows(IllegalArgumentException::class) {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ *
+ * This version of assertThrows is intended to be used in situations where reified Throwable's cannot be used,
+ * i.e. when using a @ParameterizedTest that provides exception classes as values.
+ * @see Assertions.assertThrows
+ */
+@API(status = EXPERIMENTAL, since = "6.2")
+inline fun <T : Throwable> assertThrows(
+    expectedType: KClass<T>,
+    executable: () -> Unit
+): T {
+    // no contract for `executable` because it is expected to throw an exception instead
+    // of being executed completely (see https://youtrack.jetbrains.com/issue/KT-27748)
+    val throwable: Throwable? =
+        try {
+            executable()
+        } catch (caught: Throwable) {
+            caught
+        } as? Throwable
+
+    return Assertions.assertThrows(expectedType.java) {
+        if (throwable != null) {
+            throw throwable
+        }
+    }
+}
+
+/**
+ * Example usage:
+ * ```kotlin
  * val exception = assertThrows<IllegalArgumentException>("Should throw an Exception") {
  *     throw IllegalArgumentException("Talk to a duck")
  * }
@@ -299,6 +335,26 @@ inline fun <reified T : Throwable> assertThrows(
     message: String,
     executable: () -> Unit
 ): T = assertThrows({ message }, executable)
+
+/**
+ * Example usage:
+ * ```kotlin
+ * val exception = assertThrows(IllegalArgumentException::class, "Should throw an Exception") {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ *
+ * This version of assertThrows is intended to be used in situations where reified Throwable's cannot be used,
+ * i.e. when using a @ParameterizedTest that provides exception classes as values.
+ * @see Assertions.assertThrows
+ */
+@API(status = EXPERIMENTAL, since = "6.2")
+inline fun <T : Throwable> assertThrows(
+    expectedType: KClass<T>,
+    message: String,
+    executable: () -> Unit
+): T = assertThrows(expectedType, { message }, executable)
 
 /**
  * Example usage:
@@ -342,6 +398,50 @@ inline fun <reified T : Throwable> assertThrows(
 /**
  * Example usage:
  * ```kotlin
+ * val exception = assertThrows(IllegalArgumentException::class, { "Should throw an Exception" }) {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ *
+ * This version of assertThrows is intended to be used in situations where reified Throwable's cannot be used,
+ * i.e. when using a @ParameterizedTest that provides exception classes as values.
+ * @see Assertions.assertThrows
+ */
+@OptIn(ExperimentalContracts::class)
+@API(status = EXPERIMENTAL, since = "6.2")
+inline fun <T : Throwable> assertThrows(
+    expectedType: KClass<T>,
+    noinline message: () -> String,
+    executable: () -> Unit
+): T {
+    contract {
+        callsInPlace(message, AT_MOST_ONCE)
+        // no contract for `executable` because it is expected to throw an exception instead
+        // of being executed completely (see https://youtrack.jetbrains.com/issue/KT-27748)
+    }
+
+    val throwable: Throwable? =
+        try {
+            executable()
+        } catch (caught: Throwable) {
+            caught
+        } as? Throwable
+
+    return Assertions.assertThrows(
+        expectedType.java,
+        {
+            if (throwable != null) {
+                throw throwable
+            }
+        },
+        message
+    )
+}
+
+/**
+ * Example usage:
+ * ```kotlin
  * val exception = assertThrows<IllegalArgumentException> {
  *     throw IllegalArgumentException("Talk to a duck")
  * }
@@ -369,6 +469,40 @@ inline fun <reified T : Throwable> assertThrowsExactly(executable: () -> Unit): 
 /**
  * Example usage:
  * ```kotlin
+ * val exception = assertThrows(IllegalArgumentException::class) {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ *
+ *  This version of assertThrowsExactly is intended to be used in situations where reified Throwable's cannot be used,
+ *  i.e. when using a @ParameterizedTest that provides exception classes as values.
+ * @see Assertions.assertThrowsExactly
+ */
+@API(status = EXPERIMENTAL, since = "6.2")
+inline fun <T : Throwable> assertThrowsExactly(
+    expectedType: KClass<T>,
+    executable: () -> Unit
+): T {
+    // no contract for `executable` because it is expected to throw an exception instead
+    // of being executed completely (see https://youtrack.jetbrains.com/issue/KT-27748)
+    val throwable: Throwable? =
+        try {
+            executable()
+        } catch (caught: Throwable) {
+            caught
+        } as? Throwable
+
+    return Assertions.assertThrowsExactly(expectedType.java) {
+        if (throwable != null) {
+            throw throwable
+        }
+    }
+}
+
+/**
+ * Example usage:
+ * ```kotlin
  * val exception = assertThrowsExactly<IllegalArgumentException>("Should throw an Exception") {
  *     throw IllegalArgumentException("Talk to a duck")
  * }
@@ -380,6 +514,26 @@ inline fun <reified T : Throwable> assertThrowsExactly(
     message: String,
     executable: () -> Unit
 ): T = assertThrowsExactly({ message }, executable)
+
+/**
+ * Example usage:
+ * ```kotlin
+ * val exception = assertThrowsExactly(IllegalArgumentException::class, "Should throw an Exception") {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ *
+ *  This version of assertThrowsExactly is intended to be used in situations where reified Throwable's cannot be used,
+ *  i.e. when using a @ParameterizedTest that provides exception classes as values.
+ * @see Assertions.assertThrowsExactly
+ */
+@API(status = EXPERIMENTAL, since = "6.2")
+inline fun <T : Throwable> assertThrowsExactly(
+    expectedType: KClass<T>,
+    message: String,
+    executable: () -> Unit
+): T = assertThrowsExactly(expectedType, { message }, executable)
 
 /**
  * Example usage:
@@ -411,6 +565,50 @@ inline fun <reified T : Throwable> assertThrowsExactly(
 
     return Assertions.assertThrowsExactly(
         T::class.java,
+        {
+            if (throwable != null) {
+                throw throwable
+            }
+        },
+        message
+    )
+}
+
+/**
+ * Example usage:
+ * ```kotlin
+ * val exception = assertThrowsExactly(IllegalArgumentException::class, { "Should throw an Exception" }) {
+ *     throw IllegalArgumentException("Talk to a duck")
+ * }
+ * assertEquals("Talk to a duck", exception.message)
+ * ```
+ *
+ *  This version of assertThrowsExactly is intended to be used in situations where reified Throwable's cannot be used,
+ *  i.e. when using a @ParameterizedTest that provides exception classes as values.
+ * @see Assertions.assertThrowsExactly
+ */
+@OptIn(ExperimentalContracts::class)
+@API(status = EXPERIMENTAL, since = "6.2")
+inline fun <T : Throwable> assertThrowsExactly(
+    expectedType: KClass<T>,
+    noinline message: () -> String,
+    executable: () -> Unit
+): T {
+    contract {
+        callsInPlace(message, AT_MOST_ONCE)
+        // no contract for `executable` because it is expected to throw an exception instead
+        // of being executed completely (see https://youtrack.jetbrains.com/issue/KT-27748)
+    }
+
+    val throwable: Throwable? =
+        try {
+            executable()
+        } catch (caught: Throwable) {
+            caught
+        } as? Throwable
+
+    return Assertions.assertThrowsExactly(
+        expectedType.java,
         {
             if (throwable != null) {
                 throw throwable

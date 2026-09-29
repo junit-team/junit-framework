@@ -3423,6 +3423,9 @@ public class Assertions {
 	 * of the calling code. Consequently, execution of the {@code executable} will
 	 * not be preemptively aborted if the timeout is exceeded.
 	 *
+	 * <p>The {@code timeout} must positive and be less than approximately 292
+	 * years (2^63 nanoseconds).
+	 *
 	 * @see #assertTimeout(Duration, Executable, String)
 	 * @see #assertTimeout(Duration, Executable, Supplier)
 	 * @see #assertTimeout(Duration, ThrowingSupplier)
@@ -3441,6 +3444,9 @@ public class Assertions {
 	 * <p>Note: the {@code executable} will be executed in the same thread as that
 	 * of the calling code. Consequently, execution of the {@code executable} will
 	 * not be preemptively aborted if the timeout is exceeded.
+	 *
+	 * <p>The {@code timeout} must positive and be less than approximately 292
+	 * years (2^63 nanoseconds).
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -3462,6 +3468,9 @@ public class Assertions {
 	 * <p>Note: the {@code executable} will be executed in the same thread as that
 	 * of the calling code. Consequently, execution of the {@code executable} will
 	 * not be preemptively aborted if the timeout is exceeded.
+	 *
+	 * <p>The {@code timeout} must positive and be less than approximately 292
+	 * years (2^63 nanoseconds).
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.
@@ -3490,6 +3499,9 @@ public class Assertions {
 	 * of the calling code. Consequently, execution of the {@code supplier} will
 	 * not be preemptively aborted if the timeout is exceeded.
 	 *
+	 * <p>The {@code timeout} must positive and be less than approximately 292
+	 * years (2^63 nanoseconds).
+	 *
 	 * @see #assertTimeout(Duration, Executable)
 	 * @see #assertTimeout(Duration, Executable, String)
 	 * @see #assertTimeout(Duration, Executable, Supplier)
@@ -3510,6 +3522,9 @@ public class Assertions {
 	 * <p>Note: the {@code supplier} will be executed in the same thread as that
 	 * of the calling code. Consequently, execution of the {@code supplier} will
 	 * not be preemptively aborted if the timeout is exceeded.
+	 *
+	 * <p>The {@code timeout} must positive and be less than approximately 292
+	 * years (2^63 nanoseconds).
 	 *
 	 * <p>Fails with the supplied failure {@code message}.
 	 *
@@ -3534,6 +3549,9 @@ public class Assertions {
 	 * <p>Note: the {@code supplier} will be executed in the same thread as that
 	 * of the calling code. Consequently, execution of the {@code supplier} will
 	 * not be preemptively aborted if the timeout is exceeded.
+	 *
+	 * <p>The {@code timeout} must positive and be less than approximately 292
+	 * years (2^63 nanoseconds).
 	 *
 	 * <p>If necessary, the failure message will be retrieved lazily from the
 	 * supplied {@code messageSupplier}.

@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
 import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
@@ -44,8 +43,7 @@ class SuiteTestDescriptorTests {
 	final UniqueId jupiterEngineId = suiteId.append("engine", JupiterEngineDescriptor.ENGINE_ID);
 	final UniqueId testClassId = jupiterEngineId.append(ClassTestDescriptor.SEGMENT_TYPE,
 		SingleTestTestCase.class.getName());
-	final UniqueId methodId = testClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE,
-		"test(%s)".formatted(TestReporter.class.getName()));
+	final UniqueId methodId = testClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "test()");
 
 	final ConfigurationParameters configurationParameters = new EmptyConfigurationParameters();
 	final OutputDirectoryCreator outputDirectoryCreator = OutputDirectoryCreators.dummyOutputDirectoryCreator();

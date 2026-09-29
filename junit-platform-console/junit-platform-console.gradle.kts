@@ -1,5 +1,6 @@
 import junitbuild.extensions.javaModuleName
 import junitbuild.java.UpdateJarAction
+import junitbuild.metadata.buildMetadata
 import net.ltgt.gradle.errorprone.errorprone
 import net.ltgt.gradle.nullaway.nullaway
 
@@ -54,6 +55,7 @@ tasks {
 		}
 		doLast(objects.newInstance(UpdateJarAction::class).apply {
 			javaLauncher = project.javaToolchains.launcherFor(java.toolchain)
+			date = project.buildMetadata.map { it.buildTimestamp }
 			args.addAll(
 				"--file", archiveFile.get().asFile.absolutePath,
 				"--main-class", "org.junit.platform.console.ConsoleLauncher",

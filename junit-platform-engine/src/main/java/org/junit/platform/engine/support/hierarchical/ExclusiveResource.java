@@ -27,6 +27,11 @@ import org.junit.platform.engine.support.hierarchical.Node.ExecutionMode;
  * An exclusive resource identified by a key with a lock mode that is used to
  * synchronize access to shared resources when executing nodes in parallel.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 1.3
  * @see Node#getExecutionMode()
  */

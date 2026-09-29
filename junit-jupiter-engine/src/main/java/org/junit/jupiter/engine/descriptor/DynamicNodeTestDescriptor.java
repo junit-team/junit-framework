@@ -30,18 +30,18 @@ import org.junit.platform.engine.UniqueId;
 abstract class DynamicNodeTestDescriptor extends JupiterTestDescriptor {
 
 	protected final int index;
-	private final Optional<ExecutionMode> executionMode;
+	private final @Nullable ExecutionMode executionMode;
 
 	DynamicNodeTestDescriptor(UniqueId uniqueId, int index, DynamicNode dynamicNode, @Nullable TestSource testSource,
 			JupiterConfiguration configuration) {
 		super(uniqueId, dynamicNode.getDisplayName(), testSource, configuration);
 		this.index = index;
-		this.executionMode = dynamicNode.getExecutionMode().map(JupiterTestDescriptor::toExecutionMode);
+		this.executionMode = dynamicNode.getExecutionMode().map(JupiterTestDescriptor::toExecutionMode).orElse(null);
 	}
 
 	@Override
 	Optional<ExecutionMode> getExplicitExecutionMode() {
-		return executionMode;
+		return Optional.ofNullable(executionMode);
 	}
 
 	@Override

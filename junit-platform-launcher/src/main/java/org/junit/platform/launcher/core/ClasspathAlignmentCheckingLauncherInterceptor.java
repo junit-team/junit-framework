@@ -12,6 +12,7 @@ package org.junit.platform.launcher.core;
 
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.launcher.LauncherInterceptor;
 
@@ -20,7 +21,7 @@ class ClasspathAlignmentCheckingLauncherInterceptor implements LauncherIntercept
 	static final LauncherInterceptor INSTANCE = new ClasspathAlignmentCheckingLauncherInterceptor();
 
 	@Override
-	public <T> T intercept(Invocation<T> invocation) {
+	public <T extends @Nullable Object> T intercept(Invocation<T> invocation) {
 		try {
 			return invocation.proceed();
 		}

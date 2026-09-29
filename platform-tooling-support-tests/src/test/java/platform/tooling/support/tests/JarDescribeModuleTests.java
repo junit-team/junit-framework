@@ -13,7 +13,7 @@ package platform.tooling.support.tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static platform.tooling.support.tests.Projects.getSourceDirectory;
+import static platform.tooling.support.Projects.getSourceDirectory;
 
 import java.lang.module.ModuleFinder;
 import java.nio.file.Files;
@@ -23,9 +23,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.tests.process.OutputFiles;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 
 /**
  * @since 1.3

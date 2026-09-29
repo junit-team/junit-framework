@@ -17,7 +17,6 @@ import static org.junit.jupiter.engine.descriptor.ResourceLockAware.enclosingIns
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -107,7 +106,7 @@ public class NestedClassTestDescriptor extends ClassBasedTestDescriptor {
 		ExtensionRegistry extensionRegistryForOuterInstanceCreation = parentExecutionContext.getExtensionRegistry();
 		TestInstances outerInstances = parentExecutionContext.getTestInstancesProvider().getTestInstances(
 			extensionRegistryForOuterInstanceCreation, context);
-		return instantiateTestClass(Optional.of(outerInstances), registry, extensionContext);
+		return instantiateTestClass(outerInstances, registry, extensionContext);
 	}
 
 	// --- ResourceLockAware ---------------------------------------------------

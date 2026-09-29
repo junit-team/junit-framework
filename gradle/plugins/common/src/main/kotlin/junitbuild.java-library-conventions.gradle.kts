@@ -1,5 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import junitbuild.extensions.isMavenized
 import junitbuild.extensions.isSnapshot
+import junitbuild.metadata.buildMetadata
 
 plugins {
 	`java-library`
@@ -11,10 +13,7 @@ plugins {
 	id("junitbuild.java-errorprone-conventions")
 }
 
-val mavenizedProjects: List<Project> by rootProject.extra
-val buildDate: String by rootProject.extra
-val buildTime: String by rootProject.extra
-val buildRevision: Any by rootProject.extra
+val buildMetadata = project.buildMetadata
 
 val extension = extensions.create<JavaLibraryExtension>("javaLibrary")
 
@@ -22,7 +21,7 @@ java {
 	modularity.inferModulePath = true
 }
 
-if (project in mavenizedProjects) {
+if (project.isMavenized) {
 
 	apply(plugin = "junitbuild.javadoc-conventions")
 	apply(plugin = "junitbuild.publishing-conventions")
@@ -71,20 +70,10 @@ if (project in mavenizedProjects) {
 			}
 		}
 	}
-
-} else {
-	tasks {
-		jar {
-			enabled = false
-		}
-		javadoc {
-			enabled = false
-		}
-	}
 }
 
 tasks.withType<AbstractArchiveTask>().configureEach {
-	isPreserveFileTimestamps = false
+	reproducibleFileTimestamp = buildMetadata.map { it.buildTimestamp.toEpochMilli() }
 	isReproducibleFileOrder = true
 	dirPermissions {
 		unix("rwxr-xr-x")
@@ -129,9 +118,9 @@ tasks.jar {
 				"Created-By" to (buildParameters.manifest.createdBy.orNull
 					?: "${System.getProperty("java.version")} (${System.getProperty("java.vendor")} ${System.getProperty("java.vm.version")})"),
 				"Built-By" to buildParameters.manifest.builtBy.orElse("JUnit Team"),
-				"Build-Date" to buildDate,
-				"Build-Time" to buildTime,
-				"Build-Revision" to buildRevision,
+				"Build-Date" to buildMetadata.map { it.buildDate },
+				"Build-Time" to buildMetadata.map { it.buildTime },
+				"Build-Revision" to buildMetadata.map { it.buildRevision },
 				"Specification-Title" to project.name,
 				"Specification-Version" to (project.version as String).substringBefore('-'),
 				"Specification-Vendor" to "junit.org",

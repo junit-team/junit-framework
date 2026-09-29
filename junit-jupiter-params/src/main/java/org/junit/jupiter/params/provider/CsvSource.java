@@ -59,19 +59,13 @@ import org.junit.jupiter.params.ParameterizedInvocationConstants;
  *
  * <p>In general, CSV records should not contain explicit newlines ({@code \n})
  * unless they are placed within quoted strings. Note that CSV records supplied
- * via {@link #textBlock} will implicitly contain newlines at the end of each
+ * via a <em>text block</em> will implicitly contain newlines at the end of each
  * physical line within the text block. Thus, if a CSV column wraps across a
  * new line in a text block, the column must be a quoted string.
  *
  * <p>Note that {@link #delimiter} (or {@link #delimiterString}),
- * {@link #quoteCharacter}, and {@link #commentCharacter} (when
- * {@link #textBlock} is used) are treated as <em>control characters</em>.
- *
- * <ul>
- *   <li>{@link #delimiter} and {@link #quoteCharacter} must always be distinct.</li>
- *   <li>{@link #commentCharacter} must be distinct from the others only when
- *   {@link #textBlock} is used.</li>
- * </ul>
+ * {@link #quoteCharacter}, and {@link #commentCharacter} are treated as
+ * <em>control characters</em> and must always be distinct.
  *
  * <h2>Inheritance</h2>
  *
@@ -105,10 +99,6 @@ public @interface CsvSource {
 	 * {@link #useHeadersInDisplayName}). Moreover, each specified value must
 	 * not be blank.
 	 *
-	 * <p>If <em>text block</em> syntax is supported by your programming language,
-	 * you may find it more convenient to declare your CSV content via the
-	 * {@link #textBlock} attribute.
-	 *
 	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * {@literal @}ParameterizedTest
@@ -122,12 +112,46 @@ public @interface CsvSource {
 	 *     // ...
 	 * }</pre>
 	 *
+	 * <h4>Text Blocks</h4>
+	 *
+	 * <p>If <em>text block</em> syntax is supported by your programming language,
+	 * you may also declare your CSV content as a textblock. Note that unlike
+	 * {@link #textBlock()} {@code value} does not support comments.
+	 *
+	 * <p>When using text blocks each value corresponds to a CSV document and
+	 * will be split using the specified {@link #delimiter} or
+	 * {@link #delimiterString}. The first record of the first document may
+	 * optionally be used to supply CSV headers (see {@link #useHeadersInDisplayName}).
+	 * Moreover, each specified value must not be blank.
+	 *
+	 * <p>Java's <a href="https://docs.oracle.com/en/java/javase/17/text-blocks/index.html">text block</a>
+	 * feature automatically removes <em>incidental whitespace</em> when the code
+	 * is compiled. However, other JVM languages such as Groovy and Kotlin do not.
+	 * Thus, if you are using a programming language other than Java and your text
+	 * block contains comments or new lines within quoted strings, you will need
+	 * to ensure that there is no leading whitespace within your text block.
+	 *
+	 * <h5>Example</h5>
+	 * <pre class="code">
+	 * {@literal @}ParameterizedTest
+	 * {@literal @}CsvSource(
+	 *     """
+	 *     apple,         1
+	 *     banana,        2
+	 *     'lemon, lime', 0xF1
+	 *     strawberry,    700_000
+	 *     """
+	 * )
+	 * void test(String fruit, int rank) {
+	 *     // ...
+	 * }</pre>
+	 *
 	 * @see #textBlock
 	 */
 	String[] value() default {};
 
 	/**
-	 * The CSV records to use as the source of arguments, supplied as a single
+	 * The CSV document to use as the source of arguments, supplied as a single
 	 * <em>text block</em>; must not be empty.
 	 *
 	 * <p>Defaults to an empty string. You therefore must supply CSV content
@@ -135,7 +159,7 @@ public @interface CsvSource {
 	 *
 	 * <p>Text block syntax is supported by various languages on the JVM
 	 * including Java SE. If text blocks are not supported, you
-	 * should declare your CSV content via the {@link #value} attribute.
+	 * should declare your CSV records via the {@link #value} attribute.
 	 *
 	 * <p>Each record in the text block corresponds to a record in a CSV file and will
 	 * be split using the specified {@link #delimiter} or {@link #delimiterString}.
@@ -200,7 +224,7 @@ public @interface CsvSource {
 	 * <h4>Example</h4>
 	 * <pre class="code">
 	 * {@literal @}ParameterizedTest(name = "[{index}] {arguments}")
-	 * {@literal @}CsvSource(useHeadersInDisplayName = true, textBlock = """
+	 * {@literal @}CsvSource(useHeadersInDisplayName = true, value = """
 	 *     FRUIT,         RANK
 	 *     apple,         1
 	 *     banana,        2
@@ -311,7 +335,7 @@ public @interface CsvSource {
 	boolean ignoreLeadingAndTrailingWhitespace() default true;
 
 	/**
-	 * The character used to denote comments in a {@linkplain #textBlock text block}.
+	 * The character used to denote comments.
 	 *
 	 * <p>Any line that begins with this character will be treated as a comment
 	 * and ignored during parsing. Note that there is one exception to this rule:

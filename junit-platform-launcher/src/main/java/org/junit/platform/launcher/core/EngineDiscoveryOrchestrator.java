@@ -192,6 +192,7 @@ public class EngineDiscoveryOrchestrator {
 		LauncherDiscoveryListener listener = request.getDiscoveryListener();
 		try {
 			listener.engineDiscoveryStarted(uniqueEngineId);
+			EngineIdValidator.validateReservedPrefix(testEngine, uniqueEngineId, issueCollector);
 			TestDescriptor engineRoot = testEngine.discover(request, uniqueEngineId);
 			discoveryResultValidator.validate(testEngine, engineRoot);
 			listener.engineDiscoveryFinished(uniqueEngineId, EngineDiscoveryResult.successful());

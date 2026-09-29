@@ -54,6 +54,19 @@ class KotlinAssertionsDemo {
         assertEquals("/ by zero", exception.message)
     }
 
+    // end::user_guide[]
+    @extensions.DisabledOnOpenJ9
+    // tag::user_guide[]
+    @Test
+    fun `expected exception testing with class parameter`() {
+        val calculator = Calculator()
+        val exception =
+            assertThrows(ArithmeticException::class, "Should throw an exception") {
+                calculator.divide(1, 0)
+            }
+        assertEquals("/ by zero", exception.message)
+    }
+
     @Test
     fun `grouped assertions`() {
         assertAll(

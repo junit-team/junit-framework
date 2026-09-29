@@ -518,6 +518,7 @@ public interface SelectorResolver {
 		 *
 		 * @return {@code true} if this resolution contains matches or selectors
 		 */
+		@SuppressWarnings("ReferenceEquality")
 		public boolean isResolved() {
 			return this != UNRESOLVED;
 		}

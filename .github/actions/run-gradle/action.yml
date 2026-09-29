@@ -15,16 +15,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+    - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
       id: setup-gradle-jdk
       with:
         distribution: temurin
         java-version: 25
         check-latest: true
-    - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+    - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
-    - uses: testlens-app/setup-testlens@9c133d83ab2a89290a72589bbddb6773b9b5e503 # v1.9.0
+    - uses: testlens-app/setup-testlens@d29a2be31512b3aeda3adcef09fbe0d55af90c51 # v1.9.4
       with:
         write-log-files: true
     - shell: bash
@@ -39,21 +39,21 @@ runs:
         "-Dscan.value.GitHub job=${{ github.job }}" \
         javaToolchains \
         ${{ inputs.arguments }} || error_code=$?
-        
-        
+
+
         if [ -n "${{ inputs.broken-by-issue }}" ]; then
           if [ -n "$error_code" ]; then
-            # we expected the build to fail, it failed => pass 
+            # we expected the build to fail, it failed => pass
             exit 0
-          else            
+          else
             # we expected the build to fail, it didn't => fail
             RED='\033[0;31m'
             RESET='\033[0m' # No Color
             echo "${RED}Build was expected to fail, but it passed. Was ${{ inputs.broken-by-issue }} resolved?${RESET}"
-            exit 1            
+            exit 1
           fi
         fi
-        
+
         # exit with the original error code if set
         if [ -n "$error_code" ]; then
           exit "$error_code"
@@ -63,3 +63,4 @@ runs:
       with:
         name: TestLens logs (${{ github.job }} - ${{ job.check_run_id }})
         path: '**/build/**/testlens-logs/**'
+        if-no-files-found: ignore

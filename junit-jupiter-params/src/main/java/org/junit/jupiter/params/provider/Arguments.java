@@ -87,7 +87,8 @@ public interface Arguments {
 	default List<@Nullable Object> toList() {
 		// We could return List<?> here but the unbounded wildcard is painful
 		// to work with.
-		return new ArrayList<>(Arrays.asList(get()));
+		// The explicit type argument is temporary until NullAway's JSpecifyExperimental mode can be enabled.
+		return new ArrayList<@Nullable Object>(Arrays.asList(get()));
 	}
 
 	/**

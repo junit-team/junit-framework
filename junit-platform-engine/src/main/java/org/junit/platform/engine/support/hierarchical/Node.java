@@ -226,7 +226,7 @@ public interface Node<C extends EngineExecutionContext> {
 		private static final SkipResult alwaysExecuteSkipResult = new SkipResult(false, null);
 
 		private final boolean skipped;
-		private final Optional<String> reason;
+		private final @Nullable String reason;
 
 		/**
 		 * Factory for creating <em>skipped</em> results.
@@ -254,7 +254,7 @@ public interface Node<C extends EngineExecutionContext> {
 
 		private SkipResult(boolean skipped, @Nullable String reason) {
 			this.skipped = skipped;
-			this.reason = Optional.ofNullable(reason);
+			this.reason = reason;
 		}
 
 		/**
@@ -271,7 +271,7 @@ public interface Node<C extends EngineExecutionContext> {
 		 * if available.
 		 */
 		public Optional<String> getReason() {
-			return this.reason;
+			return Optional.ofNullable(this.reason);
 		}
 
 		@Override
@@ -279,7 +279,7 @@ public interface Node<C extends EngineExecutionContext> {
 			// @formatter:off
 			return new ToStringBuilder(this)
 					.append("skipped", this.skipped)
-					.append("reason", this.reason.orElse("<unknown>"))
+					.append("reason", this.reason != null ? this.reason : "<unknown>")
 					.toString();
 			// @formatter:on
 		}

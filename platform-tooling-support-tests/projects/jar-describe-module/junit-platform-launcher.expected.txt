@@ -9,6 +9,7 @@ requires jdk.jfr static
 requires org.apiguardian.api static transitive
 requires org.jspecify static transitive
 requires org.junit.platform.commons transitive
+requires org.junit.platform.configuration.api static
 requires org.junit.platform.engine transitive
 uses org.junit.platform.engine.TestEngine
 uses org.junit.platform.launcher.LauncherDiscoveryListener

@@ -11,7 +11,7 @@ You'll find more information about the key here: [KEYS](./KEYS)
 
 | Version | Supported          |
 |---------| ------------------ |
-| 6.0.x   | :white_check_mark: |
+| 6.1.x   | :white_check_mark: |
 | 5.14.x  | :white_check_mark: |
 | < 5.14  | :x:                |
 

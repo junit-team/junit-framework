@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+    tags-ignore:
+      - '**'
+  pull_request:
+  merge_group:
+  schedule:
+    - cron: '33 17 * * 0'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  # Cancels in-progress runs only for pull requests
+  group: ci-group-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  Build:
+    uses: ./.github/workflows/_build.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  Cross-Version:
+    uses: ./.github/workflows/_cross-version.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  Reproducibility:
+    uses: ./.github/workflows/_reproducible-build.yml
+    secrets: inherit
+    permissions:
+      contents: read
+
+  CodeQL:
+    uses: ./.github/workflows/_codeql.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      security-events: write
+
+  zizmor:
+    name: GitHub Actions Security Analysis
+    uses: ./.github/workflows/_zizmor-analysis.yml
+    secrets: inherit
+    permissions:
+      contents: read
+      security-events: write
+
+  Publish:
+    if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework'
+    needs: [ Build ]
+    uses: ./.github/workflows/_publish.yml
+    secrets: inherit
+    permissions:
+      actions: write # to trigger documentation deployment workflow
+      attestations: write # for build provenance attestation
+      id-token: write # for build provenance attestation
+
+  status:
+    name: Status
+    needs: [ Build, Cross-Version, Reproducibility, CodeQL, zizmor, Publish ]
+    if: always()
+    runs-on: ubuntu-slim
+    steps:
+      - name: Determine overall status
+        env:
+          STATUS: ${{ join(needs.*.result, ',') }}
+          FAILURE: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [ "$FAILURE" = "true" ]; then
+            exit 1
+          fi

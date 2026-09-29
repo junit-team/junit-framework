@@ -18,6 +18,15 @@ package org.junit.vintage {
 
 package org.junit.platform {
     [junit-platform-commons] as commons
+    [junit-platform-configuration-api] as configuration_api
+    note top of configuration_api #white
+        junit-jupiter-engine, junit-vintage-engine,
+        and junit-platform-launcher have a compile-
+        time dependency on this artifact. The edges
+        have been omitted from this diagram for the
+        sake of readability.
+    endnote
+    [junit-platform-configuration-processor] as configuration_processor
     [junit-platform-console] as console
     [junit-platform-engine] as engine
     [junit-platform-launcher] as launcher
@@ -67,6 +76,8 @@ jupiter_params ..> jupiter_api
 jupiter_migration_support ..> jupiter_api
 jupiter_migration_support ...> junit4
 
+configuration_api ...> configuration_processor
+
 console ..> launcher
 console ..> reporting
 
@@ -83,6 +94,7 @@ suite ..> suite_engine
 
 suite_engine ..> launcher
 suite_engine ..> suite_api
+suite_engine ..> engine
 
 testkit ....> opentest4j
 testkit ..> launcher

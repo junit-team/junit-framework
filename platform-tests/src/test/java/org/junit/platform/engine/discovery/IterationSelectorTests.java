@@ -33,7 +33,7 @@ import org.junit.platform.engine.DiscoverySelectorIdentifier;
 class IterationSelectorTests {
 
 	@ParameterizedTest
-	@CsvSource(delimiter = '|', textBlock = """
+	@CsvSource(delimiter = '|', value = """
 				1         | 1
 				1,2       | 1 | 2
 				1..3      | 1 | 2 | 3

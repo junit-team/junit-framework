@@ -1,0 +1,5 @@
+org.junit.platform.configuration.api@${version} jar:file:.+/junit-platform-configuration-api-\d.+\.jar..module-info\.class
+exports org.junit.platform.configuration.api
+requires java.base mandated
+requires org.apiguardian.api static transitive
+requires org.jspecify static transitive

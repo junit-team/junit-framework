@@ -21,7 +21,7 @@ tasks.register("generateAntoraResources") {
 	dependsOn("generateAntoraYml")
 }
 
-val generateAntoraPlaybook by tasks.registering(Copy::class) {
+val generateAntoraPlaybook = tasks.register("generateAntoraPlaybook", Copy::class) {
 
 	val gitRepoRoot = providers.exec {
 		commandLine("git", "worktree", "list", "--porcelain", "-z")
@@ -49,9 +49,9 @@ val generateAntoraPlaybook by tasks.registering(Copy::class) {
 
 node {
 	download = buildParameters.antora.downloadNode
-	version = providers.fileContents(layout.projectDirectory.file(".tool-versions")).asText.map {
-		it.substringAfter("nodejs").trim()
-	}
+	// renovate: datasource=node-version depName=node versioning=node
+	version = "24.21.0"
+	workDir = layout.settingsDirectory.dir(".gradle/nodejs")
 }
 
 tasks.npmInstall {
@@ -63,7 +63,10 @@ tasks.register<NpxTask>("antora") {
 	description = "Runs Antora to generate a documentation site described by the playbook file."
 
 	command = "antora"
-	args.addAll("--clean", "--stacktrace", "--fetch", "--log-format=pretty", "--log-level=all")
+	args.addAll("--clean", "--stacktrace", "--log-format=pretty", "--log-level=all")
+	if (!gradle.startParameter.isOffline) {
+		args.add("--fetch")
+	}
 
 	args.add("--to-dir")
 	args.add(siteDir.map { it.asFile.toRelativeString(layout.projectDirectory.asFile) })

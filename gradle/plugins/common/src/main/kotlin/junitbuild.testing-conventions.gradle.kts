@@ -6,6 +6,7 @@ import junitbuild.extensions.dependencyFromLibs
 import junitbuild.extensions.trackOperationSystemAsInput
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.internal.os.OperatingSystem
 import java.io.IOException
@@ -36,7 +37,7 @@ var openTestReportingCliClasspath = configurations.resolvable("openTestReporting
 	}
 }
 
-val generateOpenTestHtmlReport by tasks.registering(JavaExec::class) {
+val generateOpenTestHtmlReport = tasks.register("generateOpenTestHtmlReport", JavaExec::class) {
 	mustRunAfter(tasks.withType<Test>())
 	mainModule.set("org.opentest4j.reporting.cli")
 	modularity.inferModulePath = true
@@ -51,10 +52,8 @@ val generateOpenTestHtmlReport by tasks.registering(JavaExec::class) {
 		outputLocation = layout.buildDirectory.file("reports/open-test-report.html")
 	}
 	if (buildParameters.testing.hideOpenTestReportHtmlGeneratorOutput) {
-		standardOutput = object : OutputStream() {
-			override fun write(b: Int) {
-				// discard output
-			}
+		doFirst {
+			standardOutput = OutputStream.nullOutputStream()
 		}
 	}
 	outputs.cacheIf { true }
@@ -82,6 +81,11 @@ tasks.withType<Test>().configureEach {
 	testLogging {
 		events = setOf(FAILED)
 		exceptionFormat = FULL
+
+		info {
+			events = TestLogEvent.entries.toSet()
+			showStandardStreams = true
+		}
 	}
 	develocity {
 		testRetry {
@@ -108,7 +112,7 @@ tasks.withType<Test>().configureEach {
 
 			// Ensure PTS works when publishing Build Scans to scans.gradle.com
 			this as PredictiveTestSelectionConfigurationInternal
-			server = uri("https://ge.junit.org")
+			server = uri("https://develocity.junit.org")
 
 			mergeCodeCoverage = true
 		}

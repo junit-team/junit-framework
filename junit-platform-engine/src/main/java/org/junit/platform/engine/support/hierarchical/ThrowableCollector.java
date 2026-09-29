@@ -86,6 +86,7 @@ public class ThrowableCollector {
 	 * @see #execute(Executable)
 	 * @see #assertEmpty()
 	 */
+	@SuppressWarnings("ReferenceEquality")
 	private void add(Throwable t) {
 		Preconditions.notNull(t, "Throwable must not be null");
 

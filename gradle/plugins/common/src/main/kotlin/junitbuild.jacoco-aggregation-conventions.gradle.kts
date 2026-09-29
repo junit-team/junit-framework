@@ -3,7 +3,7 @@ plugins {
 	`jacoco-report-aggregation`
 }
 
-val jacocoRootReport by reporting.reports.creating(JacocoCoverageReport::class) {
+val jacocoRootReport = reporting.reports.create("jacocoRootReport", JacocoCoverageReport::class) {
 	testSuiteName = "test"
 }
 
@@ -17,7 +17,7 @@ val classesView = configurations["aggregateCodeCoverageReportResults"].incoming.
 
 tasks {
 	val reportTask = named<JacocoReport>(jacocoRootReport.reportTask.name)
-	val jacocoRootCoverageVerification by registering(JacocoCoverageVerification::class) {
+	val jacocoRootCoverageVerification = register("jacocoRootCoverageVerification", JacocoCoverageVerification::class) {
 		enabled = !buildParameters.junit.develocity.predictiveTestSelection.enabled
 		executionData.from(reportTask.map { it.executionData })
 		classDirectories.from(reportTask.map { it.classDirectories })

@@ -10,6 +10,7 @@
 
 package org.junit.platform.launcher.listeners;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.platform.launcher.LauncherConstants;
 
 class OutputDirTests {
+
+	private final SecureRandom random = new SecureRandom("20260909".getBytes(UTF_8));
 
 	@TempDir
 	Path cwd;
@@ -44,6 +48,20 @@ class OutputDirTests {
 				.hasParent(cwd.resolve("build")) //
 				.extracting(it -> it.getFileName().toString(), as(STRING)) //
 				.matches("junit-\\d+");
+	}
+
+	@Test
+	void getOutputDirExpandsEachPlaceholderIndividuallyAndPreservesLiteralText() {
+		var placeholder = LauncherConstants.OUTPUT_DIR_UNIQUE_NUMBER_PLACEHOLDER;
+		var customDir = cwd.resolve("build").resolve("junit-" + placeholder + "-" + placeholder + "-$literal");
+
+		var outputDir = OutputDir.create(Optional.of(customDir.toAbsolutePath().toString())).toPath();
+
+		assertThat(outputDir).exists() //
+				.hasParent(cwd.resolve("build")) //
+				.extracting(it -> it.getFileName().toString(), as(STRING)) //
+				.matchesSatisfying("junit-(\\d+)-(\\d+)-\\$literal",
+					matcher -> assertThat(matcher.group(1)).isNotEqualTo(matcher.group(2)));
 	}
 
 	@Test
@@ -94,7 +112,7 @@ class OutputDirTests {
 	}
 
 	private void assertOutputDirIsDetected(Path expected) throws IOException {
-		var outputDir = OutputDir.createSafely(Optional.empty(), () -> cwd).toPath();
+		var outputDir = OutputDir.createSafely(Optional.empty(), () -> cwd, random).toPath();
 		assertThat(Files.isSameFile(expected, outputDir)).isTrue();
 		assertThat(outputDir).exists();
 	}

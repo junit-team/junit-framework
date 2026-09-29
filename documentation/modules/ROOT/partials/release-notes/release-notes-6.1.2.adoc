@@ -1,0 +1,31 @@
+[[v6.1.2]]
+== 6.1.2
+
+*Date of Release:* July 12, 2026
+
+*Scope:* Bug fixes and enhancements since 6.1.1
+
+For a complete list of all _closed_ issues and pull requests for this release, consult the
+link:{junit-framework-repo}+/milestone/121?closed=1+[6.1.2] milestone page in the JUnit
+repository on GitHub.
+
+
+[[v6.1.2-junit-platform]]
+=== JUnit Platform
+
+[[v6.1.2-junit-platform-bug-fixes]]
+==== Bug Fixes
+
+* Fix `NoTestsDiscoveredException` for suites containing only dynamic tests
+
+
+[[v6.1.2-junit-jupiter]]
+=== JUnit Jupiter
+
+No changes.
+
+
+[[v6.1.2-junit-vintage]]
+=== JUnit Vintage
+
+No changes.

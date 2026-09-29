@@ -200,7 +200,7 @@ The default build cache server is located in the US.
 If you're in Europe, you can configure the build to use a build cache node located in the EU by adding the following to the `gradle.properties` file in your [Gradle user home](https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home):
 
 ```properties
-junit.develocity.buildCache.server=https://eu-build-cache-ge.junit.org
+junit.develocity.buildCache.server=https://eu-develocity-node.junit.org
 ```
 
 ### Build Parameters

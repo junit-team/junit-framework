@@ -249,7 +249,7 @@ class MethodArgumentsProviderTests {
 	void providesArgumentsUsingExternalFactoryMethodInTypeFromDifferentClassLoader() throws Exception {
 		try (var testClassLoader = TestClassLoader.forClasses(TestCase.class, ExternalFactoryMethods.class)) {
 			var testClass = testClassLoader.loadClass(TestCase.class.getName());
-			var testMethod = ReflectionUtils.findMethod(testClass, "test").get();
+			var testMethod = ReflectionUtils.findMethod(testClass, "test").orElseThrow();
 			var fullyQualifiedMethodName = ExternalFactoryMethods.class.getName() + "#stringsProvider";
 
 			assertThat(testClass.getClassLoader()).isSameAs(testClassLoader);
@@ -257,8 +257,8 @@ class MethodArgumentsProviderTests {
 			var arguments = provideArguments(testClass, false, fullyQualifiedMethodName);
 			assertThat(arguments).containsExactly(array("string1"), array("string2"));
 
-			var factoryMethod = MethodArgumentsProvider.findFactoryMethodByFullyQualifiedName(testClass,
-				Optional.of(testMethod), fullyQualifiedMethodName);
+			var factoryMethod = MethodArgumentsProvider.findFactoryMethodByFullyQualifiedName(testClass, testMethod,
+				fullyQualifiedMethodName);
 			assertThat(factoryMethod).isNotNull();
 			assertThat(factoryMethod.getName()).isEqualTo("stringsProvider");
 			assertThat(factoryMethod.getParameterTypes()).isEmpty();

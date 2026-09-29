@@ -3,29 +3,21 @@ import junitbuild.extensions.requiredVersionFromLibs
 
 plugins {
 	id("com.diffplug.spotless")
+	id("junitbuild.license")
 }
-
-val license: License by rootProject.extra
 
 spotless {
 
-	format("misc") {
-		target("*.gradle.kts", "gradle/plugins/**/*.gradle.kts", "*.gitignore")
-		targetExclude("gradle/plugins/**/build/**")
-		leadingSpacesToTabs()
-		trimTrailingWhitespace()
-		endWithNewline()
-	}
-
-	format("documentation") {
-		target("*.adoc", "*.md", "src/**/*.adoc", "src/**/*.md")
+	format("markdown") {
+		target("*.md", "src/**/*.md")
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
 
 	pluginManager.withPlugin("java") {
 
-		val configDir = rootProject.layout.projectDirectory.dir("gradle/config/eclipse")
+		val license = project.the<License>()
+		val configDir = layout.settingsDirectory.dir("gradle/config/eclipse")
 		val importOrderConfigFile = configDir.file("junit-eclipse.importorder")
 		val javaFormatterConfigFile = configDir.file("junit-eclipse-formatter-settings.xml")
 
@@ -38,7 +30,6 @@ spotless {
 			eclipse(majorMinorVersion).configFile(javaFormatterConfigFile)
 			trimTrailingWhitespace()
 			endWithNewline()
-			removeUnusedImports()
 		}
 
 		format("moduleAndPackageInfo") {
@@ -53,6 +44,7 @@ spotless {
 	}
 
 	pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+		val license = project.the<License>()
 		kotlin {
 			targetExclude("**/src/test/resources/**")
 			ktlint(requiredVersionFromLibs("ktlint"))
@@ -64,6 +56,7 @@ spotless {
 	}
 
 	pluginManager.withPlugin("groovy") {
+		val license = project.the<License>()
 		groovy {
 			licenseHeaderFile(license.headerFile)
 			trimTrailingWhitespace()
@@ -71,16 +64,13 @@ spotless {
 		}
 	}
 
+	yaml {
+		target("*.yaml", "*.yml")
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+
 	// Explicitly configure line endings to avoid Spotless to search for .gitattributes file
 	// see https://github.com/gradle/gradle/issues/25469#issuecomment-3444231151
 	lineEndings = LineEnding.UNIX
-}
-
-tasks {
-	named("spotlessDocumentation") {
-		outputs.doNotCacheIf("negative avoidance savings") { true }
-	}
-	named("spotlessMisc") {
-		outputs.doNotCacheIf("negative avoidance savings") { true }
-	}
 }

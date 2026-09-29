@@ -12,14 +12,14 @@ This repository is the home of JUnit Platform, Jupiter, and Vintage.
 
 [![Support JUnit](https://img.shields.io/badge/%F0%9F%92%9A-Support%20JUnit-brightgreen.svg)](https://junit.org/sponsoring)
 
-* **Gold Sponsors:** [JetBrains](https://jb.gg/junit-logo)
+* **Gold Sponsors:** [JetBrains](https://jb.gg/junit-logo), [Netflix](https://www.netflix.com/)
 * **Silver Sponsors:** [Micromata](https://www.micromata.de), [Quo Card](https://quo-digital.jp)
 * **Bronze Sponsors:** [Premium Minds](https://www.premium-minds.com), [codefortynine](https://codefortynine.com), [Info Support](https://www.infosupport.com), [Code Intelligence](https://www.code-intelligence.com), [Route4Me](https://route4me.com/), [Testiny](https://www.testiny.io/), [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=junit)
 
 ## Latest Releases
 
-- General Availability (GA): [JUnit 6.0.3](https://github.com/junit-team/junit-framework/releases/tag/r6.0.3) (February 15, 2026)
-- Preview (Milestone/Release Candidate): [JUnit 6.1.0-RC1](https://github.com/junit-team/junit-framework/releases/tag/r6.1.0-RC1) (April 25, 2026)
+- General Availability (GA): [JUnit 6.1.3](https://github.com/junit-team/junit-framework/releases/tag/r6.1.3) (August 7, 2026)
+- Preview (Milestone/Release Candidate): N/A
 
 ## Documentation
 
@@ -44,11 +44,10 @@ Ask JUnit-related questions on [StackOverflow] or use the Q&A category on [GitHu
 
 ## Continuous Integration Builds
 
-[![CI](https://github.com/junit-team/junit-framework/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/main.yml) [![Cross-Version](https://github.com/junit-team/junit-framework/actions/workflows/cross-version.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/cross-version.yml)
+[![CI](https://github.com/junit-team/junit-framework/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/junit-team/junit-framework/actions/workflows/ci.yml)
 
-Official CI build server used to perform quick checks on submitted pull requests and for
-build matrices including the latest released OpenJDK and early access builds of the next
-OpenJDK.
+Official CI build that performs quick checks on submitted pull requests and runs
+build matrices for the latest release and early access versions of OpenJDK.
 
 ## Code Coverage
 
@@ -60,13 +59,13 @@ in `build/reports/jacoco/jacocoRootReport/html/index.html`.
 
 ## Develocity
 
-[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.junit.org/scans)
+[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://develocity.junit.org/scans)
 
 JUnit utilizes [Develocity](https://gradle.com/) for [Build Scans](https://scans.gradle.com/),
 [Build Cache](https://docs.gradle.org/current/userguide/build_cache.html), and
 [Predictive Test Selection](https://docs.gradle.com/enterprise/predictive-test-selection/).
 
-The latest Build Scans are available on [ge.junit.org](https://ge.junit.org/). Currently,
+The latest Build Scans are available on [develocity.junit.org](https://develocity.junit.org/). Currently,
 only core team members can publish Build Scans on that server.
 You can, however, publish a Build Scan to [scans.gradle.com](https://scans.gradle.com/) by
 using the `--scan` parameter explicitly.
@@ -105,7 +104,7 @@ of the JUnit Platform, JUnit Jupiter, and JUnit Vintage.
 [Gradle toolchains]: https://docs.gradle.org/current/userguide/toolchains.html
 [Gradle Wrapper]: https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:using_wrapper
 [JaCoCo]: https://www.eclemma.org/jacoco/
-[Javadoc]: https://api.junit.org
+[Javadoc]: https://docs.junit.org/current/api/
 [JDK 25]: https://javaalmanac.io/jdk/25/
 [Release Notes]: https://docs.junit.org/current/release-notes.html
 [Examples]: https://github.com/junit-team/junit-examples

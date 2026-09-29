@@ -704,14 +704,14 @@ class ResolverFacade {
 
 		private ParameterContext toParameterContext(ExtensionContext extensionContext,
 				Optional<ParameterContext> originalParameterContext) {
-			Optional<Object> target = originalParameterContext.flatMap(ParameterContext::getTarget);
-			if (target.isEmpty()) {
-				target = extensionContext.getTestInstance();
+			Object target = originalParameterContext.flatMap(ParameterContext::getTarget).orElse(null);
+			if (target == null) {
+				target = extensionContext.getTestInstance().orElse(null);
 			}
 			return toParameterContext(target);
 		}
 
-		private ParameterContext toParameterContext(Optional<Object> target) {
+		private ParameterContext toParameterContext(@Nullable Object target) {
 			return new ParameterContext() {
 				@Override
 				public java.lang.reflect.Parameter getParameter() {
@@ -725,7 +725,7 @@ class ResolverFacade {
 
 				@Override
 				public Optional<Object> getTarget() {
-					return target;
+					return Optional.ofNullable(target);
 				}
 			};
 		}

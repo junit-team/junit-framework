@@ -1,5 +1,6 @@
 import aQute.bnd.gradle.BundleTaskExtension
 import aQute.bnd.gradle.Resolve
+import junitbuild.metadata.buildMetadata
 
 plugins {
 	`java-library`
@@ -12,11 +13,14 @@ val projectDescription = objects.property<String>().convention(provider { projec
 // metadata into the jar
 tasks.withType<Jar>().named {
 	it == "jar" || it == "shadowJar"
-}.all { // configure tasks eagerly as workaround for https://github.com/bndtools/bnd/issues/5695
+}.configureEach {
 
-	val importAPIGuardian by extra { "org.apiguardian.*;resolution:=\"optional\"" }
-	val importJSpecify by extra { "org.jspecify.*;resolution:=\"optional\"" }
-	val importCommonsLogging by extra { "org.junit.platform.commons.logging;status=INTERNAL" }
+	val importAPIGuardian = "org.apiguardian.*;resolution:=\"optional\""
+		.also { extra["importAPIGuardian"] = it }
+	val importJSpecify = "org.jspecify.*;resolution:=\"optional\""
+		.also { extra["importJSpecify"] = it }
+	val importCommonsLogging = "org.junit.platform.commons.logging;status=INTERNAL"
+		.also { extra["importCommonsLogging"] = it }
 
 	extensions.create<BundleTaskExtension>(BundleTaskExtension.NAME, this).apply {
 		properties.set(projectDescription.map {
@@ -25,7 +29,7 @@ tasks.withType<Jar>().named {
 		// These are bnd instructions necessary for generating OSGi metadata.
 		// We've generalized these so that they are widely applicable limiting
 		// module configurations to special cases.
-		setBnd(
+		setBnd(project.buildMetadata.map {
 			"""
 				# Set the Bundle-SymbolicName to the archiveBaseName.
 				# We don't use the archiveClassifier which Bnd will use
@@ -69,8 +73,10 @@ tasks.withType<Jar>().named {
 				# See https://bnd.bndtools.org/instructions/noimportjava.html
 				# Issue: https://github.com/junit-team/junit-framework/issues/4733
 				-noimportjava: true
+
+				-reproducible: ${it.buildTimestamp.epochSecond}
 			"""
-		)
+		})
 
 		// Do the actual work putting OSGi stuff in the jar.
 		doLast(buildAction())
@@ -80,7 +86,7 @@ tasks.withType<Jar>().named {
 // Bnd's Resolve task uses a properties file for its configuration. This
 // task writes out the properties necessary for it to verify the OSGi
 // metadata.
-val osgiProperties by tasks.registering(WriteProperties::class) {
+val osgiProperties = tasks.register("osgiProperties", WriteProperties::class) {
 	destinationFile = layout.buildDirectory.file("verifyOSGiProperties.bndrun")
 	property("-standalone", true)
 	project.extensions.getByType(JavaLibraryExtension::class).let { javaLibrary ->
@@ -102,7 +108,7 @@ val osgiVerificationClasspath = configurations.resolvable("osgiVerificationClass
 // Bnd's Resolve task is what verifies that a jar can be used in OSGi and
 // that its metadata is valid. If the metadata is invalid this task will
 // fail.
-val verifyOSGi by tasks.registering(Resolve::class) {
+val verifyOSGi = tasks.register("verifyOSGi", Resolve::class) {
 	bndrun = osgiProperties.flatMap { it.destinationFile }
 	outputBndrun = layout.buildDirectory.file("resolvedOSGiProperties.bndrun")
 	isReportOptional = false

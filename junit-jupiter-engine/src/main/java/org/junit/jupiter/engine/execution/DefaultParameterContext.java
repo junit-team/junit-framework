@@ -10,25 +10,22 @@
 
 package org.junit.jupiter.engine.execution;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
-import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ToStringBuilder;
 
 /**
  * @since 5.0
  */
-record DefaultParameterContext(Parameter parameter, int index, Optional<Object> target) implements ParameterContext {
+record DefaultParameterContext(Parameter parameter, int index, @Nullable Object target) implements ParameterContext {
 
 	DefaultParameterContext {
 		Preconditions.condition(index >= 0, "index must be greater than or equal to zero");
 		Preconditions.notNull(parameter, "parameter must not be null");
-		Preconditions.notNull(target, "target must not be null");
 	}
 
 	@Override
@@ -43,22 +40,7 @@ record DefaultParameterContext(Parameter parameter, int index, Optional<Object> 
 
 	@Override
 	public Optional<Object> getTarget() {
-		return this.target;
-	}
-
-	@Override
-	public boolean isAnnotated(Class<? extends Annotation> annotationType) {
-		return AnnotationUtils.isAnnotated(this.parameter, this.index, annotationType);
-	}
-
-	@Override
-	public <A extends Annotation> Optional<A> findAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.parameter, this.index, annotationType);
-	}
-
-	@Override
-	public <A extends Annotation> List<A> findRepeatableAnnotations(Class<A> annotationType) {
-		return AnnotationUtils.findRepeatableAnnotations(this.parameter, this.index, annotationType);
+		return Optional.ofNullable(this.target);
 	}
 
 	@Override

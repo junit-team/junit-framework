@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 import static org.junit.platform.commons.util.StringUtils.containsIsoControlCharacter;
 import static org.junit.platform.commons.util.StringUtils.containsWhitespace;
+import static org.junit.platform.commons.util.StringUtils.defaultToString;
 import static org.junit.platform.commons.util.StringUtils.doesNotContainIsoControlCharacter;
 import static org.junit.platform.commons.util.StringUtils.doesNotContainWhitespace;
 import static org.junit.platform.commons.util.StringUtils.isBlank;
@@ -126,6 +127,11 @@ class StringUtilsTests {
 		assertEquals(" ", replaceWhitespaceCharacters("\f", " "));
 
 		assertPreconditionViolationFor(() -> replaceWhitespaceCharacters("", null));
+	}
+
+	@Test
+	void defaultToStringReturnsNullForNullInput() {
+		assertEquals("null", defaultToString(null));
 	}
 
 	@Test

@@ -9,7 +9,7 @@ repositories {
 	mavenCentral()
 }
 
-val junitVersion: String by project
+val junitVersion = providers.gradleProperty("junitVersion").orNull
 
 dependencies {
 	val junit4Version = System.getProperty("junit4Version", "4.12")

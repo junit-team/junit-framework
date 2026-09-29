@@ -29,6 +29,7 @@ import org.junit.jupiter.engine.config.JupiterConfiguration;
 @API(status = INTERNAL, since = "5.12")
 public interface ExtensionContextSupplier {
 
+	@SuppressWarnings("ReferenceEquality")
 	static ExtensionContextSupplier create(ExtensionContext currentExtensionContext,
 			ExtensionContext legacyExtensionContext, JupiterConfiguration configuration) {
 		if (currentExtensionContext == legacyExtensionContext

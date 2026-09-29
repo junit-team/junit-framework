@@ -1,0 +1,106 @@
+name: Cross-Version
+
+on:
+  workflow_call:
+
+permissions: {}
+
+env:
+  DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+jobs:
+  openjdk:
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk:
+        - version: 26
+          type: ga
+        - version: 27
+          type: ga
+        - version: 28
+          type: ea
+    name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Set up Test JDK
+        uses: ./.github/actions/setup-test-jdk
+      - name: "Set up JDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || 'ea' }})"
+        if: matrix.jdk.type == 'ea'
+        uses: oracle-actions/setup-java@fff43251af9936a0e6a4d5d0946e14f1680e9b6b # v1.5.0
+        with:
+          website: jdk.java.net
+          release: ${{ matrix.jdk.release || matrix.jdk.version }}
+          version: latest
+      - name: "Set up JDK ${{ matrix.jdk.version }} (${{ matrix.jdk.distribution || 'temurin' }})"
+        if: matrix.jdk.type == 'ga'
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: ${{ matrix.jdk.distribution || 'temurin' }}
+          java-version: ${{ matrix.jdk.version }}
+          check-latest: true
+      - name: 'Prepare JDK${{ matrix.jdk.version }} env var'
+        shell: bash
+        run: echo "JDK${{ matrix.jdk.version }}=$JAVA_HOME" >> $GITHUB_ENV
+      - name: Build
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: >-
+            -Ptesting.enableJaCoCo=false
+            -PjavaToolchain.version=${{ matrix.jdk.version }}
+            -Dscan.tag.JDK_${{ matrix.jdk.version }}
+            build
+          broken-by-issue: ${{ matrix.jdk.broken-by-issue }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ always() }}
+        with:
+          name: Open Test Reports (${{ github.job }} ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }}))
+          path: '**/build/reports/open-test-report.html'
+  openj9:
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: [ 25 ]
+    name: "OpenJ9 ${{ matrix.jdk }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Set up Test JDK
+        uses: ./.github/actions/setup-test-jdk
+        with:
+          distribution: semeru
+      - name: 'Set up JDK ${{ matrix.jdk }}'
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: semeru
+          java-version: ${{ matrix.jdk }}
+          check-latest: true
+      - name: 'Prepare JDK${{ matrix.jdk }} env var'
+        shell: bash
+        run: echo "JDK${{ matrix.jdk }}=$JAVA_HOME" >> $GITHUB_ENV
+      - name: Build
+        uses: ./.github/actions/run-gradle
+        with:
+          encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          arguments: >-
+            -Ptesting.enableJaCoCo=false
+            -PjavaToolchain.version=${{ matrix.jdk }}
+            -PjavaToolchain.implementation=j9
+            -Dscan.tag.JDK_${{ matrix.jdk }}
+            -Dscan.tag.OpenJ9
+            build
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ always() }}
+        with:
+          name: Open Test Reports (${{ github.job }})
+          path: '**/build/reports/open-test-report.html'

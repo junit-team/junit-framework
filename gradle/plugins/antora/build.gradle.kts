@@ -5,14 +5,14 @@ plugins {
 }
 
 dependencies {
-	implementation(projects.buildParameters)
+	implementation("junitbuild.base:build-parameters")
 	implementation(libs.plugins.node.markerCoordinates)
 	constraints {
-		implementation("com.fasterxml.jackson.core:jackson-core") {
+		implementation("com.fasterxml.jackson.core:jackson-databind") {
 			version {
-				require("2.21.1")
+				require("2.22.1")
 			}
-			because("Workaround for GHSA-72hv-8253-57qq")
+			because("Workaround for CVE-2026-54515")
 		}
 	}
 	implementation(libs.plugins.spring.antora.markerCoordinates)

@@ -10,6 +10,8 @@
 
 package org.junit.jupiter.params.provider;
 
+import static org.junit.jupiter.params.provider.CsvReaderConfiguration.fromCsvFileSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -52,7 +54,7 @@ class CsvFileArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvFileS
 
 		Charset charset = getCharsetFrom(csvFileSource);
 
-		CsvReaderFactory.validate(csvFileSource);
+		var configuration = fromCsvFileSource(csvFileSource);
 
 		Stream<Source> resources = Arrays.stream(csvFileSource.resources()).map(inputStreamProvider::classpathResource);
 		Stream<Source> files = Arrays.stream(csvFileSource.files()).map(inputStreamProvider::file);
@@ -62,7 +64,7 @@ class CsvFileArgumentsProvider extends AnnotationBasedArgumentsProvider<CsvFileS
 		return Preconditions.notEmpty(sources, "Resources or files must not be empty")
 				.stream()
 				.map(source -> source.open(context))
-				.map(inputStream -> CsvReaderFactory.createReaderFor(csvFileSource, inputStream, charset))
+				.map(inputStream -> CsvReaderFactory.createReaderFor(configuration, inputStream, charset))
 				.flatMap(reader -> toStream(reader, csvFileSource));
 		// @formatter:on
 	}

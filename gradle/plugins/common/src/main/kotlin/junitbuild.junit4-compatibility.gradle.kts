@@ -24,8 +24,8 @@ dependencies {
 }
 
 tasks {
-	val test_4_12 by registering(Test::class) {
-		val test by testing.suites.existing(JvmTestSuite::class)
+	val test_4_12 = register("test_4_12", Test::class) {
+		val test = testing.suites.named<JvmTestSuite>("test")
 		testClassesDirs = files(test.map { it.sources.output.classesDirs })
 		classpath = files(sourceSets.main.map { it.output }) + files(test.map { it.sources.output }) + junit_4_12_classpath.get()
 	}

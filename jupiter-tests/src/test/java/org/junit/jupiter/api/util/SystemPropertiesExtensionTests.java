@@ -41,12 +41,11 @@ import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
 
 @DisplayName("System Properties Extension")
 class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
@@ -64,13 +63,25 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 
 	@AfterAll
 	static void globalTearDown() {
+		// First check if all properties have been restored to their original values
+		assertThat(System.getProperty("A")).isEqualTo("old A");
+		assertThat(System.getProperty("B")).isEqualTo("old B");
+		assertThat(System.getProperty("C")).isEqualTo("old C");
+		assertThat(System.getProperty("clear envvar D")).isNull();
+		assertThat(System.getProperty("clear envvar E")).isNull();
+		assertThat(System.getProperty("clear envvar F")).isNull();
+
+		// Cleanup
 		System.clearProperty("A");
 		System.clearProperty("B");
 		System.clearProperty("C");
 
-		assertThat(System.getProperty("clear prop D")).isNull();
-		assertThat(System.getProperty("clear prop E")).isNull();
-		assertThat(System.getProperty("clear prop F")).isNull();
+		assertThat(System.getProperty("A")).isNull();
+		assertThat(System.getProperty("B")).isNull();
+		assertThat(System.getProperty("C")).isNull();
+		assertThat(System.getProperty("clear envvar D")).isNull();
+		assertThat(System.getProperty("clear envvar E")).isNull();
+		assertThat(System.getProperty("clear envvar F")).isNull();
 	}
 
 	@Nested
@@ -359,47 +370,6 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 			}
 
 		}
-
-		@Nested
-		@DisplayName("RestorableContext Workflow Tests")
-		@MockitoSettings
-		class RestorableContextWorkflowTests {
-
-			@Mock
-			ExtensionContext context;
-
-			@Test
-			@DisplayName("Workflow of RestorableContext")
-			void workflowOfRestorableContexts() {
-				Properties initialState = System.getProperties(); //This is a live reference
-
-				try {
-					Properties returnedFromPrepareToEnter = spe.prepareToEnterRestorableContext(context);
-					Properties postPrepareToEnterSysProps = System.getProperties();
-					spe.prepareToExitRestorableContext(initialState);
-					Properties postPrepareToExitSysProps = System.getProperties();
-
-					assertThat(returnedFromPrepareToEnter) //
-							.withFailMessage(
-								"prepareToEnterRestorableContext should return actual original or deep copy") //
-							.isSameAs(initialState);
-
-					assertThat(returnedFromPrepareToEnter) //
-							.withFailMessage("prepareToEnterRestorableContext should replace the actual Sys Props") //
-							.isNotSameAs(postPrepareToEnterSysProps);
-
-					assertThat(postPrepareToEnterSysProps).isEqualTo(initialState);
-
-					assertThat(postPrepareToExitSysProps).isSameAs(initialState);
-
-				}
-				finally {
-					System.setProperties(initialState); // Ensure complete recovery
-				}
-			}
-
-		}
-
 	}
 
 	@Nested
@@ -429,6 +399,38 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 			void shouldSetSystemPropertyFromEnclosedClassAfterRestore() {
 				assertThat(System.getProperty("A")).isNull();
 				assertThat(System.getProperty("B")).isEqualTo("new B");
+			}
+
+			@Nested
+			@SetSystemProperty(key = "A", value = "1")
+			@DisplayName("a sparsely annotated class structure")
+			class SparselyAnnotatedStructure {
+
+				@Nested
+				@DisplayName("system properties should be restored to values from the parent when they are not provided by this class")
+				class WithoutSystemPropertyAnnotations {
+
+					@Test
+					@SetSystemProperty(key = "A", value = "3")
+					@DisplayName("change the property so that it can be restored")
+					void changePropertyForRestore() {
+						assertThat(System.getProperty("A")).isEqualTo("3");
+					}
+
+					@Test
+					@SetSystemProperty(key = "A", value = "3")
+					@DisplayName("change the property programmatically so that it can be restored")
+					void programmaticallyChangePropertyForRestore() {
+						System.setProperty("B", "changed B");
+					}
+				}
+
+				@AfterAll
+				static void afterAll() {
+					assertThat(System.getProperty("A")).isEqualTo("1");
+					assertThat(System.getProperty("B")).isEqualTo("new B");
+				}
+
 			}
 
 		}
@@ -674,6 +676,83 @@ class SystemPropertiesExtensionTests extends AbstractJupiterTestEngineTests {
 				assertThat(System.getProperty("RestoreAll")).isNull(); // Should be restored
 			}
 
+		}
+
+	}
+
+	@Nested
+	@DisplayName("properties are restored after ParameterizedTest")
+	class RestoreAfterParameterizedTest {
+
+		private static final String PROP_NORMAL_TEST = "Normal Test PROP Variable";
+		private static final String PROP_PARAM_TEST = "ParameterizedTest PROP Variable";
+		private static final String PROP_PARAM_WITH_RESTORE_TEST = "ParameterizedTest With Restore PROP Variable";
+		private static final String PROP_ORIG_VALUE = "Original Value";
+		private static final String PROP_CHANGED_VALUE = "Changed Value";
+
+		// For these tests we need very explicit reporting about which variable is incorrect.
+		private static void assertSystemProperty(String propName, String propValue) {
+			assertThat(System.getProperty(propName)).as(
+				"System property \"" + propName + "\" should be \"" + propValue + "\".").isEqualTo(propValue);
+		}
+
+		private static void assertSystemPropertyIsNull(String propName) {
+			assertThat(System.getProperty(propName)).as(
+				"System property \"" + propName + "\" should be NULL.").isNull();
+		}
+
+		@BeforeAll
+		public static void setup() {
+			System.setProperty(PROP_NORMAL_TEST, PROP_ORIG_VALUE);
+			System.setProperty(PROP_PARAM_TEST, PROP_ORIG_VALUE);
+			System.setProperty(PROP_PARAM_WITH_RESTORE_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_NORMAL_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_WITH_RESTORE_TEST, PROP_ORIG_VALUE);
+		}
+
+		@AfterAll
+		public static void finish() {
+			assertSystemProperty(PROP_NORMAL_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_WITH_RESTORE_TEST, PROP_ORIG_VALUE);
+
+			System.clearProperty(PROP_NORMAL_TEST);
+			System.clearProperty(PROP_PARAM_TEST);
+			System.clearProperty(PROP_PARAM_WITH_RESTORE_TEST);
+
+			assertSystemPropertyIsNull(PROP_NORMAL_TEST);
+			assertSystemPropertyIsNull(PROP_PARAM_TEST);
+			assertSystemPropertyIsNull(PROP_PARAM_WITH_RESTORE_TEST);
+		}
+
+		@Test
+		@SetSystemProperty(key = PROP_NORMAL_TEST, value = PROP_CHANGED_VALUE)
+		void testNormal() {
+			assertSystemProperty(PROP_NORMAL_TEST, PROP_CHANGED_VALUE);
+			assertSystemProperty(PROP_PARAM_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_WITH_RESTORE_TEST, PROP_ORIG_VALUE);
+		}
+
+		@ParameterizedTest(name = "ParameterizedTest WITHOUT RestoreSystemProperties ({0})")
+		@ValueSource(ints = { 1 })
+		@SetSystemProperty(key = PROP_PARAM_TEST, value = PROP_CHANGED_VALUE)
+		void testParamWithoutRestore(int dummy) {
+			assertThat(dummy).isEqualTo(1);
+			assertSystemProperty(PROP_NORMAL_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_TEST, PROP_CHANGED_VALUE);
+			assertSystemProperty(PROP_PARAM_WITH_RESTORE_TEST, PROP_ORIG_VALUE);
+		}
+
+		@ParameterizedTest(name = "ParameterizedTest WITH RestoreSystemProperties ({0})")
+		@ValueSource(ints = { 1 })
+		@SetSystemProperty(key = PROP_PARAM_WITH_RESTORE_TEST, value = PROP_CHANGED_VALUE)
+		@RestoreSystemProperties
+		void testParamWithRestore(int dummy) {
+			assertThat(dummy).isEqualTo(1);
+			assertSystemProperty(PROP_NORMAL_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_TEST, PROP_ORIG_VALUE);
+			assertSystemProperty(PROP_PARAM_WITH_RESTORE_TEST, PROP_CHANGED_VALUE);
 		}
 
 	}

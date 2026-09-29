@@ -16,7 +16,6 @@ import static org.junit.platform.commons.util.CollectionUtils.isConvertibleToStr
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -45,7 +44,7 @@ class MethodArgumentsProvider extends AnnotationBasedArgumentsProvider<MethodSou
 	protected Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context,
 			MethodSource methodSource) {
 		Class<?> testClass = context.getRequiredTestClass();
-		Optional<Method> testMethod = context.getTestMethod();
+		Method testMethod = context.getTestMethod().orElse(null);
 		Object testInstance = context.getTestInstance().orElse(null);
 		String[] methodNames = methodSource.value();
 		// @formatter:off
@@ -58,15 +57,15 @@ class MethodArgumentsProvider extends AnnotationBasedArgumentsProvider<MethodSou
 		// @formatter:on
 	}
 
-	private static Method findFactoryMethod(Class<?> testClass, Optional<Method> testMethod, String factoryMethodName) {
+	private static Method findFactoryMethod(Class<?> testClass, @Nullable Method testMethod, String factoryMethodName) {
 		String originalFactoryMethodName = factoryMethodName;
 
 		// If the user did not provide a factory method name, find a "default" local
 		// factory method with the same name as the parameterized test method.
 		if (StringUtils.isBlank(factoryMethodName)) {
-			Preconditions.condition(testMethod.isPresent(),
+			Preconditions.condition(testMethod != null,
 				"You must specify a method name when using @MethodSource with @ParameterizedClass");
-			factoryMethodName = testMethod.get().getName();
+			factoryMethodName = testMethod.getName();
 			return findFactoryMethodBySimpleName(testClass, testMethod, factoryMethodName);
 		}
 
@@ -107,7 +106,7 @@ class MethodArgumentsProvider extends AnnotationBasedArgumentsProvider<MethodSou
 	}
 
 	// package-private for testing
-	static Method findFactoryMethodByFullyQualifiedName(Class<?> testClass, Optional<Method> testMethod,
+	static Method findFactoryMethodByFullyQualifiedName(Class<?> testClass, @Nullable Method testMethod,
 			String fullyQualifiedMethodName) {
 		String[] methodParts = ReflectionUtils.parseFullyQualifiedMethodName(fullyQualifiedMethodName);
 		String className = methodParts[0];
@@ -146,10 +145,10 @@ class MethodArgumentsProvider extends AnnotationBasedArgumentsProvider<MethodSou
 	 * @throws PreconditionViolationException if the factory method was not found or
 	 * multiple competing factory methods with the same name were found
 	 */
-	private static Method findFactoryMethodBySimpleName(Class<?> clazz, Optional<Method> testMethod,
+	private static Method findFactoryMethodBySimpleName(Class<?> clazz, @Nullable Method testMethod,
 			String factoryMethodName) {
 		Predicate<Method> isCandidate = candidate -> factoryMethodName.equals(candidate.getName())
-				&& !candidate.equals(testMethod.orElse(null));
+				&& !candidate.equals(testMethod);
 		List<Method> candidates = ReflectionUtils.findMethods(clazz, isCandidate);
 
 		List<Method> factoryMethods = candidates.stream().filter(isFactoryMethod).toList();

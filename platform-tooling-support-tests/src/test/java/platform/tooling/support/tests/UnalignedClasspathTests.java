@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 import static platform.tooling.support.ProcessStarters.currentJdkHome;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -27,9 +27,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.tests.process.OutputFiles;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 
 /**
  * @since 1.3

@@ -11,7 +11,7 @@
 package platform.tooling.support.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static platform.tooling.support.tests.Projects.copyToWorkspace;
+import static platform.tooling.support.Projects.copyToWorkspace;
 
 import java.nio.file.Path;
 
@@ -23,9 +23,11 @@ import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessResult;
 import org.opentest4j.TestAbortedException;
 
+import platform.tooling.support.FilePrefix;
 import platform.tooling.support.Helper;
 import platform.tooling.support.MavenRepo;
 import platform.tooling.support.ProcessStarters;
+import platform.tooling.support.Projects;
 
 class VintageMavenIntegrationTests {
 
@@ -41,8 +43,7 @@ class VintageMavenIntegrationTests {
 
 		assertThat(result.exitCode()).isEqualTo(1);
 		assertThat(result.stdOut()) //
-				.contains("TestEngine with ID 'junit-vintage' failed to discover tests") //
-				.contains("Tests run: 0, Failures: 0, Errors: 0, Skipped: 0");
+				.contains("Surefire is not compatible with JUnit 4.11 or older. Project version is 4.11");
 	}
 
 	@ParameterizedTest(name = "{0}", quoteTextArguments = false)

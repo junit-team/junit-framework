@@ -13,9 +13,11 @@ package org.junit.jupiter.api.condition;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.condition.OS.AIX;
+import static org.junit.jupiter.api.condition.OS.DRAGONFLYBSD;
 import static org.junit.jupiter.api.condition.OS.FREEBSD;
 import static org.junit.jupiter.api.condition.OS.LINUX;
 import static org.junit.jupiter.api.condition.OS.MAC;
+import static org.junit.jupiter.api.condition.OS.NETBSD;
 import static org.junit.jupiter.api.condition.OS.OPENBSD;
 import static org.junit.jupiter.api.condition.OS.OTHER;
 import static org.junit.jupiter.api.condition.OS.SOLARIS;
@@ -52,7 +54,7 @@ class EnabledOnOsIntegrationTests {
 	}
 
 	@Test
-	@EnabledOnOs({ AIX, FREEBSD, LINUX, MAC, OPENBSD, WINDOWS, SOLARIS, OTHER })
+	@EnabledOnOs({ AIX, DRAGONFLYBSD, FREEBSD, LINUX, MAC, NETBSD, OPENBSD, WINDOWS, SOLARIS, OTHER })
 	void enabledOnEveryOs() {
 	}
 
@@ -60,6 +62,12 @@ class EnabledOnOsIntegrationTests {
 	@EnabledOnOs(AIX)
 	void aix() {
 		assertTrue(onAix());
+	}
+
+	@Test
+	@EnabledOnOs(DRAGONFLYBSD)
+	void dragonflybsd() {
+		assertTrue(onDragonflybsd());
 	}
 
 	@Test
@@ -93,6 +101,12 @@ class EnabledOnOsIntegrationTests {
 	}
 
 	@Test
+	@EnabledOnOs(NETBSD)
+	void netbsd() {
+		assertTrue(onNetbsd());
+	}
+
+	@Test
 	@EnabledOnOs(WINDOWS)
 	void windows() {
 		assertTrue(onWindows());
@@ -107,7 +121,8 @@ class EnabledOnOsIntegrationTests {
 	@Test
 	@EnabledOnOs(value = OTHER, disabledReason = "Disabled on almost every OS")
 	void other() {
-		assertFalse(onAix() || onFreebsd() || onLinux() || onMac() || onOpenbsd() || onSolaris() || onWindows());
+		assertFalse(onAix() || onDragonflybsd() || onFreebsd() || onLinux() || onMac() || onNetbsd() || onOpenbsd()
+				|| onSolaris() || onWindows());
 	}
 
 	@Test
@@ -168,6 +183,10 @@ class EnabledOnOsIntegrationTests {
 		return OS_NAME.contains("aix");
 	}
 
+	static boolean onDragonflybsd() {
+		return OS_NAME.contains("dragonflybsd");
+	}
+
 	static boolean onArchitecture(String arch) {
 		return ARCH.contains(arch);
 	}
@@ -182,6 +201,10 @@ class EnabledOnOsIntegrationTests {
 
 	static boolean onMac() {
 		return OS_NAME.contains("mac");
+	}
+
+	static boolean onNetbsd() {
+		return OS_NAME.contains("netbsd");
 	}
 
 	static boolean onOpenbsd() {

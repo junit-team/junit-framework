@@ -15,7 +15,3 @@ dependencies {
 	implementation(projects.junitPlatformLauncher)
 	implementation(projects.junitPlatformConsole)
 }
-
-backwardCompatibilityChecks {
-	enabled = false // TODO enable after initial release
-}

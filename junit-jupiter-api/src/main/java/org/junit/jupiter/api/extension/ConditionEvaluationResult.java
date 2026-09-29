@@ -82,11 +82,11 @@ public class ConditionEvaluationResult {
 
 	private final boolean enabled;
 
-	private final Optional<String> reason;
+	private final @Nullable String reason;
 
 	private ConditionEvaluationResult(boolean enabled, @Nullable String reason) {
 		this.enabled = enabled;
-		this.reason = StringUtils.isNotBlank(reason) ? Optional.of(reason.strip()) : Optional.empty();
+		this.reason = StringUtils.isNotBlank(reason) ? reason.strip() : null;
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class ConditionEvaluationResult {
 	 * if available.
 	 */
 	public Optional<String> getReason() {
-		return this.reason;
+		return Optional.ofNullable(this.reason);
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class ConditionEvaluationResult {
 		// @formatter:off
 		return new ToStringBuilder(this)
 				.append("enabled", this.enabled)
-				.append("reason", this.reason.orElse("<unknown>"))
+				.append("reason", reason != null ? reason : "<unknown>")
 				.toString();
 		// @formatter:on
 	}

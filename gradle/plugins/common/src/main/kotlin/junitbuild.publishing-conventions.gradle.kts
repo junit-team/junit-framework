@@ -1,23 +1,48 @@
+import junitbuild.extensions.artifactGroup
 import junitbuild.extensions.isSnapshot
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE
+import junitbuild.publishing.TEMP_MAVEN_REPO_ATTRIBUTE_VALUE
+import junitbuild.release.VerifyBinaryArtifactsAreIdentical
 
 plugins {
 	`maven-publish`
 	signing
 	id("junitbuild.base-conventions")
 	id("junitbuild.build-parameters")
+	id("junitbuild.license")
 }
 
-val jupiterProjects: List<Project> by rootProject
-val platformProjects: List<Project> by rootProject
-val vintageProjects: List<Project> by rootProject
+group = buildParameters.publishing.group.getOrElse(artifactGroup)
 
-group = buildParameters.publishing.group
-	.getOrElse(when (project) {
-		in jupiterProjects -> "org.junit.jupiter"
-		in platformProjects -> "org.junit.platform"
-		in vintageProjects -> "org.junit.vintage"
-		else -> "org.junit"
-	})
+val tempMavenRepoDir = layout.buildDirectory.dir("temp-maven-repo")
+
+val clearTempMavenRepo = tasks.register<Delete>("clearTempMavenRepo") {
+	delete(tempMavenRepoDir)
+}
+
+tasks.withType<PublishToMavenRepository>().named { it.endsWith("ToTempRepository") }.configureEach {
+	dependsOn(clearTempMavenRepo)
+}
+
+configurations.consumable("tempMavenRepoElements") {
+	attributes {
+		attribute(TEMP_MAVEN_REPO_ATTRIBUTE, TEMP_MAVEN_REPO_ATTRIBUTE_VALUE)
+		attribute(Category.CATEGORY_ATTRIBUTE, named(TEMP_MAVEN_REPO_ATTRIBUTE_VALUE))
+	}
+	outgoing.artifact(tempMavenRepoDir) {
+		builtBy("publishAllPublicationsToTempRepository")
+	}
+}
+
+// Verify that this project's freshly built artifacts are byte-for-byte identical
+// to the ones already staged in the remote repository. Gated on the `java`
+// plugin since jar-less projects (e.g. the BOM) publish no artifacts to compare.
+pluginManager.withPlugin("java") {
+	tasks.register<VerifyBinaryArtifactsAreIdentical>("verifyArtifactsInStagingRepositoryAreReproducible") {
+		dependsOn("publishAllPublicationsToTempRepository")
+		localRepoDir = tempMavenRepoDir
+	}
+}
 
 val signArtifacts = buildParameters.publishing.signArtifacts.getOrElse(!(project.version.isSnapshot() || buildParameters.ci))
 
@@ -32,10 +57,22 @@ tasks.withType<Sign>().configureEach {
 }
 
 publishing {
+	repositories {
+		maven {
+			name = "temp"
+			url = uri(tempMavenRepoDir)
+		}
+	}
 	publications {
 		create<MavenPublication>("maven") {
 			version = buildParameters.jitpack.version
-				.map { value -> "(.+)-[0-9a-f]+-\\d+".toRegex().matchEntire(value)!!.groupValues[1] + "-SNAPSHOT" }
+				.map { value ->
+					val pattern = "(.+)-[0-9a-f]+-\\d+".toRegex()
+					val matcher = requireNotNull(pattern.matchEntire(value)) {
+						"Jitpack version does not match expected pattern: $pattern"
+					}
+					matcher.groupValues[1] + "-SNAPSHOT"
+				}
 				.getOrElse(project.version.toString())
 			pom {
 				name.set(provider {
@@ -49,7 +86,7 @@ publishing {
 				}
 				licenses {
 					license {
-						val license: License by rootProject.extra
+						val license = project.the<License>()
 						name = license.name
 						url = license.url.toString()
 					}

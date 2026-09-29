@@ -29,6 +29,11 @@ import org.junit.platform.launcher.TestPlan;
  * Simple {@link TestExecutionListener} that generates a
  * {@linkplain TestExecutionSummary summary} of the test execution.
  *
+ * <h2>Extensibility</h2>
+ *
+ * <p>Although it is technically possible to extend this class, extension is
+ * strongly discouraged.
+ *
  * @since 1.0
  * @see #getSummary()
  */

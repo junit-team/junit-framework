@@ -11,10 +11,11 @@
 package org.junit.platform.engine.support.hierarchical;
 
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.engine.support.hierarchical.ExclusiveResource.GLOBAL_READ_WRITE;
 import static org.junit.platform.engine.support.hierarchical.Node.ExecutionMode.SAME_THREAD;
@@ -66,7 +67,7 @@ import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestEx
  * @see ParallelExecutorServiceType#WORKER_THREAD_POOL
  * @see DefaultParallelExecutionConfigurationStrategy
  */
-@API(status = EXPERIMENTAL, since = "6.1")
+@API(status = MAINTAINED, since = "6.2")
 public final class WorkerThreadPoolHierarchicalTestExecutorService implements HierarchicalTestExecutorService {
 
 	/*
@@ -709,13 +710,13 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 
 		private static final class Entry {
 
-			private static final Comparator<Entry> QUEUE_COMPARATOR = comparing(Entry::level).reversed() //
+			private static final Comparator<Entry> QUEUE_COMPARATOR = comparingInt(Entry::level).reversed() //
 					.thenComparing(Entry::isContainer) // tests before containers
-					.thenComparing(Entry::index) //
+					.thenComparingInt(Entry::index) //
 					.thenComparing(Entry::uniqueId, new SameLengthUniqueIdComparator());
 
 			private static final Comparator<Entry> CHILD_COMPARATOR = comparing(Entry::isContainer).reversed() // containers before tests
-					.thenComparing(Entry::index);
+					.thenComparingInt(Entry::index);
 
 			private final TestTask task;
 			private final CompletableFuture<@Nullable Void> future;
@@ -842,7 +843,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			return new ReacquisitionToken();
 		}
 
-		private class ReacquisitionToken {
+		class ReacquisitionToken {
 
 			private boolean used = false;
 

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  workflow_call:
+
+permissions: {}
+
+env:
+  DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+jobs:
+  artifacts:
+    name: Snapshot Artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write # required for build provenance attestation
+      id-token: write # required for build provenance attestation
+    if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && (startsWith(github.ref, 'refs/heads/releases/') || github.ref == 'refs/heads/main')
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 1
+        persist-credentials: false
+    - name: Publish
+      uses: ./.github/actions/run-gradle
+      env:
+        ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      with:
+        encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        arguments: >-
+          publishAggregationToCentralSnapshots
+          prepareGitHubAttestation
+          -x check
+    - name: Generate build provenance attestations
+      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+      with:
+        subject-path: documentation/build/attestation/*.jar
+
+  Documentation:
+    if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy-docs.yml
+    permissions:
+      actions: write

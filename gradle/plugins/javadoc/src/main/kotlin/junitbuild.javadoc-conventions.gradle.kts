@@ -1,0 +1,103 @@
+import junitbuild.javadoc.JavadocConventionsExtension
+import java.nio.file.Files
+import kotlin.io.path.writeLines
+
+plugins {
+	`java-library`
+}
+
+java {
+	withJavadocJar()
+}
+
+val javadocReference = configurations.dependencyScope("javadocReference")
+
+val extension = JavadocConventionsExtension(project, javadocReference.get(), tasks.javadoc)
+project.extensions.add("javadocConventions", extension)
+
+val javadocClasspath = configurations.resolvable("javadocClasspath") {
+	extendsFrom(configurations.compileClasspath.get())
+	extendsFrom(javadocReference.get())
+}
+
+tasks.javadoc {
+	classpath = javadocClasspath.get()
+	options {
+		memberLevel = JavadocMemberLevel.PROTECTED
+		header = project.name
+		encoding = "UTF-8"
+		locale = "en"
+		(this as StandardJavadocDocletOptions).apply {
+			addBooleanOption("Xdoclint:all,-missing", true)
+			addBooleanOption("html5", true)
+			addBooleanOption("Werror", true)
+			addBooleanOption("-no-fonts", true)
+			addMultilineStringsOption("tag").value = listOf(
+				"apiNote:a:API Note:",
+				"implNote:a:Implementation Note:"
+			)
+			use(true)
+			noTimestamp(true)
+		}
+	}
+
+	val sourceUrl = "https://docs.junit.org/current"
+	val targetUrl = "https://docs.junit.org/${version.toString().replace("-SNAPSHOT", "")}"
+	doLast {
+		destinationDir!!.walkTopDown()
+			.forEach { file ->
+				if (file.extension == "html") {
+					val content = file.readText()
+					if (content.contains(sourceUrl)) {
+						val updatedContent = content.replace(sourceUrl, targetUrl)
+						file.writeText(updatedContent)
+					}
+				} else if (file.name == "stylesheet.css") {
+					// Remove invalid import of `dejavu.css` due to `javadoc --no-fonts`
+					val filteredLines = file.readLines()
+						.filter { !it.startsWith("@import url('fonts/") }
+					file.toPath().writeLines(filteredLines)
+				}
+			}
+	}
+}
+
+tasks.named<Jar>("javadocJar").configure {
+	from(tasks.javadoc.map { File(it.destinationDir, "element-list") }) {
+		// For compatibility with older tools, e.g. NetBeans 11
+		rename { "package-list" }
+	}
+}
+
+val extractJavadocSinceValues = tasks.register("extractJavadocSinceValues") {
+	val sourceFiles = files(sourceSets.main.get().allJava.elements)
+	inputs.files(sourceFiles).withPathSensitivity(PathSensitivity.NONE)
+
+	val outputFile = layout.buildDirectory.file("docs/javadoc-since-values.txt")
+	outputs.file(outputFile)
+
+	outputs.cacheIf { true }
+
+	doFirst {
+		val regex = "\\s+(?:\\*|///) @since ([0-9.]+).*".toRegex()
+		val values = sourceFiles.files.asSequence()
+			.flatMap { file -> file.readLines().asSequence() }
+			.mapNotNull(regex::matchEntire)
+			.map { result -> result.groupValues[1] }
+			.sorted()
+			.distinct()
+		with(outputFile.get().asFile.toPath()) {
+			Files.createDirectories(parent)
+			writeLines(values)
+		}
+	}
+}
+
+configurations.consumable("javadocSinceValues") {
+	attributes {
+		attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, named("javadoc-since-values"))
+	}
+	outgoing {
+		artifact(extractJavadocSinceValues)
+	}
+}

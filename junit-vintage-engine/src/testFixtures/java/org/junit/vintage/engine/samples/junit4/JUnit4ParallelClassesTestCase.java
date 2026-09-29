@@ -10,11 +10,9 @@
 
 package org.junit.vintage.engine.samples.junit4;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,7 +27,7 @@ public class JUnit4ParallelClassesTestCase {
 	public static class AbstractBlockingTestCase {
 
 		public static final Set<String> threadNames = ConcurrentHashMap.newKeySet();
-		public static CountDownLatch countDownLatch;
+		public static CyclicBarrier cyclicBarrier;
 
 		@Rule
 		public final TestWatcher testWatcher = new TestWatcher() {
@@ -41,19 +39,9 @@ public class JUnit4ParallelClassesTestCase {
 
 		@Test
 		public void test() throws Exception {
-			countDownAndBlock(countDownLatch);
+			cyclicBarrier.await();
 		}
 
-		@SuppressWarnings("ResultOfMethodCallIgnored")
-		private static void countDownAndBlock(CountDownLatch countDownLatch) throws InterruptedException {
-			countDownLatch.countDown();
-			countDownLatch.await(estimateSimulatedTestDurationInMilliseconds(), MILLISECONDS);
-		}
-
-		private static long estimateSimulatedTestDurationInMilliseconds() {
-			var runningInCi = Boolean.parseBoolean(System.getenv("CI"));
-			return runningInCi ? 1000 : 100;
-		}
 	}
 
 	public static class FirstClassTestCase extends AbstractBlockingTestCase {

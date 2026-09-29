@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
@@ -36,7 +37,7 @@ class DefaultLauncherSession implements LauncherSession {
 
 	private static final LauncherInterceptor NOOP_INTERCEPTOR = new LauncherInterceptor() {
 		@Override
-		public <T> T intercept(Invocation<T> invocation) {
+		public <T extends @Nullable Object> T intercept(Invocation<T> invocation) {
 			return invocation.proceed();
 		}
 
@@ -52,6 +53,7 @@ class DefaultLauncherSession implements LauncherSession {
 	private final LauncherSessionListener listener;
 	private final DelegatingLauncher launcher;
 
+	@SuppressWarnings("ReferenceEquality")
 	DefaultLauncherSession(List<LauncherInterceptor> interceptors, //
 			Supplier<LauncherSessionListener> listenerSupplier, //
 			Function<NamespacedHierarchicalStore<Namespace>, Launcher> launcherFactory //
@@ -81,6 +83,7 @@ class DefaultLauncherSession implements LauncherSession {
 	}
 
 	@Override
+	@SuppressWarnings("ReferenceEquality")
 	public void close() {
 		if (launcher.delegate != ClosedLauncher.INSTANCE) {
 			launcher.delegate = ClosedLauncher.INSTANCE;
@@ -151,7 +154,7 @@ class DefaultLauncherSession implements LauncherSession {
 					}
 
 					@Override
-					public <T> T intercept(Invocation<T> invocation) {
+					public <T extends @Nullable Object> T intercept(Invocation<T> invocation) {
 						return a.intercept(() -> b.intercept(invocation));
 					}
 				});

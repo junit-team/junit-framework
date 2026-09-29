@@ -16,7 +16,6 @@ import static org.junit.jupiter.engine.descriptor.DisplayNameUtils.createDisplay
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -93,7 +92,7 @@ public class ClassTestDescriptor extends ClassBasedTestDescriptor {
 	protected TestInstances instantiateTestClass(JupiterEngineExecutionContext parentExecutionContext,
 			ExtensionContextSupplier extensionContext, ExtensionRegistry registry,
 			JupiterEngineExecutionContext context) {
-		return instantiateTestClass(Optional.empty(), registry, extensionContext);
+		return instantiateTestClass(null, registry, extensionContext);
 	}
 
 	// --- ResourceLockAware ---------------------------------------------------

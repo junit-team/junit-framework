@@ -34,8 +34,8 @@ by the JUnit Team may use the `junit-` prefix for their `TestEngine` IDs.
 
 * If any third-party `TestEngine` claims to be `junit-jupiter` or `junit-vintage`, an
   exception will be thrown, immediately halting execution of the JUnit Platform.
-* If any third-party `TestEngine` uses the `junit-` prefix for its ID, a warning message
-  will be logged. Later releases of the JUnit Platform will throw an exception for such
+* If any third-party `TestEngine` uses the `junit-` prefix for its ID, a discovery issue
+  will be created. Later releases of the JUnit Platform will throw an exception for such
   violations.
 ====
 
@@ -128,6 +128,8 @@ compatibility with build tools and IDEs:
   report already started `TestDescriptors` as aborted in case they have not been executed
   completely. If a `TestEngine` supports cancellation, it should clean up any resources
   that it has created just like if execution had finished regularly.
+* A `TestEngine` _may_ xref:advanced-topics/configuration-parameter-documentation.adoc[document its configuration parameters]
+  in `META-INF/junit-platform-configuration-metadata.json`.
 
 [[discovery-issues]]
 == Reporting Discovery Issues

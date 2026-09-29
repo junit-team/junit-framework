@@ -70,7 +70,7 @@ class UsingTheLauncherDemo {
 
 		try (LauncherSession session = LauncherFactory.openSession()) {
 			Launcher launcher = session.getLauncher();
-			// Register one ore more listeners of your choice.
+			// Register one or more listeners of your choice.
 			launcher.registerTestExecutionListeners(listener);
 			// Discover tests and build a test plan.
 			TestPlan testPlan = launcher.discover(discoveryRequest);

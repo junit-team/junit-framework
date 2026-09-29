@@ -16,6 +16,8 @@ eclipse {
 	jdt {
 		sourceCompatibility = JavaVersion.VERSION_25
 		targetCompatibility = JavaVersion.VERSION_25
+		// Disable deprecation warning for now (will probably have to removed for Gradle 10)
+		@Suppress("DEPRECATION")
 		file {
 			// Set properties for org.eclipse.jdt.core.prefs
 			withProperties {

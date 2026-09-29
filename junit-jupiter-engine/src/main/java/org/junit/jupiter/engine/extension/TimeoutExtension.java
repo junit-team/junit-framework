@@ -10,10 +10,12 @@
 
 package org.junit.jupiter.engine.extension;
 
-import static org.junit.jupiter.api.Timeout.ThreadMode.SAME_THREAD;
+import static org.junit.jupiter.api.Timeout.DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT;
+import static org.junit.jupiter.api.extension.PreInterruptCallback.THREAD_DUMP_ENABLED_PROPERTY_NAME;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -25,7 +27,6 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.junit.jupiter.engine.extension.TimeoutInvocationFactory.TimeoutInvocationParameters;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -183,19 +184,35 @@ class TimeoutExtension implements BeforeAllCallback, BeforeEachCallback, Invocat
 			return invocation;
 		}
 
-		ThreadMode threadMode = resolveTimeoutThreadMode(extensionContext, timeoutConfiguration);
-		return new TimeoutInvocationFactory(extensionContext.getRoot().getStore(NAMESPACE)).create(threadMode,
-			new TimeoutInvocationParameters<>(invocation, timeout, () -> describe(invocationContext, extensionContext),
-				PreInterruptCallbackInvocationFactory.create((ExtensionContextInternal) extensionContext)));
+		var threadMode = resolveTimeoutThreadMode(extensionContext, timeoutConfiguration);
+		return new TimeoutInvocationFactory(extensionContext.getRoot().getStore(NAMESPACE)) //
+				.create(threadMode, createParameters(invocation, invocationContext, extensionContext, timeout));
+	}
+
+	private <T extends @Nullable Object> TimeoutInvocationParameters<T> createParameters(Invocation<T> invocation,
+			ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext,
+			TimeoutDuration timeout) {
+		var threadDumpEnabled = extensionContext.getConfigurationParameter(THREAD_DUMP_ENABLED_PROPERTY_NAME) //
+				.map(Boolean::parseBoolean) //
+				.orElse(false);
+		return new TimeoutInvocationParameters<>(invocation, timeout,
+			() -> describe(invocationContext, extensionContext),
+			PreInterruptCallbackInvocationFactory.create((ExtensionContextInternal) extensionContext),
+			threadDumpEnabled);
 	}
 
 	private ThreadMode resolveTimeoutThreadMode(ExtensionContext extensionContext,
 			TimeoutConfiguration timeoutConfiguration) {
 		ThreadMode annotationThreadMode = getAnnotationThreadMode(extensionContext);
 		if (annotationThreadMode == null || annotationThreadMode == ThreadMode.INFERRED) {
-			return timeoutConfiguration.getDefaultTimeoutThreadMode().orElse(SAME_THREAD);
+			return timeoutConfiguration.getDefaultTimeoutThreadMode() //
+					.orElseGet(TimeoutExtension::getDefaultThreadMode);
 		}
 		return annotationThreadMode;
+	}
+
+	private static ThreadMode getDefaultThreadMode() {
+		return ThreadMode.valueOf(DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT.toUpperCase(Locale.ROOT));
 	}
 
 	private @Nullable ThreadMode getAnnotationThreadMode(ExtensionContext extensionContext) {
