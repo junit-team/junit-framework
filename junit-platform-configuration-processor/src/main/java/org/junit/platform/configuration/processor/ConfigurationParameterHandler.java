@@ -10,21 +10,14 @@
 
 package org.junit.platform.configuration.processor;
 
-import static java.lang.Boolean.TRUE;
-import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirrorList;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationValue;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -70,9 +63,7 @@ final class ConfigurationParameterHandler {
 				element);
 			return;
 		}
-		var annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
-		var field = new ConfigurationParameterAnnotatedField(variableElement, elementUtils, enclosingTypeElement,
-			annotationMirror, typeUtils);
+		var field = new ConfigurationParameterAnnotatedField(enclosingTypeElement, variableElement);
 		if (!field.isStatic() || !field.isFinal() || !(field.constantValue() instanceof String name)) {
 			messager.printMessage(ERROR,
 				"@ConfigurationParameter annotated field must be static, final, and have constant string value",
@@ -96,15 +87,15 @@ final class ConfigurationParameterHandler {
 	}
 
 	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {
-		var value = field.typeTypeElement();
+		var value = field.type();
 		if (value == null) {
 			return defaultType;
 		}
-		return value.getQualifiedName().toString();
+		return value.toString();
 	}
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
-		var docComment = field.docComment();
+		var docComment = elementUtils.getDocComment(field.element());
 		return extractFirstParagraph(docComment);
 	}
 
@@ -174,7 +165,7 @@ final class ConfigurationParameterHandler {
 	}
 
 	private @Nullable Deprecation processDeprecation(ConfigurationParameterAnnotatedField field) {
-		var values = field.deprecationValues();
+		var values = field.deprecation();
 		if (!values.isEmpty()) {
 			return new Deprecation(values.get("reason"), values.get("replacement"), values.get("since"));
 		}
@@ -189,13 +180,13 @@ final class ConfigurationParameterHandler {
 			@Nullable Default defaults) {
 
 		// Derive hint from ConfigurationParameter.hints value
-		var hints = field.hints();
-		if (hints != null) {
-			return new Hint(name, processHintValues(hints), processPermitsAdditionalValues(hints));
+		if (!field.hints().isEmpty()) {
+			return new Hint(name, processHintValues(field), processPermitsAdditionalValues(field));
 		}
 		// Derive hint from ConfigurationParameter.type value
-		var typeElement = field.typeTypeElement();
-		if (typeElement != null) {
+		var type = field.type();
+		if (type != null) {
+			var typeElement = (TypeElement) typeUtils.asElement(type);
 			var typeElementKind = typeElement.getKind();
 			var typeElementName = typeElement.getQualifiedName().toString();
 			if (typeElementKind == ElementKind.ENUM) {
@@ -219,7 +210,7 @@ final class ConfigurationParameterHandler {
 			return new Hint(name, processBooleanValues(), null);
 		}
 		if (Class.class.getName().equals(defaultType)) {
-			if (typeElement == null) {
+			if (type == null) {
 				messager.printMessage(ERROR,
 					"@ConfigurationParameter must declare a type when the default value is a classValue",
 					field.element());
@@ -230,22 +221,17 @@ final class ConfigurationParameterHandler {
 		return null;
 	}
 
-	private @Nullable List<ValueProvider> processPermitsAdditionalValues(AnnotationMirror hints) {
-		var permitsAdditionalValues = getAnnotationValue(hints, "permitsAdditionalValues");
-		if (permitsAdditionalValues == null || !TRUE.equals(permitsAdditionalValues.getValue())) {
+	private @Nullable List<ValueProvider> processPermitsAdditionalValues(ConfigurationParameterAnnotatedField field) {
+		var permitsAdditionalValues = field.hintsPermitsAdditionalValues();
+		if (!permitsAdditionalValues) {
 			return null;
 		}
 		return List.of(new ValueProvider("any", null));
 	}
 
-	private List<ValueHint> processHintValues(AnnotationMirror hints) {
-		var hintValues = getAnnotationMirrorList(hints, "value");
-		if (hintValues == null) {
-			return Collections.emptyList();
-		}
-		return hintValues.stream() //
-				.map(AnnotationMirrorUtil::getStringValuesMap) //
-				.filter(map -> map.get("value") != null) //
+	private List<ValueHint> processHintValues(ConfigurationParameterAnnotatedField field) {
+		return field.hintsValue().stream() //
+				.filter(map -> map.containsKey("value")) //
 				.map(map -> new ValueHint(map.get("value"), map.get("description"))) //
 				.toList();
 	}

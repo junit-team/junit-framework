@@ -47,6 +47,7 @@ import org.junit.platform.configuration.testcases.NonStatic;
 import org.junit.platform.configuration.testcases.NonString;
 import org.junit.platform.configuration.testcases.TypeAbstractClass;
 import org.junit.platform.configuration.testcases.TypeAbstractClassWithDefaultClass;
+import org.junit.platform.configuration.testcases.TypeBoolean;
 import org.junit.platform.configuration.testcases.TypeClass;
 import org.junit.platform.configuration.testcases.TypeEnum;
 import org.junit.platform.configuration.testcases.TypeEnumWithDocumentedEnumValues;
@@ -269,6 +270,34 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					          "since": "2.0.0"
 					        }
 					    }
+					  ]
+					}""");
+		}
+
+		@Test
+		void booleanType() {
+			compiler.compileWithoutError(TypeBoolean.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "type": "java.lang.Boolean",
+						  "sourceType": "org.junit.platform.configuration.testcases.TypeBoolean"
+						}
+					  ],
+					  "hints": [
+						{
+						  "name": "org.example.property",
+						  "values": [
+							{
+							  "value": true
+							},
+							{
+							  "value": false
+							}
+						  ]
+						}
 					  ]
 					}""");
 		}
