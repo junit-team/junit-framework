@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static platform.tooling.support.Projects.copyToWorkspace;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -118,4 +119,61 @@ class JUnitStartTests {
 		assertTrue(result.stdOut().contains("multiplication()"), result.stdOut());
 	}
 
+	@Test
+	@EnabledOnJre(JRE.JAVA_25)
+	void junitWithCustomModulePath(@FilePrefix("junit-run-module") OutputFiles outputFiles) throws Exception {
+		var compilation = ProcessStarters.javaCommand("javac") //
+				.workingDir(workspace) //
+				.addArguments("-d", "compilation") //
+				.addArguments("--module-path", "lib") //
+				.addArguments("--module-source-path", "m=modular") //
+				.addArguments("--module", "m") //
+				.redirectOutput(outputFiles) //
+				.startAndWait();
+		assertEquals(0, compilation.exitCode());
+		// as user/boot modules of the `java` launcher process
+		{
+			var execution = ProcessStarters.java() //
+					.workingDir(workspace) //
+					.addArguments("--module-path", "lib" + File.pathSeparator + "compilation") //
+					.addArguments("--add-modules", "ALL-MODULE-PATH") //
+					.addArguments("--module", "org.junit.platform.console") //
+					.addArguments("discover") // no need to "execute"
+					.addArguments("--scan-modules") //
+					.redirectOutput(outputFiles) //
+					.startAndWait();
+			assertEquals(0, execution.exitCode());
+			assertTrue(execution.stdOut().contains("multiplication()"), execution.stdOut());
+		}
+		// --scan-modules
+		{
+			var execution = ProcessStarters.java() //
+					.workingDir(workspace) //
+					.addArguments("--module-path", "lib") //
+					.addArguments("--add-modules", "ALL-MODULE-PATH") //
+					.addArguments("--module", "org.junit.platform.console") //
+					.addArguments("discover") // no need to "execute"
+					.addArguments("--class-path", "compilation") //
+					.addArguments("--scan-modules") //
+					.redirectOutput(outputFiles) //
+					.startAndWait();
+			assertEquals(0, execution.exitCode());
+			assertTrue(execution.stdOut().contains("multiplication()"), execution.stdOut());
+		}
+		// --select-module m
+		{
+			var execution = ProcessStarters.java() //
+					.workingDir(workspace) //
+					.addArguments("--module-path", "lib") //
+					.addArguments("--add-modules", "ALL-MODULE-PATH") //
+					.addArguments("--module", "org.junit.platform.console") //
+					.addArguments("discover") // no need to "execute"
+					.addArguments("--class-path", "compilation") //
+					.addArguments("--select-module", "m") //
+					.redirectOutput(outputFiles) //
+					.startAndWait();
+			assertEquals(0, execution.exitCode());
+			assertTrue(execution.stdOut().contains("multiplication()"), execution.stdOut());
+		}
+	}
 }
