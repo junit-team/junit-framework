@@ -58,6 +58,9 @@ public class ModuleUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(ModuleUtils.class);
 
+	// TODO Hack!
+	public static ModuleLayer LAYER = ModuleLayer.boot();
+
 	/**
 	 * Find all non-system boot modules names.
 	 *
@@ -107,7 +110,7 @@ public class ModuleUtils {
 				.map(ResolvedModule::reference)
 				.collect(toSet());
 		// @formatter:on
-		return scan(moduleReferences, filter, ModuleUtils.class.getClassLoader());
+		return scan(moduleReferences, filter, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
 	/**
@@ -152,7 +155,7 @@ public class ModuleUtils {
 				.map(ResolvedModule::reference)
 				.collect(toSet());
 		// @formatter:on
-		return scan(moduleReferences, filter, ModuleUtils.class.getClassLoader());
+		return scan(moduleReferences, filter, ClassLoaderUtils.getDefaultClassLoader());
 	}
 
 	/**
@@ -181,7 +184,7 @@ public class ModuleUtils {
 	 */
 	private static Stream<ResolvedModule> streamResolvedModules(Predicate<String> moduleNamePredicate) {
 		Module module = ModuleUtils.class.getModule();
-		ModuleLayer layer = module.getLayer();
+		ModuleLayer layer = LAYER;
 		if (layer == null) {
 			logger.config(() -> ModuleUtils.class + " is a member of " + module
 					+ " - using boot layer returned by ModuleLayer.boot() as fall-back.");
