@@ -23,7 +23,7 @@ import org.apiguardian.api.API;
  * This annotation should be used to facilitate the automated
  * generation of documentation.
  */
-@API(status = API.Status.EXPERIMENTAL)
+@API(status = API.Status.EXPERIMENTAL, since = "6.2")
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)
 public @interface ConfigurationParameter {
