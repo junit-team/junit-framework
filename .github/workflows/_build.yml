@@ -18,15 +18,15 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Set up GraalVM 21
-      uses: ./.github/actions/setup-graalvm
+      uses: $/.github/actions/setup-graalvm
       with:
         java-version: 21
     - name: Set up GraalVM 25
-      uses: ./.github/actions/setup-graalvm
+      uses: $/.github/actions/setup-graalvm
       with:
         java-version: 25
     - name: Build
-      uses: ./.github/actions/main-build
+      uses: $/.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: >-
@@ -48,7 +48,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Build
-      uses: ./.github/actions/main-build
+      uses: $/.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
@@ -61,7 +61,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Build
-      uses: ./.github/actions/main-build
+      uses: $/.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
@@ -83,7 +83,7 @@ jobs:
       with:
         node-version-file: documentation/.tool-versions
     - name: Build Documentation
-      uses: ./.github/actions/run-gradle
+      uses: $/.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: >-

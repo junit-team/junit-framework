@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 
-@API(status = API.Status.EXPERIMENTAL)
+@API(status = API.Status.EXPERIMENTAL, since = "6.2")
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
 public final class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	public static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";

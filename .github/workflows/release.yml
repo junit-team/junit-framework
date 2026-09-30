@@ -44,7 +44,7 @@ jobs:
           ref: "refs/tags/${{ env.RELEASE_TAG }}"
           persist-credentials: false
       - name: Prepare Maven Central user token
-        uses: ./.github/actions/maven-central-user-token
+        uses: $/.github/actions/maven-central-user-token
         with:
           username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -59,7 +59,7 @@ jobs:
           echo "createdBy=$(jq --raw-output .Created_By /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "sourceDateEpoch=$(jq --raw-output .Build_Date /tmp/manifest.json) $(jq --raw-output .Build_Time /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
       - name: Verify artifacts
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-
@@ -137,7 +137,7 @@ jobs:
           persist-credentials: false
       - name: Release staging repository
         if: ${{ inputs.dryRun == false && inputs.skipPublishStep == false }}
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

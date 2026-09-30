@@ -38,6 +38,17 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	}
 
 	@Test
+	void dynamicStrategyThrowsExceptionWhenMaxPoolSizeFactorIsLessThanOne() {
+		when(configParams.get("dynamic.max-pool-size-factor")).thenReturn(Optional.of("0.5"));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasMessage(
+			"Factor '0.5' specified via configuration parameter 'dynamic.max-pool-size-factor' must be greater than or equal to 1");
+	}
+
+	@Test
 	void fixedStrategyCreatesValidConfiguration() {
 		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("42"));
 

@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Set up Test JDK
-        uses: ./.github/actions/setup-test-jdk
+        uses: $/.github/actions/setup-test-jdk
       - name: "Set up JDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || 'ea' }})"
         if: matrix.jdk.type == 'ea'
         uses: oracle-actions/setup-java@fff43251af9936a0e6a4d5d0946e14f1680e9b6b # v1.5.0
@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: echo "JDK${{ matrix.jdk.version }}=$JAVA_HOME" >> $GITHUB_ENV
       - name: Build
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-
@@ -76,7 +76,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Set up Test JDK
-        uses: ./.github/actions/setup-test-jdk
+        uses: $/.github/actions/setup-test-jdk
         with:
           distribution: semeru
       - name: 'Set up JDK ${{ matrix.jdk }}'
@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: echo "JDK${{ matrix.jdk }}=$JAVA_HOME" >> $GITHUB_ENV
       - name: Build
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-

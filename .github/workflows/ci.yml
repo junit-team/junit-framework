@@ -23,25 +23,25 @@ concurrency:
 jobs:
 
   Build:
-    uses: ./.github/workflows/_build.yml
+    uses: $/.github/workflows/_build.yml
     secrets: inherit
     permissions:
       contents: read
 
   Cross-Version:
-    uses: ./.github/workflows/_cross-version.yml
+    uses: $/.github/workflows/_cross-version.yml
     secrets: inherit
     permissions:
       contents: read
 
   Reproducibility:
-    uses: ./.github/workflows/_reproducible-build.yml
+    uses: $/.github/workflows/_reproducible-build.yml
     secrets: inherit
     permissions:
       contents: read
 
   CodeQL:
-    uses: ./.github/workflows/_codeql.yml
+    uses: $/.github/workflows/_codeql.yml
     secrets: inherit
     permissions:
       contents: read
@@ -49,7 +49,7 @@ jobs:
 
   zizmor:
     name: GitHub Actions Security Analysis
-    uses: ./.github/workflows/_zizmor-analysis.yml
+    uses: $/.github/workflows/_zizmor-analysis.yml
     secrets: inherit
     permissions:
       contents: read
@@ -58,7 +58,7 @@ jobs:
   Publish:
     if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework'
     needs: [ Build ]
-    uses: ./.github/workflows/_publish.yml
+    uses: $/.github/workflows/_publish.yml
     secrets: inherit
     permissions:
       actions: write # to trigger documentation deployment workflow

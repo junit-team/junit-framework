@@ -27,9 +27,9 @@ dependencies {
 		}
 		roseauDependencies("com.fasterxml.jackson.core:jackson-databind") {
 			version {
-				require("2.22.1")
+				require("2.22.3")
 			}
-			because("Workaround for CVE-2026-54515")
+			because("Workaround for CVE-2026-68497")
 		}
 		roseauDependencies("org.codehaus.plexus:plexus-utils") {
 			version {

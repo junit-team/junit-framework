@@ -18,7 +18,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Restore Gradle cache and display toolchains
-      uses: ./.github/actions/run-gradle
+      uses: $/.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: --quiet
