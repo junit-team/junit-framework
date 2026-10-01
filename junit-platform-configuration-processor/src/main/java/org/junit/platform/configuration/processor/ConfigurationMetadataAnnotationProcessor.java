@@ -31,6 +31,11 @@ import org.jspecify.annotations.Nullable;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 
+/**
+ * Annotation processor for {@link org.junit.platform.configuration.api.ConfigurationParameter}.
+ *
+ * @since 6.2
+ */
 @API(status = API.Status.EXPERIMENTAL, since = "6.2")
 @SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
 public final class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {

@@ -33,6 +33,8 @@ public interface PreInterruptCallback extends Extension {
 
 	/**
 	 * Default value for {@value #THREAD_DUMP_ENABLED_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	boolean THREAD_DUMP_ENABLED_DEFAULT = false;

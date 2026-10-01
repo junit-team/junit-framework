@@ -48,6 +48,8 @@ public final class Constants {
 
 	/**
 	 * Default value for {@value #EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final String INCLUDE_ALL_EXTENSIONS_PATTERN = "*";

@@ -302,6 +302,8 @@ public @interface Timeout {
 
 	/**
 	 * Default value for {@value #TIMEOUT_MODE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	String TIMEOUT_MODE_DEFAULT = "enabled";
@@ -324,6 +326,8 @@ public @interface Timeout {
 
 	/**
 	 * Default value for {@value #DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "same_thread";
@@ -400,6 +404,11 @@ public @interface Timeout {
 		SEPARATE_THREAD,
 	}
 
+	/**
+	 * {@code TimeoutMode} is used to define whether timeouts should be applied to tests.
+	 *
+	 * @since 6.2
+	 */
 	@API(status = STABLE, since = "6.2")
 	enum TimeoutMode {
 		/**

@@ -109,6 +109,8 @@ public @interface TestInstance {
 
 		/**
 		 * Default value for {@value #DEFAULT_LIFECYCLE_PROPERTY_NAME} is {@value}.
+		 *
+		 * @since 6.2
 		 */
 		@API(status = MAINTAINED, since = "6.2")
 		public static final String DEFAULT_LIFECYCLE_PATTERN_DEFAULT = "per_method";

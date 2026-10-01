@@ -22,6 +22,8 @@ import org.apiguardian.api.API;
  * <p>
  * This annotation should be used to facilitate the automated
  * generation of documentation.
+ *
+ * @since 6.2
  */
 @API(status = API.Status.EXPERIMENTAL, since = "6.2")
 @Retention(RetentionPolicy.SOURCE)
