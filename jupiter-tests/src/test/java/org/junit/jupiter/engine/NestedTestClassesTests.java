@@ -312,7 +312,7 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 	}
 
 	@Test
-	void nestedTestsWithSameNameAreCorrectlyDiscoveredAndExecuted() throws Exception {
+	void nestedTestClassesWithSameNameAreCorrectlyDiscoveredAndExecuted() throws Exception {
 		var request = defaultRequest() //
 				.selectors(selectClass(TestCaseWithSameNameNesting.class)) //
 				.build();
