@@ -43,13 +43,13 @@ public class LauncherStoreFacade {
 		return getStoreAdapter(this.sessionLevelStore, namespace);
 	}
 
-	public NamespaceAwareStore getStoreAdapter(NamespacedHierarchicalStore<Namespace> valuesStore,
+	public static NamespaceAwareStore getStoreAdapter(NamespacedHierarchicalStore<Namespace> valuesStore,
 			ExtensionContext.Namespace namespace) {
 		Preconditions.notNull(namespace, "Namespace must not be null");
 		return new NamespaceAwareStore(valuesStore, convert(namespace));
 	}
 
-	private Namespace convert(ExtensionContext.Namespace namespace) {
+	private static Namespace convert(ExtensionContext.Namespace namespace) {
 		return namespace.equals(ExtensionContext.Namespace.GLOBAL) //
 				? Namespace.GLOBAL //
 				: Namespace.create(namespace.getParts());

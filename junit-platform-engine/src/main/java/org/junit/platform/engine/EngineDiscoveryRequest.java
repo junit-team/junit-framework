@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
  * {@code EngineDiscoveryRequest} provides a {@link TestEngine} access to the
@@ -111,6 +113,11 @@ public interface EngineDiscoveryRequest {
 	default OutputDirectoryCreator getOutputDirectoryCreator() {
 		throw new JUnitException(
 			"OutputDirectoryCreator not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.");
+	}
+
+	default NamespacedHierarchicalStore<Namespace> getSessionStore() {
+		throw new JUnitException(
+				"Session store not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.");
 	}
 
 }

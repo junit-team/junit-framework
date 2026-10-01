@@ -35,6 +35,8 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.EngineDiscoveryResult;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -55,17 +57,19 @@ public class EngineDiscoveryOrchestrator {
 	private final Iterable<TestEngine> testEngines;
 	private final Collection<PostDiscoveryFilter> postDiscoveryFilters;
 	private final ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry;
+	private NamespacedHierarchicalStore<Namespace> sessionLevelStore;
 
 	public EngineDiscoveryOrchestrator(Iterable<TestEngine> testEngines,
 			Collection<PostDiscoveryFilter> postDiscoveryFilters) {
-		this(testEngines, postDiscoveryFilters, ListenerRegistry.forLauncherDiscoveryListeners());
+		this(testEngines, postDiscoveryFilters, ListenerRegistry.forLauncherDiscoveryListeners(), new NamespacedHierarchicalStore<>(null));
 	}
 
 	EngineDiscoveryOrchestrator(Iterable<TestEngine> testEngines, Collection<PostDiscoveryFilter> postDiscoveryFilters,
-			ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry) {
+			ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry, NamespacedHierarchicalStore<Namespace> sessionLevelStore) {
 		this.testEngines = EngineIdValidator.validate(testEngines);
 		this.postDiscoveryFilters = postDiscoveryFilters;
 		this.launcherDiscoveryListenerRegistry = launcherDiscoveryListenerRegistry;
+		this.sessionLevelStore = sessionLevelStore;
 	}
 
 	/**
@@ -111,6 +115,11 @@ public class EngineDiscoveryOrchestrator {
 			@Override
 			public LauncherDiscoveryListener getDiscoveryListener() {
 				return listener;
+			}
+
+			@Override
+			public NamespacedHierarchicalStore<Namespace> getSessionStore() {
+				return sessionLevelStore;
 			}
 		};
 		listener.launcherDiscoveryStarted(request);

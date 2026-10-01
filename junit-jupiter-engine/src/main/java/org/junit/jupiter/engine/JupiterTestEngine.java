@@ -70,7 +70,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 			DiscoveryIssueReporter.forwarding(discoveryRequest.getDiscoveryListener(), uniqueId));
 		JupiterConfiguration configuration = new CachingJupiterConfiguration(
 			new DefaultJupiterConfiguration(discoveryRequest.getConfigurationParameters(),
-				discoveryRequest.getOutputDirectoryCreator(), issueReporter));
+				discoveryRequest.getOutputDirectoryCreator(), issueReporter, discoveryRequest.getSessionStore()));
 		JupiterEngineDescriptor engineDescriptor = new JupiterEngineDescriptor(uniqueId, configuration);
 		DiscoverySelectorResolver.resolveSelectors(discoveryRequest, engineDescriptor, issueReporter);
 		return engineDescriptor;
