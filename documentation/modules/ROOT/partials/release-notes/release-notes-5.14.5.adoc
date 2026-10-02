@@ -39,7 +39,9 @@ repository on GitHub.
 [[v5.14.5-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* `@Nested` test classes declared in super classes of a test class are now discovered and
+  executed even if they have the same simple name as a `@Nested` class declared in the
+  test class.
 
 [[v5.14.5-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

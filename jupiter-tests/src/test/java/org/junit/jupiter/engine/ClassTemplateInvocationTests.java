@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -91,6 +92,7 @@ import org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -116,11 +118,13 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			TwoInvocationsTestCase.class.getName());
 		var invocationId1 = classTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var invocation1MethodAId = invocationId1.append(TestMethodTestDescriptor.SEGMENT_TYPE, "a()");
-		var invocation1NestedClassId = invocationId1.append(NestedClassTestDescriptor.SEGMENT_TYPE, "NestedTestCase");
+		var invocation1NestedClassId = invocationId1.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE,
+			"NestedTestCase");
 		var invocation1NestedMethodBId = invocation1NestedClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
 		var invocationId2 = classTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var invocation2MethodAId = invocationId2.append(TestMethodTestDescriptor.SEGMENT_TYPE, "a()");
-		var invocation2NestedClassId = invocationId2.append(NestedClassTestDescriptor.SEGMENT_TYPE, "NestedTestCase");
+		var invocation2NestedClassId = invocationId2.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE,
+			"NestedTestCase");
 		var invocation2NestedMethodBId = invocation2NestedClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
 
 		var results = executeTests(DiscoverySelectors.parse(
@@ -216,7 +220,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		var classId = engineId.append(ClassTestDescriptor.SEGMENT_TYPE,
 			NestedClassTemplateWithTwoInvocationsTestCase.class.getName());
 		var methodAId = classId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "a()");
-		var nestedClassTemplateId = classId.append(ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE,
+		var nestedClassTemplateId = classId.append(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE,
 			"NestedTestCase");
 		var invocationId1 = nestedClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var invocation1NestedMethodBId = invocationId1.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
@@ -263,7 +267,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		var engineId = UniqueId.forEngine(JupiterEngineDescriptor.ENGINE_ID);
 		var classId = engineId.append(ClassTestDescriptor.SEGMENT_TYPE,
 			NestedClassTemplateWithTwoInvocationsTestCase.class.getName());
-		var nestedClassTemplateId = classId.append(ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE,
+		var nestedClassTemplateId = classId.append(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE,
 			"NestedTestCase");
 		var invocationId1 = nestedClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var invocation1NestedMethodBId = invocationId1.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
@@ -306,7 +310,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 
 		var outerInvocation1Id = outerClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var outerInvocation1NestedClassTemplateId = outerInvocation1Id.append(
-			ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
+			ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
 		var outerInvocation1InnerInvocation1Id = outerInvocation1NestedClassTemplateId.append(
 			ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var outerInvocation1InnerInvocation1NestedMethodId = outerInvocation1InnerInvocation1Id.append(
@@ -318,7 +322,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 
 		var outerInvocation2Id = outerClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var outerInvocation2NestedClassTemplateId = outerInvocation2Id.append(
-			ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
+			ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
 		var outerInvocation2InnerInvocation1Id = outerInvocation2NestedClassTemplateId.append(
 			ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var outerInvocation2InnerInvocation1NestedMethodId = outerInvocation2InnerInvocation1Id.append(
@@ -623,7 +627,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			TwoInvocationsTestCase.class.getName());
 		var invocationId2 = classTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var methodAId = invocationId2.append(TestMethodTestDescriptor.SEGMENT_TYPE, "a()");
-		var nestedClassId = invocationId2.append(NestedClassTestDescriptor.SEGMENT_TYPE, "NestedTestCase");
+		var nestedClassId = invocationId2.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE, "NestedTestCase");
 		var nestedMethodBId = nestedClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
 
 		var results = executeTests(selectUniqueId(invocationId2));
@@ -656,7 +660,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			TwoInvocationsTestCase.class.getName());
 		var invocationId2 = classTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var methodAId = invocationId2.append(TestMethodTestDescriptor.SEGMENT_TYPE, "a()");
-		var nestedClassId = invocationId2.append(NestedClassTestDescriptor.SEGMENT_TYPE, "NestedTestCase");
+		var nestedClassId = invocationId2.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE, "NestedTestCase");
 		var nestedMethodBId = nestedClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
 
 		var results = executeTests(selectIteration(selectClass(TwoInvocationsTestCase.class), 1));
@@ -730,7 +734,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		var classTemplateId = engineId.append(ClassTemplateTestDescriptor.STANDALONE_CLASS_SEGMENT_TYPE,
 			TwoInvocationsTestCase.class.getName());
 		var invocationId2 = classTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
-		var nestedClassId = invocationId2.append(NestedClassTestDescriptor.SEGMENT_TYPE, "NestedTestCase");
+		var nestedClassId = invocationId2.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE, "NestedTestCase");
 		var nestedMethodBId = nestedClassId.append(TestMethodTestDescriptor.SEGMENT_TYPE, "b()");
 
 		var results = executeTests(selectUniqueId(nestedMethodBId));
@@ -760,7 +764,7 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			TwoTimesTwoInvocationsWithMultipleMethodsTestCase.class.getName());
 		var outerInvocation2Id = outerClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var outerInvocation2NestedClassTemplateId = outerInvocation2Id.append(
-			ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
+			ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
 		var outerInvocation2InnerInvocation2Id = outerInvocation2NestedClassTemplateId.append(
 			ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var outerInvocation2InnerInvocation2NestedMethodId = outerInvocation2InnerInvocation2Id.append(
@@ -800,14 +804,14 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 			TwoTimesTwoInvocationsTestCase.class.getName());
 		var outerInvocation1Id = outerClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#1");
 		var outerInvocation1NestedClassTemplateId = outerInvocation1Id.append(
-			ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
+			ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
 		var outerInvocation1InnerInvocation2Id = outerInvocation1NestedClassTemplateId.append(
 			ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var outerInvocation1InnerInvocation2NestedMethodId = outerInvocation1InnerInvocation2Id.append(
 			TestMethodTestDescriptor.SEGMENT_TYPE, "test()");
 		var outerInvocation2Id = outerClassTemplateId.append(ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var outerInvocation2NestedClassTemplateId = outerInvocation2Id.append(
-			ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
+			ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase");
 		var outerInvocation2InnerInvocation2Id = outerInvocation2NestedClassTemplateId.append(
 			ClassTemplateInvocationTestDescriptor.SEGMENT_TYPE, "#2");
 		var outerInvocation2InnerInvocation2NestedMethodId = outerInvocation2InnerInvocation2Id.append(
@@ -1023,6 +1027,27 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		results.containerEvents().assertStatistics(stats -> stats.started(4).succeeded(4));
 	}
 
+	@Test
+	void nestedClassTemplateIsInherited() {
+		var engineDescriptor = discoverTestsWithoutIssues(
+			defaultRequest().selectors(selectClass(NestedInheritedClassTemplateTestCase.class)).build());
+		assertThat(engineDescriptor.getDescendants()) //
+				.extracting(TestDescriptor::getUniqueId) //
+				.extracting(UniqueId::getLastSegment) //
+				.extracting(UniqueId.Segment::getType, UniqueId.Segment::getValue).contains(
+					tuple(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "NestedTestCase"), //
+					tuple(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE, "$"), //
+					tuple(ClassTemplateTestDescriptor.FULLY_QUALIFIED_NESTED_CLASS_SEGMENT_TYPE,
+						NestedClassTemplateWithTagOnEnclosingClassTestCase.NestedTestCase.class.getName()));
+		assertAll(engineDescriptor.getDescendants().stream() //
+				.map(TestDescriptor::getUniqueId) //
+				.map(uniqueId -> () -> discoverTestsWithoutIssues(
+					defaultRequest().selectors(selectUniqueId(uniqueId)).build())));
+
+		var results = executeTestsForClass(NestedInheritedClassTemplateTestCase.class);
+		results.testEvents().assertStatistics(stats -> stats.started(3 * 2).succeeded(3 * 2));
+	}
+
 	// -------------------------------------------------------------------
 
 	private static Stream<String> allReportEntryValues(EngineExecutionResults results) {
@@ -1226,6 +1251,26 @@ public class ClassTemplateInvocationTests extends AbstractJupiterTestEngineTests
 		@ValueSource(ints = { 1, 2 })
 		void test(int i) {
 			assertNotEquals(0, i);
+		}
+	}
+
+	static class NestedInheritedClassTemplateTestCase extends NestedClassTemplateWithTagOnEnclosingClassTestCase {
+		@Nested
+		@ClassTemplate
+		@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
+		class NestedTestCase {
+			@Test
+			void test() {
+			}
+		}
+
+		@Nested
+		@ClassTemplate
+		@ExtendWith(TwoInvocationsClassTemplateInvocationContextProvider.class)
+		class $ {
+			@Test
+			void test() {
+			}
 		}
 	}
 
