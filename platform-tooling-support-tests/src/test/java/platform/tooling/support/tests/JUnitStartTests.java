@@ -165,11 +165,11 @@ class JUnitStartTests {
 			var execution = ProcessStarters.java() //
 					.workingDir(workspace) //
 					.addArguments("--module-path", "lib") //
-					.addArguments("--add-modules", "ALL-MODULE-PATH") //
+					.addArguments("--add-modules", "org.junit.start") //
 					.addArguments("--module", "org.junit.platform.console") //
 					.addArguments("discover") // no need to "execute"
 					.addArguments("--class-path", "compilation") //
-					.addArguments("--select-module", "m") //
+					.addArguments("--select-module", "m") // "requires org.junit.start"
 					.redirectOutput(outputFiles) //
 					.startAndWait();
 			assertEquals(0, execution.exitCode());

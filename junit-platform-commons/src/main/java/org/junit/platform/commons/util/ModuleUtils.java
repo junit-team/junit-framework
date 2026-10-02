@@ -12,13 +12,11 @@ package org.junit.platform.commons.util;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.isEqual;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.io.IOException;
 import java.lang.module.Configuration;
-import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReader;
 import java.lang.module.ModuleReference;
 import java.lang.module.ResolvedModule;
@@ -26,7 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,26 +54,6 @@ import org.junit.platform.commons.support.scanning.ClassFilter;
 public class ModuleUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(ModuleUtils.class);
-
-	// TODO Hack!
-	public static ModuleLayer LAYER = ModuleLayer.boot();
-
-	/**
-	 * Find all non-system boot modules names.
-	 *
-	 * @return a set of all such module names; never {@code null} but
-	 * potentially empty
-	 */
-	public static Set<String> findAllNonSystemBootModuleNames() {
-		// @formatter:off
-		Set<String> systemModules = ModuleFinder.ofSystem().findAll().stream()
-				.map(reference -> reference.descriptor().name())
-				.collect(toSet());
-		return streamResolvedModules(name -> !systemModules.contains(name))
-				.map(ResolvedModule::name)
-				.collect(toCollection(LinkedHashSet::new));
-		// @formatter:on
-	}
 
 	public static Optional<String> getModuleName(Class<?> type) {
 		Preconditions.notNull(type, "Class type must not be null");
@@ -184,7 +161,7 @@ public class ModuleUtils {
 	 */
 	private static Stream<ResolvedModule> streamResolvedModules(Predicate<String> moduleNamePredicate) {
 		Module module = ModuleUtils.class.getModule();
-		ModuleLayer layer = LAYER;
+		ModuleLayer layer = module.getLayer();
 		if (layer == null) {
 			logger.config(() -> ModuleUtils.class + " is a member of " + module
 					+ " - using boot layer returned by ModuleLayer.boot() as fall-back.");

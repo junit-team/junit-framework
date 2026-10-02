@@ -30,13 +30,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.ClassLoaderUtils;
-import org.junit.platform.commons.util.ModuleUtils;
 import org.junit.platform.console.options.Details;
 import org.junit.platform.console.options.TestConsoleOutputOptions;
 import org.junit.platform.console.options.TestDiscoveryOptions;
@@ -179,10 +178,9 @@ public class ConsoleTestExecutor {
 		if (!additionalClasspathEntries.isEmpty()) {
 			URL[] urls = additionalClasspathEntries.stream().map(this::toURL).toArray(URL[]::new);
 			ClassLoader parentClassLoader = ClassLoaderUtils.getDefaultClassLoader();
-			ClassLoader classLoader = isModularTesting() //
-					? createModularClassLoader(urls, parentClassLoader) //
-					: URLClassLoader.newInstance(urls, parentClassLoader);
-			return new CustomClassLoader(classLoader);
+			return isModularTesting() //
+					? createModularCustomClassLoader(urls, parentClassLoader) //
+					: new CustomClassLoader(URLClassLoader.newInstance(urls, parentClassLoader));
 		}
 		return null;
 	}
@@ -191,36 +189,37 @@ public class ConsoleTestExecutor {
 		return discoveryOptions.isScanModulepath() || !discoveryOptions.getSelectedModules().isEmpty();
 	}
 
-	private ClassLoader createModularClassLoader(URL[] urls, ClassLoader parentClassLoader) {
-		Path[] entries = new Path[urls.length];
-		for (int i = 0; i < urls.length; i++) {
-			URL url = urls[i];
-			try {
-				entries[i] = Path.of(url.toURI());
-			}
-			catch (URISyntaxException exception) {
-				throw new JUnitException("URL represents no path: " + url, exception);
-			}
-		}
-		ModuleFinder moduleFinder = ModuleFinder.of(entries);
-		Set<String> moduleNames = discoveryOptions.isScanModulepath() //
+	private CustomClassLoader createModularCustomClassLoader(URL[] urls, ClassLoader parentClassLoader) {
+		Path[] paths = Stream.of(urls).map(this::toPath).toArray(Path[]::new);
+		ModuleFinder moduleFinder = ModuleFinder.of(paths);
+		List<String> moduleNames = discoveryOptions.isScanModulepath() //
 				? moduleFinder.findAll().stream() //
 						.map(ModuleReference::descriptor) //
 						.map(ModuleDescriptor::name) //
-						.collect(Collectors.toSet()) //
+						.sorted() //
+						.toList() //
 				: discoveryOptions.getSelectedModules().stream() //
 						.map(ModuleSelector::getModuleName) //
-						.collect(Collectors.toSet());
+						.sorted() //
+						.toList();
 		if (moduleNames.isEmpty()) {
-			throw new JUnitException("No module found in: " + Set.of(entries));
+			throw new JUnitException("No module found in: " + Set.of(paths));
 		}
 		ModuleLayer parentLayer = ModuleLayer.boot();
 		Configuration configuration = parentLayer.configuration().resolve(moduleFinder, ModuleFinder.of(), moduleNames);
 		ModuleLayer moduleLayer = parentLayer.defineModulesWithOneLoader(configuration, parentClassLoader);
-		var loader = moduleLayer.findLoader(moduleNames.iterator().next());
-		Thread.currentThread().setContextClassLoader(loader);
-		ModuleUtils.LAYER = moduleLayer; // TODO Hack!
-		return loader;
+		discoveryOptions.setModuleLayer(moduleLayer);
+		var classLoader = moduleLayer.findLoader(moduleNames.get(0));
+		return new CustomClassLoader(classLoader);
+	}
+
+	private Path toPath(URL url) {
+		try {
+			return Path.of(url.toURI());
+		}
+		catch (URISyntaxException exception) {
+			throw new JUnitException("URL represents no path: " + url, exception);
+		}
 	}
 
 	private URL toURL(Path path) {
