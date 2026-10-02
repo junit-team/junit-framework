@@ -183,7 +183,7 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 		assertThat(discoveryIssues.getFirst().source()) //
 				.contains(ClassSource.from(InterfaceWithNestedClass.NestedInInterface.class));
 
-		var executionResults = executeTests(request -> request //
+		var executionResults = executeTests(request -o> request //
 				.selectors(selectors) //
 				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.ERROR.name()));
 

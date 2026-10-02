@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
  * {@code ClassOrdererContext} encapsulates the <em>context</em> in which
@@ -53,4 +54,5 @@ public interface ClassOrdererContext {
 	 */
 	Optional<String> getConfigurationParameter(String key);
 
+	ExtensionContext.Store getSessionStore(ExtensionContext.Namespace namespace);
 }

@@ -65,7 +65,7 @@ class DefaultLauncher implements Launcher {
 		Preconditions.containsNoNullElements(postDiscoveryFilters,
 			"postDiscoveryFilter array must not contain null elements");
 		this.discoveryOrchestrator = new EngineDiscoveryOrchestrator(testEngines,
-			unmodifiableCollection(postDiscoveryFilters), listenerRegistry.launcherDiscoveryListeners);
+			unmodifiableCollection(postDiscoveryFilters), listenerRegistry.launcherDiscoveryListeners, sessionLevelStore);
 		this.sessionLevelStore = sessionLevelStore;
 	}
 

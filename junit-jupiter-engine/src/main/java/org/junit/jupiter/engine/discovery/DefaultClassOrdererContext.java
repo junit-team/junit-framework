@@ -15,7 +15,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.ClassDescriptor;
 import org.junit.jupiter.api.ClassOrdererContext;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
+import org.junit.jupiter.engine.execution.LauncherStoreFacade;
 
 /**
  * Default implementation of {@link ClassOrdererContext}.
@@ -42,4 +44,8 @@ class DefaultClassOrdererContext implements ClassOrdererContext {
 		return this.configuration.getRawConfigurationParameter(key);
 	}
 
+	@Override
+	public ExtensionContext.Store getSessionStore(ExtensionContext.Namespace namespace) {
+		return LauncherStoreFacade.getStoreAdapter(this.configuration.getSessionStore(), namespace);
+	}
 }

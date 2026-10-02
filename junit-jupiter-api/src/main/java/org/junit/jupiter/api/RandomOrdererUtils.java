@@ -13,6 +13,7 @@ package org.junit.jupiter.api;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.logging.Logger;
 
 /**
@@ -28,16 +29,21 @@ class RandomOrdererUtils {
 
 	static final long DEFAULT_SEED = System.nanoTime();
 
-	static Long getSeed(Function<String, Optional<String>> configurationParameterLookup, Logger logger) {
-		return getCustomSeed(configurationParameterLookup, logger).orElse(DEFAULT_SEED);
+	static long getSeed(Function<String, Optional<String>> configurationParameterLookup, Function<ExtensionContext.Namespace, ExtensionContext.Store> storeLookup, Logger logger) {
+		var seed = getCustomSeed(configurationParameterLookup, logger).orElse(DEFAULT_SEED);
+		var store = storeLookup.apply(ExtensionContext.Namespace.create(RandomOrdererUtils.class.getName()));
+		var key = String.valueOf(seed);
+		if (store.get(key) == null) {
+			logger.config(() -> "Using seed [%d] for ordering classes/methods. To reuse the same seed in a subsequent execution, please pass '%s=%1$d' as configuration parameter".formatted(
+					seed, RANDOM_SEED_PROPERTY_NAME));
+			store.put(key, true);
+		}
+		return seed;
 	}
 
-	private static Optional<Long> getCustomSeed(Function<String, Optional<String>> configurationParameterLookup,
-			Logger logger) {
+	private static Optional<Long> getCustomSeed(Function<String, Optional<String>> configurationParameterLookup, Logger logger) {
 		return configurationParameterLookup.apply(RANDOM_SEED_PROPERTY_NAME).map(configurationParameter -> {
 			try {
-				logger.config(() -> "Using custom seed for configuration parameter [%s] with value [%s].".formatted(
-					RANDOM_SEED_PROPERTY_NAME, configurationParameter));
 				return Long.valueOf(configurationParameter);
 			}
 			catch (NumberFormatException ex) {
