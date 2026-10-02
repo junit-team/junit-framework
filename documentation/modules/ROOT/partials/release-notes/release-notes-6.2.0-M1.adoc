@@ -61,6 +61,9 @@ repository on GitHub.
   of causing parameterized tests to fail with an internal exception.
 * The elements of `@CsvSource.value[]` are now treated as individual CSV documents. This
   prevents unfinished quotes in one document from affecting another.
+* `@Nested` test classes declared in super classes of a test class are now discovered and
+  executed even if they have the same simple name as a `@Nested` class declared in the
+  test class.
 
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

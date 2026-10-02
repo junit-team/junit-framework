@@ -10,15 +10,20 @@
 
 package org.junit.jupiter.engine;
 
+import static java.util.function.Predicate.isEqual;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.abort;
+import static org.junit.jupiter.engine.discovery.JupiterUniqueIdBuilder.uniqueIdForClass;
 import static org.junit.platform.engine.discovery.ClassNameFilter.includeClassNamePatterns;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId;
 import static org.junit.platform.launcher.LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME;
+import static org.junit.platform.testkit.engine.Event.byTestDescriptor;
+import static org.junit.platform.testkit.engine.EventConditions.engine;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
@@ -26,10 +31,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,15 +46,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.engine.NestedTestClassesTests.OuterClass.NestedClass;
 import org.junit.jupiter.engine.NestedTestClassesTests.OuterClass.NestedClass.RecursiveNestedClass;
 import org.junit.jupiter.engine.NestedTestClassesTests.OuterClass.NestedClass.RecursiveNestedSiblingClass;
+import org.junit.jupiter.engine.descriptor.NestedClassTestDescriptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
+import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
 /**
@@ -174,18 +184,11 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 	void deeplyNestedInheritedMethodsAreExecutedWhenSelectedViaUniqueId() {
 		var selectors = List.of( //
 			selectUniqueId(
-				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner1]/[nested-class:NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"),
+				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner1]/[fq-nested-class:org.junit.jupiter.engine.NestedTestClassesTests$AbstractSuperClass$NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"),
 			selectUniqueId(
-				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner2]/[nested-class:NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"));
+				"[engine:junit-jupiter]/[class:org.junit.jupiter.engine.NestedTestClassesTests$TestCaseWithExtendedNested]/[nested-class:ConcreteInner2]/[fq-nested-class:org.junit.jupiter.engine.NestedTestClassesTests$AbstractSuperClass$NestedInAbstractClass]/[nested-class:SecondLevelInherited]/[method:test()]"));
 
-		var discoveryIssues = discoverTests(request -> request.selectors(selectors)).getDiscoveryIssues();
-		assertThat(discoveryIssues).hasSize(1);
-		assertThat(discoveryIssues.getFirst().source()) //
-				.contains(ClassSource.from(InterfaceWithNestedClass.NestedInInterface.class));
-
-		var executionResults = executeTests(request -> request //
-				.selectors(selectors) //
-				.configurationParameter(CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME, Severity.ERROR.name()));
+		var executionResults = executeTests(selectors);
 
 		Events containers = executionResults.containerEvents();
 		Events tests = executionResults.testEvents();
@@ -306,6 +309,65 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 							+ "It will only be executed if discovered as a standalone test class. "
 							+ "You should remove the annotation or make it non-static to resolve this warning.",
 					StaticNestedTestCase.TestCase.class.getName());
+	}
+
+	@Test
+	void nestedTestClassesWithSameNameAreCorrectlyDiscoveredAndExecuted() throws Exception {
+		var request = defaultRequest() //
+				.selectors(selectClass(TestCaseWithSameNameNesting.class)) //
+				.build();
+		var engineDescriptor = discoverTestsWithoutIssues(request);
+		assertThat(engineDescriptor.getDescendants()).hasSize(9);
+		assertAll(engineDescriptor.getDescendants().stream() //
+				.map(TestDescriptor::getUniqueId) //
+				.map(uniqueId -> () -> discoverTestsWithoutIssues(
+					defaultRequest().selectors(selectUniqueId(uniqueId)).build())));
+
+		var executionResults = executeTests(request);
+		executionResults.containerEvents() //
+				.assertStatistics(stats -> stats //
+						.finished(5).succeeded(5)) //
+				.assertThatEvents() //
+				.haveExactly(2, engine()) //
+				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.class))) //
+				.haveExactly(2, source(ClassSource.from(TestCaseWithNesting.NestedTestCase.class))) //
+				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.NestedTestCase.class))) //
+				.haveExactly(2, source(ClassSource.from(TestCaseWithSameNameNesting.$.class)));
+		executionResults.testEvents() //
+				.assertStatistics(stats -> stats //
+						.finished(5).succeeded(3).failed(1).aborted(1)) //
+				.assertThatEvents() //
+				.haveExactly(2, methodSource(TestCaseWithSameNameNesting.class,
+					TestCaseWithNesting.class.getDeclaredMethod("someTest"))) //
+				.haveExactly(2, methodSource(TestCaseWithNesting.NestedTestCase.class.getDeclaredMethod("successful"))) //
+				.haveExactly(2, methodSource(TestCaseWithNesting.NestedTestCase.class.getDeclaredMethod("failing"))) //
+				.haveExactly(2,
+					methodSource(TestCaseWithSameNameNesting.NestedTestCase.class.getDeclaredMethod("aborted"))) //
+				.haveExactly(2, methodSource(TestCaseWithSameNameNesting.$.class.getDeclaredMethod("test")));
+	}
+
+	@Test
+	void doesNotDiscoverNestedClassesWithInvalidEnclosingClasses() {
+		var uniqueId = uniqueIdForClass(TestCaseWithExtendedNested.class) //
+				.append(NestedClassTestDescriptor.FULLY_QUALIFIED_NAME_SEGMENT_TYPE,
+					AbstractSuperClass.NestedInAbstractClass.class.getName());
+
+		var results = discoverTests(selectUniqueId(uniqueId));
+		assertThat(results.getDiscoveryIssues()).isNotEmpty();
+		assertThat(results.getEngineDescriptor().getDescendants()).isEmpty();
+	}
+
+	private static Condition<Event> methodSource(Method method) {
+		return source(org.junit.platform.engine.support.descriptor.MethodSource.from(method));
+	}
+
+	private static Condition<Event> methodSource(Class<?> testClass, Method method) {
+		return source(org.junit.platform.engine.support.descriptor.MethodSource.from(testClass, method));
+	}
+
+	private static Condition<Event> source(TestSource source) {
+		return new Condition<>(byTestDescriptor(it -> it.getSource().filter(isEqual(source)).isPresent()),
+			"has source %s", source);
 	}
 
 	// -------------------------------------------------------------------
@@ -518,6 +580,26 @@ class NestedTestClassesTests extends AbstractJupiterTestEngineTests {
 			@Test
 			void test() {
 
+			}
+		}
+	}
+
+	static class TestCaseWithSameNameNesting extends TestCaseWithNesting {
+
+		@Nested
+		class NestedTestCase {
+
+			@Test
+			void aborted() {
+				abort();
+			}
+		}
+
+		@Nested
+		class $ {
+
+			@Test
+			void test() {
 			}
 		}
 	}

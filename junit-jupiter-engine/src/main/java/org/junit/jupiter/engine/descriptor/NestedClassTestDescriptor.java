@@ -47,7 +47,8 @@ import org.junit.platform.engine.UniqueId;
 @API(status = INTERNAL, since = "5.0")
 public class NestedClassTestDescriptor extends ClassBasedTestDescriptor {
 
-	public static final String SEGMENT_TYPE = "nested-class";
+	public static final String SIMPLE_NAME_SEGMENT_TYPE = "nested-class";
+	public static final String FULLY_QUALIFIED_NAME_SEGMENT_TYPE = "fq-nested-class";
 
 	public NestedClassTestDescriptor(UniqueId uniqueId, Class<?> testClass,
 			Supplier<List<Class<?>>> enclosingInstanceTypes, JupiterConfiguration configuration) {
