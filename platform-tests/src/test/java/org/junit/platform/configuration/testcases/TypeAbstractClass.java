@@ -11,14 +11,13 @@
 package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
-import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 
-public final class TypeEnumWithStringDefault {
+public final class TypeAbstractClass {
 
-	@ConfigurationParameter(type = ExampleEnum.class, defaultValue = @Value(stringValue = "a"))
-	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
+	@ConfigurationParameter(type = Example.class)
+	public static final String CLASSES_PROPERTY_NAME = "org.example.property";
 
-	enum ExampleEnum {
-		A, B
+	private static abstract class Example {
+
 	}
 }

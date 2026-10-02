@@ -11,14 +11,12 @@
 package org.junit.platform.configuration.testcases;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
-import org.junit.platform.configuration.api.ConfigurationParameter.Value;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
 
-public final class TypeEnumWithStringDefault {
+public final class HintsWithDescription {
 
-	@ConfigurationParameter(type = ExampleEnum.class, defaultValue = @Value(stringValue = "a"))
+	@ConfigurationParameter(hints = @Hints(@Hint(value = "42 ns", description = "a timeout in nano seconds")))
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
 
-	enum ExampleEnum {
-		A, B
-	}
 }

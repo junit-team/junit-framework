@@ -16,6 +16,8 @@ import org.apiguardian.api.API;
 
 /**
  * Defaults for configuration properties.
+ *
+ * @since 6.2
  */
 @API(status = INTERNAL, since = "6.2")
 public final class Defaults {

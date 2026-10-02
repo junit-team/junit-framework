@@ -20,7 +20,7 @@ import org.apiguardian.api.API;
 /**
  * Internal utilities for working with durations.
  *
- * @since 6.0
+ * @since 6.2
  */
 @API(status = INTERNAL, since = "6.2")
 public final class DurationUtils {

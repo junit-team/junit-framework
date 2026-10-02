@@ -10,9 +10,9 @@
 
 package org.junit.platform.configuration.processor;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getStringValuesMap;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getValuesMap;
+import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.toMap;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,22 +23,22 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
+import javax.lang.model.type.DeclaredType;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.platform.configuration.api.ConfigurationParameter;
 
 final class ConfigurationParameterAnnotatedField {
 	private final VariableElement element;
 	private final TypeElement enclosingType;
 	private final AnnotationMirror annotationMirror;
-	private final Elements elementUtils;
+	private final Map<String, Object> values;
 
-	ConfigurationParameterAnnotatedField(VariableElement element, Elements elementUtils, TypeElement enclosingType,
-			AnnotationMirror annotationMirror) {
+	ConfigurationParameterAnnotatedField(TypeElement enclosingType, VariableElement element) {
 		this.element = element;
-		this.elementUtils = elementUtils;
 		this.enclosingType = enclosingType;
-		this.annotationMirror = annotationMirror;
+		this.annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
+		this.values = toMap(annotationMirror);
 	}
 
 	Element element() {
@@ -47,27 +47,6 @@ final class ConfigurationParameterAnnotatedField {
 
 	AnnotationMirror annotationMirror() {
 		return annotationMirror;
-	}
-
-	Map<String, String> deprecationValues() {
-		var deprecation = getAnnotationMirror(annotationMirror, "deprecation");
-		if (deprecation == null) {
-			return Collections.emptyMap();
-		}
-		return getStringValuesMap(deprecation);
-	}
-
-	Map<String, List<Object>> defaultValues() {
-		var defaultValue = getAnnotationMirror(annotationMirror, "defaultValue");
-		if (defaultValue == null) {
-			return Collections.emptyMap();
-		}
-		return getValuesMap(defaultValue);
-	}
-
-	@Nullable
-	String typeValue() {
-		return getStringValuesMap(annotationMirror).get("type");
 	}
 
 	@Nullable
@@ -87,12 +66,40 @@ final class ConfigurationParameterAnnotatedField {
 		return getAnnotationMirror(element, Deprecated.class) != null;
 	}
 
-	@Nullable
-	String docComment() {
-		return elementUtils.getDocComment(element);
-	}
-
 	String enclosingTypeName() {
 		return enclosingType.getQualifiedName().toString();
+	}
+
+	Map<String, Object> values() {
+		return values;
+	}
+
+	@SuppressWarnings("unchecked")
+	Map<String, String> deprecation() {
+		return (Map<String, String>) values().getOrDefault("deprecation", Collections.emptyMap());
+	}
+
+	@SuppressWarnings("unchecked")
+	Map<String, List<Object>> defaultValues() {
+		return (Map<String, List<Object>>) values().getOrDefault("defaultValue", Collections.emptyMap());
+	}
+
+	@Nullable
+	DeclaredType type() {
+		return (DeclaredType) values().get("type");
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> hints() {
+		return (Map<String, Object>) values().getOrDefault("hints", Collections.emptyMap());
+	}
+
+	@SuppressWarnings("unchecked")
+	List<Map<String, String>> hintsValue() {
+		return (List<Map<String, String>>) hints().getOrDefault("value", Collections.emptyList());
+	}
+
+	boolean hintsPermitsAdditionalValues() {
+		return (boolean) hints().getOrDefault("permitsAdditionalValues", false);
 	}
 }

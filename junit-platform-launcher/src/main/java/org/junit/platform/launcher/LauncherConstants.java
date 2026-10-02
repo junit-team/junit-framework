@@ -35,6 +35,8 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #CAPTURE_STDOUT_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean CAPTURE_STDOUT_DEFAULT = false;
@@ -59,6 +61,8 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #CAPTURE_STDERR_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean CAPTURE_STDERR_DEFAULT = false;
@@ -173,6 +177,8 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #ENABLE_LAUNCHER_INTERCEPTORS} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT = false;
@@ -197,6 +203,8 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #DRY_RUN_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean DRY_RUN_DEFAULT = false;
@@ -220,6 +228,8 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean STACKTRACE_PRUNING_ENABLED_DEFAULT = true;
@@ -268,9 +278,11 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT = "ERROR";
+	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT = "error";
 
 	/**
 	 * Property name used to configure the critical severity of issues
@@ -322,6 +334,8 @@ public class LauncherConstants {
 
 	/**
 	 * Default value for {@value #MEMORY_CLEANUP_ENABLED_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
 	public static final boolean MEMORY_CLEANUP_ENABLED_DEFAULT = false;

@@ -10,13 +10,11 @@
 
 package org.junit.platform.configuration.processor;
 
-import static java.util.stream.Collectors.toMap;
-
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -39,44 +37,28 @@ class AnnotationMirrorUtil {
 				.orElse(null);
 	}
 
-	static @Nullable AnnotationMirror getAnnotationMirror(AnnotationMirror annotation, String elementName) {
-		return annotation.getElementValues().entrySet() //
+	static Map<String, Object> toMap(AnnotationMirror annotationMirror) {
+		return annotationMirror.getElementValues().entrySet() //
 				.stream() //
-				.filter(element -> elementName.equals(element.getKey().getSimpleName().toString())) //
-				.map(Entry::getValue) //
-				.map(AnnotationValue::getValue) //
-				.findFirst() //
-				.filter(AnnotationMirror.class::isInstance) //
-				.map(AnnotationMirror.class::cast) //
-				.orElse(null);
+				.collect(Collectors.toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getValueFrom));
 	}
 
-	static Map<String, List<Object>> getValuesMap(AnnotationMirror annotation) {
-		return annotation.getElementValues().entrySet() //
-				.stream() //
-				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getValues));
+	private static Object getValueFrom(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
+		var value = entry.getValue().getValue();
+		return getValueFrom(value);
 	}
 
-	static Map<String, String> getStringValuesMap(AnnotationMirror annotation) {
-		return annotation.getElementValues().entrySet() //
-				.stream() //
-				.collect(toMap(AnnotationMirrorUtil::getSimpleName, AnnotationMirrorUtil::getStringValue));
-	}
-
-	private static List<Object> getValues(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
-		if (entry.getValue().getValue() instanceof List<?> values) {
-			return values.stream() //
-					.filter(AnnotationValue.class::isInstance) //
-					.map(AnnotationValue.class::cast) //
-					.map(AnnotationValue::getValue) //
-					.toList();
+	private static Object getValueFrom(Object value) {
+		if (value instanceof AnnotationMirror annotationMirror) {
+			return toMap(annotationMirror);
 		}
-		return Collections.emptyList();
-	}
-
-	private static String getStringValue(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {
-		Object value = entry.getValue().getValue();
-		return value.toString();
+		if (value instanceof List<?> list) {
+			return list.stream().map(AnnotationMirrorUtil::getValueFrom).toList();
+		}
+		if (value instanceof AnnotationValue annotationValue) {
+			return annotationValue.getValue();
+		}
+		return value;
 	}
 
 	private static String getSimpleName(Entry<? extends ExecutableElement, ? extends AnnotationValue> entry) {

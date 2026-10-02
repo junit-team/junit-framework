@@ -175,9 +175,11 @@ public interface TestInstantiationAwareExtension extends Extension {
 
 		/**
 		 * Default value for {@value #DEFAULT_SCOPE_PROPERTY_NAME} is {@value}.
+		 *
+		 * @since 6.2
 		 */
 		@API(status = MAINTAINED, since = "6.2")
-		public static final String DEFAULT_SCOPE_DEFAULT = "DEFAULT";
+		public static final String DEFAULT_SCOPE_DEFAULT = "default";
 
 		/**
 		 * Property name used to set the default extension context scope: {@value}

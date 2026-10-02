@@ -134,9 +134,11 @@ public @interface TempDir {
 
 	/**
 	 * Default value for {@value #DEFAULT_CLEANUP_MODE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
 	 */
 	@API(status = MAINTAINED, since = "6.2")
-	String DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT = "ALWAYS";
+	String DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT = "always";
 
 	/**
 	 * Property name used to configure the default {@link CleanupMode}: {@value}

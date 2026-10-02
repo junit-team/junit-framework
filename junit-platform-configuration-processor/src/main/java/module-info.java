@@ -56,6 +56,11 @@
 /// {@code .}. Likewise {@code {@code}} and {@code {@link}} tags are replaced
 /// with plain text versions.
 ///
+/// <h5>Hints</h5>
+///
+/// When the {@linkplain  org.junit.platform.configuration.api.ConfigurationParameter#type() type}
+/// or the type of the {@linkplain  org.junit.platform.configuration.api.ConfigurationParameter#defaultValue() default value}
+/// is a boolean, enum, or interface, hints are automatically generated.
 module org.junit.platform.configuration.processor {
 	requires static transitive org.jspecify;
 	requires static transitive org.apiguardian.api;

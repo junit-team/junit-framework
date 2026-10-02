@@ -18,10 +18,15 @@ or provide code completion by IDEs. An example is shown below.
 
 [source,json,indent=0]
 [subs=attributes+]
-.A minimal `META-INF/junit-platform-configuration-metadata.json`
+.A small `META-INF/junit-platform-configuration-metadata.json`
 ----
 include::example$junit-platform-configuration-metadata.json[]
 ----
 
-The first paragraph from the java documentation will be used to describe the property. If
-the first paragraph contains Javadoc tags these will be sensibly replaced.
+The first paragraph from the Javadoc will be used to describe the property. If the first
+paragraph contains tags these will be sensibly replaced.
+
+When the `type` is an enum or interface, hints will be automatically generated. The first
+paragraph of the enum constant is used to describe the enum value. If the allowed values
+are not enumerable, {PlatformConfigurationParameterHints} can be used to provide
+examples instead.

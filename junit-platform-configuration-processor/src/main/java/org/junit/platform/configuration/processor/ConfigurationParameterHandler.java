@@ -10,34 +10,45 @@
 
 package org.junit.platform.configuration.processor;
 
-import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static org.junit.platform.configuration.processor.AnnotationMirrorUtil.getAnnotationMirror;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Deprecation;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Hint;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.Parameters;
 import org.junit.platform.configuration.processor.ConfigurationMetadata.Property;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.ValueHint;
+import org.junit.platform.configuration.processor.ConfigurationMetadata.ValueProvider;
 
 final class ConfigurationParameterHandler {
 
 	private final ConfigurationMetadata metaData;
 	private final Elements elementUtils;
 	private final Messager messager;
+	private final Types typeUtils;
 
-	ConfigurationParameterHandler(ConfigurationMetadata metaData, Elements elementUtils, Messager messager) {
+	ConfigurationParameterHandler(ConfigurationMetadata metaData, Elements elementUtils, Messager messager,
+			Types typeUtils) {
 		this.metaData = metaData;
 		this.elementUtils = elementUtils;
 		this.messager = messager;
+		this.typeUtils = typeUtils;
 	}
 
 	void process(RoundEnvironment roundEnv) {
@@ -54,12 +65,11 @@ final class ConfigurationParameterHandler {
 				element);
 			return;
 		}
-		var annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameter.class));
-		var field = new ConfigurationParameterAnnotatedField(variableElement, elementUtils, enclosingTypeElement,
-			annotationMirror);
+		var field = new ConfigurationParameterAnnotatedField(enclosingTypeElement, variableElement);
 		if (!field.isStatic() || !field.isFinal() || !(field.constantValue() instanceof String name)) {
 			messager.printMessage(ERROR,
-				"@ConfigurationParameter annotated field must static, final, and have constant string value", element);
+				"@ConfigurationParameter annotated field must be static, final, and have constant string value",
+				element);
 			return;
 		}
 		var description = processDescription(field);
@@ -71,15 +81,27 @@ final class ConfigurationParameterHandler {
 		var type = processType(field, defaultType);
 		var property = new Property(name, type, description, sourceType, defaultValue, deprecation);
 		metaData.addProperty(property);
+
+		var hint = processHint(name, field, defaults);
+		if (hint != null) {
+			metaData.addHint(hint);
+		}
 	}
 
 	private @Nullable String processType(ConfigurationParameterAnnotatedField field, @Nullable String defaultType) {
-		var type = field.typeValue();
-		return type == null ? defaultType : type;
+		var value = field.type();
+		if (value == null) {
+			return defaultType;
+		}
+		return value.toString();
 	}
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
-		var docComment = field.docComment();
+		var docComment = elementUtils.getDocComment(field.element());
+		return extractFirstParagraph(docComment);
+	}
+
+	private static @Nullable String extractFirstParagraph(@Nullable String docComment) {
 		if (docComment == null) {
 			return null;
 		}
@@ -145,7 +167,7 @@ final class ConfigurationParameterHandler {
 	}
 
 	private @Nullable Deprecation processDeprecation(ConfigurationParameterAnnotatedField field) {
-		var values = field.deprecationValues();
+		var values = field.deprecation();
 		if (!values.isEmpty()) {
 			return new Deprecation(values.get("reason"), values.get("replacement"), values.get("since"));
 		}
@@ -156,4 +178,100 @@ final class ConfigurationParameterHandler {
 		return null;
 	}
 
+	private @Nullable Hint processHint(String name, ConfigurationParameterAnnotatedField field,
+			@Nullable Default defaults) {
+
+		// Derive hint from ConfigurationParameter.hints value
+		if (!field.hintsValue().isEmpty()) {
+			return new Hint(name, processHintValues(field), processPermitsAdditionalValues(field));
+		}
+		// Derive hint from ConfigurationParameter.type value
+		var type = field.type();
+		if (type != null) {
+			var typeElement = (TypeElement) typeUtils.asElement(type);
+			var typeElementKind = typeElement.getKind();
+			var typeElementName = typeElement.getQualifiedName().toString();
+			if (typeElementKind == ElementKind.ENUM) {
+				return new Hint(name, processEnumValues(typeElement), processPermitsAdditionalValues(field));
+			}
+			// It is not possible to determine hints for abstract classes
+			if (typeElementKind == ElementKind.INTERFACE) {
+				var providers = new ArrayList<ValueProvider>();
+				providers.addAll(processClassValues(typeElementName));
+				providers.addAll(processPermitsAdditionalValues(field));
+				return new Hint(name, null, providers);
+			}
+			if (Boolean.class.getName().equals(typeElementName)) {
+				return new Hint(name, processBooleanValues(), processPermitsAdditionalValues(field));
+			}
+		}
+
+		// Derive hints from ConfigurationParameter.defaultValue if available.
+		if (defaults == null) {
+			return null;
+		}
+		var defaultType = defaults.defaultType();
+		if (Boolean.class.getName().equals(defaultType)) {
+			return new Hint(name, processBooleanValues(), null);
+		}
+		if (Class.class.getName().equals(defaultType)) {
+			if (type == null) {
+				messager.printMessage(ERROR,
+					"@ConfigurationParameter must declare a type when the default value is a classValue",
+					field.element());
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	private List<ValueProvider> processPermitsAdditionalValues(ConfigurationParameterAnnotatedField field) {
+		var permitsAdditionalValues = field.hintsPermitsAdditionalValues();
+		if (!permitsAdditionalValues) {
+			return Collections.emptyList();
+		}
+		return List.of(new ValueProvider("any", null));
+	}
+
+	private List<ValueHint> processHintValues(ConfigurationParameterAnnotatedField field) {
+		return field.hintsValue().stream() //
+				.filter(map -> map.containsKey("value")) //
+				.map(map -> new ValueHint(map.get("value"), map.get("description"))) //
+				.toList();
+	}
+
+	private static List<ValueProvider> processClassValues(String typeElementName) {
+		var parameters = new Parameters(typeElementName);
+		var valueprovider = new ValueProvider("class-reference", parameters);
+		return List.of(valueprovider);
+	}
+
+	private static List<ValueHint> processBooleanValues() {
+		return List.of( //
+			new ValueHint(true, null), //
+			new ValueHint(false, null) //
+		);
+	}
+
+	private List<ValueHint> processEnumValues(TypeElement typeElement) {
+		return typeElement.getEnclosedElements().stream() //
+				.filter(element -> element.getKind() == ElementKind.ENUM_CONSTANT) //
+				.map(element -> {
+					var enumValueName = processEnumValue(element);
+					var description = processDescription(element);
+					return new ValueHint(enumValueName, description);
+				}) //
+				.toList();
+	}
+
+	private static String processEnumValue(Element element) {
+		var simpleName = element.getSimpleName();
+		return simpleName.toString().toLowerCase(Locale.ROOT);
+	}
+
+	private @Nullable String processDescription(Element element) {
+		var docComment = elementUtils.getDocComment(element);
+		return extractFirstParagraph(docComment);
+	}
 }

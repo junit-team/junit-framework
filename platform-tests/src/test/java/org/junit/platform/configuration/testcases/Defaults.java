@@ -42,10 +42,14 @@ public final class Defaults {
 	@ConfigurationParameter(defaultValue = @Value(stringValue = "default"))
 	public static final String STRING_PROPERTY_NAME = "org.example.strings";
 
-	@ConfigurationParameter(defaultValue = @Value(classValue = Example.class))
+	@ConfigurationParameter(type = Example.class, defaultValue = @Value(classValue = Default.class))
 	public static final String CLASSES_PROPERTY_NAME = "org.example.classes";
 
-	private record Example() {
+	private interface Example {
+
+	}
+
+	private final class Default implements Example {
 
 	}
 
