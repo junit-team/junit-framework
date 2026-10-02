@@ -206,13 +206,14 @@ class ClassSelectorResolver implements SelectorResolver {
 		return toResolution(context.addToParent(() -> selectUniqueId(uniqueId.removeLastSegment()), parent -> {
 			var className = uniqueId.getLastSegment().getValue();
 			var segmentType = uniqueId.getLastSegment().getType();
+			var parentTestClass = ((TestClassAware) parent).getTestClass();
 			if (segmentType.equals(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE)
 					|| segmentType.equals(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE)) {
-				var parentTestClass = ((TestClassAware) parent).getTestClass();
 				className = "%s$%s".formatted(parentTestClass.getName(), className);
 			}
 			return ReflectionSupport.tryToLoadClass(className) //
 					.toOptional() //
+					.filter(testClass -> testClass.getEnclosingClass().isAssignableFrom(parentTestClass)) //
 					.filter(predicates.isAnnotatedWithNestedAndValid.and(condition)) //
 					.map(testClass -> factory.apply(parent, testClass));
 		}));
