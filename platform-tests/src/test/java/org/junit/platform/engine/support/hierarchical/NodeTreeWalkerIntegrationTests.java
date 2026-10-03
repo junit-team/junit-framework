@@ -39,6 +39,7 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
+import org.junit.platform.testkit.engine.EngineTestKit;
 
 /**
  * @since 1.3
@@ -245,7 +246,8 @@ class NodeTreeWalkerIntegrationTests {
 
 	private TestDescriptor discover(Class<?> testClass) {
 		var discoveryRequest = request().selectors(selectClass(testClass)).build();
-		return new JupiterTestEngine().discover(discoveryRequest, UniqueId.forEngine("junit-jupiter"));
+		var discoveryResults = EngineTestKit.discover(new JupiterTestEngine(), discoveryRequest);
+		return discoveryResults.getEngineDescriptor();
 	}
 
 	@ResourceLock("a")

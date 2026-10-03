@@ -35,6 +35,8 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.EngineDiscoveryResult;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -55,17 +57,21 @@ public class EngineDiscoveryOrchestrator {
 	private final Iterable<TestEngine> testEngines;
 	private final Collection<PostDiscoveryFilter> postDiscoveryFilters;
 	private final ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 
 	public EngineDiscoveryOrchestrator(Iterable<TestEngine> testEngines,
-			Collection<PostDiscoveryFilter> postDiscoveryFilters) {
-		this(testEngines, postDiscoveryFilters, ListenerRegistry.forLauncherDiscoveryListeners());
+			Collection<PostDiscoveryFilter> postDiscoveryFilters,
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
+		this(testEngines, postDiscoveryFilters, sessionScopedStore, ListenerRegistry.forLauncherDiscoveryListeners());
 	}
 
 	EngineDiscoveryOrchestrator(Iterable<TestEngine> testEngines, Collection<PostDiscoveryFilter> postDiscoveryFilters,
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore,
 			ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry) {
 		this.testEngines = EngineIdValidator.validate(testEngines);
 		this.postDiscoveryFilters = postDiscoveryFilters;
 		this.launcherDiscoveryListenerRegistry = launcherDiscoveryListenerRegistry;
+		this.sessionScopedStore = sessionScopedStore;
 	}
 
 	/**
@@ -111,6 +117,11 @@ public class EngineDiscoveryOrchestrator {
 			@Override
 			public LauncherDiscoveryListener getDiscoveryListener() {
 				return listener;
+			}
+
+			@Override
+			public NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+				return sessionScopedStore;
 			}
 		};
 		listener.launcherDiscoveryStarted(request);
