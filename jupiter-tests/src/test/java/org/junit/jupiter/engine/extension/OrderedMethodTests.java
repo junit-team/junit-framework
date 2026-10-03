@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine.extension;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Constants.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
@@ -87,6 +88,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	private static final Set<String> callSequence = Collections.synchronizedSet(new LinkedHashSet<>());
 	private static final Set<String> threadNames = Collections.synchronizedSet(new LinkedHashSet<>());
+	private static String methodOrdererStoreValue = "not set";
 
 	@BeforeEach
 	void clearCallSequence() {
@@ -114,6 +116,16 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		assertThat(callSequence).containsExactly("$()", "AAA()", "AAA(org.junit.jupiter.api.TestInfo)",
 			"AAA(org.junit.jupiter.api.TestReporter)", "ZZ_Top()", "___()", "a1()", "a2()", "b()", "c()", "zzz()");
 		assertThat(threadNames).hasSize(1);
+	}
+
+	@Test
+	void methodOrdererCanAccessSessionScopedStore() {
+		methodOrdererStoreValue = "not set";
+
+		var results = discoverTests(MethodOrdererStoreTestCase.class, MethodOrdererStoreAccessor.class);
+
+		assertThat(results.getDiscoveryIssues()).isEmpty();
+		assertThat(methodOrdererStoreValue).isEqualTo("stored by method orderer");
 	}
 
 	@Test
@@ -752,6 +764,23 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 			return (T) Mockito.mock((Class<? super T>) MethodDescriptor.class);
 		}
 
+	}
+
+	static class MethodOrdererStoreAccessor implements MethodOrderer {
+
+		@Override
+		public void orderMethods(MethodOrdererContext context) {
+			var store = context.getStoreAccessor("method-orderer");
+			store.put("key", "stored by method orderer");
+			methodOrdererStoreValue = requireNonNull((String) store.get("key"));
+		}
+	}
+
+	static class MethodOrdererStoreTestCase {
+
+		@Test
+		void test() {
+		}
 	}
 
 	static class MisbehavingByImpersonating implements MethodOrderer {

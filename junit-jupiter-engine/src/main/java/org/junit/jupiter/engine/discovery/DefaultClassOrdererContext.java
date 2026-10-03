@@ -11,7 +11,6 @@
 package org.junit.jupiter.engine.discovery;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.ClassDescriptor;
 import org.junit.jupiter.api.ClassOrdererContext;
@@ -22,24 +21,18 @@ import org.junit.jupiter.engine.config.JupiterConfiguration;
  *
  * @since 5.8
  */
-class DefaultClassOrdererContext implements ClassOrdererContext {
+class DefaultClassOrdererContext extends DefaultDiscoveryContext implements ClassOrdererContext {
 
 	private final List<? extends ClassDescriptor> classDescriptors;
-	private final JupiterConfiguration configuration;
 
 	DefaultClassOrdererContext(List<? extends ClassDescriptor> classDescriptors, JupiterConfiguration configuration) {
+		super(configuration);
 		this.classDescriptors = classDescriptors;
-		this.configuration = configuration;
 	}
 
 	@Override
 	public List<? extends ClassDescriptor> getClassDescriptors() {
 		return this.classDescriptors;
-	}
-
-	@Override
-	public Optional<String> getConfigurationParameter(String key) {
-		return this.configuration.getRawConfigurationParameter(key);
 	}
 
 }

@@ -309,7 +309,7 @@ public interface MethodOrderer {
 		@Override
 		public void orderMethods(MethodOrdererContext context) {
 			Collections.shuffle(context.getMethodDescriptors(),
-				new java.util.Random(RandomOrdererUtils.getSeed(context::getConfigurationParameter, logger)));
+				new java.util.Random(RandomOrdererUtils.getSeed(context, logger)));
 		}
 
 	}

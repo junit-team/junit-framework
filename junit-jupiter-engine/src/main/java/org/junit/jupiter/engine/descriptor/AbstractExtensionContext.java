@@ -95,13 +95,13 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 	private NamespacedHierarchicalStore<org.junit.platform.engine.support.store.Namespace> getParentStore(
 			@Nullable ExtensionContext parent) {
 		return parent == null //
-				? this.launcherStoreFacade.getRequestLevelStore() //
+				? this.launcherStoreFacade.getRequestScopedStore() //
 				: ((AbstractExtensionContext<?>) parent).valuesStore;
 	}
 
 	@SuppressWarnings("deprecation")
 	private <N> NamespacedHierarchicalStore.CloseAction<N> createCloseAction() {
-		var store = this.launcherStoreFacade.getSessionLevelStore(CLOSEABLE_RESOURCE_LOGGING_NAMESPACE);
+		var store = this.launcherStoreFacade.getSessionScopedStore(CLOSEABLE_RESOURCE_LOGGING_NAMESPACE);
 		return (__, ___, value) -> {
 			boolean isAutoCloseEnabled = this.configuration.isClosingStoredAutoCloseablesEnabled();
 
@@ -223,8 +223,8 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 	@Override
 	public Store getStore(StoreScope scope, Namespace namespace) {
 		return switch (scope) {
-			case LAUNCHER_SESSION -> launcherStoreFacade.getSessionLevelStore(namespace);
-			case EXECUTION_REQUEST -> launcherStoreFacade.getRequestLevelStore(namespace);
+			case LAUNCHER_SESSION -> launcherStoreFacade.getSessionScopedStore(namespace);
+			case EXECUTION_REQUEST -> launcherStoreFacade.getRequestScopedStore(namespace);
 			case EXTENSION_CONTEXT -> getStore(namespace);
 		};
 	}
