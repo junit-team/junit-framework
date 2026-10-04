@@ -110,7 +110,7 @@ jobs:
         run: java src/StagingRepoInjector.java ${STAGING_REPO_URL}
         working-directory: junit-examples
       - name: Build examples
-        run: java src/Builder.java --exclude=junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
+        run: java src/Builder.java --exclude=junit-jupiter-starter-ant,junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
         working-directory: junit-examples
         env:
           MAVEN_ARGS: --settings ${{ github.workspace }}/junit-examples/src/central-staging-maven-settings.xml --activate-profiles central-staging
