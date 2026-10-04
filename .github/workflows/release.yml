@@ -101,7 +101,7 @@ jobs:
       - name: Inject staging repository URL
         run: java src/StagingRepoInjector.java ${STAGING_REPO_URL}
       - name: Build examples
-        run: java src/Builder.java --exclude=junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
+        run: java src/Builder.java --exclude=junit-jupiter-starter-ant,junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
         env:
           MAVEN_ARGS: --settings ${{ github.workspace }}/src/central-staging-maven-settings.xml --activate-profiles central-staging
 
