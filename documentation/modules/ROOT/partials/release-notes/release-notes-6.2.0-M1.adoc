@@ -89,6 +89,13 @@ repository on GitHub.
 * Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 * The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
   now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
+* New `TestTemplateComparisonProvider` extension API for _comparison testing_: every
+  invocation of a `@TestTemplate` method -- including `@ParameterizedTest` and
+  `@RepeatedTest` methods -- is executed against several _comparison subjects_, for example
+  alternative implementations of an API or a real server and its test double. Comparison
+  subjects form the innermost level of the test tree. See
+  xref:extensions/providing-invocation-contexts-for-test-templates.adoc#comparison-testing[Comparison
+  Testing] for details.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage

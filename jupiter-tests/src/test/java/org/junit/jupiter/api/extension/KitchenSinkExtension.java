@@ -61,6 +61,7 @@ public class KitchenSinkExtension implements
 
 	// @TestTemplate and @ClassTemplate
 	TestTemplateInvocationContextProvider,
+	TestTemplateComparisonProvider,
 	ClassTemplateInvocationContextProvider,
 
 	// Miscellaneous
@@ -185,6 +186,16 @@ public class KitchenSinkExtension implements
 	@Override
 	public boolean mayReturnZeroTestTemplateInvocationContexts(ExtensionContext context) {
 		return false;
+	}
+
+	@Override
+	public boolean supportsComparison(ExtensionContext context) {
+		return false;
+	}
+
+	@Override
+	public Stream<TestTemplateInvocationContext> provideComparisonSubjects(ExtensionContext context) {
+		throw new UnsupportedOperationException();
 	}
 
 	// --- @ClassTemplate -------------------------------------------------------

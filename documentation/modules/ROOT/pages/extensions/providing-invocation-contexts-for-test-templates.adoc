@@ -49,3 +49,109 @@ the test class instance differently, or multiple times without modifying the con
 Please refer to the implementations of xref:writing-tests/repeated-tests.adoc[] or
 xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] which use this extension point
 to provide their functionality.
+
+[[comparison-testing]]
+== Comparison Testing
+
+_Comparison testing_ executes the same test against several _comparison subjects_ -- for
+example, alternative implementations of an API, a real server and its test double, or
+several database backends -- and reports the outcome for each subject separately. When a
+test fails, the test tree immediately shows whether the behavior fails for all subjects or
+only for some of them.
+
+A `{TestTemplateComparisonProvider}` enables comparison testing for `{TestTemplate}`
+methods. Like an invocation, each comparison subject is described by a
+`{TestTemplateInvocationContext}` that supplies its display name and additional extensions,
+typically a `{ParameterResolver}` that injects the subject into the test method and its
+lifecycle methods.
+
+Comparison subjects always form the innermost level of the test tree. The invocation
+contexts of all active `{TestTemplateInvocationContextProvider}` instances are chained as
+usual, but each resulting invocation becomes a container in which the test template method
+is executed once per comparison subject. If no `{TestTemplateInvocationContextProvider}` is
+active, the test template method is executed once per comparison subject directly below the
+test template. Since
+xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] and
+xref:writing-tests/repeated-tests.adoc[] are test templates, they support comparison testing
+without further ado.
+
+.Tests compared across implementations of an interface
+[source,java,indent=0]
+----
+@ExtendWith(SearchTreeImplementations.class)
+class SearchTreeTests {
+
+	@TestTemplate
+	void sizeIsZero(SearchTree tree) {
+		assertEquals(0, tree.size());
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = { -7, 42 })
+	void containsAddedKey(int key, SearchTree tree) {
+		tree.add(key);
+		assertTrue(tree.contains(key));
+	}
+}
+
+class SearchTreeImplementations implements TestTemplateComparisonProvider {
+
+	@Override
+	public boolean supportsComparison(ExtensionContext context) {
+		return Arrays.asList(context.getRequiredTestMethod().getParameterTypes()).contains(SearchTree.class);
+	}
+
+	@Override
+	public Stream<TestTemplateInvocationContext> provideComparisonSubjects(ExtensionContext context) {
+		return Stream.of(subject("BinarySearchTree", BinarySearchTree::new),
+			subject("TreeSetSearchTree", TreeSetSearchTree::new));
+	}
+
+	private static TestTemplateInvocationContext subject(String name, Supplier<SearchTree> factory) {
+		return new TestTemplateInvocationContext() {
+			@Override
+			public String getDisplayName(int invocationIndex) {
+				return name;
+			}
+
+			@Override
+			public List<Extension> getAdditionalExtensions() {
+				return List.of(new TypeBasedParameterResolver<SearchTree>() {
+					@Override
+					public SearchTree resolveParameter(ParameterContext parameterContext,
+							ExtensionContext extensionContext) {
+						return factory.get();
+					}
+				});
+			}
+		};
+	}
+}
+----
+
+A test that compares only the subjects themselves, such as `sizeIsZero()`, is declared as
+a plain `@TestTemplate` method; its comparison subjects are executed directly below the
+method. A `@Test` method, on the other hand, is not a test template and is therefore
+never compared. In `containsAddedKey()`, each set of arguments of the
+`@ParameterizedTest` is compared across the subjects. The output when using the
+`ConsoleLauncher` is as follows.
+
+....
+└─ SearchTreeTests ✔
+   ├─ containsAddedKey(int, SearchTree) ✔
+   │  ├─ [1] key = -7 ✔
+   │  │  ├─ BinarySearchTree ✔
+   │  │  └─ TreeSetSearchTree ✔
+   │  └─ [2] key = 42 ✔
+   │     ├─ BinarySearchTree ✔
+   │     └─ TreeSetSearchTree ✔
+   └─ sizeIsZero(SearchTree) ✔
+      ├─ BinarySearchTree ✔
+      └─ TreeSetSearchTree ✔
+....
+
+A test can be disabled for an individual comparison subject by including an
+`{ExecutionCondition}` in the additional extensions of the subject's invocation context;
+the corresponding test is then reported as skipped, so that unsupported combinations remain
+visible. A provider that returns an empty `Stream` of comparison subjects causes the
+enclosing invocation to fail.

@@ -214,6 +214,7 @@ asciidoc:
     TestInstancePostProcessor: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestInstancePostProcessor.html[TestInstancePostProcessor]'
     TestInstancePreConstructCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestInstancePreConstructCallback.html[TestInstancePreConstructCallback]'
     TestInstancePreDestroyCallback: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestInstancePreDestroyCallback.html[TestInstancePreDestroyCallback]'
+    TestTemplateComparisonProvider: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestTemplateComparisonProvider.html[TestTemplateComparisonProvider]'
     TestTemplateInvocationContext: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestTemplateInvocationContext.html[TestTemplateInvocationContext]'
     TestTemplateInvocationContextProvider: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestTemplateInvocationContextProvider.html[TestTemplateInvocationContextProvider]'
     TestWatcher: '{javadoc-root}/org.junit.jupiter.api/org/junit/jupiter/api/extension/TestWatcher.html[TestWatcher]'

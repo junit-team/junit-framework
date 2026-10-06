@@ -23,6 +23,7 @@ import org.apiguardian.api.API;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstances;
+import org.junit.jupiter.api.extension.TestTemplateComparisonProvider;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -109,15 +110,37 @@ public class TestTemplateTestDescriptor extends MethodBasedTestDescriptor implem
 	public JupiterEngineExecutionContext execute(JupiterEngineExecutionContext context,
 			DynamicTestExecutor dynamicTestExecutor) throws Exception {
 
-		new TestTemplateExecutor().execute(context, dynamicTestExecutor);
+		new TestTemplateExecutor(context).execute(context, dynamicTestExecutor);
 		return context;
 	}
 
 	private class TestTemplateExecutor
 			extends TemplateExecutor<TestTemplateInvocationContextProvider, TestTemplateInvocationContext> {
 
-		TestTemplateExecutor() {
+		/**
+		 * Whether at least one {@link TestTemplateComparisonProvider} is
+		 * active: if so, every invocation is compared across comparison
+		 * subjects instead of being executed directly.
+		 */
+		private final boolean comparesSubjects;
+
+		TestTemplateExecutor(JupiterEngineExecutionContext context) {
 			super(TestTemplateTestDescriptor.this, TestTemplateInvocationContextProvider.class);
+			ExtensionContext extensionContext = context.getExtensionContext();
+			this.comparesSubjects = context.getExtensionRegistry().stream(TestTemplateComparisonProvider.class) //
+					.anyMatch(provider -> provider.supportsComparison(extensionContext));
+		}
+
+		@Override
+		void executeWithoutProviders(JupiterEngineExecutionContext context, DynamicTestExecutor dynamicTestExecutor) {
+			if (!this.comparesSubjects) {
+				super.executeWithoutProviders(context, dynamicTestExecutor);
+				return;
+			}
+			// Without invocation context providers, the test template method is
+			// executed once per comparison subject directly below the template.
+			new ComparisonSubjectExecutor(TestTemplateTestDescriptor.this, getTestClass(), getTestMethod(),
+				TestTemplateTestDescriptor.this.configuration).execute(context, dynamicTestExecutor);
 		}
 
 		@Override
@@ -160,6 +183,11 @@ public class TestTemplateTestDescriptor extends MethodBasedTestDescriptor implem
 		@Override
 		TestDescriptor createInvocationTestDescriptor(UniqueId uniqueId,
 				TestTemplateInvocationContext invocationContext, int index) {
+			if (this.comparesSubjects) {
+				return new TestTemplateComparisonTestDescriptor(uniqueId, getTestClass(), getTestMethod(),
+					invocationContext, index, dynamicDescendantFilter.withoutIndexFiltering(),
+					TestTemplateTestDescriptor.this.configuration);
+			}
 			return new TestTemplateInvocationTestDescriptor(uniqueId, getTestClass(), getTestMethod(),
 				invocationContext, index, TestTemplateTestDescriptor.this.configuration);
 		}

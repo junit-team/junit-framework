@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TemplateInvocationValidationException;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
+import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.TestDescriptor;
@@ -40,11 +41,25 @@ abstract class TemplateExecutor<P extends Extension, C> {
 
 	void execute(JupiterEngineExecutionContext context, Node.DynamicTestExecutor dynamicTestExecutor) {
 		ExtensionContext extensionContext = context.getExtensionContext();
-		List<P> providers = validateProviders(extensionContext, context.getExtensionRegistry());
+		List<P> providers = findActiveProviders(extensionContext, context.getExtensionRegistry());
+		if (providers.isEmpty()) {
+			executeWithoutProviders(context, dynamicTestExecutor);
+			return;
+		}
 		AtomicInteger invocationIndex = new AtomicInteger();
 		for (P provider : providers) {
 			executeForProvider(provider, invocationIndex, dynamicTestExecutor, extensionContext);
 		}
+	}
+
+	/**
+	 * Execute the template although no active provider was found.
+	 *
+	 * <p>The default implementation fails with
+	 * {@link #getNoRegisteredProviderErrorMessage()}.
+	 */
+	void executeWithoutProviders(JupiterEngineExecutionContext context, Node.DynamicTestExecutor dynamicTestExecutor) {
+		throw new PreconditionViolationException(getNoRegisteredProviderErrorMessage());
 	}
 
 	private void executeForProvider(P provider, AtomicInteger invocationIndex,
@@ -76,11 +91,10 @@ abstract class TemplateExecutor<P extends Extension, C> {
 			getZeroContextsProvidedErrorMessage(provider));
 	}
 
-	private List<P> validateProviders(ExtensionContext extensionContext, ExtensionRegistry extensionRegistry) {
-		List<P> providers = extensionRegistry.stream(providerType) //
+	private List<P> findActiveProviders(ExtensionContext extensionContext, ExtensionRegistry extensionRegistry) {
+		return extensionRegistry.stream(providerType) //
 				.filter(provider -> supports(provider, extensionContext)) //
 				.toList();
-		return Preconditions.notEmpty(providers, this::getNoRegisteredProviderErrorMessage);
 	}
 
 	private Optional<TestDescriptor> createInvocationTestDescriptor(C invocationContext, int index) {

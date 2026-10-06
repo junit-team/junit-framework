@@ -42,6 +42,7 @@ import org.junit.platform.engine.support.hierarchical.ExclusiveResource;
 public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescriptor {
 
 	public static final String SEGMENT_TYPE = "test-template-invocation";
+	public static final String COMPARISON_SUBJECT_SEGMENT_TYPE = "comparison-subject";
 	private static final VoidMethodInterceptorCall interceptorCall = InvocationInterceptor::interceptTestTemplateMethod;
 
 	private @Nullable TestTemplateInvocationContext invocationContext;

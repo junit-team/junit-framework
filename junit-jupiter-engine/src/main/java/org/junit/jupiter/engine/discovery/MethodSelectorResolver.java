@@ -181,7 +181,8 @@ class MethodSelectorResolver implements SelectorResolver {
 					TestFactoryTestDescriptor.SEGMENT_TYPE, TestFactoryTestDescriptor.DYNAMIC_CONTAINER_SEGMENT_TYPE,
 					TestFactoryTestDescriptor.DYNAMIC_TEST_SEGMENT_TYPE), //
 				new MethodType(new IsTestTemplateMethod(issueReporter), TestTemplateTestDescriptor::new,
-					TestTemplateTestDescriptor.SEGMENT_TYPE, TestTemplateInvocationTestDescriptor.SEGMENT_TYPE) //
+					TestTemplateTestDescriptor.SEGMENT_TYPE, TestTemplateInvocationTestDescriptor.SEGMENT_TYPE,
+					TestTemplateInvocationTestDescriptor.COMPARISON_SUBJECT_SEGMENT_TYPE) //
 			);
 		}
 
