@@ -24,9 +24,11 @@ import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstances;
+import org.junit.jupiter.api.extension.TestTemplateComparisonProvider;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
@@ -41,11 +43,11 @@ import org.junit.platform.engine.support.hierarchical.ExclusiveResource;
  * compared across comparison subjects: a container that encloses one
  * {@linkplain TestTemplateInvocationTestDescriptor execution} of the test
  * template method per comparison subject provided by the active
- * {@linkplain org.junit.jupiter.api.extension.TestTemplateComparisonProvider
+ * {@linkplain TestTemplateComparisonProvider
  * TestTemplateComparisonProviders}.
  *
  * @since 6.2
- * @see ComparisonSubjectExecutor
+ * @see TestTemplateComparisonProvider
  */
 @API(status = INTERNAL, since = "6.2")
 public class TestTemplateComparisonTestDescriptor extends MethodBasedTestDescriptor implements Filterable {
@@ -150,6 +152,71 @@ public class TestTemplateComparisonTestDescriptor extends MethodBasedTestDescrip
 
 	private TestTemplateInvocationContext requiredInvocationContext() {
 		return requireNonNull(this.invocationContext);
+	}
+
+	/**
+	 * Executes the test template method once per comparison subject provided
+	 * by the active {@link TestTemplateComparisonProvider TestTemplateComparisonProviders},
+	 * as children of the supplied parent: either a
+	 * {@code TestTemplateComparisonTestDescriptor} or, if no invocation context
+	 * provider is active, the test template itself.
+	 */
+	static final class ComparisonSubjectExecutor
+			extends TemplateExecutor<TestTemplateComparisonProvider, TestTemplateInvocationContext> {
+
+		private final Class<?> testClass;
+		private final Method templateMethod;
+		private final JupiterConfiguration configuration;
+
+		<T extends TestDescriptor & Filterable> ComparisonSubjectExecutor(T parent, Class<?> testClass,
+				Method templateMethod, JupiterConfiguration configuration) {
+			super(parent, TestTemplateComparisonProvider.class);
+			this.testClass = testClass;
+			this.templateMethod = templateMethod;
+			this.configuration = configuration;
+		}
+
+		@Override
+		boolean supports(TestTemplateComparisonProvider provider, ExtensionContext extensionContext) {
+			return provider.supportsComparison(extensionContext);
+		}
+
+		@Override
+		protected String getNoRegisteredProviderErrorMessage() {
+			return "You must register at least one %s that supports @%s method [%s]".formatted(
+				TestTemplateComparisonProvider.class.getSimpleName(), TestTemplate.class.getSimpleName(),
+				this.templateMethod);
+		}
+
+		@Override
+		Stream<? extends TestTemplateInvocationContext> provideContexts(TestTemplateComparisonProvider provider,
+				ExtensionContext extensionContext) {
+			return provider.provideComparisonSubjects(extensionContext);
+		}
+
+		@Override
+		boolean mayReturnZeroContexts(TestTemplateComparisonProvider provider, ExtensionContext extensionContext) {
+			return false;
+		}
+
+		@Override
+		protected String getZeroContextsProvidedErrorMessage(TestTemplateComparisonProvider provider) {
+			return "Provider [%s] did not provide any comparison subjects, but was expected to do so.".formatted(
+				provider.getClass().getSimpleName());
+		}
+
+		@Override
+		UniqueId createInvocationUniqueId(UniqueId parentUniqueId, int index) {
+			return parentUniqueId.append(TestTemplateInvocationTestDescriptor.COMPARISON_SUBJECT_SEGMENT_TYPE,
+				"#" + index);
+		}
+
+		@Override
+		TestDescriptor createInvocationTestDescriptor(UniqueId uniqueId, TestTemplateInvocationContext subject,
+				int index) {
+			return new TestTemplateInvocationTestDescriptor(uniqueId, this.testClass, this.templateMethod, subject,
+				index, this.configuration);
+		}
 	}
 
 }

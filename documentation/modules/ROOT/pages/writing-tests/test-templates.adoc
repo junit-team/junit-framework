@@ -11,9 +11,3 @@ xref:extensions/providing-invocation-contexts-for-test-templates.adoc[] for usag
 NOTE: xref:writing-tests/repeated-tests.adoc[] and
 xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] are built-in specializations of
 test templates.
-
-A test template can additionally be executed against several _comparison subjects_ -- for
-example, alternative implementations of an API -- by registering a
-`{TestTemplateComparisonProvider}`. Please refer to
-xref:extensions/providing-invocation-contexts-for-test-templates.adoc#comparison-testing[Comparison Testing]
-for details.
