@@ -18,49 +18,7 @@
 /// format. This enables IDEs and other tools to process and validate Test
 /// Engine configuration.
 ///
-/// <h4>Usage</h4>
-///
-/// Given this minimal example:
-///
-/// <pre>{@code
-/// /**
-///   * A brief multi-line description of
-///   * this property: {@value}.
-///   *
-///   * <p>Followed by an additional paragraph.
-///   */
-///  @ConfigurationParameter
-///  public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
-///
-/// }</pre>
-///
-/// Processing the annotations with {@code org.junit.platform:junit-platform-configuration-processor}
-/// will produce:
-///
-/// <pre>{@code
-/// {
-///   "properties": [
-/// 	    {
-/// 	  "name": "org.example.property",
-///       "description": "A brief multi-line description of this property.",
-/// 	  "sourceType": "com.example.app.Constants"
-///    }
-///   ]
-/// }
-/// }
-/// </pre>
-///
-/// Of note is that the first paragraph from the doc string will be used
-/// to describe the property. If the first paragraph ends with
-/// {@code : {@value}.} or {@code : {@value}} it will be replaced with
-/// {@code .}. Likewise {@code {@code}} and {@code {@link}} tags are replaced
-/// with plain text versions.
-///
-/// <h5>Hints</h5>
-///
-/// When the {@linkplain  org.junit.platform.configuration.api.ConfigurationParameter#type() type}
-/// or the type of the {@linkplain  org.junit.platform.configuration.api.ConfigurationParameter#defaultValue() default value}
-/// is a boolean, enum, or interface, hints are automatically generated.
+/// For further details and examples see <a href="https://docs.junit.org/current/advanced-topics/configuration-parameter-documentation.html">User Guide</a>.
 module org.junit.platform.configuration.processor {
 	requires static transitive org.jspecify;
 	requires static transitive org.apiguardian.api;
