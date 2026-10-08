@@ -103,7 +103,14 @@ final class ConfigurationParameterHandler {
 	}
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
-		var docComment = elementUtils.getDocComment(field.element());
+		return processDescription(field.element());
+	}
+
+	private @Nullable String processDescription(Element element) {
+		var docComment = elementUtils.getDocComment(element);
+		if (docComment == null) {
+			return null;
+		}
 		return DocumentationUtil.extractFirstParagraph(docComment);
 	}
 
@@ -253,8 +260,4 @@ final class ConfigurationParameterHandler {
 		return simpleName.toString().toLowerCase(Locale.ROOT);
 	}
 
-	private @Nullable String processDescription(Element element) {
-		var docComment = elementUtils.getDocComment(element);
-		return DocumentationUtil.extractFirstParagraph(docComment);
-	}
 }

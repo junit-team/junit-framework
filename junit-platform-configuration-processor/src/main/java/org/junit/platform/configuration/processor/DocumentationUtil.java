@@ -12,18 +12,13 @@ package org.junit.platform.configuration.processor;
 
 import java.util.regex.Pattern;
 
-import org.jspecify.annotations.Nullable;
-
 final class DocumentationUtil {
 
 	private DocumentationUtil() {
 		/* no-op */
 	}
 
-	static @Nullable String extractFirstParagraph(@Nullable String docComment) {
-		if (docComment == null) {
-			return null;
-		}
+	static String extractFirstParagraph(String docComment) {
 		// matches either a new paragraph, header or Javadoc tag without content (e.g. @see).
 		var matcher = Pattern.compile("<p>|<h\\d>|[^{]@[a-z]+").matcher(docComment);
 		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());

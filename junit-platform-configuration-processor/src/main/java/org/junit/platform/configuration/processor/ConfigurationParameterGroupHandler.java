@@ -62,6 +62,9 @@ final class ConfigurationParameterGroupHandler {
 
 	private @Nullable String processDescription(TypeElement element) {
 		var docComment = elementUtils.getDocComment(element);
+		if (docComment == null) {
+			return null;
+		}
 		return DocumentationUtil.extractFirstParagraph(docComment);
 	}
 
