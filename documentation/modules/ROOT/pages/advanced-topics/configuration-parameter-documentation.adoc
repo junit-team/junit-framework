@@ -2,8 +2,8 @@
 
 Authors of test engines and JUnit Jupiter extensions may generate a machine-readable
 overview of configuration parameters by annotating their configuration parameters
-with `{PlatformConfigurationParameter}` from the
-`org.junit.platform:junit-platform-configuration-api` artifact.
+with `{PlatformConfigurationParameter}` and `{PlatformConfigurationParameterGroup}` from
+the `org.junit.platform:junit-platform-configuration-api` artifact.
 
 [source,java,indent=0]
 .A small example
