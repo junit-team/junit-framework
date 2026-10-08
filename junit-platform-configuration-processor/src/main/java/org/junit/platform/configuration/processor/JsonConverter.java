@@ -35,6 +35,10 @@ final class JsonConverter {
 	JsonObject toJsonObject(ConfigurationMetadata metaData) {
 		var builder = factory.createObjectBuilder();
 
+		var groups = metaData.groups();
+		if (!groups.isEmpty()) {
+			builder.add("groups", toJsonArray(groups, this::toJsonObject));
+		}
 		var properties = metaData.properties();
 		if (!properties.isEmpty()) {
 			builder.add("properties", toJsonArray(properties, this::toJsonObject));
@@ -42,10 +46,6 @@ final class JsonConverter {
 		var hints = metaData.hints();
 		if (!hints.isEmpty()) {
 			builder.add("hints", toJsonArray(hints, this::toJsonObject));
-		}
-		var groups = metaData.groups();
-		if (!groups.isEmpty()) {
-			builder.add("groups", toJsonArray(groups, this::toJsonObject));
 		}
 
 		return builder.build();

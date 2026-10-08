@@ -909,15 +909,15 @@ class ConfigurationMetadataAnnotationProcessorTests {
 			compiler.compileWithoutError(GroupWithConfigurationParameter.class);
 			assertMetaDataIsEqualTo("""
 					{
-					  "properties": [
-						{
-						  "name": "org.example.property",
-						  "sourceType": "org.junit.platform.configuration.testcases.GroupWithConfigurationParameter"
-						}
-					  ],
 					  "groups": [
 						{
 						  "name": "org.example",
+						  "sourceType": "org.junit.platform.configuration.testcases.GroupWithConfigurationParameter"
+						}
+					  ],
+					  "properties": [
+						{
+						  "name": "org.example.property",
 						  "sourceType": "org.junit.platform.configuration.testcases.GroupWithConfigurationParameter"
 						}
 					  ]

@@ -20,11 +20,15 @@ import org.jspecify.annotations.Nullable;
  */
 final class ConfigurationMetadata {
 
+	private final List<Group> groups = new ArrayList<>();
+
 	private final List<Property> properties = new ArrayList<>();
 
 	private final List<Hint> hints = new ArrayList<>();
 
-	private final List<Group> groups = new ArrayList<>();
+	List<Group> groups() {
+		return groups;
+	}
 
 	List<Property> properties() {
 		return properties;
@@ -34,8 +38,8 @@ final class ConfigurationMetadata {
 		return hints;
 	}
 
-	List<Group> groups() {
-		return groups;
+	void addGroup(Group group) {
+		groups.add(group);
 	}
 
 	void addProperty(Property property) {
@@ -44,10 +48,6 @@ final class ConfigurationMetadata {
 
 	void addHint(Hint hint) {
 		hints.add(hint);
-	}
-
-	void addGroup(Group group) {
-		groups.add(group);
 	}
 
 	record Property( //
