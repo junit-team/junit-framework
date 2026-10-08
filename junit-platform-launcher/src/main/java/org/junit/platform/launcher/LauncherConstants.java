@@ -44,7 +44,7 @@ public class LauncherConstants {
 	public static final boolean CAPTURE_STDOUT_DEFAULT = false;
 
 	/**
-	 * Property name used to enable capturing output to {@link System#out System.out}:
+	 * Property name used to enable capturing output to {@link System#out}:
 	 * {@value}
 	 *
 	 * <p>By default, output to {@link System#out} is not captured.
@@ -70,7 +70,7 @@ public class LauncherConstants {
 	public static final boolean CAPTURE_STDERR_DEFAULT = false;
 
 	/**
-	 * Property name used to enable capturing output to {@link System#err System.err}:
+	 * Property name used to enable capturing output to {@link System#err}:
 	 * {@value}
 	 *
 	 * <p>By default, output to {@link System#err} is not captured.
@@ -315,7 +315,7 @@ public class LauncherConstants {
 
 	/**
 	 * Property name used to configure the phase that critical discovery issues
-	 * should cause a failure.
+	 * should cause a failure
 	 *
 	 * <h4>Supported Values</h4>
 	 *
