@@ -31,6 +31,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
 import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
+import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 import org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy;
 import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
 import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
@@ -44,6 +45,7 @@ import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestEx
  * section about configuration parameters
  */
 @API(status = STABLE, since = "6.1")
+@ConfigurationParameterGroup("junit.jupiter")
 public final class Constants {
 
 	/**

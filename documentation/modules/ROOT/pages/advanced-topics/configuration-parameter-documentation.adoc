@@ -2,8 +2,8 @@
 
 Authors of test engines and JUnit Jupiter extensions may generate a machine-readable
 overview of configuration parameters by annotating their configuration parameters
-with `{PlatformConfigurationParameter}` from the
-`org.junit.platform:junit-platform-configuration-api` artifact.
+with `{PlatformConfigurationParameter}` and `{PlatformConfigurationParameterGroup}` from
+the `org.junit.platform:junit-platform-configuration-api` artifact.
 
 [source,java,indent=0]
 .A small example
@@ -23,8 +23,8 @@ or provide code completion by IDEs. An example is shown below.
 include::example$junit-platform-configuration-metadata.json[]
 ----
 
-The first paragraph from the Javadoc will be used to describe the property. If the first
-paragraph contains tags these will be sensibly replaced.
+The first paragraph from the Javadoc will be used to describe the property or group. If
+the first paragraph contains tags these will be sensibly replaced.
 
 When the `type` is an enum or interface, hints will be automatically generated. The first
 paragraph of the enum constant is used to describe the enum value. If the allowed values

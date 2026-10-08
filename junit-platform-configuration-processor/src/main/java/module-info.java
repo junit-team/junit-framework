@@ -8,59 +8,22 @@
  * https://www.eclipse.org/legal/epl-v20.html
  */
 
-/// Annotation processor to generate machine-readable configuration parameter
-/// documentation.
-///
-/// The annotation processor all configuration parameters marked with
-/// {@link org.junit.platform.configuration.api.ConfigurationParameter} to
-/// {@value org.junit.platform.configuration.processor.ConfigurationMetadataAnnotationProcessor#METADATA_PATH}
-/// in [Spring Boot's Configuration Metadata](https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html)
-/// format. This enables IDEs and other tools to process and validate Test
-/// Engine configuration.
-///
-/// <h4>Usage</h4>
-///
-/// Given this minimal example:
-///
-/// <pre>{@code
-/// /**
-///   * A brief multi-line description of
-///   * this property: {@value}.
-///   *
-///   * <p>Followed by an additional paragraph.
-///   */
-///  @ConfigurationParameter
-///  public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
-///
-/// }</pre>
-///
-/// Processing the annotations with {@code org.junit.platform:junit-platform-configuration-processor}
-/// will produce:
-///
-/// <pre>{@code
-/// {
-///   "properties": [
-/// 	    {
-/// 	  "name": "org.example.property",
-///       "description": "A brief multi-line description of this property.",
-/// 	  "sourceType": "com.example.app.Constants"
-///    }
-///   ]
-/// }
-/// }
-/// </pre>
-///
-/// Of note is that the first paragraph from the doc string will be used
-/// to describe the property. If the first paragraph ends with
-/// {@code : {@value}.} or {@code : {@value}} it will be replaced with
-/// {@code .}. Likewise {@code {@code}} and {@code {@link}} tags are replaced
-/// with plain text versions.
-///
-/// <h5>Hints</h5>
-///
-/// When the {@linkplain  org.junit.platform.configuration.api.ConfigurationParameter#type() type}
-/// or the type of the {@linkplain  org.junit.platform.configuration.api.ConfigurationParameter#defaultValue() default value}
-/// is a boolean, enum, or interface, hints are automatically generated.
+/**
+ * Annotation processor to generate machine-readable configuration parameter
+ * documentation.
+ *
+ * <p>The annotation processor processes
+ * {@link org.junit.platform.configuration.api.ConfigurationParameter ConfigurationParameter} and
+ * {@link org.junit.platform.configuration.api.ConfigurationParameterGroup ConfigurationParameterGroup}
+ * annotations to {@value org.junit.platform.configuration.processor.ConfigurationMetadataAnnotationProcessor#METADATA_PATH}
+ * in <a href="https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html">
+ * Spring Boot's Configuration Metadata</a> format. This enables IDEs and
+ * other tools to process and validate Test Engine configuration.
+ *
+ * <p>Please refer to the
+ * <a href="https://docs.junit.org/current/advanced-topics/configuration-parameter-documentation.html">
+ * JUnit User Guide</a> for usage examples.
+ */
 module org.junit.platform.configuration.processor {
 	requires static transitive org.jspecify;
 	requires static transitive org.apiguardian.api;

@@ -30,6 +30,7 @@ import org.junit.platform.configuration.testcases.Defaults;
 import org.junit.platform.configuration.testcases.Deprecation;
 import org.junit.platform.configuration.testcases.DeprecationWithDetails;
 import org.junit.platform.configuration.testcases.Documented;
+import org.junit.platform.configuration.testcases.DocumentedGroup;
 import org.junit.platform.configuration.testcases.DocumentedWithAtCode;
 import org.junit.platform.configuration.testcases.DocumentedWithAtLink;
 import org.junit.platform.configuration.testcases.DocumentedWithAtLinkPlain;
@@ -38,6 +39,10 @@ import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
 import org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs;
+import org.junit.platform.configuration.testcases.Empty;
+import org.junit.platform.configuration.testcases.Group;
+import org.junit.platform.configuration.testcases.GroupEmpty;
+import org.junit.platform.configuration.testcases.GroupWithConfigurationParameter;
 import org.junit.platform.configuration.testcases.Hints;
 import org.junit.platform.configuration.testcases.HintsTypeBooleanWithPermitsAdditionalValues;
 import org.junit.platform.configuration.testcases.HintsTypeEnumWithPermitsAdditionalValues;
@@ -72,19 +77,19 @@ class ConfigurationMetadataAnnotationProcessorTests {
 
 	final Path sourceDirectory = Path.of("src/test/java");
 
+	@TempDir
+	Path outputDirectory;
+
+	TestCompiler compiler;
+
+	@BeforeEach
+	void setup() {
+		var processor = new ConfigurationMetadataAnnotationProcessor();
+		compiler = new TestCompiler(sourceDirectory, outputDirectory, processor);
+	}
+
 	@Nested
 	class ConfigurationParameter {
-
-		@TempDir
-		Path outputDirectory;
-
-		TestCompiler compiler;
-
-		@BeforeEach
-		void setup() {
-			var processor = new ConfigurationMetadataAnnotationProcessor();
-			compiler = new TestCompiler(sourceDirectory, outputDirectory, processor);
-		}
 
 		@Test
 		void none() {
@@ -849,6 +854,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void mustBeNonEmpty() {
+			var result = compiler.compile(Empty.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameter annotated field must have a non-empty string value");
+		}
+
+		@Test
 		void mustHaveExactlyOneSetOfDefaults() {
 			var result = compiler.compile(DefaultDifferentSets.class);
 			assertThat(result.diagnostics()) //
@@ -872,18 +885,80 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					.contains("@ConfigurationParameter must declare a type when the default value is a classValue");
 		}
 
-		private void assertMetaDataIsEqualTo(@Language("JSON") String json) {
-			assertThat(metaData()).isEqualToNormalizingWhitespace(json);
+	}
+
+	@Nested
+	class ConfigurationParameterGroup {
+
+		@Test
+		void minimal() {
+			compiler.compileWithoutError(Group.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "groups": [
+						{
+						  "name": "org.example",
+						  "sourceType": "org.junit.platform.configuration.testcases.Group"
+						}
+					  ]
+					}""");
 		}
 
-		private String metaData() throws UncheckedIOException {
-			try {
-				var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
-				return Files.readString(metaDataPath);
-			}
-			catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
+		@Test
+		void withConfigurationParameter() {
+			compiler.compileWithoutError(GroupWithConfigurationParameter.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "groups": [
+						{
+						  "name": "org.example",
+						  "sourceType": "org.junit.platform.configuration.testcases.GroupWithConfigurationParameter"
+						}
+					  ],
+					  "properties": [
+						{
+						  "name": "org.example.property",
+						  "sourceType": "org.junit.platform.configuration.testcases.GroupWithConfigurationParameter"
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void documented() {
+			compiler.compileWithoutError(DocumentedGroup.class);
+			assertMetaDataIsEqualTo("""
+					{
+					  "groups": [
+						{
+						  "name": "org.example",
+						  "sourceType": "org.junit.platform.configuration.testcases.DocumentedGroup",
+						  "description": "Collection of configuration constants for the example project."
+						}
+					  ]
+					}""");
+		}
+
+		@Test
+		void mustBeNonEmpty() {
+			var result = compiler.compile(GroupEmpty.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameterGroup.value must be non-empty");
+		}
+	}
+
+	private void assertMetaDataIsEqualTo(@Language("JSON") String json) {
+		assertThat(metaData()).isEqualToNormalizingWhitespace(json);
+	}
+
+	private String metaData() throws UncheckedIOException {
+		try {
+			var metaDataPath = outputDirectory.resolve(expectedMetadataPath);
+			return Files.readString(metaDataPath);
+		}
+		catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 

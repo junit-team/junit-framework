@@ -86,6 +86,7 @@ asciidoc:
     PackageSelector: '{javadoc-root}/org.junit.platform.engine/org/junit/platform/engine/discovery/PackageSelector.html[PackageSelector]'
     ParallelExecutionConfigurationStrategy: '{javadoc-root}/org.junit.platform.engine/org/junit/platform/engine/support/hierarchical/ParallelExecutionConfigurationStrategy.html[ParallelExecutionConfigurationStrategy]'
     PlatformConfigurationParameter: '{javadoc-root}/org.junit.platform.configuration.api/org/junit/platform/configuration/api/ConfigurationParameter.html[ConfigurationParameter]'
+    PlatformConfigurationParameterGroup: '{javadoc-root}/org.junit.platform.configuration.api/org/junit/platform/configuration/api/ConfigurationParameterGroup.html[ConfigurationParameterGroup]'
     PlatformConfigurationParameterHints: '{javadoc-root}/org.junit.platform.configuration.api/org/junit/platform/configuration/api/ConfigurationParameter.html#hints()[ConfigurationParameter.hints()]'
     UniqueIdSelector: '{javadoc-root}/org.junit.platform.engine/org/junit/platform/engine/discovery/UniqueIdSelector.html[UniqueIdSelector]'
     UriSelector: '{javadoc-root}/org.junit.platform.engine/org/junit/platform/engine/discovery/UriSelector.html[UriSelector]'
