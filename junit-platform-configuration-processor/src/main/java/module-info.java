@@ -18,7 +18,9 @@
 /// format. This enables IDEs and other tools to process and validate Test
 /// Engine configuration.
 ///
-/// For further details and examples see <a href="https://docs.junit.org/current/advanced-topics/configuration-parameter-documentation.html">User Guide</a>.
+/// Please refer to the
+/// <a href="https://docs.junit.org/current/advanced-topics/configuration-parameter-documentation.html">JUnit User Guide</a>
+/// for usage examples.
 module org.junit.platform.configuration.processor {
 	requires static transitive org.jspecify;
 	requires static transitive org.apiguardian.api;
