@@ -24,12 +24,18 @@ final class ConfigurationMetadata {
 
 	private final List<Hint> hints = new ArrayList<>();
 
+	private final List<Group> groups = new ArrayList<>();
+
 	List<Property> properties() {
 		return properties;
 	}
 
-	public List<Hint> hints() {
+	List<Hint> hints() {
 		return hints;
+	}
+
+	List<Group> groups() {
+		return groups;
 	}
 
 	void addProperty(Property property) {
@@ -38,6 +44,10 @@ final class ConfigurationMetadata {
 
 	void addHint(Hint hint) {
 		hints.add(hint);
+	}
+
+	void addGroup(Group group) {
+		groups.add(group);
 	}
 
 	record Property( //
@@ -83,6 +93,14 @@ final class ConfigurationMetadata {
 
 	record Parameters( //
 			String target //
+	) {
+
+	}
+
+	record Group( //
+			String name, //
+			String sourceType, //
+			@Nullable String description //
 	) {
 
 	}

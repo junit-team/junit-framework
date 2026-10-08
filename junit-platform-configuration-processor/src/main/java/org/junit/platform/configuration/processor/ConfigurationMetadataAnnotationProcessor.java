@@ -37,11 +37,13 @@ import jakarta.json.stream.JsonGenerator;
  * @since 6.2
  */
 @API(status = API.Status.EXPERIMENTAL, since = "6.2")
-@SupportedAnnotationTypes("org.junit.platform.configuration.api.ConfigurationParameter")
+@SupportedAnnotationTypes({ "org.junit.platform.configuration.api.ConfigurationParameter",
+		"org.junit.platform.configuration.api.ConfigurationParameterGroup" })
 public final class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor {
 	public static final String METADATA_PATH = "META-INF/junit-platform-configuration-metadata.json";
 	private @Nullable ConfigurationMetadata metaData;
 	private @Nullable ConfigurationParameterHandler configurationParameterHandler;
+	private @Nullable ConfigurationParameterGroupHandler configurationParameterGroupHandler;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment environment) {
@@ -49,6 +51,8 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 		this.metaData = new ConfigurationMetadata();
 		this.configurationParameterHandler = new ConfigurationParameterHandler(metaData,
 			processingEnv.getElementUtils(), processingEnv.getMessager(), processingEnv.getTypeUtils());
+		this.configurationParameterGroupHandler = new ConfigurationParameterGroupHandler(metaData,
+			processingEnv.getElementUtils(), processingEnv.getMessager());
 	}
 
 	@Override
@@ -60,6 +64,7 @@ public final class ConfigurationMetadataAnnotationProcessor extends AbstractProc
 	@SuppressWarnings("DoNotClaimAnnotations")
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		requireNonNull(configurationParameterHandler).process(roundEnv);
+		requireNonNull(configurationParameterGroupHandler).process(roundEnv);
 
 		if (roundEnv.processingOver()) {
 			writeMetaData();

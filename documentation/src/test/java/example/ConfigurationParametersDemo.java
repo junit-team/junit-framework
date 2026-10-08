@@ -12,8 +12,14 @@ package example;
 
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
+import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 
 // tag::user_guide[]
+
+/**
+ * Collection of configuration parameters for the example project.
+ */
+@ConfigurationParameterGroup("org.example")
 public class ConfigurationParametersDemo {
 
 	enum ExecutionMode {

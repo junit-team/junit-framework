@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
@@ -98,30 +97,7 @@ final class ConfigurationParameterHandler {
 
 	private @Nullable String processDescription(ConfigurationParameterAnnotatedField field) {
 		var docComment = elementUtils.getDocComment(field.element());
-		return extractFirstParagraph(docComment);
-	}
-
-	private static @Nullable String extractFirstParagraph(@Nullable String docComment) {
-		if (docComment == null) {
-			return null;
-		}
-		// matches either a new paragraph, header or Javadoc tag without content (e.g. @see).
-		var matcher = Pattern.compile("<p>|<h\\d>|[^{]@[a-z]+").matcher(docComment);
-		var firstParagraph = !matcher.find() ? docComment : docComment.substring(0, matcher.start());
-		return firstParagraph //
-				// Replace newlines with space
-				.replaceAll("[\n\r]", " ") //
-				// Merge multiple spaces
-				.replaceAll(" +", " ") //
-				// Replace the `: {@value}` conventional syntax.
-				.replaceAll(": \\{@value}\\.?", ".") //
-				// Replace the `{@code example}` syntax.
-				.replaceAll("\\{@code (.+?)}", "$1") //
-				// Replace the `{@link(plain) reference}` syntax.
-				.replaceAll("\\{@link(?:plain)? ([^ ]+?)}", "$1") //
-				// Replace the `{@link(plain) reference plain}` syntax.
-				.replaceAll("\\{@link(?:plain)? [^ ]+ (.+?)}", "$1") //
-				.trim();
+		return DocumentationUtil.extractFirstParagraph(docComment);
 	}
 
 	private String processSourceType(ConfigurationParameterAnnotatedField field) {
@@ -272,6 +248,6 @@ final class ConfigurationParameterHandler {
 
 	private @Nullable String processDescription(Element element) {
 		var docComment = elementUtils.getDocComment(element);
-		return extractFirstParagraph(docComment);
+		return DocumentationUtil.extractFirstParagraph(docComment);
 	}
 }

@@ -16,6 +16,7 @@ import static org.apiguardian.api.API.Status.MAINTAINED;
 import org.apiguardian.api.API;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
+import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 
 /**
  * Collection of constants related to the {@link VintageTestEngine}.
@@ -25,6 +26,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter.Value;
  */
 @Deprecated(since = "6.0")
 @API(status = DEPRECATED, since = "6.0")
+@ConfigurationParameterGroup("junit.vintage")
 public final class Constants {
 
 	/**

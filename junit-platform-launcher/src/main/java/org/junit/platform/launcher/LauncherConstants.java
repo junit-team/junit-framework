@@ -18,6 +18,7 @@ import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.configuration.api.ConfigurationParameter;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
+import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
@@ -31,6 +32,7 @@ import org.junit.platform.launcher.core.LauncherPhase;
  * @see org.junit.platform.engine.ConfigurationParameters
  */
 @API(status = STABLE, since = "1.7")
+@ConfigurationParameterGroup("junit.platform")
 public class LauncherConstants {
 
 	/**

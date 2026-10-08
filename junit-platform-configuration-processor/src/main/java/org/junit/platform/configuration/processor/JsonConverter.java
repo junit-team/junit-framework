@@ -43,6 +43,10 @@ final class JsonConverter {
 		if (!hints.isEmpty()) {
 			builder.add("hints", toJsonArray(hints, this::toJsonObject));
 		}
+		var groups = metaData.groups();
+		if (!groups.isEmpty()) {
+			builder.add("groups", toJsonArray(groups, this::toJsonObject));
+		}
 
 		return builder.build();
 	}
@@ -141,6 +145,18 @@ final class JsonConverter {
 	private JsonObject toJsonObject(Parameters parameters) {
 		var builder = factory.createObjectBuilder();
 		builder.add("target", parameters.target());
+		return builder.build();
+	}
+
+	private JsonObject toJsonObject(ConfigurationMetadata.Group group) {
+		var builder = factory.createObjectBuilder();
+		builder.add("name", group.name());
+		builder.add("sourceType", group.sourceType());
+
+		var description = group.description();
+		if (description != null) {
+			builder.add("description", description);
+		}
 		return builder.build();
 	}
 
