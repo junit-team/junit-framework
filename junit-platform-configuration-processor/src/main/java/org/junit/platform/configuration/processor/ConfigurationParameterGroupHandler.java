@@ -46,25 +46,18 @@ final class ConfigurationParameterGroupHandler {
 			messager.printMessage(ERROR, "@ConfigurationParameterGroup annotated element was not a type", element);
 			return;
 		}
-		var name = processName(typeElement);
-		if (name == null) {
+
+		var annotationMirror = requireNonNull(getAnnotationMirror(typeElement, ConfigurationParameterGroup.class));
+		var values = toMap(annotationMirror);
+		var name = (String) values.get("value");
+		if (name == null || name.isEmpty()) {
+			messager.printMessage(ERROR, "@ConfigurationParameterGroup.value must be non-empty", typeElement);
 			return;
 		}
+
 		var sourceType = processSourceType(typeElement);
 		var description = processDescription(typeElement);
 		metaData.addGroup(new Group(name, sourceType, description));
-	}
-
-	private @Nullable String processName(TypeElement element) {
-		var annotationMirror = requireNonNull(getAnnotationMirror(element, ConfigurationParameterGroup.class));
-		var values = toMap(annotationMirror);
-
-		String name = (String) values.get("value");
-		if (name == null || name.isEmpty()) {
-			messager.printMessage(ERROR, "@ConfigurationParameterGroup.value must not be empty", element);
-			return null;
-		}
-		return name;
 	}
 
 	private @Nullable String processDescription(TypeElement element) {

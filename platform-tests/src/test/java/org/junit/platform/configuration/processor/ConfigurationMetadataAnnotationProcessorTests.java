@@ -39,7 +39,9 @@ import org.junit.platform.configuration.testcases.DocumentedWithAtValue;
 import org.junit.platform.configuration.testcases.DocumentedWithHeader;
 import org.junit.platform.configuration.testcases.DocumentedWithMultiLines;
 import org.junit.platform.configuration.testcases.DocumentedWithMultipleParagraphs;
+import org.junit.platform.configuration.testcases.Empty;
 import org.junit.platform.configuration.testcases.Group;
+import org.junit.platform.configuration.testcases.GroupEmpty;
 import org.junit.platform.configuration.testcases.GroupWithConfigurationParameter;
 import org.junit.platform.configuration.testcases.Hints;
 import org.junit.platform.configuration.testcases.HintsTypeBooleanWithPermitsAdditionalValues;
@@ -852,6 +854,14 @@ class ConfigurationMetadataAnnotationProcessorTests {
 		}
 
 		@Test
+		void mustBeNonEmpty() {
+			var result = compiler.compile(Empty.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameter annotated field must have a non-empty string value");
+		}
+
+		@Test
 		void mustHaveExactlyOneSetOfDefaults() {
 			var result = compiler.compile(DefaultDifferentSets.class);
 			assertThat(result.diagnostics()) //
@@ -929,6 +939,13 @@ class ConfigurationMetadataAnnotationProcessorTests {
 					}""");
 		}
 
+		@Test
+		void mustBeNonEmpty() {
+			var result = compiler.compile(GroupEmpty.class);
+			assertThat(result.diagnostics()) //
+					.extracting(diagnostic -> diagnostic.getMessage(Locale.ROOT)) //
+					.contains("@ConfigurationParameterGroup.value must be non-empty");
+		}
 	}
 
 	private void assertMetaDataIsEqualTo(@Language("JSON") String json) {

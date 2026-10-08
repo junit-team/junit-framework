@@ -71,6 +71,13 @@ final class ConfigurationParameterHandler {
 				element);
 			return;
 		}
+
+		if (name.isEmpty()) {
+			messager.printMessage(ERROR, "@ConfigurationParameter annotated field must have a non-empty string value",
+				element);
+			return;
+		}
+
 		var description = processDescription(field);
 		var sourceType = processSourceType(field);
 		var defaults = processDefaults(field);
