@@ -12,6 +12,7 @@ junit4 = "4.13.2"
 junit4Min = "4.12"
 ktlint = "1.8.0"
 log4j = "2.26.1"
+mavenCompiler = "3.16.0"
 opentest4j = "1.3.0"
 openTestReporting = "0.2.7"
 snapshotTests = "1.11.0"
@@ -58,6 +59,7 @@ log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "lo
 log4j-jul = { module = "org.apache.logging.log4j:log4j-jul", version.ref = "log4j" }
 maven = { module = "org.apache.maven:apache-maven", version = "3.10.0" }
 mavenSurefirePlugin = { module = "org.apache.maven.plugins:maven-surefire-plugin", version.ref = "surefire" }
+mavenCompilerPlugin = { module = "org.apache.maven.plugins:maven-compiler-plugin", version.ref = "mavenCompiler" }
 memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version = "2.8.2" }
 mockito-bom = { module = "org.mockito:mockito-bom", version = "5.24.0" }
 mockito-core = { module = "org.mockito:mockito-core" }

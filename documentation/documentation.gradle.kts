@@ -498,6 +498,7 @@ tasks {
 				"apiguardian-version" to libs.versions.apiguardian.get(),
 				"ota4j-version" to libs.versions.opentest4j.get(),
 				"surefire-version" to libs.versions.surefire.get(),
+				"maven-compiler-version" to libs.versions.mavenCompiler.get(),
 				"release-branch" to releaseBranch,
 				"jdk-javadoc-base-url" to jdkJavadocBaseUrl
 			)
