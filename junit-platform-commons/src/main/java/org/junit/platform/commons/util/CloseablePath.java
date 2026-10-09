@@ -56,11 +56,11 @@ final class CloseablePath implements Closeable {
 
 	private static CloseablePath createForJarScheme(URI uri, FileSystemProvider fileSystemProvider) {
 		var jarUri = JarUri.parse(uri);
-		var fileSystem = fileSystemProvider.newFileSystem(Path.of(jarUri.nestedUrl));
+		var fileSystem = fileSystemProvider.newFileSystem(Path.of(jarUri.nestedUri));
 		return new CloseablePath(fileSystem.getPath(jarUri.entry), fileSystem);
 	}
 
-	record JarUri(URI nestedUrl, String entry) {
+	record JarUri(URI nestedUri, String entry) {
 		static JarUri parse(URI uri) {
 			// Parsing: jar:<url>!/[<entry>], see java.net.JarURLConnection
 			Preconditions.condition(JAR_URI_SCHEME.equals(uri.getScheme()),

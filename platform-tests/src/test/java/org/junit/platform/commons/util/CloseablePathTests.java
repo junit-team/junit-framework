@@ -83,12 +83,12 @@ class CloseablePathTests {
 	void parsesRecursiveJarUri() {
 		var jarNestedFileWithEntry = JarUri.parse(
 			URI.create("jar:nested:file:/example.jar!/BOOT-INF/classes!/com/example/Example.class"));
-		assertThat(jarNestedFileWithEntry.nestedUrl()).isEqualTo(
+		assertThat(jarNestedFileWithEntry.nestedUri()).isEqualTo(
 			URI.create("nested:file:/example.jar!/BOOT-INF/classes"));
 		assertThat(jarNestedFileWithEntry.entry()).isEqualTo("/com/example/Example.class");
 
 		var jarNestedFile = JarUri.parse(URI.create("jar:nested:file:/example.jar!/BOOT-INF/classes"));
-		assertThat(jarNestedFile.nestedUrl()).isEqualTo(URI.create("nested:file:/example.jar"));
+		assertThat(jarNestedFile.nestedUri()).isEqualTo(URI.create("nested:file:/example.jar"));
 		assertThat(jarNestedFile.entry()).isEqualTo("/BOOT-INF/classes");
 	}
 
