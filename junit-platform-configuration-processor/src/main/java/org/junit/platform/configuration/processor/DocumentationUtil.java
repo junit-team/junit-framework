@@ -35,6 +35,8 @@ final class DocumentationUtil {
 				.replaceAll("\\{@link(?:plain)? ([^ ]+?)}", "$1") //
 				// Replace the `{@link(plain) reference plain}` syntax.
 				.replaceAll("\\{@link(?:plain)? [^ ]+ (.+?)}", "$1") //
+				// Replace all emphasis tags
+				.replace("<em>", "").replace("</em>", "") //
 				.trim();
 	}
 }
