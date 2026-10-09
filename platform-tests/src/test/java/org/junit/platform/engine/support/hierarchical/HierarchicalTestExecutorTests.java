@@ -623,8 +623,8 @@ class HierarchicalTestExecutorTests {
 		var dynamicTestDescriptor = spy(new MyLeaf(leafUniqueId.append("dynamic", "child")));
 		root.addChild(child);
 
-		// The dynamic test finishes only once the child either awaits it or calls
-		// after() without awaiting it.
+		// Released by whichever comes first: the child awaiting the dynamic test
+		// or the child calling after() without awaiting it.
 		var awaitedOrAbandoned = new CountDownLatch(1);
 		var exceptionInExecute = new RuntimeException("execute");
 		when(child.execute(any(), any())).thenAnswer(useDynamicTestExecutor(executor -> {
