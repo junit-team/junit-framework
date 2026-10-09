@@ -623,14 +623,14 @@ class HierarchicalTestExecutorTests {
 		root.addChild(child);
 
 		// The dynamic test finishes only once the child awaits it
-		var awaitedOrAbandoned = new CountDownLatch(1);
+		var awaited = new CountDownLatch(1);
 		var exceptionInExecute = new RuntimeException("execute");
 		when(child.execute(any(), any())).thenAnswer(useDynamicTestExecutor(executor -> {
 			executor.execute(dynamicTestDescriptor);
 			throw exceptionInExecute;
 		}));
 		when(dynamicTestDescriptor.execute(any(), any())).thenAnswer(invocation -> {
-			awaitedOrAbandoned.await();
+			awaited.await();
 			return invocation.getArgument(0);
 		});
 
@@ -640,7 +640,7 @@ class HierarchicalTestExecutorTests {
 			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, 2));
 
 		try (var executorService = ParallelHierarchicalTestExecutorServiceFactory.create(parameters)) {
-			createExecutor(countDownOnAwait(executorService, dynamicTestDescriptor, awaitedOrAbandoned)) //
+			createExecutor(countDownOnAwait(executorService, dynamicTestDescriptor, awaited)) //
 					.execute().get();
 		}
 
