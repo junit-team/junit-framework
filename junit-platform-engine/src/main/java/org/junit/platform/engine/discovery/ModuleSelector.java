@@ -49,6 +49,13 @@ public final class ModuleSelector implements DiscoverySelector {
 		this.moduleName = moduleName;
 	}
 
+	@API(status = EXPERIMENTAL, since = "6.2")
+	public ModuleSelector resolveIfNameBased(ModuleLayer layer) {
+		if (module != null)
+			return this;
+		return new ModuleSelector(layer.findModule(moduleName).orElseThrow());
+	}
+
 	/**
 	 * {@return the selected {@link Module}, if available}
 	 *

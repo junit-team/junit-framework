@@ -13,7 +13,6 @@ package org.junit.platform.console.command;
 import static org.junit.platform.engine.discovery.ClassNameFilter.excludeClassNamePatterns;
 import static org.junit.platform.engine.discovery.ClassNameFilter.includeClassNamePatterns;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasspathRoots;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectModules;
 import static org.junit.platform.engine.discovery.PackageNameFilter.excludePackageNames;
 import static org.junit.platform.engine.discovery.PackageNameFilter.includePackageNames;
 import static org.junit.platform.launcher.EngineFilter.excludeEngines;
@@ -36,7 +35,6 @@ import java.util.stream.Stream;
 
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.junit.platform.commons.util.ModuleUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.console.options.TestDiscoveryOptions;
@@ -44,8 +42,10 @@ import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.discovery.ClassSelector;
 import org.junit.platform.engine.discovery.ClasspathRootSelector;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.discovery.IterationSelector;
 import org.junit.platform.engine.discovery.MethodSelector;
+import org.junit.platform.engine.discovery.ModuleSelector;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 
 /**
@@ -67,7 +67,12 @@ class DiscoveryRequestCreator {
 	}
 
 	private static List<? extends DiscoverySelector> createDiscoverySelectors(TestDiscoveryOptions options) {
-		List<DiscoverySelector> explicitSelectors = options.getExplicitSelectors();
+		// Replace each name-based module selector with resolving it to a module-based selector
+		ModuleLayer layer = options.getModuleLayer();
+		List<DiscoverySelector> explicitSelectors = options.getExplicitSelectors().stream() //
+				.map(selector -> selector instanceof ModuleSelector moduleSelector //
+						? moduleSelector.resolveIfNameBased(layer) //
+						: selector).toList();
 		if (options.isScanClasspath()) {
 			Preconditions.condition(explicitSelectors.isEmpty(),
 				"Scanning the classpath and using explicit selectors at the same time is not supported");
@@ -76,7 +81,10 @@ class DiscoveryRequestCreator {
 		if (options.isScanModulepath()) {
 			Preconditions.condition(explicitSelectors.isEmpty(),
 				"Scanning the module-path and using explicit selectors at the same time is not supported");
-			return selectModules(ModuleUtils.findAllNonSystemBootModuleNames());
+			return layer.modules().stream() //
+					.filter(module -> module.getClassLoader() != null) // always skip system/boot modules
+					.map(DiscoverySelectors::selectModule) //
+					.toList();
 		}
 		return Preconditions.notEmpty(explicitSelectors,
 			"Please specify an explicit selector option or use --scan-class-path or --scan-modules");
