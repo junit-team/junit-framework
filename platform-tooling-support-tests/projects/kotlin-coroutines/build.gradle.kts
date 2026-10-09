@@ -1,5 +1,5 @@
 plugins {
-	kotlin("jvm") version "2.4.20"
+	kotlin("jvm") version "2.4.21"
 }
 
 val junitVersion = providers.gradleProperty("junitVersion").orNull
