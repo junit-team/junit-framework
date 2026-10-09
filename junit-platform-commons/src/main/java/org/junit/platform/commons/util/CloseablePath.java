@@ -14,19 +14,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-
-import org.jspecify.annotations.Nullable;
 
 /**
  * @since 1.0
@@ -41,18 +33,16 @@ final class CloseablePath implements Closeable {
 	private static final Closeable NULL_CLOSEABLE = () -> {
 	};
 
-	private static final ConcurrentMap<URI, ManagedFileSystem> MANAGED_FILE_SYSTEMS = new ConcurrentHashMap<>();
-
 	private final AtomicBoolean closed = new AtomicBoolean();
 
 	private final Path path;
 	private final Closeable delegate;
 
-	static CloseablePath create(URI uri) throws URISyntaxException {
+	static CloseablePath create(URI uri) {
 		return create(uri, FileSystemProvider.DEFAULT);
 	}
 
-	static CloseablePath create(URI uri, FileSystemProvider fileSystemProvider) throws URISyntaxException {
+	static CloseablePath create(URI uri, FileSystemProvider fileSystemProvider) {
 		if (JAR_URI_SCHEME.equals(uri.getScheme())) {
 			return createForJarScheme(uri, fileSystemProvider);
 		}
@@ -64,45 +54,22 @@ final class CloseablePath implements Closeable {
 		return new CloseablePath(Path.of(uri), NULL_CLOSEABLE);
 	}
 
-	private static CloseablePath createForJarScheme(URI uri, FileSystemProvider fileSystemProvider)
-			throws URISyntaxException {
-		// Parsing: jar:<url>!/[<entry>], see java.net.JarURLConnection
-		var uriString = uri.toString();
-		int lastJarUriSeparator = uriString.lastIndexOf(JAR_URI_SEPARATOR);
-		var jarUri = new URI(uriString.substring(0, lastJarUriSeparator));
-		var jarEntry = uriString.substring(lastJarUriSeparator + 1);
-		var schemeSpecificPart = jarUri.getRawSchemeSpecificPart();
-		Function<FileSystem, Path> pathProvider = fileSystem -> fileSystem.getPath(jarEntry);
-		if (schemeSpecificPart.startsWith("file:")) {
-			var path = schemeSpecificPart.substring("file:".length());
-			var fileSystem = fileSystemProvider.newFileSystem(Path.of(path));
-			return new CloseablePath(pathProvider.apply(fileSystem), fileSystem);
-		}
-		return createForManagedJarFileSystem(jarUri, pathProvider, fileSystemProvider);
+	private static CloseablePath createForJarScheme(URI uri, FileSystemProvider fileSystemProvider) {
+		var jarUri = JarUri.parse(uri);
+		var fileSystem = fileSystemProvider.newFileSystem(Path.of(jarUri.nestedUrl));
+		return new CloseablePath(fileSystem.getPath(jarUri.entry), fileSystem);
 	}
 
-	private static CloseablePath createForManagedJarFileSystem(URI jarUri, Function<FileSystem, Path> pathProvider,
-			FileSystemProvider fileSystemProvider) {
-		// Matches the keys used in ZipFileSystemProvider.filesystems
-		var realJarUri = resolveJarUri(jarUri);
-		var managedFileSystem = MANAGED_FILE_SYSTEMS.compute(realJarUri,
-			(__, oldValue) -> oldValue == null ? new ManagedFileSystem(jarUri, fileSystemProvider.newFileSystem(jarUri))
-					: oldValue.retain());
-		var path = pathProvider.apply(managedFileSystem.fileSystem);
-		return new CloseablePath(path,
-			() -> MANAGED_FILE_SYSTEMS.compute(realJarUri, (__, ___) -> managedFileSystem.release()));
-	}
-
-	private static URI resolveJarUri(URI jarUri) {
-		try {
-			var spec = jarUri.getRawSchemeSpecificPart();
-			// ZipFileSystemProvider uses both toAbsolutePath and toRealPath
-			var realPath = Path.of(new URI(spec)).toAbsolutePath().toRealPath();
-			return new URI(JAR_URI_SCHEME + ':' + realPath.toUri());
-		}
-		catch (URISyntaxException | IOException | IllegalArgumentException | FileSystemNotFoundException ignored) {
-			// fall back to the original URI
-			return jarUri;
+	record JarUri(URI nestedUrl, String entry) {
+		static JarUri parse(URI uri) {
+			// Parsing: jar:<url>!/[<entry>], see java.net.JarURLConnection
+			Preconditions.condition(JAR_URI_SCHEME.equals(uri.getScheme()),
+				() -> "Unsupported URI scheme: " + uri.getScheme());
+			var schemeSpecificPart = uri.getRawSchemeSpecificPart();
+			int lastJarUriSeparator = schemeSpecificPart.lastIndexOf(JAR_URI_SEPARATOR);
+			var nestedUri = URI.create(schemeSpecificPart.substring(0, lastJarUriSeparator));
+			var jarEntry = schemeSpecificPart.substring(lastJarUriSeparator + 1);
+			return new JarUri(nestedUri, jarEntry);
 		}
 	}
 
@@ -122,53 +89,10 @@ final class CloseablePath implements Closeable {
 		}
 	}
 
-	private static class ManagedFileSystem {
-
-		private final AtomicInteger referenceCount = new AtomicInteger(1);
-		private final FileSystem fileSystem;
-		private final URI jarUri;
-
-		ManagedFileSystem(URI jarUri, FileSystem fileSystem) {
-			this.jarUri = jarUri;
-			this.fileSystem = fileSystem;
-		}
-
-		private ManagedFileSystem retain() {
-			referenceCount.incrementAndGet();
-			return this;
-		}
-
-		private @Nullable ManagedFileSystem release() {
-			if (referenceCount.decrementAndGet() == 0) {
-				close();
-				return null;
-			}
-			return this;
-		}
-
-		private void close() {
-			try {
-				fileSystem.close();
-			}
-			catch (IOException e) {
-				throw new UncheckedIOException("Failed to close file system for " + jarUri, e);
-			}
-		}
-	}
-
 	interface FileSystemProvider {
 
+		@SuppressWarnings("Convert2Lambda") // to support spying using Mockito
 		FileSystemProvider DEFAULT = new FileSystemProvider() {
-			@Override
-			public FileSystem newFileSystem(URI uri) {
-				try {
-					return FileSystems.newFileSystem(uri, Map.of());
-				}
-				catch (IOException e) {
-					throw new UncheckedIOException("Failed to create file system for " + uri, e);
-				}
-			}
-
 			@Override
 			public FileSystem newFileSystem(Path path) {
 				try {
@@ -179,8 +103,6 @@ final class CloseablePath implements Closeable {
 				}
 			}
 		};
-
-		FileSystem newFileSystem(URI uri);
 
 		FileSystem newFileSystem(Path path);
 	}
