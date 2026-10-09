@@ -30,6 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.google.common.jimfs.Jimfs;
 
@@ -142,6 +144,21 @@ class CloseablePathTests {
 
 		path2.close();
 		assertThat(path2.getPath().getFileSystem().isOpen()).isFalse();
+	}
+
+	@Test
+	void resolvesPercentEncodedJarEntry() throws Exception {
+		var tempDir = Files.createTempDirectory(jimfs.getPath("/"), "junit-");
+		var jar = tempDir.resolve("unicode.jar");
+		try (var out = new ZipOutputStream(Files.newOutputStream(jar))) {
+			out.putNextEntry(new ZipEntry("com/example/café/Example.class"));
+			out.closeEntry();
+		}
+
+		var path = CloseablePath.create(URI.create(jarUri(jar) + "com/example/caf%c3%a9/"));
+		paths.add(path);
+
+		assertThat(path.getPath()).exists();
 	}
 
 	private static URI jarUri(Path path) {

@@ -68,7 +68,7 @@ final class CloseablePath implements Closeable {
 			var schemeSpecificPart = uri.getRawSchemeSpecificPart();
 			int lastJarUriSeparator = schemeSpecificPart.lastIndexOf(JAR_URI_SEPARATOR);
 			var nestedUri = URI.create(schemeSpecificPart.substring(0, lastJarUriSeparator));
-			var jarEntry = schemeSpecificPart.substring(lastJarUriSeparator + 1);
+			var jarEntry = URI.create(schemeSpecificPart.substring(lastJarUriSeparator + 1)).getPath();
 			return new JarUri(nestedUri, jarEntry);
 		}
 	}
