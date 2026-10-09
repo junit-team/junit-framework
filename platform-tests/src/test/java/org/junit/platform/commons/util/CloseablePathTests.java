@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +47,7 @@ import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCo
 class CloseablePathTests {
 
 	@AutoClose
-	FileSystem jimfs = Jimfs.newFileSystem();
+	FileSystem jimfs = Jimfs.newFileSystem(Configuration.unix());
 
 	List<CloseablePath> paths = new ArrayList<>();
 
