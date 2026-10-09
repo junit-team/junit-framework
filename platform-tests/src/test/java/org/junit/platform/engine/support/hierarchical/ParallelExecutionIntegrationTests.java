@@ -192,7 +192,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	@Test
 	void testTemplateAwaitsSubmittedInvocationsWhenItsInvocationStreamFails() {
-		FailingInvocationStreamTestCase.log.clear();
+		FailingInvocationStreamTestCase.reset();
 
 		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
 			FailingInvocationStreamTestCase.class);
@@ -205,7 +205,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	@Test
 	void classTemplateAwaitsSubmittedInvocationsWhenItsInvocationStreamFails() {
-		FailingClassInvocationStreamTestCase.log.clear();
+		FailingClassInvocationStreamTestCase.reset();
 
 		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
 			FailingClassInvocationStreamTestCase.class);
@@ -220,7 +220,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	@Test
 	void afterHooksAreCalledAfterConcurrentDynamicTestsAreFinishedWhenTheTestFactoryStreamFails() {
-		FailingDynamicTestStreamTestCase.log.clear();
+		FailingDynamicTestStreamTestCase.reset();
 
 		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
 			List.of(selectMethod(FailingDynamicTestStreamTestCase.class, "testFactory")));
@@ -233,7 +233,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	@Test
 	void dynamicContainerAwaitsSubmittedChildrenWhenItsChildStreamFails() {
-		FailingDynamicTestStreamTestCase.log.clear();
+		FailingDynamicTestStreamTestCase.reset();
 
 		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
 			List.of(selectMethod(FailingDynamicTestStreamTestCase.class, "dynamicContainer")));
@@ -950,6 +950,12 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	static class FailingInvocationStreamTestCase {
 		static final List<String> log = new CopyOnWriteArrayList<>();
+		static CountDownLatch argumentsFailed = new CountDownLatch(1);
+
+		static void reset() {
+			log.clear();
+			argumentsFailed = new CountDownLatch(1);
+		}
 
 		@AfterAll
 		static void afterAll() {
@@ -959,13 +965,14 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		@ParameterizedTest
 		@org.junit.jupiter.params.provider.MethodSource("arguments")
 		void test(String argument) throws InterruptedException {
-			Thread.sleep(100);
+			argumentsFailed.await(); // finish only after the arguments source has thrown
 			log.add("test " + argument + " finished");
 		}
 
 		static Stream<String> arguments() {
 			return Stream.of("a", "b").map(argument -> {
 				if (argument.equals("b")) {
+					argumentsFailed.countDown();
 					throw new IllegalStateException("cannot provide b");
 				}
 				return argument;
@@ -978,12 +985,17 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 	static class FailingClassInvocationStreamTestCase {
 		static final List<String> log = new CopyOnWriteArrayList<>();
 
+		static void reset() {
+			log.clear();
+			FailingInvocationStreamTestCase.reset();
+		}
+
 		@Parameter
 		String argument;
 
 		@Test
 		void test() throws InterruptedException {
-			Thread.sleep(100);
+			FailingInvocationStreamTestCase.argumentsFailed.await();
 			log.add("test " + argument + " finished");
 		}
 
@@ -994,6 +1006,12 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 
 	static class FailingDynamicTestStreamTestCase {
 		static final List<String> log = new CopyOnWriteArrayList<>();
+		static CountDownLatch streamFailed = new CountDownLatch(1);
+
+		static void reset() {
+			log.clear();
+			streamFailed = new CountDownLatch(1);
+		}
 
 		@AfterEach
 		void afterEach() {
@@ -1013,10 +1031,11 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		private static Stream<DynamicTest> dynamicTests() {
 			return Stream.of("a", "b").map(name -> {
 				if (name.equals("b")) {
+					streamFailed.countDown();
 					throw new IllegalStateException("cannot create b");
 				}
 				return dynamicTest(name, () -> {
-					Thread.sleep(100);
+					streamFailed.await(); // finish only after the stream has thrown
 					log.add("dynamic test " + name + " finished");
 				});
 			});

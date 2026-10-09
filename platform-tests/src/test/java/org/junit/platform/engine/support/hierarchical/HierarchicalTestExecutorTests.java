@@ -617,12 +617,14 @@ class HierarchicalTestExecutorTests {
 		root.addChild(child);
 
 		var exceptionInExecute = new RuntimeException("execute");
+		var executeThrows = new CountDownLatch(1);
 		when(child.execute(any(), any())).thenAnswer(useDynamicTestExecutor(executor -> {
 			executor.execute(dynamicTestDescriptor);
+			executeThrows.countDown();
 			throw exceptionInExecute;
 		}));
 		when(dynamicTestDescriptor.execute(any(), any())).thenAnswer(invocation -> {
-			Thread.sleep(100);
+			executeThrows.await(); // finish only after execute() has thrown
 			return invocation.getArgument(0);
 		});
 
