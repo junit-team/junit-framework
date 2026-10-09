@@ -42,9 +42,8 @@ an `annotationProcessor`.
 [subs=attributes+]
 ----
 dependencies {
-	implementation(platform("org.junit:junit-bom:{version}"))
-	annotationProcessor("org.junit.platform:junit-platform-configuration-processor")
-	compileOnly("org.junit.platform:junit-platform-configuration-api")
+	annotationProcessor("org.junit.platform:junit-platform-configuration-processor:{version}")
+	compileOnly("org.junit.platform:junit-platform-configuration-api:{version}")
 }
 ----
 
