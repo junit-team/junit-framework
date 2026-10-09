@@ -10,14 +10,14 @@
 
 package org.junit.platform.commons.util;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.condition.OS.WINDOWS;
-import static org.junit.platform.commons.util.CloseablePath.JAR_URI_SCHEME;
+import static org.junit.platform.commons.test.ConcurrencyTestingUtils.executeConcurrently;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -30,29 +30,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import org.jspecify.annotations.NonNull;
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
+
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.platform.commons.test.ConcurrencyTestingUtils;
 import org.junit.platform.commons.util.CloseablePath.FileSystemProvider;
+import org.junit.platform.commons.util.CloseablePath.JarUri;
 import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCollector;
 
 class CloseablePathTests {
 
-	URI uri;
-	URI jarUri;
+	@AutoClose
+	FileSystem jimfs = Jimfs.newFileSystem(Configuration.unix());
 
 	List<CloseablePath> paths = new ArrayList<>();
 
+	Path jarOnDefaultFileSystem;
+
 	@BeforeEach
 	void createUris() throws Exception {
-		uri = getClass().getResource("/jartest.jar").toURI();
-		jarUri = URI.create(JAR_URI_SCHEME + ':' + uri);
+		jarOnDefaultFileSystem = Path.of(requireNonNull(getClass().getResource("/jartest.jar")).toURI());
+		assertThat(jarOnDefaultFileSystem).hasFileSystem(FileSystems.getDefault());
 	}
 
 	@AfterEach
@@ -65,137 +69,101 @@ class CloseablePathTests {
 		FileSystemProvider fileSystemProvider = mock();
 
 		FileSystem fileSystem = mock();
-		when(fileSystemProvider.newFileSystem(any())).thenReturn(fileSystem);
+		when(fileSystemProvider.newFileSystem(any(Path.class))).thenReturn(fileSystem);
 
-		URI jarFileWithEntry = URI.create("jar:file:/example.jar!/com/example/Example.class");
+		var jarFileWithEntry = URI.create("jar:file:/example.jar!/com/example/Example.class");
 		CloseablePath.create(jarFileWithEntry, fileSystemProvider).close();
 
-		URI jarFileUri = URI.create("jar:file:/example.jar");
-		verify(fileSystemProvider).newFileSystem(jarFileUri);
+		var jarFile = Path.of("/example.jar");
+		verify(fileSystemProvider).newFileSystem(jarFile);
 		verifyNoMoreInteractions(fileSystemProvider);
 	}
 
 	@Test
-	void parsesRecursiveJarUri() throws Exception {
-		FileSystemProvider fileSystemProvider = mock();
+	void parsesRecursiveJarUri() {
+		var jarNestedFileWithEntry = JarUri.parse(
+			URI.create("jar:nested:file:/example.jar!/BOOT-INF/classes!/com/example/Example.class"));
+		assertThat(jarNestedFileWithEntry.nestedUri()).isEqualTo(
+			URI.create("nested:file:/example.jar!/BOOT-INF/classes"));
+		assertThat(jarNestedFileWithEntry.entry()).isEqualTo("/com/example/Example.class");
 
-		FileSystem fileSystem = mock();
-		when(fileSystemProvider.newFileSystem(any())).thenReturn(fileSystem);
-
-		URI jarNestedFileWithEntry = URI.create(
-			"jar:nested:file:/example.jar!/BOOT-INF/classes!/com/example/Example.class");
-		CloseablePath.create(jarNestedFileWithEntry, fileSystemProvider).close();
-
-		URI jarNestedFile = URI.create("jar:nested:file:/example.jar!/BOOT-INF/classes");
-		verify(fileSystemProvider).newFileSystem(jarNestedFile);
-		verifyNoMoreInteractions(fileSystemProvider);
+		var jarNestedFile = JarUri.parse(URI.create("jar:nested:file:/example.jar!/BOOT-INF/classes"));
+		assertThat(jarNestedFile.nestedUri()).isEqualTo(URI.create("nested:file:/example.jar"));
+		assertThat(jarNestedFile.entry()).isEqualTo("/BOOT-INF/classes");
 	}
 
 	@Test
-	void createsAndClosesJarFileSystemOnceWhenCalledConcurrently() throws Exception {
+	void createsSeparateFileSystemsForJarFilesOnDefaultFileSystem() throws Exception {
 		var numThreads = 50;
+		var fileSystemProvider = spy(FileSystemProvider.DEFAULT);
 
-		FileSystemProvider fileSystemProvider = mock();
-		when(fileSystemProvider.newFileSystem(any())) //
-				.thenAnswer(invocation -> FileSystems.newFileSystem((URI) invocation.getArgument(0), Map.of()));
+		paths = executeConcurrently(numThreads,
+			() -> CloseablePath.create(jarUri(jarOnDefaultFileSystem), fileSystemProvider));
 
-		paths = ConcurrencyTestingUtils.executeConcurrently(numThreads,
-			() -> CloseablePath.create(uri, fileSystemProvider));
-		verify(fileSystemProvider, only()).newFileSystem(jarUri);
-
-		// Close all but the first path
-		closeAll(paths.subList(1, numThreads));
-		assertDoesNotThrow(() -> FileSystems.getFileSystem(jarUri), "FileSystem should still be open");
-
-		// Close last remaining path
-		paths.getFirst().close();
-		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri),
-			"FileSystem should have been closed");
+		verify(fileSystemProvider, times(numThreads)).newFileSystem(jarOnDefaultFileSystem);
+		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri(jarOnDefaultFileSystem)),
+			"Uses separate file systems");
+		assertThat(paths) //
+				.extracting(it -> it.getPath().resolve("META-INF/MANIFEST.MF")) //
+				.allSatisfy(Files::exists);
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	void createsSeparateFileSystemsForJarFilesOnNonDefaultFileSystem() throws Exception {
+		var numThreads = 50;
+		var tempDir = Files.createTempDirectory(jimfs.getPath("/"), "junit-");
+		var jar = Files.copy(jarOnDefaultFileSystem, tempDir.resolve("jartest.jar"));
+		var jarUri = jarUri(jar);
+
+		var fileSystemProvider = spy(FileSystemProvider.DEFAULT);
+
+		paths = executeConcurrently(numThreads, () -> CloseablePath.create(jarUri, fileSystemProvider));
+		verify(fileSystemProvider, times(numThreads)).newFileSystem(any(Path.class));
+		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri),
+			"Uses separate file systems");
+		assertThat(paths) //
+				.extracting(it -> it.getPath().resolve("META-INF/MANIFEST.MF")) //
+				.allSatisfy(Files::exists);
+	}
+
+	@Test
 	void closingIsIdempotent() throws Exception {
-		var path1 = CloseablePath.create(uri);
+		var tempDir = Files.createTempDirectory(jimfs.getPath("/"), "junit-");
+		var original = Files.copy(jarOnDefaultFileSystem, tempDir.resolve("original.jar"));
+		var path1 = CloseablePath.create(jarUri(original));
 		paths.add(path1);
-		var path2 = CloseablePath.create(uri);
+		var path2 = CloseablePath.create(jarUri(original));
 		paths.add(path2);
 
+		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri(original)),
+			"Uses separate file systems");
+
 		path1.close();
 		path1.close();
-		assertDoesNotThrow(() -> FileSystems.getFileSystem(jarUri), "FileSystem should still be open");
+		assertThat(path1.getPath().getFileSystem().isOpen()).isFalse();
+		assertThat(path2.getPath().getFileSystem().isOpen()).isTrue();
 
 		path2.close();
-		assertThrows(FileSystemNotFoundException.class, () -> FileSystems.getFileSystem(jarUri),
-			"FileSystem should have been closed");
+		assertThat(path2.getPath().getFileSystem().isOpen()).isFalse();
 	}
 
 	@Test
-	@DisabledOnOs(WINDOWS)
-	void supportsSymlinkedJarsPointingToSameJar(@TempDir Path tempDir) throws Exception {
-		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
-		var a = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
-		var b = Files.createSymbolicLink(tempDir.resolve("b.jar"), original);
+	void resolvesPercentEncodedJarEntry() throws Exception {
+		var tempDir = Files.createTempDirectory(jimfs.getPath("/"), "junit-");
+		var jar = tempDir.resolve("unicode.jar");
+		try (var out = new ZipOutputStream(Files.newOutputStream(jar))) {
+			out.putNextEntry(new ZipEntry("com/example/café/Example.class"));
+			out.closeEntry();
+		}
 
-		var pathA = CloseablePath.create(a.toUri());
-		paths.add(pathA);
-		var pathB = CloseablePath.create(b.toUri());
-		paths.add(pathB);
+		var path = CloseablePath.create(URI.create(jarUri(jar) + "com/example/caf%c3%a9/"));
+		paths.add(path);
 
-		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
-
-		pathA.close();
-		assertDoesNotThrow(() -> Files.walk(pathB.getPath()).close(), "FileSystem should still be open");
+		assertThat(path.getPath()).exists();
 	}
 
-	@Test
-	@DisabledOnOs(WINDOWS)
-	void resolvesSymlinkedPaths(@TempDir Path tempDir) throws Exception {
-		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
-		var withSymlink = Files.createSymbolicLink(tempDir.resolve("a.jar"), original);
-
-		var pathA = CloseablePath.create(jarUri(withSymlink));
-		paths.add(pathA);
-		var pathB = CloseablePath.create(jarUri(original));
-		paths.add(pathB);
-
-		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
-
-		// Path a and b both resolve to the same file system so we know they
-		// have the same cache key in ClosablePath. Now we check that
-		// ZipFileSystemProvider stored the file system created for a with the
-		// absolute real path. This implies that ClosablePath uses the same
-		// cache key as ZipFileSystemProvider.
-		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
-		assertThat(createdFileSystem.toString()).isEqualTo(withSymlink.toString());
-	}
-
-	@Test
-	@DisabledOnOs(WINDOWS)
-	void resolvesSpecialNameIdenticallyToZipFileSystemProvider(@TempDir Path tempDir) throws Exception {
-		var original = Files.copy(Path.of(uri), tempDir.resolve("original.jar"));
-		// Creates a path like `/tmp/junit-12345689/../junit-12345689/original.jar
-		var withSpecialNames = Path.of(tempDir.toString(), "..", tempDir.getFileName().toString(),
-			original.getFileName().toString());
-
-		var pathA = CloseablePath.create(jarUri(withSpecialNames));
-		paths.add(pathA);
-		var pathB = CloseablePath.create(jarUri(original));
-		paths.add(pathB);
-
-		assertThat(pathA.getPath().getFileSystem()).isEqualTo(pathB.getPath().getFileSystem());
-
-		// Path a and b both resolve to the same file system so we know they
-		// have the same cache key in ClosablePath. Now we check that
-		// ZipFileSystemProvider stored the file system created for a with the
-		// absolute real path. This implies that ClosablePath uses the same
-		// cache key as ZipFileSystemProvider.
-		var createdFileSystem = FileSystems.getFileSystem(jarUri(original));
-		assertThat(createdFileSystem.toString()).isEqualTo(withSpecialNames.toString());
-	}
-
-	private static @NonNull URI jarUri(Path withSpecialNames) {
-		return URI.create("jar:" + withSpecialNames.toUri() + "!/");
+	private static URI jarUri(Path path) {
+		return URI.create("jar:" + path.toUri() + "!/");
 	}
 
 	private static void closeAll(List<CloseablePath> paths) {
