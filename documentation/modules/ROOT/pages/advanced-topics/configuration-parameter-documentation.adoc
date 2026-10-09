@@ -30,3 +30,71 @@ When the `type` is an enum or interface, hints will be automatically generated. 
 paragraph of the enum constant is used to describe the enum value. If the allowed values
 are not enumerable, {PlatformConfigurationParameterHints} can be used to provide
 examples instead.
+
+
+== Gradle
+
+To use the annotation processor with Gradle, add the `junit-platform-configuration-api`
+as a `compileOnly` dependency and enable the `junit-platform-configuration-processor` as
+an `annotationProcessor`.
+
+[source,kotlin,indent=0]
+[subs=attributes+]
+----
+dependencies {
+	annotationProcessor("org.junit.platform:junit-platform-configuration-processor:{version}")
+	compileOnly("org.junit.platform:junit-platform-configuration-api:{version}")
+}
+----
+
+== Maven
+
+To use the annotation processor with Maven, add the `junit-platform-configuration-api`
+as an `optional` runtime dependency and add the `junit-platform-configuration-processor`
+to the `annotationProcessorPaths` of the `maven-compiler-plugin`.
+
+[source,xml,indent=0]
+[subs=attributes+]
+----
+<project>
+	<!-- ... -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>{version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-configuration-api</artifactId>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>{maven-compiler-version}</version>
+				<configuration>
+					<annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.junit.platform</groupId>
+							<artifactId>junit-platform-configuration-processor</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- ... -->
+</project>
+----
