@@ -219,17 +219,30 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 	}
 
 	@Test
-	void dynamicContainerAwaitsSubmittedChildrenWhenItsChildStreamFails() {
-		FailingDynamicContainerStreamTestCase.log.clear();
+	void afterHooksAreCalledAfterConcurrentDynamicTestsAreFinishedWhenTheTestFactoryStreamFails() {
+		FailingDynamicTestStreamTestCase.log.clear();
 
 		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
-			List.of(selectMethod(FailingDynamicContainerStreamTestCase.class, "dynamicContainer")));
+			List.of(selectMethod(FailingDynamicTestStreamTestCase.class, "testFactory")));
+
+		results.testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
+		var testFactory = event(container("test-factory:"), finishedWithFailure(message("cannot create b")));
+		assertFinishedBefore(results, event(test(), finishedSuccessfully()), testFactory);
+		assertThat(FailingDynamicTestStreamTestCase.log).containsExactly("dynamic test a finished", "afterEach");
+	}
+
+	@Test
+	void dynamicContainerAwaitsSubmittedChildrenWhenItsChildStreamFails() {
+		FailingDynamicTestStreamTestCase.log.clear();
+
+		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
+			List.of(selectMethod(FailingDynamicTestStreamTestCase.class, "dynamicContainer")));
 
 		results.testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
 		var dynamicContainer = event(container("dynamic-container:#1"),
 			finishedWithFailure(message("cannot create b")));
 		assertFinishedBefore(results, event(test(), finishedSuccessfully()), dynamicContainer);
-		assertThat(FailingDynamicContainerStreamTestCase.log).containsExactly("dynamic test a finished", "afterEach");
+		assertThat(FailingDynamicTestStreamTestCase.log).containsExactly("dynamic test a finished", "afterEach");
 	}
 
 	/**
@@ -979,7 +992,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		}
 	}
 
-	static class FailingDynamicContainerStreamTestCase {
+	static class FailingDynamicTestStreamTestCase {
 		static final List<String> log = new CopyOnWriteArrayList<>();
 
 		@AfterEach
@@ -988,8 +1001,17 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		}
 
 		@TestFactory
+		Stream<DynamicTest> testFactory() {
+			return dynamicTests();
+		}
+
+		@TestFactory
 		DynamicContainer dynamicContainer() {
-			return DynamicContainer.dynamicContainer("container", Stream.of("a", "b").map(name -> {
+			return DynamicContainer.dynamicContainer("container", dynamicTests());
+		}
+
+		private static Stream<DynamicTest> dynamicTests() {
+			return Stream.of("a", "b").map(name -> {
 				if (name.equals("b")) {
 					throw new IllegalStateException("cannot create b");
 				}
@@ -997,7 +1019,7 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 					Thread.sleep(100);
 					log.add("dynamic test " + name + " finished");
 				});
-			}));
+			});
 		}
 	}
 
