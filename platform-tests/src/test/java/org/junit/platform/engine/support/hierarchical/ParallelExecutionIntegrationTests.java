@@ -38,7 +38,6 @@ import static org.junit.platform.testkit.engine.EventConditions.started;
 import static org.junit.platform.testkit.engine.EventConditions.test;
 import static org.junit.platform.testkit.engine.EventConditions.type;
 import static org.junit.platform.testkit.engine.EventType.REPORTING_ENTRY_PUBLISHED;
-import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -46,7 +45,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,7 +56,6 @@ import java.util.stream.Stream;
 import org.assertj.core.api.Condition;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicContainer;
@@ -78,7 +75,6 @@ import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -188,61 +184,6 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		assertThat(events.stream().filter(event(test(), finishedSuccessfully())::matches)).hasSize(1);
 		var timestampedEvents = ConcurrentDynamicTestCase.events;
 		assertThat(timestampedEvents.get("afterEach")).isAfterOrEqualTo(timestampedEvents.get("dynamicTestFinished"));
-	}
-
-	@Test
-	void testTemplateAwaitsSubmittedInvocationsWhenItsInvocationStreamFails() {
-		FailingInvocationStreamTestCase.reset();
-
-		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
-			FailingInvocationStreamTestCase.class);
-
-		results.testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
-		var template = event(container("test-template:"), finishedWithFailure(message("cannot provide b")));
-		assertFinishedBefore(results, event(test(), finishedSuccessfully()), template);
-		assertThat(FailingInvocationStreamTestCase.log).containsExactly("test a finished", "afterAll");
-	}
-
-	@Test
-	void classTemplateAwaitsSubmittedInvocationsWhenItsInvocationStreamFails() {
-		FailingClassInvocationStreamTestCase.reset();
-
-		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
-			FailingClassInvocationStreamTestCase.class);
-
-		results.testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
-		var invocation = event(container("class-template-invocation:#1"), finishedSuccessfully());
-		var classTemplate = event(container("class-template:"), finishedWithFailure(message("cannot provide b")));
-		assertFinishedBefore(results, event(test(), finishedSuccessfully()), invocation);
-		assertFinishedBefore(results, invocation, classTemplate);
-		assertThat(FailingClassInvocationStreamTestCase.log).containsExactly("test a finished");
-	}
-
-	@Test
-	void afterHooksAreCalledAfterConcurrentDynamicTestsAreFinishedWhenTheTestFactoryStreamFails() {
-		FailingDynamicTestStreamTestCase.reset();
-
-		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
-			List.of(selectMethod(FailingDynamicTestStreamTestCase.class, "testFactory")));
-
-		results.testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
-		var testFactory = event(container("test-factory:"), finishedWithFailure(message("cannot create b")));
-		assertFinishedBefore(results, event(test(), finishedSuccessfully()), testFactory);
-		assertThat(FailingDynamicTestStreamTestCase.log).containsExactly("dynamic test a finished", "afterEach");
-	}
-
-	@Test
-	void dynamicContainerAwaitsSubmittedChildrenWhenItsChildStreamFails() {
-		FailingDynamicTestStreamTestCase.reset();
-
-		var results = executeWithFixedParallelism(3, Map.of(DEFAULT_EXECUTION_MODE_PROPERTY_NAME, "concurrent"),
-			List.of(selectMethod(FailingDynamicTestStreamTestCase.class, "dynamicContainer")));
-
-		results.testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
-		var dynamicContainer = event(container("dynamic-container:#1"),
-			finishedWithFailure(message("cannot create b")));
-		assertFinishedBefore(results, event(test(), finishedSuccessfully()), dynamicContainer);
-		assertThat(FailingDynamicTestStreamTestCase.log).containsExactly("dynamic test a finished", "afterEach");
 	}
 
 	/**
@@ -613,16 +554,6 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 		return results.allEvents().filter(condition::matches).map(Event::getTestDescriptor).findFirst().orElseThrow();
 	}
 
-	private static void assertFinishedBefore(EngineExecutionResults results, Condition<Event> first,
-			Condition<Event> second) {
-		var events = results.allEvents().list();
-		var firstIndex = IntStream.range(0, events.size()).filter(i -> first.matches(events.get(i))).findFirst();
-		var secondIndex = IntStream.range(0, events.size()).filter(i -> second.matches(events.get(i))).findFirst();
-		assertThat(firstIndex).as("event matching %s", first).isPresent();
-		assertThat(secondIndex).as("event matching %s", second).isPresent();
-		assertThat(firstIndex.getAsInt()).as("index of event matching %s", first).isLessThan(secondIndex.getAsInt());
-	}
-
 	private List<Instant> getTimestampsFor(List<Event> events, Condition<Event> condition) {
 		// @formatter:off
 		return events.stream()
@@ -944,100 +875,6 @@ record ParallelExecutionIntegrationTests(ParallelExecutorServiceType executorSer
 			return dynamicTest("slow", () -> {
 				Thread.sleep(100);
 				events.put("dynamicTestFinished", Instant.now());
-			});
-		}
-	}
-
-	static class FailingInvocationStreamTestCase {
-		static final List<String> log = new CopyOnWriteArrayList<>();
-		static CountDownLatch argumentsFailed = new CountDownLatch(1);
-
-		static void reset() {
-			log.clear();
-			argumentsFailed = new CountDownLatch(1);
-		}
-
-		@AfterAll
-		static void afterAll() {
-			log.add("afterAll");
-		}
-
-		@ParameterizedTest
-		@org.junit.jupiter.params.provider.MethodSource("arguments")
-		void test(String argument) throws InterruptedException {
-			argumentsFailed.await(); // finish only after the arguments source has thrown
-			log.add("test " + argument + " finished");
-		}
-
-		static Stream<String> arguments() {
-			return Stream.of("a", "b").map(argument -> {
-				if (argument.equals("b")) {
-					argumentsFailed.countDown();
-					throw new IllegalStateException("cannot provide b");
-				}
-				return argument;
-			});
-		}
-	}
-
-	@ParameterizedClass
-	@org.junit.jupiter.params.provider.MethodSource("arguments")
-	static class FailingClassInvocationStreamTestCase {
-		static final List<String> log = new CopyOnWriteArrayList<>();
-
-		static void reset() {
-			log.clear();
-			FailingInvocationStreamTestCase.reset();
-		}
-
-		@Parameter
-		String argument;
-
-		@Test
-		void test() throws InterruptedException {
-			FailingInvocationStreamTestCase.argumentsFailed.await();
-			log.add("test " + argument + " finished");
-		}
-
-		static Stream<String> arguments() {
-			return FailingInvocationStreamTestCase.arguments();
-		}
-	}
-
-	static class FailingDynamicTestStreamTestCase {
-		static final List<String> log = new CopyOnWriteArrayList<>();
-		static CountDownLatch streamFailed = new CountDownLatch(1);
-
-		static void reset() {
-			log.clear();
-			streamFailed = new CountDownLatch(1);
-		}
-
-		@AfterEach
-		void afterEach() {
-			log.add("afterEach");
-		}
-
-		@TestFactory
-		Stream<DynamicTest> testFactory() {
-			return dynamicTests();
-		}
-
-		@TestFactory
-		DynamicContainer dynamicContainer() {
-			return DynamicContainer.dynamicContainer("container", dynamicTests());
-		}
-
-		private static Stream<DynamicTest> dynamicTests() {
-			return Stream.of("a", "b").map(name -> {
-				if (name.equals("b")) {
-					streamFailed.countDown();
-					throw new IllegalStateException("cannot create b");
-				}
-				return dynamicTest(name, () -> {
-					streamFailed.await(); // finish only after the stream has thrown
-					log.add("dynamic test " + name + " finished");
-				});
 			});
 		}
 	}

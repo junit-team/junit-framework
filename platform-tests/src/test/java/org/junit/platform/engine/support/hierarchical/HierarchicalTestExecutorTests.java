@@ -20,6 +20,7 @@ import static org.junit.platform.engine.TestExecutionResult.Status.SUCCESSFUL;
 import static org.junit.platform.engine.TestExecutionResult.successful;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -29,13 +30,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.quality.Strictness.LENIENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -616,15 +623,20 @@ class HierarchicalTestExecutorTests {
 		var dynamicTestDescriptor = spy(new MyLeaf(leafUniqueId.append("dynamic", "child")));
 		root.addChild(child);
 
+		// The dynamic test finishes only once the child either awaits it or calls
+		// after() without awaiting it.
+		var awaitedOrAbandoned = new CountDownLatch(1);
 		var exceptionInExecute = new RuntimeException("execute");
-		var executeThrows = new CountDownLatch(1);
 		when(child.execute(any(), any())).thenAnswer(useDynamicTestExecutor(executor -> {
 			executor.execute(dynamicTestDescriptor);
-			executeThrows.countDown();
 			throw exceptionInExecute;
 		}));
+		doAnswer(invocation -> {
+			awaitedOrAbandoned.countDown();
+			return null;
+		}).when(child).after(any());
 		when(dynamicTestDescriptor.execute(any(), any())).thenAnswer(invocation -> {
-			executeThrows.await(); // finish only after execute() has thrown
+			awaitedOrAbandoned.await();
 			return invocation.getArgument(0);
 		});
 
@@ -634,7 +646,8 @@ class HierarchicalTestExecutorTests {
 			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, 2));
 
 		try (var executorService = ParallelHierarchicalTestExecutorServiceFactory.create(parameters)) {
-			createExecutor(executorService).execute().get();
+			createExecutor(countDownOnAwait(executorService, dynamicTestDescriptor, awaitedOrAbandoned)) //
+					.execute().get();
 		}
 
 		var inOrder = inOrder(listener, child);
@@ -645,6 +658,65 @@ class HierarchicalTestExecutorTests {
 
 		assertThat(childExecutionResult.getValue().getStatus()).isEqualTo(FAILED);
 		assertThat(childExecutionResult.getValue().getThrowable().orElseThrow()).isSameAs(exceptionInExecute);
+	}
+
+	/**
+	 * Wrap the supplied executor service so that the supplied latch is counted
+	 * down when the future of the supplied test descriptor's task is awaited.
+	 */
+	private static HierarchicalTestExecutorService countDownOnAwait(HierarchicalTestExecutorService delegate,
+			TestDescriptor testDescriptor, CountDownLatch latch) {
+
+		return new HierarchicalTestExecutorService() {
+
+			@Override
+			public Future<@Nullable Void> submit(TestTask testTask) {
+				var future = delegate.submit(testTask);
+				if (!testDescriptor.equals(testTask.getTestDescriptor())) {
+					return future;
+				}
+				return new Future<>() {
+
+					@Override
+					public boolean cancel(boolean mayInterruptIfRunning) {
+						return future.cancel(mayInterruptIfRunning);
+					}
+
+					@Override
+					public boolean isCancelled() {
+						return future.isCancelled();
+					}
+
+					@Override
+					public boolean isDone() {
+						return future.isDone();
+					}
+
+					@Override
+					public @Nullable Void get() throws InterruptedException, ExecutionException {
+						latch.countDown();
+						return future.get();
+					}
+
+					@Override
+					public @Nullable Void get(long timeout, TimeUnit unit)
+							throws InterruptedException, ExecutionException, TimeoutException {
+						latch.countDown();
+						return future.get(timeout, unit);
+					}
+				};
+			}
+
+			@Override
+			public void invokeAll(List<? extends TestTask> testTasks) {
+				delegate.invokeAll(testTasks);
+			}
+
+			@Override
+			public void close() {
+				delegate.close();
+			}
+		};
 	}
 
 	private Answer<Object> execute(TestDescriptor dynamicChild) {
