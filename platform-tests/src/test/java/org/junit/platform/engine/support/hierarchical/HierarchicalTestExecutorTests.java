@@ -605,6 +605,46 @@ class HierarchicalTestExecutorTests {
 		assertTrue(interrupted.get(), "dynamic node was interrupted");
 	}
 
+	@ParameterizedTest
+	@EnumSource(ParallelExecutorServiceType.class)
+	@MockitoSettings(strictness = LENIENT)
+	void awaitsSubmittedDynamicChildrenBeforeAfterWhenExecuteThrows(ParallelExecutorServiceType executorServiceType)
+			throws Exception {
+
+		var leafUniqueId = UniqueId.root("leaf", "child leaf");
+		var child = spy(new MyLeaf(leafUniqueId));
+		var dynamicTestDescriptor = spy(new MyLeaf(leafUniqueId.append("dynamic", "child")));
+		root.addChild(child);
+
+		var exceptionInExecute = new RuntimeException("execute");
+		when(child.execute(any(), any())).thenAnswer(useDynamicTestExecutor(executor -> {
+			executor.execute(dynamicTestDescriptor);
+			throw exceptionInExecute;
+		}));
+		when(dynamicTestDescriptor.execute(any(), any())).thenAnswer(invocation -> {
+			Thread.sleep(100);
+			return invocation.getArgument(0);
+		});
+
+		var parameters = ConfigurationParametersFactoryForTests.create(Map.of(//
+			ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_PROPERTY_NAME, executorServiceType, //
+			DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_PROPERTY_NAME, "fixed", //
+			DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, 2));
+
+		try (var executorService = ParallelHierarchicalTestExecutorServiceFactory.create(parameters)) {
+			createExecutor(executorService).execute().get();
+		}
+
+		var inOrder = inOrder(listener, child);
+		inOrder.verify(listener).executionFinished(dynamicTestDescriptor, successful());
+		inOrder.verify(child).after(any());
+		var childExecutionResult = ArgumentCaptor.forClass(TestExecutionResult.class);
+		inOrder.verify(listener).executionFinished(eq(child), childExecutionResult.capture());
+
+		assertThat(childExecutionResult.getValue().getStatus()).isEqualTo(FAILED);
+		assertThat(childExecutionResult.getValue().getThrowable().orElseThrow()).isSameAs(exceptionInExecute);
+	}
+
 	private Answer<Object> execute(TestDescriptor dynamicChild) {
 		return useDynamicTestExecutor(executor -> executor.execute(dynamicChild));
 	}

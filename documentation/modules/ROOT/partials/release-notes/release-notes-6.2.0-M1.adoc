@@ -18,6 +18,11 @@ repository on GitHub.
 
 * When scanning the classpath, the resolved path is used to cache an open jar file system
   rather than a (potential) symlink.
+* `HierarchicalTestEngine` implementations now wait for the dynamic tests a node has
+  already submitted even if the node's `execute()` method throws an exception. Previously,
+  with parallel execution, such dynamic tests could finish after their parent, e.g. when
+  the arguments source of a `@ParameterizedTest` or `@ParameterizedClass` or the children
+  stream of a `DynamicContainer` threw an exception.
 
 [[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
