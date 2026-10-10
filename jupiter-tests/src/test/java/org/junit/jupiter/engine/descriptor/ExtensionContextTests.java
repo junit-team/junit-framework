@@ -479,7 +479,7 @@ public class ExtensionContextTests {
 		ConfigurationParameters configurationParameters = mock();
 		when(configurationParameters.get("123")).thenReturn(expected);
 		JupiterConfiguration echo = new DefaultJupiterConfiguration(configurationParameters,
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), mock());
 
 		var context = extensionContextFactory.apply(echo);
 

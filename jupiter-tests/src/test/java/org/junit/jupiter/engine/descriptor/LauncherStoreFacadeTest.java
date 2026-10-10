@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.execution.LauncherStoreFacade;
@@ -33,39 +32,33 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
  */
 class LauncherStoreFacadeTest {
 
-	private NamespacedHierarchicalStore<Namespace> requestLevelStore;
-	private NamespacedHierarchicalStore<Namespace> sessionLevelStore;
-	private ExtensionContext.Namespace extensionNamespace;
-
-	@BeforeEach
-	void setUp() {
-		sessionLevelStore = new NamespacedHierarchicalStore<>(null);
-		requestLevelStore = new NamespacedHierarchicalStore<>(sessionLevelStore);
-		extensionNamespace = ExtensionContext.Namespace.create("foo", "bar");
-	}
+	private NamespacedHierarchicalStore<Namespace> sessionScopedStore = new NamespacedHierarchicalStore<>(null);
+	private NamespacedHierarchicalStore<Namespace> requestScopedStore = new NamespacedHierarchicalStore<>(
+		sessionScopedStore);
+	private ExtensionContext.Namespace extensionNamespace = ExtensionContext.Namespace.create("foo", "bar");
 
 	@Test
 	void createsInstanceSuccessfullyWithValidStore() {
-		assertDoesNotThrow(() -> new LauncherStoreFacade(requestLevelStore));
+		assertDoesNotThrow(() -> new LauncherStoreFacade(requestScopedStore));
 	}
 
 	@Test
 	void throwsExceptionWhenRequestLevelStoreHasNoParent() {
-		assertThrowsExactly(JUnitException.class, () -> new LauncherStoreFacade(sessionLevelStore), () -> {
+		assertThrowsExactly(JUnitException.class, () -> new LauncherStoreFacade(sessionScopedStore), () -> {
 			throw new JUnitException("Request-level store must have a parent");
 		});
 	}
 
 	@Test
 	void returnsRequestLevelStore() {
-		LauncherStoreFacade facade = new LauncherStoreFacade(requestLevelStore);
-		assertEquals(requestLevelStore, facade.getRequestLevelStore());
+		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
+		assertEquals(requestScopedStore, facade.getRequestScopedStore());
 	}
 
 	@Test
 	void returnsNamespaceAwareStoreWithRequestLevelStore() {
-		LauncherStoreFacade facade = new LauncherStoreFacade(requestLevelStore);
-		ExtensionContext.Store store = facade.getRequestLevelStore(extensionNamespace);
+		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
+		ExtensionContext.Store store = facade.getRequestScopedStore(extensionNamespace);
 
 		assertNotNull(store);
 		assertInstanceOf(NamespaceAwareStore.class, store);
@@ -73,8 +66,8 @@ class LauncherStoreFacadeTest {
 
 	@Test
 	void returnsNamespaceAwareStore() {
-		LauncherStoreFacade facade = new LauncherStoreFacade(requestLevelStore);
-		NamespaceAwareStore adapter = facade.getStoreAdapter(requestLevelStore, extensionNamespace);
+		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
+		NamespaceAwareStore adapter = facade.getStoreAdapter(requestScopedStore, extensionNamespace);
 
 		assertNotNull(adapter);
 	}
@@ -82,16 +75,16 @@ class LauncherStoreFacadeTest {
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void throwsExceptionWhenNamespaceIsNull() {
-		LauncherStoreFacade facade = new LauncherStoreFacade(requestLevelStore);
-		assertPreconditionViolationFor(() -> facade.getStoreAdapter(requestLevelStore, null));
+		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
+		assertPreconditionViolationFor(() -> facade.getStoreAdapter(requestScopedStore, null));
 	}
 
 	@Test
 	void returnsNamespaceAwareStoreWithGlobalNamespace() {
-		requestLevelStore.put(Namespace.GLOBAL, "foo", "bar");
+		requestScopedStore.put(Namespace.GLOBAL, "foo", "bar");
 
-		LauncherStoreFacade facade = new LauncherStoreFacade(requestLevelStore);
-		ExtensionContext.Store store = facade.getRequestLevelStore(ExtensionContext.Namespace.GLOBAL);
+		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
+		ExtensionContext.Store store = facade.getRequestScopedStore(ExtensionContext.Namespace.GLOBAL);
 
 		assertEquals("bar", store.get("foo"));
 	}

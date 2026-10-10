@@ -64,6 +64,8 @@ import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
  * Default implementation of the {@link JupiterConfiguration} API.
@@ -109,12 +111,16 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 
 	private final ConfigurationParameters configurationParameters;
 	private final OutputDirectoryCreator outputDirectoryCreator;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 
 	public DefaultJupiterConfiguration(ConfigurationParameters configurationParameters,
-			OutputDirectoryCreator outputDirectoryCreator, DiscoveryIssueReporter issueReporter) {
+			OutputDirectoryCreator outputDirectoryCreator, DiscoveryIssueReporter issueReporter,
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
 		this.configurationParameters = Preconditions.notNull(configurationParameters,
-			"ConfigurationParameters must not be null");
-		this.outputDirectoryCreator = outputDirectoryCreator;
+			"configurationParameters must not be null");
+		this.outputDirectoryCreator = Preconditions.notNull(outputDirectoryCreator,
+			"outputDirectoryCreator must not be null");
+		this.sessionScopedStore = Preconditions.notNull(sessionScopedStore, "sessionScopedStore must not be null");
 		validateConfigurationParameters(issueReporter);
 	}
 
@@ -253,4 +259,10 @@ public class DefaultJupiterConfiguration implements JupiterConfiguration {
 	public OutputDirectoryCreator getOutputDirectoryCreator() {
 		return outputDirectoryCreator;
 	}
+
+	@Override
+	public NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+		return sessionScopedStore;
+	}
+
 }
