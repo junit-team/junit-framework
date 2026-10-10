@@ -18,8 +18,12 @@ import static org.mockito.Mockito.mock;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.MethodOrdererContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.engine.descriptor.ClassTestDescriptor;
 import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor;
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor;
@@ -28,6 +32,8 @@ import org.junit.platform.engine.OutputDirectoryCreator;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.core.OutputDirectoryCreators;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.engine.testcases.SingleTestTestCase;
@@ -48,8 +54,10 @@ class SuiteTestDescriptorTests {
 	final ConfigurationParameters configurationParameters = new EmptyConfigurationParameters();
 	final OutputDirectoryCreator outputDirectoryCreator = OutputDirectoryCreators.dummyOutputDirectoryCreator();
 	final DiscoveryIssueReporter discoveryIssueReporter = DiscoveryIssueReporter.forwarding(mock(), engineId);
+	final NamespacedHierarchicalStore<Namespace> sessionScopedStore = new NamespacedHierarchicalStore<>(null);
+
 	final SuiteTestDescriptor suite = new SuiteTestDescriptor(suiteId, TestSuite.class, configurationParameters,
-		outputDirectoryCreator, mock(), discoveryIssueReporter);
+		outputDirectoryCreator, mock(), sessionScopedStore, discoveryIssueReporter);
 
 	@Test
 	void suiteIsEmptyBeforeDiscovery() {
@@ -65,6 +73,22 @@ class SuiteTestDescriptorTests {
 
 		assertThat(suite.getDescendants()).map(TestDescriptor::getUniqueId)//
 				.containsExactly(jupiterEngineId, testClassId, methodId);
+	}
+
+	@Test
+	void suitePassesSessionScopedStoreToNestedEngineDiscovery() {
+		var namespace = Namespace.create("suite-forwarding");
+		var suite = new SuiteTestDescriptor(suiteId, StoreAccessorSuite.class, configurationParameters,
+			outputDirectoryCreator, mock(), sessionScopedStore, discoveryIssueReporter);
+		suite.addDiscoveryRequestFrom(StoreAccessorSuite.class);
+
+		var oldValue = UUID.randomUUID();
+		sessionScopedStore.put(namespace, StoreAccessorMethodOrderer.KEY, oldValue);
+
+		suite.discover();
+
+		assertThat(sessionScopedStore.get(namespace, StoreAccessorMethodOrderer.KEY)) //
+				.isEqualTo(oldValue + " (modified)");
 	}
 
 	@Test
@@ -95,6 +119,30 @@ class SuiteTestDescriptorTests {
 
 	@Suite
 	static class TestSuite {
+	}
+
+	@Suite
+	@org.junit.platform.suite.api.SelectClasses(StoreAccessorTestCase.class)
+	static class StoreAccessorSuite {
+	}
+
+	@TestMethodOrder(StoreAccessorMethodOrderer.class)
+	static class StoreAccessorTestCase {
+		@Test
+		void test() {
+		}
+	}
+
+	static class StoreAccessorMethodOrderer implements MethodOrderer {
+
+		public static final String KEY = "key";
+
+		@Override
+		public void orderMethods(MethodOrdererContext context) {
+			var accessor = context.getStoreAccessor("suite-forwarding");
+			var oldValue = accessor.get(KEY);
+			accessor.put(KEY, oldValue + " (modified)");
+		}
 	}
 
 	private static class EmptyConfigurationParameters implements ConfigurationParameters {

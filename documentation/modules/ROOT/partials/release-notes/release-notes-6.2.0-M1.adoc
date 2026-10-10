@@ -54,6 +54,9 @@ repository on GitHub.
 * Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 * Test engines using the `ParallelHierarchicalTestExecutorServiceFactory` now use the
   `WORKER_THREAD_POOL` executor service by default.
+* Test engines may now access the store scoped to the enclosing launcher session via the
+  new `EngineDiscoveryRequest.getSessionScopedStore()` API. This can be used to store or
+  cache information that is reused during test execution or later discovery phases.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter

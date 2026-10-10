@@ -16,6 +16,8 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -71,5 +73,10 @@ class DelegatingLauncherDiscoveryRequest implements LauncherDiscoveryRequest {
 	@Override
 	public OutputDirectoryCreator getOutputDirectoryCreator() {
 		return this.request.getOutputDirectoryCreator();
+	}
+
+	@Override
+	public NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+		return this.request.getSessionScopedStore();
 	}
 }

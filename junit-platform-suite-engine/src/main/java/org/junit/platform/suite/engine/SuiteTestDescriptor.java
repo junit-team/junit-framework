@@ -82,6 +82,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 	private final OutputDirectoryCreator outputDirectoryCreator;
 	private final Boolean failIfNoTests;
 	private final Class<?> suiteClass;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 	private final LifecycleMethods lifecycleMethods;
 
 	private @Nullable LauncherDiscoveryResult launcherDiscoveryResult;
@@ -90,12 +91,13 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 
 	SuiteTestDescriptor(UniqueId id, Class<?> suiteClass, ConfigurationParameters configurationParameters,
 			OutputDirectoryCreator outputDirectoryCreator, EngineDiscoveryListener discoveryListener,
-			DiscoveryIssueReporter issueReporter) {
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore, DiscoveryIssueReporter issueReporter) {
 		super(id, getSuiteDisplayName(suiteClass, issueReporter), ClassSource.from(suiteClass));
 		this.configurationParameters = configurationParameters;
 		this.outputDirectoryCreator = outputDirectoryCreator;
 		this.failIfNoTests = getFailIfNoTests(suiteClass);
 		this.suiteClass = suiteClass;
+		this.sessionScopedStore = sessionScopedStore;
 		this.lifecycleMethods = new LifecycleMethods(suiteClass, issueReporter);
 		this.discoveryRequestBuilder.listener(DiscoveryIssueForwardingListener.create(id, discoveryListener));
 		reportUseOfJupiterDisabled(suiteClass, issueReporter);
@@ -147,7 +149,7 @@ final class SuiteTestDescriptor extends AbstractTestDescriptor {
 				.outputDirectoryCreator(outputDirectoryCreator)
 				.build();
 		// @formatter:on
-		this.launcher = SuiteLauncher.create();
+		this.launcher = SuiteLauncher.create(sessionScopedStore);
 		this.launcherDiscoveryResult = launcher.discover(request, getUniqueId());
 		// @formatter:off
 		launcherDiscoveryResult.getTestEngines()
