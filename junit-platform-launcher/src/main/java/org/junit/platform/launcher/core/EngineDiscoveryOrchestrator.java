@@ -246,13 +246,16 @@ public class EngineDiscoveryOrchestrator {
 
 	private void logTestDescriptorExclusionReasons(Map<String, List<TestDescriptor>> excludedTestDescriptorsByReason) {
 		excludedTestDescriptorsByReason.forEach((exclusionReason, testDescriptors) -> {
-			String displayNames = testDescriptors.stream().map(TestDescriptor::getDisplayName).collect(joining(", "));
-			long containerCount = testDescriptors.stream().filter(TestDescriptor::isContainer).count();
-			long methodCount = testDescriptors.stream().filter(TestDescriptor::isTest).count();
-			logger.config(
-				() -> "%d containers and %d tests were %s".formatted(containerCount, methodCount, exclusionReason));
-			logger.debug(
-				() -> "The following containers and tests were %s: %s".formatted(exclusionReason, displayNames));
+			logger.config(() -> {
+				long containerCount = testDescriptors.stream().filter(TestDescriptor::isContainer).count();
+				long methodCount = testDescriptors.stream().filter(TestDescriptor::isTest).count();
+				return "%d containers and %d tests were %s".formatted(containerCount, methodCount, exclusionReason);
+			});
+			logger.debug(() -> {
+				String displayNames = testDescriptors.stream().map(TestDescriptor::getDisplayName).collect(
+					joining(", "));
+				return "The following containers and tests were %s: %s".formatted(exclusionReason, displayNames);
+			});
 		});
 	}
 
