@@ -28,11 +28,15 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
         val mapper = JsonMapper()
 
         val propertiesByGroup = GROUPS.associate { it.title to mutableListOf<JsonNode>() }
+        val hintsByGroup = GROUPS.associate { it.title to mutableListOf<JsonNode>() }
         metadataJars.forEach { jar ->
             val group = GROUPS.firstOrNull { jar.name.startsWith(it.prefix) } ?: return@forEach
             archives.zipTree(jar).matching { include(METADATA_PATH) }.forEach { file ->
-                val properties = mapper.readTree(file).path("properties")
+                val contents = mapper.readTree(file)
+                val properties = contents.path("properties")
                 properties.forEach { propertiesByGroup.getValue(group.title).add(it) }
+                val hints = contents.path("hints")
+                hints.forEach { hintsByGroup.getValue(group.title).add(it) }
             }
         }
 
@@ -41,24 +45,56 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
             if (properties.isEmpty()) {
                 return@forEach
             }
+            val hints = hintsByGroup[title]
+
             sb.appendLine("[[configuration-parameters-${title.lowercase().replace(' ', '-')}]]")
             sb.appendLine("=== $title")
             sb.appendLine()
             properties.sortedBy { it.path("name").asString() }.forEach { property ->
                 val name = property.path("name").asString()
-                sb.appendLine("`$name`::")
+                val deprecation = if (property.has("deprecation")) " _(deprecated)_" else ""
+                sb.appendLine("==== `$name`$deprecation")
+
                 val description = text(property.path("description").asString(""))
                 val default = property.path("defaultValue")
                 val hasDefault = !default.isMissingNode
+
                 if (description.isNotEmpty()) {
-                    val terminated = if (hasDefault && !description.endsWith(".")) "$description." else description
-                    sb.appendLine("  $terminated")
+                    sb.appendLine(description)
+                }
+
+                val hint = hints?.find { jsonNode ->  jsonNode.get("name")?.asString() == name}
+                val classReferenceProvider = hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
+                if (classReferenceProvider != null) {
+                    val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
+                    sb.appendLine("Value must be a class that implements `$valueMustBeSubtypeOf`.")
                 }
                 if (hasDefault) {
-                    sb.appendLine("  Defaults to `${text(default.asString())}`.")
+                    sb.appendLine("Defaults to `${text(default.asString())}`.")
                 }
-                if (property.has("deprecation")) {
-                    sb.appendLine("  _(deprecated)_")
+
+                val isBoolean = property.get("type")?.stringValue() == "java.lang.Boolean"
+                if(hint != null && classReferenceProvider == null && !isBoolean){
+                    val values = hint.get("values")
+                    val anyProvider = hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
+                    val valueTitle = if (anyProvider != null) "Example values" else "Allowed values"
+
+                    sb.appendLine(
+                        """
+                        [cols="1,1"]
+                        |===
+                        |$valueTitle |Description
+                        """.trimIndent()
+                    )
+                    values.forEach({
+                        val value = it.get("value")?.asString()
+                        val description = it.get("description")?.asString() ?: ""
+                        sb.appendLine("|`$value`")
+                        sb.appendLine("|$description" )
+                        sb.appendLine()
+                    })
+                    sb.appendLine("|===")
+                    sb.appendLine()
                 }
                 sb.appendLine()
             }
