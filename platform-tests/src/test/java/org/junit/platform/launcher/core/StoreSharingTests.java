@@ -10,12 +10,18 @@
 
 package org.junit.platform.launcher.core;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
+import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.fakes.TestEngineSpy;
 import org.junit.platform.fakes.TestEngineStub;
@@ -60,5 +66,34 @@ class StoreSharingTests {
 				.build();
 
 		launcher.execute(discoveryRequest);
+	}
+
+	@Test
+	void testEngineCanReuseSessionScopedStoreAcrossDiscoveries() {
+		var valueFromSecondDiscovery = new AtomicReference<>();
+		var engine = new TestEngineStub("SessionStore") {
+			int discoveryCount = 0;
+			@Override
+			public TestDescriptor discover(EngineDiscoveryRequest request, UniqueId uniqueId) {
+				var store = request.getSessionScopedStore();
+				if (++discoveryCount == 1) {
+					store.put(Namespace.GLOBAL, "key", "value");
+				}
+				else {
+					valueFromSecondDiscovery.set(requireNonNull(store.get(Namespace.GLOBAL, "key")));
+				}
+				return super.discover(request, uniqueId);
+			}
+		};
+		var config = LauncherConfig.builder().addTestEngines(engine).build();
+
+		try (var session = LauncherFactory.openSession(config)) {
+			var launcher = session.getLauncher();
+			var request = LauncherDiscoveryRequestBuilder.request().build();
+			launcher.discover(request);
+			launcher.discover(request);
+		}
+
+		assertEquals("value", valueFromSecondDiscovery.get());
 	}
 }

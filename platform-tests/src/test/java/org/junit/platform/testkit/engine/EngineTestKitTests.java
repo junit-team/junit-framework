@@ -13,6 +13,7 @@ package org.junit.platform.testkit.engine;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.AfterEach;
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.util.SetSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.engine.CancellationToken;
+import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
@@ -85,6 +88,32 @@ class EngineTestKitTests {
 				eq(CancellationToken.disabled()));
 			assertNotNull(storeCaptor.getValue(), "Request level store should be passed to execute");
 		}
+	}
+
+	@Test
+	void closesAutoCloseablesStoredDuringDiscovery() {
+		var closed = new AtomicBoolean();
+		TestEngine testEngine = new TestEngine() {
+			@Override
+			public String getId() {
+				return "test-engine";
+			}
+
+			@Override
+			public EngineDescriptor discover(EngineDiscoveryRequest request, UniqueId uniqueId) {
+				request.getSessionScopedStore().put(Namespace.GLOBAL, "resource",
+					(AutoCloseable) () -> closed.set(true));
+				return new EngineDescriptor(uniqueId, "Engine");
+			}
+
+			@Override
+			public void execute(ExecutionRequest request) {
+			}
+		};
+
+		EngineTestKit.discover(testEngine, request().build());
+
+		assertThat(closed).isTrue();
 	}
 
 	@ParameterizedTest

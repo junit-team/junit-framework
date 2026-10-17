@@ -30,6 +30,8 @@ import org.junit.platform.engine.discovery.UniqueIdSelector;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 import org.junit.platform.engine.support.discovery.SelectorResolver;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
  * @since 1.8
@@ -42,18 +44,20 @@ final class ClassSelectorResolver implements SelectorResolver {
 	private final ConfigurationParameters configurationParameters;
 	private final OutputDirectoryCreator outputDirectoryCreator;
 	private final EngineDiscoveryListener discoveryListener;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 	private final DiscoveryIssueReporter issueReporter;
 
 	ClassSelectorResolver(Predicate<String> classNameFilter, SuiteEngineDescriptor suiteEngineDescriptor,
 			ConfigurationParameters configurationParameters, OutputDirectoryCreator outputDirectoryCreator,
-			EngineDiscoveryListener discoveryListener, DiscoveryIssueReporter issueReporter) {
-
+			EngineDiscoveryListener discoveryListener, NamespacedHierarchicalStore<Namespace> sessionScopedStore,
+			DiscoveryIssueReporter issueReporter) {
 		this.isSuiteClass = new IsSuiteClass(issueReporter);
 		this.classNameFilter = classNameFilter;
 		this.suiteEngineDescriptor = suiteEngineDescriptor;
 		this.configurationParameters = configurationParameters;
 		this.outputDirectoryCreator = outputDirectoryCreator;
 		this.discoveryListener = discoveryListener;
+		this.sessionScopedStore = sessionScopedStore;
 		this.issueReporter = issueReporter;
 	}
 
@@ -116,7 +120,7 @@ final class ClassSelectorResolver implements SelectorResolver {
 		}
 
 		return Optional.of(new SuiteTestDescriptor(id, suiteClass, configurationParameters, outputDirectoryCreator,
-			discoveryListener, issueReporter));
+			discoveryListener, sessionScopedStore, issueReporter));
 	}
 
 	private static boolean containsCycle(UniqueId id) {
