@@ -22,25 +22,25 @@ import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 @API(status = INTERNAL, since = "5.14")
 public class LauncherStoreFacade {
 
-	private final NamespacedHierarchicalStore<Namespace> requestLevelStore;
-	private final NamespacedHierarchicalStore<Namespace> sessionLevelStore;
+	private final NamespacedHierarchicalStore<Namespace> requestScopedStore;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 
-	public LauncherStoreFacade(NamespacedHierarchicalStore<Namespace> requestLevelStore) {
-		this.requestLevelStore = requestLevelStore;
-		this.sessionLevelStore = requestLevelStore.getParent().orElseThrow(
+	public LauncherStoreFacade(NamespacedHierarchicalStore<Namespace> requestScopedStore) {
+		this.requestScopedStore = requestScopedStore;
+		this.sessionScopedStore = requestScopedStore.getParent().orElseThrow(
 			() -> new JUnitException("Request-level store must have a parent"));
 	}
 
-	public NamespacedHierarchicalStore<Namespace> getRequestLevelStore() {
-		return this.requestLevelStore;
+	public NamespacedHierarchicalStore<Namespace> getRequestScopedStore() {
+		return this.requestScopedStore;
 	}
 
-	public ExtensionContext.Store getRequestLevelStore(ExtensionContext.Namespace namespace) {
-		return getStoreAdapter(this.requestLevelStore, namespace);
+	public ExtensionContext.Store getRequestScopedStore(ExtensionContext.Namespace namespace) {
+		return getStoreAdapter(this.requestScopedStore, namespace);
 	}
 
-	public ExtensionContext.Store getSessionLevelStore(ExtensionContext.Namespace namespace) {
-		return getStoreAdapter(this.sessionLevelStore, namespace);
+	public ExtensionContext.Store getSessionScopedStore(ExtensionContext.Namespace namespace) {
+		return getStoreAdapter(this.sessionScopedStore, namespace);
 	}
 
 	public NamespaceAwareStore getStoreAdapter(NamespacedHierarchicalStore<Namespace> valuesStore,

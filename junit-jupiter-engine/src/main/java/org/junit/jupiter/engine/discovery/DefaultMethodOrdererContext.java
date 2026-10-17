@@ -11,7 +11,6 @@
 package org.junit.jupiter.engine.discovery;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.MethodDescriptor;
 import org.junit.jupiter.api.MethodOrdererContext;
@@ -23,18 +22,16 @@ import org.junit.platform.commons.util.ToStringBuilder;
  *
  * @since 5.4
  */
-class DefaultMethodOrdererContext implements MethodOrdererContext {
+class DefaultMethodOrdererContext extends DefaultDiscoveryContext implements MethodOrdererContext {
 
 	private final Class<?> testClass;
 	private final List<? extends MethodDescriptor> methodDescriptors;
-	private final JupiterConfiguration configuration;
 
 	DefaultMethodOrdererContext(Class<?> testClass, List<? extends MethodDescriptor> methodDescriptors,
 			JupiterConfiguration configuration) {
-
+		super(configuration);
 		this.testClass = testClass;
 		this.methodDescriptors = methodDescriptors;
-		this.configuration = configuration;
 	}
 
 	@Override
@@ -45,11 +42,6 @@ class DefaultMethodOrdererContext implements MethodOrdererContext {
 	@Override
 	public List<? extends MethodDescriptor> getMethodDescriptors() {
 		return this.methodDescriptors;
-	}
-
-	@Override
-	public Optional<String> getConfigurationParameter(String key) {
-		return this.configuration.getRawConfigurationParameter(key);
 	}
 
 	@Override
