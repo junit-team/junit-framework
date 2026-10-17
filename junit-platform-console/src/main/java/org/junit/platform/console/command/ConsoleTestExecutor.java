@@ -17,13 +17,20 @@ import static org.junit.platform.launcher.LauncherConstants.OUTPUT_DIR_PROPERTY_
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.lang.module.Configuration;
+import java.lang.module.ModuleDescriptor;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -40,6 +47,7 @@ import org.junit.platform.console.output.Theme;
 import org.junit.platform.console.output.TreePrintingListener;
 import org.junit.platform.console.output.VerboseTreePrintingListener;
 import org.junit.platform.engine.CancellationToken;
+import org.junit.platform.engine.discovery.ModuleSelector;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -170,9 +178,48 @@ public class ConsoleTestExecutor {
 		if (!additionalClasspathEntries.isEmpty()) {
 			URL[] urls = additionalClasspathEntries.stream().map(this::toURL).toArray(URL[]::new);
 			ClassLoader parentClassLoader = ClassLoaderUtils.getDefaultClassLoader();
-			return new CustomClassLoader(URLClassLoader.newInstance(urls, parentClassLoader));
+			return isModularTesting() //
+					? createModularCustomClassLoader(urls, parentClassLoader) //
+					: new CustomClassLoader(URLClassLoader.newInstance(urls, parentClassLoader));
 		}
 		return null;
+	}
+
+	private boolean isModularTesting() {
+		return discoveryOptions.isScanModulepath() || !discoveryOptions.getSelectedModules().isEmpty();
+	}
+
+	private CustomClassLoader createModularCustomClassLoader(URL[] urls, ClassLoader parentClassLoader) {
+		Path[] paths = Stream.of(urls).map(this::toPath).toArray(Path[]::new);
+		ModuleFinder moduleFinder = ModuleFinder.of(paths);
+		List<String> moduleNames = discoveryOptions.isScanModulepath() //
+				? moduleFinder.findAll().stream() //
+						.map(ModuleReference::descriptor) //
+						.map(ModuleDescriptor::name) //
+						.sorted() //
+						.toList() //
+				: discoveryOptions.getSelectedModules().stream() //
+						.map(ModuleSelector::getModuleName) //
+						.sorted() //
+						.toList();
+		if (moduleNames.isEmpty()) {
+			throw new JUnitException("No module found in: " + Set.of(paths));
+		}
+		ModuleLayer parentLayer = ModuleLayer.boot();
+		Configuration configuration = parentLayer.configuration().resolve(moduleFinder, ModuleFinder.of(), moduleNames);
+		ModuleLayer moduleLayer = parentLayer.defineModulesWithOneLoader(configuration, parentClassLoader);
+		discoveryOptions.setModuleLayer(moduleLayer);
+		var classLoader = moduleLayer.findLoader(moduleNames.get(0));
+		return new CustomClassLoader(classLoader);
+	}
+
+	private Path toPath(URL url) {
+		try {
+			return Path.of(url.toURI());
+		}
+		catch (URISyntaxException exception) {
+			throw new JUnitException("URL represents no path: " + url, exception);
+		}
 	}
 
 	private URL toURL(Path path) {
