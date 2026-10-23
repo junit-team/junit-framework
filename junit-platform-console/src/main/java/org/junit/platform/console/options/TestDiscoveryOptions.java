@@ -43,6 +43,8 @@ import org.junit.platform.engine.discovery.UriSelector;
 @API(status = INTERNAL, since = "1.10")
 public class TestDiscoveryOptions {
 
+	private ModuleLayer moduleLayer = ModuleLayer.boot();
+
 	private boolean scanClasspath;
 	private List<Path> additionalClasspathEntries = emptyList();
 
@@ -75,6 +77,17 @@ public class TestDiscoveryOptions {
 
 	private List<String> configurationParametersResources = emptyList();
 	private Map<String, String> configurationParameters = emptyMap();
+
+	public TestDiscoveryOptions() {
+	}
+
+	public ModuleLayer getModuleLayer() {
+		return moduleLayer;
+	}
+
+	public void setModuleLayer(ModuleLayer moduleLayer) {
+		this.moduleLayer = moduleLayer;
+	}
 
 	public boolean isScanModulepath() {
 		return this.scanModulepath;

@@ -10,10 +10,10 @@
 
 package org.junit.platform.console.command;
 
-import java.net.URLClassLoader;
+import java.io.Closeable;
 
 /**
- * Custom class loader that proxies a {@link URLClassLoader} but does
+ * Custom class loader that proxies a {@link ClassLoader} but does
  * <em>not</em> implement {@link AutoCloseable} so user code is less likely to
  * accidentally close it.
  *
@@ -25,11 +25,13 @@ class CustomClassLoader extends ClassLoader {
 		ClassLoader.registerAsParallelCapable();
 	}
 
-	CustomClassLoader(URLClassLoader parent) {
+	CustomClassLoader(ClassLoader parent) {
 		super(parent);
 	}
 
 	void close() throws Exception {
-		((URLClassLoader) getParent()).close();
+		if (getParent() instanceof Closeable parent) {
+			parent.close();
+		}
 	}
 }
