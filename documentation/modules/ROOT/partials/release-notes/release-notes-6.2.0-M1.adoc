@@ -62,6 +62,10 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-bug-fixes]]
 ==== Bug Fixes
 
+* `@DefaultLocale` now restores the default locale of each `Locale.Category` (`DISPLAY`
+  and `FORMAT`) after a test. Previously, both were reset to the general default locale,
+  which changed how subsequent tests format numbers and dates if the format locale
+  differed from it, e.g., due to the region settings of the operating system.
 * The `junit.jupiter.params.displayname.argument.maxlength` configuration parameter is
   now validated and rejected with a clear error when set to a non-positive value instead
   of causing parameterized tests to fail with an internal exception.

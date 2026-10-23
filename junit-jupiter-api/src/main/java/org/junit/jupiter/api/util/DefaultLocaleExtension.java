@@ -41,12 +41,12 @@ final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallb
 	@Override
 	public void beforeEach(ExtensionContext context) {
 		createLocaleFromAnnotation(context) //
-				.or(() -> load(context, CUSTOM_KEY)) //
+				.or(() -> load(context, CUSTOM_KEY, Locale.class)) //
 				.ifPresent(locale -> setDefaultLocale(context, locale));
 	}
 
 	private void setDefaultLocale(ExtensionContext context, Locale customLocale) {
-		store(context, DEFAULT_KEY, Locale.getDefault());
+		store(context, DEFAULT_KEY, DefaultLocales.current());
 		Locale.setDefault(customLocale);
 	}
 
@@ -126,19 +126,38 @@ final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallb
 
 	@Override
 	public void afterEach(ExtensionContext context) {
-		load(context, DEFAULT_KEY).ifPresent(Locale::setDefault);
+		load(context, DEFAULT_KEY, DefaultLocales.class).ifPresent(DefaultLocales::restore);
 	}
 
-	private static void store(ExtensionContext context, String key, Locale value) {
+	private static void store(ExtensionContext context, String key, Object value) {
 		getStore(context).put(key, value);
 	}
 
-	private static Optional<Locale> load(ExtensionContext context, String key) {
-		return Optional.ofNullable(getStore(context).get(key, Locale.class));
+	private static <T> Optional<T> load(ExtensionContext context, String key, Class<T> type) {
+		return Optional.ofNullable(getStore(context).get(key, type));
 	}
 
 	private static ExtensionContext.Store getStore(ExtensionContext context) {
 		return context.getStore(NAMESPACE);
+	}
+
+	/**
+	 * The default locale along with the default locale of each
+	 * {@link Locale.Category}, since {@link Locale#setDefault(Locale)} changes
+	 * all of them.
+	 */
+	private record DefaultLocales(Locale locale, Locale displayLocale, Locale formatLocale) {
+
+		static DefaultLocales current() {
+			return new DefaultLocales(Locale.getDefault(), Locale.getDefault(Locale.Category.DISPLAY),
+				Locale.getDefault(Locale.Category.FORMAT));
+		}
+
+		void restore() {
+			Locale.setDefault(locale);
+			Locale.setDefault(Locale.Category.DISPLAY, displayLocale);
+			Locale.setDefault(Locale.Category.FORMAT, formatLocale);
+		}
 	}
 
 }
