@@ -47,6 +47,8 @@ import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
  * Caching implementation of the {@link JupiterConfiguration} API.
@@ -180,4 +182,10 @@ public class CachingJupiterConfiguration implements JupiterConfiguration {
 	public OutputDirectoryCreator getOutputDirectoryCreator() {
 		return delegate.getOutputDirectoryCreator();
 	}
+
+	@Override
+	public NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+		return delegate.getSessionScopedStore();
+	}
+
 }

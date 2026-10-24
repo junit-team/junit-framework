@@ -266,7 +266,7 @@ public interface ClassOrderer {
 		@Override
 		public void orderClasses(ClassOrdererContext context) {
 			Collections.shuffle(context.getClassDescriptors(),
-				new java.util.Random(RandomOrdererUtils.getSeed(context::getConfigurationParameter, logger)));
+				new java.util.Random(RandomOrdererUtils.getSeed(context, logger)));
 		}
 	}
 

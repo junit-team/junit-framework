@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.extension;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME;
@@ -29,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.ClassOrdererContext;
 import org.junit.jupiter.api.ClassTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -58,6 +60,7 @@ import org.junit.platform.testkit.engine.Events;
 class OrderedClassTests {
 
 	private static final List<String> callSequence = Collections.synchronizedList(new ArrayList<>());
+	private static String classOrdererStoreValue = "not set";
 
 	@BeforeEach
 	@AfterEach
@@ -87,6 +90,15 @@ class OrderedClassTests {
 
 		assertThat(callSequence)//
 				.containsExactly("A_TestCase", "B_TestCase", "C_TestCase");
+	}
+
+	@Test
+	void classOrdererCanAccessSessionScopedStore() {
+		classOrdererStoreValue = "not set";
+
+		discoverTests(ClassOrdererStoreAccessor.class);
+
+		assertThat(classOrdererStoreValue).isEqualTo("stored by class orderer");
 	}
 
 	@Test
@@ -230,6 +242,16 @@ class OrderedClassTests {
 							"Note that the annotation may be either directly present or meta-present on the class."));
 		assertThat(discoveryIssues).extracting(DiscoveryIssue::source).extracting(Optional::orElseThrow) //
 				.containsExactlyInAnyOrder(ClassSource.from(A_TestCase.class), ClassSource.from(C_TestCase.class));
+	}
+
+	static class ClassOrdererStoreAccessor implements ClassOrderer {
+
+		@Override
+		public void orderClasses(ClassOrdererContext context) {
+			var store = context.getStoreAccessor("class-orderer");
+			store.put("key", "stored by class orderer");
+			classOrdererStoreValue = requireNonNull((String) store.get("key"));
+		}
 	}
 
 	private Events executeTests(@Nullable Class<? extends ClassOrderer> classOrderer) {
