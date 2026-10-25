@@ -75,17 +75,28 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     val anyProvider = hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
                     val valueTitle = if (anyProvider != null) "Example" else "Value"
 
-                    sb.appendLine(
-                        """
+                    if(hasDefault) {
+                        sb.appendLine(
+                            """
                         [cols="1,1,98"]
                         |===
                         |Default |$valueTitle |Description
                         """.trimIndent()
+                        )
+                    } else {
+                    sb.appendLine(
+                        """
+                        [cols="1,99"]
+                        |===
+                        |$valueTitle |Description
+                        """.trimIndent()
                     )
+                        }
                     values.forEach({
                         val value = it.get("value")?.asString()
                         val description = it.get("description")?.asString() ?: ""
-                        sb.appendLine(if (hasDefault && default.asString() == value) "|✓" else "|" )
+                        if(hasDefault)
+                            sb.appendLine(if (default.asString() == value) "|✓" else "|" )
                         sb.appendLine("|`$value`")
                         sb.appendLine("|$description" )
                         sb.appendLine()
