@@ -96,7 +96,7 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     }
                     var foundDefaultInValues = false
                     values.forEach({
-                        val value = it.get("value")?.asString()
+                        val value = it.get("value")?.asString() ?: ""
                         val description = it.get("description")?.asString() ?: ""
                         if (hasDefault) {
                             if (default.asString().equals(value, true)) {
@@ -106,15 +106,15 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                                 sb.appendLine("|")
                             }
                         }
-                        sb.appendLine("|`$value`")
-                        sb.appendLine("|$description")
+                        sb.appendLine("|`${escapeCellSeparator(value)}`")
+                        sb.appendLine("|${escapeCellSeparator(description)}")
                         sb.appendLine()
                     })
                     sb.appendLine("|===")
                     sb.appendLine()
 
                     if (hasDefault && !foundDefaultInValues) {
-                        throw RuntimeException("The default value of $name (${default.asString()}) must be one of the hint values")
+                        throw IllegalArgumentException("The default value of $name (${default.asString()}) must be one of the hint values.")
                     }
 
                 } else if (hasDefault) {
@@ -128,6 +128,8 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
     }
 
     private fun text(value: String) = value.replace('\n', ' ').trim()
+
+    private fun escapeCellSeparator(value: String) = value.replace("|", "{vbar}")
 
     private data class Group(val title: String, val prefix: String)
 
