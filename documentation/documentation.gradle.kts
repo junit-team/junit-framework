@@ -102,6 +102,7 @@ dependencies {
 	javadocClasspath(libs.fastcsv)
 	javadocClasspath(libs.openTestReporting.events)
 	javadocClasspath(libs.jakarta.json.api)
+	javadocClasspath(libs.owasp.java.html.sanitizer)
 	javadocClasspath(libs.kotlinx.coroutines.core)
 	javadocClasspath(kotlin("stdlib"))
 	javadocClasspath(kotlin("reflect"))
