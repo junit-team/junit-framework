@@ -36,7 +36,7 @@ public class ConfigurationParametersDemo {
 	}
 
 	/**
-	 * Property name used to set the default test execution mode: {@value}.
+	 * Property name used to set the default test execution mode: {@value}
 	 * <p>
 	 * Test can be executed with either a fixed number of threads, a number
 	 * based on the available cores or a custom strategy.
