@@ -63,19 +63,21 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     sb.appendLine(description)
                 }
 
-                val hint = hints?.find { jsonNode ->  jsonNode.get("name")?.asString() == name}
-                val classReferenceProvider = hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
+                val hint = hints?.find { jsonNode -> jsonNode.get("name")?.asString() == name }
+                val classReferenceProvider =
+                    hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
                 if (classReferenceProvider != null) {
                     val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
                     sb.appendLine("Value must be a class that implements `$valueMustBeSubtypeOf`.")
                 }
 
-                if(hint != null && classReferenceProvider == null){
+                if (hint != null && classReferenceProvider == null) {
                     val values = hint.get("values")
-                    val anyProvider = hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
+                    val anyProvider =
+                        hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
                     val valueTitle = if (anyProvider != null) "Example" else "Value"
 
-                    if(hasDefault) {
+                    if (hasDefault) {
                         sb.appendLine(
                             """
                         [cols="1,1,98"]
@@ -84,21 +86,21 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                         """.trimIndent()
                         )
                     } else {
-                    sb.appendLine(
-                        """
+                        sb.appendLine(
+                            """
                         [cols="1,99"]
                         |===
                         |$valueTitle |Description
                         """.trimIndent()
-                    )
-                        }
+                        )
+                    }
                     values.forEach({
                         val value = it.get("value")?.asString()
                         val description = it.get("description")?.asString() ?: ""
-                        if(hasDefault)
-                            sb.appendLine(if (default.asString() == value) "|✓" else "|" )
+                        if (hasDefault)
+                            sb.appendLine(if (default.asString() == value) "|✓" else "|")
                         sb.appendLine("|`$value`")
-                        sb.appendLine("|$description" )
+                        sb.appendLine("|$description")
                         sb.appendLine()
                     })
                     sb.appendLine("|===")
