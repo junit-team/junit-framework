@@ -101,6 +101,7 @@ dependencies {
 	thirdPartyJars(libs.opentest4j)
 	thirdPartyJars(libs.openTestReporting.events)
 	thirdPartyJars(libs.openTestReporting.tooling.spi)
+	thirdPartyJars(libs.owasp.java.html.sanitizer)
 	thirdPartyJars(libs.picocli)
 
 	antJars(platform(projects.junitBom))
