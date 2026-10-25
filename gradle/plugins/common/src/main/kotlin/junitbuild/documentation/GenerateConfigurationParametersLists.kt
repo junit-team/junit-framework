@@ -69,32 +69,31 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
                     sb.appendLine("Value must be a class that implements `$valueMustBeSubtypeOf`.")
                 }
-                if (hasDefault) {
-                    sb.appendLine("Defaults to `${text(default.asString())}`.")
-                }
 
-                val isBoolean = property.get("type")?.stringValue() == "java.lang.Boolean"
-                if(hint != null && classReferenceProvider == null && !isBoolean){
+                if(hint != null && classReferenceProvider == null){
                     val values = hint.get("values")
                     val anyProvider = hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
-                    val valueTitle = if (anyProvider != null) "Example values" else "Allowed values"
+                    val valueTitle = if (anyProvider != null) "Example" else "Value"
 
                     sb.appendLine(
                         """
-                        [cols="1,1"]
+                        [cols="1,1,98"]
                         |===
-                        |$valueTitle |Description
+                        |Default |$valueTitle |Description
                         """.trimIndent()
                     )
                     values.forEach({
                         val value = it.get("value")?.asString()
                         val description = it.get("description")?.asString() ?: ""
+                        sb.appendLine(if (hasDefault && default.asString() == value) "|✓" else "|" )
                         sb.appendLine("|`$value`")
                         sb.appendLine("|$description" )
                         sb.appendLine()
                     })
                     sb.appendLine("|===")
                     sb.appendLine()
+                } else if (hasDefault) {
+                    sb.appendLine("Defaults to `${default.asString()}`.")
                 }
                 sb.appendLine()
             }
