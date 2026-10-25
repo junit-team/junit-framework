@@ -68,7 +68,7 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
                 if (classReferenceProvider != null) {
                     val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
-                    sb.appendLine("Value must be a class that implements `$valueMustBeSubtypeOf`.")
+                    sb.appendLine("Value must be a class that implements ${javaDocLink(valueMustBeSubtypeOf)}.")
                 }
 
                 if (hint != null && classReferenceProvider == null) {
@@ -130,6 +130,20 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
     private fun text(value: String) = value.replace('\n', ' ').trim()
 
     private fun escapeCellSeparator(value: String) = value.replace("|", "{vbar}")
+
+    private fun javaDocLink(fqn: String): String {
+        // Doesn't work for inner-classes.
+        val simpleName = fqn.substringAfterLast(".")
+        val fqp = fqn.replace(".", "/")
+        val module = if (fqn.startsWith("org.junit.jupiter.api")) {
+            "org.junit.jupiter.api"
+        } else if (fqn.startsWith("org.junit.platform.engine")) {
+            "org.junit.platform.engine"
+        } else {
+            throw IllegalArgumentException("Could not guess module name for $fqn")
+        }
+        return "{javadoc-root}/$module/$fqp.html[$simpleName]"
+    }
 
     private data class Group(val title: String, val prefix: String)
 
