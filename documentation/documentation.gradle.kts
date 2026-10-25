@@ -424,11 +424,12 @@ tasks {
 
 		args.addAll(
 			"--module", modularProjects.joinToString(",") { it.javaModuleName },
-			"--add-modules", "info.picocli,org.opentest4j.reporting.events,de.siegmar.fastcsv,jakarta.json",
+			"--add-modules", "info.picocli,org.opentest4j.reporting.events,de.siegmar.fastcsv,jakarta.json,owasp.java.html.sanitizer",
 			"--add-reads", "org.junit.platform.console=info.picocli",
 			"--add-reads", "org.junit.platform.reporting=org.opentest4j.reporting.events",
 			"--add-reads", "org.junit.jupiter.params=de.siegmar.fastcsv",
 			"--add-reads", "org.junit.platform.configuration.processor=jakarta.json",
+			"--add-reads", "org.junit.platform.configuration.processor=owasp.java.html.sanitizer",
 		)
 
 		outputDirectory = layout.buildDirectory.dir("docs/javadoc")
