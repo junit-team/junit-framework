@@ -30,7 +30,15 @@ import org.junit.platform.engine.ConfigurationParameters;
 @API(status = INTERNAL, since = "1.13")
 public enum LauncherPhase {
 
-	DISCOVERY, EXECUTION;
+	/**
+	 * During discovery tests are discovered to be executed during the execution phase.
+	 */
+	DISCOVERY,
+
+	/**
+	 * During the execution phase, previously discovered tests are executed.
+	 */
+	EXECUTION;
 
 	static Optional<LauncherPhase> getDiscoveryIssueFailurePhase(ConfigurationParameters configurationParameters) {
 		Function<String, @Nullable LauncherPhase> stringLauncherPhaseFunction = value -> {

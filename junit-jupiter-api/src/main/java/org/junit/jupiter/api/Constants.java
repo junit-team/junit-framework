@@ -560,7 +560,11 @@ public final class Constants {
 	 *
 	 * @see Timeout
 	 */
-	@ConfigurationParameter(type = Timeout.ThreadMode.class, defaultValue = @Value(stringValue = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT))
+	@ConfigurationParameter(type = Timeout.ThreadMode.class, hints = @Hints({
+			// Use explicit hints. Not all values of the enum should be
+			// configured through a property.
+			@Hint(value = "same_thread", description = "The test code is executed in the thread of the calling code."),
+			@Hint(value = "separate_thread", description = "The test code is executed in a different thread than that of the calling code. Furthermore, execution of the test code will be preemptively aborted if the timeout is exceeded.") }), defaultValue = @Value(stringValue = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT))
 	public static final String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
 
 	/**
