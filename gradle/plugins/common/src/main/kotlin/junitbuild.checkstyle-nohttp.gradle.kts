@@ -15,7 +15,7 @@ dependencies {
 		}
 		checkstyle("ch.qos.logback:logback-classic") {
 			version {
-				require("1.6.5")
+				require("1.6.6")
 			}
 			because("Workaround for CVE-2026-10532")
 		}
