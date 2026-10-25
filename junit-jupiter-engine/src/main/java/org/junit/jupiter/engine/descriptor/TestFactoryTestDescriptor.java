@@ -129,8 +129,11 @@ public class TestFactoryTestDescriptor extends TestMethodTestDescriptor implemen
 			catch (ClassCastException ex) {
 				throw invalidReturnTypeException(ex);
 			}
-			dynamicTestExecutor.awaitFinished();
 		});
+
+		// Dynamic tests submitted before the stream threw an exception have to
+		// finish before the after-each callbacks and methods are executed.
+		context.getThrowableCollector().execute(dynamicTestExecutor::awaitFinished);
 	}
 
 	@SuppressWarnings("unchecked")

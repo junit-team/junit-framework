@@ -49,6 +49,7 @@ dependencies {
 	testImplementation(testFixtures(projects.junitJupiterParams))
 	testImplementation(libs.apiguardian)
 	testImplementation(libs.classgraph)
+	testImplementation(libs.jimfs)
 	testImplementation(libs.jfrunit) {
 		exclude(group = "org.junit.vintage")
 	}

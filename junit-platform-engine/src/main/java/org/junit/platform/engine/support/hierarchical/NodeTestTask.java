@@ -163,6 +163,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		throwableCollector.execute(() -> {
 			node.around(requiredContext(), ctx -> {
 				context = ctx;
+				final DynamicTestExecutor dynamicTestExecutor = new DefaultDynamicTestExecutor();
 				throwableCollector.execute(() -> {
 					// @formatter:off
 					List<NodeTestTask<C>> children = testDescriptor.getChildren().stream()
@@ -172,17 +173,16 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 
 					context = node.before(requiredContext());
 
-					final DynamicTestExecutor dynamicTestExecutor = new DefaultDynamicTestExecutor();
 					context = node.execute(requiredContext(), dynamicTestExecutor);
 
 					if (!children.isEmpty()) {
 						children.forEach(child -> child.setParentContext(context));
 						taskContext.executorService().invokeAll(children);
 					}
-
-					throwableCollector.execute(dynamicTestExecutor::awaitFinished);
 				});
 
+				// Await submitted dynamic tests even if execute() threw an exception
+				throwableCollector.execute(dynamicTestExecutor::awaitFinished);
 				throwableCollector.execute(() -> node.after(requiredContext()));
 			});
 		});

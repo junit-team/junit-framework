@@ -95,7 +95,10 @@ public interface Node<C extends EngineExecutionContext> {
 	 * {@link HierarchicalTestEngine} handles execution of their children.
 	 *
 	 * <p>The supplied {@code dynamicTestExecutor} may be used to submit
-	 * additional dynamic tests for immediate execution.
+	 * additional dynamic tests for immediate execution. All dynamic tests
+	 * submitted to it are finished before the {@linkplain #after after}
+	 * behavior of this node is executed, even if this method throws an
+	 * exception.
 	 *
 	 * <p>The default implementation returns the supplied {@code context} unmodified.
 	 *

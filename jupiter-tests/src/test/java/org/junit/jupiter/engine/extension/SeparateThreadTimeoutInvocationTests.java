@@ -42,7 +42,7 @@ class SeparateThreadTimeoutInvocationTests {
 		AtomicReference<String> threadName = new AtomicReference<>();
 		var invocation = aSeparateThreadInvocation(() -> {
 			threadName.set(Thread.currentThread().getName());
-			Thread.sleep(PREEMPTIVE_TIMEOUT_MILLIS * 2);
+			Thread.sleep(PREEMPTIVE_TIMEOUT_MILLIS * 20);
 			return "ignored";
 		});
 

@@ -64,6 +64,8 @@ class ClasspathAlignmentCheckerTests {
 	void allRootPackagesAreChecked() {
 		var allowedFileNames = Pattern.compile("junit-(?:platform|jupiter|vintage)-.+[\\d.]+(?:-SNAPSHOT)?\\.jar");
 		var classGraph = new ClassGraph() //
+				.enableClasspath() //
+				.enableClassInfo() //
 				.acceptPackages("org.junit.platform", "org.junit.jupiter", "org.junit.vintage") //
 				.rejectPackages("org.junit.platform.reporting.shadow", "org.junit.jupiter.params.shadow") //
 				.filterClasspathElements(e -> {

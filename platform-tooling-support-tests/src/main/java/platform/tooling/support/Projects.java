@@ -28,6 +28,7 @@ public class Projects {
 	public static final String MAVEN_JUNIT_PLATFORM_CONFIGURATION_PROCESSOR = "maven-junit-platform-configuration-processor";
 	public static final String MEMORY_CLEANUP = "memory-cleanup";
 	public static final String REFLECTION_TESTS = "reflection-tests";
+	public static final String SPRING_BOOT_EXECUTABLE_JAR = "spring-boot-executable-jar";
 	public static final String STANDALONE = "standalone";
 	public static final String VINTAGE = "vintage";
 

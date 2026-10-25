@@ -86,11 +86,11 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@6158cb0903b8ceeae04f830055f3155e1b6a5ad7 # v1.5.11
+      - uses: sbt/setup-sbt@ecad189dd245444b9ae0a0cd5922fd938b88906f # v1.5.12
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Prepare Maven Central user token
@@ -191,11 +191,11 @@ jobs:
           token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_EXAMPLES_REPO }}
           persist-credentials: true
       - name: Set up JDK
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@6158cb0903b8ceeae04f830055f3155e1b6a5ad7 # v1.5.11
+      - uses: sbt/setup-sbt@ecad189dd245444b9ae0a0cd5922fd938b88906f # v1.5.12
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Build examples

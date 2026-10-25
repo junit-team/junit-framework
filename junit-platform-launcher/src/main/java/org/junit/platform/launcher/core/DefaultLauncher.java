@@ -46,7 +46,7 @@ class DefaultLauncher implements Launcher {
 	private final EngineExecutionOrchestrator executionOrchestrator = new EngineExecutionOrchestrator(
 		listenerRegistry.testExecutionListeners);
 	private final EngineDiscoveryOrchestrator discoveryOrchestrator;
-	private final NamespacedHierarchicalStore<Namespace> sessionLevelStore;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 
 	/**
 	 * Construct a new {@code DefaultLauncher} with the supplied test engines.
@@ -57,7 +57,7 @@ class DefaultLauncher implements Launcher {
 	 * discovery requests; never {@code null}
 	 */
 	DefaultLauncher(Iterable<TestEngine> testEngines, Collection<PostDiscoveryFilter> postDiscoveryFilters,
-			NamespacedHierarchicalStore<Namespace> sessionLevelStore) {
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
 		Preconditions.condition(testEngines.iterator().hasNext(),
 			() -> "Cannot create Launcher without at least one TestEngine; "
 					+ "consider adding an engine implementation JAR to the classpath");
@@ -65,8 +65,9 @@ class DefaultLauncher implements Launcher {
 		Preconditions.containsNoNullElements(postDiscoveryFilters,
 			"postDiscoveryFilter array must not contain null elements");
 		this.discoveryOrchestrator = new EngineDiscoveryOrchestrator(testEngines,
-			unmodifiableCollection(postDiscoveryFilters), listenerRegistry.launcherDiscoveryListeners);
-		this.sessionLevelStore = sessionLevelStore;
+			unmodifiableCollection(postDiscoveryFilters), sessionScopedStore,
+			listenerRegistry.launcherDiscoveryListeners);
+		this.sessionScopedStore = sessionScopedStore;
 	}
 
 	@Override
@@ -139,7 +140,7 @@ class DefaultLauncher implements Launcher {
 	}
 
 	private NamespacedHierarchicalStore<Namespace> createRequestLevelStore() {
-		return new NamespacedHierarchicalStore<>(sessionLevelStore, closeAutoCloseables());
+		return new NamespacedHierarchicalStore<>(sessionScopedStore, closeAutoCloseables());
 	}
 
 }

@@ -9,13 +9,13 @@ dependencies {
 	constraints {
 		checkstyle("org.apache.commons:commons-lang3") {
 			version {
-				require("3.18.0")
+				require("3.21.0")
 			}
 			because("Workaround for CVE-2025-48924")
 		}
 		checkstyle("org.codehaus.plexus:plexus-utils") {
 			version {
-				require("3.6.1")
+				require("4.1.0")
 			}
 			because("Workaround for CVE-2025-67030")
 		}

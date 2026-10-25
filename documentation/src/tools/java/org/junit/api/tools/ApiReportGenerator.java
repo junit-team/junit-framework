@@ -135,8 +135,9 @@ class ApiReportGenerator {
 		// scan all types below "org.junit" package
 		var classGraph = new ClassGraph() //
 				.acceptPackages("org.junit") //
-				.rejectPackages("*.shadow.*", "org.opentest4j.*", "org.junit.platform.commons.logging",
+				.rejectPackages("**.shadow", "org.opentest4j", "org.junit.platform.commons.logging",
 					"org.junit.platform.commons.util") //
+				.enableNonSystemModules() //
 				.disableNestedJarScanning() //
 				.enableClassInfo() //
 				.enableMethodInfo() //
@@ -150,14 +151,17 @@ class ApiReportGenerator {
 			var configuration = bootLayer.configuration().resolveAndBind(ModuleFinder.of(), ModuleFinder.of(paths),
 				roots);
 			var layer = bootLayer.defineModulesWithOneLoader(configuration, ClassLoader.getPlatformClassLoader());
-			classGraph = classGraph.overrideModuleLayers(layer);
+			classGraph = classGraph.enableModuleLayers(layer);
+		}
+		else {
+			classGraph = classGraph.enableClasspath();
 		}
 		return classGraph.scan();
 	}
 
 	private static SortedSet<ClassInfo> collectTypes(ScanResult scanResult) {
 		var types = scanResult.getClassesWithAnnotation(API.class).stream() //
-				.filter(it -> !it.getAnnotationInfo(API.class).isInherited()) //
+				.filter(it -> !it.getAllAnnotationInfo(API.class).isInherited()) //
 				.collect(toCollection(TreeSet::new));
 
 		logger.debug(() -> {
@@ -173,7 +177,7 @@ class ApiReportGenerator {
 	private static Stream<MethodInfo> collectMethods(ScanResult scanResult) {
 		return scanResult.getClassesWithMethodAnnotation(API.class).stream() //
 				.flatMap(type -> type.getDeclaredMethodAndConstructorInfo().stream()) //
-				.filter(m -> m.getAnnotationInfo(API.class) != null);
+				.filter(m -> m.getAllAnnotationInfo(API.class) != null);
 	}
 
 	private ApiReportGenerator() {

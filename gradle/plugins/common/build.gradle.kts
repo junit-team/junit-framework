@@ -25,7 +25,7 @@ dependencies {
 	constraints {
 		implementation("org.codehaus.plexus:plexus-utils") {
 			version {
-				require("4.0.3")
+				require("4.1.0")
 			}
 			because("Workaround for CVE-2025-67030 (used by shadow plugin)")
 		}

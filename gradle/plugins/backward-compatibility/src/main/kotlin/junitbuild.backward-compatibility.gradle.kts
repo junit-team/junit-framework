@@ -21,19 +21,19 @@ dependencies {
 	constraints {
 		roseauDependencies("org.apache.commons:commons-lang3") {
 			version {
-				require("3.18.0")
+				require("3.21.0")
 			}
 			because("Workaround for CVE-2025-48924")
 		}
 		roseauDependencies("com.fasterxml.jackson.core:jackson-databind") {
 			version {
-				require("2.22.3")
+				require("2.22.4")
 			}
 			because("Workaround for CVE-2026-68497")
 		}
 		roseauDependencies("org.codehaus.plexus:plexus-utils") {
 			version {
-				require("3.6.1")
+				require("4.1.0")
 			}
 			because("Workaround for CVE-2025-67030")
 		}
