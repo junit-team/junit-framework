@@ -17,6 +17,8 @@ import static org.apiguardian.api.API.Status.STABLE;
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
@@ -310,7 +312,15 @@ public class LauncherConstants {
 	 * @see org.junit.platform.engine.DiscoveryIssue.Severity
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
-	@ConfigurationParameter(type = Severity.class, defaultValue = @Value(stringValue = CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT))
+	@ConfigurationParameter(type = Severity.class,
+			// Severity is located in a different module so its values must be
+			// documented explicitly
+			hints = @Hints({ //
+					@Hint(value = "info", description = "Indicates that the engine encountered something that could be potentially problematic, but could also happen due to a valid setup or configuration."), //
+					@Hint(value = "warning", description = "Indicates that the engine encountered something that is problematic and might lead to unexpected behavior or will be removed or changed in a future release."), //
+					@Hint(value = "error", description = "Indicates that the engine encountered something that is definitely problematic and will lead to unexpected behavior.") //
+			}), //
+			defaultValue = @Value(stringValue = CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT))
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
 
 	/**
