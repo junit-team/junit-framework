@@ -19,7 +19,9 @@ import static org.junit.platform.commons.util.ReflectionUtils.tryToLoadClass;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
 import org.apiguardian.api.API;
@@ -39,6 +41,7 @@ public class KotlinReflectionUtils {
 	private static final @Nullable Class<? extends Annotation> kotlinMetadata;
 	private static final @Nullable Class<? extends Annotation> jvmInline;
 	private static final @Nullable Class<?> kotlinCoroutineContinuation;
+	private static final @Nullable Class<?> kotlinUnit;
 	private static final boolean kotlinReflectPresent;
 	private static final boolean kotlinxCoroutinesPresent;
 
@@ -48,6 +51,10 @@ public class KotlinReflectionUtils {
 		jvmInline = tryToLoadJvmInlineClass().toOptional().orElse(null);
 		kotlinCoroutineContinuation = metadata //
 				.andThen(__ -> tryToLoadClass("kotlin.coroutines.Continuation")) //
+				.toOptional() //
+				.orElse(null);
+		kotlinUnit = metadata //
+				.andThen(__ -> tryToLoadClass("kotlin.Unit")) //
 				.toOptional() //
 				.orElse(null);
 		kotlinReflectPresent = metadata.andThen(__ -> tryToLoadClass("kotlin.reflect.jvm.ReflectJvmMapping")) //
@@ -138,7 +145,49 @@ public class KotlinReflectionUtils {
 
 	public static Class<?> getKotlinSuspendingFunctionReturnType(Method method) {
 		requireKotlinReflect(method);
+		if (returnsUnit(method)) {
+			return void.class;
+		}
 		return KotlinFunctionUtils.getReturnType(method);
+	}
+
+	/**
+	 * Determine whether the supplied suspending function returns {@code Unit}
+	 * by inspecting the generic type of its trailing {@code Continuation}
+	 * parameter (i.e., {@code Continuation<? super Unit>}), which avoids the
+	 * comparatively expensive lookup via {@code kotlin-reflect}.
+	 */
+	private static boolean returnsUnit(Method method) {
+		if (kotlinUnit == null) {
+			return false;
+		}
+		Type[] genericParameterTypes = method.getGenericParameterTypes();
+		if (genericParameterTypes.length > 0
+				&& genericParameterTypes[genericParameterTypes.length - 1] instanceof ParameterizedType continuation
+				&& continuation.getActualTypeArguments().length == 1
+				&& continuation.getActualTypeArguments()[0] instanceof WildcardType wildcard) {
+			Type[] lowerBounds = wildcard.getLowerBounds();
+			return lowerBounds.length == 1 && lowerBounds[0] == kotlinUnit;
+		}
+		return false;
+	}
+
+	/**
+	 * Determine whether the name of the supplied method was mangled by the
+	 * Kotlin compiler, e.g., because it has parameters of inline value class
+	 * types, in which case it must be invoked via {@code kotlin-reflect}.
+	 */
+	private static boolean hasMangledName(Method method) {
+		return method.getName().indexOf('-') >= 0;
+	}
+
+	private static boolean hasInlineTypeArgument(@Nullable Object[] args) {
+		for (Object arg : args) {
+			if (isInstanceOfInlineType(arg)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Type getKotlinSuspendingFunctionGenericReturnType(Method method) {
@@ -160,6 +209,9 @@ public class KotlinReflectionUtils {
 			@Nullable Object[] args) {
 		requireKotlinReflect(method);
 		requireKotlinxCoroutines(method);
+		if (returnsUnit(method) && !hasMangledName(method) && !hasInlineTypeArgument(args)) {
+			return KotlinFunctionUtils.invokeUnitReturningKotlinSuspendingFunction(method, target, args);
+		}
 		return KotlinFunctionUtils.invokeKotlinSuspendingFunction(method, target, args);
 	}
 

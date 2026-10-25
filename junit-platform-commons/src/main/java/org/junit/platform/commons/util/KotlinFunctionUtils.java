@@ -94,6 +94,26 @@ class KotlinFunctionUtils {
 		}
 	}
 
+	/**
+	 * Invoke the supplied {@code Unit}-returning suspending function directly
+	 * by passing the {@code Continuation} as its last argument, thereby
+	 * avoiding the overhead of {@code kotlin-reflect}.
+	 */
+	static @Nullable Object invokeUnitReturningKotlinSuspendingFunction(Method method, @Nullable Object target,
+			@Nullable Object[] args) {
+		try {
+			return runBlocking(EmptyCoroutineContext.INSTANCE, (__, continuation) -> {
+				@Nullable
+				Object[] arguments = Arrays.copyOf(args, args.length + 1);
+				arguments[args.length] = continuation;
+				return ReflectionUtils.invokeMethod(method, target, arguments);
+			});
+		}
+		catch (InterruptedException e) {
+			throw throwAsUncheckedException(e);
+		}
+	}
+
 	private static <T extends @Nullable Object> T invokeKotlinSuspendingFunction(KFunction<T> function,
 			@Nullable Object target, @Nullable Object[] args) throws InterruptedException {
 		if (!isAccessible(function)) {

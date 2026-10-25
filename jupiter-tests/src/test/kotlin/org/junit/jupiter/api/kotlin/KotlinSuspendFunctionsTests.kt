@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api.kotlin
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -18,10 +19,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
+import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.TestReporter
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests
 import org.junit.jupiter.params.AfterParameterizedClassInvocation
@@ -32,6 +35,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.junit.platform.engine.reporting.ReportEntry
 import org.junit.platform.testkit.engine.EngineExecutionResults
+import org.junit.platform.testkit.engine.EventConditions.finishedWithFailure
+import org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf
+import org.junit.platform.testkit.engine.TestExecutionResultConditions.message
 import java.util.stream.Stream
 
 class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
@@ -77,6 +83,17 @@ class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
         assertThat(
             getPublishedEvents(results)
         ).containsExactly("beforeInvocation[1]", "test[1]", "afterInvocation[1]", "beforeInvocation[2]", "test[2]", "afterInvocation[2]")
+    }
+
+    @Test
+    fun actuallySuspendingTestMethodsAreSupported() {
+        val results = executeTestsForClass(ActuallySuspendingTestCase::class)
+        results.testEvents().assertStatistics { it.started(2).succeeded(1).failed(1) }
+        assertThat(getPublishedEvents(results)).containsExactly("before delay", "after delay")
+        results.testEvents().assertThatEvents().haveExactly(
+            1,
+            finishedWithFailure(instanceOf(IllegalStateException::class.java), message("failure after delay"))
+        )
     }
 
     private fun assertAllTestsPassed(
@@ -192,6 +209,23 @@ class KotlinSuspendFunctionsTests : AbstractJupiterTestEngineTests() {
         @Test
         suspend fun test(reporter: TestReporter) {
             suspendingPublish(reporter, "test[$parameter]")
+        }
+    }
+
+    @Suppress("JUnitMalformedDeclaration")
+    @TestMethodOrder(MethodOrderer.MethodName::class)
+    class ActuallySuspendingTestCase {
+        @Test
+        suspend fun a(reporter: TestReporter) {
+            reporter.publishEntry("before delay")
+            delay(1)
+            reporter.publishEntry("after delay")
+        }
+
+        @Test
+        suspend fun b() {
+            delay(1)
+            throw IllegalStateException("failure after delay")
         }
     }
 
