@@ -94,17 +94,29 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                         """.trimIndent()
                         )
                     }
+                    var foundDefaultInValues = false
                     values.forEach({
                         val value = it.get("value")?.asString()
                         val description = it.get("description")?.asString() ?: ""
-                        if (hasDefault)
-                            sb.appendLine(if (default.asString() == value) "|✓" else "|")
+                        if (hasDefault) {
+                            if (default.asString().equals(value, true)) {
+                                foundDefaultInValues = true;
+                                sb.appendLine("|✓")
+                            } else {
+                                sb.appendLine("|")
+                            }
+                        }
                         sb.appendLine("|`$value`")
                         sb.appendLine("|$description")
                         sb.appendLine()
                     })
                     sb.appendLine("|===")
                     sb.appendLine()
+
+                    if (hasDefault && !foundDefaultInValues) {
+                        throw RuntimeException("The default value of $name (${default.asString()}) must be one of the hint values")
+                    }
+
                 } else if (hasDefault) {
                     sb.appendLine("Defaults to `${default.asString()}`.")
                 }
