@@ -36,6 +36,7 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.ClassLoaderUtils;
+import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.console.options.Details;
 import org.junit.platform.console.options.TestConsoleOutputOptions;
 import org.junit.platform.console.options.TestDiscoveryOptions;
@@ -206,8 +207,17 @@ public class ConsoleTestExecutor {
 			throw new JUnitException("No module found in: " + Set.of(paths));
 		}
 		ModuleLayer parentLayer = ModuleLayer.boot();
-		Configuration configuration = parentLayer.configuration().resolve(moduleFinder, ModuleFinder.of(), moduleNames);
-		ModuleLayer moduleLayer = parentLayer.defineModulesWithOneLoader(configuration, parentClassLoader);
+		Configuration configuration = parentLayer.configuration().resolveAndBind(moduleFinder, ModuleFinder.of(), moduleNames);
+		ModuleLayer.Controller controller = ModuleLayer.defineModulesWithOneLoader(configuration, List.of(parentLayer), parentClassLoader);
+		ModuleLayer moduleLayer = controller.layer();
+		Module commons = ReflectionUtils.class.getModule(); // open for deep-reflection
+		if (commons.isNamed()) {
+			for (Module module : moduleLayer.modules()) {
+				for (String name : module.getPackages()) {
+					controller.addOpens(module, name, commons); // --test-opens ...
+				}
+			}
+		}
 		discoveryOptions.setModuleLayer(moduleLayer);
 		var classLoader = moduleLayer.findLoader(moduleNames.get(0));
 		return new CustomClassLoader(classLoader);

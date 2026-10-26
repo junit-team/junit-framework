@@ -72,7 +72,8 @@ class DiscoveryRequestCreator {
 		List<DiscoverySelector> explicitSelectors = options.getExplicitSelectors().stream() //
 				.map(selector -> selector instanceof ModuleSelector moduleSelector //
 						? moduleSelector.resolveIfNameBased(layer) //
-						: selector).toList();
+						: selector) //
+				.toList();
 		if (options.isScanClasspath()) {
 			Preconditions.condition(explicitSelectors.isEmpty(),
 				"Scanning the classpath and using explicit selectors at the same time is not supported");
@@ -82,7 +83,7 @@ class DiscoveryRequestCreator {
 			Preconditions.condition(explicitSelectors.isEmpty(),
 				"Scanning the module-path and using explicit selectors at the same time is not supported");
 			return layer.modules().stream() //
-					.filter(module -> module.getClassLoader() != null) // always skip system/boot modules
+					.filter(module -> module.getClassLoader() != null) // always skip system/bootstrap modules
 					.map(DiscoverySelectors::selectModule) //
 					.toList();
 		}

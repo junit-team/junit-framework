@@ -138,7 +138,7 @@ class JUnitStartTests {
 					.addArguments("--module-path", "lib" + File.pathSeparator + "compilation") //
 					.addArguments("--add-modules", "ALL-MODULE-PATH") //
 					.addArguments("--module", "org.junit.platform.console") //
-					.addArguments("discover") // no need to "execute"
+					.addArguments("execute") //
 					.addArguments("--scan-modules") //
 					.redirectOutput(outputFiles) //
 					.startAndWait();
@@ -152,7 +152,7 @@ class JUnitStartTests {
 					.addArguments("--module-path", "lib") //
 					.addArguments("--add-modules", "ALL-MODULE-PATH") //
 					.addArguments("--module", "org.junit.platform.console") //
-					.addArguments("discover") // no need to "execute"
+					.addArguments("execute") //
 					.addArguments("--class-path", "compilation") //
 					.addArguments("--scan-modules") //
 					.redirectOutput(outputFiles) //
@@ -167,7 +167,7 @@ class JUnitStartTests {
 					.addArguments("--module-path", "lib") //
 					.addArguments("--add-modules", "org.junit.start") //
 					.addArguments("--module", "org.junit.platform.console") //
-					.addArguments("discover") // no need to "execute"
+					.addArguments("execute") //
 					.addArguments("--class-path", "compilation") //
 					.addArguments("--select-module", "m") // "requires org.junit.start"
 					.redirectOutput(outputFiles) //
