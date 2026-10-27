@@ -13,7 +13,7 @@ package org.junit.platform.launcher.core;
 import static java.util.stream.Collectors.joining;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.engine.Filter.composeFilters;
-import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.getDiscoveryIssueFailurePhase;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -142,10 +142,13 @@ public class EngineDiscoveryOrchestrator {
 	}
 
 	private static boolean shouldReportDiscoveryIssues(LauncherDiscoveryRequest request,
-			Optional<LauncherPhase> phase) {
+			Optional<LauncherPhase> currentPhase) {
 		ConfigurationParameters configurationParameters = request.getConfigurationParameters();
-		return getDiscoveryIssueFailurePhase(configurationParameters) //
-				.orElse(phase.orElse(null)) == LauncherPhase.DISCOVERY;
+		return switch (getDiscoveryIssueFailurePhase(configurationParameters)) {
+			case DISCOVERY -> true;
+			case EXECUTION -> false;
+			case AUTOMATIC -> currentPhase.orElse(null) == LauncherPhase.DISCOVERY;
+		};
 	}
 
 	private static void reportDiscoveryIssues(LauncherDiscoveryResult discoveryResult) {

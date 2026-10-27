@@ -16,7 +16,7 @@ import static org.junit.platform.launcher.LauncherConstants.DRY_RUN_PROPERTY_NAM
 import static org.junit.platform.launcher.LauncherConstants.MEMORY_CLEANUP_ENABLED_DEFAULT;
 import static org.junit.platform.launcher.LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME;
-import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.getDiscoveryIssueFailurePhase;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -236,8 +236,10 @@ public class EngineExecutionOrchestrator {
 
 	private static boolean shouldReportDiscoveryIssues(LauncherDiscoveryResult discoveryResult) {
 		ConfigurationParameters configurationParameters = discoveryResult.getConfigurationParameters();
-		return getDiscoveryIssueFailurePhase(configurationParameters) //
-				.orElse(LauncherPhase.EXECUTION) == LauncherPhase.EXECUTION;
+		return switch (getDiscoveryIssueFailurePhase(configurationParameters)) {
+			case DISCOVERY -> false;
+			case EXECUTION, AUTOMATIC -> true;
+		};
 	}
 
 	private ListenerRegistry<TestExecutionListener> buildListenerRegistryForExecution(
