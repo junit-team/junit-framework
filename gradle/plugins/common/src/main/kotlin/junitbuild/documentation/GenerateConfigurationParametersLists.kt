@@ -81,7 +81,8 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
         }
 
         // Render class reference phrase
-        val classReferenceProvider = hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
+        val classReferenceProvider =
+            hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
         if (classReferenceProvider != null) {
             val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
             sb.appendLine(
@@ -129,18 +130,18 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
         if (default != null) {
             sb.appendLine(
                 """
-                            [cols="1,1,98"]
-                            |===
-                            |Default |$valueTitle |Description
-                            """.trimIndent()
+                [cols="1,1,98"]
+                |===
+                |Default |$valueTitle |Description
+                """.trimIndent()
             )
         } else {
             sb.appendLine(
                 """
-                            [cols="1,99"]
-                            |===
-                            |$valueTitle |Description
-                            """.trimIndent()
+                [cols="1,99"]
+                |===
+                |$valueTitle |Description
+                """.trimIndent()
             )
         }
 
