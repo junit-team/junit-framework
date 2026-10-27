@@ -53,7 +53,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 
@@ -456,13 +455,6 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 		@DisplayName("that uses custom temp dir parent directory")
 		void supportsFactoryWithCustomParentDirectory() {
 			executeTestsForClass(FactoryWithCustomParentDirectoryTestCase.class).testEvents()//
-					.assertStatistics(stats -> stats.started(1).succeeded(1));
-		}
-
-		@Test
-		@DisplayName("that uses com.github.marschall:memoryfilesystem")
-		void supportsFactoryWithMemoryFileSystem() {
-			executeTestsForClass(FactoryWithMemoryFileSystemTestCase.class).testEvents()//
 					.assertStatistics(stats -> stats.started(1).succeeded(1));
 		}
 
@@ -1354,36 +1346,6 @@ class TempDirectoryTests extends AbstractJupiterTestEngineTests {
 			public Path createTempDirectory(AnnotatedElementContext elementContext, ExtensionContext extensionContext)
 					throws Exception {
 				return Files.createTempDirectory(requireNonNull(parent), "prefix");
-			}
-		}
-
-	}
-
-	static class FactoryWithMemoryFileSystemTestCase {
-
-		@Test
-		void test(@TempDir(factory = Factory.class) Path tempDir) {
-			assertThat(tempDir).exists().hasFileSystem(Factory.fileSystem);
-			assertThat(tempDir.getFileName()).asString().startsWith("prefix");
-		}
-
-		@NullMarked
-		private static class Factory implements TempDirFactory {
-
-			@Nullable
-			private static FileSystem fileSystem;
-
-			@Override
-			public Path createTempDirectory(AnnotatedElementContext elementContext, ExtensionContext extensionContext)
-					throws Exception {
-				fileSystem = MemoryFileSystemBuilder.newEmpty().build();
-				return Files.createTempDirectory(fileSystem.getPath("/"), "prefix");
-			}
-
-			@Override
-			public void close() throws IOException {
-				requireNonNull(fileSystem).close();
-				fileSystem = null;
 			}
 		}
 
