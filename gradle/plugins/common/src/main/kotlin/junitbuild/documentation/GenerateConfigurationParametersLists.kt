@@ -107,7 +107,7 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                         val description = it.get("description")?.asString() ?: ""
                         if (hasDefault) {
                             if (default.asString().equals(value, true)) {
-                                foundDefaultInValues = true;
+                                foundDefaultInValues = true
                                 sb.appendLine("|✓")
                             } else {
                                 sb.appendLine("|")
