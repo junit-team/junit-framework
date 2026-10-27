@@ -986,7 +986,8 @@ class DefaultLauncherTests {
 				.configurationParameter(LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME, "wrong")));
 
 		assertThat(exception) //
-				.hasRootCauseMessage("Invalid LauncherPhase 'wrong' set via the '%s' configuration parameter.",
+				.hasRootCauseMessage(
+					"Invalid DiscoveryIssueFailurePhase 'wrong' set via the '%s' configuration parameter.",
 					LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME);
 	}
 

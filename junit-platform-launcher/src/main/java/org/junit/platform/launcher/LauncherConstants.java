@@ -23,7 +23,7 @@ import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
-import org.junit.platform.launcher.core.LauncherPhase;
+import org.junit.platform.launcher.core.DiscoveryIssueFailurePhase;
 
 /**
  * Collection of constants related to {@link Launcher}.
@@ -314,14 +314,23 @@ public class LauncherConstants {
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
 
 	/**
+	 * Default value for {@value #DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT = "automatic";
+
+	/**
 	 * Property name used to configure the phase that critical discovery issues
 	 * should cause a failure: {@value}
 	 *
 	 * <h4>Supported Values</h4>
 	 *
-	 * <p>Supported values are "discovery" or "execution".
+	 * <p>Supported values are {@code discovery}, {@code execution},
+	 * or {@code automatic}; defaults to {@code automatic}.
 	 *
-	 * <p>If not specified, the {@code Launcher} will report discovery issues
+	 * <p>When set to {@code automatic}, the {@code Launcher} will report discovery issues
 	 * during the discovery phase if
 	 * {@link Launcher#discover(LauncherDiscoveryRequest)} is called, and during
 	 * the execution phase if {@link Launcher#execute(LauncherExecutionRequest)}
@@ -331,7 +340,7 @@ public class LauncherConstants {
 	 * @see #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
-	@ConfigurationParameter(type = LauncherPhase.class)
+	@ConfigurationParameter(type = DiscoveryIssueFailurePhase.class, defaultValue = @Value(stringValue = DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT))
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	/**
