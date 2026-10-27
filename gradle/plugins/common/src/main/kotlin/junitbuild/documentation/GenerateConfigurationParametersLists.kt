@@ -45,97 +45,129 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
             if (properties.isEmpty()) {
                 return@forEach
             }
-            val hints = hintsByGroup[title]
 
             sb.appendLine("[[configuration-parameters-${title.lowercase().replace(' ', '-')}]]")
             sb.appendLine("=== $title")
             sb.appendLine()
-            properties.sortedBy { it.path("name").asString() }.forEach { property ->
-                val name = property.path("name").asString()
-                val deprecation = if (property.has("deprecation")) " _(deprecated)_" else ""
-                sb.appendLine("==== `$name`$deprecation")
 
-                val description = text(property.path("description").asString(""))
-                val default = property.path("defaultValue")
-                val hasDefault = !default.isMissingNode
-
-                if (description.isNotEmpty()) {
-                    sb.appendLine(description)
+            val hints = hintsByGroup[title]
+            properties.sortedBy { it.path("name").asString() }
+                .map { property ->
+                    val propertyName = property.path("name").asString()
+                    val hint = hints?.find { jsonNode -> jsonNode.get("name")?.asString() == propertyName }
+                    renderProperty(propertyName, property, hint)
                 }
-
-                val hint = hints?.find { jsonNode -> jsonNode.get("name")?.asString() == name }
-                val classReferenceProvider =
-                    hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
-                if (classReferenceProvider != null) {
-                    val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
-                    sb.appendLine(
-                        "Value must be the fully qualified name of a class that implements ${
-                            javaDocLink(
-                                valueMustBeSubtypeOf,
-                                true
-                            )
-                        }."
-                    )
-                }
-
-                if (hint != null && classReferenceProvider == null) {
-                    val values = hint.get("values")
-                    val anyProvider =
-                        hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
-                    val valueTitle = if (anyProvider != null) "Example" else "Value"
-
-                    if (hasDefault) {
-                        sb.appendLine(
-                            """
-                        [cols="1,1,98"]
-                        |===
-                        |Default |$valueTitle |Description
-                        """.trimIndent()
-                        )
-                    } else {
-                        sb.appendLine(
-                            """
-                        [cols="1,99"]
-                        |===
-                        |$valueTitle |Description
-                        """.trimIndent()
-                        )
-                    }
-                    var foundDefaultInValues = false
-                    values.forEach({
-                        val value = it.get("value")?.asString() ?: ""
-                        val description = it.get("description")?.asString() ?: ""
-                        if (hasDefault) {
-                            if (default.asString().equals(value, true)) {
-                                foundDefaultInValues = true
-                                sb.appendLine("|✓")
-                            } else {
-                                sb.appendLine("|")
-                            }
-                        }
-                        sb.appendLine("|`${escapeCellSeparator(value)}`")
-                        sb.appendLine("|${escapeCellSeparator(description)}")
-                        sb.appendLine()
-                    })
-                    sb.appendLine("|===")
-                    sb.appendLine()
-
-                    if (hasDefault && !foundDefaultInValues) {
-                        throw IllegalArgumentException("The default value of $name (${default.asString()}) must be one of the hint values.")
-                    }
-
-                } else if (hasDefault) {
-                    if (classReferenceProvider != null) {
-                        sb.appendLine("Defaults to `${javaDocLink(default.asString())}`.")
-                    } else {
-                        sb.appendLine("Defaults to `${default.asString()}`.")
-                    }
-                }
-                sb.appendLine()
-            }
+                .forEach { property -> sb.append(property) }
         }
 
         outputFile.get().asFile.writeText(sb.toString())
+    }
+
+    private fun renderProperty(
+        propertyName: String,
+        property: JsonNode,
+        hint: JsonNode?,
+    ): StringBuilder {
+        val sb = StringBuilder()
+
+        // Render title + deprecation
+        val deprecation = if (property.has("deprecation")) " _(deprecated)_" else ""
+        sb.appendLine("==== `$propertyName`$deprecation")
+
+        // Render description
+        val description = property.path("description").asString(null)
+        if (description != null) {
+            sb.appendLine(text(description))
+        }
+
+        // Render class reference phrase
+        val classReferenceProvider = hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
+        if (classReferenceProvider != null) {
+            val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
+            sb.appendLine(
+                "Value must be the fully qualified name of a class that implements ${
+                    javaDocLink(
+                        valueMustBeSubtypeOf,
+                        true
+                    )
+                }."
+            )
+        }
+
+        // Render hint table with default
+        val hintValues = hint?.get("values")
+        val default = property.path("defaultValue").asString(null)
+        if (hintValues != null) {
+            val anyProvider = hint.get("providers")?.find { provider -> provider.get("name")?.asString() == "any" }
+            val hintsAreNonExhaustive = anyProvider != null
+            sb.append(renderHintTableWithDefault(propertyName, hintValues, hintsAreNonExhaustive, default))
+        }
+
+        // Render default if there were no hints
+        else if (default != null) {
+            if (classReferenceProvider != null) {
+                sb.appendLine("Defaults to `${javaDocLink(default)}`.")
+            } else {
+                sb.appendLine("Defaults to `${default}`.")
+            }
+        }
+        sb.appendLine()
+
+        return sb
+    }
+
+    private fun renderHintTableWithDefault(
+        name: String,
+        hintValues: JsonNode,
+        hintsAreNonExhaustive: Boolean,
+        default: String?
+    ): StringBuilder {
+        val sb = StringBuilder()
+        val valueTitle = if (hintsAreNonExhaustive) "Example" else "Value"
+
+        // Render table header
+        if (default != null) {
+            sb.appendLine(
+                """
+                            [cols="1,1,98"]
+                            |===
+                            |Default |$valueTitle |Description
+                            """.trimIndent()
+            )
+        } else {
+            sb.appendLine(
+                """
+                            [cols="1,99"]
+                            |===
+                            |$valueTitle |Description
+                            """.trimIndent()
+            )
+        }
+
+        // Render table body
+        var foundDefaultInValues = false
+        hintValues.forEach {
+            val value = it.get("value")?.asString() ?: ""
+            val description = it.get("description")?.asString() ?: ""
+            if (default != null) {
+                if (default.equals(value, true)) {
+                    foundDefaultInValues = true
+                    sb.appendLine("|✓")
+                } else {
+                    sb.appendLine("|")
+                }
+            }
+            sb.appendLine("|`${escapeCellSeparator(value)}`")
+            sb.appendLine("|${escapeCellSeparator(description)}")
+            sb.appendLine()
+        }
+        sb.appendLine("|===")
+        sb.appendLine()
+
+        if (default != null && !foundDefaultInValues) {
+            throw IllegalArgumentException("The default value of $name (${default}) must be one of the hint values.")
+        }
+        return sb
     }
 
     private fun text(value: String) = value.replace('\n', ' ').trim()
