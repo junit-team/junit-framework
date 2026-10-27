@@ -13,6 +13,8 @@ package org.junit.platform.launcher.core;
 import static java.util.stream.Collectors.joining;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.engine.Filter.composeFilters;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.AUTOMATIC;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.DISCOVERY;
 import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.getDiscoveryIssueFailurePhase;
 
 import java.util.ArrayList;
@@ -141,20 +143,12 @@ public class EngineDiscoveryOrchestrator {
 		return discoveryResult;
 	}
 
-	@SuppressWarnings({ "EnhancedSwitchMigration", "StatementSwitchToExpressionSwitch" }) // Enhanced switch creates an anonymous class
 	private static boolean shouldReportDiscoveryIssues(LauncherDiscoveryRequest request,
 			Optional<LauncherPhase> currentPhase) {
 		ConfigurationParameters configurationParameters = request.getConfigurationParameters();
-		switch (getDiscoveryIssueFailurePhase(configurationParameters)) {
-			case DISCOVERY:
-				return true;
-			case EXECUTION:
-				return false;
-			case AUTOMATIC:
-				return currentPhase.orElse(null) == LauncherPhase.DISCOVERY;
-			default:
-				throw new IllegalArgumentException();
-		}
+		var failurePhase = getDiscoveryIssueFailurePhase(configurationParameters);
+		return failurePhase == DISCOVERY
+				|| (failurePhase == AUTOMATIC && currentPhase.orElse(null) == LauncherPhase.DISCOVERY);
 	}
 
 	private static void reportDiscoveryIssues(LauncherDiscoveryResult discoveryResult) {
