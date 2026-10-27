@@ -25,7 +25,7 @@ import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherExecutionRequest;
 
 /**
- * The phase during which the {@link org.junit.platform.launcher.Launcher}
+ * The {@link LauncherPhase phase} during which the {@link org.junit.platform.launcher.Launcher Launcher}
  * should report discovery issues.
  *
  * @since 6.2
