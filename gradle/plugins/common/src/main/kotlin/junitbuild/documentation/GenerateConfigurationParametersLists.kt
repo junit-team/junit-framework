@@ -68,7 +68,7 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
                 if (classReferenceProvider != null) {
                     val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
-                    sb.appendLine("Value must be a class that implements ${javaDocLink(valueMustBeSubtypeOf)}.")
+                    sb.appendLine("Value must be the fully qualified name of a class that implements ${javaDocLink(valueMustBeSubtypeOf, true)}.")
                 }
 
                 if (hint != null && classReferenceProvider == null) {
@@ -118,7 +118,11 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     }
 
                 } else if (hasDefault) {
-                    sb.appendLine("Defaults to `${default.asString()}`.")
+                    if (classReferenceProvider != null) {
+                        sb.appendLine("Defaults to `${javaDocLink(default.asString())}`.")
+                    } else {
+                        sb.appendLine("Defaults to `${default.asString()}`.")
+                    }
                 }
                 sb.appendLine()
             }
@@ -131,19 +135,33 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
 
     private fun escapeCellSeparator(value: String) = value.replace("|", "{vbar}")
 
-    private fun javaDocLink(fqn: String): String {
-        // Doesn't work for inner-classes.
-        val simpleName = fqn.substringAfterLast(".")
-        val fqp = fqn.replace(".", "/")
-        val module = if (fqn.startsWith("org.junit.jupiter.api")) {
+    private fun javaDocLink(fqn: String, useClassNameAsLinkText: Boolean = false): String {
+        val (moduleName, packageName, className) = guessModulePackageAndClassName(fqn)
+        val packagePath = packageName.replace(".", "/")
+        val linkText = if (useClassNameAsLinkText) fqn else className
+        return "{javadoc-root}/$moduleName/$packagePath/$className.html[$linkText]"
+    }
+
+    private fun guessModulePackageAndClassName(fqn: String): PackageClassName {
+        // Class name probably starts at the first uppercased letter
+        val guess = Regex("(.*?)\\.([A-Z].*)").find(fqn)
+            ?: throw IllegalArgumentException("Could not guess package name for $fqn")
+        val packageName = guess.groupValues[1]
+        val className = guess.groupValues[2]
+
+        // The module name is probably a well known suffix of the package name
+        val moduleName = if (fqn.startsWith("org.junit.jupiter.api")) {
             "org.junit.jupiter.api"
         } else if (fqn.startsWith("org.junit.platform.engine")) {
             "org.junit.platform.engine"
         } else {
             throw IllegalArgumentException("Could not guess module name for $fqn")
         }
-        return "{javadoc-root}/$module/$fqp.html[$simpleName]"
+
+        return PackageClassName(moduleName, packageName, className)
     }
+
+    private data class PackageClassName(val moduleName: String, val packageName: String, val className: String)
 
     private data class Group(val title: String, val prefix: String)
 
