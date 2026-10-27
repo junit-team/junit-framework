@@ -68,7 +68,14 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
                     hint?.get("providers")?.find { provider -> provider.get("name")?.asString() == "class-reference" }
                 if (classReferenceProvider != null) {
                     val valueMustBeSubtypeOf = classReferenceProvider.get("parameters").get("target").stringValue()
-                    sb.appendLine("Value must be the fully qualified name of a class that implements ${javaDocLink(valueMustBeSubtypeOf, true)}.")
+                    sb.appendLine(
+                        "Value must be the fully qualified name of a class that implements ${
+                            javaDocLink(
+                                valueMustBeSubtypeOf,
+                                true
+                            )
+                        }."
+                    )
                 }
 
                 if (hint != null && classReferenceProvider == null) {
