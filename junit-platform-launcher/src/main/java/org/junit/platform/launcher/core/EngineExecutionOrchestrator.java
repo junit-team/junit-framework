@@ -234,12 +234,18 @@ public class EngineExecutionOrchestrator {
 		}
 	}
 
+	@SuppressWarnings({ "EnhancedSwitchMigration", "StatementSwitchToExpressionSwitch" }) // Enhanced switch creates an anonymous class
 	private static boolean shouldReportDiscoveryIssues(LauncherDiscoveryResult discoveryResult) {
 		ConfigurationParameters configurationParameters = discoveryResult.getConfigurationParameters();
-		return switch (getDiscoveryIssueFailurePhase(configurationParameters)) {
-			case DISCOVERY -> false;
-			case EXECUTION, AUTOMATIC -> true;
-		};
+		switch (getDiscoveryIssueFailurePhase(configurationParameters)) {
+			case DISCOVERY:
+				return false;
+			case EXECUTION:
+			case AUTOMATIC:
+				return true;
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 
 	private ListenerRegistry<TestExecutionListener> buildListenerRegistryForExecution(
