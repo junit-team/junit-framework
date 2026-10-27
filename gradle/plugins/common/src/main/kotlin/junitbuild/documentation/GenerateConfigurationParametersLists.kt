@@ -138,7 +138,7 @@ abstract class GenerateConfigurationParametersLists @Inject constructor(
     private fun javaDocLink(fqn: String, useClassNameAsLinkText: Boolean = false): String {
         val (moduleName, packageName, className) = guessModulePackageAndClassName(fqn)
         val packagePath = packageName.replace(".", "/")
-        val linkText = if (useClassNameAsLinkText) fqn else className
+        val linkText = if (useClassNameAsLinkText) className else fqn
         return "{javadoc-root}/$moduleName/$packagePath/$className.html[$linkText]"
     }
 
