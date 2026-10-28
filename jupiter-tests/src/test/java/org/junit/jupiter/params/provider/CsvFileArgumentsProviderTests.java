@@ -561,11 +561,11 @@ class CsvFileArgumentsProviderTests {
 		assertThat(arguments).containsExactly(array(" ab ", " cd"), array("ef ", "gh"));
 	}
 
-	private Stream<Object[]> provideArguments(CsvFileSource annotation, String content) {
+	private Stream<@Nullable Object[]> provideArguments(CsvFileSource annotation, String content) {
 		return provideArguments(new ByteArrayInputStream(content.getBytes(UTF_8)), annotation);
 	}
 
-	private Stream<Object[]> provideArguments(InputStream inputStream, CsvFileSource annotation) {
+	private Stream<@Nullable Object[]> provideArguments(InputStream inputStream, CsvFileSource annotation) {
 		var provider = new CsvFileArgumentsProvider(new InputStreamProvider() {
 			@Override
 			public InputStream openClasspathResource(Class<?> baseClass, String path) {
@@ -582,7 +582,7 @@ class CsvFileArgumentsProviderTests {
 		return provideArguments(provider, annotation);
 	}
 
-	private Stream<Object[]> provideArguments(CsvFileArgumentsProvider provider, CsvFileSource annotation) {
+	private Stream<@Nullable Object[]> provideArguments(CsvFileArgumentsProvider provider, CsvFileSource annotation) {
 		provider.accept(annotation);
 		var context = mock(ExtensionContext.class);
 		when(context.getTestClass()).thenReturn(Optional.of(CsvFileArgumentsProviderTests.class));
