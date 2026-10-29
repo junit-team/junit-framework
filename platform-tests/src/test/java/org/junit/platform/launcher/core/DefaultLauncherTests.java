@@ -987,8 +987,8 @@ class DefaultLauncherTests {
 
 		assertThat(exception) //
 				.hasMessage("Failed to transform configuration parameter with key '%s' and initial value 'wrong'",
-					LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME).hasRootCauseMessage(
-						"No enum constant %s.WRONG", DiscoveryIssueFailurePhase.class.getName());
+					LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME) //
+				.hasRootCauseMessage("No enum constant %s.WRONG", DiscoveryIssueFailurePhase.class.getName());
 	}
 
 	@Test
