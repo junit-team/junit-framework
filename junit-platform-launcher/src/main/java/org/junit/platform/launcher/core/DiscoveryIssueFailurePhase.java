@@ -15,7 +15,6 @@ import static org.junit.platform.launcher.LauncherConstants.DISCOVERY_ISSUE_FAIL
 import static org.junit.platform.launcher.LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME;
 
 import java.util.Locale;
-import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -51,9 +50,8 @@ public enum DiscoveryIssueFailurePhase {
 	AUTOMATIC;
 
 	static DiscoveryIssueFailurePhase getDiscoveryIssueFailurePhase(ConfigurationParameters configurationParameters) {
-		Function<String, DiscoveryIssueFailurePhase> stringLauncherPhaseFunction = DiscoveryIssueFailurePhase::parseValue;
 		return configurationParameters.get(DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME,
-			stringLauncherPhaseFunction).orElseGet(() -> parseValue(DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT));
+			DiscoveryIssueFailurePhase::parseValue).orElseGet(() -> parseValue(DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT));
 	}
 
 	private static DiscoveryIssueFailurePhase parseValue(String value) {
