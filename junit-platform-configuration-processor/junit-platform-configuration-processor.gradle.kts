@@ -16,6 +16,7 @@ dependencies {
 
 	shadowed(libs.jakarta.json.api)
 	shadowed(libs.jakarta.json.implementation)
+	shadowed(libs.owasp.java.html.sanitizer)
 }
 
 backwardCompatibilityChecks {
@@ -24,15 +25,29 @@ backwardCompatibilityChecks {
 
 tasks {
 	compileJava {
-		options.compilerArgs.addAll(listOf(
-			"--add-modules", "jakarta.json",
-			"--add-reads", "${javaModuleName}=jakarta.json"
-		))
+		options.compilerArgs.addAll(
+			listOf(
+				"--add-modules", "jakarta.json",
+				"--add-reads", "${javaModuleName}=jakarta.json",
+				"--add-modules", "owasp.java.html.sanitizer",
+				"--add-reads", "${javaModuleName}=owasp.java.html.sanitizer"
+			)
+		)
 	}
 	javadoc {
 		(options as StandardJavadocDocletOptions).apply {
-			addStringOption("-add-modules", "jakarta.json")
-			addStringOption("-add-reads", "${javaModuleName}=jakarta.json")
+			addMultilineMultiValueOption("-add-modules").setValue(
+				listOf(
+					listOf("jakarta.json"),
+					listOf("owasp.java.html.sanitizer")
+				)
+			)
+			addMultilineMultiValueOption("-add-reads").setValue(
+				listOf(
+					listOf("${javaModuleName}=jakarta.json"),
+					listOf("${javaModuleName}=owasp.java.html.sanitizer")
+				)
+			)
 		}
 	}
 	val extractLicenses = register("extractLicenses", Sync::class) {
@@ -54,14 +69,20 @@ tasks {
 			Import-Package: \
 				${extra["importAPIGuardian"]},\
 				${extra["importJSpecify"]},\
+				javax.annotation;resolution:=optional;version="[3.0,4)",\
 				*
 			"""
 			)
 		}
 		relocate("jakarta.json", "org.junit.platform.configuration.processor.shadow.jakarta.json")
 		relocate("org.eclipse.parsson", "org.junit.platform.configuration.processor.shadow.org.eclipse.parsson")
+		relocate("org.owasp", "org.junit.platform.configuration.processor.shadow.org.owasp")
 		exclude("META-INF/LICENSE.md", "META-INF/NOTICE.md")
 		from(extractLicenses)
+		from(projectDir) {
+			include("LICENSE-java-html-sanitizer")
+			into("META-INF")
+		}
 		mergeServiceFiles()
 	}
 }

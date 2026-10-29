@@ -16,7 +16,7 @@ public final class DocumentedWithMultiLines {
 
 	/**
 	 * A brief multi-line description of
-	 * this property: {@value}.
+	 * this property: {@value}
 	 */
 	@ConfigurationParameter
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";
