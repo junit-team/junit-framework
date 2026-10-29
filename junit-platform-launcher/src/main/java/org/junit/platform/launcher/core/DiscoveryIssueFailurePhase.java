@@ -18,8 +18,6 @@ import java.util.Locale;
 import java.util.function.Function;
 
 import org.apiguardian.api.API;
-import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.JUnitException;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.LauncherExecutionRequest;
