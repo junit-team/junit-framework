@@ -102,6 +102,14 @@ dependencies {
 	thirdPartyJars(libs.openTestReporting.events)
 	thirdPartyJars(libs.openTestReporting.tooling.spi)
 	thirdPartyJars(libs.picocli)
+	constraints {
+		thirdPartyJars("com.google.guava:guava") {
+			version {
+				require("33.7.2-jre")
+			}
+			because("Workaround for CVE-2026-102554")
+		}
+	}
 
 	antJars(platform(projects.junitBom))
 	antJars(libs.bundles.ant)

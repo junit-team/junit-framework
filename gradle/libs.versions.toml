@@ -6,7 +6,7 @@ bnd = "7.4.0"
 checkstyle = "14.3.0"
 eclipse = "4.41.0"
 jackson = "3.2.4"
-jacoco = "0.8.15"
+jacoco = "0.8.16"
 jmh = "1.37"
 junit4 = "4.13.2"
 junit4Min = "4.12"
@@ -29,7 +29,7 @@ assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bndlib = { module = "biz.aQute.bnd:biz.aQute.bndlib", version.ref = "bnd" }
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version = "1.18.15" }
 checkstyle = { module = "com.puppycrawl.tools:checkstyle", version.ref = "checkstyle" }
-classgraph = { module = "io.github.classgraph:classgraph", version = "6.0.0" }
+classgraph = { module = "io.github.classgraph:classgraph", version = "6.0.1" }
 commons-io = { module = "commons-io:commons-io", version = "2.22.0" }
 error-prone-contrib = { module = "tech.picnic.error-prone-support:error-prone-contrib", version = "0.30.0" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.51.0" }
@@ -102,7 +102,7 @@ develocity = { id = "com.gradle.develocity", version = "4.6.1" }
 download = { id = "de.undercouch.download", version = "5.7.0" }
 errorProne = { id = "net.ltgt.errorprone", version = "5.1.1" }
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver", version = "1.0.0" }
-jmh = { id = "me.champeau.jmh", version = "0.7.3" }
+jmh = { id = "me.champeau.jmh", version = "0.7.4" }
 # check if workaround in gradle.properties can be removed when updating
 kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.4.21" }
 nmcp-settings = { id = "com.gradleup.nmcp.settings", version = "1.6.2" }

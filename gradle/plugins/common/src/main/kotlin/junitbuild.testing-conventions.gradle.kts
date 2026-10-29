@@ -203,6 +203,12 @@ dependencies {
 
 	constraints {
 		testImplementation(dependencyFromLibs("byteBuddy"))
+		testImplementation("com.google.guava:guava") {
+			version {
+				require("33.7.2-jre")
+			}
+			because("Workaround for CVE-2026-102554")
+		}
 	}
 
 	testImplementation(platform(dependencyFromLibs("mockito-bom")))
