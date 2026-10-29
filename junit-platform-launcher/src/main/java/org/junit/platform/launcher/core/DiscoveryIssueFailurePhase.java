@@ -53,16 +53,7 @@ public enum DiscoveryIssueFailurePhase {
 	AUTOMATIC;
 
 	static DiscoveryIssueFailurePhase getDiscoveryIssueFailurePhase(ConfigurationParameters configurationParameters) {
-		Function<String, @Nullable DiscoveryIssueFailurePhase> stringLauncherPhaseFunction = value -> {
-			try {
-				return parseValue(value);
-			}
-			catch (Exception e) {
-				throw new JUnitException(
-					"Invalid DiscoveryIssueFailurePhase '%s' set via the '%s' configuration parameter.".formatted(value,
-						DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME));
-			}
-		};
+		Function<String, DiscoveryIssueFailurePhase> stringLauncherPhaseFunction = DiscoveryIssueFailurePhase::parseValue;
 		return configurationParameters.get(DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME,
 			stringLauncherPhaseFunction).orElseGet(() -> parseValue(DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT));
 	}
