@@ -327,10 +327,10 @@ public class LauncherConstants {
 	 *
 	 * <h4>Supported Values</h4>
 	 *
-	 * <p>Supported values are {@code discovery}, {@code execution},
-	 * or {@code automatic}; defaults to {@code automatic}.
+	 * <p>Supported values are "discovery", "execution",
+	 * or {@value #DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT}; defaults to {@value #DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT}.
 	 *
-	 * <p>When set to {@code automatic}, the {@code Launcher} will report discovery issues
+	 * <p>When set to {@value #DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT}, the {@code Launcher} will report discovery issues
 	 * during the discovery phase if
 	 * {@link Launcher#discover(LauncherDiscoveryRequest)} is called, and during
 	 * the execution phase if {@link Launcher#execute(LauncherExecutionRequest)}
