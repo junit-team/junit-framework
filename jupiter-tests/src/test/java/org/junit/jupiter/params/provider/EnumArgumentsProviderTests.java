@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -192,16 +193,17 @@ class EnumArgumentsProviderTests {
 	enum EnumWithNoConstant {
 	}
 
-	private <E extends Enum<E>> Stream<Object[]> provideArguments(Class<E> enumClass, String... names) {
+	private <E extends Enum<E>> Stream<@Nullable Object[]> provideArguments(Class<E> enumClass, String... names) {
 		return provideArguments(enumClass, Mode.INCLUDE, names);
 	}
 
-	private <E extends Enum<E>> Stream<Object[]> provideArguments(Class<E> enumClass, Mode mode, String... names) {
+	private <E extends Enum<E>> Stream<@Nullable Object[]> provideArguments(Class<E> enumClass, Mode mode,
+			String... names) {
 		return provideArguments(enumClass, "", "", mode, names);
 	}
 
-	private <E extends Enum<E>> Stream<Object[]> provideArguments(Class<E> enumClass, String from, String to, Mode mode,
-			String... names) {
+	private <E extends Enum<E>> Stream<@Nullable Object[]> provideArguments(Class<E> enumClass, String from, String to,
+			Mode mode, String... names) {
 		var annotation = mock(EnumSource.class);
 		when(annotation.value()).thenAnswer(__ -> enumClass);
 		when(annotation.from()).thenReturn(from);

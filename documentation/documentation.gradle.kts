@@ -132,6 +132,15 @@ dependencies {
 	}
 
 	standaloneConsoleLauncher(projects.junitPlatformConsoleStandalone)
+
+	constraints {
+		plantuml("com.google.guava:guava") {
+			version {
+				require("33.7.2-jre")
+			}
+			because("workaround for CVE-2026-102554")
+		}
+	}
 }
 
 val snapshot = version.isSnapshot()
