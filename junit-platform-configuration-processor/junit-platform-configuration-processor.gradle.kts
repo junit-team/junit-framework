@@ -64,7 +64,7 @@ tasks {
 	}
 	val copyLicenses = register("copyLicenses", Copy::class) {
 		from(projectDir) {
-			include("LICENSE-java-html-sanitizer.md")
+			include("LICENSE-java-html-sanitizer")
 		}
 		into(layout.buildDirectory.dir("licenses/META-INF"))
 	}
