@@ -62,12 +62,6 @@ tasks {
 		}
 		into(layout.buildDirectory.dir("licenses"))
 	}
-	val copyLicenses = register("copyLicenses", Copy::class) {
-		from(projectDir) {
-			include("LICENSE-java-html-sanitizer")
-		}
-		into(layout.buildDirectory.dir("licenses/META-INF"))
-	}
 	shadowJar {
 		bundle {
 			bnd(
@@ -84,7 +78,11 @@ tasks {
 		relocate("org.eclipse.parsson", "org.junit.platform.configuration.processor.shadow.org.eclipse.parsson")
 		relocate("org.owasp", "org.junit.platform.configuration.processor.shadow.org.owasp")
 		exclude("META-INF/LICENSE.md", "META-INF/NOTICE.md")
-		from(extractLicenses, copyLicenses)
+		from(extractLicenses)
+		from(projectDir) {
+			include("LICENSE-java-html-sanitizer")
+			into("META-INF")
+		}
 		mergeServiceFiles()
 	}
 }
