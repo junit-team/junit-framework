@@ -16,7 +16,8 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.junit.platform.commons.util.Preconditions;
@@ -88,7 +89,7 @@ class ArgumentCountValidator {
 	private ArgumentCountValidationMode getArgumentCountValidationModeConfiguration(ExtensionContext extensionContext) {
 		String key = ARGUMENT_COUNT_VALIDATION_KEY;
 		ArgumentCountValidationMode fallback = ArgumentCountValidationMode.NONE;
-		ExtensionContext.Store store = getStore(extensionContext);
+		Store store = getStore(extensionContext);
 		return store.computeIfAbsent(key, __ -> {
 			Optional<String> optionalConfigValue = extensionContext.getConfigurationParameter(key);
 			if (optionalConfigValue.isPresent()) {
@@ -119,7 +120,7 @@ class ArgumentCountValidator {
 		return count == 1 ? singular : plural;
 	}
 
-	private ExtensionContext.Store getStore(ExtensionContext context) {
+	private Store getStore(ExtensionContext context) {
 		return context.getRoot().getStore(NAMESPACE);
 	}
 }

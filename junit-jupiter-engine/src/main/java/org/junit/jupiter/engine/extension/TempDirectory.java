@@ -38,14 +38,14 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
@@ -247,12 +247,12 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 				|| getContextSpecificStore(context).getOrDefault(CHILD_FAILED, Boolean.class, false);
 	}
 
-	private static ExtensionContext.Store getContextSpecificStore(ExtensionContext context) {
+	private static Store getContextSpecificStore(ExtensionContext context) {
 		return context.getStore(NAMESPACE.append(context));
 	}
 
 	@SuppressWarnings("deprecation")
-	static class CloseablePath implements Store.CloseableResource, AutoCloseable {
+	static class CloseablePath implements ExtensionContext.Store.CloseableResource, AutoCloseable {
 
 		private final @Nullable Path dir;
 		private final TempDirFactory factory;
@@ -322,7 +322,7 @@ class TempDirectory implements BeforeAllCallback, BeforeEachCallback, ParameterR
 
 	@SuppressWarnings("deprecation")
 	private record FailureTracker(ExtensionContext context, ExtensionContext parentContext)
-			implements Store.CloseableResource, AutoCloseable {
+			implements ExtensionContext.Store.CloseableResource, AutoCloseable {
 
 		@Override
 		public void close() {

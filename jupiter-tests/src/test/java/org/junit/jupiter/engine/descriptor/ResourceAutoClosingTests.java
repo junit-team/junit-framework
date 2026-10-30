@@ -20,6 +20,8 @@ import java.util.logging.LogRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.LauncherStoreFacade;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
@@ -43,7 +45,7 @@ class ResourceAutoClosingTests {
 
 		ExtensionContext extensionContext = new JupiterEngineExtensionContext(mock(), testDescriptor, configuration,
 			extensionRegistry, launcherStoreFacade);
-		ExtensionContext.Store store = extensionContext.getStore(ExtensionContext.Namespace.GLOBAL);
+		Store store = extensionContext.getStore(Namespace.GLOBAL);
 		store.put("resource", resource);
 
 		((AutoCloseable) extensionContext).close();
@@ -59,7 +61,7 @@ class ResourceAutoClosingTests {
 
 		ExtensionContext extensionContext = new JupiterEngineExtensionContext(mock(), testDescriptor, configuration,
 			extensionRegistry, launcherStoreFacade);
-		ExtensionContext.Store store = extensionContext.getStore(ExtensionContext.Namespace.GLOBAL);
+		Store store = extensionContext.getStore(Namespace.GLOBAL);
 		store.put("resource", resource);
 
 		((AutoCloseable) extensionContext).close();
@@ -80,7 +82,7 @@ class ResourceAutoClosingTests {
 
 		ExtensionContext extensionContext = new JupiterEngineExtensionContext(executionRecorder, testDescriptor,
 			configuration, extensionRegistry, launcherStoreFacade);
-		ExtensionContext.Store store = extensionContext.getStore(ExtensionContext.Namespace.GLOBAL);
+		Store store = extensionContext.getStore(Namespace.GLOBAL);
 		store.put("resource1", resource1);
 		store.put("resource2", resource2);
 		store.put("resource3", resource3);
@@ -106,7 +108,7 @@ class ResourceAutoClosingTests {
 
 		ExtensionContext extensionContext = new JupiterEngineExtensionContext(executionRecorder, testDescriptor,
 			configuration, extensionRegistry, launcherStoreFacade);
-		ExtensionContext.Store store = extensionContext.getStore(ExtensionContext.Namespace.GLOBAL);
+		Store store = extensionContext.getStore(Namespace.GLOBAL);
 		store.put("resource", resource);
 
 		((AutoCloseable) extensionContext).close();

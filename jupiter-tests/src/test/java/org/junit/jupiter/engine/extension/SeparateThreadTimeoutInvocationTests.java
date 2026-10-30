@@ -22,7 +22,6 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout.ThreadMode;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.engine.execution.NamespaceAwareStore;
 import org.junit.platform.engine.support.store.Namespace;
@@ -72,9 +71,8 @@ class SeparateThreadTimeoutInvocationTests {
 
 	private static <T extends @Nullable Object> SeparateThreadTimeoutInvocation<T> aSeparateThreadInvocation(
 			Invocation<T> invocation) {
-		var namespace = ExtensionContext.Namespace.create(SeparateThreadTimeoutInvocationTests.class);
 		var store = new NamespaceAwareStore(new NamespacedHierarchicalStore<>(null),
-			Namespace.create(namespace.getParts()));
+			Namespace.create(SeparateThreadTimeoutInvocationTests.class));
 		var parameters = new TimeoutInvocationParameters<>(invocation,
 			new TimeoutDuration(PREEMPTIVE_TIMEOUT_MILLIS, MILLISECONDS), () -> "method()",
 			PreInterruptCallbackInvocation.NOOP, false);

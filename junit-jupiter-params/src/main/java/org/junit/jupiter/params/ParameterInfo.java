@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.params;
 
+import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
 import org.apiguardian.api.API;
@@ -17,7 +18,8 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.support.ParameterDeclarations;
 
@@ -27,12 +29,12 @@ import org.junit.jupiter.params.support.ParameterDeclarations;
  *
  * <p>Registered {@link Extension} implementations may retrieve the current
  * {@code ParameterInfo} instance by calling
- * {@link ExtensionContext#getStore(Namespace)} with {@link #NAMESPACE} and
- * {@link ExtensionContext.Store#get(Object, Class) Store.get(...)} with
+ * {@link ExtensionContext#getStore(Namespace)} with {@link #STORE_NAMESPACE} and
+ * {@link Store#get(Object, Class) Store.get(...)} with
  * {@link #KEY}. Alternatively, the {@link #get(ExtensionContext)} method may
  * be used to retrieve the {@code ParameterInfo} instance for the supplied
  * {@code ExtensionContext}. Extensions must not modify any entries in the
- * {@link ExtensionContext.Store Store} for {@link #NAMESPACE}.
+ * {@link Store Store} for {@link #STORE_NAMESPACE}.
  *
  * <p>When a {@link ParameterizedTest @ParameterizedTest} method is declared
  * inside a {@link ParameterizedClass @ParameterizedClass} or a
@@ -42,7 +44,7 @@ import org.junit.jupiter.params.support.ParameterDeclarations;
  * levels of the {@link ExtensionContext} hierarchy. In such cases, please use
  * {@link ExtensionContext#getParent()} to navigate to the right level before
  * retrieving the {@code ParameterInfo} instance from the
- * {@link ExtensionContext.Store Store}.
+ * {@link Store Store}.
  *
  * @since 5.14
  * @see ParameterizedClass
@@ -52,14 +54,27 @@ import org.junit.jupiter.params.support.ParameterDeclarations;
 public interface ParameterInfo {
 
 	/**
-	 * The {@link Namespace} for accessing the
+	 * The {@link ExtensionContext.Namespace} for accessing the
 	 * {@link ExtensionContext.Store Store} for {@code ParameterInfo}.
+	 *
+	 * @deprecated Please use {@link #STORE_NAMESPACE} instead.
 	 */
-	Namespace NAMESPACE = Namespace.create(ParameterInfo.class);
+	@Deprecated(since = "6.2")
+	@API(status = DEPRECATED, since = "6.2")
+	ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(ParameterInfo.class);
+
+	/**
+	 * The {@link Namespace} for accessing the
+	 * {@link Store Store} for {@code ParameterInfo}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	Namespace STORE_NAMESPACE = Namespace.create(ParameterInfo.class);
 
 	/**
 	 * The key for retrieving the {@code ParameterInfo} instance from the
-	 * {@link ExtensionContext.Store Store}.
+	 * {@link Store Store}.
 	 */
 	Object KEY = ParameterInfo.class;
 
@@ -68,7 +83,7 @@ public interface ParameterInfo {
 	 * {@code ExtensionContext}; potentially {@code null}}
 	 */
 	static @Nullable ParameterInfo get(ExtensionContext context) {
-		return context.getStore(NAMESPACE).get(KEY, ParameterInfo.class);
+		return context.getStore(STORE_NAMESPACE).get(KEY, ParameterInfo.class);
 	}
 
 	/**

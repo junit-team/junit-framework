@@ -216,13 +216,25 @@ abstract class AbstractExtensionContext<T extends TestDescriptor> implements Ext
 		return this.testDescriptor;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Store getStore(Namespace namespace) {
-		return NamespaceAwareStore.createAdapter(this.valuesStore, namespace);
+		return getStore((org.junit.jupiter.api.store.Namespace) namespace);
 	}
 
 	@Override
+	public Store getStore(org.junit.jupiter.api.store.Namespace namespace) {
+		return NamespaceAwareStore.createAdapter(this.valuesStore, namespace);
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
 	public Store getStore(StoreScope scope, Namespace namespace) {
+		return getStore(scope, (org.junit.jupiter.api.store.Namespace) namespace);
+	}
+
+	@Override
+	public Store getStore(StoreScope scope, org.junit.jupiter.api.store.Namespace namespace) {
 		return switch (scope) {
 			case LAUNCHER_SESSION -> launcherStoreFacade.getSessionScopedStore(namespace);
 			case EXECUTION_REQUEST -> launcherStoreFacade.getRequestScopedStore(namespace);

@@ -12,9 +12,9 @@ package example.kotlin.extensions
 
 import com.sun.net.httpserver.HttpServer
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.store.Namespace
 import java.io.IOException
 import java.io.UncheckedIOException
 
