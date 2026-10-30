@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.api.extension;
 
-import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
+import static org.junit.jupiter.api.store.Namespace.GLOBAL;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
 import static org.junit.platform.testkit.engine.EventConditions.reportEntry;
@@ -22,6 +22,7 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.su
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 
 public class CloseableResourceIntegrationTests extends AbstractJupiterTestEngineTests {
@@ -39,7 +40,7 @@ public class CloseableResourceIntegrationTests extends AbstractJupiterTestEngine
 	static class TestCase {
 		@Test
 		void closesCloseableResourcesInExtensionContext(ExtensionContext extensionContext) {
-			ExtensionContext.Store store = extensionContext.getStore(GLOBAL);
+			Store store = extensionContext.getStore(GLOBAL);
 			store.put("foo", reportEntryOnClose(extensionContext, "1"));
 			store.put("bar", reportEntryOnClose(extensionContext, "2"));
 			store.put("baz", reportEntryOnClose(extensionContext, "3"));

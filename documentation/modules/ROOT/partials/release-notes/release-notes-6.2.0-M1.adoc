@@ -96,7 +96,10 @@ repository on GitHub.
 * When the timeout provided to `assertTimeout`, `assertTimeoutPreemptively` and test
   methods annotated with `@Timeout` is not a positive value less than 2^63^ nanoseconds
   (approximately 292 years) a `PreconditionViolationException` is thrown.
-
+* `ExtensionContext.Namespace` and `ExtensionContext.Store` have been deprecated
+  in favor of `org.junit.jupiter.api.store.Namespace` and
+  `org.junit.jupiter.api.store.Store`. In most cases, changing the `Namespace`
+  and `Store` imports suffices to migrate.
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 

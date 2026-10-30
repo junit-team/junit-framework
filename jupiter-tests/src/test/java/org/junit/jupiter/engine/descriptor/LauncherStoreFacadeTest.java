@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.platform.commons.test.PreconditionAssertions.assertPreconditionViolationFor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.engine.execution.LauncherStoreFacade;
 import org.junit.jupiter.engine.execution.NamespaceAwareStore;
 import org.junit.platform.commons.JUnitException;
@@ -35,7 +35,8 @@ class LauncherStoreFacadeTest {
 	private NamespacedHierarchicalStore<Namespace> sessionScopedStore = new NamespacedHierarchicalStore<>(null);
 	private NamespacedHierarchicalStore<Namespace> requestScopedStore = new NamespacedHierarchicalStore<>(
 		sessionScopedStore);
-	private ExtensionContext.Namespace extensionNamespace = ExtensionContext.Namespace.create("foo", "bar");
+	private org.junit.jupiter.api.store.Namespace extensionNamespace = org.junit.jupiter.api.store.Namespace.create(
+		"foo", "bar");
 
 	@Test
 	void createsInstanceSuccessfullyWithValidStore() {
@@ -58,7 +59,7 @@ class LauncherStoreFacadeTest {
 	@Test
 	void returnsNamespaceAwareStoreWithRequestLevelStore() {
 		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
-		ExtensionContext.Store store = facade.getRequestScopedStore(extensionNamespace);
+		Store store = facade.getRequestScopedStore(extensionNamespace);
 
 		assertNotNull(store);
 		assertInstanceOf(NamespaceAwareStore.class, store);
@@ -84,7 +85,7 @@ class LauncherStoreFacadeTest {
 		requestScopedStore.put(Namespace.GLOBAL, "foo", "bar");
 
 		LauncherStoreFacade facade = new LauncherStoreFacade(requestScopedStore);
-		ExtensionContext.Store store = facade.getRequestScopedStore(ExtensionContext.Namespace.GLOBAL);
+		Store store = facade.getRequestScopedStore(org.junit.jupiter.api.store.Namespace.GLOBAL);
 
 		assertEquals("bar", store.get("foo"));
 	}

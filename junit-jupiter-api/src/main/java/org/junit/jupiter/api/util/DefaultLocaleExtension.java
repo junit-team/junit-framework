@@ -18,7 +18,8 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
 
@@ -137,7 +138,7 @@ final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallb
 		return Optional.ofNullable(getStore(context).get(key, Locale.class));
 	}
 
-	private static ExtensionContext.Store getStore(ExtensionContext context) {
+	private static Store getStore(ExtensionContext context) {
 		return context.getStore(NAMESPACE);
 	}
 

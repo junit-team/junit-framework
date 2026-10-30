@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code TestWatcher} defines the API for {@link Extension Extensions} that
@@ -23,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>The methods in this API are called after a test has been skipped or
  * executed. Any {@link ExtensionContext.Store.CloseableResource CloseableResource}
- * objects stored in the {@link ExtensionContext.Store Store} of the supplied
+ * objects stored in the {@link Store Store} of the supplied
  * {@link ExtensionContext} will have already been <strong>closed</strong> before
  * methods in this API are invoked.
  *

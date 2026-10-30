@@ -466,38 +466,81 @@ public interface ExtensionContext {
 	/**
 	 * Get the {@link Store} for the supplied {@link Namespace}.
 	 *
-	 * <p>Use {@code getStore(Namespace.GLOBAL)} to get the default, global {@link Namespace}.
+	 * @param namespace the {@code Namespace} to get the store for; never {@code null}
+	 * @return the store in which to put and get objects for other invocations
+	 * working in the same namespace; never {@code null}
+	 * @deprecated Please use
+	 * {@link #getStore(org.junit.jupiter.api.store.Namespace)} instead.
+	 */
+	@Deprecated(since = "6.2")
+	@API(status = DEPRECATED, since = "6.2")
+	Store getStore(Namespace namespace);
+
+	/**
+	 * Get the {@link org.junit.jupiter.api.store.Store Store} for the supplied
+	 * {@link org.junit.jupiter.api.store.Namespace Namespace}.
+	 *
+	 * <p>Use {@code getStore(Namespace.GLOBAL)} to get the default, global
+	 * {@link org.junit.jupiter.api.store.Namespace Namespace}.
 	 *
 	 * <p>A store is bound to its extension context lifecycle. When an extension
 	 * context lifecycle ends it closes its associated store. All stored values
-	 * that are instances of {@link ExtensionContext.Store.CloseableResource} are
-	 * notified by invoking their {@code close()} methods.
+	 * that are instances of {@link AutoCloseable} or
+	 * {@link ExtensionContext.Store.CloseableResource} are notified by invoking
+	 * their {@code close()} methods.
 	 *
 	 * @param namespace the {@code Namespace} to get the store for; never {@code null}
 	 * @return the store in which to put and get objects for other invocations
 	 * working in the same namespace; never {@code null}
-	 * @see Namespace#GLOBAL
-	 * @see #getStore(StoreScope, Namespace)
+	 * @since 6.2
+	 * @see org.junit.jupiter.api.store.Namespace#GLOBAL
+	 * @see #getStore(StoreScope, org.junit.jupiter.api.store.Namespace)
 	 */
-	Store getStore(Namespace namespace);
+	@API(status = MAINTAINED, since = "6.2")
+	default org.junit.jupiter.api.store.Store getStore(org.junit.jupiter.api.store.Namespace namespace) {
+		return getStore(toExtensionContextNamespace(namespace));
+	}
+
+	/**
+	 * Returns the store for supplied scope and namespace.
+	 *
+	 * @since 5.13
+	 * @deprecated Please use
+	 * {@link #getStore(StoreScope, org.junit.jupiter.api.store.Namespace)}
+	 * instead.
+	 */
+	@Deprecated(since = "6.2")
+	@API(status = DEPRECATED, since = "6.2")
+	Store getStore(StoreScope scope, Namespace namespace);
 
 	/**
 	 * Returns the store for supplied scope and namespace.
 	 *
 	 * <p>If {@code scope} is
 	 * {@link StoreScope#EXTENSION_CONTEXT EXTENSION_CONTEXT}, the store behaves
-	 * exactly like the one returned by {@link #getStore(Namespace)}. If the
+	 * exactly like the one returned by
+	 * {@link #getStore(org.junit.jupiter.api.store.Namespace)}. If the
 	 * {@code scope} is {@link StoreScope#LAUNCHER_SESSION LAUNCHER_SESSION} or
 	 * {@link StoreScope#EXECUTION_REQUEST EXECUTION_REQUEST}, all stored values
 	 * that are instances of {@link AutoCloseable} are notified by invoking
 	 * their {@code close()} methods when the scope is closed.
 	 *
-	 * @since 5.13
+	 * @since 6.2
 	 * @see StoreScope
-	 * @see #getStore(Namespace)
+	 * @see #getStore(org.junit.jupiter.api.store.Namespace)
 	 */
-	@API(status = EXPERIMENTAL, since = "6.0")
-	Store getStore(StoreScope scope, Namespace namespace);
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default org.junit.jupiter.api.store.Store getStore(StoreScope scope,
+			org.junit.jupiter.api.store.Namespace namespace) {
+		return getStore(scope, toExtensionContextNamespace(namespace));
+	}
+
+	private static Namespace toExtensionContextNamespace(org.junit.jupiter.api.store.Namespace namespace) {
+		Preconditions.notNull(namespace, "Namespace must not be null");
+		return namespace instanceof Namespace extensionContextNamespace //
+				? extensionContextNamespace //
+				: Namespace.create(namespace.getParts().toArray());
+	}
 
 	/**
 	 * Get the {@link ExecutionMode} associated with the current test or container.
