@@ -10,8 +10,7 @@
 
 package org.junit.jupiter.api;
 
-import java.util.Optional;
-
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.platform.commons.logging.Logger;
 
 /**
@@ -27,25 +26,37 @@ class RandomOrdererUtils {
 
 	static final long DEFAULT_SEED = System.nanoTime();
 
+	private static final Namespace NAMESPACE = Namespace.create(RandomOrdererUtils.class);
+
 	static long getSeed(DiscoveryContext context, Logger logger) {
-		return getCustomSeed(context, logger).orElse(DEFAULT_SEED);
+		// Use the session-scoped store to log parse failures and used seeds only once per session.
+		// Configured values are stored under String keys, logged seeds under Long keys.
+		var store = context.getStore(NAMESPACE);
+		long seed = context.getConfigurationParameter(RANDOM_SEED_PROPERTY_NAME) //
+				.map(value -> store.computeIfAbsent(value, __ -> parseCustomSeed(value, logger), Long.class)) //
+				.orElse(DEFAULT_SEED);
+		store.computeIfAbsent(seed, __ -> {
+			logger.config(() -> """
+					Using seed [%d] for ordering classes/methods. \
+					To reuse the same seed in a subsequent execution, \
+					pass '%s=%1$d' as configuration parameter.\
+					""".formatted(seed, RANDOM_SEED_PROPERTY_NAME));
+			return true;
+		});
+		return seed;
 	}
 
-	private static Optional<Long> getCustomSeed(DiscoveryContext context, Logger logger) {
-		return context.getConfigurationParameter(RANDOM_SEED_PROPERTY_NAME).map(configurationParameter -> {
-			try {
-				logger.config(() -> "Using custom seed for configuration parameter [%s] with value [%s].".formatted(
-					RANDOM_SEED_PROPERTY_NAME, configurationParameter));
-				return Long.valueOf(configurationParameter);
-			}
-			catch (NumberFormatException ex) {
-				logger.warn(ex, () -> """
-						Failed to convert configuration parameter [%s] with value [%s] to a long. \
-						Using default seed [%s] as fallback.""".formatted(RANDOM_SEED_PROPERTY_NAME,
-					configurationParameter, DEFAULT_SEED));
-				return null;
-			}
-		});
+	private static long parseCustomSeed(String configurationParameter, Logger logger) {
+		try {
+			return Long.parseLong(configurationParameter);
+		}
+		catch (NumberFormatException ex) {
+			logger.warn(ex, () -> """
+					Failed to convert configuration parameter [%s] with value [%s] to a long. \
+					Using default seed [%s] as fallback.""".formatted(RANDOM_SEED_PROPERTY_NAME, configurationParameter,
+				DEFAULT_SEED));
+			return DEFAULT_SEED;
+		}
 	}
 
 	private RandomOrdererUtils() {

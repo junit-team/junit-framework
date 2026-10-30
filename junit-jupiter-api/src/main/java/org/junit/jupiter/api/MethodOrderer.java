@@ -260,13 +260,14 @@ public interface MethodOrderer {
 	 * <p>By default, the random <em>seed</em> used for ordering methods is the
 	 * value returned by {@link System#nanoTime()} during static class
 	 * initialization. In order to support repeatable builds, the value of the
-	 * default random seed is logged at {@code CONFIG} level. In addition, a
-	 * custom seed (potentially the default seed from the previous test plan
-	 * execution) may be specified via the {@value Random#RANDOM_SEED_PROPERTY_NAME}
-	 * <em>configuration parameter</em> which can be supplied via the {@code Launcher}
-	 * API, build tools (e.g., Gradle and Maven), a JVM system property, or the JUnit
-	 * Platform configuration file (i.e., a file named {@code junit-platform.properties}
-	 * in the root of the class path). Consult the User Guide for further information.
+	 * random seed in use is logged at {@code CONFIG} level. A custom seed
+	 * (potentially the default seed from the previous test plan execution) may
+	 * be specified via the {@value Random#RANDOM_SEED_PROPERTY_NAME}
+	 * <em>configuration parameter</em> which can be supplied via the
+	 * {@code Launcher} API, build tools (e.g., Gradle and Maven), a JVM system
+	 * property, or the JUnit Platform configuration file (i.e., a file named
+	 * {@code junit-platform.properties} in the root of the class path). Consult
+	 * the User Guide for further information.
 	 *
 	 * @see Random#RANDOM_SEED_PROPERTY_NAME
 	 * @see java.util.Random
@@ -274,10 +275,6 @@ public interface MethodOrderer {
 	class Random implements MethodOrderer {
 
 		private static final Logger logger = LoggerFactory.getLogger(Random.class);
-
-		static {
-			logger.config(() -> "MethodOrderer.Random default seed: " + RandomOrdererUtils.DEFAULT_SEED);
-		}
 
 		/**
 		 * Property name used to set the random seed used by this

@@ -216,7 +216,12 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 			// @formatter:off
 			assertThat(listener.stream(Random.class, Level.WARNING)
 					.map(LogRecord::getMessage))
-					.anyMatch(expectedMessagePattern.asMatchPredicate());
+					.filteredOn(expectedMessagePattern.asMatchPredicate())
+					.hasSize(1);
+			assertThat(listener.stream(Random.class, Level.CONFIG)
+					.map(LogRecord::getMessage))
+					.filteredOn(message -> message.startsWith("Using seed ["))
+					.hasSize(1);
 			// @formatter:on
 		}
 
@@ -229,8 +234,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 		for (var i = 0; i < 10; i++) {
 			var seed = String.valueOf(i);
-			var expectedMessage = "Using custom seed for configuration parameter [" + Random.RANDOM_SEED_PROPERTY_NAME
-					+ "] with value [" + seed + "].";
+			var expectedMessage = expectedSeedMessage(seed);
 			callSequence.clear();
 			listener.clear();
 
@@ -256,8 +260,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 	@Test
 	void randomWithCustomSeed(@TrackLogRecords LogRecordListener listener) {
 		var seed = "42";
-		var expectedMessage = "Using custom seed for configuration parameter [" + Random.RANDOM_SEED_PROPERTY_NAME
-				+ "] with value [" + seed + "].";
+		var expectedMessage = expectedSeedMessage(seed);
 
 		for (var i = 0; i < 10; i++) {
 			callSequence.clear();
@@ -278,6 +281,11 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 
 		assertThat(threadNames).size().isGreaterThanOrEqualTo(3);
+	}
+
+	private static String expectedSeedMessage(String seed) {
+		return "Using seed [%s] for ordering classes/methods. To reuse the same seed in a subsequent execution, pass '%s=%s' as configuration parameter.".formatted(
+			seed, RANDOM_SEED_PROPERTY_NAME, seed);
 	}
 
 	@Test
