@@ -107,6 +107,9 @@ repository on GitHub.
 * Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 * The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
   now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
+* Discovery and execution of Kotlin `suspend` test and lifecycle methods returning `Unit`
+  no longer go through `kotlin-reflect`, which noticeably speeds up test suites with many
+  such methods.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage

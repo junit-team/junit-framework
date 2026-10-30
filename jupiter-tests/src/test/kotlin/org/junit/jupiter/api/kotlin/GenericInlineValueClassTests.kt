@@ -26,6 +26,12 @@ class GenericInlineValueClassTests {
         assertEquals("success", result.getOrThrow())
     }
 
+    @MethodSource("resultProvider")
+    @ParameterizedTest
+    suspend fun testSuspendingResult(result: Result<String>) {
+        assertEquals("success", result.getOrThrow())
+    }
+
     @MethodSource("multipleResultsProvider")
     @ParameterizedTest
     fun testMultipleResults(
