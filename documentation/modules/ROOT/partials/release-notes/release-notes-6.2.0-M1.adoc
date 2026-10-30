@@ -107,6 +107,13 @@ repository on GitHub.
 * Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 * The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
   now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
+* Implementations of `ClassOrderer` or `MethodOrderer` may now access the store scoped to
+  the enclosing launcher session via the new `DiscoveryContext.getStore(...)` API.
+  This can be used to store or cache information that is reused during test execution or
+  later discovery phases.
+* New `org.junit.jupiter.api.store` package containing `Store` and `Namespace` interfaces
+  which are now extended by `ExtensionContext.Store` and `ExtensionContext.Namespace`,
+  respectively.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage

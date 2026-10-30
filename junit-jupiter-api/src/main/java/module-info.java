@@ -32,6 +32,7 @@ module org.junit.jupiter.api {
 	exports org.junit.jupiter.api.function;
 	exports org.junit.jupiter.api.io;
 	exports org.junit.jupiter.api.parallel;
+	exports org.junit.jupiter.api.store;
 	exports org.junit.jupiter.api.timeout to org.junit.jupiter.engine;
 	exports org.junit.jupiter.api.util;
 
