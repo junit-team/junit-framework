@@ -34,7 +34,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.PreconditionViolationException;
-import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.Preconditions;
 
 /**
@@ -522,8 +521,14 @@ public interface ExtensionContext {
 
 	/**
 	 * {@code Store} provides methods for extensions to save and retrieve data.
+	 *
+	 * <p>Stored values that implement {@link CloseableResource} or
+	 * {@link AutoCloseable} are closed when the store is closed. For
+	 * {@code AutoCloseable}, this can be disabled by setting the
+	 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
+	 * configuration parameter to {@code false}.
 	 */
-	interface Store {
+	interface Store extends org.junit.jupiter.api.store.Store {
 
 		/**
 		 * Classes implementing this interface indicate that they want to {@link #close}
@@ -550,68 +555,6 @@ public interface ExtensionContext {
 			 */
 			void close() throws Throwable;
 
-		}
-
-		/**
-		 * Get the value that is stored under the supplied {@code key}.
-		 *
-		 * <p>If no value is stored in the current {@link ExtensionContext}
-		 * for the supplied {@code key}, ancestors of the context will be queried
-		 * for a value with the same {@code key} in the {@code Namespace} used
-		 * to create this store.
-		 *
-		 * <p>For greater type safety, consider using {@link #get(Object, Class)}
-		 * instead.
-		 *
-		 * @param key the key; never {@code null}
-		 * @return the value; potentially {@code null}
-		 * @see #get(Object, Class)
-		 * @see #getOrDefault(Object, Class, Object)
-		 */
-		@Nullable
-		Object get(Object key);
-
-		/**
-		 * Get the value of the specified required type that is stored under
-		 * the supplied {@code key}.
-		 *
-		 * <p>If no value is stored in the current {@link ExtensionContext}
-		 * for the supplied {@code key}, ancestors of the context will be queried
-		 * for a value with the same {@code key} in the {@code Namespace} used
-		 * to create this store.
-		 *
-		 * @param key the key; never {@code null}
-		 * @param requiredType the required type of the value; never {@code null}
-		 * @param <V> the value type
-		 * @return the value; potentially {@code null}
-		 * @see #get(Object)
-		 * @see #getOrDefault(Object, Class, Object)
-		 */
-		<V> @Nullable V get(Object key, Class<V> requiredType);
-
-		/**
-		 * Get the value of the specified required type that is stored under
-		 * the supplied {@code key}, or the supplied {@code defaultValue} if no
-		 * value is found for the supplied {@code key} in this store or in an
-		 * ancestor.
-		 *
-		 * <p>If no value is stored in the current {@link ExtensionContext}
-		 * for the supplied {@code key}, ancestors of the context will be queried
-		 * for a value with the same {@code key} in the {@code Namespace} used
-		 * to create this store.
-		 *
-		 * @param key the key; never {@code null}
-		 * @param requiredType the required type of the value; never {@code null}
-		 * @param defaultValue the default value; never {@code null}
-		 * @param <V> the value type
-		 * @return the value; never {@code null}
-		 * @since 5.5
-		 * @see #get(Object, Class)
-		 */
-		@API(status = STABLE, since = "5.5")
-		default <V> V getOrDefault(Object key, Class<V> requiredType, V defaultValue) {
-			V value = get(key, requiredType);
-			return (value != null ? value : defaultValue);
 		}
 
 		/**
@@ -656,44 +599,6 @@ public interface ExtensionContext {
 		}
 
 		/**
-		 * Return the object of type {@code type} if it is present and not
-		 * {@code null} in this {@code Store} (<em>keyed</em> by {@code type});
-		 * otherwise, invoke the default constructor for {@code type} to
-		 * generate the object, store it, and return it.
-		 *
-		 * <p>This method is a shortcut for the following, where {@code X} is
-		 * the type of object we wish to retrieve from the store.
-		 *
-		 * <pre style="code">
-		 * X x = store.computeIfAbsent(X.class, key -&gt; new X(), X.class);
-		 * // Equivalent to:
-		 * // X x = store.computeIfAbsent(X.class);
-		 * </pre>
-		 *
-		 * <p>See {@link #computeIfAbsent(Object, Function, Class)} for further
-		 * details.
-		 *
-		 * <p>If {@code type} implements {@link CloseableResource} or
-		 * {@link AutoCloseable} (unless the
-		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
-		 * configuration parameter is set to {@code false}), then the {@code close()}
-		 * method will be invoked on the stored object when the store is closed.
-		 *
-		 * @param type the type of object to retrieve; never {@code null}
-		 * @param <V> the key and value type
-		 * @return the object; never {@code null}
-		 * @since 6.0
-		 * @see #computeIfAbsent(Object, Function)
-		 * @see #computeIfAbsent(Object, Function, Class)
-		 * @see CloseableResource
-		 * @see AutoCloseable
-		 */
-		@API(status = MAINTAINED, since = "6.0")
-		default <V> V computeIfAbsent(Class<V> type) {
-			return computeIfAbsent(type, ReflectionSupport::newInstance, type);
-		}
-
-		/**
 		 * Get the value that is stored under the supplied {@code key}.
 		 *
 		 * <p>If no value is stored in the current {@link ExtensionContext}
@@ -731,43 +636,6 @@ public interface ExtensionContext {
 				Function<? super K, ? extends V> defaultCreator);
 
 		/**
-		 * Return the value of the specified required type that is stored under
-		 * the supplied {@code key}.
-		 *
-		 * <p>If no value is stored in the current {@link ExtensionContext}
-		 * for the supplied {@code key}, ancestors of the context will be queried
-		 * for a value with the same {@code key} in the {@code Namespace} used
-		 * to create this store. If no value is found for the supplied {@code key}
-		 * or the value is {@code null}, a new value will be computed by the
-		 * {@code defaultCreator} (given the {@code key} as input), stored, and
-		 * returned.
-		 *
-		 * <p>For greater type safety, consider using
-		 * {@link #computeIfAbsent(Object, Function, Class)} instead.
-		 *
-		 * <p>If the created value is an instance of {@link CloseableResource} or
-		 * {@link AutoCloseable} (unless the
-		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
-		 * configuration parameter is set to {@code false}), then the {@code close()}
-		 * method will be invoked on the stored object when the store is closed.
-		 *
-		 * @param key the key; never {@code null}
-		 * @param defaultCreator the function called with the supplied {@code key}
-		 * to create a new value; never {@code null} and must not return
-		 * {@code null}
-		 * @param <K> the key type
-		 * @param <V> the value type
-		 * @return the value; never {@code null}
-		 * @since 6.0
-		 * @see #computeIfAbsent(Class)
-		 * @see #computeIfAbsent(Object, Function, Class)
-		 * @see CloseableResource
-		 * @see AutoCloseable
-		 */
-		@API(status = MAINTAINED, since = "6.0")
-		<K, V> Object computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator);
-
-		/**
 		 * Get the value of the specified required type that is stored under the
 		 * supplied {@code key}.
 		 *
@@ -803,97 +671,6 @@ public interface ExtensionContext {
 		<K, V extends @Nullable Object> @Nullable V getOrComputeIfAbsent(K key,
 				Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
 
-		/**
-		 * Get the value of the specified required type that is stored under the
-		 * supplied {@code key}.
-		 *
-		 * <p>If no value is stored in the current {@link ExtensionContext}
-		 * for the supplied {@code key}, ancestors of the context will be queried
-		 * for a value with the same {@code key} in the {@code Namespace} used
-		 * to create this store. If no value is found for the supplied {@code key}
-		 * or the value is {@code null}, a new value will be computed by the
-		 * {@code defaultCreator} (given the {@code key} as input), stored, and
-		 * returned.
-		 *
-		 * <p>If the created value is an instance of {@link CloseableResource} or
-		 * {@link AutoCloseable} (unless the
-		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
-		 * configuration parameter is set to {@code false}), then the {@code close()}
-		 * method will be invoked on the stored object when the store is closed.
-		 *
-		 * @param key the key; never {@code null}
-		 * @param defaultCreator the function called with the supplied {@code key}
-		 * to create a new value; never {@code null} and must not return
-		 * {@code null}
-		 * @param requiredType the required type of the value; never {@code null}
-		 * @param <K> the key type
-		 * @param <V> the value type
-		 * @return the value; never {@code null}
-		 * @since 6.0
-		 * @see #computeIfAbsent(Class)
-		 * @see #computeIfAbsent(Object, Function)
-		 * @see CloseableResource
-		 * @see AutoCloseable
-		 */
-		@API(status = MAINTAINED, since = "6.0")
-		<K, V> V computeIfAbsent(K key, Function<? super K, ? extends V> defaultCreator, Class<V> requiredType);
-
-		/**
-		 * Store a {@code value} for later retrieval under the supplied {@code key}.
-		 *
-		 * <p>A stored {@code value} is visible in child {@link ExtensionContext
-		 * ExtensionContexts} for the store's {@code Namespace} unless they
-		 * overwrite it.
-		 *
-		 * <p>If the {@code value} is an instance of {@link CloseableResource} or
-		 * {@link AutoCloseable} (unless the
-		 * {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
-		 * configuration parameter is set to {@code false}), then the {@code close()}
-		 * method will be invoked on the stored object when the store is closed.
-		 *
-		 * @param key the key under which the value should be stored; never
-		 * {@code null}
-		 * @param value the value to store; may be {@code null}
-		 * @see CloseableResource
-		 * @see AutoCloseable
-		 */
-		void put(Object key, @Nullable Object value);
-
-		/**
-		 * Remove the value that was previously stored under the supplied {@code key}.
-		 *
-		 * <p>The value will only be removed in the current {@link ExtensionContext},
-		 * not in ancestors. In addition, the {@link CloseableResource} and {@link AutoCloseable}
-		 * API will not be honored for values that are manually removed via this method.
-		 *
-		 * <p>For greater type safety, consider using {@link #remove(Object, Class)}
-		 * instead.
-		 *
-		 * @param key the key; never {@code null}
-		 * @return the previous value or {@code null} if no value was present
-		 * for the specified key
-		 * @see #remove(Object, Class)
-		 */
-		@Nullable
-		Object remove(Object key);
-
-		/**
-		 * Remove the value of the specified required type that was previously stored
-		 * under the supplied {@code key}.
-		 *
-		 * <p>The value will only be removed in the current {@link ExtensionContext},
-		 * not in ancestors. In addition, the {@link CloseableResource} and {@link AutoCloseable}
-		 * API will not be honored for values that are manually removed via this method.
-		 *
-		 * @param key the key; never {@code null}
-		 * @param requiredType the required type of the value; never {@code null}
-		 * @param <V> the value type
-		 * @return the previous value or {@code null} if no value was present
-		 * for the specified key
-		 * @see #remove(Object)
-		 */
-		<V> @Nullable V remove(Object key, Class<V> requiredType);
-
 	}
 
 	/**
@@ -904,13 +681,13 @@ public interface ExtensionContext {
 	 * mixing data between extensions or across different invocations within the
 	 * lifecycle of a single extension.
 	 */
-	final class Namespace {
+	final class Namespace implements org.junit.jupiter.api.store.Namespace {
 
 		/**
 		 * The default, global namespace which allows access to stored data from
 		 * all extensions.
 		 */
-		public static final Namespace GLOBAL = Namespace.create(new Object());
+		public static final Namespace GLOBAL = new Namespace(org.junit.jupiter.api.store.Namespace.GLOBAL.getParts());
 
 		/**
 		 * Create a namespace which restricts access to data to all extensions
@@ -937,11 +714,7 @@ public interface ExtensionContext {
 			if (this == o) {
 				return true;
 			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			Namespace that = (Namespace) o;
-			return this.parts.equals(that.parts);
+			return o instanceof org.junit.jupiter.api.store.Namespace that && this.parts.equals(that.getParts());
 		}
 
 		@Override
@@ -956,6 +729,7 @@ public interface ExtensionContext {
 		 * @return new namespace; never {@code null}
 		 * @since 5.8
 		 */
+		@Override
 		@API(status = STABLE, since = "5.10")
 		public Namespace append(Object... parts) {
 			Preconditions.notEmpty(parts, "parts array must not be null or empty");
@@ -966,6 +740,7 @@ public interface ExtensionContext {
 			return new Namespace(newParts);
 		}
 
+		@Override
 		@API(status = INTERNAL, since = "5.13")
 		public List<Object> getParts() {
 			return parts;

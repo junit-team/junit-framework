@@ -11,7 +11,6 @@
 package org.junit.jupiter.api;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.junit.platform.commons.logging.Logger;
 
@@ -28,13 +27,12 @@ class RandomOrdererUtils {
 
 	static final long DEFAULT_SEED = System.nanoTime();
 
-	static Long getSeed(Function<String, Optional<String>> configurationParameterLookup, Logger logger) {
-		return getCustomSeed(configurationParameterLookup, logger).orElse(DEFAULT_SEED);
+	static long getSeed(DiscoveryContext context, Logger logger) {
+		return getCustomSeed(context, logger).orElse(DEFAULT_SEED);
 	}
 
-	private static Optional<Long> getCustomSeed(Function<String, Optional<String>> configurationParameterLookup,
-			Logger logger) {
-		return configurationParameterLookup.apply(RANDOM_SEED_PROPERTY_NAME).map(configurationParameter -> {
+	private static Optional<Long> getCustomSeed(DiscoveryContext context, Logger logger) {
+		return context.getConfigurationParameter(RANDOM_SEED_PROPERTY_NAME).map(configurationParameter -> {
 			try {
 				logger.config(() -> "Using custom seed for configuration parameter [%s] with value [%s].".formatted(
 					RANDOM_SEED_PROPERTY_NAME, configurationParameter));
