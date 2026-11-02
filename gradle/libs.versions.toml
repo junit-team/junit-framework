@@ -50,7 +50,7 @@ jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
 joox = { module = "org.jooq:joox", version = "2.0.2" }
 jspecify = { module = "org.jspecify:jspecify", version = "1.0.1" }
-jte = { module = "gg.jte:jte", version = "3.2.4" }
+jte = { module = "gg.jte:jte", version = "3.2.5" }
 junit4 = { module = "junit:junit", version = { require = "[4.12,)", prefer = "4.13.2" } }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.11.0" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.11.0" }
