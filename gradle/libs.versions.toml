@@ -111,5 +111,5 @@ node = { id = "com.github.node-gradle.node", version = "7.1.0" }
 nullaway = { id = "net.ltgt.nullaway", version = "3.3.0" }
 plantuml = { id = "io.freefair.plantuml", version = "9.8.3" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.4" }
+spotless = { id = "com.diffplug.spotless", version = "8.11.0" }
 spring-antora = { id = "io.spring.antora.generate-antora-yml", version = "0.0.1" }
