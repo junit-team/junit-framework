@@ -627,6 +627,15 @@ NOTE: For conciseness, this snippet assumes that the enclosing test class uses t
 --
 ====
 
+The single argument can also be a user-defined type, such as a record. The following
+example uses a record as a type-safe test case and its `toString()` implementation in
+the invocation display name:
+
+[source,java,indent=0]
+----
+include::example$java/example/ParameterizedTestDemo.java[tags=record_MethodSource_example]
+----
+
 For a `@ParameterizedClass`, providing a factory method name via `@MethodSource` is
 mandatory. For a `@ParameterizedTest`, if you do not explicitly provide a factory method
 name, JUnit Jupiter will search for a _factory_ method with the same name as the current
