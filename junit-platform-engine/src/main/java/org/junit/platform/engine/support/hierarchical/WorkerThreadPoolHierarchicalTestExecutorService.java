@@ -133,7 +133,6 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			ClassLoader classLoader) {
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
 		parallelism = configuration.getParallelism();
-		Preconditions.condition(parallelism >= 1, "parallelism must be positive");
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
 		var rejectedExecutionHandler = new LeaseAwareRejectedExecutionHandler(workerLeaseManager);
 		executor = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
@@ -821,6 +820,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		private final Consumer<BooleanSupplier> compensation;
 
 		WorkerLeaseManager(int parallelism, Consumer<BooleanSupplier> onRelease) {
+			Preconditions.condition(parallelism >= 1, "parallelism must be positive");
 			this.parallelism = parallelism;
 			this.semaphore = new Semaphore(parallelism);
 			this.compensation = onRelease;
