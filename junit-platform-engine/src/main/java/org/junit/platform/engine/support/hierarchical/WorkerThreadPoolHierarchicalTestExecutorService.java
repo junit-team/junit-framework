@@ -134,9 +134,9 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 		Preconditions.condition(configuration.getParallelism() >= 1, "parallelism must be positive");
 		Preconditions.condition(configuration.getMaxPoolSize() >= configuration.getParallelism(),
 			"maxPoolSize must be greater than or equal to parallelism");
-		parallelism = configuration.getParallelism();
 
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
+		parallelism = configuration.getParallelism();
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
 		var rejectedExecutionHandler = new LeaseAwareRejectedExecutionHandler(workerLeaseManager);
 		executor = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),
