@@ -133,6 +133,7 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 			ClassLoader classLoader) {
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
 		parallelism = configuration.getParallelism();
+		Preconditions.condition(parallelism >= 1, "parallelism must be positive");
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
 		var rejectedExecutionHandler = new LeaseAwareRejectedExecutionHandler(workerLeaseManager);
 		executor = new ThreadPoolExecutor(configuration.getCorePoolSize(), configuration.getMaxPoolSize(),

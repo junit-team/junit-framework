@@ -29,6 +29,9 @@ repository on GitHub.
   other code if a file system for the same jar file has already been opened elsewhere.
 * Classpath scanning now finds packages within jar files whose names contain non-ASCII
   characters.
+* Validate configuration parameters for `fixed.parallelism` and `fixed.max-pool-size`.
+* For the `fixed` and `dynamic` strategy limit the calculated max pool size to
+  `Integer.MAX_VALUE`.
 
 [[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

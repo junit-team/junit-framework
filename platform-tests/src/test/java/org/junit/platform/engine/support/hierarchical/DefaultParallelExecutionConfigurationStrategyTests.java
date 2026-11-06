@@ -10,12 +10,14 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.math.MathContext.DECIMAL128;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,11 +43,10 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	void dynamicStrategyThrowsExceptionWhenMaxPoolSizeFactorIsLessThanOne() {
 		when(configParams.get("dynamic.max-pool-size-factor")).thenReturn(Optional.of("0.5"));
 
-		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
 		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
 
-		assertThat(exception).hasMessage(
-			"Factor '0.5' specified via configuration parameter 'dynamic.max-pool-size-factor' must be greater than or equal to 1");
+		assertThat(exception).hasRootCauseMessage("max pool size factor must be greater than or equal to one");
 	}
 
 	@Test
@@ -140,19 +141,65 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	}
 
 	@Test
-	void fixedStrategyThrowsExceptionWhenPropertyIsNotPresent() {
+	void fixedStrategyThrowsExceptionWhenParallelismIsNotPresent() {
 		when(configParams.get("fixed.parallelism")).thenReturn(Optional.empty());
 
 		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasMessage("Configuration parameter 'fixed.parallelism' must be set");
+	}
+
+	@Test
+	void fixedStrategyThrowsExceptionWhenParallelismIsNotAnInteger() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("foo"));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
 		assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
 	}
 
 	@Test
-	void fixedStrategyThrowsExceptionWhenPropertyIsNotAnInteger() {
-		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("foo"));
+	void fixedStrategyThrowsExceptionWhenParallelismIsNotPositive() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("0"));
 
-		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
-		assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasRootCauseMessage("parallelism must be positive");
+	}
+
+	@Test
+	void fixedStrategyThrowsExceptionWhenThreadPoolIsNotPositive() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("2"));
+		when(configParams.get("fixed.max-pool-size")).thenReturn(Optional.of("0"));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasRootCauseMessage("max pool size must be positive");
+	}
+
+	@Test
+	void fixedStrategyThrowsExceptionWhenThreadPoolIsSmallerThanParallelism() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("2"));
+		when(configParams.get("fixed.max-pool-size")).thenReturn(Optional.of("1"));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasRootCauseMessage("max pool size must be greater than or equal to the parallelism");
+	}
+
+	@Test
+	void fixedStrategyLimitsDefaultMaxPoolSizeToPositiveInteger() {
+		int desiredParallelism = Integer.MAX_VALUE - 100;
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of(String.valueOf(desiredParallelism)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(desiredParallelism);
+		assertThat(configuration.getMaxPoolSize()).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test
@@ -206,6 +253,49 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 		assertThat(configuration.getMinimumRunnable()).isEqualTo(1);
 		assertThat(configuration.getMaxPoolSize()).isEqualTo(256 + 1);
 		assertThat(configuration.getKeepAliveSeconds()).isEqualTo(30);
+	}
+
+	@Test
+	void dynamicStrategyLimitParallelismToPositiveInteger() {
+		long desiredParallelism = 2L * Integer.MAX_VALUE;
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		var factor = BigDecimal.valueOf(desiredParallelism).divide(BigDecimal.valueOf(availableProcessors), DECIMAL128);
+		when(configParams.get("dynamic.factor")).thenReturn(Optional.of(String.valueOf(factor)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@Test
+	void dynamicStrategyLimitMaxPoolSizeToPositiveInteger() {
+		long desiredMaxCorePoolSize = 2L * Integer.MAX_VALUE;
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		var maxPoolSizeFactor = BigDecimal.valueOf(desiredMaxCorePoolSize) //
+				.divide(BigDecimal.valueOf(availableProcessors), DECIMAL128);
+		when(configParams.get("dynamic.max-pool-size-factor")).thenReturn(
+			Optional.of(String.valueOf(maxPoolSizeFactor)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(availableProcessors);
+		assertThat(configuration.getMaxPoolSize()).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@Test
+	void dynamicStrategyLimitsDefaultMaxPoolSizeToPositiveInteger() {
+		int desiredParallelism = Integer.MAX_VALUE - 100;
+		var availableProcessors = BigDecimal.valueOf(Runtime.getRuntime().availableProcessors());
+		var factor = BigDecimal.valueOf(desiredParallelism).divide(availableProcessors, DECIMAL128);
+		when(configParams.get("dynamic.factor")).thenReturn(Optional.of(String.valueOf(factor)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(desiredParallelism);
+		assertThat(configuration.getMaxPoolSize()).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test
