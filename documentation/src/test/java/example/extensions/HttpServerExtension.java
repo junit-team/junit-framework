@@ -16,9 +16,10 @@ import java.io.UncheckedIOException;
 import com.sun.net.httpserver.HttpServer;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 
 // tag::user_guide[]
 public class HttpServerExtension implements ParameterResolver {
@@ -32,7 +33,7 @@ public class HttpServerExtension implements ParameterResolver {
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 
 		ExtensionContext rootContext = extensionContext.getRoot();
-		ExtensionContext.Store store = rootContext.getStore(Namespace.GLOBAL);
+		Store store = rootContext.getStore(Namespace.GLOBAL);
 		Class<HttpServerResource> key = HttpServerResource.class;
 		HttpServerResource resource = store.computeIfAbsent(key, __ -> {
 			try {

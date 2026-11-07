@@ -46,6 +46,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestInstanceFactory;
 import org.junit.jupiter.api.extension.TestInstanceFactoryContext;
 import org.junit.jupiter.api.extension.TestInstantiationException;
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.test.TestClassLoader;
@@ -727,7 +728,7 @@ class TestInstanceFactoryTests extends AbstractJupiterTestEngineTests {
 			Class<?> testClass = factoryContext.getTestClass();
 			instantiated(getClass(), testClass);
 
-			extensionContext.getStore(ExtensionContext.Namespace.create(this)).put(new Object(),
+			extensionContext.getStore(Namespace.create(this)).put(new Object(),
 				(AutoCloseable) () -> callSequence.add("close " + testClass.getSimpleName()));
 
 			if (factoryContext.getOuterInstance().isPresent()) {

@@ -37,6 +37,12 @@ dependencies {
 			}
 			because("Workaround for CVE-2025-67030")
 		}
+		roseauDependencies("com.google.guava:guava") {
+			version {
+				require("33.7.2-jre")
+			}
+			because("Workaround for CVE-2026-102554")
+		}
 	}
 }
 

@@ -986,8 +986,9 @@ class DefaultLauncherTests {
 				.configurationParameter(LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME, "wrong")));
 
 		assertThat(exception) //
-				.hasRootCauseMessage("Invalid LauncherPhase 'wrong' set via the '%s' configuration parameter.",
-					LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME);
+				.hasMessage("Failed to transform configuration parameter with key '%s' and initial value 'wrong'",
+					LauncherConstants.DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME) //
+				.hasRootCauseMessage("No enum constant %s.WRONG", DiscoveryIssueFailurePhase.class.getName());
 	}
 
 	@Test

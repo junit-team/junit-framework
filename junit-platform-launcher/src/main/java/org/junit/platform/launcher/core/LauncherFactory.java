@@ -101,7 +101,7 @@ public class LauncherFactory {
 		LauncherConfigurationParameters configurationParameters = LauncherConfigurationParameters.builder().build();
 		return new DefaultLauncherSession(collectLauncherInterceptors(configurationParameters),
 			() -> createLauncherSessionListener(config),
-			sessionLevelStore -> createDefaultLauncher(config, configurationParameters, sessionLevelStore));
+			sessionScopedStore -> createDefaultLauncher(config, configurationParameters, sessionScopedStore));
 	}
 
 	/**
@@ -131,16 +131,16 @@ public class LauncherFactory {
 		Preconditions.notNull(config, "LauncherConfig must not be null");
 		LauncherConfigurationParameters configurationParameters = LauncherConfigurationParameters.builder().build();
 		return new SessionPerRequestLauncher(
-			sessionLevelStore -> createDefaultLauncher(config, configurationParameters, sessionLevelStore),
+			sessionScopedStore -> createDefaultLauncher(config, configurationParameters, sessionScopedStore),
 			() -> createLauncherSessionListener(config), () -> collectLauncherInterceptors(configurationParameters));
 	}
 
 	private static DefaultLauncher createDefaultLauncher(LauncherConfig config,
 			LauncherConfigurationParameters configurationParameters,
-			NamespacedHierarchicalStore<Namespace> sessionLevelStore) {
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
 		Set<TestEngine> engines = collectTestEngines(config);
 		List<PostDiscoveryFilter> filters = collectPostDiscoveryFilters(config);
-		DefaultLauncher launcher = new DefaultLauncher(engines, filters, sessionLevelStore);
+		DefaultLauncher launcher = new DefaultLauncher(engines, filters, sessionScopedStore);
 		JfrUtils.registerListeners(launcher);
 		registerLauncherDiscoveryListeners(config, launcher);
 		registerTestExecutionListeners(config, launcher, configurationParameters);

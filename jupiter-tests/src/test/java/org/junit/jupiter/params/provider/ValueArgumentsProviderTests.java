@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -139,7 +140,7 @@ class ValueArgumentsProviderTests {
 		assertThat(arguments).containsExactly(array(Integer.class), array(getClass()));
 	}
 
-	private static Stream<Object[]> provideArguments(short[] shorts, byte[] bytes, int[] ints, long[] longs,
+	private static Stream<@Nullable Object[]> provideArguments(short[] shorts, byte[] bytes, int[] ints, long[] longs,
 			float[] floats, double[] doubles, char[] chars, boolean[] booleans, String[] strings, Class<?>[] classes) {
 
 		var annotation = mock(ValueSource.class);

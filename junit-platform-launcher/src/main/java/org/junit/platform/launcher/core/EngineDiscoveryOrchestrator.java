@@ -13,7 +13,9 @@ package org.junit.platform.launcher.core;
 import static java.util.stream.Collectors.joining;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.engine.Filter.composeFilters;
-import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.AUTOMATIC;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.DISCOVERY;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.getDiscoveryIssueFailurePhase;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +37,8 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.EngineDiscoveryResult;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -55,17 +59,21 @@ public class EngineDiscoveryOrchestrator {
 	private final Iterable<TestEngine> testEngines;
 	private final Collection<PostDiscoveryFilter> postDiscoveryFilters;
 	private final ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry;
+	private final NamespacedHierarchicalStore<Namespace> sessionScopedStore;
 
 	public EngineDiscoveryOrchestrator(Iterable<TestEngine> testEngines,
-			Collection<PostDiscoveryFilter> postDiscoveryFilters) {
-		this(testEngines, postDiscoveryFilters, ListenerRegistry.forLauncherDiscoveryListeners());
+			Collection<PostDiscoveryFilter> postDiscoveryFilters,
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
+		this(testEngines, postDiscoveryFilters, sessionScopedStore, ListenerRegistry.forLauncherDiscoveryListeners());
 	}
 
 	EngineDiscoveryOrchestrator(Iterable<TestEngine> testEngines, Collection<PostDiscoveryFilter> postDiscoveryFilters,
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore,
 			ListenerRegistry<LauncherDiscoveryListener> launcherDiscoveryListenerRegistry) {
 		this.testEngines = EngineIdValidator.validate(testEngines);
 		this.postDiscoveryFilters = postDiscoveryFilters;
 		this.launcherDiscoveryListenerRegistry = launcherDiscoveryListenerRegistry;
+		this.sessionScopedStore = sessionScopedStore;
 	}
 
 	/**
@@ -112,6 +120,11 @@ public class EngineDiscoveryOrchestrator {
 			public LauncherDiscoveryListener getDiscoveryListener() {
 				return listener;
 			}
+
+			@Override
+			public NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+				return sessionScopedStore;
+			}
 		};
 		listener.launcherDiscoveryStarted(request);
 		LauncherDiscoveryResult discoveryResult;
@@ -131,10 +144,11 @@ public class EngineDiscoveryOrchestrator {
 	}
 
 	private static boolean shouldReportDiscoveryIssues(LauncherDiscoveryRequest request,
-			Optional<LauncherPhase> phase) {
+			Optional<LauncherPhase> currentPhase) {
 		ConfigurationParameters configurationParameters = request.getConfigurationParameters();
-		return getDiscoveryIssueFailurePhase(configurationParameters) //
-				.orElse(phase.orElse(null)) == LauncherPhase.DISCOVERY;
+		var failurePhase = getDiscoveryIssueFailurePhase(configurationParameters);
+		return failurePhase == DISCOVERY
+				|| (failurePhase == AUTOMATIC && currentPhase.orElse(null) == LauncherPhase.DISCOVERY);
 	}
 
 	private static void reportDiscoveryIssues(LauncherDiscoveryResult discoveryResult) {

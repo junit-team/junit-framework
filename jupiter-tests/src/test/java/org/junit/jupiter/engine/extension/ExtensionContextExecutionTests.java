@@ -23,6 +23,8 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContextParameterResolver;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 
 class ExtensionContextExecutionTests extends AbstractJupiterTestEngineTests {
@@ -76,7 +78,7 @@ class ExtensionContextExecutionTests extends AbstractJupiterTestEngineTests {
 	static class OnlyIncrementCounterOnce implements BeforeAllCallback {
 		@Override
 		public void beforeAll(ExtensionContext context) {
-			ExtensionContext.Store store = getRoot(context).getStore(ExtensionContext.Namespace.GLOBAL);
+			Store store = getRoot(context).getStore(Namespace.GLOBAL);
 			store.computeIfAbsent("counter", key -> Parent.counter.incrementAndGet());
 		}
 

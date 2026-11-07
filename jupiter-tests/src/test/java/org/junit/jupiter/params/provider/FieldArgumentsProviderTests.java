@@ -437,11 +437,11 @@ class FieldArgumentsProviderTests {
 		return objects;
 	}
 
-	private static Stream<Object[]> provideArguments(String... fieldNames) {
+	private static Stream<@Nullable Object[]> provideArguments(String... fieldNames) {
 		return provideArguments(TestCase.class, false, fieldNames);
 	}
 
-	private static Stream<Object[]> provideArguments(Class<?> testClass, boolean allowNonStaticMethod,
+	private static Stream<@Nullable Object[]> provideArguments(Class<?> testClass, boolean allowNonStaticMethod,
 			String... fieldNames) {
 
 		// Ensure we have a non-null test method, even if it's not a real test method.
@@ -450,7 +450,7 @@ class FieldArgumentsProviderTests {
 		return provideArguments(testClass, testMethod, allowNonStaticMethod, fieldNames);
 	}
 
-	private static Stream<Object[]> provideArguments(Class<?> testClass, Method testMethod,
+	private static Stream<@Nullable Object[]> provideArguments(Class<?> testClass, Method testMethod,
 			boolean allowNonStaticMethod, String... fieldNames) {
 
 		var extensionRegistry = createRegistryWithDefaultExtensions(mock());

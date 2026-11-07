@@ -15,7 +15,7 @@ import org.junit.platform.configuration.api.ConfigurationParameter;
 public final class DocumentedWithAtValue {
 
 	/**
-	 * A brief description of this property: {@value}.
+	 * A brief description of this property: {@value}
 	 */
 	@ConfigurationParameter
 	public static final String EXAMPLE_PROPERTY_NAME = "org.example.property";

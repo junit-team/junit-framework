@@ -263,26 +263,31 @@ public final class EngineTestKit {
 		TestExecutionListener noopTestExecutionListener = new TestExecutionListener() {
 
 		};
-		withRequestLevelStore(store -> new EngineExecutionOrchestrator().execute(discoveryResult,
+		withRequestScopedStore(store -> new EngineExecutionOrchestrator().execute(discoveryResult,
 			engineExecutionListener, noopTestExecutionListener, store, cancellationToken));
 	}
 
-	private static void withRequestLevelStore(Consumer<NamespacedHierarchicalStore<Namespace>> action) {
-		try (NamespacedHierarchicalStore<Namespace> sessionLevelStore = newStore(null);
-				NamespacedHierarchicalStore<Namespace> requestLevelStore = newStore(sessionLevelStore)) {
-			action.accept(requestLevelStore);
+	private static void withRequestScopedStore(Consumer<NamespacedHierarchicalStore<Namespace>> action) {
+		try (var sessionScopedStore = newSessionScopedStore(); var requestScopedStore = newStore(sessionScopedStore)) {
+			action.accept(requestScopedStore);
 		}
+	}
+
+	private static LauncherDiscoveryResult discoverUsingOrchestrator(TestEngine testEngine,
+			LauncherDiscoveryRequest discoveryRequest) {
+		try (var store = newSessionScopedStore()) {
+			return new EngineDiscoveryOrchestrator(singleton(testEngine), emptySet(), store) //
+					.discover(discoveryRequest);
+		}
+	}
+
+	private static NamespacedHierarchicalStore<Namespace> newSessionScopedStore() {
+		return newStore(null);
 	}
 
 	private static NamespacedHierarchicalStore<Namespace> newStore(
 			@Nullable NamespacedHierarchicalStore<Namespace> parentStore) {
 		return new NamespacedHierarchicalStore<>(parentStore, closeAutoCloseables());
-	}
-
-	private static LauncherDiscoveryResult discoverUsingOrchestrator(TestEngine testEngine,
-			LauncherDiscoveryRequest discoveryRequest) {
-		return new EngineDiscoveryOrchestrator(singleton(testEngine), emptySet()) //
-				.discover(discoveryRequest);
 	}
 
 	@SuppressWarnings("unchecked")

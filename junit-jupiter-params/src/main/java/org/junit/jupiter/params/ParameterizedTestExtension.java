@@ -17,8 +17,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * @since 5.0
@@ -60,7 +61,7 @@ class ParameterizedTestExtension extends ParameterizedInvocationContextProvider<
 				.get(DECLARATION_CONTEXT_KEY, ParameterizedTestContext.class));
 	}
 
-	private ExtensionContext.Store getStore(ExtensionContext context) {
+	private Store getStore(ExtensionContext context) {
 		return context.getStore(Namespace.create(ParameterizedTestExtension.class, context.getRequiredTestMethod()));
 	}
 

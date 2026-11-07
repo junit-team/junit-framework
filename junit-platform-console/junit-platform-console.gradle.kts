@@ -50,7 +50,7 @@ tasks {
 		exclude("META-INF/**/module-info.class")
 		relocate("picocli", "org.junit.platform.console.shadow.picocli")
 		from(projectDir) {
-			include("LICENSE-picocli.md")
+			include("LICENSE-picocli")
 			into("META-INF")
 		}
 		doLast(objects.newInstance(UpdateJarAction::class).apply {

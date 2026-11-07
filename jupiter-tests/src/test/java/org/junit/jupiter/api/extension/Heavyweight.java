@@ -16,11 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.store.Namespace;
+
 class Heavyweight implements ParameterResolver, BeforeEachCallback {
 
 	@Override
 	public void beforeEach(ExtensionContext context) {
-		context.getStore(ExtensionContext.Namespace.GLOBAL).put("once", new CloseableOnlyOnceResource());
+		context.getStore(Namespace.GLOBAL).put("once", new CloseableOnlyOnceResource());
 	}
 
 	@Override
@@ -31,7 +33,7 @@ class Heavyweight implements ParameterResolver, BeforeEachCallback {
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext context) {
 		var engineContext = context.getRoot();
-		var store = engineContext.getStore(ExtensionContext.Namespace.GLOBAL);
+		var store = engineContext.getStore(Namespace.GLOBAL);
 		var resource = store.computeIfAbsent(ResourceValue.class);
 		resource.usages.incrementAndGet();
 		return resource;

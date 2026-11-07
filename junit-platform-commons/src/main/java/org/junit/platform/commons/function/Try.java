@@ -313,19 +313,22 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 
 		@Override
-		public boolean equals(Object that) {
-			if (this == that) {
+		public boolean equals(Object obj) {
+			if (this == obj) {
 				return true;
 			}
-			if (that == null || this.getClass() != that.getClass()) {
-				return false;
-			}
-			return Objects.equals(this.value, ((Success<?>) that).value);
+			return obj instanceof Try.Success<?> that //
+					&& Objects.equals(this.value, that.value);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(value);
+			return Objects.hashCode(value);
+		}
+
+		@Override
+		public String toString() {
+			return "Try.success[" + value + "]";
 		}
 	}
 
@@ -398,19 +401,22 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 
 		@Override
-		public boolean equals(Object that) {
-			if (this == that) {
+		public boolean equals(Object obj) {
+			if (this == obj) {
 				return true;
 			}
-			if (that == null || this.getClass() != that.getClass()) {
-				return false;
-			}
-			return Objects.equals(this.cause, ((Failure<?>) that).cause);
+			return obj instanceof Try.Failure<?> that //
+					&& Objects.equals(this.cause, that.cause);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(cause);
+			return Objects.hashCode(cause);
+		}
+
+		@Override
+		public String toString() {
+			return "Try.failure[" + cause + "]";
 		}
 
 	}

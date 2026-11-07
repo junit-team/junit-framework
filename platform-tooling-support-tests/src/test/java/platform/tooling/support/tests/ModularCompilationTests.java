@@ -58,7 +58,9 @@ class ModularCompilationTests {
 				.addArguments("--add-modules", "de.siegmar.fastcsv") //
 				.addArguments("--add-reads", "org.junit.jupiter.params=de.siegmar.fastcsv") //
 				.addArguments("--add-modules", "jakarta.json") //
-				.addArguments("--add-reads", "org.junit.platform.configuration.processor=jakarta.json")
+				.addArguments("--add-reads", "org.junit.platform.configuration.processor=jakarta.json") //
+				.addArguments("--add-modules", "owasp.java.html.sanitizer") //
+				.addArguments("--add-reads", "org.junit.platform.configuration.processor=owasp.java.html.sanitizer") //
 				// modules to compile
 				.addArguments("--module", String.join(",", moduleNames)) //
 				.redirectOutput(javacOutputFiles) //

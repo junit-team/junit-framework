@@ -34,7 +34,9 @@ tasks.test {
 
 val initializeAtBuildTime = mapOf<String, List<String>>(
 	// These need to be added to native-build-tools
-	"6.2" to listOf(),
+	"6.2" to listOf(
+		"org.junit.jupiter.api.store.Namespace",
+	),
 )
 
 graalvmNative {

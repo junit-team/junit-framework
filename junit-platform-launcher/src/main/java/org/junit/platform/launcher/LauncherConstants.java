@@ -17,13 +17,15 @@ import static org.apiguardian.api.API.Status.STABLE;
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.ClassNamePatternFilterUtils;
 import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
 import org.junit.platform.configuration.api.ConfigurationParameter.Value;
 import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.reporting.ReportEntry;
-import org.junit.platform.launcher.core.LauncherPhase;
+import org.junit.platform.launcher.core.DiscoveryIssueFailurePhase;
 
 /**
  * Collection of constants related to {@link Launcher}.
@@ -44,7 +46,7 @@ public class LauncherConstants {
 	public static final boolean CAPTURE_STDOUT_DEFAULT = false;
 
 	/**
-	 * Property name used to enable capturing output to {@link System#out}:
+	 * Property name used to enable capturing output to {@link System#out System.out}:
 	 * {@value}
 	 *
 	 * <p>By default, output to {@link System#out} is not captured.
@@ -70,7 +72,7 @@ public class LauncherConstants {
 	public static final boolean CAPTURE_STDERR_DEFAULT = false;
 
 	/**
-	 * Property name used to enable capturing output to {@link System#err}:
+	 * Property name used to enable capturing output to {@link System#err System.err}:
 	 * {@value}
 	 *
 	 * <p>By default, output to {@link System#err} is not captured.
@@ -310,18 +312,35 @@ public class LauncherConstants {
 	 * @see org.junit.platform.engine.DiscoveryIssue.Severity
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
-	@ConfigurationParameter(type = Severity.class, defaultValue = @Value(stringValue = CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT))
+	@ConfigurationParameter(type = Severity.class,
+			// Severity is located in a different module so its values must be
+			// documented explicitly
+			hints = @Hints({ //
+					@Hint(value = "info", description = "Indicates that the engine encountered something that could be potentially problematic, but could also happen due to a valid setup or configuration."), //
+					@Hint(value = "warning", description = "Indicates that the engine encountered something that is problematic and might lead to unexpected behavior or will be removed or changed in a future release."), //
+					@Hint(value = "error", description = "Indicates that the engine encountered something that is definitely problematic and will lead to unexpected behavior.") //
+			}), //
+			defaultValue = @Value(stringValue = CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT))
 	public static final String CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME = "junit.platform.discovery.issue.severity.critical";
 
 	/**
+	 * Default value for {@value #DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT = "automatic";
+
+	/**
 	 * Property name used to configure the phase that critical discovery issues
-	 * should cause a failure
+	 * should cause a failure: {@value}
 	 *
 	 * <h4>Supported Values</h4>
 	 *
-	 * <p>Supported values are "discovery" or "execution".
+	 * <p>Supported values are "discovery", "execution",
+	 * or {@value #DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT}; defaults to {@value #DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT}.
 	 *
-	 * <p>If not specified, the {@code Launcher} will report discovery issues
+	 * <p>When set to {@value #DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT}, the {@code Launcher} will report discovery issues
 	 * during the discovery phase if
 	 * {@link Launcher#discover(LauncherDiscoveryRequest)} is called, and during
 	 * the execution phase if {@link Launcher#execute(LauncherExecutionRequest)}
@@ -331,7 +350,7 @@ public class LauncherConstants {
 	 * @see #CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
-	@ConfigurationParameter(type = LauncherPhase.class)
+	@ConfigurationParameter(type = DiscoveryIssueFailurePhase.class, defaultValue = @Value(stringValue = DISCOVERY_ISSUE_FAILURE_PHASE_DEFAULT))
 	public static final String DISCOVERY_ISSUE_FAILURE_PHASE_PROPERTY_NAME = "junit.platform.discovery.issue.failure.phase";
 
 	/**

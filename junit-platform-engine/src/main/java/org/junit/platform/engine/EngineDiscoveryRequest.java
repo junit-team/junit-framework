@@ -11,6 +11,7 @@
 package org.junit.platform.engine;
 
 import static org.apiguardian.api.API.Status.DEPRECATED;
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -18,6 +19,8 @@ import java.util.List;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
  * {@code EngineDiscoveryRequest} provides a {@link TestEngine} access to the
@@ -111,6 +114,18 @@ public interface EngineDiscoveryRequest {
 	default OutputDirectoryCreator getOutputDirectoryCreator() {
 		throw new JUnitException(
 			"OutputDirectoryCreator not available; probably due to unaligned versions of the junit-platform-engine and junit-platform-launcher jars on the classpath/module path.");
+	}
+
+	/**
+	 * Get the {@link NamespacedHierarchicalStore} scoped to the current
+	 * launcher session.
+	 *
+	 * @return the launcher session-scoped store; never {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+		throw new JUnitException("Session-scoped store not available");
 	}
 
 }

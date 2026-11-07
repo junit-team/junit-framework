@@ -16,8 +16,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Timeout.ThreadMode;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
+import org.junit.jupiter.api.store.Store;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.util.Preconditions;
@@ -50,7 +51,7 @@ class TimeoutInvocationFactory {
 	}
 
 	@SuppressWarnings({ "deprecation", "try" })
-	abstract static class ExecutorResource implements Store.CloseableResource, AutoCloseable {
+	abstract static class ExecutorResource implements ExtensionContext.Store.CloseableResource, AutoCloseable {
 
 		private final ScheduledExecutorService executor;
 

@@ -24,6 +24,11 @@ repository on GitHub.
   the arguments source of a `@ParameterizedTest` or `@ParameterizedClass` or the children
   stream of a `DynamicContainer` threw an exception.
 * The generic type parameters of `Try` methods now consistently allow nullable types.
+* When scanning the classpath, a separate file system is now created for each jar file
+  rather than a shared one. Thus, classpath scanning no longer fails or interferes with
+  other code if a file system for the same jar file has already been opened elsewhere.
+* Classpath scanning now finds packages within jar files whose names contain non-ASCII
+  characters.
 
 [[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -55,6 +60,9 @@ repository on GitHub.
 * Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 * Test engines using the `ParallelHierarchicalTestExecutorServiceFactory` now use the
   `WORKER_THREAD_POOL` executor service by default.
+* Test engines may now access the store scoped to the enclosing launcher session via the
+  new `EngineDiscoveryRequest.getSessionScopedStore()` API. This can be used to store or
+  cache information that is reused during test execution or later discovery phases.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
@@ -78,6 +86,8 @@ repository on GitHub.
   it has already provided now finish before the `@AfterEach` methods and after-each
   callbacks of the factory method are executed. Previously, with parallel execution, these
   could run while the dynamic tests were still executing.
+* `ClassOrderer.Random` and `MethodOrderer.Random` now log the used seed only once per
+  launcher session.
 
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -90,7 +100,10 @@ repository on GitHub.
 * When the timeout provided to `assertTimeout`, `assertTimeoutPreemptively` and test
   methods annotated with `@Timeout` is not a positive value less than 2^63^ nanoseconds
   (approximately 292 years) a `PreconditionViolationException` is thrown.
-
+* `ExtensionContext.Namespace` and `ExtensionContext.Store` have been deprecated
+  in favor of `org.junit.jupiter.api.store.Namespace` and
+  `org.junit.jupiter.api.store.Store`. In most cases, changing the `Namespace`
+  and `Store` imports suffices to migrate.
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
@@ -103,6 +116,13 @@ repository on GitHub.
 * Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
 * The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
   now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
+* Implementations of `ClassOrderer` or `MethodOrderer` may now access the store scoped to
+  the enclosing launcher session via the new `DiscoveryContext.getStore(...)` API.
+  This can be used to store or cache information that is reused during test execution or
+  later discovery phases.
+* New `org.junit.jupiter.api.store` package containing `Store` and `Namespace` interfaces
+  which are now extended by `ExtensionContext.Store` and `ExtensionContext.Namespace`,
+  respectively.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage

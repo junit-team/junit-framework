@@ -31,6 +31,8 @@ import org.junit.jupiter.api.io.TempDirDeletionStrategy;
 import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 
 /**
  * @since 5.4
@@ -76,4 +78,7 @@ public interface JupiterConfiguration {
 	ExtensionContextScope getDefaultTestInstantiationExtensionContextScope();
 
 	OutputDirectoryCreator getOutputDirectoryCreator();
+
+	NamespacedHierarchicalStore<Namespace> getSessionScopedStore();
+
 }

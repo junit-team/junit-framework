@@ -10,9 +10,9 @@
 
 package platform.tooling.support.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertLinesMatch;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static platform.tooling.support.Projects.getSourceDirectory;
 
 import java.lang.module.ModuleFinder;
@@ -62,7 +62,7 @@ class JarDescribeModuleTests {
 		var moduleDescriptor = ModuleFinder.of(modulePath).findAll().iterator().next().descriptor();
 		var moduleName = moduleDescriptor.name();
 		for (var packageName : moduleDescriptor.packages()) {
-			assertTrue(packageName.startsWith(moduleName));
+			assertThat(packageName).startsWith(moduleName);
 		}
 	}
 

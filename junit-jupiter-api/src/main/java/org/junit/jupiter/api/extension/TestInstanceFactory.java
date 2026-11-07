@@ -14,6 +14,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code TestInstanceFactory} defines the API for {@link Extension
@@ -76,7 +77,7 @@ public interface TestInstanceFactory extends TestInstantiationAwareExtension {
 	 * {@link TestInstance.Lifecycle#PER_CLASS PER_CLASS} lifecycle is used.
 	 * Changing the scope makes test-specific data available to the
 	 * implementation of this method and allows keeping state on the test level
-	 * by using the provided {@link ExtensionContext.Store Store} instance.
+	 * by using the provided {@link Store Store} instance.
 	 *
 	 * <p><strong>Note</strong>: the {@code ExtensionContext} supplied to a
 	 * {@code TestInstanceFactory} will always return an empty

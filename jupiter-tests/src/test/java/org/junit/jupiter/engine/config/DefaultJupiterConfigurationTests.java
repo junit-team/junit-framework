@@ -48,23 +48,27 @@ import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.support.discovery.DiscoveryIssueReporter;
 import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.core.ConfigurationParametersFactoryForTests;
 
 class DefaultJupiterConfigurationTests {
 
 	private static final String KEY = DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME;
 
+	final NamespacedHierarchicalStore<Namespace> sessionScopedStore = new NamespacedHierarchicalStore<>(null);
+
 	@SuppressWarnings("DataFlowIssue")
 	@Test
 	void getDefaultTestInstanceLifecyclePreconditions() {
-		assertPreconditionViolationNotNullFor("ConfigurationParameters",
-			() -> new DefaultJupiterConfiguration(null, dummyOutputDirectoryCreator(), mock()));
+		assertPreconditionViolationNotNullFor("configurationParameters",
+			() -> new DefaultJupiterConfiguration(null, dummyOutputDirectoryCreator(), mock(), sessionScopedStore));
 	}
 
 	@Test
 	void getDefaultTestInstanceLifecycleWithNoConfigParamSet() {
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), sessionScopedStore);
 		Lifecycle lifecycle = configuration.getDefaultTestInstanceLifecycle();
 		assertThat(lifecycle).isEqualTo(PER_METHOD);
 	}
@@ -72,7 +76,7 @@ class DefaultJupiterConfigurationTests {
 	@Test
 	void getDefaultTempDirCleanupModeWithNoConfigParamSet() {
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), sessionScopedStore);
 		CleanupMode cleanupMode = configuration.getDefaultTempDirCleanupMode();
 		assertThat(cleanupMode).isEqualTo(ALWAYS);
 	}
@@ -103,7 +107,7 @@ class DefaultJupiterConfigurationTests {
 			Map.of(Constants.DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME, CustomDisplayNameGenerator.class.getName()));
 
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
-			mock());
+			mock(), sessionScopedStore);
 
 		DisplayNameGenerator defaultDisplayNameGenerator = configuration.getDefaultDisplayNameGenerator();
 
@@ -113,7 +117,7 @@ class DefaultJupiterConfigurationTests {
 	@Test
 	void shouldGetStandardAsDefaultDisplayNameGeneratorWithoutConfigParamSet() {
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), sessionScopedStore);
 
 		DisplayNameGenerator defaultDisplayNameGenerator = configuration.getDefaultDisplayNameGenerator();
 
@@ -123,7 +127,7 @@ class DefaultJupiterConfigurationTests {
 	@Test
 	void shouldGetNothingAsDefaultTestMethodOrderWithoutConfigParamSet() {
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), sessionScopedStore);
 
 		final Optional<MethodOrderer> defaultTestMethodOrder = configuration.getDefaultTestMethodOrderer();
 
@@ -135,7 +139,7 @@ class DefaultJupiterConfigurationTests {
 		var parameters = configurationParameters(
 			Map.of(Constants.DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME, CustomFactory.class.getName()));
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(parameters, dummyOutputDirectoryCreator(),
-			mock());
+			mock(), sessionScopedStore);
 
 		Supplier<TempDirFactory> supplier = configuration.getDefaultTempDirFactorySupplier();
 
@@ -145,7 +149,7 @@ class DefaultJupiterConfigurationTests {
 	@Test
 	void shouldGetStandardAsDefaultTempDirFactorySupplierWithoutConfigParamSet() {
 		JupiterConfiguration configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), sessionScopedStore);
 
 		Supplier<TempDirFactory> supplier = configuration.getDefaultTempDirFactorySupplier();
 
@@ -155,7 +159,7 @@ class DefaultJupiterConfigurationTests {
 	@Test
 	void shouldGetStandardAsDefaultTempDirDeletionStrategyWithoutConfigParamSet() {
 		var configuration = new DefaultJupiterConfiguration(configurationParameters(Map.of()),
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), sessionScopedStore);
 
 		var defaultTempDirDeletionStrategySupplier = configuration.getDefaultTempDirDeletionStrategySupplier();
 
@@ -167,7 +171,7 @@ class DefaultJupiterConfigurationTests {
 		List<DiscoveryIssue> issues = new ArrayList<>();
 
 		new DefaultJupiterConfiguration(configurationParameters(Map.of()), dummyOutputDirectoryCreator(),
-			DiscoveryIssueReporter.collecting(issues)).getDefaultTestInstanceLifecycle();
+			DiscoveryIssueReporter.collecting(issues), sessionScopedStore).getDefaultTestInstanceLifecycle();
 
 		assertThat(issues).isEmpty();
 	}
@@ -181,7 +185,8 @@ class DefaultJupiterConfigurationTests {
 		List<DiscoveryIssue> issues = new ArrayList<>();
 
 		new DefaultJupiterConfiguration(ConfigurationParametersFactoryForTests.create(parameters),
-			dummyOutputDirectoryCreator(), DiscoveryIssueReporter.collecting(issues)).getDefaultTestInstanceLifecycle();
+			dummyOutputDirectoryCreator(), DiscoveryIssueReporter.collecting(issues),
+			sessionScopedStore).getDefaultTestInstanceLifecycle();
 
 		assertThat(issues).isEmpty();
 	}
@@ -191,10 +196,10 @@ class DefaultJupiterConfigurationTests {
 		assertThat(lifecycle).isEqualTo(expected);
 	}
 
-	private static Lifecycle getDefaultTestInstanceLifecycleConfigParam(@Nullable String configValue) {
+	private Lifecycle getDefaultTestInstanceLifecycleConfigParam(@Nullable String configValue) {
 		var configParams = configurationParameters(configValue == null ? Map.of() : Map.of(KEY, configValue));
-		return new DefaultJupiterConfiguration(configParams, dummyOutputDirectoryCreator(),
-			mock()).getDefaultTestInstanceLifecycle();
+		return new DefaultJupiterConfiguration(configParams, dummyOutputDirectoryCreator(), mock(),
+			sessionScopedStore).getDefaultTestInstanceLifecycle();
 	}
 
 	private static ConfigurationParameters configurationParameters(Map<@NonNull String, ?> parameters) {

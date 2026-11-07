@@ -541,7 +541,7 @@ class CsvArgumentsProviderTests {
 					"The number of columns (3) exceeds the number of supplied headers (2) in CSV record: [banana, 2, BOOM!]");
 	}
 
-	private Stream<Object[]> provideArguments(CsvSource annotation) {
+	private Stream<@Nullable Object[]> provideArguments(CsvSource annotation) {
 		var provider = new CsvArgumentsProvider();
 		provider.accept(annotation);
 		return provider.provideArguments(mock(), mock(ExtensionContext.class)).map(Arguments::get);

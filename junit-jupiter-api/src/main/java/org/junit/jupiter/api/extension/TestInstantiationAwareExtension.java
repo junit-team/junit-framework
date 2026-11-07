@@ -14,6 +14,7 @@ import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code TestInstantiationAwareExtension} defines the API for {@link Extension
@@ -101,7 +102,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 	 *   <li>
 	 *     If the extension adds a {@link ExtensionContext.Store.CloseableResource
 	 *     CloseableResource} or {@link AutoCloseable} to the
-	 *     {@link ExtensionContext.Store Store} (unless the
+	 *     {@link Store Store} (unless the
 	 *     {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
 	 *     configuration parameter is set to {@code false}), then the resource will
 	 *     be closed just after the instance is destroyed.
@@ -123,7 +124,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 	 * @implNote There are no guarantees about how often this method will be called.
 	 * Therefore, implementations should be idempotent and avoid side effects.
 	 * If computation of the return value is costly, implementations may wish to
-	 * cache the result in the {@link ExtensionContext.Store Store} of the supplied
+	 * cache the result in the {@link Store Store} of the supplied
 	 * {@code ExtensionContext}.
 	 * @param rootContext the root extension context to allow inspection of
 	 * configuration parameters; never {@code null}

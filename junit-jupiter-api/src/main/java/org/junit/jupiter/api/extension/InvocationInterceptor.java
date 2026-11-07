@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code InvocationInterceptor} defines the API for {@link Extension
@@ -77,7 +78,7 @@ public interface InvocationInterceptor extends TestInstantiationAwareExtension {
 	 * {@link TestInstance.Lifecycle#PER_CLASS PER_CLASS} lifecycle is used.
 	 * Changing the scope makes test-specific data available to the
 	 * implementation of this method and allows keeping state on the test level
-	 * by using the provided {@link ExtensionContext.Store Store} instance.
+	 * by using the provided {@link Store Store} instance.
 	 *
 	 * @param invocation the invocation that is being intercepted; never
 	 * {@code null}

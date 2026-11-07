@@ -17,7 +17,7 @@ import java.io.Serial;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.store.Store;
 import org.junit.platform.commons.JUnitException;
 
 /**

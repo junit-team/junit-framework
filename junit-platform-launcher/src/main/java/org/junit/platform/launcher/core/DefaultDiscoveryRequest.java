@@ -12,12 +12,15 @@ package org.junit.platform.launcher.core;
 
 import java.util.List;
 
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
 import org.junit.platform.engine.DiscoveryFilter;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.OutputDirectoryCreator;
+import org.junit.platform.engine.support.store.Namespace;
+import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
 import org.junit.platform.launcher.EngineFilter;
 import org.junit.platform.launcher.LauncherDiscoveryListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -101,4 +104,8 @@ final class DefaultDiscoveryRequest implements LauncherDiscoveryRequest {
 		return this.outputDirectoryCreator;
 	}
 
+	@Override
+	public NamespacedHierarchicalStore<Namespace> getSessionScopedStore() {
+		throw new JUnitException("Session-scoped store is only available to test engines");
+	}
 }

@@ -24,11 +24,11 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.MediaType;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.platform.tests.process.OutputFiles;
 import org.junit.platform.tests.process.ProcessStarter;
 

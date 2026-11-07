@@ -56,7 +56,7 @@ tasks.withType<JavaCompile>().configureEach {
 			if (shouldDisableErrorProne) {
 				disable()
 			} else {
-				enable()
+				error()
 			}
 			onlyNullMarked = true
 			jspecifyMode = true
