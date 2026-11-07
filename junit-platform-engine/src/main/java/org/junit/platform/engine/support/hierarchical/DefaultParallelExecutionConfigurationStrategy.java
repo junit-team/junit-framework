@@ -118,7 +118,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 		}
 
 		private static int calculateMaxPoolSize(BigDecimal maxPoolSizeFactor, int parallelism) {
-			var maxPoolSize = maxPoolSizeFactor.multiply(BigDecimal.valueOf(parallelism));
+			var maxPoolSize = BigDecimal.valueOf(parallelism).multiply(maxPoolSizeFactor);
 			return clampPositiveIntValue(maxPoolSize);
 		}
 

@@ -18,6 +18,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,10 @@ import org.junit.platform.engine.ConfigurationParameters;
  * @since 1.3
  */
 class DefaultParallelExecutionConfigurationStrategyTests {
+
+	// Ensures we can calculate the factor for the desired dynamic parallelism
+	// for any number of cpu values.
+	static final MathContext DECIMAL128_ROUND_UP = new MathContext(DECIMAL128.getPrecision(), RoundingMode.UP);
 
 	final ConfigurationParameters configParams = mock();
 
@@ -259,7 +265,8 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	void dynamicStrategyLimitParallelismToPositiveInteger() {
 		long desiredParallelism = 2L * Integer.MAX_VALUE;
 		int availableProcessors = Runtime.getRuntime().availableProcessors();
-		var factor = BigDecimal.valueOf(desiredParallelism).divide(BigDecimal.valueOf(availableProcessors), DECIMAL128);
+		var factor = BigDecimal.valueOf(desiredParallelism) //
+				.divide(BigDecimal.valueOf(availableProcessors), DECIMAL128_ROUND_UP);
 		when(configParams.get("dynamic.factor")).thenReturn(Optional.of(String.valueOf(factor)));
 
 		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
@@ -273,7 +280,7 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 		long desiredMaxCorePoolSize = 2L * Integer.MAX_VALUE;
 		int availableProcessors = Runtime.getRuntime().availableProcessors();
 		var maxPoolSizeFactor = BigDecimal.valueOf(desiredMaxCorePoolSize) //
-				.divide(BigDecimal.valueOf(availableProcessors), DECIMAL128);
+				.divide(BigDecimal.valueOf(availableProcessors), DECIMAL128_ROUND_UP);
 		when(configParams.get("dynamic.max-pool-size-factor")).thenReturn(
 			Optional.of(String.valueOf(maxPoolSizeFactor)));
 
@@ -288,7 +295,8 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	void dynamicStrategyLimitsDefaultMaxPoolSizeToPositiveInteger() {
 		int desiredParallelism = Integer.MAX_VALUE - 100;
 		var availableProcessors = BigDecimal.valueOf(Runtime.getRuntime().availableProcessors());
-		var factor = BigDecimal.valueOf(desiredParallelism).divide(availableProcessors, DECIMAL128);
+		var factor = BigDecimal.valueOf(desiredParallelism) //
+				.divide(availableProcessors, DECIMAL128_ROUND_UP);
 		when(configParams.get("dynamic.factor")).thenReturn(Optional.of(String.valueOf(factor)));
 
 		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
