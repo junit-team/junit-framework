@@ -131,6 +131,10 @@ public final class WorkerThreadPoolHierarchicalTestExecutorService implements Hi
 	// package-private for testing
 	WorkerThreadPoolHierarchicalTestExecutorService(ParallelExecutionConfiguration configuration,
 			ClassLoader classLoader) {
+		Preconditions.condition(configuration.getParallelism() >= 1, "parallelism must be positive");
+		Preconditions.condition(configuration.getMaxPoolSize() >= configuration.getParallelism(),
+			"maxPoolSize must be greater than or equal to parallelism");
+
 		ThreadFactory threadFactory = new WorkerThreadFactory(classLoader);
 		parallelism = configuration.getParallelism();
 		workerLeaseManager = new WorkerLeaseManager(parallelism, this::maybeStartWorker);
