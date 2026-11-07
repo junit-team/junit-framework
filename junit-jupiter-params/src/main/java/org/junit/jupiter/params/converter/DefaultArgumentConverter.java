@@ -12,14 +12,17 @@ package org.junit.jupiter.params.converter;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getClassLoader;
+import static org.junit.platform.commons.util.KotlinReflectionUtils.findInlineTypeUnboxMethod;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apiguardian.api.API;
@@ -43,6 +46,13 @@ import org.junit.platform.commons.util.ReflectionUtils;
  *
  * <p>If the source and target types are identical the source object will not
  * be modified.
+ *
+ * <p>If the source object is an instance of a Kotlin inline value class (i.e.,
+ * a {@code @JvmInline value class}) and the JVM type of its underlying value is
+ * identical to the target type, the underlying value will be used. This is the
+ * case when a Kotlin function declares a parameter of an inline value class
+ * type, since the Kotlin compiler replaces that type with the underlying type
+ * (e.g., {@code String} or {@code long}) in the JVM method signature.
  *
  * @since 5.0
  * @see org.junit.jupiter.params.converter.ArgumentConverter
@@ -83,6 +93,12 @@ public class DefaultArgumentConverter implements ArgumentConverter {
 
 		if (ReflectionUtils.isAssignableTo(source, targetType)) {
 			return source;
+		}
+
+		Optional<Method> inlineTypeUnboxMethod = findInlineTypeUnboxMethod(source) //
+				.filter(method -> method.getReturnType() == targetType);
+		if (inlineTypeUnboxMethod.isPresent()) {
+			return ReflectionUtils.invokeMethod(inlineTypeUnboxMethod.get(), source);
 		}
 
 		if (source instanceof String string) {

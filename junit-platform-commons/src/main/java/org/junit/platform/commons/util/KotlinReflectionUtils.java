@@ -14,6 +14,7 @@ import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.util.ReflectionUtils.EMPTY_CLASS_ARRAY;
 import static org.junit.platform.commons.util.ReflectionUtils.findMethod;
 import static org.junit.platform.commons.util.ReflectionUtils.isStatic;
+import static org.junit.platform.commons.util.ReflectionUtils.tryToGetMethod;
 import static org.junit.platform.commons.util.ReflectionUtils.tryToLoadClass;
 
 import java.lang.annotation.Annotation;
@@ -21,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -35,6 +37,8 @@ import org.junit.platform.commons.function.Try;
 public class KotlinReflectionUtils {
 
 	private static final String DEFAULT_IMPLS_CLASS_NAME = "DefaultImpls";
+
+	private static final String INLINE_TYPE_UNBOX_METHOD_NAME = "unbox-impl";
 
 	private static final @Nullable Class<? extends Annotation> kotlinMetadata;
 	private static final @Nullable Class<? extends Annotation> jvmInline;
@@ -166,6 +170,29 @@ public class KotlinReflectionUtils {
 	@API(status = INTERNAL, since = "6.1")
 	public static boolean isInstanceOfInlineType(@Nullable Object value) {
 		return jvmInline != null && value != null && value.getClass().getDeclaredAnnotation(jvmInline) != null;
+	}
+
+	/**
+	 * Find the compiler-generated {@code unbox-impl} method of the class of the
+	 * supplied value, if it is an instance of a Kotlin inline value class.
+	 *
+	 * <p>The returned method yields the underlying value in the representation
+	 * the Kotlin compiler uses for parameters of the inline value class type in
+	 * JVM method signatures, e.g. {@code String} or {@code long}. It does not
+	 * require {@code kotlin-reflect} to be present.
+	 *
+	 * @param value the value to inspect; may be {@code null}
+	 * @return the {@code unbox-impl} method; empty if the value is {@code null},
+	 * not an instance of an inline value class, or if no such method exists
+	 * @since 6.2
+	 */
+	@API(status = INTERNAL, since = "6.2")
+	public static Optional<Method> findInlineTypeUnboxMethod(@Nullable Object value) {
+		if (value == null || !isInstanceOfInlineType(value)) {
+			return Optional.empty();
+		}
+		return tryToGetMethod(value.getClass(), INLINE_TYPE_UNBOX_METHOD_NAME).toOptional() //
+				.filter(method -> !isStatic(method) && method.getReturnType() != void.class);
 	}
 
 	@API(status = INTERNAL, since = "6.1")
