@@ -40,7 +40,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
 			int parallelism = configurationParameters //
-					.get(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, this::parseParallelism) //
+					.get(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, value -> parseParallelism(value)) //
 					.orElseThrow(() -> new JUnitException("Configuration parameter '%s' must be set" //
 							.formatted(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME)));
 
@@ -56,7 +56,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 				KEEP_ALIVE_SECONDS, __ -> saturate);
 		}
 
-		private int parseParallelism(String value) {
+		private static int parseParallelism(String value) {
 			var parallelism = Integer.parseInt(value);
 			Preconditions.condition(parallelism >= 1, "parallelism must be positive");
 			return parallelism;
