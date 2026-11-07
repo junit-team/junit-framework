@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.ConfigurationParameters;
 
 /**
@@ -319,13 +320,78 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 		when(configParams.get("custom.class")).thenReturn(Optional.of("com.acme.ClassDoesNotExist"));
 
 		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
-		assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception.getCause()) //
+				.hasMessage("Could not instantiate strategy class: com.acme.ClassDoesNotExist");
+	}
+
+	@Test
+	void customStrategyThrowsExceptionWhenClassDoesNotImplementParallelExecutionConfigurationStrategy() {
+		when(configParams.get("custom.class")).thenReturn(Optional.of("java.lang.Object"));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception.getCause()) //
+				.hasMessage("Could not instantiate strategy class: java.lang.Object") //
+				.hasRootCauseMessage(
+					"java.lang.Object does not implement " + ParallelExecutionConfigurationStrategy.class);
+	}
+
+	@Test
+	void customStrategyThrowsExceptionWhenClassDoesNotInstantiate() {
+		when(configParams.get("custom.class")).thenReturn(
+			Optional.of(BrokenParallelExecutionConfigurationStrategyConstructor.class.getName()));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception.getCause()) //
+				.hasMessage("Could not instantiate strategy class: "
+						+ BrokenParallelExecutionConfigurationStrategyConstructor.class.getName()) //
+				.hasRootCauseMessage("this class is intentionally broken");
+	}
+
+	@Test
+	void customStrategyThrowsExceptionWhenClassDoesNotCreate() {
+		when(configParams.get("custom.class")).thenReturn(
+			Optional.of(BrokenParallelExecutionConfigurationStrategyMethod.class.getName()));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception) //
+				.hasMessage("Could not create configuration for strategy class: "
+						+ BrokenParallelExecutionConfigurationStrategyMethod.class.getName()) //
+				.hasRootCauseMessage("this method is intentionally broken");
 	}
 
 	static class CustomParallelExecutionConfigurationStrategy implements ParallelExecutionConfigurationStrategy {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
 			return new DefaultParallelExecutionConfiguration(1, 2, 3, 4, 5, __ -> true);
+		}
+	}
+
+	static class BrokenParallelExecutionConfigurationStrategyConstructor
+			implements ParallelExecutionConfigurationStrategy {
+
+		BrokenParallelExecutionConfigurationStrategyConstructor() {
+			throw new PreconditionViolationException("this class is intentionally broken");
+		}
+
+		@Override
+		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
+			return new DefaultParallelExecutionConfiguration(1, 2, 3, 4, 5, __ -> true);
+		}
+	}
+
+	static class BrokenParallelExecutionConfigurationStrategyMethod implements ParallelExecutionConfigurationStrategy {
+
+		@Override
+		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
+			throw new PreconditionViolationException("this method is intentionally broken");
 		}
 	}
 

@@ -135,24 +135,26 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	CUSTOM {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-			return configurationParameters.get(CONFIG_CUSTOM_CLASS_PROPERTY_NAME,
-				className -> loadConfigurationStrategy(className) //
-						.andThenTry(strategy -> strategy.createConfiguration(configurationParameters)) //
-						.getNonNullOrThrow(cause -> new JUnitException(
-							"Could not create configuration for strategy class: " + className, cause)))//
+			var strategy = configurationParameters //
+					.get(CONFIG_CUSTOM_CLASS_PROPERTY_NAME, className -> loadConfigurationStrategy(className)) //
 					.orElseThrow(() -> new JUnitException(CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " must be set"));
 
+			return Try.call(() -> strategy.createConfiguration(configurationParameters)) //
+					.getNonNullOrThrow(cause -> new JUnitException(
+						"Could not create configuration for strategy class: " + strategy.getClass().getName(), cause));
 		}
 
-		private Try<ParallelExecutionConfigurationStrategy> loadConfigurationStrategy(String className) {
+		private static ParallelExecutionConfigurationStrategy loadConfigurationStrategy(String className) {
 			return ReflectionSupport.tryToLoadClass(className) //
 					.andThenTry(strategyClass -> {
-						Preconditions.condition(
-							ParallelExecutionConfigurationStrategy.class.isAssignableFrom(strategyClass),
-							CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " does not implement "
-									+ ParallelExecutionConfigurationStrategy.class);
-						return (ParallelExecutionConfigurationStrategy) ReflectionSupport.newInstance(strategyClass);
-					});
+						Preconditions.condition( //
+							ParallelExecutionConfigurationStrategy.class.isAssignableFrom(strategyClass), //
+							() -> className + " does not implement " + ParallelExecutionConfigurationStrategy.class);
+						var instance = ReflectionSupport.newInstance(strategyClass);
+						return (ParallelExecutionConfigurationStrategy) instance;
+					})//
+					.getNonNullOrThrow(
+						cause -> new JUnitException("Could not instantiate strategy class: " + className, cause));
 		}
 	};
 
