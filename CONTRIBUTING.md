@@ -67,6 +67,7 @@ If you use AI tools while working on a contribution, we require the following:
   of the codebase without the aid of AI tools.
 - **Stay in the loop.**
   Any AI-generated content must be reviewed and edited by you before you submit it.
+  Moreover, Git commits must be authored by you and not attribute an AI tool as co-author.
 - **Comply with the [JUnit Contributor License Agreement](#junit-contributor-license-agreement).**
   Using AI tools does not change your obligations under the CLA. In particular, you
   remain responsible for ensuring that you have authored your contribution and have the
