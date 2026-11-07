@@ -122,8 +122,8 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 			return clampPositiveIntValue(maxPoolSize);
 		}
 
-		private static int clampPositiveIntValue(BigDecimal parallelism) {
-			return parallelism.max(BigDecimal.ONE).min(BigDecimal.valueOf(Integer.MAX_VALUE)).intValue();
+		private static int clampPositiveIntValue(BigDecimal value) {
+			return value.max(BigDecimal.ONE).min(BigDecimal.valueOf(Integer.MAX_VALUE)).intValue();
 		}
 	},
 
