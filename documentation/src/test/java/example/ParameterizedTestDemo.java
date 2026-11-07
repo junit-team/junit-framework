@@ -195,6 +195,25 @@ class ParameterizedTestDemo {
 	}
 	// end::simple_MethodSource_example[]
 
+	// tag::record_MethodSource_example[]
+	record FruitCase(String fruit, int expectedLength) {
+		@Override
+		public String toString() {
+			return fruit + " (length " + expectedLength + ")";
+		}
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("fruitCases")
+	void testWithSingleRecordArgument(FruitCase fruitCase) {
+		assertEquals(fruitCase.expectedLength(), fruitCase.fruit().length());
+	}
+
+	static Stream<FruitCase> fruitCases() {
+		return Stream.of(new FruitCase("apple", 5), new FruitCase("lemon", 5));
+	}
+	// end::record_MethodSource_example[]
+
 	// tag::simple_MethodSource_without_value_example[]
 	@ParameterizedTest
 	@MethodSource
