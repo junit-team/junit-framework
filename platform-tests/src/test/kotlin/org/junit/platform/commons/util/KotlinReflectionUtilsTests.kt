@@ -10,6 +10,7 @@
 
 package org.junit.platform.commons.util
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -45,6 +46,43 @@ class KotlinReflectionUtilsTests {
 
         assertFalse(KotlinReflectionUtils.isKotlinSuspendingFunction(method))
     }
+
+    @Test
+    fun findsUnboxMethodOfStringBackedInlineValueClass() {
+        val method = KotlinReflectionUtils.findInlineTypeUnboxMethod(StringBacked("value")).orElseThrow()
+
+        assertEquals(String::class.java, method.returnType)
+        assertEquals("value", ReflectionUtils.invokeMethod(method, StringBacked("value")))
+    }
+
+    @Test
+    fun findsUnboxMethodOfPrimitiveBackedInlineValueClass() {
+        val method = KotlinReflectionUtils.findInlineTypeUnboxMethod(LongBacked(42)).orElseThrow()
+
+        assertEquals(Long::class.javaPrimitiveType, method.returnType)
+        assertEquals(42L, ReflectionUtils.invokeMethod(method, LongBacked(42)))
+    }
+
+    @Test
+    fun doesNotFindUnboxMethodForValuesThatAreNotInstancesOfInlineValueClasses() {
+        assertTrue(KotlinReflectionUtils.findInlineTypeUnboxMethod(null).isEmpty)
+        assertTrue(KotlinReflectionUtils.findInlineTypeUnboxMethod("value").isEmpty)
+        assertTrue(KotlinReflectionUtils.findInlineTypeUnboxMethod(DataClass("value")).isEmpty)
+    }
+
+    @JvmInline
+    value class StringBacked(
+        val value: String
+    )
+
+    @JvmInline
+    value class LongBacked(
+        val value: Long
+    )
+
+    data class DataClass(
+        val value: String
+    )
 
     @Suppress("JUnitMalformedDeclaration")
     open class OpenTestMethodTestCase {
