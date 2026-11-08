@@ -5,7 +5,7 @@ assertj = "3.27.7"
 bnd = "7.4.0"
 checkstyle = "14.4.0"
 eclipse = "4.41.0"
-jackson = "3.2.4"
+jackson = "3.3.0"
 jacoco = "0.8.16"
 jmh = "1.37"
 junit4 = "4.13.2"
@@ -70,7 +70,7 @@ openTestReporting-cli = { module = "org.opentest4j.reporting:open-test-reporting
 openTestReporting-events = { module = "org.opentest4j.reporting:open-test-reporting-events", version.ref = "openTestReporting" }
 openTestReporting-tooling-core = { module = "org.opentest4j.reporting:open-test-reporting-tooling-core", version.ref = "openTestReporting" }
 openTestReporting-tooling-spi = { module = "org.opentest4j.reporting:open-test-reporting-tooling-spi", version.ref = "openTestReporting" }
-owasp-java-html-sanitizer = { module = "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer", version = "20261103.2" }
+owasp-java-html-sanitizer = { module = "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer", version = "20261107.1" }
 picocli = { module = "info.picocli:picocli", version = "4.7.7" }
 roseau-cli = { module = "io.github.alien-tools:roseau-cli", version = "0.7.0" }
 slf4j-julBinding = { module = "org.slf4j:slf4j-jdk14", version = "2.0.20" }
