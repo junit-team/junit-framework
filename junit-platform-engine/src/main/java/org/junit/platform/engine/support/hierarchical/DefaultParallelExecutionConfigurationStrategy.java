@@ -10,7 +10,6 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
-import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
 
@@ -19,6 +18,7 @@ import java.util.Locale;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.function.Try;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.ConfigurationParameters;
@@ -39,19 +39,35 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	FIXED {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-			int parallelism = configurationParameters.get(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME,
-				Integer::valueOf).orElseThrow(
-					() -> new JUnitException(
-						"Configuration parameter '%s' must be set".formatted(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME)));
+			int parallelism = configurationParameters //
+					.get(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME, value -> parseParallelism(value)) //
+					.orElseThrow(() -> new JUnitException("Configuration parameter '%s' must be set" //
+							.formatted(CONFIG_FIXED_PARALLELISM_PROPERTY_NAME)));
 
-			int maxPoolSize = configurationParameters.get(CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME,
-				Integer::valueOf).orElse(parallelism + 256);
+			int maxPoolSize = configurationParameters //
+					.get(CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME, value -> parseMaxPoolSize(value, parallelism)) //
+					.orElseGet(() -> defaultMaxPoolSize(parallelism));
 
-			boolean saturate = configurationParameters.get(CONFIG_FIXED_SATURATE_PROPERTY_NAME,
-				Boolean::valueOf).orElse(CONFIG_FIXED_SATURATE_DEFAULT);
+			boolean saturate = configurationParameters //
+					.get(CONFIG_FIXED_SATURATE_PROPERTY_NAME, Boolean::valueOf) //
+					.orElse(CONFIG_FIXED_SATURATE_DEFAULT);
 
 			return new DefaultParallelExecutionConfiguration(parallelism, parallelism, maxPoolSize, parallelism,
 				KEEP_ALIVE_SECONDS, __ -> saturate);
+		}
+
+		private static int parseParallelism(String value) {
+			var parallelism = Integer.parseInt(value);
+			Preconditions.condition(parallelism >= 1, "parallelism must be positive");
+			return parallelism;
+		}
+
+		private static Integer parseMaxPoolSize(String value, int parallelism) {
+			var maxPoolSize = Integer.parseInt(value);
+			Preconditions.condition(maxPoolSize >= 1, "max pool size must be positive");
+			Preconditions.condition(maxPoolSize >= parallelism,
+				"max pool size must be greater than or equal to the parallelism");
+			return maxPoolSize;
 		}
 	},
 
@@ -63,29 +79,51 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	DYNAMIC {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-			BigDecimal factor = configurationParameters.get(CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME,
-				BigDecimal::new).orElse(BigDecimal.valueOf(CONFIG_DYNAMIC_FACTOR_DEFAULT));
+			var factor = configurationParameters //
+					.get(CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME, this::parseDynamicFactor) //
+					.orElse(BigDecimal.valueOf(CONFIG_DYNAMIC_FACTOR_DEFAULT));
 
-			Preconditions.condition(factor.compareTo(BigDecimal.ZERO) > 0,
-				() -> "Factor '%s' specified via configuration parameter '%s' must be greater than 0".formatted(factor,
-					CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME));
+			int parallelism = calculateParallelism(factor);
 
-			int parallelism = Math.max(1,
-				factor.multiply(BigDecimal.valueOf(Runtime.getRuntime().availableProcessors())).intValue());
+			int maxPoolSize = configurationParameters //
+					.get(CONFIG_DYNAMIC_MAX_POOL_SIZE_FACTOR_PROPERTY_NAME, this::parseDynamicMaxPoolSizeFactor) //
+					.map(maxPoolSizeFactor -> calculateMaxPoolSize(maxPoolSizeFactor, parallelism)) //
+					.orElseGet(() -> defaultMaxPoolSize(parallelism));
 
-			int maxPoolSize = configurationParameters.get(CONFIG_DYNAMIC_MAX_POOL_SIZE_FACTOR_PROPERTY_NAME,
-				BigDecimal::new).map(maxPoolSizeFactor -> {
-					Preconditions.condition(maxPoolSizeFactor.compareTo(BigDecimal.ONE) >= 0,
-						() -> "Factor '%s' specified via configuration parameter '%s' must be greater than or equal to 1".formatted(
-							maxPoolSizeFactor, CONFIG_DYNAMIC_MAX_POOL_SIZE_FACTOR_PROPERTY_NAME));
-					return maxPoolSizeFactor.multiply(BigDecimal.valueOf(parallelism)).intValue();
-				}).orElseGet(() -> 256 + parallelism);
-
-			boolean saturate = configurationParameters.get(CONFIG_DYNAMIC_SATURATE_PROPERTY_NAME,
-				Boolean::valueOf).orElse(true);
+			boolean saturate = configurationParameters //
+					.get(CONFIG_DYNAMIC_SATURATE_PROPERTY_NAME, Boolean::valueOf) //
+					.orElse(true);
 
 			return new DefaultParallelExecutionConfiguration(parallelism, parallelism, maxPoolSize, parallelism,
 				KEEP_ALIVE_SECONDS, __ -> saturate);
+		}
+
+		private BigDecimal parseDynamicFactor(String value) {
+			var dynamicFactor = new BigDecimal(value);
+			Preconditions.condition(dynamicFactor.compareTo(BigDecimal.ZERO) > 0,
+				"dynamic factor must be greater than zero");
+			return dynamicFactor;
+		}
+
+		private static int calculateParallelism(BigDecimal factor) {
+			var availableProcessors = BigDecimal.valueOf(Runtime.getRuntime().availableProcessors());
+			return clampPositiveIntValue(factor.multiply(availableProcessors));
+		}
+
+		private BigDecimal parseDynamicMaxPoolSizeFactor(String value) {
+			var maxPoolSizeFactor = new BigDecimal(value);
+			Preconditions.condition(maxPoolSizeFactor.compareTo(BigDecimal.ONE) >= 0,
+				"max pool size factor must be greater than or equal to one");
+			return maxPoolSizeFactor;
+		}
+
+		private static int calculateMaxPoolSize(BigDecimal maxPoolSizeFactor, int parallelism) {
+			var maxPoolSize = BigDecimal.valueOf(parallelism).multiply(maxPoolSizeFactor);
+			return clampPositiveIntValue(maxPoolSize);
+		}
+
+		private static int clampPositiveIntValue(BigDecimal value) {
+			return value.max(BigDecimal.ONE).min(BigDecimal.valueOf(Integer.MAX_VALUE)).intValue();
 		}
 	},
 
@@ -97,19 +135,26 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 	CUSTOM {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
-			String className = configurationParameters.get(CONFIG_CUSTOM_CLASS_PROPERTY_NAME).orElseThrow(
-				() -> new JUnitException(CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " must be set"));
+			var strategy = configurationParameters //
+					.get(CONFIG_CUSTOM_CLASS_PROPERTY_NAME, className -> loadConfigurationStrategy(className)) //
+					.orElseThrow(() -> new JUnitException(CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " must be set"));
+
+			return Try.call(() -> strategy.createConfiguration(configurationParameters)) //
+					.getNonNullOrThrow(cause -> new JUnitException(
+						"Could not create configuration for strategy class: " + strategy.getClass().getName(), cause));
+		}
+
+		private static ParallelExecutionConfigurationStrategy loadConfigurationStrategy(String className) {
 			return ReflectionSupport.tryToLoadClass(className) //
 					.andThenTry(strategyClass -> {
-						Preconditions.condition(
-							ParallelExecutionConfigurationStrategy.class.isAssignableFrom(strategyClass),
-							CONFIG_CUSTOM_CLASS_PROPERTY_NAME + " does not implement "
-									+ ParallelExecutionConfigurationStrategy.class);
-						return (ParallelExecutionConfigurationStrategy) ReflectionSupport.newInstance(strategyClass);
-					}) //
-					.andThenTry(strategy -> requireNonNull(strategy).createConfiguration(configurationParameters)) //
-					.getNonNullOrThrow(cause -> new JUnitException(
-						"Could not create configuration for strategy class: " + className, cause));
+						Preconditions.condition( //
+							ParallelExecutionConfigurationStrategy.class.isAssignableFrom(strategyClass), //
+							() -> className + " does not implement " + ParallelExecutionConfigurationStrategy.class);
+						var instance = ReflectionSupport.newInstance(strategyClass);
+						return (ParallelExecutionConfigurationStrategy) instance;
+					})//
+					.getNonNullOrThrow(
+						cause -> new JUnitException("Could not instantiate strategy class: " + className, cause));
 		}
 	};
 
@@ -250,4 +295,7 @@ public enum DefaultParallelExecutionConfigurationStrategy implements ParallelExe
 		return valueOf(CONFIG_STRATEGY_DEFAULT.toUpperCase(Locale.ROOT));
 	}
 
+	private static int defaultMaxPoolSize(int parallelism) {
+		return parallelism > Integer.MAX_VALUE - 256 ? Integer.MAX_VALUE : parallelism + 256;
+	}
 }

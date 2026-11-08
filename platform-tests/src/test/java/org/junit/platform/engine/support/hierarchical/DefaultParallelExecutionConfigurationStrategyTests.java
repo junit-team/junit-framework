@@ -10,12 +10,16 @@
 
 package org.junit.platform.engine.support.hierarchical;
 
+import static java.math.MathContext.DECIMAL128;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +27,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.ConfigurationParameters;
 
 /**
  * @since 1.3
  */
 class DefaultParallelExecutionConfigurationStrategyTests {
+
+	// Ensures we can calculate the factor for the desired dynamic parallelism
+	// for any number of cpu values.
+	static final MathContext DECIMAL128_ROUND_UP = new MathContext(DECIMAL128.getPrecision(), RoundingMode.UP);
 
 	final ConfigurationParameters configParams = mock();
 
@@ -41,11 +50,10 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	void dynamicStrategyThrowsExceptionWhenMaxPoolSizeFactorIsLessThanOne() {
 		when(configParams.get("dynamic.max-pool-size-factor")).thenReturn(Optional.of("0.5"));
 
-		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
 		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
 
-		assertThat(exception).hasMessage(
-			"Factor '0.5' specified via configuration parameter 'dynamic.max-pool-size-factor' must be greater than or equal to 1");
+		assertThat(exception).hasRootCauseMessage("max pool size factor must be greater than or equal to one");
 	}
 
 	@Test
@@ -140,19 +148,65 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	}
 
 	@Test
-	void fixedStrategyThrowsExceptionWhenPropertyIsNotPresent() {
+	void fixedStrategyThrowsExceptionWhenParallelismIsNotPresent() {
 		when(configParams.get("fixed.parallelism")).thenReturn(Optional.empty());
 
 		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasMessage("Configuration parameter 'fixed.parallelism' must be set");
+	}
+
+	@Test
+	void fixedStrategyThrowsExceptionWhenParallelismIsNotAnInteger() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("foo"));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
 		assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
 	}
 
 	@Test
-	void fixedStrategyThrowsExceptionWhenPropertyIsNotAnInteger() {
-		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("foo"));
+	void fixedStrategyThrowsExceptionWhenParallelismIsNotPositive() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("0"));
 
-		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
-		assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasRootCauseMessage("parallelism must be positive");
+	}
+
+	@Test
+	void fixedStrategyThrowsExceptionWhenThreadPoolIsNotPositive() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("2"));
+		when(configParams.get("fixed.max-pool-size")).thenReturn(Optional.of("0"));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasRootCauseMessage("max pool size must be positive");
+	}
+
+	@Test
+	void fixedStrategyThrowsExceptionWhenThreadPoolIsSmallerThanParallelism() {
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of("2"));
+		when(configParams.get("fixed.max-pool-size")).thenReturn(Optional.of("1"));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception).hasRootCauseMessage("max pool size must be greater than or equal to the parallelism");
+	}
+
+	@Test
+	void fixedStrategyLimitsDefaultMaxPoolSizeToPositiveInteger() {
+		int desiredParallelism = Integer.MAX_VALUE - 100;
+		when(configParams.get("fixed.parallelism")).thenReturn(Optional.of(String.valueOf(desiredParallelism)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.FIXED;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(desiredParallelism);
+		assertThat(configuration.getMaxPoolSize()).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test
@@ -209,6 +263,51 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 	}
 
 	@Test
+	void dynamicStrategyLimitParallelismToPositiveInteger() {
+		long desiredParallelism = 2L * Integer.MAX_VALUE;
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		var factor = BigDecimal.valueOf(desiredParallelism) //
+				.divide(BigDecimal.valueOf(availableProcessors), DECIMAL128_ROUND_UP);
+		when(configParams.get("dynamic.factor")).thenReturn(Optional.of(String.valueOf(factor)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@Test
+	void dynamicStrategyLimitMaxPoolSizeToPositiveInteger() {
+		long desiredMaxCorePoolSize = 2L * Integer.MAX_VALUE;
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		var maxPoolSizeFactor = BigDecimal.valueOf(desiredMaxCorePoolSize) //
+				.divide(BigDecimal.valueOf(availableProcessors), DECIMAL128_ROUND_UP);
+		when(configParams.get("dynamic.max-pool-size-factor")).thenReturn(
+			Optional.of(String.valueOf(maxPoolSizeFactor)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(availableProcessors);
+		assertThat(configuration.getMaxPoolSize()).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@Test
+	void dynamicStrategyLimitsDefaultMaxPoolSizeToPositiveInteger() {
+		int desiredParallelism = Integer.MAX_VALUE - 100;
+		var availableProcessors = BigDecimal.valueOf(Runtime.getRuntime().availableProcessors());
+		var factor = BigDecimal.valueOf(desiredParallelism) //
+				.divide(availableProcessors, DECIMAL128_ROUND_UP);
+		when(configParams.get("dynamic.factor")).thenReturn(Optional.of(String.valueOf(factor)));
+
+		var strategy = DefaultParallelExecutionConfigurationStrategy.DYNAMIC;
+		var configuration = strategy.createConfiguration(configParams);
+
+		assertThat(configuration.getParallelism()).isEqualTo(desiredParallelism);
+		assertThat(configuration.getMaxPoolSize()).isEqualTo(Integer.MAX_VALUE);
+	}
+
+	@Test
 	void customStrategyThrowsExceptionWhenPropertyIsNotPresent() {
 		when(configParams.get("custom.class")).thenReturn(Optional.empty());
 
@@ -221,13 +320,78 @@ class DefaultParallelExecutionConfigurationStrategyTests {
 		when(configParams.get("custom.class")).thenReturn(Optional.of("com.acme.ClassDoesNotExist"));
 
 		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
-		assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception.getCause()) //
+				.hasMessage("Could not instantiate strategy class: com.acme.ClassDoesNotExist");
+	}
+
+	@Test
+	void customStrategyThrowsExceptionWhenClassDoesNotImplementParallelExecutionConfigurationStrategy() {
+		when(configParams.get("custom.class")).thenReturn(Optional.of("java.lang.Object"));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception.getCause()) //
+				.hasMessage("Could not instantiate strategy class: java.lang.Object") //
+				.hasRootCauseMessage(
+					"java.lang.Object does not implement " + ParallelExecutionConfigurationStrategy.class);
+	}
+
+	@Test
+	void customStrategyThrowsExceptionWhenClassDoesNotInstantiate() {
+		when(configParams.get("custom.class")).thenReturn(
+			Optional.of(BrokenParallelExecutionConfigurationStrategyConstructor.class.getName()));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception.getCause()) //
+				.hasMessage("Could not instantiate strategy class: "
+						+ BrokenParallelExecutionConfigurationStrategyConstructor.class.getName()) //
+				.hasRootCauseMessage("this class is intentionally broken");
+	}
+
+	@Test
+	void customStrategyThrowsExceptionWhenClassDoesNotCreate() {
+		when(configParams.get("custom.class")).thenReturn(
+			Optional.of(BrokenParallelExecutionConfigurationStrategyMethod.class.getName()));
+
+		ParallelExecutionConfigurationStrategy strategy = DefaultParallelExecutionConfigurationStrategy.CUSTOM;
+		var exception = assertThrows(JUnitException.class, () -> strategy.createConfiguration(configParams));
+
+		assertThat(exception) //
+				.hasMessage("Could not create configuration for strategy class: "
+						+ BrokenParallelExecutionConfigurationStrategyMethod.class.getName()) //
+				.hasRootCauseMessage("this method is intentionally broken");
 	}
 
 	static class CustomParallelExecutionConfigurationStrategy implements ParallelExecutionConfigurationStrategy {
 		@Override
 		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
 			return new DefaultParallelExecutionConfiguration(1, 2, 3, 4, 5, __ -> true);
+		}
+	}
+
+	static class BrokenParallelExecutionConfigurationStrategyConstructor
+			implements ParallelExecutionConfigurationStrategy {
+
+		BrokenParallelExecutionConfigurationStrategyConstructor() {
+			throw new PreconditionViolationException("this class is intentionally broken");
+		}
+
+		@Override
+		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
+			return new DefaultParallelExecutionConfiguration(1, 2, 3, 4, 5, __ -> true);
+		}
+	}
+
+	static class BrokenParallelExecutionConfigurationStrategyMethod implements ParallelExecutionConfigurationStrategy {
+
+		@Override
+		public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters configurationParameters) {
+			throw new PreconditionViolationException("this method is intentionally broken");
 		}
 	}
 

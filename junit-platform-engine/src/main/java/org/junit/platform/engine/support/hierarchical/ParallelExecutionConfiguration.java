@@ -37,28 +37,39 @@ public interface ParallelExecutionConfiguration {
 	/**
 	 * Get the parallelism to be used.
 	 *
-	 * @see ForkJoinPool#getParallelism()
+	 * @return the parallelism to be used; must be a positive number.
 	 */
 	int getParallelism();
 
 	/**
 	 * Get the minimum number of runnable threads to be used.
+	 *
+	 * @return the minimum number of runnable threads to be used.
 	 */
 	int getMinimumRunnable();
 
 	/**
 	 * Get the maximum thread pool size to be used.
+	 *
+	 * @return the maximum thread pool size to be used; must be greater than
+	 * or equal to {@link #getParallelism()}.
 	 */
 	int getMaxPoolSize();
 
 	/**
 	 * Get the core thread pool size to be used.
+	 *
+	 * @return the core thread pool size to be used; must be a non-negative
+	 * number.
 	 */
 	int getCorePoolSize();
 
 	/**
 	 * Get the number of seconds for which inactive threads should be kept alive
 	 * before terminating them and shrinking the thread pool.
+	 *
+	 * @return the number of seconds for which inactive threads should be kept
+	 * alive; must be a non-negative number.
 	 */
 	int getKeepAliveSeconds();
 
