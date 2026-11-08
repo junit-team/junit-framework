@@ -16,7 +16,9 @@ jobs:
         env:
           CCHK_AI_ATTRIBUTION: forbid
           CCHK_CONVENTIONAL_COMMITS: false
-          CCHK_IGNORE_AUTHORS: renovate[bot]
+          # Disable default length rules
+          CCHK_SUBJECT_MIN_LENGTH: 0
+          CCHK_SUBJECT_MAX_LENGTH: 10000
         with:
           message: true
           branch: false
