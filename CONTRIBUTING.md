@@ -50,6 +50,29 @@ Please add the following lines to your pull request description:
 I hereby agree to the terms of the JUnit Contributor License Agreement.
 ```
 
+## AI Usage
+
+JUnit is developed and maintained by people. We read every issue, pull request, and
+discussion, and we appreciate it when you take the time to communicate with us in your
+own words. Therefore, **please do not use AI to write issues, pull request descriptions,
+comments, or discussion posts.**
+
+If you use AI tools while working on a contribution, we require the following:
+
+- **Disclose all AI usage.**
+  State in your pull request description to what extent your work was AI-assisted, for
+  example, whether an AI tool generated code that you subsequently reviewed and edited.
+- **Fully understand your changes.**
+  You must be able to explain what your changes do and how they interact with the rest
+  of the codebase without the aid of AI tools.
+- **Stay in the loop.**
+  Any AI-generated content must be reviewed and edited by you before you submit it.
+  Moreover, Git commits must be authored by you and not attribute an AI tool as co-author.
+- **Comply with the [JUnit Contributor License Agreement](#junit-contributor-license-agreement).**
+  Using AI tools does not change your obligations under the CLA. In particular, you
+  remain responsible for ensuring that you have authored your contribution and have the
+  necessary rights to submit it.
+
 ## Coding Conventions
 
 ### Naming Conventions

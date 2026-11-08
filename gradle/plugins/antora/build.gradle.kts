@@ -10,7 +10,7 @@ dependencies {
 	constraints {
 		implementation("com.fasterxml.jackson.core:jackson-databind") {
 			version {
-				require("2.22.4")
+				require("2.23.0")
 			}
 			because("Workaround for CVE-2026-68497")
 		}

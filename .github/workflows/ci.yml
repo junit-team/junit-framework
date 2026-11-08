@@ -55,6 +55,13 @@ jobs:
       contents: read
       security-events: write
 
+  ai-attribution:
+    name: Forbid AI-attributed commits
+    if: github.event_name == 'pull_request'
+    uses: $/.github/workflows/_forbid-ai-attribution.yml
+    permissions:
+      pull-requests: read
+
   Publish:
     if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework'
     needs: [ Build ]
@@ -67,7 +74,7 @@ jobs:
 
   status:
     name: Status
-    needs: [ Build, Cross-Version, Reproducibility, CodeQL, zizmor, Publish ]
+    needs: [ Build, Cross-Version, Reproducibility, CodeQL, zizmor, ai-attribution, Publish ]
     if: always()
     runs-on: ubuntu-slim
     steps:

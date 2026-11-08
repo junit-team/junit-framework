@@ -1,0 +1,24 @@
+name: Forbid AI-attributed commits
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  check:
+    name: Check commits
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: commit-check/commit-check-action@382788bc42fde36f387a6b62210c8a4a29c24f07 # v2.18.3
+        env:
+          CCHK_AI_ATTRIBUTION: forbid
+          CCHK_CONVENTIONAL_COMMITS: false
+          # Disable default length rules
+          CCHK_SUBJECT_MIN_LENGTH: 0
+          CCHK_SUBJECT_MAX_LENGTH: 10000
+        with:
+          message: true
+          branch: false
