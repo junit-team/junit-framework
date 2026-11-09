@@ -131,11 +131,6 @@ public class KotlinReflectionUtils {
 				&& clazz.getDeclaredAnnotation(kotlinMetadata) != null;
 	}
 
-	@API(status = INTERNAL, since = "6.1")
-	public static boolean isKotlinReflectPresent() {
-		return kotlinReflectPresent;
-	}
-
 	public static Class<?> getKotlinSuspendingFunctionReturnType(Method method) {
 		requireKotlinReflect(method);
 		return KotlinFunctionUtils.getReturnType(method);
@@ -168,12 +163,22 @@ public class KotlinReflectionUtils {
 		return jvmInline != null && value != null && value.getClass().getDeclaredAnnotation(jvmInline) != null;
 	}
 
+	public static boolean isInlineTypeAssignableTo(Object value, Class<?> targetType) {
+		requireKotlinReflect(value);
+		return KotlinFunctionUtils.isInlineTypeAssignableTo(value, targetType);
+	}
+
 	@API(status = INTERNAL, since = "6.1")
 	public static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target,
 			@Nullable Object... args) {
 		requireKotlinReflect(method);
 		return KotlinFunctionUtils.invokeKotlinFunction(method, target, args);
 	}
+
+	private static void requireKotlinReflect(Object value) {
+		requireDependency(value, kotlinReflectPresent, "org.jetbrains.kotlin:kotlin-reflect");
+	}
+
 
 	private static void requireKotlinReflect(Method method) {
 		requireDependency(method, kotlinReflectPresent, "org.jetbrains.kotlin:kotlin-reflect");
@@ -187,6 +192,13 @@ public class KotlinReflectionUtils {
 		Preconditions.condition(condition,
 			() -> ("Kotlin suspending function [%s] requires %s to be on the classpath or module path. "
 					+ "Please add a corresponding dependency.").formatted(method.toGenericString(),
+						dependencyNotation));
+	}
+
+	private static void requireDependency(Object value, boolean condition, String dependencyNotation) {
+		Preconditions.condition(condition,
+			() -> ("Kotlin value [%s] requires %s to be on the classpath or module path. "
+					+ "Please add a corresponding dependency.").formatted(value.getClass(),
 						dependencyNotation));
 	}
 

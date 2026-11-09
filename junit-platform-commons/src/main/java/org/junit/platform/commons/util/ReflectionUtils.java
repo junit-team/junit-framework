@@ -464,10 +464,15 @@ public final class ReflectionUtils {
 		Preconditions.notNull(targetType, "target type must not be null");
 
 		if (obj == null) {
+			// TODO: What about KType::isMarkedNullable?
 			return !targetType.isPrimitive();
 		}
 
 		if (targetType.isInstance(obj)) {
+			return true;
+		}
+
+		if (KotlinReflectionUtils.isInstanceOfInlineType(obj) && KotlinReflectionUtils.isInlineTypeAssignableTo(obj, targetType)) {
 			return true;
 		}
 

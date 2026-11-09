@@ -11,6 +11,7 @@
 package org.junit.platform.commons.util;
 
 import static kotlin.jvm.JvmClassMappingKt.getJavaClass;
+import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 import static kotlin.reflect.full.KCallables.callSuspendBy;
 import static kotlin.reflect.jvm.KCallablesJvm.isAccessible;
 import static kotlin.reflect.jvm.KCallablesJvm.setAccessible;
@@ -33,8 +34,10 @@ import org.junit.platform.commons.JUnitException;
 
 import kotlin.Unit;
 import kotlin.coroutines.EmptyCoroutineContext;
+import kotlin.reflect.KCallable;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
 class KotlinFunctionUtils {
@@ -132,5 +135,22 @@ class KotlinFunctionUtils {
 	}
 
 	private KotlinFunctionUtils() {
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean isInlineTypeAssignableTo(Object value, Class<?> targetType) {
+		var kotlinClass = getKotlinClass(value.getClass());
+		Preconditions.condition(kotlinClass.isValue(), "value must be a value class");
+		return kotlinClass.getMembers()
+				.stream()
+				// By definition value classes only have one property
+				.filter(KProperty.class::isInstance)
+				.findFirst()
+				.map(KCallable::getReturnType)
+				.map(ReflectJvmMapping::getJavaType)
+				.filter(Class.class::isInstance)
+				.map(Class.class::cast)
+				.map(targetType::isAssignableFrom)
+				.orElse(false);
 	}
 }

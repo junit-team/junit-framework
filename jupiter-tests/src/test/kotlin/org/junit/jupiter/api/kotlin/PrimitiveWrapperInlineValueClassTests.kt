@@ -11,40 +11,45 @@
 package org.junit.jupiter.api.kotlin
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.params.ParameterizedClass
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 /**
  * Tests for primitive-wrapper inline value classes.
- *
- * Currently disabled: These fail because Kotlin compiles them to primitives
- * (UInt→int, UserId→long), causing JUnit's type validation to fail before
- * reaching the invocation logic.
- *
- * Supporting these would require modifications to JUnit's core type validation system.
- *
- * @see <a href="https://github.com/junit-team/junit-framework/issues/5081">Issue #5081</a>
  */
-@Disabled("Primitive-wrapper inline value classes are not yet supported")
-class PrimitiveWrapperInlineValueClassTests {
+@ParameterizedClass
+@MethodSource("uintProvider")
+class PrimitiveWrapperInlineValueClassTests(value: UInt) {
+
     @MethodSource("uintProvider")
     @ParameterizedTest
+    @JvmName("testUInt")
     fun testUInt(value: UInt) {
         assertEquals(42u, value)
     }
 
     @MethodSource("userIdProvider")
     @ParameterizedTest
+    @JvmName("testUserId")
     fun testUserId(userId: UserId) {
         assertEquals(123L, userId.value)
     }
 
     @MethodSource("emailProvider")
     @ParameterizedTest
+    @JvmName("testEmail")
     fun testEmail(email: Email) {
         assertEquals("test@example.com", email.value)
+    }
+
+    @MethodSource("subscriptionProvider")
+    @ParameterizedTest
+    @JvmName("testSubscription")
+    fun testSubscription(subscription: Subscription?) {
+        assertNull(subscription)
     }
 
     companion object {
@@ -56,6 +61,9 @@ class PrimitiveWrapperInlineValueClassTests {
 
         @JvmStatic
         fun emailProvider() = listOf(Arguments.of(Email("test@example.com")))
+
+        @JvmStatic
+        fun subscriptionProvider() = listOf(Arguments.of(null))
     }
 }
 
@@ -67,4 +75,9 @@ value class UserId(
 @JvmInline
 value class Email(
     val value: String
+)
+
+@JvmInline
+value class Subscription(
+    val value: Boolean
 )

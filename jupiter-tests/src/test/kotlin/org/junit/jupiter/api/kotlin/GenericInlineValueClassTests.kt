@@ -20,14 +20,17 @@ import org.junit.jupiter.params.provider.MethodSource
  * These work because they compile to Object in JVM, bypassing strict type validation.
  */
 class GenericInlineValueClassTests {
+
     @MethodSource("resultProvider")
     @ParameterizedTest
+    @JvmName("testResult")
     fun testResult(result: Result<String>) {
         assertEquals("success", result.getOrThrow())
     }
 
     @MethodSource("multipleResultsProvider")
     @ParameterizedTest
+    @JvmName("testMultipleResults")
     fun testMultipleResults(
         result1: Result<String>,
         result2: Result<Int>
@@ -38,12 +41,14 @@ class GenericInlineValueClassTests {
 
     @MethodSource("nullableResultProvider")
     @ParameterizedTest
+    @JvmName("testNullableResult")
     fun testNullableResult(result: Result<String>?) {
         assertEquals("test", result?.getOrNull())
     }
 
     @MethodSource("customGenericProvider")
     @ParameterizedTest
+    @JvmName("testCustomGenericContainer")
     fun testCustomGenericContainer(container: Container<String>) {
         assertEquals("content", container.value)
     }
