@@ -318,7 +318,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			// Awaits evaluation and uses the stored value if it was not null
 			// this ensures we replace both null and absent values.
 			// Otherwise, another thread won the race but failed to insert a
-			// non-null value. If so we try again.
+			// non-null value. If so, we try again.
 			Object storedResult = storedValue.evaluate();
 			if (storedResult != null) {
 				return storedResult;
