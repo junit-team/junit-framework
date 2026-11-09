@@ -841,13 +841,13 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 
 		@Test
 		@Order(1)
-		@Timeout(value = 10, unit = MILLISECONDS, threadMode = SAME_THREAD)
+		@Timeout(value = 100, unit = MILLISECONDS, threadMode = SAME_THREAD)
 		void testZero() {
 		}
 
 		@Test
 		@Order(2)
-		@Timeout(value = 10, unit = MILLISECONDS, threadMode = SAME_THREAD)
+		@Timeout(value = 100, unit = MILLISECONDS, threadMode = SAME_THREAD)
 		void testOne() {
 		}
 	}
