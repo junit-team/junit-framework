@@ -11,16 +11,19 @@
 package org.junit.platform.commons.util;
 
 import static kotlin.jvm.JvmClassMappingKt.getJavaClass;
+import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 import static kotlin.reflect.full.KCallables.callSuspendBy;
 import static kotlin.reflect.jvm.KCallablesJvm.isAccessible;
 import static kotlin.reflect.jvm.KCallablesJvm.setAccessible;
 import static kotlin.reflect.jvm.KTypesJvm.getJvmErasure;
 import static kotlin.reflect.jvm.ReflectJvmMapping.getJavaType;
 import static kotlinx.coroutines.BuildersKt.runBlocking;
+import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.commons.util.ReflectionUtils.EMPTY_CLASS_ARRAY;
 import static org.junit.platform.commons.util.ReflectionUtils.getUnderlyingCause;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -70,6 +73,15 @@ class KotlinFunctionUtils {
 	static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target, @Nullable Object[] args) {
 		try {
 			return invokeKotlinFunction(getKotlinFunction(method), target, args);
+		}
+		catch (InterruptedException e) {
+			throw throwAsUncheckedException(e);
+		}
+	}
+
+	static <T> T invokeKotlinConstructor(Constructor<T> constructor, @Nullable Object[] args) {
+		try {
+			return invokeKotlinFunction(getKotlinFunction(constructor), null, args);
 		}
 		catch (InterruptedException e) {
 			throw throwAsUncheckedException(e);
@@ -129,6 +141,18 @@ class KotlinFunctionUtils {
 	private static KFunction<?> getKotlinFunction(Method method) {
 		return Preconditions.notNull(ReflectJvmMapping.getKotlinFunction(method),
 			() -> "Failed to get Kotlin function for method: " + method);
+	}
+
+	private static <T> KFunction<T> getKotlinFunction(Constructor<T> constructor) {
+		return Preconditions.notNull(ReflectJvmMapping.getKotlinFunction(constructor),
+			() -> "Failed to get Kotlin function for constructor: " + constructor);
+	}
+
+	static <T> KFunction<T> getKotlinConstructor(Class<T> clazz) {
+		var constructors = getKotlinClass(clazz).getConstructors();
+		Preconditions.condition(constructors.size() == 1,
+			() -> "Class [%s] must declare a single constructor".formatted(clazz.getName()));
+		return getOnlyElement(constructors);
 	}
 
 	private KotlinFunctionUtils() {

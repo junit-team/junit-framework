@@ -24,6 +24,7 @@ public class Projects {
 	public static final String JUNIT_START = "junit-start";
 	public static final String JUPITER_STARTER = "jupiter-starter";
 	public static final String KOTLIN_COROUTINES = "kotlin-coroutines";
+	public static final String KOTLIN_INLINE_VALUE_TYPES = "kotlin-inline-value-types";
 	public static final String MAVEN_SUREFIRE_COMPATIBILITY = "maven-surefire-compatibility";
 	public static final String MAVEN_JUNIT_PLATFORM_CONFIGURATION_PROCESSOR = "maven-junit-platform-configuration-processor";
 	public static final String MEMORY_CLEANUP = "memory-cleanup";

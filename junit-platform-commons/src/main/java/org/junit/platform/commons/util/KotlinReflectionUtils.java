@@ -10,6 +10,7 @@
 
 package org.junit.platform.commons.util;
 
+import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.util.ReflectionUtils.EMPTY_CLASS_ARRAY;
 import static org.junit.platform.commons.util.ReflectionUtils.findMethod;
@@ -17,14 +18,20 @@ import static org.junit.platform.commons.util.ReflectionUtils.isStatic;
 import static org.junit.platform.commons.util.ReflectionUtils.tryToLoadClass;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.function.Try;
+
+import kotlin.reflect.KCallable;
+import kotlin.reflect.KProperty;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 
 /**
  * Internal Kotlin-specific reflection utilities
@@ -131,11 +138,6 @@ public class KotlinReflectionUtils {
 				&& clazz.getDeclaredAnnotation(kotlinMetadata) != null;
 	}
 
-	@API(status = INTERNAL, since = "6.1")
-	public static boolean isKotlinReflectPresent() {
-		return kotlinReflectPresent;
-	}
-
 	public static Class<?> getKotlinSuspendingFunctionReturnType(Method method) {
 		requireKotlinReflect(method);
 		return KotlinFunctionUtils.getReturnType(method);
@@ -156,6 +158,15 @@ public class KotlinReflectionUtils {
 		return KotlinFunctionUtils.getParameterTypes(method);
 	}
 
+	@API(status = INTERNAL, since = "6.2")
+	public static <T> Constructor<T> getKotlinConstructor(Class<T> clazz) {
+		requireKotlinReflect(clazz);
+		var constructor = KotlinFunctionUtils.getKotlinConstructor(clazz);
+		var javaConstructor = ReflectJvmMapping.getJavaConstructor(constructor);
+		return Preconditions.notNull(javaConstructor,
+			() -> "Failed to get constructor for Kotlin constructor of: " + clazz);
+	}
+
 	public static @Nullable Object invokeKotlinSuspendingFunction(Method method, @Nullable Object target,
 			@Nullable Object[] args) {
 		requireKotlinReflect(method);
@@ -168,6 +179,26 @@ public class KotlinReflectionUtils {
 		return jvmInline != null && value != null && value.getClass().getDeclaredAnnotation(jvmInline) != null;
 	}
 
+	@API(status = INTERNAL, since = "6.2")
+	public static boolean isInlineTypeAssignableTo(@Nullable Object value, Class<?> targetType) {
+		if (value == null || !isInstanceOfInlineType(value)) {
+			return false;
+		}
+		requireKotlinReflect(value);
+		var kotlinClass = getKotlinClass(value.getClass());
+		Preconditions.condition(kotlinClass.isValue(), "value must be a value class");
+		return kotlinClass.getMembers().stream() //
+				.filter(KProperty.class::isInstance) //
+				// By definition value classes only have one property
+				.findFirst() //
+				.map(KCallable::getReturnType) //
+				.map(ReflectJvmMapping::getJavaType) //
+				.filter(Class.class::isInstance) //
+				.map(Class.class::cast) //
+				.map(targetType::isAssignableFrom) //
+				.orElse(false);
+	}
+
 	@API(status = INTERNAL, since = "6.1")
 	public static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target,
 			@Nullable Object... args) {
@@ -175,18 +206,32 @@ public class KotlinReflectionUtils {
 		return KotlinFunctionUtils.invokeKotlinFunction(method, target, args);
 	}
 
+	@API(status = INTERNAL, since = "6.2")
+	public static <T> T newInstance(Constructor<T> constructor, @Nullable Object... args) {
+		requireKotlinReflect(constructor);
+		return KotlinFunctionUtils.invokeKotlinConstructor(constructor, args);
+	}
+
+	private static void requireKotlinReflect(Object value) {
+		requireDependency(value::toString, kotlinReflectPresent, "inline value type",
+			"org.jetbrains.kotlin:kotlin-reflect");
+	}
+
 	private static void requireKotlinReflect(Method method) {
-		requireDependency(method, kotlinReflectPresent, "org.jetbrains.kotlin:kotlin-reflect");
+		requireDependency(method::toGenericString, kotlinReflectPresent, "suspending function",
+			"org.jetbrains.kotlin:kotlin-reflect");
 	}
 
 	private static void requireKotlinxCoroutines(Method method) {
-		requireDependency(method, kotlinxCoroutinesPresent, "org.jetbrains.kotlinx:kotlinx-coroutines-core");
+		requireDependency(method::toGenericString, kotlinxCoroutinesPresent, "suspending function",
+			"org.jetbrains.kotlinx:kotlinx-coroutines-core");
 	}
 
-	private static void requireDependency(Method method, boolean condition, String dependencyNotation) {
+	private static void requireDependency(Supplier<String> representation, boolean condition, String type,
+			String dependencyNotation) {
 		Preconditions.condition(condition,
-			() -> ("Kotlin suspending function [%s] requires %s to be on the classpath or module path. "
-					+ "Please add a corresponding dependency.").formatted(method.toGenericString(),
+			() -> ("Kotlin %s [%s] requires %s to be on the classpath or module path. "
+					+ "Please add a corresponding dependency.").formatted(type, representation.get(),
 						dependencyNotation));
 	}
 

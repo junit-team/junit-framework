@@ -36,6 +36,8 @@ repository on GitHub.
 ==== Bug Fixes
 
 * `@DefaultLocale` now also restores the default locale of each `Locale.Category`.
+* Support all Kotlin inline value types in `@ParameterizedTest` and
+  `@ParameterizedClass`.
 
 [[v6.2.0-M2-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes

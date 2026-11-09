@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.ExecutableInvoker;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
 import org.junit.jupiter.engine.support.MethodReflectionUtils;
-import org.junit.platform.commons.util.ReflectionUtils;
 
 /**
  * @since 5.9
@@ -42,7 +41,7 @@ public class DefaultExecutableInvoker implements ExecutableInvoker {
 	public <T> T invoke(Constructor<T> constructor, @Nullable Object outerInstance) {
 		@Nullable
 		Object[] arguments = resolveParameters(constructor, null, outerInstance, extensionContext, extensionRegistry);
-		return ReflectionUtils.newInstance(constructor, arguments);
+		return MethodReflectionUtils.newInstance(constructor, arguments);
 	}
 
 	@Override

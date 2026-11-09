@@ -18,14 +18,15 @@ import static org.junit.platform.commons.util.KotlinReflectionUtils.invokeKotlin
 import static org.junit.platform.commons.util.KotlinReflectionUtils.isKotlinSuspendingFunction;
 import static org.junit.platform.commons.util.KotlinReflectionUtils.isKotlinType;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
-import org.junit.platform.commons.support.ReflectionSupport;
 import org.junit.platform.commons.util.KotlinReflectionUtils;
+import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.ReflectionUtils;
 
 @API(status = INTERNAL, since = "6.0")
 public class MethodReflectionUtils {
@@ -46,19 +47,73 @@ public class MethodReflectionUtils {
 		if (isKotlinSuspendingFunction(method)) {
 			return invokeKotlinSuspendingFunction(method, target, arguments);
 		}
-		if (isKotlinType(method.getDeclaringClass()) && KotlinReflectionUtils.isKotlinReflectPresent()
-				&& hasInlineTypeArgument(arguments)) {
+		if (isKotlinType(method.getDeclaringClass()) && hasInlineTypeArgument(arguments)) {
 			return invokeKotlinFunction(method, target, arguments);
 		}
-		return ReflectionSupport.invokeMethod(method, target, arguments);
+		return ReflectionUtils.invokeMethod(method, target, arguments);
 	}
 
 	private static boolean hasInlineTypeArgument(@Nullable Object[] arguments) {
-		if (!KotlinReflectionUtils.isKotlinReflectPresent()) {
-			return false;
+		for (Object argument : arguments) {
+			if (KotlinReflectionUtils.isInstanceOfInlineType(argument)) {
+				return true;
+			}
 		}
+		return false;
+	}
 
-		return arguments.length > 0 && Arrays.stream(arguments).anyMatch(KotlinReflectionUtils::isInstanceOfInlineType);
+	@API(status = INTERNAL, since = "6.2")
+	public static <T> T newInstance(Constructor<T> constructor, @Nullable Object[] arguments) {
+		var declaringClass = constructor.getDeclaringClass();
+		if (!isKotlinType(declaringClass) || !hasInlineTypeArgument(arguments)) {
+			return ReflectionUtils.newInstance(constructor, arguments);
+		}
+		// Because the arguments include Kotlin inline value types we can't use
+		// the Java constructor and must use KFunction.callBy instead. This
+		// requires a Kotlin constructor.
+		//
+		// For ordinary constructors we can use kotlin-reflect to find the
+		// Kotlin constructor matching the Java constructor. However, when
+		// inline value types there is a single Kotlin constructor and two
+		// Java constructors.
+		//
+		// Kotlin:
+		// 0 = fun `<init>`(kotlin.UInt): ExampleTest
+		// Java:
+		// 0 =           private ExampleTest(int)
+		// 1 = synthetic public ExampleTest(int,DefaultConstructorMarker)
+		//
+		// To further complicate things, private method doesn't have a matching
+		// Kotlin function for use with KFunction.callBy. The synthetic method
+		// is not usable because of the DefaultConstructorMarker.
+		//
+		// Additionally, because Kotlin reflect is an optional dependency the
+		// implementation has to be written using java.lang.reflect types
+		// rather than kotlin.reflect types.
+		//
+		// To resolve this we have to swap the private Java constructor we have
+		// for the default constructor and then get its kotlin function for
+		// KFunction.callBy.
+		//
+		// By noting that this method is only ever used with constructors
+		// produced by ReflectionUtils.getDeclaredConstructor we know that
+		// there is a single Kotlin constructor that takes at-least one
+		// argument.
+		//
+		// So we look it up using kotlin-reflect. Then we find the matching
+		// Java method for that. Because of the DefaultConstructorMarker we
+		// can't use this method directly, but it will have a usable Kotlin
+		// function. So we can pass that to KotlinReflectionUtils.newInstance
+		// avoiding the use of kotlin.reflect types.
+		var constructorWithKotlinConstructor = KotlinReflectionUtils.getKotlinConstructor(declaringClass);
+		return KotlinReflectionUtils.newInstance(constructorWithKotlinConstructor, arguments);
+	}
+
+	@API(status = INTERNAL, since = "6.2")
+	public static boolean isAssignableTo(@Nullable Object obj, Class<?> targetType) {
+		Preconditions.notNull(targetType, "target type must not be null");
+		return ReflectionUtils.isAssignableTo(obj, targetType) //
+				|| KotlinReflectionUtils.isInlineTypeAssignableTo(obj, targetType);
 	}
 
 	private MethodReflectionUtils() {
