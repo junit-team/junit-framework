@@ -219,7 +219,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		if (currentStoredValue != null) {
 			return currentStoredValue.evaluate();
 		}
-		var candidateStoredValue = newStoredSuppliedNullableValue(() -> {
+		var candidateStoredValue = newStoredSuppliedNullableValue(compositeKey, () -> {
 			rejectIfClosed();
 			return defaultCreator.apply(key);
 		});
@@ -282,7 +282,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		if (result != null) {
 			return result;
 		}
-		var candidateStoredValue = newStoredSuppliedValue(() -> {
+		var candidateStoredValue = newStoredSuppliedValue(compositeKey, () -> {
 			rejectIfClosed();
 			return Preconditions.notNull(defaultCreator.apply(key), "defaultCreator must not return null");
 		});
@@ -318,7 +318,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			// Awaits evaluation and uses the stored value if it was not null
 			// this ensures we replace both null and absent values.
 			// Otherwise, another thread won the race but failed to insert a
-			// non-null value so we try again.
+			// non-null value. If so we try again.
 			Object storedResult = storedValue.evaluate();
 			if (storedResult != null) {
 				return storedResult;
@@ -452,14 +452,16 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		return new StoredValue.Value(sequenceNumber, value);
 	}
 
-	private StoredValue.DeferredValue newStoredSuppliedNullableValue(Supplier<@Nullable Object> supplier) {
+	private StoredValue.DeferredValue newStoredSuppliedNullableValue(CompositeKey<?> compositeKey,
+			Supplier<@Nullable Object> supplier) {
 		var sequenceNumber = insertOrderSequence.getAndIncrement();
-		return new StoredValue.DeferredValue(sequenceNumber, supplier);
+		return new StoredValue.DeferredValue(compositeKey, sequenceNumber, supplier);
 	}
 
-	private StoredValue.DeferredOptionalValue newStoredSuppliedValue(Supplier<Object> supplier) {
+	private StoredValue.DeferredOptionalValue newStoredSuppliedValue(CompositeKey<?> compositeKey,
+			Supplier<Object> supplier) {
 		var sequenceNumber = insertOrderSequence.getAndIncrement();
-		return new StoredValue.DeferredOptionalValue(sequenceNumber, supplier);
+		return new StoredValue.DeferredOptionalValue(compositeKey, sequenceNumber, supplier);
 	}
 
 	private @Nullable StoredValue getStoredValue(CompositeKey<N> compositeKey) {
@@ -502,7 +504,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 		}
 	}
 
-	private record CompositeKey<N>(N namespace, Object key) {
+	record CompositeKey<N>(N namespace, Object key) {
 
 		CompositeKey {
 			Preconditions.notNull(namespace, "namespace must not be null");
@@ -570,9 +572,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			private final int order;
 			private final DeferredSupplier delegate;
 
-			DeferredValue(int order, Supplier<@Nullable Object> delegate) {
+			DeferredValue(CompositeKey<?> compositeKey, int order, Supplier<@Nullable Object> delegate) {
 				this.order = order;
-				this.delegate = new DeferredSupplier(delegate);
+				this.delegate = new DeferredSupplier(compositeKey, delegate);
 			}
 
 			@Override
@@ -609,9 +611,9 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			private final int order;
 			private final DeferredSupplier delegate;
 
-			DeferredOptionalValue(int order, Supplier<Object> delegate) {
+			DeferredOptionalValue(CompositeKey<?> compositeKey, int order, Supplier<Object> delegate) {
 				this.order = order;
-				this.delegate = new DeferredSupplier(delegate);
+				this.delegate = new DeferredSupplier(compositeKey, delegate);
 			}
 
 			@Override
@@ -676,18 +678,29 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 	 */
 	static final class DeferredSupplier {
 
+		private final CompositeKey<?> compositeKey;
 		private final FutureTask<@Nullable Object> task;
+		private volatile @Nullable Thread runner;
 
-		DeferredSupplier(Supplier<?> delegate) {
+		DeferredSupplier(CompositeKey<?> compositeKey, Supplier<?> delegate) {
+			this.compositeKey = compositeKey;
 			this.task = new FutureTask<>(delegate::get);
 		}
 
 		void run() {
-			task.run();
+			runner = Thread.currentThread();
+			try {
+				task.run();
+			}
+			finally {
+				runner = null;
+			}
 		}
 
 		@Nullable
 		Object get() {
+			rejectSimpleDeadlock();
+
 			try {
 				return task.get();
 			}
@@ -705,6 +718,8 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		@Nullable
 		Object getOrThrow() {
+			rejectSimpleDeadlock();
+
 			try {
 				return task.get();
 			}
@@ -718,6 +733,12 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 				UnrecoverableExceptions.rethrowIfUnrecoverable(cause);
 				throw throwAsUncheckedException(cause);
 			}
+		}
+
+		private void rejectSimpleDeadlock() {
+			Preconditions.condition(runner != Thread.currentThread(),
+				() -> "Thread [%s] can not get the stored value for [%s] while computing it." //
+						.formatted(runner, compositeKey));
 		}
 
 		boolean isDone() {
