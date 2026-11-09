@@ -35,6 +35,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.platform.commons.PreconditionViolationException;
 
 /**
  * Unit tests for {@link NamespacedHierarchicalStore}.
@@ -47,6 +49,8 @@ public class NamespacedHierarchicalStoreTests {
 	private final Object value = "value";
 
 	private final String namespace = "ns";
+	private final NamespacedHierarchicalStore.CompositeKey<String> compositeKey = new NamespacedHierarchicalStore.CompositeKey<>(
+		namespace, key);
 
 	private final NamespacedHierarchicalStore.CloseAction<String> closeAction = mock();
 	private final NamespacedHierarchicalStore<String> grandParentStore = new NamespacedHierarchicalStore<>(null,
@@ -493,10 +497,14 @@ public class NamespacedHierarchicalStoreTests {
 			assertEquals(1, counter.get());
 			assertThat(values).hasSize(threads).containsOnly(1);
 		}
+	}
+
+	@Nested
+	class RecursiveUpdateTests {
 
 		@SuppressWarnings("deprecation")
 		@Test
-		void updateRecursivelyGetOrComputeIfAbsent() {
+		void getOrComputeIfAbsent() {
 			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
 				var value = localStore.getOrComputeIfAbsent(namespace, new CollidingKey("a"), //
 					a -> requireNonNull(localStore.getOrComputeIfAbsent(namespace, new CollidingKey("b"), //
@@ -506,7 +514,7 @@ public class NamespacedHierarchicalStoreTests {
 		}
 
 		@Test
-		void updateRecursivelyComputeIfAbsent() {
+		void computeIfAbsent() {
 			try (var localStore = new NamespacedHierarchicalStore<>(null)) {
 				var value = localStore.computeIfAbsent(namespace, new CollidingKey("a"), //
 					a -> localStore.computeIfAbsent(namespace, new CollidingKey("b"), //
@@ -515,6 +523,46 @@ public class NamespacedHierarchicalStoreTests {
 			}
 		}
 
+		@SuppressWarnings("deprecation")
+		@Test
+		@Timeout(5)
+		void getOrComputeIfAbsentRejectsSimpleDeadlock() {
+			var exception = assertThrows(PreconditionViolationException.class, () -> {
+
+				try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+					localStore.getOrComputeIfAbsent(namespace, key, //
+						_ -> requireNonNull(localStore.getOrComputeIfAbsent(namespace, key, //
+							_ -> "enigma")));
+				}
+			});
+
+			assertThat(exception) //
+					.hasMessage("Thread [%s] can not get the stored value for [%s] while computing it." //
+							.formatted(Thread.currentThread(), compositeKey));
+		}
+
+		@Test
+		@Timeout(5)
+		void computeIfAbsentRejectsSimpleDeadlock() {
+			var exception = assertThrows(PreconditionViolationException.class, () -> {
+				try (var localStore = new NamespacedHierarchicalStore<>(null)) {
+					localStore.computeIfAbsent(namespace, key, //
+						_ -> localStore.computeIfAbsent(namespace, key, //
+							_ -> "enigma"));
+				}
+			});
+
+			assertThat(exception) //
+					.hasMessage("Thread [%s] can not get the stored value for [%s] while computing it." //
+							.formatted(Thread.currentThread(), compositeKey));
+		}
+
+		/**
+		 * The colliding key ensures that when updating the underlying
+		 * concurrent hashmap, the update happens in the same bucket. Without
+		 * deferred values, this would result in a recursive update and
+		 * exception from the concurrent hashmap.
+		 */
 		private record CollidingKey(String value) {
 
 			@Override
@@ -786,7 +834,7 @@ public class NamespacedHierarchicalStoreTests {
 
 		@Test
 		void getCanBeInterrupted() {
-			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(compositeKey, () -> {
 				try {
 					Thread.sleep(1000);
 				}
@@ -804,7 +852,7 @@ public class NamespacedHierarchicalStoreTests {
 
 		@Test
 		void getThrowsIfUnrecoverable() {
-			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(compositeKey, () -> {
 				throw new OutOfMemoryError("boom");
 			});
 			supplier.run();
@@ -814,19 +862,8 @@ public class NamespacedHierarchicalStoreTests {
 		}
 
 		@Test
-		void getOrThrowThrowsIfUnrecoverable() {
-			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
-				throw new OutOfMemoryError("boom");
-			});
-			supplier.run();
-			assertThrows(OutOfMemoryError.class, () -> {
-				supplier.getOrThrow();
-			});
-		}
-
-		@Test
 		void getOrThrowCanBeInterrupted() {
-			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(() -> {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(compositeKey, () -> {
 				try {
 					Thread.sleep(1000);
 				}
@@ -841,6 +878,40 @@ public class NamespacedHierarchicalStoreTests {
 			});
 			assertTrue(Thread.interrupted());
 		}
+
+		@Test
+		void getOrThrowThrowsIfUnrecoverable() {
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(compositeKey, () -> {
+				throw new OutOfMemoryError("boom");
+			});
+			supplier.run();
+			assertThrows(OutOfMemoryError.class, () -> {
+				supplier.getOrThrow();
+			});
+		}
+
+		@Test
+		void getThrowsForSimpleDeadlock() {
+			var self = new NamespacedHierarchicalStore.DeferredSupplier[1];
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(compositeKey, () -> self[0].get());
+			self[0] = supplier;
+			supplier.run();
+
+			// Use getOrThrow to collect the stored exception
+			assertThrows(PreconditionViolationException.class, supplier::getOrThrow);
+		}
+
+		@Test
+		void getOrThrowThrowsForSimpleDeadlock() {
+			var self = new NamespacedHierarchicalStore.DeferredSupplier[1];
+			var supplier = new NamespacedHierarchicalStore.DeferredSupplier(compositeKey, () -> self[0].getOrThrow());
+			self[0] = supplier;
+			supplier.run();
+
+			// Use getOrThrow to collect the stored exception
+			assertThrows(PreconditionViolationException.class, supplier::getOrThrow);
+		}
+
 	}
 
 	private static Object createObject(String display) {

@@ -32,6 +32,7 @@ repository on GitHub.
 * Validate configuration parameters for `fixed.parallelism` and `fixed.max-pool-size`.
 * For the `fixed` and `dynamic` strategy limit the calculated max pool size to
   `Integer.MAX_VALUE`.
+* Reject simple deadlocks when updating `NamespacedHierarchicalStore`.
 
 [[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
