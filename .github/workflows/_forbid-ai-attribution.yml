@@ -12,7 +12,7 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: commit-check/commit-check-action@08357050a644b85d321164f23054f176c13bb018 # v2.20.2
+      - uses: commit-check/commit-check-action@25b7143b3e69a01ec73c74fac3e6e9c9d56dba72 # v2.21.0
         env:
           CCHK_AI_ATTRIBUTION: forbid
           CCHK_CONVENTIONAL_COMMITS: false
