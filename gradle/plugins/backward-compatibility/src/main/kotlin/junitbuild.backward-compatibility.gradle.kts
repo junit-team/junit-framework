@@ -21,7 +21,7 @@ dependencies {
 	constraints {
 		roseauDependencies("org.apache.commons:commons-lang3") {
 			version {
-				require("3.21.0")
+				require("3.22.0")
 			}
 			because("Workaround for CVE-2025-48924")
 		}
