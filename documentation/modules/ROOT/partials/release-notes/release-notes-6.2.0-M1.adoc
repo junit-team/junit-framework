@@ -123,6 +123,11 @@ repository on GitHub.
 * New `org.junit.jupiter.api.store` package containing `Store` and `Namespace` interfaces
   which are now extended by `ExtensionContext.Store` and `ExtensionContext.Namespace`,
   respectively.
+* Arguments for parameterized tests may now be instances of Kotlin inline value classes
+  (`@JvmInline value class`) whose underlying type is not generic, e.g. `String` or
+  `Long`. Since the Kotlin compiler replaces such parameter types with their underlying
+  type in the JVM method signature, the `DefaultArgumentConverter` now unboxes such
+  arguments when the underlying type matches the target type.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage
