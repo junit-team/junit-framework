@@ -1,9 +1,17 @@
 [[v6.2.0-M1]]
 == 6.2.0-M1
 
-*Date of Release:* ❓
+*Date of Release:* November 15, 2026
 
-*Scope:* ❓
+*Scope:*
+
+* Machine-readable documentation of configuration parameters for IDEs
+* New parallel test executor implementation is now used by default
+* Session-scoped store available to test engines and orderers during discovery
+* Stricter parsing of `@CsvSource.value[]` records
+* Sub-millisecond precision and thread dump hint for timeouts
+* New `@Disabled` annotation for `@Suite` classes
+* Kotlin `assertThrows` variants that take the exception class as a value
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
 link:{junit-framework-repo}+/milestone/107?closed=1+[6.2.0-M1] milestone page in the JUnit
@@ -34,11 +42,6 @@ repository on GitHub.
   `Integer.MAX_VALUE`.
 * Reject simple deadlocks when updating `NamespacedHierarchicalStore`.
 
-[[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
 [[v6.2.0-M1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
 
@@ -59,9 +62,10 @@ repository on GitHub.
   reported output from different tests could interleave.
 * Test Engine and Jupiter Extension authors may generate a machine-readable overview
   of configuration parameters. See
-  xref:advanced-topics/configuration-parameter-documentation.adoc[Documenting Configuration
-  Parameters] for more information.
-* Platform configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+  xref:advanced-topics/configuration-parameter-documentation.adoc[Documenting
+  Configuration Parameters] for more information.
+* Platform configuration parameters are documented in
+  `META-INF/junit-platform-configuration-metadata.json`
 * Test engines using the `ParallelHierarchicalTestExecutorServiceFactory` now use the
   `WORKER_THREAD_POOL` executor service by default.
 * Test engines may now access the store scoped to the enclosing launcher session via the
@@ -104,6 +108,7 @@ repository on GitHub.
   in favor of `org.junit.jupiter.api.store.Namespace` and
   `org.junit.jupiter.api.store.Store`. In most cases, changing the `Namespace`
   and `Store` imports suffices to migrate.
+
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
@@ -113,7 +118,8 @@ repository on GitHub.
   xref:writing-tests/timeouts.adoc#debugging-thread-dump[thread dumps].
 * The `assertTimeout`, `assertTimeoutPreemptively` and methods annotated with `@Timeout`
   now measure the execution time with sub-millisecond precision.
-* Jupiter configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+* Jupiter configuration parameters are documented in
+  `META-INF/junit-platform-configuration-metadata.json`
 * The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
   now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
 * Implementations of `ClassOrderer` or `MethodOrderer` may now access the store scoped to
@@ -127,17 +133,8 @@ repository on GitHub.
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage
 
-[[v6.2.0-M1-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.2.0-M1-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
 [[v6.2.0-M1-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* Vintage configuration parameters are documented in `META-INF/junit-platform-configuration-metadata.json`
+* Vintage configuration parameters are documented in
+  `META-INF/junit-platform-configuration-metadata.json`
