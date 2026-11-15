@@ -29,7 +29,7 @@ abstract class BuildMetadata @Inject constructor(private val providers: Provider
     private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSSZ").withZone(UTC)
 
     val buildTimestamp: Instant by lazy {
-        parameters.sourceDateEpoch.orNull?.let { value ->
+        val timestamp = parameters.sourceDateEpoch.orNull?.let { value ->
             value.toLongOrNull()
                 ?.let { Instant.ofEpochSecond(it) }
                 ?: DateTimeFormatterBuilder()
@@ -38,8 +38,8 @@ abstract class BuildMetadata @Inject constructor(private val providers: Provider
                     .append(timeFormatter)
                     .toFormatter()
                     .parse(value, Instant::from)
-                    .truncatedTo(SECONDS)
         } ?: Instant.now()
+        timestamp.truncatedTo(SECONDS)
     }
 
     val buildDate: String by lazy { dateFormatter.format(buildTimestamp) }
