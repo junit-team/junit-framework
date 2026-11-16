@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import static org.junit.jupiter.engine.descriptor.JupiterTestDescriptor.abortIfCancellationRequested;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
 
 import org.junit.jupiter.api.extension.Extension;
@@ -32,6 +33,7 @@ class CallbackSupport {
 
 		for (T callback : registry.getExtensions(type)) {
 			throwableCollector.execute(() -> callbackInvoker.invoke(callback, extensionContext));
+			abortIfCancellationRequested(context);
 			if (throwableCollector.isNotEmpty()) {
 				break;
 			}

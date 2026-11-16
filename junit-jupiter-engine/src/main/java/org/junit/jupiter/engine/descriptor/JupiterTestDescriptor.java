@@ -56,6 +56,8 @@ import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.hierarchical.ExclusiveResource;
 import org.junit.platform.engine.support.hierarchical.Node;
+import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
+import org.opentest4j.TestAbortedException;
 
 /**
  * @since 5.0
@@ -248,6 +250,21 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	@Override
 	public void cleanUp(JupiterEngineExecutionContext context) throws Exception {
 		context.close();
+	}
+
+	/**
+	 * Abort the current execution if cancellation has been requested and no
+	 * exception has been collected so far.
+	 *
+	 * @since 6.2
+	 */
+	static void abortIfCancellationRequested(JupiterEngineExecutionContext context) {
+		ThrowableCollector throwableCollector = context.getThrowableCollector();
+		if (throwableCollector.isEmpty() && context.getCancellationToken().isCancellationRequested()) {
+			throwableCollector.execute(() -> {
+				throw new TestAbortedException("Execution cancelled");
+			});
+		}
 	}
 
 	/**

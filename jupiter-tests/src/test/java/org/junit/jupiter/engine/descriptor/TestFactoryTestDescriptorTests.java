@@ -33,6 +33,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
@@ -167,7 +168,7 @@ class TestFactoryTestDescriptorTests {
 			extensionContext = mock();
 			isClosed = false;
 
-			context = new JupiterEngineExecutionContext(mock(), mock(), mock()) //
+			context = new JupiterEngineExecutionContext(mock(), mock(), mock(), CancellationToken.disabled()) //
 					.extend() //
 					.withThrowableCollector(new OpenTest4JAwareThrowableCollector()) //
 					.withExtensionContext(extensionContext) //

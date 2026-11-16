@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 
 /**
@@ -36,14 +37,23 @@ class JupiterEngineExecutionContextTests {
 
 	private final LauncherStoreFacade launcherStoreFacade = mock();
 
+	private final CancellationToken cancellationToken = CancellationToken.create();
+
 	private final JupiterEngineExecutionContext originalContext = new JupiterEngineExecutionContext(
-		engineExecutionListener, configuration, launcherStoreFacade);
+		engineExecutionListener, configuration, launcherStoreFacade, cancellationToken);
 
 	@Test
 	void executionListenerIsHandedOnWhenContextIsExtended() {
 		assertSame(engineExecutionListener, originalContext.getExecutionListener());
 		JupiterEngineExecutionContext newContext = originalContext.extend().build();
 		assertSame(engineExecutionListener, newContext.getExecutionListener());
+	}
+
+	@Test
+	void cancellationTokenIsHandedOnWhenContextIsExtended() {
+		assertSame(cancellationToken, originalContext.getCancellationToken());
+		JupiterEngineExecutionContext newContext = originalContext.extend().withExtensionContext(mock()).build();
+		assertSame(cancellationToken, newContext.getCancellationToken());
 	}
 
 	@Test

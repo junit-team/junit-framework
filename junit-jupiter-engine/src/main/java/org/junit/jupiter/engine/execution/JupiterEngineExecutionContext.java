@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.engine.EngineExecutionListener;
 import org.junit.platform.engine.support.hierarchical.EngineExecutionContext;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
@@ -36,8 +37,8 @@ public class JupiterEngineExecutionContext implements EngineExecutionContext {
 	private boolean beforeAllMethodsExecuted = false;
 
 	public JupiterEngineExecutionContext(EngineExecutionListener executionListener, JupiterConfiguration configuration,
-			LauncherStoreFacade launcherStoreFacade) {
-		this(new State(executionListener, configuration, launcherStoreFacade));
+			LauncherStoreFacade launcherStoreFacade, CancellationToken cancellationToken) {
+		this(new State(executionListener, configuration, launcherStoreFacade, cancellationToken));
 	}
 
 	private JupiterEngineExecutionContext(State state) {
@@ -66,6 +67,10 @@ public class JupiterEngineExecutionContext implements EngineExecutionContext {
 
 	public LauncherStoreFacade getLauncherStoreFacade() {
 		return this.state.launcherStoreFacade;
+	}
+
+	public CancellationToken getCancellationToken() {
+		return this.state.cancellationToken;
 	}
 
 	public TestInstancesProvider getTestInstancesProvider() {
@@ -126,6 +131,7 @@ public class JupiterEngineExecutionContext implements EngineExecutionContext {
 		final EngineExecutionListener executionListener;
 		final JupiterConfiguration configuration;
 		final LauncherStoreFacade launcherStoreFacade;
+		final CancellationToken cancellationToken;
 
 		@Nullable
 		TestInstancesProvider testInstancesProvider;
@@ -140,10 +146,11 @@ public class JupiterEngineExecutionContext implements EngineExecutionContext {
 		ThrowableCollector throwableCollector;
 
 		State(EngineExecutionListener executionListener, JupiterConfiguration configuration,
-				LauncherStoreFacade launcherStoreFacade) {
+				LauncherStoreFacade launcherStoreFacade, CancellationToken cancellationToken) {
 			this.executionListener = executionListener;
 			this.configuration = configuration;
 			this.launcherStoreFacade = launcherStoreFacade;
+			this.cancellationToken = cancellationToken;
 		}
 
 		@Override

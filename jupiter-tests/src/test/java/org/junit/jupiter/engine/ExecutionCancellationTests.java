@@ -14,7 +14,9 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.junit.jupiter.engine.ExecutionCancellationTests.TestCase.requiredCancellationToken;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.testkit.engine.EventConditions.abortedWithReason;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.displayName;
 import static org.junit.platform.testkit.engine.EventConditions.dynamicTestRegistered;
@@ -25,12 +27,14 @@ import static org.junit.platform.testkit.engine.EventConditions.reportEntry;
 import static org.junit.platform.testkit.engine.EventConditions.skippedWithReason;
 import static org.junit.platform.testkit.engine.EventConditions.started;
 import static org.junit.platform.testkit.engine.EventConditions.test;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -39,7 +43,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.TestReporter;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.engine.CancellationToken;
+import org.opentest4j.TestAbortedException;
 
 class ExecutionCancellationTests extends AbstractJupiterTestEngineTests {
 
@@ -59,7 +67,7 @@ class ExecutionCancellationTests extends AbstractJupiterTestEngineTests {
 
 		var results = jupiterTestEngine() //
 				.selectors(selectClass(testClass)) //
-				.cancellationToken(TestCase.requiredCancellationToken()) //
+				.cancellationToken(requiredCancellationToken()) //
 				.execute();
 
 		results.testEvents().assertStatistics(stats -> stats.started(1).finished(1).skipped(1));
@@ -81,7 +89,7 @@ class ExecutionCancellationTests extends AbstractJupiterTestEngineTests {
 
 		var results = jupiterTestEngine() //
 				.selectors(selectClass(testClass)) //
-				.cancellationToken(TestCase.requiredCancellationToken()) //
+				.cancellationToken(requiredCancellationToken()) //
 				.execute();
 
 		results.containerEvents().assertStatistics(stats -> stats.skipped(1));
@@ -99,6 +107,57 @@ class ExecutionCancellationTests extends AbstractJupiterTestEngineTests {
 			event(container("testFactory"), finishedSuccessfully()), //
 			event(container(testClass), finishedSuccessfully()), //
 			event(engine(), finishedSuccessfully()));
+	}
+
+	@Test
+	void abortsTestWhenCancelledDuringBeforeEachMethod() {
+		var testClass = CancelledInBeforeEachTestCase.class;
+
+		var results = jupiterTestEngine() //
+				.selectors(selectClass(testClass)) //
+				.cancellationToken(requiredCancellationToken()) //
+				.execute();
+
+		results.testEvents().assertStatistics(stats -> stats.started(1).aborted(1).failed(0));
+
+		results.allEvents().assertEventsMatchExactly( //
+			event(engine(), started()), //
+			event(container(testClass), started()), //
+			event(test("testMethod"), started()), //
+			event(test("testMethod"), reportEntry(Map.of("afterEach", "called"))), //
+			event(test("testMethod"), abortedWithReason(instanceOf(TestAbortedException.class))), //
+			event(container(testClass), finishedSuccessfully()), //
+			event(engine(), finishedSuccessfully()));
+	}
+
+	@Test
+	void abortsClassWhenCancelledDuringBeforeAllMethod() {
+		var testClass = CancelledInBeforeAllMethodTestCase.class;
+
+		var results = jupiterTestEngine() //
+				.selectors(selectClass(testClass)) //
+				.cancellationToken(requiredCancellationToken()) //
+				.execute();
+
+		results.testEvents().assertStatistics(stats -> stats.started(0));
+
+		results.allEvents().assertEventsMatchExactly( //
+			event(engine(), started()), //
+			event(container(testClass), started()), //
+			event(container(testClass), abortedWithReason(instanceOf(TestAbortedException.class))), //
+			event(engine(), finishedSuccessfully()));
+	}
+
+	@Test
+	void doesNotInvokeRemainingBeforeEachCallbacksWhenCancelled() {
+		var testClass = CancelledInFirstOfTwoBeforeEachCallbacksTestCase.class;
+
+		var results = jupiterTestEngine() //
+				.selectors(selectClass(testClass)) //
+				.cancellationToken(requiredCancellationToken()) //
+				.execute();
+
+		results.testEvents().assertStatistics(stats -> stats.started(1).aborted(1).failed(0));
 	}
 
 	static class TestCase {
@@ -142,6 +201,62 @@ class ExecutionCancellationTests extends AbstractJupiterTestEngineTests {
 					dynamicTest("second", () -> fail("should not be called")) //
 				)) //
 			);
+		}
+	}
+
+	static class CancelledInBeforeEachTestCase extends TestCase {
+
+		@BeforeEach
+		void beforeEach() {
+			requiredCancellationToken().cancel();
+		}
+
+		@Test
+		void testMethod() {
+			fail("should not be called");
+		}
+
+		@AfterEach
+		void afterEach(TestReporter reporter) {
+			reporter.publishEntry("afterEach", "called");
+		}
+	}
+
+	static class CancelledInBeforeAllMethodTestCase extends TestCase {
+
+		@BeforeAll
+		static void beforeAll() {
+			requiredCancellationToken().cancel();
+		}
+
+		@Test
+		void testMethod() {
+			fail("should not be called");
+		}
+	}
+
+	@ExtendWith({ CancellingBeforeEachCallback.class, FailingBeforeEachCallback.class })
+	static class CancelledInFirstOfTwoBeforeEachCallbacksTestCase extends TestCase {
+
+		@Test
+		void testMethod() {
+			fail("should not be called");
+		}
+	}
+
+	static class CancellingBeforeEachCallback implements BeforeEachCallback {
+
+		@Override
+		public void beforeEach(ExtensionContext context) throws Exception {
+			requiredCancellationToken().cancel();
+		}
+	}
+
+	static class FailingBeforeEachCallback implements BeforeEachCallback {
+
+		@Override
+		public void beforeEach(ExtensionContext context) throws Exception {
+			fail("should not be called");
 		}
 	}
 
