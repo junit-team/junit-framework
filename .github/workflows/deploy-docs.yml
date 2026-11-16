@@ -74,9 +74,7 @@ jobs:
         with:
           repository: junit-team/docs.junit.org
           path: docs-repo
-          fetch-depth: 1
-          token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_DOCS_REPO }}
-          persist-credentials: true
+          persist-credentials: false
       - name: Copy Antora site to docs.junit.org repo
         id: antora_copy
         if: env.DEPLOY == 'true'
@@ -94,9 +92,11 @@ jobs:
       - name: Push to docs.junit.org repo
         if: env.DEPLOY == 'true' && steps.antora_copy.outputs.git_changes > 0
         working-directory: docs-repo
+        env:
+          TOKEN: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_DOCS_REPO }}
         run: |
           git config --global user.name "JUnit Team"
           git config --global user.email "team@junit.org"
           git add .
           git commit -m "Deploy latest Antora site"
-          git push
+          git push "https://x-access-token:${TOKEN}@github.com/junit-team/docs.junit.org.git" HEAD
