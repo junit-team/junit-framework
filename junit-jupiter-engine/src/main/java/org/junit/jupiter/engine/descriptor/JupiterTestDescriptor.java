@@ -253,18 +253,23 @@ public abstract class JupiterTestDescriptor extends AbstractTestDescriptor
 	}
 
 	/**
-	 * Abort the current execution if cancellation has been requested and no
-	 * exception has been collected so far.
+	 * Determine whether execution should continue with the next step.
 	 *
+	 * <p>If cancellation has been requested and no exception has been
+	 * collected so far, a {@link TestAbortedException} is added to the
+	 * {@link ThrowableCollector} of the supplied context.
+	 *
+	 * @return {@code true} if no exception has been collected
 	 * @since 6.2
 	 */
-	static void abortIfCancellationRequested(JupiterEngineExecutionContext context) {
+	static boolean shouldContinue(JupiterEngineExecutionContext context) {
 		ThrowableCollector throwableCollector = context.getThrowableCollector();
 		if (throwableCollector.isEmpty() && context.getCancellationToken().isCancellationRequested()) {
 			throwableCollector.execute(() -> {
 				throw new TestAbortedException("Execution cancelled");
 			});
 		}
+		return throwableCollector.isEmpty();
 	}
 
 	/**

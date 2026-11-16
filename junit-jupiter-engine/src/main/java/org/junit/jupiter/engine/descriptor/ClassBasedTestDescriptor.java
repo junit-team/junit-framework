@@ -242,12 +242,11 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 			});
 		}
 
-		abortIfCancellationRequested(context);
-		if (throwableCollector.isEmpty()) {
+		if (shouldContinue(context)) {
 			context.beforeAllCallbacksExecuted(true);
 			invokeBeforeAllCallbacks(context);
 
-			if (throwableCollector.isEmpty()) {
+			if (shouldContinue(context)) {
 				context.beforeAllMethodsExecuted(true);
 				invokeBeforeAllMethods(context);
 			}
@@ -454,8 +453,7 @@ public abstract class ClassBasedTestDescriptor extends JupiterTestDescriptor
 					invokeBeforeAllMethodExecutionExceptionHandlers(registry, extensionContext, throwable);
 				}
 			});
-			abortIfCancellationRequested(context);
-			if (throwableCollector.isNotEmpty()) {
+			if (!shouldContinue(context)) {
 				break;
 			}
 		}
