@@ -85,7 +85,8 @@ jobs:
             build/site/ \
             docs-repo
           git -C docs-repo status --porcelain
-          git -C docs-repo status --porcelain | java RestoreUnchangedPdfs.java docs-repo | sh
+          # pipefail so that a crash in RestoreUnchangedPdfs fails the step
+          (set -o pipefail; git -C docs-repo status --porcelain | java RestoreUnchangedPdfs.java docs-repo | sh)
           git_changes=$(git -C docs-repo status --porcelain | grep --invert-match --regexp=' sitemap\.xml$' --regexp=' search-index\.js$' --regexp=' _redirects$' | wc -l)
           echo "Detected $git_changes change(s)"
           echo "git_changes=$git_changes" >> "$GITHUB_OUTPUT"
