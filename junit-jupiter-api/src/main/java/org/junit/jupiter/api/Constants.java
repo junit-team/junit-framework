@@ -610,6 +610,19 @@ public final class Constants {
 	public static final String DEFAULT_TEMP_DIR_DELETION_STRATEGY_PROPERTY_NAME = TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME;
 
 	/**
+	 * Property name used to configure the log level for deleting links to targets
+	 * outside a temporary directory: {@value}
+	 *
+	 * @since 6.2
+	 * @see TempDir#EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	@ConfigurationParameter(defaultValue = @Value(stringValue = TempDir.DEFAULT_EXTERNAL_TARGET_LOG_LEVEL), hints = @Hints({
+			@Hint("ERROR"), @Hint("WARN"), @Hint("INFO"), @Hint("CONFIG"), @Hint("DEBUG"), @Hint("TRACE"),
+			@Hint("OFF") }))
+	public static final String TEMP_DIR_EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME = TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME;
+
+	/**
 	 * Property name used to set the default extension context scope for
 	 * extensions that participate in test instantiation: {@value}
 	 *

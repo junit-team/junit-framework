@@ -179,6 +179,106 @@ public @interface TempDir {
 	String DEFAULT_DELETION_STRATEGY_PROPERTY_NAME = "junit.jupiter.tempdir.deletion.strategy.default";
 
 	/**
+	 * Default value for {@value #EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME}: {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	String DEFAULT_EXTERNAL_TARGET_LOG_LEVEL = "WARN";
+
+	/**
+	 * Property name used to configure the log level for deleting links to targets
+	 * outside the temporary directory: {@value}
+	 *
+	 * <p>Supported values are {@code ERROR}, {@code WARN}, {@code INFO},
+	 * {@code CONFIG}, {@code DEBUG}, {@code TRACE}, and {@code OFF}, ignoring
+	 * case and surrounding whitespace. Invalid values cause a configuration error.
+	 * If not specified, {@value #DEFAULT_EXTERNAL_TARGET_LOG_LEVEL} is used.
+	 * An explicit {@link #externalTargetLogLevel()} overrides this configuration
+	 * parameter for the annotated field or parameter.
+	 *
+	 * <p>This setting only affects the diagnostic logged by
+	 * {@link TempDirDeletionStrategy.Standard}, including when used by
+	 * {@link TempDirDeletionStrategy.IgnoreFailures}. It does not change deletion
+	 * behavior or the handling of deletion failures.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	String EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME = "junit.jupiter.tempdir.deletion.external_target_log_level";
+
+	/**
+	 * Log level for the diagnostic about deleting links to targets outside this
+	 * temporary directory.
+	 *
+	 * <p>An explicit value overrides the
+	 * {@value #EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME} configuration parameter
+	 * for this field or parameter. {@link LogLevel#DEFAULT} uses that configuration
+	 * parameter, falling back to {@value #DEFAULT_EXTERNAL_TARGET_LOG_LEVEL}.
+	 *
+	 * <p>This attribute is honored by {@link TempDirDeletionStrategy.Standard}
+	 * and {@link TempDirDeletionStrategy.IgnoreFailures}. It does not affect
+	 * deletion behavior or the handling of deletion failures.
+	 *
+	 * @return the log level, or {@link LogLevel#DEFAULT} to use the global configuration
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	LogLevel externalTargetLogLevel() default LogLevel.DEFAULT;
+
+	/**
+	 * Log levels for the diagnostic about deleting links to targets outside a
+	 * temporary directory.
+	 *
+	 * @since 6.2
+	 * @see #externalTargetLogLevel()
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	enum LogLevel {
+
+		/**
+		 * Use the global configuration, falling back to {@link #WARN}.
+		 */
+		DEFAULT,
+
+		/**
+		 * Log at error level ({@code java.util.logging.Level#SEVERE} in JUL).
+		 */
+		ERROR,
+
+		/**
+		 * Log at warning level ({@code java.util.logging.Level#WARNING} in JUL).
+		 */
+		WARN,
+
+		/**
+		 * Log at info level ({@code java.util.logging.Level#INFO} in JUL).
+		 */
+		INFO,
+
+		/**
+		 * Log at configuration level ({@code java.util.logging.Level#CONFIG} in JUL).
+		 */
+		CONFIG,
+
+		/**
+		 * Log at debug level ({@code java.util.logging.Level#FINE} in JUL).
+		 */
+		DEBUG,
+
+		/**
+		 * Log at trace level ({@code java.util.logging.Level#FINER} in JUL).
+		 */
+		TRACE,
+
+		/**
+		 * Do not log this diagnostic.
+		 */
+		OFF
+
+	}
+
+	/**
 	 * Deletion strategy for the temporary directory.
 	 *
 	 * <p>Defaults to {@link TempDirDeletionStrategy.Standard}.

@@ -112,6 +112,11 @@ repository on GitHub.
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
+* The new `junit.jupiter.tempdir.deletion.external_target_log_level` configuration parameter controls only the xref:writing-tests/built-in-extensions.adoc#TempDirExternalTargetLogging[external-target link diagnostic] during temporary directory cleanup, without changing cleanup behavior or external target protection.
+  It defaults to `WARN` and supports `ERROR`, `WARN`, `INFO`, `CONFIG`, `DEBUG`, `TRACE`, and `OFF`, ignoring case and stripping leading and trailing whitespace.
+  The new enum-valued `externalTargetLogLevel` attribute of `@TempDir` overrides this configuration for an individual field or parameter, with `TempDir.LogLevel.DEFAULT` inheriting the global configuration.
+  `DEBUG` maps to `java.util.logging.Level.FINE`, and logging backend filtering still applies.
+
 * Added `OS.NETBSD` and `OS.DRAGONFLYBSD` enum constants for use with `@EnabledOnOs`
   and `@DisabledOnOs`.
 * Failures caused by `@Timeout` expirations now include a hint about enabling

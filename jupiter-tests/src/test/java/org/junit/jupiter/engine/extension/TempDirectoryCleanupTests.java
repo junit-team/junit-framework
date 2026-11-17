@@ -24,23 +24,32 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMetho
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.io.TempDir.LogLevel;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.logging.LogRecordListener;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 
@@ -507,6 +516,179 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 
 	}
 
+	@ParameterizedTest
+	@CsvSource({ ", WARNING", "'  DeBuG  ', FINE", "'  oFf  '," })
+	@DisabledOnOs(WINDOWS)
+	void configuresExternalSymbolicLinkLogLevel(@Nullable String configuredLevel, @Nullable String expectedLevel,
+			@TempDir Path outsideDir, @TrackLogRecords LogRecordListener listener) throws IOException {
+		var testFile = Files.writeString(outsideDir.resolve("test.txt"), "test");
+		var builder = request().selectors(selectClass(SymbolicLinkTestCase.class));
+		if (configuredLevel != null) {
+			builder.configurationParameter(TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME, configuredLevel);
+		}
+
+		SymbolicLinkTestCase.target = outsideDir;
+		try {
+			executeTests(builder.build()).testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
+
+			assertThat(SymbolicLinkTestCase.tempDir).doesNotExist();
+			assertThat(outsideDir).isDirectory();
+			assertThat(testFile).hasContent("test");
+			assertExternalTargetLogLevel(listener, expectedLevel == null ? null : Level.parse(expectedLevel));
+		}
+		finally {
+			SymbolicLinkTestCase.target = null;
+			SymbolicLinkTestCase.tempDir = null;
+		}
+	}
+
+	@NullUnmarked
+	static class SymbolicLinkTestCase {
+		static Path target;
+		static Path tempDir;
+
+		@Test
+		void createSymbolicLinkToTarget(@TempDir Path dir) throws IOException {
+			tempDir = dir;
+			Files.createSymbolicLink(dir.resolve("link"), target);
+		}
+	}
+
+	private static void assertExternalTargetLogLevel(LogRecordListener listener, @Nullable Level expectedLevel) {
+		var records = listener.stream().filter(record -> record.getMessage().matches(
+			"Deleting (symbolic link|link) from location inside of temp dir \\(.+\\) to location outside of temp dir \\(.+\\) but not the target file/directory"));
+		if (expectedLevel == null) {
+			assertThat(records).isEmpty();
+		}
+		else {
+			assertThat(records).extracting(LogRecord::getLevel).containsExactly(expectedLevel);
+		}
+	}
+
+	@Nested
+	@NullUnmarked
+	@DisabledOnOs(WINDOWS)
+	class LocalExternalTargetLogLevelTests {
+
+		private static Path target;
+		private static Path[] tempDirs;
+
+		@ParameterizedTest
+		@CsvSource({ "true, OFF", "true, DEBUG", "true, invalid", "false, OFF", "false, DEBUG", "false, invalid" })
+		void annotationOverridesGlobalConfiguration(boolean fields, String globalLevel, @TempDir Path outsideDir,
+				@TrackLogRecords LogRecordListener listener) throws IOException {
+			assertCleanupAndLogs(fields ? LocalFieldCase.class : LocalParameterCase.class, globalLevel, outsideDir,
+				listener, Level.WARNING, Level.WARNING, Level.FINE, null);
+		}
+
+		@ParameterizedTest
+		@CsvSource({ "true, OFF,", "true, DEBUG, FINE", "true, WARN, WARNING", "false, OFF,", "false, DEBUG, FINE",
+				"false, WARN, WARNING" })
+		void defaultAnnotationInheritsGlobalConfiguration(boolean fields, String globalLevel, String expectedLevel,
+				@TempDir Path outsideDir, @TrackLogRecords LogRecordListener listener) throws IOException {
+			assertCleanupAndLogs(fields ? DefaultFieldCase.class : DefaultParameterCase.class, globalLevel, outsideDir,
+				listener, expectedLevel == null ? null : Level.parse(expectedLevel));
+		}
+
+		private void assertCleanupAndLogs(Class<?> testCase, String globalLevel, Path outsideDir,
+				LogRecordListener listener, Level... expectedLevels) throws IOException {
+			final var testFile = Files.writeString(outsideDir.resolve("test.txt"), "test");
+			final var discoveryRequest = request().selectors(selectClass(testCase)).configurationParameter(
+				TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME, globalLevel).build();
+			target = outsideDir;
+			try {
+				executeTests(discoveryRequest).testEvents().assertStatistics(stats -> stats.started(1).succeeded(1));
+
+				assertThat(tempDirs).hasSize(expectedLevels.length);
+				for (int i = 0; i < tempDirs.length; i++) {
+					final var dir = tempDirs[i];
+					assertThat(dir).doesNotExist();
+					final var records = listener.stream().filter(
+						record -> record.getMessage().startsWith("Deleting ")).filter(
+							record -> record.getMessage().contains("(" + dir.resolve("link") + ")"));
+					if (expectedLevels[i] == null) {
+						assertThat(records).isEmpty();
+					}
+					else {
+						assertThat(records).extracting(LogRecord::getLevel).containsExactly(expectedLevels[i]);
+					}
+				}
+				assertThat(outsideDir).isDirectory();
+				assertThat(testFile).hasContent("test");
+			}
+			finally {
+				target = null;
+				tempDirs = null;
+			}
+		}
+
+		private static void createSymbolicLinks(Path... dirs) throws IOException {
+			tempDirs = dirs;
+			for (final var dir : dirs) {
+				Files.createSymbolicLink(dir.resolve("link"), target);
+			}
+		}
+
+		@Retention(RetentionPolicy.RUNTIME)
+		@Target({ ElementType.FIELD, ElementType.PARAMETER })
+		@TempDir(externalTargetLogLevel = LogLevel.WARN)
+		@interface WarnTempDir {
+		}
+
+		@SuppressWarnings("NewClassNamingConvention")
+		static class LocalFieldCase {
+
+			@TempDir(externalTargetLogLevel = LogLevel.WARN)
+			Path warnDir;
+
+			@WarnTempDir
+			Path composedDir;
+
+			@TempDir(externalTargetLogLevel = LogLevel.DEBUG)
+			Path debugDir;
+
+			@TempDir(externalTargetLogLevel = LogLevel.OFF)
+			Path offDir;
+
+			@Test
+			void createLinks() throws IOException {
+				createSymbolicLinks(warnDir, composedDir, debugDir, offDir);
+			}
+		}
+
+		@SuppressWarnings("NewClassNamingConvention")
+		static class LocalParameterCase {
+
+			@Test
+			void createLinks(@TempDir(externalTargetLogLevel = LogLevel.WARN) Path warnDir,
+					@WarnTempDir Path composedDir, @TempDir(externalTargetLogLevel = LogLevel.DEBUG) Path debugDir,
+					@TempDir(externalTargetLogLevel = LogLevel.OFF) Path offDir) throws IOException {
+				createSymbolicLinks(warnDir, composedDir, debugDir, offDir);
+			}
+		}
+
+		@SuppressWarnings("NewClassNamingConvention")
+		static class DefaultFieldCase {
+
+			@TempDir(externalTargetLogLevel = LogLevel.DEFAULT)
+			Path dir;
+
+			@Test
+			void createLink() throws IOException {
+				createSymbolicLinks(dir);
+			}
+		}
+
+		@SuppressWarnings("NewClassNamingConvention")
+		static class DefaultParameterCase {
+
+			@Test
+			void createLink(@TempDir(externalTargetLogLevel = LogLevel.DEFAULT) Path dir) throws IOException {
+				createSymbolicLinks(dir);
+			}
+		}
+	}
+
 	@Nested
 	@EnabledOnOs(WINDOWS)
 	class WindowsTests {
@@ -521,35 +703,42 @@ class TempDirectoryCleanupTests extends AbstractJupiterTestEngineTests {
 			Files.delete(test);
 		}
 
-		@Test
-		void doesNotFollowJunctions(@TempDir Path tempDir, @TrackLogRecords LogRecordListener listener)
-				throws IOException {
+		@ParameterizedTest
+		@CsvSource({ ", WARNING", "'  DeBuG  ', FINE", "'  oFf  '," })
+		void doesNotFollowJunctions(@Nullable String configuredLevel, @Nullable String expectedLevel,
+				@TempDir Path tempDir, @TrackLogRecords LogRecordListener listener) throws IOException {
 			var outsideDir = Files.createDirectory(tempDir.resolve("outside"));
 			var testFile = Files.writeString(outsideDir.resolve("test.txt"), "test");
+			var builder = request().selectors(selectClass(JunctionTestCase.class));
+			if (configuredLevel != null) {
+				builder.configurationParameter(TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME, configuredLevel);
+			}
 
 			JunctionTestCase.target = outsideDir;
 			try {
-				executeTestsForClass(JunctionTestCase.class).testEvents() //
+				executeTests(builder.build()).testEvents() //
 						.assertStatistics(stats -> stats.started(1).succeeded(1));
+
+				assertThat(JunctionTestCase.tempDir).doesNotExist();
 			}
 			finally {
 				JunctionTestCase.target = null;
+				JunctionTestCase.tempDir = null;
 			}
 
 			assertThat(outsideDir).exists();
-			assertThat(testFile).exists();
-			assertThat(listener.stream(Level.WARNING)) //
-					.map(LogRecord::getMessage) //
-					.anyMatch(m -> m.matches(
-						"Deleting link from location inside of temp dir \\(.+\\) to location outside of temp dir \\(.+\\) but not the target file/directory"));
+			assertThat(testFile).hasContent("test");
+			assertExternalTargetLogLevel(listener, expectedLevel == null ? null : Level.parse(expectedLevel));
 		}
 
 		@NullUnmarked
 		static class JunctionTestCase {
 			public static Path target;
+			static Path tempDir;
 
 			@Test
 			void createJunctionToTarget(@TempDir Path dir) throws Exception {
+				tempDir = dir;
 				var link = createWindowsJunction(dir.resolve("link"), target);
 				try (var files = Files.list(link)) {
 					files.forEach(it -> System.out.println("- " + it));

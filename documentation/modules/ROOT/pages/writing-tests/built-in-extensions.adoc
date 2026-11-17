@@ -323,6 +323,34 @@ following precedence rules:
 if present
 3. Otherwise, `org.junit.jupiter.api.io.TempDirDeletionStrategy$Standard` will be used.
 
+[[TempDirExternalTargetLogging]]
+==== External-target Link Diagnostics
+
+During temporary directory cleanup, links whose targets are outside the temporary directory are reported without deleting the external targets.
+You can use the `junit.jupiter.tempdir.deletion.external_target_log_level` xref:running-tests/configuration-parameters.adoc[configuration parameter] to configure the log level of this diagnostic.
+The default is `WARN`, and the supported values are `ERROR`, `WARN`, `INFO`, `CONFIG`, `DEBUG`, `TRACE`, and `OFF`.
+Values are case-insensitive, and leading and trailing whitespace is stripped.
+To override the global configuration for an individual field or method parameter, set the enum-valued `externalTargetLogLevel` attribute of `@TempDir`:
+
+[source,java]
+----
+@TempDir(externalTargetLogLevel = TempDir.LogLevel.OFF)
+Path tempDir;
+
+@Test
+void test(@TempDir(externalTargetLogLevel = TempDir.LogLevel.DEBUG) Path directory) {
+    // ...
+}
+----
+
+An explicit annotation value other than `TempDir.LogLevel.DEFAULT` takes precedence over the configuration parameter, even if the global value is invalid.
+The default annotation value, `TempDir.LogLevel.DEFAULT`, inherits the global configuration, falling back to `WARN` if no global value is configured.
+The enum provides compile-time validation for annotation values, while invalid configuration parameter values cause a configuration error.
+`DEFAULT` is only supported by the annotation, not by the configuration parameter.
+Setting the value to `OFF` disables only this diagnostic; it does not change cleanup behavior or the protection of external targets.
+Both settings are honored by the built-in `Standard` and `IgnoreFailures` deletion strategies and do not affect other cleanup diagnostics or deletion failures.
+`DEBUG` maps to `java.util.logging.Level.FINE`, and logging backend filtering still applies, so selecting a level does not guarantee that the diagnostic will be displayed.
+
 [[AutoClose]]
 == The @AutoClose Extension
 

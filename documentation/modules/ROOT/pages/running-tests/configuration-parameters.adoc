@@ -10,6 +10,7 @@ parameters_ for the following use cases.
 - xref:extensions/registering-extensions.adoc#registration-automatic-enabling[Enabling Automatic Extension Detection]
 - xref:extensions/conditional-test-execution.adoc#deactivation[Deactivating Conditions]
 - xref:writing-tests/display-names.adoc#generator-default[Setting the Default Display Name Generator]
+- xref:writing-tests/built-in-extensions.adoc#TempDirExternalTargetLogging[Configuring Temporary Directory External-target Link Diagnostics] (`junit.jupiter.tempdir.deletion.external_target_log_level`, default: `WARN`)
 
 _Configuration Parameters_ are text-based key-value pairs that can be supplied to test
 engines running on the JUnit Platform via one of the following mechanisms.

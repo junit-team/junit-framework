@@ -35,14 +35,18 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AnnotatedElementContext;
+import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.io.TempDir.LogLevel;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
@@ -154,7 +158,12 @@ public interface TempDirDeletionStrategy {
 	 *
 	 * <p>Symbolic and other types of links, such as junctions on Windows, are
 	 * not followed. A warning is logged when deleting a link that targets a
-	 * location outside the temporary directory.
+	 * location outside the temporary directory. The log level can be configured
+	 * via the {@value TempDir#EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME}
+	 * configuration parameter and defaults to
+	 * {@value TempDir#DEFAULT_EXTERNAL_TARGET_LOG_LEVEL}.
+	 * An explicit {@link TempDir#externalTargetLogLevel()} on the annotated
+	 * field or parameter overrides the configuration parameter.
 	 *
 	 * <p>If a file or directory cannot be deleted, its permissions are reset
 	 * and deletion is attempted again. If deletion still fails, the path is
@@ -178,21 +187,37 @@ public interface TempDirDeletionStrategy {
 		public DeletionResult delete(Path tempDir, AnnotatedElementContext elementContext,
 				ExtensionContext extensionContext) throws IOException {
 
-			return delete(tempDir, Files::delete);
+			final var annotationLevel = elementContext.findAnnotation(TempDir.class).map(
+				TempDir::externalTargetLogLevel).orElse(LogLevel.DEFAULT);
+			final LogLevel logLevel;
+			if (annotationLevel != LogLevel.DEFAULT) {
+				logLevel = annotationLevel;
+			}
+			else {
+				logLevel = extensionContext.getConfigurationParameter(
+					TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME).map(Standard::parseLogLevel).orElseGet(
+						() -> LogLevel.valueOf(TempDir.DEFAULT_EXTERNAL_TARGET_LOG_LEVEL));
+			}
+			return delete(tempDir, Files::delete, logLevel);
 		}
 
 		// package-private for testing
 		DeletionResult delete(Path tempDir, FileOperations fileOperations) throws IOException {
+			return delete(tempDir, fileOperations, LogLevel.WARN);
+		}
+
+		private DeletionResult delete(Path tempDir, FileOperations fileOperations, LogLevel logLevel)
+				throws IOException {
 			var result = DeletionResult.builder(tempDir);
-			delete(tempDir, fileOperations, (path, cause) -> {
+			delete(tempDir, fileOperations, logLevel, (path, cause) -> {
 				result.addFailure(path, cause);
 				tryToDeleteOnExit(path);
 			});
 			return result.build();
 		}
 
-		private void delete(Path tempDir, FileOperations fileOperations, BiConsumer<Path, Exception> failureHandler)
-				throws IOException {
+		private void delete(Path tempDir, FileOperations fileOperations, LogLevel logLevel,
+				BiConsumer<Path, Exception> failureHandler) throws IOException {
 			Set<Path> retriedPaths = new HashSet<>();
 			Path rootRealPath = tempDir.toRealPath();
 
@@ -203,7 +228,7 @@ public interface TempDirDeletionStrategy {
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 					logger.trace(() -> "preVisitDirectory: " + dir);
 					if (isLinkWithTargetOutsideTempDir(dir)) {
-						warnAboutLinkWithTargetOutsideTempDir("link", dir);
+						logLinkWithTargetOutsideTempDir("link", dir);
 						delete(dir, fileOperations);
 						return SKIP_SUBTREE;
 					}
@@ -228,7 +253,7 @@ public interface TempDirDeletionStrategy {
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
 					logger.trace(() -> "visitFile: " + file);
 					if (Files.isSymbolicLink(file) && isLinkWithTargetOutsideTempDir(file)) {
-						warnAboutLinkWithTargetOutsideTempDir("symbolic link", file);
+						logLinkWithTargetOutsideTempDir("symbolic link", file);
 					}
 					delete(file, fileOperations);
 					return CONTINUE;
@@ -254,9 +279,12 @@ public interface TempDirDeletionStrategy {
 					}
 				}
 
-				private void warnAboutLinkWithTargetOutsideTempDir(String linkType, Path file) throws IOException {
+				private void logLinkWithTargetOutsideTempDir(String linkType, Path file) throws IOException {
+					if (logLevel == LogLevel.OFF) {
+						return;
+					}
 					Path realPath = file.toRealPath();
-					logger.warn(() -> """
+					log(logLevel, () -> """
 							Deleting %s from location inside of temp dir (%s) \
 							to location outside of temp dir (%s) but not the target file/directory""".formatted(
 						linkType, file, realPath));
@@ -348,6 +376,36 @@ public interface TempDirDeletionStrategy {
 				}
 			}
 			catch (UnsupportedOperationException ignore) {
+			}
+		}
+
+		private static LogLevel parseLogLevel(String value) {
+			try {
+				final var level = LogLevel.valueOf(value.strip().toUpperCase(Locale.ROOT));
+				if (level == LogLevel.DEFAULT) {
+					throw new IllegalArgumentException("DEFAULT is only supported on @TempDir declarations");
+				}
+				return level;
+			}
+			catch (IllegalArgumentException ex) {
+				throw new ExtensionConfigurationException(
+					"Invalid log level '%s' set via the '%s' configuration parameter. Supported values: ERROR, WARN, INFO, CONFIG, DEBUG, TRACE, OFF.".formatted(
+						value, TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME),
+					ex);
+			}
+		}
+
+		private static void log(LogLevel level, Supplier<String> message) {
+			switch (level) {
+				case ERROR -> logger.error(message);
+				case WARN -> logger.warn(message);
+				case INFO -> logger.info(message);
+				case CONFIG -> logger.config(message);
+				case DEBUG -> logger.debug(message);
+				case TRACE -> logger.trace(message);
+				case OFF -> {
+				}
+				case DEFAULT -> throw new IllegalStateException("Log level must be resolved before logging");
 			}
 		}
 

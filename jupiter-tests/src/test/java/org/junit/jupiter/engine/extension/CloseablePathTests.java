@@ -73,6 +73,7 @@ import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.jupiter.engine.execution.NamespaceAwareStore;
 import org.junit.jupiter.engine.extension.TempDirectory.CloseablePath;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.commons.logging.LogRecordListener;
@@ -437,8 +438,31 @@ class CloseablePathTests extends AbstractJupiterTestEngineTests {
 		@ParameterizedTest
 		@ElementTypeSource
 		@DisabledOnOs(WINDOWS)
-		void deletesSymbolicLinksTargetingDirOutsideTempDir(Class<?> elementType,
+		void deletesSymbolicLinksTargetingDirOutsideTempDir(Class<?> elementType, @TempDir Path directoryOutsideTempDir,
 				@TrackLogRecords LogRecordListener listener) throws IOException {
+			deletesSymbolicLinksTargetingDirOutsideTempDir(elementType, directoryOutsideTempDir, listener,
+				Level.WARNING);
+		}
+
+		@DisplayName("logs deletion of external symbolic links at the configured level")
+		@ParameterizedTest
+		@CsvSource({ "ERROR, SEVERE", "WARN, WARNING", "INFO, INFO", "CONFIG, CONFIG", "DEBUG, FINE", "TRACE, FINER",
+				"OFF,", "debug, FINE", "'  DeBuG  ', FINE", "'\u2003DeBuG\u2003', FINE", "'\tOfF\t'," })
+		@DisabledOnOs(WINDOWS)
+		void logsDeletionOfExternalSymbolicLinksAtConfiguredLevel(String configuredLevel,
+				@Nullable String expectedLevel, @TempDir Path directoryOutsideTempDir,
+				@TrackLogRecords LogRecordListener listener) throws IOException {
+
+			when(
+				extensionContext.getConfigurationParameter(TempDir.EXTERNAL_TARGET_LOG_LEVEL_PROPERTY_NAME)).thenReturn(
+					Optional.of(configuredLevel));
+
+			deletesSymbolicLinksTargetingDirOutsideTempDir(Path.class, directoryOutsideTempDir, listener,
+				expectedLevel == null ? null : Level.parse(expectedLevel));
+		}
+
+		private void deletesSymbolicLinksTargetingDirOutsideTempDir(Class<?> elementType, Path directoryOutsideTempDir,
+				LogRecordListener listener, @Nullable Level expectedLevel) throws IOException {
 
 			reset(factory);
 
@@ -447,23 +471,24 @@ class CloseablePathTests extends AbstractJupiterTestEngineTests {
 			var rootDir = closeablePath.get();
 			assertThat(rootDir).isDirectory();
 
-			var directoryOutsideTempDir = createTempDirectory("junit-");
-			try {
-				var symbolicLink = createSymbolicLink(rootDir.resolve("symbolicLink"), directoryOutsideTempDir);
+			var externalFile = Files.writeString(directoryOutsideTempDir.resolve("test.txt"), "test");
+			var symbolicLink = createSymbolicLink(rootDir.resolve("symbolicLink"), directoryOutsideTempDir);
 
-				closeablePath.close();
+			closeablePath.close();
 
-				verify(factory).close();
-				assertThat(rootDir).doesNotExist();
-				assertThat(directoryOutsideTempDir).isDirectory();
-				assertThat(listener.stream(Level.WARNING)) //
-						.map(LogRecord::getMessage) //
-						.contains(("Deleting symbolic link from location inside of temp dir (%s) "
-								+ "to location outside of temp dir (%s) but not the target file/directory").formatted(
-									symbolicLink, directoryOutsideTempDir.toRealPath()));
+			verify(factory).close();
+			assertThat(rootDir).doesNotExist();
+			assertThat(directoryOutsideTempDir).isDirectory();
+			assertThat(externalFile).hasContent("test");
+			var message = ("Deleting symbolic link from location inside of temp dir (%s) "
+					+ "to location outside of temp dir (%s) but not the target file/directory").formatted(symbolicLink,
+						directoryOutsideTempDir.toRealPath());
+			var records = listener.stream().filter(record -> record.getMessage().equals(message));
+			if (expectedLevel == null) {
+				assertThat(records).isEmpty();
 			}
-			finally {
-				Files.deleteIfExists(directoryOutsideTempDir);
+			else {
+				assertThat(records).extracting(LogRecord::getLevel).containsExactly(expectedLevel);
 			}
 		}
 	}
