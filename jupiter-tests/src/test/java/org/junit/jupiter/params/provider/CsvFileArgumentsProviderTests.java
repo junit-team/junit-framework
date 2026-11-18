@@ -339,7 +339,7 @@ class CsvFileArgumentsProviderTests {
 					strings[i] = parameterNameAndArgument.getName() + " = " + parameterNameAndArgument.getPayload();
 				}
 				else {
-					throw new IllegalStateException("Unexpected argument type: " + array[i].getClass().getName());
+					throw new IllegalStateException("Unexpected argument: " + array[i]);
 				}
 			}
 			return strings;
