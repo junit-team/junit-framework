@@ -82,7 +82,7 @@ class KotlinReflectionUtilsTests {
                     KotlinReflectionUtils.isInlineTypeAssignableTo(1u, Int::class.java)
                 }
             assertThat(exception).hasMessage(
-                "Kotlin inline value type [1] requires " +
+                "Kotlin inline value type [class kotlin.UInt] requires " +
                     "org.jetbrains.kotlin:kotlin-reflect to be on the classpath or module path. " +
                     "Please add a corresponding dependency."
             )

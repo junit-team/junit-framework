@@ -213,7 +213,7 @@ public class KotlinReflectionUtils {
 	}
 
 	private static void requireKotlinReflect(Object value) {
-		requireDependency(value::toString, kotlinReflectPresent, "inline value type",
+		requireDependency(value::getClass, kotlinReflectPresent, "inline value type",
 			"org.jetbrains.kotlin:kotlin-reflect");
 	}
 
@@ -227,7 +227,7 @@ public class KotlinReflectionUtils {
 			"org.jetbrains.kotlinx:kotlinx-coroutines-core");
 	}
 
-	private static void requireDependency(Supplier<String> representation, boolean condition, String type,
+	private static void requireDependency(Supplier<Object> representation, boolean condition, String type,
 			String dependencyNotation) {
 		Preconditions.condition(condition,
 			() -> ("Kotlin %s [%s] requires %s to be on the classpath or module path. "

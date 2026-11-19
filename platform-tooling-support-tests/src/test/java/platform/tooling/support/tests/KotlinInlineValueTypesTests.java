@@ -58,9 +58,10 @@ class KotlinInlineValueTypesTests {
 		var result = runBuild(workspace, outputFiles, "-PwithoutKotlinReflect");
 
 		assertEquals(1, result.exitCode(), "result=" + result);
-		assertThat(result.stdOut()).contains("PreconditionViolationException: Kotlin inline value type [42] "
-				+ "requires org.jetbrains.kotlin:kotlin-reflect to be on the classpath or module path. "
-				+ "Please add a corresponding dependency.");
+		assertThat(result.stdOut()).contains(
+			"PreconditionViolationException: Kotlin inline value type [class kotlin.UInt] "
+					+ "requires org.jetbrains.kotlin:kotlin-reflect to be on the classpath or module path. "
+					+ "Please add a corresponding dependency.");
 		assertThat(result.stdErr()).contains("BUILD FAILED");
 	}
 
