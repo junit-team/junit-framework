@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.engine.discovery.predicates;
 
-import static org.junit.jupiter.engine.support.MethodReflectionUtils.getReturnType;
+import static org.junit.jupiter.engine.support.JupiterReflectionUtils.getReturnType;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.junit.platform.commons.support.ModifierSupport.isNotAbstract;
 

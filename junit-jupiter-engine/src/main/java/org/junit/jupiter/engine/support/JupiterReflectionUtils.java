@@ -29,7 +29,7 @@ import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
 
 @API(status = INTERNAL, since = "6.0")
-public class MethodReflectionUtils {
+public class JupiterReflectionUtils {
 
 	public static Class<?> getReturnType(Method method) {
 		return isKotlinSuspendingFunction(method) //
@@ -116,6 +116,6 @@ public class MethodReflectionUtils {
 				|| KotlinReflectionUtils.isInlineTypeAssignableTo(obj, targetType);
 	}
 
-	private MethodReflectionUtils() {
+	private JupiterReflectionUtils() {
 	}
 }
