@@ -208,12 +208,12 @@ public class KotlinReflectionUtils {
 	}
 
 	private static void requireKotlinReflect(Method method) {
-		requireDependency(method::toGenericString, kotlinReflectPresent, "suspending function",
+		requireDependency(method::toGenericString, kotlinReflectPresent, "function",
 			"org.jetbrains.kotlin:kotlin-reflect");
 	}
 
 	private static void requireKotlinxCoroutines(Method method) {
-		requireDependency(method::toGenericString, kotlinxCoroutinesPresent, "suspending function",
+		requireDependency(method::toGenericString, kotlinxCoroutinesPresent, "function",
 			"org.jetbrains.kotlinx:kotlinx-coroutines-core");
 	}
 
