@@ -30,14 +30,17 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 
 import kotlin.Unit;
 import kotlin.coroutines.EmptyCoroutineContext;
+import kotlin.reflect.KCallable;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
 class KotlinFunctionUtils {
@@ -153,6 +156,17 @@ class KotlinFunctionUtils {
 		Preconditions.condition(constructors.size() == 1,
 			() -> "Class [%s] must declare a single constructor".formatted(clazz.getName()));
 		return getOnlyElement(constructors);
+	}
+
+	static Optional<Type> getInlineValueType(Object value) {
+		var kotlinClass = getKotlinClass(value.getClass());
+		Preconditions.condition(kotlinClass.isValue(), "value must be a value class");
+		return kotlinClass.getMembers().stream() //
+				.filter(KProperty.class::isInstance) //
+				// By definition value classes only have one property
+				.findFirst() //
+				.map(KCallable::getReturnType) //
+				.map(ReflectJvmMapping::getJavaType);
 	}
 
 	private KotlinFunctionUtils() {

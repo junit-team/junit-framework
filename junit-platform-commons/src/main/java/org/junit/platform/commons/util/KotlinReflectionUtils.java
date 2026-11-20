@@ -10,7 +10,6 @@
 
 package org.junit.platform.commons.util;
 
-import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.util.ReflectionUtils.EMPTY_CLASS_ARRAY;
 import static org.junit.platform.commons.util.ReflectionUtils.findMethod;
@@ -29,8 +28,6 @@ import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.function.Try;
 
-import kotlin.reflect.KCallable;
-import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
 /**
@@ -185,14 +182,7 @@ public class KotlinReflectionUtils {
 			return false;
 		}
 		requireKotlinReflect(value);
-		var kotlinClass = getKotlinClass(value.getClass());
-		Preconditions.condition(kotlinClass.isValue(), "value must be a value class");
-		return kotlinClass.getMembers().stream() //
-				.filter(KProperty.class::isInstance) //
-				// By definition value classes only have one property
-				.findFirst() //
-				.map(KCallable::getReturnType) //
-				.map(ReflectJvmMapping::getJavaType) //
+		return KotlinFunctionUtils.getInlineValueType(value) //
 				.filter(Class.class::isInstance) //
 				.map(Class.class::cast) //
 				.map(targetType::isAssignableFrom) //
