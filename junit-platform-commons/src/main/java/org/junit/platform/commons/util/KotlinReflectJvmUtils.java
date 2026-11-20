@@ -43,7 +43,13 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
-class KotlinFunctionUtils {
+/**
+ * Internal Kotlin-specific reflection utilities that depend on kotlin-reflect.
+ *
+ * @since 6.0.0
+ * @see KotlinReflectionUtils
+ */
+class KotlinReflectJvmUtils {
 
 	static Class<?> getReturnType(Method method) {
 		var returnType = getJavaClass(getJvmErasure(getKotlinFunction(method).getReturnType()));
@@ -169,6 +175,6 @@ class KotlinFunctionUtils {
 				.map(ReflectJvmMapping::getJavaType);
 	}
 
-	private KotlinFunctionUtils() {
+	private KotlinReflectJvmUtils() {
 	}
 }

@@ -137,28 +137,28 @@ public class KotlinReflectionUtils {
 
 	public static Class<?> getKotlinSuspendingFunctionReturnType(Method method) {
 		requireKotlinReflect(method);
-		return KotlinFunctionUtils.getReturnType(method);
+		return KotlinReflectJvmUtils.getReturnType(method);
 	}
 
 	public static Type getKotlinSuspendingFunctionGenericReturnType(Method method) {
 		requireKotlinReflect(method);
-		return KotlinFunctionUtils.getGenericReturnType(method);
+		return KotlinReflectJvmUtils.getGenericReturnType(method);
 	}
 
 	public static Parameter[] getKotlinSuspendingFunctionParameters(Method method) {
 		requireKotlinReflect(method);
-		return KotlinFunctionUtils.getParameters(method);
+		return KotlinReflectJvmUtils.getParameters(method);
 	}
 
 	public static Class<?>[] getKotlinSuspendingFunctionParameterTypes(Method method) {
 		requireKotlinReflect(method);
-		return KotlinFunctionUtils.getParameterTypes(method);
+		return KotlinReflectJvmUtils.getParameterTypes(method);
 	}
 
 	@API(status = INTERNAL, since = "6.2")
 	public static <T> Constructor<T> getKotlinConstructor(Class<T> clazz) {
 		requireKotlinReflect(clazz);
-		var constructor = KotlinFunctionUtils.getKotlinConstructor(clazz);
+		var constructor = KotlinReflectJvmUtils.getKotlinConstructor(clazz);
 		var javaConstructor = ReflectJvmMapping.getJavaConstructor(constructor);
 		return Preconditions.notNull(javaConstructor,
 			() -> "Failed to get constructor for Kotlin constructor of: " + clazz);
@@ -168,7 +168,7 @@ public class KotlinReflectionUtils {
 			@Nullable Object[] args) {
 		requireKotlinReflect(method);
 		requireKotlinxCoroutines(method);
-		return KotlinFunctionUtils.invokeKotlinSuspendingFunction(method, target, args);
+		return KotlinReflectJvmUtils.invokeKotlinSuspendingFunction(method, target, args);
 	}
 
 	@API(status = INTERNAL, since = "6.1")
@@ -182,7 +182,7 @@ public class KotlinReflectionUtils {
 			return false;
 		}
 		requireKotlinReflect(value);
-		return KotlinFunctionUtils.getInlineValueType(value) //
+		return KotlinReflectJvmUtils.getInlineValueType(value) //
 				.filter(Class.class::isInstance) //
 				.map(Class.class::cast) //
 				.map(targetType::isAssignableFrom) //
@@ -193,13 +193,13 @@ public class KotlinReflectionUtils {
 	public static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target,
 			@Nullable Object... args) {
 		requireKotlinReflect(method);
-		return KotlinFunctionUtils.invokeKotlinFunction(method, target, args);
+		return KotlinReflectJvmUtils.invokeKotlinFunction(method, target, args);
 	}
 
 	@API(status = INTERNAL, since = "6.2")
 	public static <T> T newInstance(Constructor<T> constructor, @Nullable Object... args) {
 		requireKotlinReflect(constructor);
-		return KotlinFunctionUtils.invokeKotlinConstructor(constructor, args);
+		return KotlinReflectJvmUtils.invokeKotlinConstructor(constructor, args);
 	}
 
 	private static void requireKotlinReflect(Object value) {
