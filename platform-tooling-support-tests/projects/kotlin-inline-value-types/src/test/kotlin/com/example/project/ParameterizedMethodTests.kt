@@ -24,8 +24,18 @@ class ParameterizedMethodTests {
         fail("expected")
     }
 
+    @MethodSource("resultProvider")
+    @ParameterizedTest
+    fun testResult(result: Result<String>) {
+        assertEquals("success", result.getOrThrow())
+        fail("expected")
+    }
+
     companion object {
         @JvmStatic
         fun uintProvider() = listOf(Arguments.of(42u))
+
+        @JvmStatic
+        fun resultProvider() = listOf(Arguments.of(Result.success("success")))
     }
 }
