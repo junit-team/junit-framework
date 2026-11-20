@@ -49,7 +49,9 @@ class KotlinInlineValueTypesTests {
 				.containsIgnoringNewLines("""
 						ParameterizedMethodTests > testUInt-WZ4Q5Ns(int) > [1] 42 FAILED
 						    org.opentest4j.AssertionFailedError: expected""");
-		assertThat(result.stdErr()).contains("2 tests completed, 2 failed").contains("BUILD FAILED");
+		assertThat(result.stdErr()) //
+				.contains("2 tests completed, 2 failed") //
+				.contains("BUILD FAILED");
 	}
 
 	@Test
@@ -62,7 +64,9 @@ class KotlinInlineValueTypesTests {
 			"PreconditionViolationException: Kotlin inline value type [class kotlin.UInt] "
 					+ "requires org.jetbrains.kotlin:kotlin-reflect to be on the classpath or module path. "
 					+ "Please add a corresponding dependency.");
-		assertThat(result.stdErr()).contains("BUILD FAILED");
+		assertThat(result.stdErr()) //
+				.contains("2 tests completed, 2 failed") //
+				.contains("BUILD FAILED");
 	}
 
 	private static ProcessResult runBuild(Path workspace, OutputFiles outputFiles, String... extraArgs)
