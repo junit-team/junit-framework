@@ -202,22 +202,26 @@ public class KotlinReflectionUtils {
 		return KotlinReflectJvmUtils.invokeKotlinConstructor(constructor, args);
 	}
 
+	private static void requireKotlinReflect(Class<?> clazz) {
+		requireDependency(kotlinReflectPresent, () -> clazz, "class", "org.jetbrains.kotlin:kotlin-reflect");
+	}
+
 	private static void requireKotlinReflect(Object value) {
-		requireDependency(value::getClass, kotlinReflectPresent, "inline value type",
+		requireDependency(kotlinReflectPresent, value::getClass, "inline value type",
 			"org.jetbrains.kotlin:kotlin-reflect");
 	}
 
 	private static void requireKotlinReflect(Method method) {
-		requireDependency(method::toGenericString, kotlinReflectPresent, "function",
+		requireDependency(kotlinReflectPresent, method::toGenericString, "function",
 			"org.jetbrains.kotlin:kotlin-reflect");
 	}
 
 	private static void requireKotlinxCoroutines(Method method) {
-		requireDependency(method::toGenericString, kotlinxCoroutinesPresent, "function",
+		requireDependency(kotlinxCoroutinesPresent, method::toGenericString, "function",
 			"org.jetbrains.kotlinx:kotlinx-coroutines-core");
 	}
 
-	private static void requireDependency(Supplier<Object> representation, boolean condition, String type,
+	private static void requireDependency(boolean condition, Supplier<Object> representation, String type,
 			String dependencyNotation) {
 		Preconditions.condition(condition,
 			() -> ("Kotlin %s [%s] requires %s to be on the classpath or module path. "
