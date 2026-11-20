@@ -53,6 +53,16 @@ public class JupiterReflectionUtils {
 		return ReflectionUtils.invokeMethod(method, target, arguments);
 	}
 
+	@API(status = INTERNAL, since = "6.2")
+	public static <T> T newInstance(Constructor<T> constructor, @Nullable Object[] arguments) {
+		var declaringClass = constructor.getDeclaringClass();
+		if (isKotlinType(declaringClass) && hasInlineTypeArgument(arguments)) {
+			var constructorWithKotlinConstructor = findConstructorWithKotlinConstructor(constructor);
+			return KotlinReflectionUtils.newInstance(constructorWithKotlinConstructor, arguments);
+		}
+		return ReflectionUtils.newInstance(constructor, arguments);
+	}
+
 	private static boolean hasInlineTypeArgument(@Nullable Object[] arguments) {
 		for (Object argument : arguments) {
 			if (KotlinReflectionUtils.isInstanceOfInlineType(argument)) {
@@ -62,12 +72,7 @@ public class JupiterReflectionUtils {
 		return false;
 	}
 
-	@API(status = INTERNAL, since = "6.2")
-	public static <T> T newInstance(Constructor<T> constructor, @Nullable Object[] arguments) {
-		var declaringClass = constructor.getDeclaringClass();
-		if (!isKotlinType(declaringClass) || !hasInlineTypeArgument(arguments)) {
-			return ReflectionUtils.newInstance(constructor, arguments);
-		}
+	private static <T> Constructor<T> findConstructorWithKotlinConstructor(Constructor<T> constructor) {
 		// Because the arguments include Kotlin inline value types we can't use
 		// the Java constructor and must use KFunction.callBy instead. This
 		// requires a Kotlin constructor.
@@ -105,8 +110,8 @@ public class JupiterReflectionUtils {
 		// can't use this method directly, but it will have a usable Kotlin
 		// function. So we can pass that to KotlinReflectionUtils.newInstance
 		// avoiding the use of kotlin.reflect types.
-		var constructorWithKotlinConstructor = KotlinReflectionUtils.getKotlinConstructor(declaringClass);
-		return KotlinReflectionUtils.newInstance(constructorWithKotlinConstructor, arguments);
+		var declaringClass = constructor.getDeclaringClass();
+		return KotlinReflectionUtils.getKotlinConstructor(declaringClass);
 	}
 
 	@API(status = INTERNAL, since = "6.2")
