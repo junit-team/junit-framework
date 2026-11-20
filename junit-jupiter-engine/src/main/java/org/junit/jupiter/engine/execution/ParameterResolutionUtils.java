@@ -12,9 +12,9 @@ package org.junit.jupiter.engine.execution;
 
 import static java.util.stream.Collectors.joining;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.jupiter.engine.support.JupiterReflectionUtils.isAssignableTo;
 import static org.junit.platform.commons.util.KotlinReflectionUtils.getKotlinSuspendingFunctionParameters;
 import static org.junit.platform.commons.util.KotlinReflectionUtils.isKotlinSuspendingFunction;
-import static org.junit.platform.commons.util.ReflectionUtils.isAssignableTo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;

@@ -11,33 +11,45 @@
 package org.junit.platform.commons.util;
 
 import static kotlin.jvm.JvmClassMappingKt.getJavaClass;
+import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 import static kotlin.reflect.full.KCallables.callSuspendBy;
 import static kotlin.reflect.jvm.KCallablesJvm.isAccessible;
 import static kotlin.reflect.jvm.KCallablesJvm.setAccessible;
 import static kotlin.reflect.jvm.KTypesJvm.getJvmErasure;
 import static kotlin.reflect.jvm.ReflectJvmMapping.getJavaType;
 import static kotlinx.coroutines.BuildersKt.runBlocking;
+import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 import static org.junit.platform.commons.util.ReflectionUtils.EMPTY_CLASS_ARRAY;
 import static org.junit.platform.commons.util.ReflectionUtils.getUnderlyingCause;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
 
 import kotlin.Unit;
 import kotlin.coroutines.EmptyCoroutineContext;
+import kotlin.reflect.KCallable;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KProperty;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
-class KotlinFunctionUtils {
+/**
+ * Internal Kotlin-specific reflection utilities that depend on kotlin-reflect.
+ *
+ * @since 6.0.0
+ * @see KotlinReflectionUtils
+ */
+class KotlinReflectJvmUtils {
 
 	static Class<?> getReturnType(Method method) {
 		var returnType = getJavaClass(getJvmErasure(getKotlinFunction(method).getReturnType()));
@@ -70,6 +82,15 @@ class KotlinFunctionUtils {
 	static @Nullable Object invokeKotlinFunction(Method method, @Nullable Object target, @Nullable Object[] args) {
 		try {
 			return invokeKotlinFunction(getKotlinFunction(method), target, args);
+		}
+		catch (InterruptedException e) {
+			throw throwAsUncheckedException(e);
+		}
+	}
+
+	static <T> T invokeKotlinConstructor(Constructor<T> constructor, @Nullable Object[] args) {
+		try {
+			return invokeKotlinFunction(getKotlinFunction(constructor), null, args);
 		}
 		catch (InterruptedException e) {
 			throw throwAsUncheckedException(e);
@@ -131,6 +152,29 @@ class KotlinFunctionUtils {
 			() -> "Failed to get Kotlin function for method: " + method);
 	}
 
-	private KotlinFunctionUtils() {
+	private static <T> KFunction<T> getKotlinFunction(Constructor<T> constructor) {
+		return Preconditions.notNull(ReflectJvmMapping.getKotlinFunction(constructor),
+			() -> "Failed to get Kotlin function for constructor: " + constructor);
+	}
+
+	static <T> KFunction<T> getKotlinConstructor(Class<T> clazz) {
+		var constructors = getKotlinClass(clazz).getConstructors();
+		Preconditions.condition(constructors.size() == 1,
+			() -> "Class [%s] must declare a single constructor".formatted(clazz.getName()));
+		return getOnlyElement(constructors);
+	}
+
+	static Optional<Type> getInlineValueType(Object value) {
+		var kotlinClass = getKotlinClass(value.getClass());
+		Preconditions.condition(kotlinClass.isValue(), "value must be a value class");
+		return kotlinClass.getMembers().stream() //
+				.filter(KProperty.class::isInstance) //
+				// By definition value classes only have one property
+				.findFirst() //
+				.map(KCallable::getReturnType) //
+				.map(ReflectJvmMapping::getJavaType);
+	}
+
+	private KotlinReflectJvmUtils() {
 	}
 }
