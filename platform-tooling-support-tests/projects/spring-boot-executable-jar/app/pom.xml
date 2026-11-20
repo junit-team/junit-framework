@@ -33,7 +33,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>4.1.2</version>
+                <version>4.2.0</version>
                 <configuration>
                     <mainClass>org.junit.platform.console.ConsoleLauncher</mainClass>
                 </configuration>
