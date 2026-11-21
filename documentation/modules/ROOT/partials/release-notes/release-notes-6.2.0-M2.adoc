@@ -45,7 +45,8 @@ repository on GitHub.
 [[v6.2.0-M2-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* Test execution cancellation is now also checked between before callbacks and
+  lifecycle methods such as `@BeforeAll` and `@BeforeEach` methods.
 
 
 [[v6.2.0-M2-junit-vintage]]

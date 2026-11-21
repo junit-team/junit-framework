@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.engine.descriptor;
 
+import static org.junit.jupiter.engine.descriptor.JupiterTestDescriptor.shouldContinue;
 import static org.junit.platform.commons.util.CollectionUtils.forEachInReverseOrder;
 
 import org.junit.jupiter.api.extension.Extension;
@@ -32,7 +33,7 @@ class CallbackSupport {
 
 		for (T callback : registry.getExtensions(type)) {
 			throwableCollector.execute(() -> callbackInvoker.invoke(callback, extensionContext));
-			if (throwableCollector.isNotEmpty()) {
+			if (!shouldContinue(context)) {
 				break;
 			}
 		}

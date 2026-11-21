@@ -89,7 +89,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 	@Override
 	protected JupiterEngineExecutionContext createExecutionContext(ExecutionRequest request) {
 		return new JupiterEngineExecutionContext(request.getEngineExecutionListener(), getJupiterConfiguration(request),
-			new LauncherStoreFacade(request.getStore()));
+			new LauncherStoreFacade(request.getStore()), request.getCancellationToken());
 	}
 
 	/**
