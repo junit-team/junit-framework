@@ -466,7 +466,7 @@ public class NamespacedHierarchicalStoreTests {
 		@Test
 		void closesStoreEvenIfCloseActionThrowsException() throws Throwable {
 			store.put(namespace, key, value);
-			doThrow(IllegalStateException.class).when(closeAction).close(namespace, key, value);
+			doThrow(new IllegalStateException()).when(closeAction).close(namespace, key, value);
 
 			assertThrows(IllegalStateException.class, store::close);
 			assertClosed();
@@ -481,7 +481,7 @@ public class NamespacedHierarchicalStoreTests {
 		@Test
 		void closesStoreEvenIfCloseActionThrowsUnrecoverableException() throws Throwable {
 			store.put(namespace, key, value);
-			doThrow(OutOfMemoryError.class).when(closeAction).close(namespace, key, value);
+			doThrow(new OutOfMemoryError()).when(closeAction).close(namespace, key, value);
 
 			assertThrows(OutOfMemoryError.class, store::close);
 			assertClosed();
