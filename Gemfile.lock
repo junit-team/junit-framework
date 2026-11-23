@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    Ascii85 (2.0.1)
+    Ascii85 (2.0.2)
     addressable (2.9.2)
       public_suffix (>= 2.0.2, < 8.0)
     afm (1.0.1)
@@ -20,7 +20,7 @@ GEM
     concurrent-ruby (1.3.8)
     css_parser (1.22.0)
       addressable
-    hashery (2.1.2)
+    hashery (2.2.2)
     matrix (0.4.3)
     pdf-core (0.9.0)
     pdf-reader (2.16.0)
