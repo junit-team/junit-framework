@@ -51,6 +51,8 @@ jobs:
           unzip -c /tmp/reference.jar META-INF/MANIFEST.MF | jc --jar-manifest | jq '.[0]' > /tmp/manifest.json
           echo "createdBy=$(jq --raw-output .Created_By /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "buildTimestamp=$(jq --raw-output .Build_Date /tmp/manifest.json) $(jq --raw-output .Build_Time /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
+      - name: Set up Test JDK
+        uses: ./.github/actions/setup-test-jdk
       - name: Verify artifacts
         uses: ./.github/actions/run-gradle
         with:
@@ -165,6 +167,9 @@ jobs:
         with:
           fetch-depth: 1
           ref: "refs/tags/${{ env.RELEASE_TAG }}"
+      - name: Set up Test JDK
+        if: ${{ inputs.dryRun == false }}
+        uses: ./.github/actions/setup-test-jdk
       - name: Release staging repository
         if: ${{ inputs.dryRun == false }}
         uses: ./.github/actions/run-gradle

@@ -41,6 +41,9 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
         tools: linked
+    - name: Set up Test JDK
+      if: matrix.build-mode == 'manual'
+      uses: ./.github/actions/setup-test-jdk
     - name: Build
       if: matrix.build-mode == 'manual'
       uses: ./.github/actions/run-gradle

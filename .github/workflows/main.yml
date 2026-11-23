@@ -81,6 +81,8 @@ jobs:
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       with:
         fetch-depth: 1
+    - name: Set up Test JDK
+      uses: ./.github/actions/setup-test-jdk
     - name: Publish
       uses: ./.github/actions/run-gradle
       env:
@@ -112,6 +114,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install graphviz
+    - name: Set up Test JDK
+      uses: ./.github/actions/setup-test-jdk
     - name: Build Documentation
       uses: ./.github/actions/run-gradle
       with:
