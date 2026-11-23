@@ -249,6 +249,98 @@ class EnabledOnOsConditionTests extends AbstractExecutionConditionTests {
 		assertEnabledOnCurrentOsAndArchitectureIf(onLinux() && onArchitecture("aarch64"));
 	}
 
+	/**
+	 * @see EnabledOnOsIntegrationTests#nameOnlyLinux()
+	 */
+	@Test
+	void nameOnlyLinux() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsIf(onLinux());
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#nameOnlyMac()
+	 */
+	@Test
+	void nameOnlyMac() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsIf(onMac());
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#nameOnlyWindows()
+	 */
+	@Test
+	void nameOnlyWindows() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsIf(onWindows());
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#nameOnlyUnknownOs()
+	 */
+	@Test
+	void nameOnlyUnknownOs() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsIf(false);
+		assertCustomDisabledReasonIs("Only on AmongOS");
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#nameWithArchitecture()
+	 */
+	@Test
+	void nameWithArchitecture() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsAndArchitectureIf(onLinux() && onArchitecture("x86_64"));
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#nameWithComposedAnnotation()
+	 */
+	@Test
+	void nameWithComposedAnnotation() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsIf(onMac());
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#blankNameWithOsValue()
+	 */
+	@Test
+	void blankNameWithOsValue() {
+		evaluateCondition();
+		assertEnabledOnCurrentOsIf(onMac());
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#blankNameWithArchitecture()
+	 */
+	@Test
+	void blankNameWithArchitecture() {
+		evaluateCondition();
+		assertEnabledOnCurrentArchitectureIf(onArchitecture("aarch64"));
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#blankNameOnlyDeclared()
+	 */
+	@Test
+	void blankNameOnlyDeclared() {
+		assertPreconditionViolationFor(this::evaluateCondition)//
+				.withMessageContaining("You must declare at least one OS or architecture");
+	}
+
+	/**
+	 * @see EnabledOnOsIntegrationTests#osValuesAndNameDeclared()
+	 */
+	@Test
+	void osValuesAndNameDeclared() {
+		assertPreconditionViolationFor(this::evaluateCondition)//
+				.withMessage(
+					"@EnabledOnOs must be configured with either OS enum constants or an OS name, but not both");
+	}
+
 	private void assertEnabledOnCurrentOsIf(boolean condition) {
 		if (condition) {
 			assertEnabled();

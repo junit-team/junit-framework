@@ -14,10 +14,13 @@ import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Locale;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.util.StringUtils;
 
 /**
  * Base class for OS-based {@link ExecutionCondition} implementations.
@@ -43,6 +46,32 @@ abstract class AbstractOsBasedExecutionCondition<A extends Annotation> implement
 	}
 
 	abstract ConditionEvaluationResult evaluateExecutionCondition(A annotation);
+
+	/**
+	 * Determine if the name of the current operating system contains the
+	 * supplied name, ignoring case.
+	 *
+	 * @see #osNameMatches(String, String)
+	 */
+	static boolean isCurrentOsName(String name) {
+		return osNameMatches(CURRENT_OS, name);
+	}
+
+	/**
+	 * Determine if the supplied operating system name contains the supplied
+	 * name, ignoring case.
+	 *
+	 * <p>Both names are converted to lower case using {@link Locale#ENGLISH},
+	 * so that the result does not depend on the default locale. The supplied
+	 * name is matched literally. If either name is blank, this method returns
+	 * {@code false}.
+	 */
+	static boolean osNameMatches(@Nullable String osName, String name) {
+		if (StringUtils.isBlank(osName) || StringUtils.isBlank(name)) {
+			return false;
+		}
+		return osName.toLowerCase(Locale.ENGLISH).contains(name.toLowerCase(Locale.ENGLISH));
+	}
 
 	String createReason(boolean enabled, boolean osSpecified, boolean archSpecified) {
 		StringBuilder reason = new StringBuilder() //

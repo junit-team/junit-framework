@@ -100,6 +100,20 @@ class ConditionalTestExecutionDemo {
 	}
 	// end::user_guide_architecture[]
 
+	// tag::user_guide_os_arbitrary_names[]
+	@Test
+	@EnabledOnOs(name = "AmongOS")
+	void onlyOnAmongOs() {
+		// ...
+	}
+
+	@Test
+	@DisabledOnOs(name = "AmongOS", architectures = "aarch64")
+	void notOnAmongOsOnAarch64() {
+		// ...
+	}
+	// end::user_guide_os_arbitrary_names[]
+
 	// tag::user_guide_jre[]
 	@Test
 	@EnabledOnJre(JAVA_17)

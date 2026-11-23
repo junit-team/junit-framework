@@ -47,6 +47,9 @@ repository on GitHub.
 
 * Test execution cancellation is now also checked between before callbacks and
   lifecycle methods such as `@BeforeAll` and `@BeforeEach` methods.
+* `@EnabledOnOs` and `@DisabledOnOs` now support a `name` attribute for operating systems
+  that are not represented by an `OS` enum constant. The name is matched as a
+  case-insensitive substring of the `os.name` JVM system property.
 
 
 [[v6.2.0-M2-junit-vintage]]

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.StringUtils;
 
 /**
  * {@link ExecutionCondition} for {@link EnabledOnOs @EnabledOnOs}.
@@ -30,11 +31,15 @@ class EnabledOnOsCondition extends AbstractOsBasedExecutionCondition<EnabledOnOs
 
 	@Override
 	ConditionEvaluationResult evaluateExecutionCondition(EnabledOnOs annotation) {
-		boolean osSpecified = annotation.value().length > 0;
+		boolean osValuesSpecified = annotation.value().length > 0;
+		boolean osNameSpecified = StringUtils.isNotBlank(annotation.name());
 		boolean archSpecified = annotation.architectures().length > 0;
-		Preconditions.condition(osSpecified || archSpecified,
+		Preconditions.condition(osValuesSpecified || osNameSpecified || archSpecified,
 			"You must declare at least one OS or architecture in @EnabledOnOs");
+		Preconditions.condition(!(osValuesSpecified && osNameSpecified),
+			"@EnabledOnOs must be configured with either OS enum constants or an OS name, but not both");
 
+		boolean osSpecified = osValuesSpecified || osNameSpecified;
 		boolean enabled = isEnabledBasedOnOs(annotation) && isEnabledBasedOnArchitecture(annotation);
 		String reason = createReason(enabled, osSpecified, archSpecified);
 
@@ -44,10 +49,14 @@ class EnabledOnOsCondition extends AbstractOsBasedExecutionCondition<EnabledOnOs
 
 	private boolean isEnabledBasedOnOs(EnabledOnOs annotation) {
 		OS[] operatingSystems = annotation.value();
-		if (operatingSystems.length == 0) {
-			return true;
+		if (operatingSystems.length > 0) {
+			return Arrays.stream(operatingSystems).anyMatch(OS::isCurrentOs);
 		}
-		return Arrays.stream(operatingSystems).anyMatch(OS::isCurrentOs);
+		String name = annotation.name();
+		if (StringUtils.isNotBlank(name)) {
+			return isCurrentOsName(name);
+		}
+		return true;
 	}
 
 	private boolean isEnabledBasedOnArchitecture(EnabledOnOs annotation) {

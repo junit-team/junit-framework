@@ -15,6 +15,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.platform.commons.util.Preconditions;
+import org.junit.platform.commons.util.StringUtils;
 
 /**
  * {@link ExecutionCondition} for {@link DisabledOnOs @DisabledOnOs}.
@@ -30,11 +31,15 @@ class DisabledOnOsCondition extends AbstractOsBasedExecutionCondition<DisabledOn
 
 	@Override
 	ConditionEvaluationResult evaluateExecutionCondition(DisabledOnOs annotation) {
-		boolean osSpecified = annotation.value().length > 0;
+		boolean osValuesSpecified = annotation.value().length > 0;
+		boolean osNameSpecified = StringUtils.isNotBlank(annotation.name());
 		boolean archSpecified = annotation.architectures().length > 0;
-		Preconditions.condition(osSpecified || archSpecified,
+		Preconditions.condition(osValuesSpecified || osNameSpecified || archSpecified,
 			"You must declare at least one OS or architecture in @DisabledOnOs");
+		Preconditions.condition(!(osValuesSpecified && osNameSpecified),
+			"@DisabledOnOs must be configured with either OS enum constants or an OS name, but not both");
 
+		boolean osSpecified = osValuesSpecified || osNameSpecified;
 		boolean enabled = isEnabledBasedOnOs(annotation) || isEnabledBasedOnArchitecture(annotation);
 		String reason = createReason(enabled, osSpecified, archSpecified);
 
@@ -44,10 +49,14 @@ class DisabledOnOsCondition extends AbstractOsBasedExecutionCondition<DisabledOn
 
 	private boolean isEnabledBasedOnOs(DisabledOnOs annotation) {
 		OS[] operatingSystems = annotation.value();
-		if (operatingSystems.length == 0) {
-			return false;
+		if (operatingSystems.length > 0) {
+			return Arrays.stream(operatingSystems).noneMatch(OS::isCurrentOs);
 		}
-		return Arrays.stream(operatingSystems).noneMatch(OS::isCurrentOs);
+		String name = annotation.name();
+		if (StringUtils.isNotBlank(name)) {
+			return !isCurrentOsName(name);
+		}
+		return false;
 	}
 
 	private boolean isEnabledBasedOnArchitecture(DisabledOnOs annotation) {
