@@ -155,7 +155,7 @@ class AsyncResourcePermitTests {
 	void completesWaitersOutsideTheLock() {
 		final var permit = new AsyncResourcePermit(1);
 		final var held = permit.acquire().toCompletableFuture().join();
-		try (final var executor = Executors.newSingleThreadExecutor()) {
+		try (var executor = Executors.newSingleThreadExecutor()) {
 			final var callback = permit.acquire().thenAccept(next -> {
 				// A different thread must be able to inspect the gate while this callback runs.
 				assertDoesNotThrow(
@@ -174,7 +174,7 @@ class AsyncResourcePermitTests {
 	@Test
 	void concurrentAcquireAndReleaseDoNotLoseWakeups() throws Exception {
 		final var permit = new AsyncResourcePermit(1);
-		try (final var executor = Executors.newFixedThreadPool(2)) {
+		try (var executor = Executors.newFixedThreadPool(2)) {
 			for (int i = 0; i < 200; i++) {
 				final var held = permit.acquire().toCompletableFuture().join();
 				final var start = new CountDownLatch(1);
@@ -203,7 +203,7 @@ class AsyncResourcePermitTests {
 	@Test
 	void concurrentCancellationAndReleaseKeepPermitBalance() throws Exception {
 		final var permit = new AsyncResourcePermit(1);
-		try (final var executor = Executors.newFixedThreadPool(2)) {
+		try (var executor = Executors.newFixedThreadPool(2)) {
 			for (int i = 0; i < 200; i++) {
 				final var held = permit.acquire().toCompletableFuture().join();
 				final var pending = permit.acquire().toCompletableFuture();

@@ -92,7 +92,7 @@ class AsyncNodeLifecycleTests {
 			}
 		};
 		final var listener = new RecordingListener();
-		try (final var service = new SameThreadHierarchicalTestExecutorService()) {
+		try (var service = new SameThreadHierarchicalTestExecutorService()) {
 			run(root, service, listener).get(5, SECONDS);
 		}
 		assertThat(events).containsExactly("around-before", "before", "execute", "after", "around-after");
@@ -109,7 +109,7 @@ class AsyncNodeLifecycleTests {
 			}
 		};
 		final var listener = new RecordingListener();
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1)) {
 			run(root, service, listener).get(5, SECONDS);
 		}
 		assertThat(listener.result(root).getThrowable()).isEmpty();
@@ -164,7 +164,7 @@ class AsyncNodeLifecycleTests {
 		};
 		final var worker = Executors.newSingleThreadExecutor();
 		final var listener = new RecordingListener();
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
 			final var result = run(root, service, listener);
 			beforeEntered.get(5, SECONDS);
 			assertThat(worker.submit(() -> "free").get(5, SECONDS)).isEqualTo("free");
@@ -235,7 +235,7 @@ class AsyncNodeLifecycleTests {
 		final var root = new TestNode("root", TestDescriptor.Type.CONTAINER);
 		root.addChild(parent);
 		final var listener = new RecordingListener();
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1)) {
 			final var result = run(root, service, listener);
 			dynamicEntered.get(5, SECONDS);
 			assertThat(events).isEmpty();
@@ -265,7 +265,7 @@ class AsyncNodeLifecycleTests {
 				return failedFuture(fatal);
 			}
 		};
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1)) {
 			final var result = run(root, service, new RecordingListener());
 			final var failure = assertThrows(java.util.concurrent.ExecutionException.class,
 				() -> result.get(5, SECONDS));
@@ -300,7 +300,7 @@ class AsyncNodeLifecycleTests {
 				};
 			}
 		};
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1)) {
 			final var advisor = new NodeTreeWalker().walk(root);
 			final var taskContext = new NodeTestTaskContext(new RecordingListener(), service,
 				OpenTest4JAwareThrowableCollector::new, advisor, CancellationToken.create());
@@ -341,7 +341,7 @@ class AsyncNodeLifecycleTests {
 				afterCalls.incrementAndGet();
 			}
 		};
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1)) {
 			final var result = run(root, service, new RecordingListener());
 			final var childResult = submitted.get(5, SECONDS);
 			assertThrows(java.util.concurrent.ExecutionException.class, () -> childResult.get(5, SECONDS));

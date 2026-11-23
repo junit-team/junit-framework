@@ -44,7 +44,7 @@ class ReactiveServiceLifecycleTests {
 		final var body = new CompletableFuture<Void>();
 		final var lock = new LockManager().getLockForResource(new ExclusiveResource("shared", LockMode.READ_WRITE));
 		final var worker = Executors.newFixedThreadPool(2);
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
 			final var first = service.submitAsync(new AsyncTask(lock, () -> {
 				entered.complete(null);
 				if (throwDirectly) {
@@ -75,7 +75,7 @@ class ReactiveServiceLifecycleTests {
 		final var entered = new CompletableFuture<Void>();
 		final var lock = new LockManager().getLockForResource(new ExclusiveResource("shared", LockMode.READ_WRITE));
 		final var worker = Executors.newFixedThreadPool(2);
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
 			final var first = service.submitAsync(new AsyncTask(lock, () -> {
 				entered.complete(null);
 				return body;
@@ -98,7 +98,7 @@ class ReactiveServiceLifecycleTests {
 	void rejectedSubmissionDoesNotLeakTheOnlyPermit() {
 		final var worker = Executors.newSingleThreadExecutor();
 		worker.shutdown();
-		try (final var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(1, worker)) {
 			for (int index = 0; index < 2; index++) {
 				final var result = service.submitAsync(new AsyncTask(NopLock.INSTANCE, () -> failedFuture(
 					new AssertionError("Rejected worker must not run the body")))).toCompletableFuture();
@@ -117,7 +117,7 @@ class ReactiveServiceLifecycleTests {
 			() -> failedFuture(new IllegalStateException("recoverable sibling")));
 		final var failingFatally = new AsyncTask(NopLock.INSTANCE, () -> fatalBody);
 		final var tasks = fatalFirst ? List.of(failingFatally, ordinary) : List.of(ordinary, failingFatally);
-		try (final var service = new ReactiveHierarchicalTestExecutorService(2)) {
+		try (var service = new ReactiveHierarchicalTestExecutorService(2)) {
 			final var result = service.invokeAllAsync(tasks).toCompletableFuture();
 			assertThat(result.isDone()).isFalse();
 			fatalBody.completeExceptionally(fatal);
