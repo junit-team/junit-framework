@@ -248,8 +248,8 @@ class AsyncNodeLifecycleTests {
 		}
 		assertThat(events).containsExactly("dynamic-cleanup", "parent-after", "parent-cleanup");
 		assertThat(listener.result(parent).getStatus()).isEqualTo(FAILED);
-		assertThat(listener.result(parent).getThrowable().orElseThrow()).isSameAs(executeFailure)
-				.hasSuppressedException(afterFailure);
+		assertThat(listener.result(parent).getThrowable().orElseThrow()).isSameAs(
+			executeFailure).hasSuppressedException(afterFailure);
 	}
 
 	@ParameterizedTest

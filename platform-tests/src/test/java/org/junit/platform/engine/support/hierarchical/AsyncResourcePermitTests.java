@@ -145,8 +145,7 @@ class AsyncResourcePermitTests {
 			for (int j = i; j < acquisitions.size(); j++) {
 				assertThat(acquisitions.get(j).isDone()).isEqualTo(j < i + permit.maxPermits());
 			}
-			assertThat(permit.availablePermits()).isEqualTo(
-				Math.max(0, i + permit.maxPermits() - acquisitions.size()));
+			assertThat(permit.availablePermits()).isEqualTo(Math.max(0, i + permit.maxPermits() - acquisitions.size()));
 			acquisitions.get(i).join().release();
 		}
 		assertThat(permit.availablePermits()).isEqualTo(permit.maxPermits());
@@ -159,8 +158,8 @@ class AsyncResourcePermitTests {
 		try (final var executor = Executors.newSingleThreadExecutor()) {
 			final var callback = permit.acquire().thenAccept(next -> {
 				// A different thread must be able to inspect the gate while this callback runs.
-				assertDoesNotThrow(() -> assertThat(executor.submit(permit::availablePermits).get(5,
-					TimeUnit.SECONDS)).isZero());
+				assertDoesNotThrow(
+					() -> assertThat(executor.submit(permit::availablePermits).get(5, TimeUnit.SECONDS)).isZero());
 				next.release();
 			}).toCompletableFuture();
 

@@ -113,8 +113,8 @@ class ReactiveServiceLifecycleTests {
 	void aggregateAlwaysPropagatesFatalSiblingFailure(boolean fatalFirst) throws Exception {
 		final var fatal = new OutOfMemoryError("fatal sibling");
 		final var fatalBody = new CompletableFuture<Void>();
-		final var ordinary = new AsyncTask(NopLock.INSTANCE, () -> failedFuture(
-			new IllegalStateException("recoverable sibling")));
+		final var ordinary = new AsyncTask(NopLock.INSTANCE,
+			() -> failedFuture(new IllegalStateException("recoverable sibling")));
 		final var failingFatally = new AsyncTask(NopLock.INSTANCE, () -> fatalBody);
 		final var tasks = fatalFirst ? List.of(failingFatally, ordinary) : List.of(ordinary, failingFatally);
 		try (final var service = new ReactiveHierarchicalTestExecutorService(2)) {
