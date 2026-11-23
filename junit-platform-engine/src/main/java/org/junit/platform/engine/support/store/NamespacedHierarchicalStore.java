@@ -427,7 +427,7 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 
 		private static final Object NO_VALUE_SET = new Object();
 
-		private final Supplier<Object> delegate;
+		private Supplier<Object> delegate;
 		private volatile Object value = NO_VALUE_SET;
 
 		private MemoizingSupplier(Supplier<Object> delegate) {
@@ -454,6 +454,11 @@ public final class NamespacedHierarchicalStore<N> implements AutoCloseable {
 			catch (Throwable t) {
 				this.value = new Failure(t);
 				UnrecoverableExceptions.rethrowIfUnrecoverable(t);
+			}
+			finally {
+				// Clear reference to delegate to allow it to be garbage collected.
+				// See https://github.com/junit-team/junit-framework/issues/6306
+				this.delegate = null;
 			}
 		}
 
