@@ -57,7 +57,7 @@ public interface ParameterInfo extends org.junit.jupiter.params.ParameterInfo {
 	 * The {@link Namespace} for accessing the
 	 * {@link ExtensionContext.Store Store} for {@code ParameterInfo}.
 	 * @deprecated Please use
-	 * {@link org.junit.jupiter.params.ParameterInfo#NAMESPACE} instead
+	 * {@link org.junit.jupiter.params.ParameterInfo#STORE_NAMESPACE} instead
 	 */
 	@Deprecated(since = "5.14", forRemoval = true)
 	@API(status = DEPRECATED, since = "5.14")

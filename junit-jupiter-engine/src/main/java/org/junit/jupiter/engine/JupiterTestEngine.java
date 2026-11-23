@@ -71,7 +71,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 			DiscoveryIssueReporter.forwarding(discoveryRequest.getDiscoveryListener(), uniqueId));
 		JupiterConfiguration configuration = new CachingJupiterConfiguration(
 			new DefaultJupiterConfiguration(discoveryRequest.getConfigurationParameters(),
-				discoveryRequest.getOutputDirectoryCreator(), issueReporter));
+				discoveryRequest.getOutputDirectoryCreator(), issueReporter, discoveryRequest.getSessionScopedStore()));
 		EarlyExtensionRegistry earlyExtensionRegistry = EarlyExtensionRegistry.create(configuration);
 		JupiterEngineDescriptor engineDescriptor = new JupiterEngineDescriptor(uniqueId, configuration,
 			earlyExtensionRegistry);
@@ -120,7 +120,7 @@ public final class JupiterTestEngine extends HierarchicalTestEngine<JupiterEngin
 	@Override
 	protected JupiterEngineExecutionContext createExecutionContext(ExecutionRequest request) {
 		return new JupiterEngineExecutionContext(request.getEngineExecutionListener(), getJupiterConfiguration(request),
-			new LauncherStoreFacade(request.getStore()));
+			new LauncherStoreFacade(request.getStore()), request.getCancellationToken());
 	}
 
 	/**

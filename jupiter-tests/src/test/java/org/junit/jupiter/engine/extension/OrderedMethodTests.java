@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine.extension;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Constants.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 import static org.junit.jupiter.api.Constants.DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME;
@@ -58,6 +59,7 @@ import org.junit.jupiter.api.TestReporter;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -87,6 +89,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 	private static final Set<String> callSequence = Collections.synchronizedSet(new LinkedHashSet<>());
 	private static final Set<String> threadNames = Collections.synchronizedSet(new LinkedHashSet<>());
+	private static String methodOrdererStoreValue = "not set";
 
 	@BeforeEach
 	void clearCallSequence() {
@@ -114,6 +117,16 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		assertThat(callSequence).containsExactly("$()", "AAA()", "AAA(org.junit.jupiter.api.TestInfo)",
 			"AAA(org.junit.jupiter.api.TestReporter)", "ZZ_Top()", "___()", "a1()", "a2()", "b()", "c()", "zzz()");
 		assertThat(threadNames).hasSize(1);
+	}
+
+	@Test
+	void methodOrdererCanAccessSessionScopedStore() {
+		methodOrdererStoreValue = "not set";
+
+		var results = discoverTests(MethodOrdererStoreTestCase.class, MethodOrdererStoreAccessor.class);
+
+		assertThat(results.getDiscoveryIssues()).isEmpty();
+		assertThat(methodOrdererStoreValue).isEqualTo("stored by method orderer");
 	}
 
 	@Test
@@ -203,7 +216,12 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 			// @formatter:off
 			assertThat(listener.stream(Random.class, Level.WARNING)
 					.map(LogRecord::getMessage))
-					.anyMatch(expectedMessagePattern.asMatchPredicate());
+					.filteredOn(expectedMessagePattern.asMatchPredicate())
+					.hasSize(1);
+			assertThat(listener.stream(Random.class, Level.CONFIG)
+					.map(LogRecord::getMessage))
+					.filteredOn(message -> message.startsWith("Using seed ["))
+					.hasSize(1);
 			// @formatter:on
 		}
 
@@ -216,8 +234,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 
 		for (var i = 0; i < 10; i++) {
 			var seed = String.valueOf(i);
-			var expectedMessage = "Using custom seed for configuration parameter [" + Random.RANDOM_SEED_PROPERTY_NAME
-					+ "] with value [" + seed + "].";
+			var expectedMessage = expectedSeedMessage(seed);
 			callSequence.clear();
 			listener.clear();
 
@@ -243,8 +260,7 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 	@Test
 	void randomWithCustomSeed(@TrackLogRecords LogRecordListener listener) {
 		var seed = "42";
-		var expectedMessage = "Using custom seed for configuration parameter [" + Random.RANDOM_SEED_PROPERTY_NAME
-				+ "] with value [" + seed + "].";
+		var expectedMessage = expectedSeedMessage(seed);
 
 		for (var i = 0; i < 10; i++) {
 			callSequence.clear();
@@ -265,6 +281,11 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 		}
 
 		assertThat(threadNames).size().isGreaterThanOrEqualTo(3);
+	}
+
+	private static String expectedSeedMessage(String seed) {
+		return "Using seed [%s] for ordering classes/methods. To reuse the same seed in a subsequent execution, pass '%s=%s' as configuration parameter.".formatted(
+			seed, RANDOM_SEED_PROPERTY_NAME, seed);
 	}
 
 	@Test
@@ -752,6 +773,23 @@ record OrderedMethodTests(ParallelExecutorServiceType executorServiceType) {
 			return (T) Mockito.mock((Class<? super T>) MethodDescriptor.class);
 		}
 
+	}
+
+	static class MethodOrdererStoreAccessor implements MethodOrderer {
+
+		@Override
+		public void orderMethods(MethodOrdererContext context) {
+			var store = context.getStore(Namespace.create("method-orderer"));
+			store.put("key", "stored by method orderer");
+			methodOrdererStoreValue = requireNonNull((String) store.get("key"));
+		}
+	}
+
+	static class MethodOrdererStoreTestCase {
+
+		@Test
+		void test() {
+		}
 	}
 
 	static class MisbehavingByImpersonating implements MethodOrderer {

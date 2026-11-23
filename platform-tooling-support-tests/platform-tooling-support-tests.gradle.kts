@@ -92,6 +92,7 @@ dependencies {
 	thirdPartyJars(libs.apiguardian)
 	thirdPartyJars(libs.fastcsv)
 	thirdPartyJars(libs.hamcrest)
+	thirdPartyJars(libs.jakarta.json.api)
 	thirdPartyJars(libs.jimfs)
 	thirdPartyJars(libs.jspecify)
 	thirdPartyJars(kotlin("stdlib"))
@@ -100,7 +101,16 @@ dependencies {
 	thirdPartyJars(libs.opentest4j)
 	thirdPartyJars(libs.openTestReporting.events)
 	thirdPartyJars(libs.openTestReporting.tooling.spi)
+	thirdPartyJars(libs.owasp.java.html.sanitizer)
 	thirdPartyJars(libs.picocli)
+	constraints {
+		thirdPartyJars("com.google.guava:guava") {
+			version {
+				require("33.7.2-jre")
+			}
+			because("Workaround for CVE-2026-102554")
+		}
+	}
 
 	antJars(platform(projects.junitBom))
 	antJars(libs.bundles.ant)

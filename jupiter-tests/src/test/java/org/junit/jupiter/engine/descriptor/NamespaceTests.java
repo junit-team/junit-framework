@@ -33,4 +33,21 @@ class NamespaceTests {
 
 		assertNotEquals(ns1, ns2);
 	}
+
+	@Test
+	void namespacesOfDifferentTypesEqualForSamePartsSequence() {
+		var ns1 = Namespace.create("part1", "part2");
+		var ns2 = org.junit.jupiter.api.store.Namespace.create("part1", "part2");
+
+		assertEquals(ns1, ns2);
+		assertEquals(ns2, ns1);
+		assertEquals(ns1.hashCode(), ns2.hashCode());
+		assertEquals(ns1.append("part3"), ns2.append("part3"));
+	}
+
+	@Test
+	void globalNamespacesAreEqual() {
+		assertEquals(Namespace.GLOBAL, org.junit.jupiter.api.store.Namespace.GLOBAL);
+		assertEquals(org.junit.jupiter.api.store.Namespace.GLOBAL, Namespace.GLOBAL);
+	}
 }

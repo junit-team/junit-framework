@@ -10,11 +10,12 @@
 
 package org.junit.jupiter.engine.extension;
 
-import static org.junit.jupiter.api.Timeout.ThreadMode.SAME_THREAD;
+import static org.junit.jupiter.api.Timeout.DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT;
 import static org.junit.jupiter.api.extension.PreInterruptCallback.THREAD_DUMP_ENABLED_PROPERTY_NAME;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.util.ClassUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -42,7 +44,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
 class TimeoutExtension
 		implements BeforeAllCallback, BeforeEachCallback, InvocationInterceptor, AsyncInvocationInterceptor {
 
-	private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(Timeout.class);
+	private static final Namespace NAMESPACE = Namespace.create(Timeout.class);
 	private static final String TESTABLE_METHOD_TIMEOUT_KEY = "testable_method_timeout_from_annotation";
 	private static final String TESTABLE_METHOD_TIMEOUT_THREAD_MODE_KEY = "testable_method_timeout_thread_mode_from_annotation";
 	private static final String GLOBAL_TIMEOUT_CONFIG_KEY = "global_timeout_config";
@@ -344,9 +346,14 @@ class TimeoutExtension
 			TimeoutConfiguration timeoutConfiguration) {
 		ThreadMode annotationThreadMode = getAnnotationThreadMode(extensionContext);
 		if (annotationThreadMode == null || annotationThreadMode == ThreadMode.INFERRED) {
-			return timeoutConfiguration.getDefaultTimeoutThreadMode().orElse(SAME_THREAD);
+			return timeoutConfiguration.getDefaultTimeoutThreadMode() //
+					.orElseGet(TimeoutExtension::getDefaultThreadMode);
 		}
 		return annotationThreadMode;
+	}
+
+	private static ThreadMode getDefaultThreadMode() {
+		return ThreadMode.valueOf(DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT.toUpperCase(Locale.ROOT));
 	}
 
 	private @Nullable ThreadMode getAnnotationThreadMode(ExtensionContext extensionContext) {

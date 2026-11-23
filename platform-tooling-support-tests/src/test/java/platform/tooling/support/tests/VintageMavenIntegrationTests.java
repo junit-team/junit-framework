@@ -43,8 +43,7 @@ class VintageMavenIntegrationTests {
 
 		assertThat(result.exitCode()).isEqualTo(1);
 		assertThat(result.stdOut()) //
-				.contains("TestEngine with ID 'junit-vintage' failed to discover tests") //
-				.contains("Tests run: 0, Failures: 0, Errors: 0, Skipped: 0");
+				.contains("Surefire is not compatible with JUnit 4.11 or older. Project version is 4.11");
 	}
 
 	@ParameterizedTest(name = "{0}", quoteTextArguments = false)

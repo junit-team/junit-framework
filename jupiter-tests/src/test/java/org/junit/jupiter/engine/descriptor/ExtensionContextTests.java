@@ -469,6 +469,21 @@ public class ExtensionContextTests {
 		assertEquals(parentValue, childStore.get(parentKey));
 	}
 
+	@Test
+	@SuppressWarnings("deprecation")
+	void storesForEquivalentNamespacesShareValues() {
+		ExtensionContext context = new ClassExtensionContext(mock(AbstractExtensionContext.class), mock(),
+			outerClassDescriptor(null), PER_METHOD, configuration, extensionRegistry, launcherStoreFacade, mock());
+
+		context.getStore(org.junit.jupiter.api.store.Namespace.create("x")).put("key", "value");
+		assertEquals("value", context.getStore(Namespace.create("x")).get("key"));
+		assertEquals("value", context.getStore(ExtensionContext.StoreScope.EXTENSION_CONTEXT,
+			org.junit.jupiter.api.store.Namespace.create("x")).get("key"));
+
+		context.getStore(Namespace.GLOBAL).put("key", "global value");
+		assertEquals("global value", context.getStore(org.junit.jupiter.api.store.Namespace.GLOBAL).get("key"));
+	}
+
 	@ParameterizedTest
 	@MethodSource("extensionContextFactories")
 	void configurationParameter(Function<JupiterConfiguration, ? extends ExtensionContext> extensionContextFactory) {
@@ -479,7 +494,7 @@ public class ExtensionContextTests {
 		ConfigurationParameters configurationParameters = mock();
 		when(configurationParameters.get("123")).thenReturn(expected);
 		JupiterConfiguration echo = new DefaultJupiterConfiguration(configurationParameters,
-			dummyOutputDirectoryCreator(), mock());
+			dummyOutputDirectoryCreator(), mock(), mock());
 
 		var context = extensionContextFactory.apply(echo);
 

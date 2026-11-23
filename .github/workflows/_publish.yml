@@ -23,7 +23,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Publish
-      uses: ./.github/actions/run-gradle
+      uses: $/.github/actions/run-gradle
       env:
         ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
         ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -40,6 +40,6 @@ jobs:
 
   Documentation:
     if: github.event_name == 'push' && github.repository == 'junit-team/junit-framework' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/deploy-docs.yml
+    uses: $/.github/workflows/deploy-docs.yml
     permissions:
       actions: write

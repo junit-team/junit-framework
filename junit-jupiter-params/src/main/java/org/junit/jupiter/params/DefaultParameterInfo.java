@@ -31,8 +31,9 @@ record DefaultParameterInfo(ParameterDeclarations declarations, ArgumentsAccesso
 		return this.arguments;
 	}
 
+	@SuppressWarnings("deprecation") // support.ParameterInfo.NAMESPACE resolves to the deprecated getStore overload
 	void store(ExtensionContext context) {
-		context.getStore(org.junit.jupiter.params.ParameterInfo.NAMESPACE) //
+		context.getStore(org.junit.jupiter.params.ParameterInfo.STORE_NAMESPACE) //
 				.put(org.junit.jupiter.params.ParameterInfo.KEY, this);
 		context.getStore(org.junit.jupiter.params.support.ParameterInfo.NAMESPACE) //
 				.put(org.junit.jupiter.params.support.ParameterInfo.KEY, this);

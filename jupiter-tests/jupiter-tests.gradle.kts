@@ -22,7 +22,6 @@ dependencies {
 	testImplementation(libs.junit4)
 	testImplementation(libs.kotlinx.coroutines.core)
 	testImplementation(libs.groovy)
-	testImplementation(libs.memoryfilesystem)
 	testImplementation(testFixtures(projects.junitJupiterApi))
 	testImplementation(testFixtures(projects.junitJupiterEngine))
 	testImplementation(testFixtures(projects.junitPlatformLauncher))

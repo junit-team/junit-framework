@@ -14,6 +14,7 @@ import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code TestInstantiationAwareExtension} defines the API for {@link Extension
@@ -101,7 +102,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 	 *   <li>
 	 *     If the extension adds a {@link ExtensionContext.Store.CloseableResource
 	 *     CloseableResource} or {@link AutoCloseable} to the
-	 *     {@link ExtensionContext.Store Store} (unless the
+	 *     {@link Store Store} (unless the
 	 *     {@code junit.jupiter.extensions.store.close.autocloseable.enabled}
 	 *     configuration parameter is set to {@code false}), then the resource will
 	 *     be closed just after the instance is destroyed.
@@ -123,7 +124,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 	 * @implNote There are no guarantees about how often this method will be called.
 	 * Therefore, implementations should be idempotent and avoid side effects.
 	 * If computation of the return value is costly, implementations may wish to
-	 * cache the result in the {@link ExtensionContext.Store Store} of the supplied
+	 * cache the result in the {@link Store Store} of the supplied
 	 * {@code ExtensionContext}.
 	 * @param rootContext the root extension context to allow inspection of
 	 * configuration parameters; never {@code null}
@@ -147,7 +148,7 @@ public interface TestInstantiationAwareExtension extends Extension {
 
 		/**
 		 * The extension should receive an {@link ExtensionContext} for the
-		 * the <em>default</em> scope.
+		 * <em>default</em> scope.
 		 *
 		 * <p>The default scope is determined by the configuration parameter
 		 * {@link #DEFAULT_SCOPE_PROPERTY_NAME}. If not specified, extensions
@@ -174,14 +175,20 @@ public interface TestInstantiationAwareExtension extends Extension {
 		TEST_METHOD;
 
 		/**
+		 * Default value for {@value #DEFAULT_SCOPE_PROPERTY_NAME} is {@value}.
+		 *
+		 * @since 6.2
+		 */
+		@API(status = MAINTAINED, since = "6.2")
+		public static final String DEFAULT_SCOPE_DEFAULT = "default";
+
+		/**
 		 * Property name used to set the default extension context scope: {@value}
 		 *
 		 * <h4>Supported Values</h4>
 		 *
 		 * <p>Supported values include names of enum constants defined in this
-		 * class, ignoring case.
-		 *
-		 * @see #DEFAULT
+		 * class, ignoring case. Defaults to {@value #DEFAULT_SCOPE_DEFAULT}.
 		 */
 		public static final String DEFAULT_SCOPE_PROPERTY_NAME = "junit.jupiter.extensions.testinstantiation.extensioncontextscope.default";
 

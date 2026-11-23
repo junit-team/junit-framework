@@ -44,7 +44,7 @@ jobs:
           ref: "refs/tags/${{ env.RELEASE_TAG }}"
           persist-credentials: false
       - name: Prepare Maven Central user token
-        uses: ./.github/actions/maven-central-user-token
+        uses: $/.github/actions/maven-central-user-token
         with:
           username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -59,7 +59,8 @@ jobs:
           echo "createdBy=$(jq --raw-output .Created_By /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
           echo "sourceDateEpoch=$(jq --raw-output .Build_Date /tmp/manifest.json) $(jq --raw-output .Build_Time /tmp/manifest.json)" >> "$GITHUB_OUTPUT"
       - name: Verify artifacts
-        uses: ./.github/actions/run-gradle
+        id: verifyArtifacts
+        uses: $/.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-
@@ -68,6 +69,12 @@ jobs:
             -Pmanifest.createdBy="${{ steps.referenceJar.outputs.createdBy }}"
             verifyArtifactsInStagingRepositoryAreReproducible
             --remote-repo-url=${{ env.STAGING_REPO_URL }}
+      - name: Archive temporary Maven repositories
+        if: ${{ failure() && steps.verifyArtifacts.conclusion == 'failure' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Temporary Maven repositories
+          path: '**/build/temp-maven-repo'
       - name: Generate build provenance attestations
         if: ${{ inputs.dryRun == false }}
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
@@ -86,11 +93,11 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Set up JDK
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@8feba82adc7f01ddcf8165b86f778bdb5b82cebc # v1.5.7
+      - uses: sbt/setup-sbt@7e114eae4f32ec3f93c851c2793376a77f384409 # v1.5.15
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Prepare Maven Central user token
@@ -101,7 +108,7 @@ jobs:
       - name: Inject staging repository URL
         run: java src/StagingRepoInjector.java ${STAGING_REPO_URL}
       - name: Build examples
-        run: java src/Builder.java --exclude=junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
+        run: java src/Builder.java --exclude=junit-jupiter-starter-ant,junit-jupiter-starter-bazel,junit-jupiter-starter-sbt,junit-source-launcher
         env:
           MAVEN_ARGS: --settings ${{ github.workspace }}/src/central-staging-maven-settings.xml --activate-profiles central-staging
 
@@ -137,7 +144,7 @@ jobs:
           persist-credentials: false
       - name: Release staging repository
         if: ${{ inputs.dryRun == false && inputs.skipPublishStep == false }}
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -191,11 +198,11 @@ jobs:
           token: ${{ secrets.JUNIT_BUILDS_GITHUB_TOKEN_EXAMPLES_REPO }}
           persist-credentials: true
       - name: Set up JDK
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           java-version: 25
           distribution: temurin
-      - uses: sbt/setup-sbt@8feba82adc7f01ddcf8165b86f778bdb5b82cebc # v1.5.7
+      - uses: sbt/setup-sbt@7e114eae4f32ec3f93c851c2793376a77f384409 # v1.5.15
       - name: Update JUnit dependencies in examples
         run: java src/Updater.java ${RELEASE_VERSION}
       - name: Build examples

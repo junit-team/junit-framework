@@ -15,16 +15,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+    - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
       id: setup-gradle-jdk
       with:
         distribution: temurin
         java-version: 25
         check-latest: true
-    - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+    - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       with:
         cache-encryption-key: ${{ inputs.encryptionKey }}
-    - uses: testlens-app/setup-testlens@d29a2be31512b3aeda3adcef09fbe0d55af90c51 # v1.9.4
+    - uses: testlens-app/setup-testlens@89edf53f781ac41833b4bc74d0e19a5315c79c67 # v1.10.0
       with:
         write-log-files: true
     - shell: bash
@@ -58,7 +58,7 @@ runs:
         if [ -n "$error_code" ]; then
           exit "$error_code"
         fi
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: ${{ always() }}
       with:
         name: TestLens logs (${{ github.job }} - ${{ job.check_run_id }})

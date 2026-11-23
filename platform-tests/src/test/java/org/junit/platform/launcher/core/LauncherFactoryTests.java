@@ -511,12 +511,13 @@ class LauncherFactoryTests {
 	static class SessionTrackingExtension implements BeforeAllCallback {
 		@Override
 		public void beforeAll(ExtensionContext context) {
-			var value = context.getStore(ExtensionContext.Namespace.GLOBAL).get("testKey");
+			var value = context.getStore(org.junit.jupiter.api.store.Namespace.GLOBAL).get("testKey");
 			if (!"testValue".equals(value)) {
 				throw new IllegalStateException("Expected 'testValue' but got: " + value);
 			}
 
-			value = context.getStore(StoreScope.LAUNCHER_SESSION, ExtensionContext.Namespace.GLOBAL).get("testKey");
+			value = context.getStore(StoreScope.LAUNCHER_SESSION, org.junit.jupiter.api.store.Namespace.GLOBAL).get(
+				"testKey");
 			if (!"testValue".equals(value)) {
 				throw new IllegalStateException("Expected 'testValue' but got: " + value);
 			}
@@ -526,7 +527,7 @@ class LauncherFactoryTests {
 	static class SessionStoringExtension implements BeforeAllCallback {
 		@Override
 		public void beforeAll(ExtensionContext context) {
-			context.getStore(StoreScope.LAUNCHER_SESSION, ExtensionContext.Namespace.GLOBAL).put("testKey",
+			context.getStore(StoreScope.LAUNCHER_SESSION, org.junit.jupiter.api.store.Namespace.GLOBAL).put("testKey",
 				"testValue");
 		}
 	}
@@ -548,8 +549,8 @@ class LauncherFactoryTests {
 		@Override
 		public void beforeAll(ExtensionContext context) {
 			CloseTrackingResource sessionResource = new CloseTrackingResource();
-			context.getStore(StoreScope.LAUNCHER_SESSION, ExtensionContext.Namespace.GLOBAL).put("sessionResource",
-				sessionResource);
+			context.getStore(StoreScope.LAUNCHER_SESSION, org.junit.jupiter.api.store.Namespace.GLOBAL).put(
+				"sessionResource", sessionResource);
 		}
 	}
 
@@ -557,8 +558,8 @@ class LauncherFactoryTests {
 		@Override
 		public void beforeAll(ExtensionContext context) {
 			CloseTrackingResource requestResource = new CloseTrackingResource();
-			context.getStore(StoreScope.EXECUTION_REQUEST, ExtensionContext.Namespace.GLOBAL).put("requestResource",
-				requestResource);
+			context.getStore(StoreScope.EXECUTION_REQUEST, org.junit.jupiter.api.store.Namespace.GLOBAL).put(
+				"requestResource", requestResource);
 		}
 	}
 

@@ -33,20 +33,9 @@ tasks.test {
 }
 
 val initializeAtBuildTime = mapOf<String, List<String>>(
-	// Workaround for GraalVM/JDK 21 only; see the `if (jdkVersion <= 21)` guard below.
-	//
-	// These JUnit 6.2 async classes initialize eagerly during GraalVM's build-time analysis
-	// (TestMethodTestDescriptor.<clinit> -> AsyncInterceptingExecutableInvoker.<clinit> ->
-	// AsyncInvocationInterceptorChain.<clinit>), which conflicts with GraalVM's default
-	// runtime class-initialization and fails with
-	// "Classes that should be initialized at run time got initialized during image building".
-	//
-	// The permanent fix is to add them to native-build-tools' initialize-at-buildtime list
-	// (which already contains the sync equivalents such as InterceptingExecutableInvoker and
-	// InvocationInterceptorChain):
-	// https://github.com/graalvm/native-build-tools/blob/master/common/junit-platform-native/src/main/resources/initialize-at-buildtime
-	// Once they are registered there, remove this entry again.
+	// These need to be added to native-build-tools (JDK 21 and earlier).
 	"6.2" to listOf(
+		"org.junit.jupiter.api.store.Namespace",
 		"org.junit.jupiter.engine.execution.AsyncInvocationInterceptorChain",
 		"org.junit.jupiter.engine.execution.AsyncInterceptingExecutableInvoker",
 	),

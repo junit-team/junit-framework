@@ -313,6 +313,7 @@ class ParameterizedTestExtensionTests {
 			public void publishDirectory(String name, ThrowingConsumer<Path> action) {
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public Store getStore(Namespace namespace) {
 				var store = new NamespaceAwareStore(this.store,
@@ -324,6 +325,7 @@ class ParameterizedTestExtensionTests {
 				return store;
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public Store getStore(StoreScope scope, Namespace namespace) {
 				return getStore(namespace);

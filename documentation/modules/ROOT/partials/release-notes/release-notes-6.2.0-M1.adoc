@@ -1,9 +1,17 @@
 [[v6.2.0-M1]]
 == 6.2.0-M1
 
-*Date of Release:* ❓
+*Date of Release:* November 15, 2026
 
-*Scope:* ❓
+*Scope:*
+
+* Machine-readable documentation of configuration parameters for IDEs
+* New parallel test executor implementation is now used by default
+* Session-scoped store available to test engines and orderers during discovery
+* Stricter parsing of `@CsvSource.value[]` records
+* Sub-millisecond precision and thread dump hint for timeouts
+* New `@Disabled` annotation for `@Suite` classes
+* Kotlin `assertThrows` variants that take the exception class as a value
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
 link:{junit-framework-repo}+/milestone/107?closed=1+[6.2.0-M1] milestone page in the JUnit
@@ -16,12 +24,23 @@ repository on GitHub.
 [[v6.2.0-M1-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
-
-[[v6.2.0-M1-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
+* When scanning the classpath, the resolved path is used to cache an open jar file system
+  rather than a (potential) symlink.
+* `HierarchicalTestEngine` implementations now wait for the dynamic tests a node has
+  already submitted even if the node's `execute()` method throws an exception. Previously,
+  with parallel execution, such dynamic tests could finish after their parent, e.g. when
+  the arguments source of a `@ParameterizedTest` or `@ParameterizedClass` or the children
+  stream of a `DynamicContainer` threw an exception.
+* The generic type parameters of `Try` methods now consistently allow nullable types.
+* When scanning the classpath, a separate file system is now created for each jar file
+  rather than a shared one. Thus, classpath scanning no longer fails or interferes with
+  other code if a file system for the same jar file has already been opened elsewhere.
+* Classpath scanning now finds packages within jar files whose names contain non-ASCII
+  characters.
+* Validate configuration parameters for `fixed.parallelism` and `fixed.max-pool-size`.
+* For the `fixed` and `dynamic` strategy limit the calculated max pool size to
+  `Integer.MAX_VALUE`.
+* Reject simple deadlocks when updating `NamespacedHierarchicalStore`.
 
 [[v6.2.0-M1-junit-platform-new-features-and-improvements]]
 ==== New Features and Improvements
@@ -47,6 +66,17 @@ repository on GitHub.
   (`ResourceLock#acquireAsync()`), and `submitAsync`/`invokeAllAsync` on
   `HierarchicalTestExecutorService`, enabling reactive (e.g. `CompletionStage`-based)
   test execution without parking threads.
+* Test Engine and Jupiter Extension authors may generate a machine-readable overview
+  of configuration parameters. See
+  xref:advanced-topics/configuration-parameter-documentation.adoc[Documenting
+  Configuration Parameters] for more information.
+* Platform configuration parameters are documented in
+  `META-INF/junit-platform-configuration-metadata.json`
+* Test engines using the `ParallelHierarchicalTestExecutorServiceFactory` now use the
+  `WORKER_THREAD_POOL` executor service by default.
+* Test engines may now access the store scoped to the enclosing launcher session via the
+  new `EngineDiscoveryRequest.getSessionScopedStore()` API. This can be used to store or
+  cache information that is reused during test execution or later discovery phases.
 
 [[v6.2.0-M1-junit-jupiter]]
 === JUnit Jupiter
@@ -59,6 +89,15 @@ repository on GitHub.
   of causing parameterized tests to fail with an internal exception.
 * The elements of `@CsvSource.value[]` are now treated as individual CSV documents. This
   prevents unfinished quotes in one document from affecting another.
+* `@Nested` test classes declared in super classes of a test class are now discovered and
+  executed even if they have the same simple name as a `@Nested` class declared in the
+  test class.
+* If the stream returned by a `@TestFactory` method throws an exception, the dynamic tests
+  it has already provided now finish before the `@AfterEach` methods and after-each
+  callbacks of the factory method are executed. Previously, with parallel execution, these
+  could run while the dynamic tests were still executing.
+* `ClassOrderer.Random` and `MethodOrderer.Random` now log the used seed only once per
+  launcher session.
 
 [[v6.2.0-M1-junit-jupiter-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
@@ -68,7 +107,13 @@ repository on GitHub.
   quotes.
 * When using `@CsvSource.value[]` the `commentCharacter` must be distinct from both
   `delimiter` and `quoteCharacter`.
-
+* When the timeout provided to `assertTimeout`, `assertTimeoutPreemptively` and test
+  methods annotated with `@Timeout` is not a positive value less than 2^63^ nanoseconds
+  (approximately 292 years) a `PreconditionViolationException` is thrown.
+* `ExtensionContext.Namespace` and `ExtensionContext.Store` have been deprecated
+  in favor of `org.junit.jupiter.api.store.Namespace` and
+  `org.junit.jupiter.api.store.Store`. In most cases, changing the `Namespace`
+  and `Store` imports suffices to migrate.
 
 [[v6.2.0-M1-junit-jupiter-new-features-and-improvements]]
 ==== New Features and Improvements
@@ -110,21 +155,25 @@ repository on GitHub.
   order. An explicit `@Execution` always wins. See
   xref:writing-tests/parallel-execution.adoc#config-reactive-execution[Reactive Execution].
 
+* The `assertTimeout`, `assertTimeoutPreemptively` and methods annotated with `@Timeout`
+  now measure the execution time with sub-millisecond precision.
+* Jupiter configuration parameters are documented in
+  `META-INF/junit-platform-configuration-metadata.json`
+* The `junit.jupiter.execution.parallel.config.executor-service` configuration parameter
+  now defaults to `WORKER_THREAD_POOL` when parallel execution is enabled.
+* Implementations of `ClassOrderer` or `MethodOrderer` may now access the store scoped to
+  the enclosing launcher session via the new `DiscoveryContext.getStore(...)` API.
+  This can be used to store or cache information that is reused during test execution or
+  later discovery phases.
+* New `org.junit.jupiter.api.store` package containing `Store` and `Namespace` interfaces
+  which are now extended by `ExtensionContext.Store` and `ExtensionContext.Namespace`,
+  respectively.
 
 [[v6.2.0-M1-junit-vintage]]
 === JUnit Vintage
 
-[[v6.2.0-M1-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v6.2.0-M1-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
 [[v6.2.0-M1-junit-vintage-new-features-and-improvements]]
 ==== New Features and Improvements
 
-* ❓
+* Vintage configuration parameters are documented in
+  `META-INF/junit-platform-configuration-metadata.json`

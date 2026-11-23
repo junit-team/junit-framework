@@ -49,11 +49,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.junit.jupiter.api.fixtures.TrackLogRecords;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 import org.junit.jupiter.engine.descriptor.MethodBasedTestDescriptor;
 import org.junit.platform.commons.JUnitException;
@@ -437,7 +437,7 @@ class TestWatcherTests extends AbstractJupiterTestEngineTests {
 	}
 
 	/**
-	 * {@link TestWatcher} that retrieves data from the {@link ExtensionContext.Store}.
+	 * {@link TestWatcher} that retrieves data from the {@link Store}.
 	 * @see <a href="https://github.com/junit-team/junit-framework/issues/3944">#3944</a>
 	 */
 	@NullMarked

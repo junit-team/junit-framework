@@ -33,6 +33,18 @@ public class NamespaceAwareStore implements Store {
 	private final NamespacedHierarchicalStore<Namespace> valuesStore;
 	private final Namespace namespace;
 
+	public static NamespaceAwareStore createAdapter(NamespacedHierarchicalStore<Namespace> valuesStore,
+			org.junit.jupiter.api.store.Namespace namespace) {
+		Preconditions.notNull(namespace, "Namespace must not be null");
+		return new NamespaceAwareStore(valuesStore, convert(namespace));
+	}
+
+	private static Namespace convert(org.junit.jupiter.api.store.Namespace namespace) {
+		return namespace.equals(org.junit.jupiter.api.store.Namespace.GLOBAL) //
+				? Namespace.GLOBAL //
+				: Namespace.create(namespace.getParts());
+	}
+
 	public NamespaceAwareStore(NamespacedHierarchicalStore<Namespace> valuesStore, Namespace namespace) {
 		this.valuesStore = valuesStore;
 		this.namespace = namespace;

@@ -1,0 +1,20 @@
+name: Forbid AI-attributed commits
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  check:
+    name: Check commits
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: commit-check/commit-check-action@3d46238970102271c989e85c58f22748a923384c # v2.24.1
+        env:
+          CCHK_AI_ATTRIBUTION: forbid
+        with:
+          message-ai-attribution: true
+          branch: false

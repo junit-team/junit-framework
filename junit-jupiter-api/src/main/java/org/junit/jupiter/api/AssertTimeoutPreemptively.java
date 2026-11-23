@@ -11,6 +11,8 @@
 package org.junit.jupiter.api;
 
 import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
+import static org.junit.jupiter.api.timeout.DurationUtils.formatDurationInFractionalMs;
+import static org.junit.jupiter.api.timeout.DurationUtils.isPositiveAndRepresentableInNanos;
 import static org.junit.jupiter.api.timeout.PreemptiveTimeoutUtils.executeWithPreemptiveTimeout;
 
 import java.time.Duration;
@@ -19,6 +21,7 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.function.ThrowingSupplier;
+import org.junit.platform.commons.util.Preconditions;
 import org.opentest4j.AssertionFailedError;
 
 /**
@@ -31,6 +34,10 @@ import org.opentest4j.AssertionFailedError;
 class AssertTimeoutPreemptively {
 
 	static void assertTimeoutPreemptively(Duration timeout, Executable executable) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(executable, () -> "executable must not be null");
 		assertTimeoutPreemptively(timeout, executable, (String) null);
 	}
 
@@ -52,17 +59,29 @@ class AssertTimeoutPreemptively {
 	}
 
 	static <T extends @Nullable Object> T assertTimeoutPreemptively(Duration timeout, ThrowingSupplier<T> supplier) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(supplier, () -> "supplier must not be null");
 		return executeWithPreemptiveTimeout(timeout, supplier, null, AssertTimeoutPreemptively::createAssertionFailure);
 	}
 
 	static <T extends @Nullable Object> T assertTimeoutPreemptively(Duration timeout, ThrowingSupplier<T> supplier,
 			@Nullable String message) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(supplier, () -> "supplier must not be null");
 		return executeWithPreemptiveTimeout(timeout, supplier, message == null ? null : () -> message,
 			AssertTimeoutPreemptively::createAssertionFailure);
 	}
 
 	static <T extends @Nullable Object> T assertTimeoutPreemptively(Duration timeout, ThrowingSupplier<T> supplier,
-			Supplier<@Nullable String> messageSupplier) {
+			@Nullable Supplier<@Nullable String> messageSupplier) {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
+		Preconditions.notNull(supplier, () -> "supplier must not be null");
 		return executeWithPreemptiveTimeout(timeout, supplier, messageSupplier,
 			AssertTimeoutPreemptively::createAssertionFailure);
 	}
@@ -71,7 +90,7 @@ class AssertTimeoutPreemptively {
 			@Nullable Supplier<@Nullable String> messageSupplier, @Nullable Throwable cause, @Nullable Thread thread) {
 		return assertionFailure() //
 				.message(messageSupplier) //
-				.reason("execution timed out after " + timeout.toMillis() + " ms") //
+				.reason("execution timed out after %s".formatted(formatDurationInFractionalMs(timeout))) //
 				.cause(cause) //
 				.trimStacktrace(Assertions.class) //
 				.build();

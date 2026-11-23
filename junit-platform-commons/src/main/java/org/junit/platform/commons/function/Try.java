@@ -79,7 +79,7 @@ public abstract class Try<V extends @Nullable Object> {
 	 * @return a failed {@code Try} that contains the supplied value; never
 	 * {@code null}
 	 */
-	public static <V> Try<V> failure(Exception cause) {
+	public static <V extends @Nullable Object> Try<V> failure(Exception cause) {
 		return new Failure<>(checkNotNull(cause, "cause"));
 	}
 
@@ -93,7 +93,7 @@ public abstract class Try<V extends @Nullable Object> {
 		return input;
 	}
 
-	private static <V> Try<V> of(Callable<Try<V>> action) {
+	private static <V extends @Nullable Object> Try<V> of(Callable<Try<V>> action) {
 		try {
 			return action.call();
 		}
@@ -114,7 +114,7 @@ public abstract class Try<V extends @Nullable Object> {
 	 * @param transformer the transformer to try; must not be {@code null}
 	 * @return a succeeded or failed {@code Try}; never {@code null}
 	 */
-	public abstract <U> Try<U> andThenTry(Transformer<V, U> transformer);
+	public abstract <U extends @Nullable Object> Try<U> andThenTry(Transformer<V, U> transformer);
 
 	/**
 	 * If this {@code Try} is a success, apply the supplied function to its
@@ -124,7 +124,7 @@ public abstract class Try<V extends @Nullable Object> {
 	 * @param function the function to apply; must not be {@code null}
 	 * @return a succeeded or failed {@code Try}; never {@code null}
 	 */
-	public abstract <U> Try<U> andThen(Function<V, Try<U>> function);
+	public abstract <U extends @Nullable Object> Try<U> andThen(Function<V, Try<U>> function);
 
 	/**
 	 * If this {@code Try} is a failure, call the supplied action and return a
@@ -231,7 +231,7 @@ public abstract class Try<V extends @Nullable Object> {
 	 * @return an {@link Optional}; never {@code null} but potentially
 	 * <em>empty</em>
 	 */
-	public abstract Optional<V> toOptional();
+	public abstract Optional<@NonNull V> toOptional();
 
 	/**
 	 * A transformer for values of type {@code S} to type {@code T}.
@@ -260,13 +260,13 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 
 		@Override
-		public <U> Try<U> andThenTry(Transformer<V, U> transformer) {
+		public <U extends @Nullable Object> Try<U> andThenTry(Transformer<V, U> transformer) {
 			checkNotNull(transformer, "transformer");
 			return Try.call(() -> transformer.apply(this.value));
 		}
 
 		@Override
-		public <U> Try<U> andThen(Function<V, Try<U>> function) {
+		public <U extends @Nullable Object> Try<U> andThen(Function<V, Try<U>> function) {
 			checkNotNull(function, "function");
 			return Try.of(() -> function.apply(this.value));
 		}
@@ -308,24 +308,27 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 
 		@Override
-		public Optional<V> toOptional() {
+		public Optional<@NonNull V> toOptional() {
 			return Optional.ofNullable(this.value);
 		}
 
 		@Override
-		public boolean equals(Object that) {
-			if (this == that) {
+		public boolean equals(Object obj) {
+			if (this == obj) {
 				return true;
 			}
-			if (that == null || this.getClass() != that.getClass()) {
-				return false;
-			}
-			return Objects.equals(this.value, ((Success<?>) that).value);
+			return obj instanceof Try.Success<?> that //
+					&& Objects.equals(this.value, that.value);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(value);
+			return Objects.hashCode(value);
+		}
+
+		@Override
+		public String toString() {
+			return "Try.success[" + value + "]";
 		}
 	}
 
@@ -338,19 +341,19 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 
 		@Override
-		public <U> Try<U> andThenTry(Transformer<V, U> transformer) {
+		public <U extends @Nullable Object> Try<U> andThenTry(Transformer<V, U> transformer) {
 			// don't call transformer because this Try is a failure
 			return uncheckedCast();
 		}
 
 		@Override
-		public <U> Try<U> andThen(Function<V, Try<U>> function) {
+		public <U extends @Nullable Object> Try<U> andThen(Function<V, Try<U>> function) {
 			// don't call function because this Try is a failure
 			return uncheckedCast();
 		}
 
 		@SuppressWarnings("unchecked")
-		private <U> Try<U> uncheckedCast() {
+		private <U extends @Nullable Object> Try<U> uncheckedCast() {
 			return (Try<U>) this;
 		}
 
@@ -393,24 +396,27 @@ public abstract class Try<V extends @Nullable Object> {
 		}
 
 		@Override
-		public Optional<V> toOptional() {
+		public Optional<@NonNull V> toOptional() {
 			return Optional.empty();
 		}
 
 		@Override
-		public boolean equals(Object that) {
-			if (this == that) {
+		public boolean equals(Object obj) {
+			if (this == obj) {
 				return true;
 			}
-			if (that == null || this.getClass() != that.getClass()) {
-				return false;
-			}
-			return Objects.equals(this.cause, ((Failure<?>) that).cause);
+			return obj instanceof Try.Failure<?> that //
+					&& Objects.equals(this.cause, that.cause);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(cause);
+			return Objects.hashCode(cause);
+		}
+
+		@Override
+		public String toString() {
+			return "Try.failure[" + cause + "]";
 		}
 
 	}

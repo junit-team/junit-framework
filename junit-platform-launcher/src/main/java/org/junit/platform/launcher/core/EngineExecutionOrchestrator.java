@@ -11,9 +11,14 @@
 package org.junit.platform.launcher.core;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.platform.launcher.LauncherConstants.DRY_RUN_DEFAULT;
 import static org.junit.platform.launcher.LauncherConstants.DRY_RUN_PROPERTY_NAME;
+import static org.junit.platform.launcher.LauncherConstants.MEMORY_CLEANUP_ENABLED_DEFAULT;
+import static org.junit.platform.launcher.LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.STACKTRACE_PRUNING_ENABLED_PROPERTY_NAME;
-import static org.junit.platform.launcher.core.LauncherPhase.getDiscoveryIssueFailurePhase;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.AUTOMATIC;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.EXECUTION;
+import static org.junit.platform.launcher.core.DiscoveryIssueFailurePhase.getDiscoveryIssueFailurePhase;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -33,7 +38,6 @@ import org.junit.platform.engine.TestEngine;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.store.Namespace;
 import org.junit.platform.engine.support.store.NamespacedHierarchicalStore;
-import org.junit.platform.launcher.LauncherConstants;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
@@ -114,7 +118,8 @@ public class EngineExecutionOrchestrator {
 	}
 
 	private Boolean isDryRun(InternalTestPlan internalTestPlan) {
-		return internalTestPlan.getConfigurationParameters().getBoolean(DRY_RUN_PROPERTY_NAME).orElse(false);
+		return internalTestPlan.getConfigurationParameters().getBoolean(DRY_RUN_PROPERTY_NAME) //
+				.orElse(DRY_RUN_DEFAULT);
 	}
 
 	private void dryRun(TestPlan testPlan, TestExecutionListener listener) {
@@ -153,8 +158,8 @@ public class EngineExecutionOrchestrator {
 
 	private static boolean isMemoryCleanupEnabled(TestPlan testPlan) {
 		return testPlan.getConfigurationParameters() //
-				.getBoolean(LauncherConstants.MEMORY_CLEANUP_ENABLED_PROPERTY_NAME) //
-				.orElse(false);
+				.getBoolean(MEMORY_CLEANUP_ENABLED_PROPERTY_NAME) //
+				.orElse(MEMORY_CLEANUP_ENABLED_DEFAULT);
 	}
 
 	private void withInterceptedStreams(ConfigurationParameters configurationParameters,
@@ -233,8 +238,8 @@ public class EngineExecutionOrchestrator {
 
 	private static boolean shouldReportDiscoveryIssues(LauncherDiscoveryResult discoveryResult) {
 		ConfigurationParameters configurationParameters = discoveryResult.getConfigurationParameters();
-		return getDiscoveryIssueFailurePhase(configurationParameters) //
-				.orElse(LauncherPhase.EXECUTION) == LauncherPhase.EXECUTION;
+		DiscoveryIssueFailurePhase discoveryIssueFailurePhase = getDiscoveryIssueFailurePhase(configurationParameters);
+		return discoveryIssueFailurePhase == EXECUTION || discoveryIssueFailurePhase == AUTOMATIC;
 	}
 
 	private ListenerRegistry<TestExecutionListener> buildListenerRegistryForExecution(

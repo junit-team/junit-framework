@@ -41,7 +41,7 @@ import org.junit.platform.commons.util.Preconditions;
 public interface ConfigurationParameters {
 
 	/**
-	 * Name of the JUnit Platform configuration file: {@value}.
+	 * Name of the JUnit Platform configuration file: {@value}
 	 *
 	 * <p>If a properties file with this name is present in the root of the
 	 * classpath, it will be used as a source for <em>configuration

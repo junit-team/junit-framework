@@ -10,16 +10,16 @@ dependencies {
 	constraints {
 		implementation("com.fasterxml.jackson.core:jackson-databind") {
 			version {
-				require("2.22.1")
+				require("2.23.0")
 			}
-			because("Workaround for CVE-2026-54515")
+			because("Workaround for CVE-2026-68497")
 		}
 	}
 	implementation(libs.plugins.spring.antora.markerCoordinates)
 	constraints {
 		implementation("org.yaml:snakeyaml") {
 			version {
-				require("2.0")
+				require("2.7")
 			}
 			because("Workaround for CVE-2022-1471")
 		}

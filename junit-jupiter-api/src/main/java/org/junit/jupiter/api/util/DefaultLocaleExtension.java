@@ -10,7 +10,10 @@
 
 package org.junit.jupiter.api.util;
 
+import java.util.EnumMap;
 import java.util.Locale;
+import java.util.Locale.Category;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -18,7 +21,8 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.support.ReflectionSupport;
 
@@ -35,18 +39,18 @@ final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallb
 	@Override
 	public void beforeAll(ExtensionContext context) {
 		createLocaleFromAnnotation(context) //
-				.ifPresent(locale -> store(context, CUSTOM_KEY, locale));
+				.ifPresent(customLocale -> store(context, CUSTOM_KEY, customLocale));
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext context) {
 		createLocaleFromAnnotation(context) //
-				.or(() -> load(context, CUSTOM_KEY)) //
-				.ifPresent(locale -> setDefaultLocale(context, locale));
+				.or(() -> load(context, CUSTOM_KEY, Locale.class)) //
+				.ifPresent(customLocale -> setDefaultLocale(context, customLocale));
 	}
 
-	private void setDefaultLocale(ExtensionContext context, Locale customLocale) {
-		store(context, DEFAULT_KEY, Locale.getDefault());
+	private static void setDefaultLocale(ExtensionContext context, Locale customLocale) {
+		store(context, DEFAULT_KEY, DefaultLocales.current());
 		Locale.setDefault(customLocale);
 	}
 
@@ -126,19 +130,40 @@ final class DefaultLocaleExtension implements BeforeAllCallback, BeforeEachCallb
 
 	@Override
 	public void afterEach(ExtensionContext context) {
-		load(context, DEFAULT_KEY).ifPresent(Locale::setDefault);
+		load(context, DEFAULT_KEY, DefaultLocales.class).ifPresent(DefaultLocales::restore);
 	}
 
-	private static void store(ExtensionContext context, String key, Locale value) {
+	private static void store(ExtensionContext context, String key, Object value) {
 		getStore(context).put(key, value);
 	}
 
-	private static Optional<Locale> load(ExtensionContext context, String key) {
-		return Optional.ofNullable(getStore(context).get(key, Locale.class));
+	private static <T> Optional<T> load(ExtensionContext context, String key, Class<T> type) {
+		return Optional.ofNullable(getStore(context).get(key, type));
 	}
 
-	private static ExtensionContext.Store getStore(ExtensionContext context) {
+	private static Store getStore(ExtensionContext context) {
 		return context.getStore(NAMESPACE);
+	}
+
+	/**
+	 * Backup of the default locale along with the default locales of each
+	 * {@link Category} because {@link Locale#setDefault(Locale)} changes all
+	 * of them.
+	 */
+	private record DefaultLocales(Locale locale, Map<Category, Locale> categoryLocales) {
+
+		static DefaultLocales current() {
+			var defaults = new EnumMap<Category, Locale>(Category.class);
+			for (Category category : Category.values()) {
+				defaults.put(category, Locale.getDefault(category));
+			}
+			return new DefaultLocales(Locale.getDefault(), defaults);
+		}
+
+		void restore() {
+			Locale.setDefault(locale);
+			categoryLocales.forEach(Locale::setDefault);
+		}
 	}
 
 }

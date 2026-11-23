@@ -21,10 +21,14 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apiguardian.api.API;
-import org.jspecify.annotations.Nullable;
+import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link HierarchicalTestExecutorService} that schedules tasks reactively.
@@ -109,14 +113,34 @@ final class ReactiveHierarchicalTestExecutorService implements HierarchicalTestE
 				concurrent.add(executeTask(testTask).toCompletableFuture());
 			}
 		}
-		if (concurrent.isEmpty()) {
-			return sequential;
-		}
-		if (testTasks.size() == concurrent.size()) {
-			return CompletableFuture.allOf(concurrent.toArray(new CompletableFuture<?>[0]));
-		}
-		return sequential.thenCombine(CompletableFuture.allOf(concurrent.toArray(new CompletableFuture<?>[0])),
-			(___, ____) -> null);
+		concurrent.add(sequential.toCompletableFuture());
+		return awaitAll(concurrent);
+	}
+
+	private static CompletionStage<?> awaitAll(final List<CompletableFuture<?>> futures) {
+		final var fatal = new AtomicReference<@Nullable Throwable>();
+		final var observed = futures.stream().map(future -> future.whenComplete((__, throwable) -> {
+			if (throwable != null) {
+				var cause = throwable;
+				while ((cause instanceof CompletionException || cause instanceof ExecutionException)
+						&& cause.getCause() != null) {
+					cause = cause.getCause();
+				}
+				if (UnrecoverableExceptions.isUnrecoverable(cause)) {
+					fatal.compareAndSet(null, cause);
+				}
+			}
+		})).toArray(CompletableFuture<?>[]::new);
+		return CompletableFuture.allOf(observed).handle((__, throwable) -> {
+			final var failure = fatal.get();
+			if (failure != null) {
+				throw ExceptionUtils.throwAsUncheckedException(failure);
+			}
+			if (throwable != null) {
+				throw ExceptionUtils.throwAsUncheckedException(throwable);
+			}
+			return null;
+		});
 	}
 
 	/**
@@ -156,63 +180,83 @@ final class ReactiveHierarchicalTestExecutorService implements HierarchicalTestE
 		return false;
 	}
 
-	private CompletionStage<@Nullable Void> acquireLockAndRun(TestTask testTask,
-			AsyncResourcePermit.@Nullable Permit permit) {
-		// Acquire the resource lock reactively first; then run the task body on a
-		// worker thread, releasing the lock and the permit afterwards.
-		// @formatter:off
-		return resourceGate.acquire(testTask.getResourceLock())
-				.thenCompose(lock -> runOnWorker(testTask, lock, permit));
-		// @formatter:on
+	private CompletionStage<@Nullable Void> acquireLockAndRun(final TestTask testTask,
+			final AsyncResourcePermit.@Nullable Permit permit) {
+		final CompletionStage<ResourceLock> acquisition;
+		try {
+			acquisition = resourceGate.acquire(testTask.getResourceLock());
+		}
+		catch (Throwable throwable) {
+			if (permit != null) {
+				permit.release();
+			}
+			return CompletableFuture.failedFuture(throwable);
+		}
+		return acquisition.whenComplete((__, throwable) -> {
+			if (throwable != null && permit != null) {
+				permit.release();
+			}
+		}).thenCompose(lock -> runOnWorker(testTask, lock, permit));
 	}
 
 	/**
-	 * Run a task's body on a worker thread, freeing the worker as soon as a
-	 * genuinely asynchronous body returns a pending stage, and release the lock
-	 * and permit once the body terminates.
+	 * Run only the synchronous preamble on a worker and release resources before
+	 * publishing completion, including fatal failures and rejected submissions.
 	 */
 	@SuppressWarnings("FutureReturnValueIgnored")
-	private CompletionStage<@Nullable Void> runOnWorker(TestTask testTask, ResourceLock lock,
-			AsyncResourcePermit.@Nullable Permit permit) {
-		CompletableFuture<@Nullable Void> running = new CompletableFuture<>();
-		workerPool.execute(() -> {
-			// Run only the synchronous preamble of the task on this worker thread
-			// and chain the completion handler reactively instead of blocking on
-			// join(). For an asynchronously-completing task the worker thread is
-			// thereby freed immediately, so sibling CONCURRENT tasks can all be
-			// dispatched without being throttled by the worker-pool size.
-			final CompletableFuture<?> task;
-			try {
-				task = testTask.executeAsync().toCompletableFuture();
-			}
-			catch (Throwable throwable) {
-				UnrecoverableExceptions.rethrowIfUnrecoverable(throwable);
-				releaseResources(lock, permit);
-				running.completeExceptionally(throwable);
-				return;
-			}
-			task.whenComplete((___ignore, throwable) -> {
+	private CompletionStage<@Nullable Void> runOnWorker(final TestTask testTask, final ResourceLock lock,
+			final AsyncResourcePermit.@Nullable Permit permit) {
+		final CompletableFuture<@Nullable Void> running = new CompletableFuture<>();
+		try {
+			workerPool.execute(() -> {
 				try {
-					if (throwable != null) {
-						UnrecoverableExceptions.rethrowIfUnrecoverable(throwable);
-						running.completeExceptionally(throwable);
-					}
-					else {
-						running.complete(null);
-					}
+					testTask.executeAsync().whenComplete((__, throwable) -> finish(running, lock, permit, throwable));
+				}
+				catch (Throwable throwable) {
+					finish(running, lock, permit, throwable);
 				}
 				finally {
-					releaseResources(lock, permit);
+					// Clear only this worker's interrupt status, not an external completion thread's.
+					Thread.interrupted();
 				}
 			});
-		});
+		}
+		catch (Throwable throwable) {
+			finish(running, lock, permit, throwable);
+		}
 		return running;
 	}
 
-	private void releaseResources(ResourceLock lock, AsyncResourcePermit.@Nullable Permit permit) {
-		resourceGate.release(lock);
-		if (permit != null) {
-			permit.release();
+	@SuppressWarnings("ReferenceEquality") // Suppressing the same Throwable instance is illegal.
+	private void finish(final CompletableFuture<@Nullable Void> running, final ResourceLock lock,
+			final AsyncResourcePermit.@Nullable Permit permit, final @Nullable Throwable throwable) {
+		try {
+			releaseResources(lock, permit);
+		}
+		catch (Throwable failure) {
+			if (throwable != null && throwable != failure) {
+				failure.addSuppressed(throwable);
+			}
+			running.completeExceptionally(failure);
+			return;
+		}
+		// Completion can synchronously run parent callbacks that need these resources.
+		if (throwable != null) {
+			running.completeExceptionally(throwable);
+		}
+		else {
+			running.complete(null);
+		}
+	}
+
+	private void releaseResources(final ResourceLock lock, final AsyncResourcePermit.@Nullable Permit permit) {
+		try {
+			resourceGate.release(lock);
+		}
+		finally {
+			if (permit != null) {
+				permit.release();
+			}
 		}
 	}
 

@@ -37,8 +37,8 @@ public class JupiterUniqueIdBuilder {
 
 	public static UniqueId uniqueIdForClass(Class<?> clazz) {
 		if (isInnerClass(clazz)) {
-			var segmentType = classSegmentType(clazz, NestedClassTestDescriptor.SEGMENT_TYPE,
-				ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE);
+			var segmentType = classSegmentType(clazz, NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE,
+				ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE);
 			return uniqueIdForClass(clazz.getEnclosingClass()).append(segmentType, clazz.getSimpleName());
 		}
 		return uniqueIdForStaticClass(clazz.getName());

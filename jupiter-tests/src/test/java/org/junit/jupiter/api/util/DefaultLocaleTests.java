@@ -18,6 +18,7 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.in
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
 import java.util.Locale;
+import java.util.Locale.Category;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -208,6 +209,36 @@ class DefaultLocaleTests extends AbstractJupiterTestEngineTests {
 			// only here to set the locale, so another test can verify whether it was reset;
 			// still, better to assert the value was actually set
 			assertThat(Locale.getDefault().getLanguage()).isEqualTo("en");
+		}
+
+	}
+
+	@Test
+	@WritesDefaultLocale
+	@DisplayName("resets the default locale of each category after each test")
+	void resetsDefaultLocaleOfEachCategory() {
+		Locale.setDefault(Category.DISPLAY, Locale.GERMANY);
+		Locale.setDefault(Category.FORMAT, Locale.FRANCE);
+		try {
+			executeTestsForClass(MethodLevelResetTestCase.class).testEvents() //
+					.assertStatistics(stats -> stats.started(1).succeeded(1));
+
+			assertThat(Locale.getDefault()).isEqualTo(TEST_DEFAULT_LOCALE);
+			assertThat(Locale.getDefault(Category.DISPLAY)).isEqualTo(Locale.GERMANY);
+			assertThat(Locale.getDefault(Category.FORMAT)).isEqualTo(Locale.FRANCE);
+		}
+		finally {
+			Locale.setDefault(TEST_DEFAULT_LOCALE);
+		}
+	}
+
+	static class MethodLevelResetTestCase {
+
+		@Test
+		@DefaultLocale("ja-JP")
+		void setForTestMethod() {
+			assertThat(Locale.getDefault(Category.DISPLAY)).isEqualTo(Locale.JAPAN);
+			assertThat(Locale.getDefault(Category.FORMAT)).isEqualTo(Locale.JAPAN);
 		}
 
 	}

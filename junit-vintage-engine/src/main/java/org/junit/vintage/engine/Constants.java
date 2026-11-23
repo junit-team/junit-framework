@@ -14,6 +14,9 @@ import static org.apiguardian.api.API.Status.DEPRECATED;
 import static org.apiguardian.api.API.Status.MAINTAINED;
 
 import org.apiguardian.api.API;
+import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Value;
+import org.junit.platform.configuration.api.ConfigurationParameterGroup;
 
 /**
  * Collection of constants related to the {@link VintageTestEngine}.
@@ -23,7 +26,16 @@ import org.apiguardian.api.API;
  */
 @Deprecated(since = "6.0")
 @API(status = DEPRECATED, since = "6.0")
+@ConfigurationParameterGroup("junit.vintage")
 public final class Constants {
+
+	/**
+	 * Default value for {@value #PARALLEL_EXECUTION_ENABLED} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean PARALLEL_EXECUTION_ENABLED_DEFAULT = false;
 
 	/**
 	 * Property name used to indicate whether parallel execution is enabled for the JUnit Vintage engine: {@value}
@@ -34,6 +46,7 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_EXECUTION_ENABLED = "junit.vintage.execution.parallel.enabled";
 
 	/**
@@ -46,7 +59,16 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(type = Integer.class)
 	public static final String PARALLEL_POOL_SIZE = "junit.vintage.execution.parallel.pool-size";
+
+	/**
+	 * Default value for {@value #PARALLEL_CLASS_EXECUTION} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean PARALLEL_CLASS_EXECUTION_DEFAULT = false;
 
 	/**
 	 * Property name used to indicate whether parallel execution is enabled for test classes in the
@@ -58,7 +80,16 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_CLASS_EXECUTION_DEFAULT))
 	public static final String PARALLEL_CLASS_EXECUTION = "junit.vintage.execution.parallel.classes";
+
+	/**
+	 * Default value for {@value #PARALLEL_METHOD_EXECUTION} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean PARALLEL_METHOD_EXECUTION_DEFAULT = false;
 
 	/**
 	 * Property name used to indicate whether parallel execution is enabled for test methods in the
@@ -70,7 +101,16 @@ public final class Constants {
 	 * @since 5.12
 	 */
 	@API(status = MAINTAINED, since = "5.13.3")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PARALLEL_METHOD_EXECUTION_DEFAULT))
 	public static final String PARALLEL_METHOD_EXECUTION = "junit.vintage.execution.parallel.methods";
+
+	/**
+	 * Default value for {@value #DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final boolean DISCOVERY_ISSUE_REPORTING_ENABLED_DEFAULT = true;
 
 	/**
 	 * Property name used to configure whether the JUnit Vintage engine should
@@ -82,6 +122,7 @@ public final class Constants {
 	 * @since 6.0.1
 	 */
 	@API(status = MAINTAINED, since = "6.0.1")
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DISCOVERY_ISSUE_REPORTING_ENABLED_DEFAULT))
 	public static final String DISCOVERY_ISSUE_REPORTING_ENABLED_PROPERTY_NAME = "junit.vintage.discovery.issue.reporting.enabled";
 
 	private Constants() {

@@ -1,0 +1,107 @@
+/*
+ * Copyright 2026 the original author or authors.
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v2.0 which
+ * accompanies this distribution and is available at
+ *
+ * https://www.eclipse.org/legal/epl-v20.html
+ */
+
+package org.junit.platform.configuration.processor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jspecify.annotations.Nullable;
+
+/**
+ * See <a href="https://docs.spring.io/spring-boot/specification/configuration-metadata/format.html">Spring Boot - Specifications - Configuration Metadata - Metadata Format</a>.
+ */
+final class ConfigurationMetadata {
+
+	private final List<Group> groups = new ArrayList<>();
+
+	private final List<Property> properties = new ArrayList<>();
+
+	private final List<Hint> hints = new ArrayList<>();
+
+	List<Group> groups() {
+		return groups;
+	}
+
+	List<Property> properties() {
+		return properties;
+	}
+
+	List<Hint> hints() {
+		return hints;
+	}
+
+	void addGroup(Group group) {
+		groups.add(group);
+	}
+
+	void addProperty(Property property) {
+		properties.add(property);
+	}
+
+	void addHint(Hint hint) {
+		hints.add(hint);
+	}
+
+	record Property( //
+			String name, //
+			@Nullable String type, //
+			@Nullable String description, //
+			@Nullable String sourceType, //
+			@Nullable Object defaultValue, //
+			@Nullable Deprecation deprecation //
+	) {
+
+	}
+
+	record Deprecation( //
+			@Nullable String reason, //
+			@Nullable String replacement, //
+			@Nullable String since //
+	) {
+
+	}
+
+	record Hint( //
+			String name, //
+			@Nullable List<ValueHint> values, //
+			@Nullable List<ValueProvider> providers //
+	) {
+
+	}
+
+	record ValueHint( //
+			Object value, //
+			@Nullable String description //
+	) {
+
+	}
+
+	record ValueProvider( //
+			String name, //
+			@Nullable Parameters parameters //
+	) {
+
+	}
+
+	record Parameters( //
+			String target //
+	) {
+
+	}
+
+	record Group( //
+			String name, //
+			String sourceType, //
+			@Nullable String description //
+	) {
+
+	}
+}

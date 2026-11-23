@@ -33,6 +33,7 @@ val woodstoxRuntimeClasspath = configurations.resolvable("woodstoxRuntimeClasspa
 dependencies {
 	// --- Things we are testing --------------------------------------------------
 	testImplementation(projects.junitPlatformCommons)
+	testImplementation(projects.junitPlatformConfigurationProcessor)
 	testImplementation(projects.junitPlatformConsole)
 	testImplementation(projects.junitPlatformEngine)
 	testImplementation(projects.junitPlatformLauncher)
@@ -48,6 +49,7 @@ dependencies {
 	testImplementation(testFixtures(projects.junitJupiterParams))
 	testImplementation(libs.apiguardian)
 	testImplementation(libs.classgraph)
+	testImplementation(libs.jimfs)
 	testImplementation(libs.jfrunit) {
 		exclude(group = "org.junit.vintage")
 	}

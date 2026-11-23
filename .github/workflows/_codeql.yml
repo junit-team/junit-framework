@@ -30,14 +30,14 @@ jobs:
       with:
         persist-credentials: false
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+      uses: github/codeql-action/init@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
         tools: linked
     - name: Build
       if: matrix.build-mode == 'manual'
-      uses: ./.github/actions/run-gradle
+      uses: $/.github/actions/run-gradle
       env:
         CODEQL_EXTRACTOR_JAVA_AGENT_DISABLE_KOTLIN: true # blocked by https://github.com/github/codeql/issues/21938
       with:
@@ -47,6 +47,6 @@ jobs:
           -Dscan.tag.CodeQL
           classes
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+      uses: github/codeql-action/analyze@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
       with:
         category: "/language:${{matrix.language}}"

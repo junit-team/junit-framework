@@ -10,9 +10,8 @@
 
 package org.junit.api.tools;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-
-import java.util.Arrays;
 
 import io.github.classgraph.AnnotationEnumValue;
 import io.github.classgraph.AnnotationParameterValueList;
@@ -47,7 +46,7 @@ sealed interface Declaration extends Comparable<Declaration> {
 
 		@Override
 		public String moduleName() {
-			return classInfo.getModuleRef().getName();
+			return requireNonNull(classInfo.getModuleReference()).descriptor().name();
 		}
 
 		@Override
@@ -88,7 +87,7 @@ sealed interface Declaration extends Comparable<Declaration> {
 		}
 
 		private AnnotationParameterValueList getParameterValues() {
-			return classInfo.getAnnotationInfo(API.class).getParameterValues();
+			return requireNonNull(classInfo.getAllAnnotationInfo(API.class)).getParameterValues();
 		}
 	}
 
@@ -96,7 +95,7 @@ sealed interface Declaration extends Comparable<Declaration> {
 
 		@Override
 		public String moduleName() {
-			return classInfo().getModuleRef().getName();
+			return requireNonNull(classInfo().getModuleReference()).descriptor().name();
 		}
 
 		@Override
@@ -125,8 +124,9 @@ sealed interface Declaration extends Comparable<Declaration> {
 		}
 
 		private String methodParameters() {
-			return Arrays.stream(methodInfo.getParameterInfo()) //
-					.map(parameterInfo -> parameterInfo.getTypeSignatureOrTypeDescriptor().toStringWithSimpleNames()) //
+			return methodInfo.getParameterInfo().stream() //
+					.map(parameterInfo -> requireNonNull(
+						parameterInfo.getTypeSignatureOrTypeDescriptor()).toStringWithSimpleNames()) //
 					.collect(joining(", ", "(", ")"));
 		}
 
@@ -152,7 +152,7 @@ sealed interface Declaration extends Comparable<Declaration> {
 		}
 
 		private AnnotationParameterValueList getParameterValues() {
-			return methodInfo.getAnnotationInfo(API.class).getParameterValues();
+			return requireNonNull(methodInfo.getAllAnnotationInfo(API.class)).getParameterValues();
 		}
 
 		public ClassInfo classInfo() {
@@ -161,7 +161,8 @@ sealed interface Declaration extends Comparable<Declaration> {
 	}
 
 	private static Status readStatus(AnnotationParameterValueList parameterValues) {
-		return Status.valueOf(((AnnotationEnumValue) parameterValues.getValue("status")).getValueName());
+		return Status.valueOf(
+			((AnnotationEnumValue) requireNonNull(parameterValues.getValue("status"))).getValueName());
 	}
 
 	private static String readSince(AnnotationParameterValueList parameterValues) {

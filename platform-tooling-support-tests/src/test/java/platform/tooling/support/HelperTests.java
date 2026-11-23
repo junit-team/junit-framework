@@ -38,6 +38,8 @@ class HelperTests {
 					"junit-jupiter-params", //
 					"junit-start", //
 					"junit-platform-commons", //
+					"junit-platform-configuration-api", //
+					"junit-platform-configuration-processor", //
 					"junit-platform-console", //
 					"junit-platform-engine", //
 					"junit-platform-launcher", //

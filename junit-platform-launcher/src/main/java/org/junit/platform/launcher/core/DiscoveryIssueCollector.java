@@ -60,6 +60,10 @@ class DiscoveryIssueCollector implements LauncherDiscoveryListener {
 								value, LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_PROPERTY_NAME));
 					}
 				}) //
-				.orElse(Severity.ERROR);
+				.orElseGet(DiscoveryIssueCollector::getDefaultSeverity);
+	}
+
+	private static Severity getDefaultSeverity() {
+		return Severity.valueOf(LauncherConstants.CRITICAL_DISCOVERY_ISSUE_SEVERITY_DEFAULT.toUpperCase(Locale.ROOT));
 	}
 }

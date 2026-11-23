@@ -17,6 +17,7 @@ import java.lang.reflect.Parameter;
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code ParameterResolver} defines the API for {@link Extension Extensions}
@@ -41,7 +42,7 @@ import org.junit.jupiter.api.TestInstance;
  * {@link TestInstance.Lifecycle#PER_CLASS PER_CLASS} lifecycle is used.
  * Changing the scope makes test-specific data available to the
  * implementation of this method and allows keeping state on the test level
- * by using the provided {@link ExtensionContext.Store Store} instance.
+ * by using the provided {@link Store Store} instance.
  *
  * <h2>Constructor Requirements</h2>
  *

@@ -17,7 +17,7 @@ jobs:
         - version: 26
           type: ga
         - version: 27
-          type: ea
+          type: ga
         - version: 28
           type: ea
     name: "OpenJDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }})"
@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Set up Test JDK
-        uses: ./.github/actions/setup-test-jdk
+        uses: $/.github/actions/setup-test-jdk
       - name: "Set up JDK ${{ matrix.jdk.version }} (${{ matrix.jdk.release || 'ea' }})"
         if: matrix.jdk.type == 'ea'
         uses: oracle-actions/setup-java@fff43251af9936a0e6a4d5d0946e14f1680e9b6b # v1.5.0
@@ -39,7 +39,7 @@ jobs:
           version: latest
       - name: "Set up JDK ${{ matrix.jdk.version }} (${{ matrix.jdk.distribution || 'temurin' }})"
         if: matrix.jdk.type == 'ga'
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: ${{ matrix.jdk.distribution || 'temurin' }}
           java-version: ${{ matrix.jdk.version }}
@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: echo "JDK${{ matrix.jdk.version }}=$JAVA_HOME" >> $GITHUB_ENV
       - name: Build
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-
@@ -57,7 +57,7 @@ jobs:
             -Dscan.tag.JDK_${{ matrix.jdk.version }}
             build
           broken-by-issue: ${{ matrix.jdk.broken-by-issue }}
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() }}
         with:
           name: Open Test Reports (${{ github.job }} ${{ matrix.jdk.version }} (${{ matrix.jdk.release || matrix.jdk.type }}))
@@ -76,11 +76,11 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: Set up Test JDK
-        uses: ./.github/actions/setup-test-jdk
+        uses: $/.github/actions/setup-test-jdk
         with:
           distribution: semeru
       - name: 'Set up JDK ${{ matrix.jdk }}'
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: semeru
           java-version: ${{ matrix.jdk }}
@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: echo "JDK${{ matrix.jdk }}=$JAVA_HOME" >> $GITHUB_ENV
       - name: Build
-        uses: ./.github/actions/run-gradle
+        uses: $/.github/actions/run-gradle
         with:
           encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           arguments: >-
@@ -99,7 +99,7 @@ jobs:
             -Dscan.tag.JDK_${{ matrix.jdk }}
             -Dscan.tag.OpenJ9
             build
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() }}
         with:
           name: Open Test Reports (${{ github.job }})

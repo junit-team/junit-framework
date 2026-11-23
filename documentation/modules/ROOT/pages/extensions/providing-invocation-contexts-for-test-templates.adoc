@@ -9,11 +9,27 @@ for the next invocation of the `{TestTemplate}` method.
 The following example shows how to write a test template as well as how to register and
 implement a `{TestTemplateInvocationContextProvider}`.
 
+.A test template with an accompanying extension
+[tabs]
+====
+Java::
++
+--
 [source,java,indent=0]
-.A test template with accompanying extension
 ----
 include::example$java/example/TestTemplateDemo.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/TestTemplateDemo.kt[tags=user_guide]
+----
+--
+====
 
 In this example, the test template will be invoked twice. The display names of the
 invocations will be `apple` and `banana` as specified by the invocation context. Each
@@ -28,7 +44,7 @@ parameter. The output when using the `ConsoleLauncher` is as follows.
 
 The `{TestTemplateInvocationContextProvider}` extension API is primarily intended for
 implementing different kinds of tests that rely on repetitive invocation of a test-like
-method albeit in different contexts — for example, with different parameters, by preparing
+method, albeit in different contexts — for example, with different parameters, by preparing
 the test class instance differently, or multiple times without modifying the context.
 Please refer to the implementations of xref:writing-tests/repeated-tests.adoc[] or
 xref:writing-tests/parameterized-classes-and-tests.adoc[Parameterized Tests] which use this extension point

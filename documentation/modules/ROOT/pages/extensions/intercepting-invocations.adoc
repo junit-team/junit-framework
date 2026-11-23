@@ -6,11 +6,27 @@ test code.
 The following example shows an extension that executes all test methods in Swing's Event
 Dispatch Thread.
 
-[source,java,indent=0]
 .An extension that executes tests in a user-defined thread
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
 ----
 include::example$java/example/interceptor/SwingEdtInterceptor.java[tags=user_guide]
 ----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/interceptor/SwingEdtInterceptor.kt[tags=user_guide]
+----
+--
+====
 
 [NOTE]
 .Accessing the test-scoped `ExtensionContext`

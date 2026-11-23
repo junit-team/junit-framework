@@ -48,6 +48,12 @@
       ],
     },
     {
+      allowedVersions: '!/-jdk5$/',
+      matchPackageNames: [
+        'net.bytebuddy:{/,}**',
+      ],
+    },
+    {
       matchManagers: 'npm',
       matchPackageNames: [
         '@antora/assembler',

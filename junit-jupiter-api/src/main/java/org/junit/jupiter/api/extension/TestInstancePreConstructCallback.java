@@ -15,6 +15,7 @@ import static org.apiguardian.api.API.Status.STABLE;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.store.Store;
 
 /**
  * {@code TestInstancePreConstructCallback} defines the API for {@link Extension
@@ -69,7 +70,7 @@ public interface TestInstancePreConstructCallback extends TestInstantiationAware
 	 * {@link TestInstance.Lifecycle#PER_CLASS PER_CLASS} lifecycle is used.
 	 * Changing the scope makes test-specific data available to the
 	 * implementation of this method and allows keeping state on the test level
-	 * by using the provided {@link ExtensionContext.Store Store} instance.
+	 * by using the provided {@link Store Store} instance.
 	 *
 	 * @param factoryContext the context for the test instance about to be instantiated;
 	 * never {@code null}

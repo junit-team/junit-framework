@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 
 /**
@@ -192,7 +193,7 @@ class TestInstancePostProcessorTests extends AbstractJupiterTestEngineTests {
 			}
 			String instanceType = testInstance.getClass().getSimpleName();
 			callSequence.add(name + ":" + instanceType);
-			context.getStore(ExtensionContext.Namespace.create(this)).put(new Object(),
+			context.getStore(Namespace.create(this)).put(new Object(),
 				(AutoCloseable) () -> callSequence.add("close:" + name + ":" + instanceType));
 		}
 	}

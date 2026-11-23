@@ -17,7 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.aggregator.DefaultArgumentsAccessor;
 import org.junit.jupiter.params.provider.Arguments;
@@ -55,7 +56,7 @@ class ParameterizedInvocationContext<T extends ParameterizedDeclarationContext<?
 	}
 
 	private void registerAutoCloseableArgumentsInStoreForClosing(ExtensionContext context) {
-		ExtensionContext.Store store = context.getStore(NAMESPACE);
+		Store store = context.getStore(NAMESPACE);
 		AtomicInteger argumentIndex = new AtomicInteger();
 
 		Arrays.stream(this.arguments.getAllPayloads()) //

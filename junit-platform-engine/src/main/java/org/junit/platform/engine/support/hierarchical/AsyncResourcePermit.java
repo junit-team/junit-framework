@@ -16,6 +16,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apiguardian.api.API;
 import org.junit.platform.commons.util.Preconditions;
@@ -38,6 +40,7 @@ import org.junit.platform.commons.util.Preconditions;
 final class AsyncResourcePermit {
 
 	private final int maxPermits;
+	private final ReentrantLock lock = new ReentrantLock();
 	private int availablePermits;
 	private final Deque<CompletableFuture<Permit>> waitingPermits = new ArrayDeque<>();
 
@@ -69,8 +72,12 @@ final class AsyncResourcePermit {
 	}
 
 	int availablePermits() {
-		synchronized (this) {
+		lock.lock();
+		try {
 			return availablePermits;
+		}
+		finally {
+			lock.unlock();
 		}
 	}
 
@@ -90,15 +97,20 @@ final class AsyncResourcePermit {
 	 * value of the stage.
 	 */
 	CompletionStage<Permit> acquire() {
-		Permit permit = tryAcquire();
-		if (permit != null) {
-			return CompletableFuture.completedFuture(permit);
-		}
-		CompletableFuture<Permit> pending = new CompletableFuture<>();
-		synchronized (this) {
+		lock.lock();
+		try {
+			// Check availability and register a waiter atomically with respect to release.
+			if (waitingPermits.isEmpty() && availablePermits > 0) {
+				availablePermits--;
+				return CompletableFuture.completedFuture(new Lease(this));
+			}
+			final var pending = new CompletableFuture<Permit>();
 			waitingPermits.addLast(pending);
+			return pending;
 		}
-		return pending;
+		finally {
+			lock.unlock();
+		}
 	}
 
 	/**
@@ -108,7 +120,8 @@ final class AsyncResourcePermit {
 	 */
 	@org.jspecify.annotations.Nullable
 	Permit tryAcquire() {
-		synchronized (this) {
+		lock.lock();
+		try {
 			// Do not let a new acquirer jump ahead of already-queued waiters.
 			if (!waitingPermits.isEmpty() || availablePermits == 0) {
 				return null;
@@ -116,12 +129,15 @@ final class AsyncResourcePermit {
 			availablePermits--;
 			return new Lease(this);
 		}
+		finally {
+			lock.unlock();
+		}
 	}
 
 	private static final class Lease implements Permit {
 
 		private final AsyncResourcePermit gate;
-		private volatile boolean released;
+		private final AtomicBoolean released = new AtomicBoolean();
 
 		Lease(AsyncResourcePermit gate) {
 			this.gate = gate;
@@ -129,24 +145,31 @@ final class AsyncResourcePermit {
 
 		@Override
 		public void release() {
-			if (!released) {
-				released = true;
+			if (released.compareAndSet(false, true)) {
 				gate.release();
 			}
 		}
 	}
 
 	private void release() {
-		CompletableFuture<Permit> next;
-		synchronized (this) {
-			next = waitingPermits.pollFirst();
-			if (next == null) {
-				availablePermits++;
+		while (true) {
+			final CompletableFuture<Permit> next;
+			lock.lock();
+			try {
+				next = waitingPermits.pollFirst();
+				if (next == null) {
+					availablePermits++;
+					return;
+				}
 			}
-		}
-		if (next != null) {
-			// Hand the permit to the longest-waiting acquirer directly.
-			next.complete(new Lease(this));
+			finally {
+				lock.unlock();
+			}
+			// Run callbacks outside the lock. If cancellation wins the handoff,
+			// keep the permit and try the next waiter instead of losing capacity.
+			if (next.complete(new Lease(this))) {
+				return;
+			}
 		}
 	}
 }

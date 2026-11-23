@@ -335,7 +335,8 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 		Execution execution = findExecution(results.testEvents(), "testMethod()");
 		assertThat(execution.getTerminationInfo().getExecutionResult().getThrowable().orElseThrow()) //
 				.isInstanceOf(PreconditionViolationException.class) //
-				.hasMessage("timeout duration must be a positive number: 0");
+				.hasMessage(
+					"timeout duration must be a positive number less than approximately 9223372036 seconds (2^63 nanoseconds): 0 seconds");
 	}
 
 	private static Execution findExecution(Events events, String displayName) {
@@ -840,13 +841,13 @@ class TimeoutExtensionTests extends AbstractJupiterTestEngineTests {
 
 		@Test
 		@Order(1)
-		@Timeout(value = 10, unit = MILLISECONDS, threadMode = SAME_THREAD)
+		@Timeout(value = 100, unit = MILLISECONDS, threadMode = SAME_THREAD)
 		void testZero() {
 		}
 
 		@Test
 		@Order(2)
-		@Timeout(value = 10, unit = MILLISECONDS, threadMode = SAME_THREAD)
+		@Timeout(value = 100, unit = MILLISECONDS, threadMode = SAME_THREAD)
 		void testOne() {
 		}
 	}

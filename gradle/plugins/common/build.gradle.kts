@@ -10,6 +10,7 @@ dependencies {
 	implementation("junitbuild.base:build-parameters")
 	implementation(projects.backwardCompatibility)
 	implementation(projects.javadoc)
+	implementation(libs.jackson.databind)
 	implementation(libs.plugins.kotlin.markerCoordinates)
 	implementation(libs.plugins.bnd.markerCoordinates)
 	implementation(libs.plugins.develocity.markerCoordinates)
@@ -24,7 +25,7 @@ dependencies {
 	constraints {
 		implementation("org.codehaus.plexus:plexus-utils") {
 			version {
-				require("4.0.3")
+				require("4.2.0")
 			}
 			because("Workaround for CVE-2025-67030 (used by shadow plugin)")
 		}

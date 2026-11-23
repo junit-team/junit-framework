@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.store.Namespace
 import java.net.HttpURLConnection
 import java.net.URI
 
@@ -51,7 +52,7 @@ class HttpServerParameterResolver : ParameterResolver {
         extensionContext: ExtensionContext
     ): Any =
         extensionContext
-            .getStore(ExtensionContext.Namespace.GLOBAL)
+            .getStore(Namespace.GLOBAL)
             .get("httpServer", CloseableHttpServer::class.java)!! // <1>
             .server
 }

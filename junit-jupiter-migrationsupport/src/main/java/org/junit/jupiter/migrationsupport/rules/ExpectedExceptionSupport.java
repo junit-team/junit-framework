@@ -15,10 +15,10 @@ import static org.apiguardian.api.API.Status.DEPRECATED;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.store.Namespace;
+import org.junit.jupiter.api.store.Store;
 import org.junit.jupiter.migrationsupport.rules.adapter.ExpectedExceptionAdapter;
 import org.junit.rules.ExpectedException;
 

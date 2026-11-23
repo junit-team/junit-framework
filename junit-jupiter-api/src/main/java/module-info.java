@@ -21,6 +21,8 @@ module org.junit.jupiter.api {
 	requires transitive org.junit.platform.commons;
 	requires transitive org.opentest4j;
 
+	requires static org.junit.platform.configuration.api;
+	requires static org.junit.platform.engine;
 	requires static kotlin.stdlib;
 
 	exports org.junit.jupiter.api;
@@ -30,6 +32,7 @@ module org.junit.jupiter.api {
 	exports org.junit.jupiter.api.function;
 	exports org.junit.jupiter.api.io;
 	exports org.junit.jupiter.api.parallel;
+	exports org.junit.jupiter.api.store;
 	exports org.junit.jupiter.api.timeout to org.junit.jupiter.engine;
 	exports org.junit.jupiter.api.util;
 

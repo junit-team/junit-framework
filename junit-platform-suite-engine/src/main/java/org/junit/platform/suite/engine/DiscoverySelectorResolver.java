@@ -29,6 +29,7 @@ final class DiscoverySelectorResolver {
 					context.getDiscoveryRequest().getConfigurationParameters(),
 					context.getDiscoveryRequest().getOutputDirectoryCreator(),
 					context.getDiscoveryRequest().getDiscoveryListener(),
+					context.getDiscoveryRequest().getSessionScopedStore(),
 					context.getIssueReporter()))
 			.build();
 	// @formatter:on

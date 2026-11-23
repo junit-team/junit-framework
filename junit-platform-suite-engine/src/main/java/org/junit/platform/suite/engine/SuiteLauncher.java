@@ -37,17 +37,17 @@ class SuiteLauncher {
 	private final EngineExecutionOrchestrator executionOrchestrator = new EngineExecutionOrchestrator();
 	private final EngineDiscoveryOrchestrator discoveryOrchestrator;
 
-	static SuiteLauncher create() {
+	static SuiteLauncher create(NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
 		Set<TestEngine> engines = new LinkedHashSet<>();
 		new ServiceLoaderTestEngineRegistry().loadTestEngines().forEach(engines::add);
-		return new SuiteLauncher(engines);
+		return new SuiteLauncher(engines, sessionScopedStore);
 	}
 
-	private SuiteLauncher(Set<TestEngine> testEngines) {
+	private SuiteLauncher(Set<TestEngine> testEngines, NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
 		Preconditions.condition(hasTestEngineOtherThanSuiteEngine(testEngines),
 			() -> "Cannot create SuiteLauncher without at least one other TestEngine; "
 					+ "consider adding an engine implementation JAR to the classpath");
-		this.discoveryOrchestrator = new EngineDiscoveryOrchestrator(testEngines, emptyList());
+		this.discoveryOrchestrator = new EngineDiscoveryOrchestrator(testEngines, emptyList(), sessionScopedStore);
 	}
 
 	private boolean hasTestEngineOtherThanSuiteEngine(Set<TestEngine> testEngines) {

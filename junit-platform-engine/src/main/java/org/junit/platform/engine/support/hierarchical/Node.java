@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import org.apiguardian.api.API;
 import org.jspecify.annotations.Nullable;
@@ -155,11 +156,8 @@ public interface Node<C extends EngineExecutionContext> {
 	/**
 	 * Asynchronous variant of {@link #before(EngineExecutionContext)}.
 	 *
-	 * <p>The result is used purely as a promise that the before-behavior has
-	 * finished; the {@code CompletionStage} payload is intentionally ignored.
-	 * The produced context is carried by the (blocking)
-	 * {@link #before(EngineExecutionContext)} method which the default
-	 * implementation invokes.
+	 * <p>The returned stage supplies the replacement context to use for this
+	 * node's execution, children, and after-behavior.
 	 *
 	 * <p>The default implementation delegates to the (blocking)
 	 * {@link #before(EngineExecutionContext)} method, bridging it into the
@@ -182,7 +180,10 @@ public interface Node<C extends EngineExecutionContext> {
 	 * {@link HierarchicalTestEngine} handles execution of their children.
 	 *
 	 * <p>The supplied {@code dynamicTestExecutor} may be used to submit
-	 * additional dynamic tests for immediate execution.
+	 * additional dynamic tests for immediate execution. All dynamic tests
+	 * submitted to it are finished before the {@linkplain #after after}
+	 * behavior of this node is executed, even if this method throws an
+	 * exception.
 	 *
 	 * <p>The default implementation returns the supplied {@code context} unmodified.
 	 *
@@ -272,22 +273,22 @@ public interface Node<C extends EngineExecutionContext> {
 	/**
 	 * Asynchronous variant of {@link #around(EngineExecutionContext, Invocation)}.
 	 *
-	 * <p>The result is used purely as a promise that the around-behavior has
-	 * finished; the {@code CompletionStage} payload is intentionally ignored.
-	 *
-	 * <p>The default implementation delegates to the (blocking)
-	 * {@link #around(EngineExecutionContext, Invocation)} method, bridging it
-	 * into the reactive world.
+	 * <p>The default implementation directly applies the supplied invocation.
+	 * It does not delegate to synchronous {@code around}, since a synchronous
+	 * wrapper cannot encompass asynchronous completion without blocking.
+	 * Engines using asynchronous execution that require wrapping behavior must
+	 * override this method and return a stage encompassing the invocation and
+	 * their wrapper's completion.
 	 *
 	 * @param context the context to execute in
-	 * @param invocation the wrapped invocation (must be invoked exactly once)
+	 * @param invocation the wrapped invocation (must be applied exactly once)
 	 * @return a completion stage signaling termination of the around-behavior;
 	 * never {@code null}
 	 * @since 6.2
 	 */
 	@API(status = EXPERIMENTAL, since = "6.2")
-	default CompletionStage<?> aroundAsync(C context, Invocation<C> invocation) {
-		return AsyncTestExecution.synchronous(() -> around(context, invocation));
+	default CompletionStage<?> aroundAsync(final C context, final Function<C, CompletionStage<?>> invocation) {
+		return invocation.apply(context);
 	}
 
 	/**

@@ -20,7 +20,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.store.Namespace;
 
 @ManagedResource.Scoped(LocalMavenRepo.ScopeProvider.class)
 public class LocalMavenRepo implements AutoCloseable {

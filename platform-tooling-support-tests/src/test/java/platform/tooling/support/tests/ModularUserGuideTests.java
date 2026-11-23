@@ -49,6 +49,8 @@ class ModularUserGuideTests {
 			open module documentation {
 			  exports example.testkit; // just here to ensure documentation example sources are compiled
 
+			  requires static org.junit.platform.configuration.api;
+
 			  requires org.junit.jupiter.api;
 			  requires org.junit.jupiter.migrationsupport;
 			  requires org.junit.jupiter.params;

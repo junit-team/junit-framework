@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.store.Namespace;
 
 @ExtendWith(HttpServerParameterResolver.class)
 class HttpTests {
@@ -56,7 +57,7 @@ class HttpServerParameterResolver implements ParameterResolver {
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		return extensionContext
 				// tag::custom_line_break[]
-				.getStore(ExtensionContext.Namespace.GLOBAL)
+				.getStore(Namespace.GLOBAL)
 				// tag::custom_line_break[]
 				.get("httpServer", CloseableHttpServer.class) // <1>
 				.getServer();

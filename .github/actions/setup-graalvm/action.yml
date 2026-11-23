@@ -7,7 +7,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: graalvm/setup-graalvm@5298d94fb55a4f185c602eeac5de1b553882abe2 # v1.6.4
+    - uses: graalvm/setup-graalvm@60e76998d25690099182b796e99b8804da582d90 # v1.6.10
       with:
         distribution: graalvm
         java-version: ${{ inputs.java-version }}

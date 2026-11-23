@@ -13,6 +13,7 @@ nmcpSettings {
 		password = providers.gradleProperty("mavenCentralPassword")
 		publishingType = "USER_MANAGED"
 		validationTimeout = 10.minutes.toJavaDuration()
-		publishingTimeout = buildParameters.publishing.timeout.map(Duration::parse)
+		// Resolved eagerly for configuration cache compatibility
+		buildParameters.publishing.timeout.orNull?.let { publishingTimeout = Duration.parse(it) }
 	}
 }

@@ -18,15 +18,15 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Set up GraalVM 21
-      uses: ./.github/actions/setup-graalvm
+      uses: $/.github/actions/setup-graalvm
       with:
         java-version: 21
     - name: Set up GraalVM 25
-      uses: ./.github/actions/setup-graalvm
+      uses: $/.github/actions/setup-graalvm
       with:
         java-version: 25
     - name: Build
-      uses: ./.github/actions/main-build
+      uses: $/.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: >-
@@ -35,7 +35,7 @@ jobs:
           build
           jacocoRootReport
     - name: Upload to Codecov.io
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -48,7 +48,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Build
-      uses: ./.github/actions/main-build
+      uses: $/.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
@@ -61,7 +61,7 @@ jobs:
         fetch-depth: 1
         persist-credentials: false
     - name: Build
-      uses: ./.github/actions/main-build
+      uses: $/.github/actions/main-build
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
@@ -79,14 +79,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install graphviz
     - name: Install Node.js
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version-file: documentation/.tool-versions
     - name: Build Documentation
-      uses: ./.github/actions/run-gradle
+      uses: $/.github/actions/run-gradle
       with:
         encryptionKey: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         arguments: >-
           antora
           -Pantora.downloadNode=false
           -Dscan.tag.Documentation
+    - name: Upload Antora Site
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: antora-site
+        path: documentation/build/antora-site

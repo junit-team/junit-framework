@@ -61,7 +61,7 @@ class UnalignedClasspathTests {
 
 		assertEquals(1, result.exitCode());
 		assertEquals("", result.stdErr());
-		assertThat(result.stdOutLines()).contains("[INFO] BUILD FAILURE");
+		assertThat(result.stdOutLines()).contains("[ERROR] BUILD FAILURE");
 		assertThat(result.stdOut()) //
 				.contains("The wrapped NoClassDefFoundError is likely caused by the versions of JUnit jars "
 						+ "on the classpath/module path not being properly aligned");

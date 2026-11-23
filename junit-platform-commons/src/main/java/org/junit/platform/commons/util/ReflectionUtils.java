@@ -607,7 +607,8 @@ public final class ReflectionUtils {
 	 * @see #tryToReadFieldValue(Field, Object)
 	 */
 	@API(status = INTERNAL, since = "1.4")
-	public static <T> Try<Object> tryToReadFieldValue(Class<T> clazz, String fieldName, @Nullable T instance) {
+	public static <T> Try<@Nullable Object> tryToReadFieldValue(Class<T> clazz, String fieldName,
+			@Nullable T instance) {
 		Preconditions.notNull(clazz, "Class must not be null");
 		Preconditions.notBlank(fieldName, "Field name must not be null or blank");
 
@@ -644,7 +645,7 @@ public final class ReflectionUtils {
 		Preconditions.condition((instance != null || isStatic(field)),
 			() -> "Cannot read non-static field [%s] on a null instance.".formatted(field));
 
-		return Try.<@Nullable Object> call(() -> makeAccessible(field).get(instance));
+		return Try.call(() -> makeAccessible(field).get(instance));
 	}
 
 	/**

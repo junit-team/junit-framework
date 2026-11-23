@@ -40,22 +40,30 @@ public class EnumConfigurationParameterConverter<E extends Enum<E>> implements C
 
 	@Override
 	public Optional<E> get(ConfigurationParameters configParams, String key) {
-		return configParams.get(key) //
-				.map(value -> convert(key, value));
+		var result = configParams.get(key).map(value -> convert(key, value));
+		result.ifPresent(value -> logUsageMessage(key, value));
+		return result;
 	}
 
 	public Optional<E> get(ExtensionContext extensionContext, String key) {
-		return extensionContext.getConfigurationParameter(key, value -> convert(key, value));
+		var result = extensionContext.getConfigurationParameter(key, value -> convert(key, value));
+		result.ifPresent(value -> logUsageMessage(key, value));
+		return result;
+	}
+
+	public E getOrDefault(ConfigurationParameters configParams, String key, String defaultValue) {
+		return get(configParams, key).orElseGet(() -> convert(key, defaultValue));
+	}
+
+	private void logUsageMessage(String key, E result) {
+		logger.config(() -> "Using %s '%s' set via the '%s' configuration parameter." //
+				.formatted(enumDisplayName, result, key));
 	}
 
 	private E convert(String key, String value) {
-		String constantName = null;
+		String constantName = value.strip().toUpperCase(Locale.ROOT);
 		try {
-			constantName = value.strip().toUpperCase(Locale.ROOT);
-			E result = Enum.valueOf(enumType, constantName);
-			logger.config(() -> "Using %s '%s' set via the '%s' configuration parameter.".formatted(enumDisplayName,
-				result, key));
-			return result;
+			return Enum.valueOf(enumType, constantName);
 		}
 		catch (Exception ex) {
 			throw new JUnitException("Invalid %s '%s' set via the '%s' configuration parameter.".formatted(

@@ -166,15 +166,13 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 	@Override
 	public JupiterEngineExecutionContext execute(JupiterEngineExecutionContext context,
 			DynamicTestExecutor dynamicTestExecutor) {
-		ThrowableCollector throwableCollector = context.getThrowableCollector();
-
 		// @formatter:off
 		invokeBeforeEachCallbacks(context);
-			if (throwableCollector.isEmpty()) {
+			if (shouldContinue(context)) {
 				invokeBeforeEachMethods(context);
-				if (throwableCollector.isEmpty()) {
+				if (shouldContinue(context)) {
 					invokeBeforeTestExecutionCallbacks(context);
-					if (throwableCollector.isEmpty()) {
+					if (shouldContinue(context)) {
 						invokeTestMethod(context, dynamicTestExecutor);
 					}
 					invokeAfterTestExecutionCallbacks(context);

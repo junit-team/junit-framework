@@ -1,5 +1,11 @@
 # Releasing
 
+First, create a gist of this checklist and open it:
+
+```shell
+cat RELEASING.md | gh gist create --desc 'JUnit ${VERSION}' --filename 'checklist.md' --web
+```
+
 ## Pre-release steps
 
 - [ ] Switch or create the release branch for this feature release (e.g. `releases/5.12.x`)
@@ -7,7 +13,7 @@
 - [ ] Change release date in Release Notes
 - [ ] Change release date in `README.MD`
 - [ ] Commit with message "Release ${VERSION}"
-- [ ] Execute `./gradlew --no-build-cache --no-configuration-cache clean build publishAggregationToCentralPortal`
+- [ ] Execute `./gradlew --no-build-cache --no-configuration-cache --no-isolated-projects clean build publishAggregationToCentralPortal`
 - [ ] Tag current commit: `git tag -s -m ${VERSION} r${VERSION}`
 - [ ] Change `version` in `gradle.properties` on release branch to new development versions and commit with message "Back to snapshots for further development" or similar
 - [ ] Push release branch and tag to GitHub: `git push --set-upstream --follow-tags origin HEAD`

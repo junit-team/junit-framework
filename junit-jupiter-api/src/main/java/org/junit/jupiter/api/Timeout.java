@@ -75,6 +75,9 @@ import org.apiguardian.api.API;
  * {@code <number> [ns|μs|ms|s|m|h|d]}. The space between the number and the
  * unit may be omitted. Specifying no unit is equivalent to using seconds.
  *
+ * <p>The timeout must be positive and less than approximately 292 years
+ * (2^63 nanoseconds).
+ *
  * <table class="plain">
  * <caption>Timeout configuration via configuration parameter vs. annotation</caption>
  * <tr><th> Value         </th><th> Equivalent annotation                             </th></tr>
@@ -111,7 +114,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all testable and
-	 * lifecycle methods: {@value}.
+	 * lifecycle methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a more
 	 * specific property or a {@link Timeout @Timeout}
@@ -128,7 +131,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all testable methods:
-	 * {@value}.
+	 * {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a more
 	 * specific property or a {@link Timeout @Timeout}
@@ -147,7 +150,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all {@link Test @Test}
-	 * methods: {@value}.
+	 * methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the {@link Test @Test}
@@ -166,7 +169,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link TestTemplate @TestTemplate} methods: {@value}.
+	 * {@link TestTemplate @TestTemplate} methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the
@@ -185,7 +188,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link TestFactory @TestFactory} methods: {@value}.
+	 * {@link TestFactory @TestFactory} methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the
@@ -204,7 +207,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all lifecycle methods:
-	 * {@value}.
+	 * {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a more
 	 * specific property or a {@link Timeout @Timeout} annotation present on the
@@ -223,7 +226,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link BeforeAll @BeforeAll} methods: {@value}.
+	 * {@link BeforeAll @BeforeAll} methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the
@@ -242,7 +245,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link BeforeEach @BeforeEach} methods: {@value}.
+	 * {@link BeforeEach @BeforeEach} methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the
@@ -261,7 +264,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link AfterEach @AfterEach} methods: {@value}.
+	 * {@link AfterEach @AfterEach} methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the
@@ -280,7 +283,7 @@ public @interface Timeout {
 
 	/**
 	 * Property name used to set the default timeout for all
-	 * {@link AfterAll @AfterAll} methods: {@value}.
+	 * {@link AfterAll @AfterAll} methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the
@@ -298,20 +301,23 @@ public @interface Timeout {
 	String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = "junit.jupiter.execution.timeout.afterall.method.default";
 
 	/**
+	 * Default value for {@value #TIMEOUT_MODE_PROPERTY_NAME} is {@value}
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	String TIMEOUT_MODE_DEFAULT = "enabled";
+
+	/**
 	 * Property name used to configure whether timeouts are applied to tests:
-	 * {@value}.
+	 * {@value}
 	 *
 	 * <p>The value of this property will be used to toggle whether
 	 * {@link Timeout @Timeout} is applied to tests.</p>
 	 *
-	 * <h4>Supported timeout mode values (case insensitive):</h4>
-	 * <ul>
-	 * <li>{@code ENABLED}: enables timeouts
-	 * <li>{@code DISABLED}: disables timeouts
-	 * <li>{@code DISABLED_ON_DEBUG}: disables timeouts while debugging
-	 * </ul>
-	 *
-	 * <p>If not specified, the default is {@code ENABLED}.
+	 * <p>Value must be one names of enum constants defined in
+	 *  {@link TimeoutMode}, ignoring case. If not specified, the default is
+	 *  {@value #TIMEOUT_MODE_DEFAULT}.
 	 *
 	 * @since 5.6
 	 */
@@ -319,16 +325,24 @@ public @interface Timeout {
 	String TIMEOUT_MODE_PROPERTY_NAME = "junit.jupiter.execution.timeout.mode";
 
 	/**
+	 * Default value for {@value #DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	String DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT = "same_thread";
+
+	/**
 	 * Property name used to set the default thread mode for all testable and
-	 * lifecycle methods: {@value}.
+	 * lifecycle methods: {@value}
 	 *
 	 * <p>The value of this property will be used unless overridden by a
 	 * {@link Timeout @Timeout} annotation present on the method or on an
 	 * enclosing test class (for testable methods).
 	 *
-	 * <p>The supported values are {@code SAME_THREAD} or
-	 * {@code SEPARATE_THREAD}, ignoring case. If none is provided,
-	 * {@code SAME_THREAD} is used as default.
+	 * <p>Value must be one names of enum constants defined in
+	 * {@link ThreadMode}, ignoring case. If not specified, the default is
+	 * {@value DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT}.
 	 *
 	 * @since 5.9
 	 * @see #threadMode()
@@ -388,6 +402,27 @@ public @interface Timeout {
 		 * Javadoc for a discussion of possible undesirable side effects.
 		 */
 		SEPARATE_THREAD,
+	}
+
+	/**
+	 * {@code TimeoutMode} is used to define whether timeouts should be applied to tests.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = STABLE, since = "6.2")
+	enum TimeoutMode {
+		/**
+		 * Timeouts are applied to tests.
+		 */
+		ENABLED,
+		/**
+		 * Timeouts are not applied to tests.
+		 */
+		DISABLED,
+		/**
+		 * Timeouts are not applied to tests when the JVM is started in debug mode.
+		 */
+		DISABLED_ON_DEBUG
 	}
 
 }

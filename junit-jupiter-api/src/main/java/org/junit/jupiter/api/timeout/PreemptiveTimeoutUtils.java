@@ -12,6 +12,7 @@ package org.junit.jupiter.api.timeout;
 
 import static java.util.Objects.requireNonNullElse;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.junit.jupiter.api.timeout.DurationUtils.isPositiveAndRepresentableInNanos;
 import static org.junit.platform.commons.util.ExceptionUtils.throwAsUncheckedException;
 
 import java.io.Serial;
@@ -32,6 +33,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.platform.commons.JUnitException;
+import org.junit.platform.commons.util.Preconditions;
 
 /**
  * Internal utilities for executing code with a preemptive timeout.
@@ -60,8 +62,11 @@ public class PreemptiveTimeoutUtils {
 	public static <T extends @Nullable Object, E extends Throwable> T executeWithPreemptiveTimeout(Duration timeout,
 			ThrowingSupplier<T> supplier, @Nullable Supplier<@Nullable String> messageSupplier,
 			TimeoutFailureFactory<E> failureFactory) throws E {
+		Preconditions.notNull(timeout, () -> "timeout must not be null");
+		Preconditions.condition(isPositiveAndRepresentableInNanos(timeout),
+			() -> "timeout must be positive and less than approximately 292 years (2^63 nanoseconds)");
 
-		AtomicReference<Thread> threadReference = new AtomicReference<>();
+		AtomicReference<@Nullable Thread> threadReference = new AtomicReference<>();
 		ExecutorService executorService = Executors.newSingleThreadExecutor(new TimeoutThreadFactory());
 
 		try {
@@ -75,7 +80,7 @@ public class PreemptiveTimeoutUtils {
 	}
 
 	private static <T extends @Nullable Object> Future<T> submitTask(ThrowingSupplier<T> supplier,
-			AtomicReference<Thread> threadReference, ExecutorService executorService) {
+			AtomicReference<@Nullable Thread> threadReference, ExecutorService executorService) {
 		return executorService.submit(() -> {
 			try {
 				threadReference.set(Thread.currentThread());
@@ -92,7 +97,7 @@ public class PreemptiveTimeoutUtils {
 			Supplier<@Nullable Thread> threadSupplier, TimeoutFailureFactory<E> failureFactory)
 			throws E, RuntimeException {
 		try {
-			return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+			return future.get(timeout.toNanos(), TimeUnit.NANOSECONDS);
 		}
 		catch (TimeoutException ex) {
 			Thread thread = threadSupplier.get();

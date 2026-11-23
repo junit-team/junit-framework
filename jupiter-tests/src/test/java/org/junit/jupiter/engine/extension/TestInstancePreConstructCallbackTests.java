@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestInstanceFactory;
 import org.junit.jupiter.api.extension.TestInstanceFactoryContext;
 import org.junit.jupiter.api.extension.TestInstancePreConstructCallback;
+import org.junit.jupiter.api.store.Namespace;
 import org.junit.jupiter.engine.AbstractJupiterTestEngineTests;
 
 /**
@@ -548,7 +549,7 @@ class TestInstancePreConstructCallbackTests extends AbstractJupiterTestEngineTes
 			String testClass = factoryContext.getTestClass().getSimpleName();
 			callSequence.add("PreConstructCallback: name=" + name + ", testClass=" + testClass + ", outerInstance: "
 					+ factoryContext.getOuterInstance().orElse(null));
-			context.getStore(ExtensionContext.Namespace.create(this)).put(new Object(),
+			context.getStore(Namespace.create(this)).put(new Object(),
 				(AutoCloseable) () -> callSequence.add("close: name=" + name + ", testClass=" + testClass));
 		}
 	}

@@ -13,6 +13,7 @@ package org.junit.platform.launcher.core;
 import static org.apiguardian.api.API.Status.STABLE;
 import static org.junit.platform.launcher.LauncherConstants.DEACTIVATE_LISTENERS_PATTERN_PROPERTY_NAME;
 import static org.junit.platform.launcher.LauncherConstants.ENABLE_LAUNCHER_INTERCEPTORS;
+import static org.junit.platform.launcher.LauncherConstants.ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -100,7 +101,7 @@ public class LauncherFactory {
 		LauncherConfigurationParameters configurationParameters = LauncherConfigurationParameters.builder().build();
 		return new DefaultLauncherSession(collectLauncherInterceptors(configurationParameters),
 			() -> createLauncherSessionListener(config),
-			sessionLevelStore -> createDefaultLauncher(config, configurationParameters, sessionLevelStore));
+			sessionScopedStore -> createDefaultLauncher(config, configurationParameters, sessionScopedStore));
 	}
 
 	/**
@@ -130,16 +131,16 @@ public class LauncherFactory {
 		Preconditions.notNull(config, "LauncherConfig must not be null");
 		LauncherConfigurationParameters configurationParameters = LauncherConfigurationParameters.builder().build();
 		return new SessionPerRequestLauncher(
-			sessionLevelStore -> createDefaultLauncher(config, configurationParameters, sessionLevelStore),
+			sessionScopedStore -> createDefaultLauncher(config, configurationParameters, sessionScopedStore),
 			() -> createLauncherSessionListener(config), () -> collectLauncherInterceptors(configurationParameters));
 	}
 
 	private static DefaultLauncher createDefaultLauncher(LauncherConfig config,
 			LauncherConfigurationParameters configurationParameters,
-			NamespacedHierarchicalStore<Namespace> sessionLevelStore) {
+			NamespacedHierarchicalStore<Namespace> sessionScopedStore) {
 		Set<TestEngine> engines = collectTestEngines(config);
 		List<PostDiscoveryFilter> filters = collectPostDiscoveryFilters(config);
-		DefaultLauncher launcher = new DefaultLauncher(engines, filters, sessionLevelStore);
+		DefaultLauncher launcher = new DefaultLauncher(engines, filters, sessionScopedStore);
 		JfrUtils.registerListeners(launcher);
 		registerLauncherDiscoveryListeners(config, launcher);
 		registerTestExecutionListeners(config, launcher, configurationParameters);
@@ -150,7 +151,8 @@ public class LauncherFactory {
 	private static List<LauncherInterceptor> collectLauncherInterceptors(
 			LauncherConfigurationParameters configurationParameters) {
 		List<LauncherInterceptor> interceptors = new ArrayList<>();
-		if (configurationParameters.getBoolean(ENABLE_LAUNCHER_INTERCEPTORS).orElse(false)) {
+		if (configurationParameters.getBoolean(ENABLE_LAUNCHER_INTERCEPTORS) //
+				.orElse(ENABLE_LAUNCHER_INTERCEPTORS_DEFAULT)) {
 			ServiceLoaderRegistry.load(LauncherInterceptor.class).forEach(interceptors::add);
 		}
 		interceptors.add(ClasspathAlignmentCheckingLauncherInterceptor.INSTANCE);

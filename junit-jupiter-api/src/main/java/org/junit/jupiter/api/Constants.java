@@ -12,14 +12,30 @@ package org.junit.jupiter.api;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.INTERNAL;
+import static org.apiguardian.api.API.Status.MAINTAINED;
 import static org.apiguardian.api.API.Status.STABLE;
+import static org.junit.platform.configuration.api.ConfigurationParameter.Value;
+
+import java.math.BigDecimal;
 
 import org.apiguardian.api.API;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.PreInterruptCallback;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.io.TempDirDeletionStrategy;
+import org.junit.jupiter.api.io.TempDirFactory;
 import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.platform.configuration.api.ConfigurationParameter;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hint;
+import org.junit.platform.configuration.api.ConfigurationParameter.Hints;
+import org.junit.platform.configuration.api.ConfigurationParameterGroup;
+import org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelExecutionConfigurationStrategy;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory;
+import org.junit.platform.engine.support.hierarchical.ParallelHierarchicalTestExecutorServiceFactory.ParallelExecutorServiceType;
 
 /**
  * Collection of configuration constants for the Jupiter test engine.
@@ -29,7 +45,16 @@ import org.junit.jupiter.api.parallel.Execution;
  * section about configuration parameters
  */
 @API(status = STABLE, since = "6.1")
+@ConfigurationParameterGroup("junit.jupiter")
 public final class Constants {
+
+	/**
+	 * Default value for {@value #EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME} is {@value}.
+	 *
+	 * @since 6.2
+	 */
+	@API(status = MAINTAINED, since = "6.2")
+	public static final String INCLUDE_ALL_EXTENSIONS_PATTERN = "*";
 
 	/**
 	 * Property name used to include patterns for auto-detecting extensions: {@value}
@@ -64,6 +89,7 @@ public final class Constants {
 	 *
 	 * <p>Note: A class that matches both an inclusion and exclusion pattern will be excluded.
 	 */
+	@ConfigurationParameter(defaultValue = @Value(stringValue = INCLUDE_ALL_EXTENSIONS_PATTERN))
 	public static final String EXTENSIONS_AUTODETECTION_INCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.include";
 
 	/**
@@ -99,6 +125,7 @@ public final class Constants {
 	 *
 	 * <p>Note: A class that matches both an inclusion and exclusion pattern will be excluded.
 	 */
+	@ConfigurationParameter(type = String.class)
 	public static final String EXTENSIONS_AUTODETECTION_EXCLUDE_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.exclude";
 
 	/**
@@ -107,6 +134,7 @@ public final class Constants {
 	 *
 	 * <p>The default behavior is not to perform auto-detection.
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = Defaults.EXTENSIONS_AUTODETECTION_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_AUTODETECTION_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.autodetection.enabled";
 
 	/**
@@ -115,6 +143,7 @@ public final class Constants {
 	 * <p>By default, auto-closing is enabled.
 	 *
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = Defaults.CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_DEFAULT))
 	public static final String CLOSING_STORED_AUTO_CLOSEABLE_ENABLED_PROPERTY_NAME = "junit.jupiter.extensions.store.close.autocloseable.enabled";
 
 	/**
@@ -151,6 +180,7 @@ public final class Constants {
 	 * @see #DEACTIVATE_ALL_CONDITIONS_PATTERN
 	 * @see org.junit.jupiter.api.extension.ExecutionCondition
 	 */
+	@ConfigurationParameter(type = String.class)
 	public static final String DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME = "junit.jupiter.conditions.deactivate";
 
 	/**
@@ -166,6 +196,7 @@ public final class Constants {
 	 *
 	 * @see DisplayNameGenerator#DEFAULT_GENERATOR_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = DisplayNameGenerator.class, defaultValue = @Value(classValue = DisplayNameGenerator.Standard.class))
 	public static final String DEFAULT_DISPLAY_NAME_GENERATOR_PROPERTY_NAME = DisplayNameGenerator.DEFAULT_GENERATOR_PROPERTY_NAME;
 
 	/**
@@ -174,14 +205,21 @@ public final class Constants {
 	 *
 	 * <p>This behavior is disabled by default.
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = PreInterruptCallback.THREAD_DUMP_ENABLED_DEFAULT))
 	public static final String EXTENSIONS_TIMEOUT_THREAD_DUMP_ENABLED_PROPERTY_NAME = PreInterruptCallback.THREAD_DUMP_ENABLED_PROPERTY_NAME;
 
 	/**
 	 * Property name used to set the default test instance lifecycle mode: {@value}
 	 *
-	 * @see TestInstance.Lifecycle#DEFAULT_LIFECYCLE_PROPERTY_NAME
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link Lifecycle}, ignoring case. If not specified, the default is
+	 * {@value Lifecycle#DEFAULT_LIFECYCLE_PATTERN_DEFAULT} which corresponds
+	 * to {@link Lifecycle#PER_METHOD}.
+	 *
+	 * @see Lifecycle#DEFAULT_LIFECYCLE_PROPERTY_NAME
 	 */
-	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = TestInstance.Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
+	@ConfigurationParameter(type = Lifecycle.class, defaultValue = @Value(stringValue = Lifecycle.DEFAULT_LIFECYCLE_PATTERN_DEFAULT))
+	public static final String DEFAULT_TEST_INSTANCE_LIFECYCLE_PROPERTY_NAME = Lifecycle.DEFAULT_LIFECYCLE_PROPERTY_NAME;
 
 	/**
 	 * Property name used to enable parallel test execution: {@value}
@@ -189,6 +227,7 @@ public final class Constants {
 	 * <p>By default, tests are executed sequentially in a single thread.
 	 *
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = Defaults.PARALLEL_EXECUTION_ENABLED_DEFAULT))
 	public static final String PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME = "junit.jupiter.execution.parallel.enabled";
 
 	/**
@@ -223,8 +262,14 @@ public final class Constants {
 	/**
 	 * Property name used to set the default test execution mode: {@value}
 	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link ExecutionMode}, ignoring case. If not specified, the default is
+	 * {@value Execution#DEFAULT_EXECUTION_MODE_DEFAULT} which corresponds
+	 * to {@link ExecutionMode#SAME_THREAD}.
+	 *
 	 * @see Execution#DEFAULT_EXECUTION_MODE_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = ExecutionMode.class, defaultValue = @Value(stringValue = Execution.DEFAULT_EXECUTION_MODE_DEFAULT))
 	public static final String DEFAULT_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_EXECUTION_MODE_PROPERTY_NAME;
 
 	/**
@@ -233,6 +278,7 @@ public final class Constants {
 	 *
 	 * @see Execution#DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = ExecutionMode.class)
 	public static final String DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME = Execution.DEFAULT_CLASSES_EXECUTION_MODE_PROPERTY_NAME;
 
 	/**
@@ -246,10 +292,20 @@ public final class Constants {
 	 * Property name used to determine the desired parallel executor service
 	 * type: {@value}
 	 *
-	 * <p>Value must be {@code FORK_JOIN_POOL} or {@code WORKER_THREAD_POOL},
-	 * ignoring case.
-	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link ParallelExecutorServiceType}, ignoring case. If not specified, the
+	 * default is
+	 * {@value ParallelHierarchicalTestExecutorServiceFactory#EXECUTOR_SERVICE_DEFAULT}
+	 * which corresponds to {@link ParallelExecutorServiceType#WORKER_THREAD_POOL}.
 	 */
+	@ConfigurationParameter(type = ParallelExecutorServiceType.class,
+			// ParallelExecutorServiceType is located in a different module so
+			// its values must be documented explicitly
+			hints = @Hints({ //
+					@Hint(value = "fork_join_pool", description = "Indicates that ForkJoinPoolHierarchicalTestExecutorService should be used."), //
+					@Hint(value = "worker_thread_pool", description = "Indicates that WorkerThreadPoolHierarchicalTestExecutorService should be used.") //
+			}), //
+			defaultValue = @Value(stringValue = ParallelHierarchicalTestExecutorServiceFactory.EXECUTOR_SERVICE_DEFAULT))
 	public static final String PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ "executor-service";
 
@@ -257,10 +313,12 @@ public final class Constants {
 	 * Property name used to select the parallel execution configuration
 	 * strategy: {@value}
 	 *
-	 * <p>Potential values: {@code dynamic} (default), {@code fixed}, or
-	 * {@code custom}.
-	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link DefaultParallelExecutionConfigurationStrategy}, ignoring case. If
+	 * not specified, the default is {@value DefaultParallelExecutionConfigurationStrategy#CONFIG_STRATEGY_DEFAULT}
+	 * which corresponds to {@link DefaultParallelExecutionConfigurationStrategy#DYNAMIC}.
 	 */
+	@ConfigurationParameter(type = DefaultParallelExecutionConfigurationStrategy.class, defaultValue = @Value(stringValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_STRATEGY_DEFAULT))
 	public static final String PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "strategy";
 
 	/**
@@ -270,6 +328,7 @@ public final class Constants {
 	 * <p>No default value; must be a positive integer.
 	 *
 	 */
+	@ConfigurationParameter(type = Integer.class)
 	public static final String PARALLEL_CONFIG_FIXED_PARALLELISM_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ "fixed.parallelism";
 
@@ -282,6 +341,7 @@ public final class Constants {
 	 * {@code 256 + fixed.parallelism}.
 	 *
 	 */
+	@ConfigurationParameter(type = Integer.class)
 	public static final String PARALLEL_CONFIG_FIXED_MAX_POOL_SIZE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX
 			+ "fixed.max-pool-size";
 
@@ -296,6 +356,7 @@ public final class Constants {
 	 * <p>Value must either {@code true} or {@code false}; defaults to {@code true}.
 	 *
 	 */
+	@ConfigurationParameter(defaultValue = @Value(booleanValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_FIXED_SATURATE_DEFAULT))
 	public static final String PARALLEL_CONFIG_FIXED_SATURATE_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "fixed.saturate";
 
 	/**
@@ -306,6 +367,7 @@ public final class Constants {
 	 * <p>Value must be a positive decimal number; defaults to {@code 1}.
 	 *
 	 */
+	@ConfigurationParameter(type = BigDecimal.class, defaultValue = @Value(doubleValue = DefaultParallelExecutionConfigurationStrategy.CONFIG_DYNAMIC_FACTOR_DEFAULT))
 	public static final String PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "dynamic.factor";
 
 	/**
@@ -314,6 +376,7 @@ public final class Constants {
 	 * {@value}
 	 *
 	 */
+	@ConfigurationParameter(type = ParallelExecutionConfigurationStrategy.class)
 	public static final String PARALLEL_CONFIG_CUSTOM_CLASS_PROPERTY_NAME = PARALLEL_CONFIG_PREFIX + "custom.class";
 
 	/**
@@ -322,6 +385,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -329,6 +402,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TESTABLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -337,6 +420,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -345,6 +438,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_TEMPLATE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -353,6 +456,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_TEST_FACTORY_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -360,6 +473,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_LIFECYCLE_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -368,6 +491,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -376,6 +509,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_BEFORE_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -384,6 +527,16 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_EACH_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
@@ -392,13 +545,29 @@ public final class Constants {
 	 *
 	 * @see Timeout#DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = String.class, hints = @Hints(permitsAdditionalValues = true, value = { //
+			@Hint(value = "42", description = "A duration in seconds"), //
+			@Hint(value = "42 ns", description = "A duration in nanoseconds"), //
+			@Hint(value = "42 μs", description = "A duration in microseconds"), //
+			@Hint(value = "42 ms", description = "A duration in milliseconds"), //
+			@Hint(value = "42 s", description = "A duration in seconds"), //
+			@Hint(value = "42 m", description = "A duration in minutes"), //
+			@Hint(value = "42 h", description = "A duration in hours"), //
+			@Hint(value = "42 d", description = "A duration in days") //
+	}))
 	public static final String DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME = Timeout.DEFAULT_AFTER_ALL_METHOD_TIMEOUT_PROPERTY_NAME;
 
 	/**
 	 * Property name used to configure whether timeouts are applied to tests: {@value}
 	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link org.junit.jupiter.api.Timeout.TimeoutMode}, ignoring case. If
+	 * not specified, the default is {@value Timeout#TIMEOUT_MODE_DEFAULT}
+	 * which corresponds to {@link Timeout.TimeoutMode#ENABLED}.
+	 *
 	 * @see Timeout#TIMEOUT_MODE_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = Timeout.TimeoutMode.class, defaultValue = @Value(stringValue = Timeout.TIMEOUT_MODE_DEFAULT))
 	public static final String TIMEOUT_MODE_PROPERTY_NAME = Timeout.TIMEOUT_MODE_PROPERTY_NAME;
 
 	/**
@@ -406,6 +575,7 @@ public final class Constants {
 	 *
 	 * @see MethodOrderer#DEFAULT_ORDER_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = MethodOrderer.class)
 	public static final String DEFAULT_TEST_METHOD_ORDER_PROPERTY_NAME = MethodOrderer.DEFAULT_ORDER_PROPERTY_NAME;
 
 	/**
@@ -413,14 +583,24 @@ public final class Constants {
 	 *
 	 * @see ClassOrderer#DEFAULT_ORDER_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = ClassOrderer.class)
 	public static final String DEFAULT_TEST_CLASS_ORDER_PROPERTY_NAME = ClassOrderer.DEFAULT_ORDER_PROPERTY_NAME;
 
 	/**
 	 * Property name used to set the default timeout thread mode: {@value}
 	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link org.junit.jupiter.api.Timeout.ThreadMode}, ignoring case. If not
+	 * specified, the default is {@value Timeout#DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT}
+	 * which corresponds to {@link Timeout.ThreadMode#SAME_THREAD}.
+	 *
 	 * @see Timeout
-	 * @see Timeout.ThreadMode
 	 */
+	@ConfigurationParameter(type = Timeout.ThreadMode.class, hints = @Hints({
+			// Use explicit hints. Not all values of the enum should be
+			// configured through a property.
+			@Hint(value = "same_thread", description = "The test code is executed in the thread of the calling code."),
+			@Hint(value = "separate_thread", description = "The test code is executed in a different thread than that of the calling code. Furthermore, execution of the test code will be preemptively aborted if the timeout is exceeded.") }), defaultValue = @Value(stringValue = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_DEFAULT))
 	public static final String DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME = Timeout.DEFAULT_TIMEOUT_THREAD_MODE_PROPERTY_NAME;
 
 	/**
@@ -429,6 +609,7 @@ public final class Constants {
 	 *
 	 * @see TempDir#DEFAULT_FACTORY_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = TempDirFactory.class, defaultValue = @Value(classValue = TempDirFactory.Standard.class))
 	public static final String DEFAULT_TEMP_DIR_FACTORY_PROPERTY_NAME = TempDir.DEFAULT_FACTORY_PROPERTY_NAME;
 
 	/**
@@ -436,8 +617,14 @@ public final class Constants {
 	 * temporary directories created via the {@link TempDir @TempDir}
 	 * annotation: {@value}
 	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link CleanupMode}, ignoring case. If not specified, the default is
+	 * {@value TempDir#DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT} which corresponds
+	 * to {@link CleanupMode#ALWAYS}.
+	 *
 	 * @see TempDir#DEFAULT_CLEANUP_MODE_PROPERTY_NAME
 	 */
+	@ConfigurationParameter(type = CleanupMode.class, defaultValue = @Value(stringValue = TempDir.DEFAULT_TEMP_DIR_CLEANUP_MODE_DEFAULT))
 	public static final String DEFAULT_TEMP_DIR_CLEANUP_MODE_PROPERTY_NAME = TempDir.DEFAULT_CLEANUP_MODE_PROPERTY_NAME;
 
 	/**
@@ -448,14 +635,21 @@ public final class Constants {
 	 * @see TempDir#DEFAULT_DELETION_STRATEGY_PROPERTY_NAME
 	 */
 	@API(status = EXPERIMENTAL, since = "6.1")
+	@ConfigurationParameter(type = TempDirDeletionStrategy.class, defaultValue = @Value(classValue = TempDirDeletionStrategy.Standard.class))
 	public static final String DEFAULT_TEMP_DIR_DELETION_STRATEGY_PROPERTY_NAME = TempDir.DEFAULT_DELETION_STRATEGY_PROPERTY_NAME;
 
 	/**
 	 * Property name used to set the default extension context scope for
 	 * extensions that participate in test instantiation: {@value}
 	 *
+	 * <p>Supported values include names of enum constants defined in
+	 * {@link ExtensionContextScope}, ignoring case. If not specified, the
+	 * default is {@value ExtensionContextScope#DEFAULT_SCOPE_DEFAULT} which
+	 * corresponds to {@link ExtensionContextScope#DEFAULT}.
+	 *
 	 * @see org.junit.jupiter.api.extension.TestInstantiationAwareExtension
 	 */
+	@ConfigurationParameter(type = ExtensionContextScope.class, defaultValue = @Value(stringValue = ExtensionContextScope.DEFAULT_SCOPE_DEFAULT))
 	public static final String DEFAULT_TEST_CLASS_INSTANCE_CONSTRUCTION_EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME = ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
 
 	private Constants() {
