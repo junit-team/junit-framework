@@ -62,4 +62,13 @@ project.pluginManager.withPlugin("java") {
 			languageVersion = defaultLanguageVersion
 		})
 	}
+
+	if (javaLanguageVersion.asInt() >= 28) {
+		tasks.withType<Checkstyle>().configureEach {
+			javaLauncher = javaToolchainService.launcherFor {
+				// Gradle's process-isolated workers fail on JDK 28, see https://github.com/gradle/gradle/issues/39837
+				languageVersion = defaultLanguageVersion
+			}
+		}
+	}
 }
