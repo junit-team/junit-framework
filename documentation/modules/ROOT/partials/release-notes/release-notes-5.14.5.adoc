@@ -16,7 +16,11 @@ repository on GitHub.
 [[v5.14.5-junit-platform-bug-fixes]]
 ==== Bug Fixes
 
-* ❓
+* A memory leak when using `NamespacedHierarchicalStore::getOrComputeIfAbsent` has been
+  fixed.
+  - Specifically, the store would retain a reference to the provided `defaultCreator`.
+    Depending on how the store is used and what references the default creator holds, the
+    impact can range anywhere from a trivial to a significant memory leak.
 
 [[v5.14.5-junit-platform-deprecations-and-breaking-changes]]
 ==== Deprecations and Breaking Changes
