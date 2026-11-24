@@ -12,6 +12,7 @@ package org.junit.jupiter.api.condition;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.condition.OS.AIX;
 import static org.junit.jupiter.api.condition.OS.DRAGONFLYBSD;
 import static org.junit.jupiter.api.condition.OS.FREEBSD;
@@ -179,6 +180,67 @@ class EnabledOnOsIntegrationTests {
 		assertTrue(onArchitecture("aarch64"));
 	}
 
+	@Test
+	@EnabledOnOs(name = "LiNuX")
+	void nameOnlyLinux() {
+		assertTrue(onLinux());
+	}
+
+	@Test
+	@EnabledOnOs(name = "mAc")
+	void nameOnlyMac() {
+		assertTrue(onMac());
+	}
+
+	@Test
+	@EnabledOnOs(name = "wInDoWs")
+	void nameOnlyWindows() {
+		assertTrue(onWindows());
+	}
+
+	@Test
+	@EnabledOnOs(name = "AmongOS", disabledReason = "Only on AmongOS")
+	void nameOnlyUnknownOs() {
+		fail("should be disabled");
+	}
+
+	@Test
+	@EnabledOnOs(name = "Linux", architectures = "x86_64")
+	void nameWithArchitecture() {
+		assertTrue(onLinux());
+		assertTrue(onArchitecture("x86_64"));
+	}
+
+	@Test
+	@EnabledOnMacByName
+	void nameWithComposedAnnotation() {
+		assertTrue(onMac());
+	}
+
+	@Test
+	@EnabledOnOs(value = MAC, name = " ")
+	void blankNameWithOsValue() {
+		assertTrue(onMac());
+	}
+
+	@Test
+	@EnabledOnOs(name = " ", architectures = "aarch64")
+	void blankNameWithArchitecture() {
+		assertTrue(onArchitecture("aarch64"));
+	}
+
+	@Test
+	@Disabled("Only used in a unit test via reflection")
+	@EnabledOnOs(name = " ")
+	void blankNameOnlyDeclared() {
+	}
+
+	@Test
+	@Disabled("Only used in a unit test via reflection")
+	@EnabledOnOs(value = LINUX, name = "Linux")
+	void osValuesAndNameDeclared() {
+	}
+
 	static boolean onAix() {
 		return OS_NAME.contains("aix");
 	}
@@ -225,6 +287,12 @@ class EnabledOnOsIntegrationTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@EnabledOnOs(MAC)
 	@interface EnabledOnMac {
+	}
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@EnabledOnOs(name = "mac")
+	@interface EnabledOnMacByName {
 	}
 
 }

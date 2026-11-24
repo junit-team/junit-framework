@@ -181,12 +181,77 @@ class DisabledOnOsIntegrationTests {
 	void aarch64WithLinux() {
 		assertFalse(onLinux() && onArchitecture("aarch64"));
 	}
+
+	@Test
+	@DisabledOnOs(name = "LiNuX")
+	void nameOnlyLinux() {
+		assertFalse(onLinux());
+	}
+
+	@Test
+	@DisabledOnOs(name = "mAc")
+	void nameOnlyMac() {
+		assertFalse(onMac());
+	}
+
+	@Test
+	@DisabledOnOs(name = "wInDoWs")
+	void nameOnlyWindows() {
+		assertFalse(onWindows());
+	}
+
+	@Test
+	@DisabledOnOs(name = "AmongOS")
+	void nameOnlyUnknownOs() {
+	}
+
+	@Test
+	@DisabledOnOs(name = "Linux", architectures = "x86_64")
+	void nameWithArchitecture() {
+		assertFalse(onLinux() && onArchitecture("x86_64"));
+	}
+
+	@Test
+	@DisabledOnMacByName
+	void nameWithComposedAnnotation() {
+		assertFalse(onMac());
+	}
+
+	@Test
+	@DisabledOnOs(value = MAC, name = " ")
+	void blankNameWithOsValue() {
+		assertFalse(onMac());
+	}
+
+	@Test
+	@DisabledOnOs(name = " ", architectures = "aarch64")
+	void blankNameWithArchitecture() {
+		assertFalse(onArchitecture("aarch64"));
+	}
+
+	@Test
+	@Disabled("Only used in a unit test via reflection")
+	@DisabledOnOs(name = " ")
+	void blankNameOnlyDeclared() {
+	}
+
+	@Test
+	@Disabled("Only used in a unit test via reflection")
+	@DisabledOnOs(value = LINUX, name = "Linux")
+	void osValuesAndNameDeclared() {
+	}
 	// -------------------------------------------------------------------------
 
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@DisabledOnOs(MAC)
 	@interface DisabledOnMac {
+	}
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@DisabledOnOs(name = "mac")
+	@interface DisabledOnMacByName {
 	}
 
 }

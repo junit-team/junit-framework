@@ -105,6 +105,38 @@ include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user
 --
 ====
 
+Since the enum constants defined in `OS` are static for any given JUnit release, you might
+need to configure an operating system that is not supported by the `OS` enum. To support
+such use cases, you can specify an arbitrary operating system via the `name` attribute in
+`@EnabledOnOs` and `@DisabledOnOs`. The supplied name matches if the value of the
+`os.name` JVM system property contains it, ignoring case. The name is matched literally
+and is not interpreted as a regular expression. The `name` attribute cannot be combined
+with `OS` enum constants, but it can be combined with `architectures`, in which case both
+conditions must apply.
+
+[[os-arbitrary-names-demo]]
+.Conditional execution based on arbitrary operating system names
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
+----
+include::example$java/example/ConditionalTestExecutionDemo.java[tags=user_guide_os_arbitrary_names]
+----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/ConditionalTestExecutionDemo.kt[tags=user_guide_os_arbitrary_names]
+----
+--
+====
+
 [[jre]]
 == Java Runtime Environment Conditions
 

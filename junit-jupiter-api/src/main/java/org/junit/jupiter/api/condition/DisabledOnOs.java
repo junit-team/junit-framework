@@ -10,6 +10,7 @@
 
 package org.junit.jupiter.api.condition;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
 import java.lang.annotation.Documented;
@@ -24,11 +25,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * {@code @DisabledOnOs} is used to signal that the annotated test class or
  * test method is <em>disabled</em> on one or more specified
- * {@linkplain #value operating systems} or on one or more specified
- * {@linkplain #architectures architectures}
+ * {@linkplain #value operating systems}, on an operating system with a
+ * specified {@linkplain #name name}, or on one or more specified
+ * {@linkplain #architectures architectures}.
  *
  * <p>If operating systems <em>and</em> architectures are specified, the annotated
  * test class or test method is disabled if both conditions apply.
+ *
+ * <p>If an operating system is not represented by an {@link OS} enum constant,
+ * it can be specified via its {@linkplain #name name} instead &mdash; for
+ * example, {@code @DisabledOnOs(name = "AmongOS")}. {@code OS} enum constants
+ * and a name must not be declared together.
  *
  * <p>When applied at the class level, all test methods within that class
  * will be disabled on the same specified operating systems, architectures, or
@@ -90,9 +97,38 @@ public @interface DisabledOnOs {
 	 * Operating systems on which the annotated class or method should be
 	 * disabled.
 	 *
+	 * <p>If an {@code OS} enum constant does not exist for a particular
+	 * operating system, you can specify its {@link #name() name} instead.
+	 *
 	 * @see OS
+	 * @see #name()
 	 */
 	OS[] value() default {};
+
+	/**
+	 * Name of an operating system on which the annotated class or method
+	 * should be disabled.
+	 *
+	 * <p>Use this attribute for an operating system that is not represented by
+	 * an {@link OS} enum constant. The annotated class or method is disabled if
+	 * the name of the current operating system &mdash; as returned by
+	 * {@code System.getProperty("os.name")} &mdash; contains the supplied name,
+	 * ignoring case. The supplied name is matched literally; it is not
+	 * interpreted as a regular expression.
+	 *
+	 * <p>A blank name is ignored. If the name of the current operating system
+	 * cannot be determined, the supplied name does not match.
+	 *
+	 * <p>This attribute must not be combined with {@link #value() value}. It
+	 * may be combined with {@link #architectures() architectures}, in which
+	 * case the annotated class or method is only disabled if both conditions
+	 * apply.
+	 *
+	 * @since 6.2
+	 * @see #value()
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	String name() default "";
 
 	/**
 	 * Architectures on which the annotated class or method should be disabled.
