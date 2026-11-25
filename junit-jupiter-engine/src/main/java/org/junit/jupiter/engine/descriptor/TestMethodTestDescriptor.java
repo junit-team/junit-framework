@@ -46,7 +46,9 @@ import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 
 /**
@@ -88,7 +90,13 @@ public class TestMethodTestDescriptor extends MethodBasedTestDescriptor {
 
 	TestMethodTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
 			JupiterConfiguration configuration, VoidMethodInterceptorCall interceptorCall) {
-		super(uniqueId, displayName, testClass, testMethod, configuration);
+		this(uniqueId, displayName, testClass, testMethod, MethodSource.from(testClass, testMethod), configuration,
+			interceptorCall);
+	}
+
+	TestMethodTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
+			TestSource source, JupiterConfiguration configuration, VoidMethodInterceptorCall interceptorCall) {
+		super(uniqueId, displayName, testClass, testMethod, source, configuration);
 		this.interceptorCall = interceptorCall;
 	}
 
