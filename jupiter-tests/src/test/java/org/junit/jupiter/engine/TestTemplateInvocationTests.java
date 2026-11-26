@@ -34,6 +34,7 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,7 +71,13 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.jupiter.api.store.Namespace;
 import org.junit.jupiter.engine.descriptor.TestTemplateInvocationTestDescriptor;
 import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.support.descriptor.ClassSource;
+import org.junit.platform.engine.support.descriptor.ClasspathResourceSource;
+import org.junit.platform.engine.support.descriptor.FilePosition;
+import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.engine.support.descriptor.UriSource;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.Event;
@@ -420,6 +427,30 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 		results.allEvents().assertStatistics(stats -> stats.started(4).succeeded(4));
 	}
 
+	@Test
+	void templateWithCustomTestSourceUris() throws Exception {
+		LauncherDiscoveryRequest request = request().selectors(
+			selectMethod(MyTestTemplateTestCase.class, "templateWithCustomTestSourceUris")).build();
+
+		EngineExecutionResults executionResults = executeTests(request);
+
+		executionResults.allEvents().assertStatistics(stats -> stats.dynamicallyRegistered(5).succeeded(8));
+
+		Method templateMethod = MyTestTemplateTestCase.class.getDeclaredMethod("templateWithCustomTestSourceUris");
+		List<TestSource> sources = executionResults.allEvents().dynamicallyRegistered() //
+				.map(Event::getTestDescriptor) //
+				.map(descriptor -> descriptor.getSource().orElseThrow()) //
+				.toList();
+
+		assertThat(sources).containsExactly( //
+			MethodSource.from(MyTestTemplateTestCase.class, templateMethod), //
+			ClasspathResourceSource.from("test.js", FilePosition.from(42, 21)), //
+			ClassSource.from("org.junit.Foo"), //
+			MethodSource.from("org.junit.Foo", "bar", "java.lang.String"), //
+			UriSource.from(URI.create("https://example.com/test")) //
+		);
+	}
+
 	private TestDescriptor findTestDescriptor(EngineExecutionResults executionResults, Condition<Event> condition) {
 		// @formatter:off
 		return executionResults.allEvents()
@@ -530,6 +561,11 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 		@ExtendWith(InvocationContextProviderWithCloseableStream.class)
 		@TestTemplate
 		void templateWithCloseableStream() {
+		}
+
+		@ExtendWith(CustomTestSourceUriInvocationContextProvider.class)
+		@TestTemplate
+		void templateWithCustomTestSourceUris() {
 		}
 	}
 
@@ -922,6 +958,34 @@ class TestTemplateInvocationTests extends AbstractJupiterTestEngineTests {
 			return extensionContext.getStore(PreparingTestTemplateInvocationContextProvider.NAMESPACE).get("resource");
 		}
 
+	}
+
+	private static class CustomTestSourceUriInvocationContextProvider implements TestTemplateInvocationContextProvider {
+
+		@Override
+		public boolean supportsTestTemplate(ExtensionContext context) {
+			return true;
+		}
+
+		@Override
+		public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
+			return Stream.of( //
+				emptyTestTemplateInvocationContext(), //
+				contextWithTestSourceUri(URI.create("classpath:/test.js?line=42&column=21")), //
+				contextWithTestSourceUri(URI.create("class:org.junit.Foo")), //
+				contextWithTestSourceUri(URI.create("method:org.junit.Foo#bar(java.lang.String)")), //
+				contextWithTestSourceUri(URI.create("https://example.com/test")) //
+			);
+		}
+
+		private TestTemplateInvocationContext contextWithTestSourceUri(URI testSourceUri) {
+			return new TestTemplateInvocationContext() {
+				@Override
+				public URI testSourceUri() {
+					return testSourceUri;
+				}
+			};
+		}
 	}
 
 	private static class CustomCloseableResource implements AutoCloseable {
