@@ -1,9 +1,9 @@
 [[v5.14.5]]
 == 5.14.5
 
-*Date of Release:* ❓
+*Date of Release:* November 26, 2026
 
-*Scope:* ❓
+*Scope:* Bug fixes and enhancements since 5.14.4
 
 For a complete list of all _closed_ issues and pull requests for this release, consult the
 link:{junit-framework-repo}+/milestone/124?closed=1+[5.14.5] milestone page in the JUnit
@@ -27,16 +27,6 @@ repository on GitHub.
   the arguments source of a `@ParameterizedTest` or `@ParameterizedClass` or the children
   stream of a `DynamicContainer` threw an exception.
 
-[[v5.14.5-junit-platform-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v5.14.5-junit-platform-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
 
 [[v5.14.5-junit-jupiter]]
 === JUnit Jupiter
@@ -48,31 +38,8 @@ repository on GitHub.
   executed even if they have the same simple name as a `@Nested` class declared in the
   test class.
 
-[[v5.14.5-junit-jupiter-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v5.14.5-junit-jupiter-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
-
 
 [[v5.14.5-junit-vintage]]
 === JUnit Vintage
 
-[[v5.14.5-junit-vintage-bug-fixes]]
-==== Bug Fixes
-
-* ❓
-
-[[v5.14.5-junit-vintage-deprecations-and-breaking-changes]]
-==== Deprecations and Breaking Changes
-
-* ❓
-
-[[v5.14.5-junit-vintage-new-features-and-improvements]]
-==== New Features and Improvements
-
-* ❓
+No changes.
