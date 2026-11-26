@@ -11,23 +11,13 @@
 package org.junit.jupiter.api.kotlin
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 /**
  * Tests for primitive-wrapper inline value classes.
- *
- * Currently disabled: These fail because Kotlin compiles them to primitives
- * (UInt→int, UserId→long), causing JUnit's type validation to fail before
- * reaching the invocation logic.
- *
- * Supporting these would require modifications to JUnit's core type validation system.
- *
- * @see <a href="https://github.com/junit-team/junit-framework/issues/5081">Issue #5081</a>
  */
-@Disabled("Primitive-wrapper inline value classes are not yet supported")
 class PrimitiveWrapperInlineValueClassTests {
     @MethodSource("uintProvider")
     @ParameterizedTest

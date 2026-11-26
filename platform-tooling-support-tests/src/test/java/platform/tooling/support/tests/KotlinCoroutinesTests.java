@@ -52,7 +52,7 @@ class KotlinCoroutinesTests {
 		var result = runBuild(workspace, outputFiles, "-PwithoutKotlinxCoroutines");
 
 		assertEquals(1, result.exitCode(), "result=" + result);
-		assertThat(result.stdOut()).contains("PreconditionViolationException: Kotlin suspending function "
+		assertThat(result.stdOut()).contains("PreconditionViolationException: Kotlin function "
 				+ "[public final java.lang.Object com.example.project.SuspendFunctionTests.test(kotlin.coroutines.Continuation<? super kotlin.Unit>)] "
 				+ "requires org.jetbrains.kotlinx:kotlinx-coroutines-core to be on the classpath or module path. "
 				+ "Please add a corresponding dependency.");
@@ -65,7 +65,7 @@ class KotlinCoroutinesTests {
 		var result = runBuild(workspace, outputFiles, "-PwithoutKotlinReflect");
 
 		assertEquals(1, result.exitCode(), "result=" + result);
-		assertThat(result.stdOut()).contains("PreconditionViolationException: Kotlin suspending function "
+		assertThat(result.stdOut()).contains("PreconditionViolationException: Kotlin function "
 				+ "[public final java.lang.Object com.example.project.SuspendFunctionTests.test(kotlin.coroutines.Continuation<? super kotlin.Unit>)] "
 				+ "requires org.jetbrains.kotlin:kotlin-reflect to be on the classpath or module path. "
 				+ "Please add a corresponding dependency.");

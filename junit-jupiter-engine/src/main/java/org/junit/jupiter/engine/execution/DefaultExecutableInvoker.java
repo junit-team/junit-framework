@@ -21,8 +21,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExecutableInvoker;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.extension.ExtensionRegistry;
-import org.junit.jupiter.engine.support.MethodReflectionUtils;
-import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.jupiter.engine.support.JupiterReflectionUtils;
 
 /**
  * @since 5.9
@@ -42,14 +41,14 @@ public class DefaultExecutableInvoker implements ExecutableInvoker {
 	public <T> T invoke(Constructor<T> constructor, @Nullable Object outerInstance) {
 		@Nullable
 		Object[] arguments = resolveParameters(constructor, null, outerInstance, extensionContext, extensionRegistry);
-		return ReflectionUtils.newInstance(constructor, arguments);
+		return JupiterReflectionUtils.newInstance(constructor, arguments);
 	}
 
 	@Override
 	public @Nullable Object invoke(Method method, @Nullable Object target) {
 		@Nullable
 		Object[] arguments = resolveParameters(method, target, extensionContext, extensionRegistry);
-		return MethodReflectionUtils.invoke(method, target, arguments);
+		return JupiterReflectionUtils.invoke(method, target, arguments);
 	}
 
 }

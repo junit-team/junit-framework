@@ -20,7 +20,7 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.junit.jupiter.engine.support.MethodReflectionUtils;
+import org.junit.jupiter.engine.support.JupiterReflectionUtils;
 
 class MethodInvocation<T extends @Nullable Object> implements Invocation<T>, ReflectiveInvocationContext<Method> {
 
@@ -58,7 +58,7 @@ class MethodInvocation<T extends @Nullable Object> implements Invocation<T>, Ref
 	@Override
 	@SuppressWarnings({ "unchecked", "NullAway" })
 	public T proceed() {
-		return (T) MethodReflectionUtils.invoke(this.method, this.target, this.arguments);
+		return (T) JupiterReflectionUtils.invoke(this.method, this.target, this.arguments);
 	}
 
 }

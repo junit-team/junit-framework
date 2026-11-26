@@ -10,7 +10,7 @@
 
 package org.junit.jupiter.engine.descriptor;
 
-import static org.junit.jupiter.engine.support.MethodReflectionUtils.getReturnType;
+import static org.junit.jupiter.engine.support.JupiterReflectionUtils.getReturnType;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotatedMethods;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.junit.platform.engine.support.discovery.DiscoveryIssueReporter.Condition.alwaysSatisfied;

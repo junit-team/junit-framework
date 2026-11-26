@@ -12,6 +12,8 @@ package org.junit.jupiter.params.converter;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
 import static org.junit.platform.commons.util.ClassLoaderUtils.getClassLoader;
+import static org.junit.platform.commons.util.KotlinReflectionUtils.isInlineTypeAssignableTo;
+import static org.junit.platform.commons.util.ReflectionUtils.isAssignableTo;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -28,7 +30,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.support.FieldContext;
 import org.junit.platform.commons.support.conversion.ConversionException;
 import org.junit.platform.commons.support.conversion.ConversionSupport;
-import org.junit.platform.commons.util.ReflectionUtils;
 
 /**
  * {@code DefaultArgumentConverter} is the default implementation of the
@@ -81,7 +82,7 @@ public class DefaultArgumentConverter implements ArgumentConverter {
 			return null;
 		}
 
-		if (ReflectionUtils.isAssignableTo(source, targetType)) {
+		if (isAssignableTo(source, targetType) || isInlineTypeAssignableTo(source, targetType)) {
 			return source;
 		}
 

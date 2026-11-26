@@ -20,7 +20,7 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.InvocationInterceptor.Invocation;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.jupiter.engine.support.JupiterReflectionUtils;
 
 class ConstructorInvocation<T> implements Invocation<T>, ReflectiveInvocationContext<Constructor<T>> {
 
@@ -55,7 +55,7 @@ class ConstructorInvocation<T> implements Invocation<T>, ReflectiveInvocationCon
 
 	@Override
 	public T proceed() {
-		return ReflectionUtils.newInstance(this.constructor, this.arguments);
+		return JupiterReflectionUtils.newInstance(this.constructor, this.arguments);
 	}
 
 }
