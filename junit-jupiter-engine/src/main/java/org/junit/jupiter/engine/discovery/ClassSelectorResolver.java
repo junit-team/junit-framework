@@ -11,14 +11,12 @@
 package org.junit.jupiter.engine.discovery;
 
 import static java.util.Collections.emptyList;
-import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.engine.descriptor.NestedClassTestDescriptor.getEnclosingTestClasses;
 import static org.junit.jupiter.engine.discovery.predicates.TestClassPredicates.NestedClassInvalidityReason.NOT_INNER;
 import static org.junit.platform.commons.support.HierarchyTraversalMode.TOP_DOWN;
 import static org.junit.platform.commons.support.ReflectionSupport.findMethods;
-import static org.junit.platform.commons.util.FunctionUtils.where;
 import static org.junit.platform.commons.util.ReflectionUtils.isInnerClass;
 import static org.junit.platform.commons.util.ReflectionUtils.isNotAbstract;
 import static org.junit.platform.commons.util.ReflectionUtils.streamNestedClasses;
@@ -147,10 +145,13 @@ class ClassSelectorResolver implements SelectorResolver {
 			return resolveStandaloneClassUniqueId(context, lastSegment, this.predicates.isAnnotatedWithClassTemplate,
 				this::newClassTemplateTestDescriptor);
 		}
-		if (NestedClassTestDescriptor.SEGMENT_TYPE.equals(lastSegment.getType())) {
+		if (NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE.equals(lastSegment.getType())
+				|| NestedClassTestDescriptor.FULLY_QUALIFIED_NAME_SEGMENT_TYPE.equals(lastSegment.getType())) {
 			return resolveNestedClassUniqueId(context, uniqueId, __ -> true, this::newNestedClassTestDescriptor);
 		}
-		if (ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE.equals(lastSegment.getType())) {
+		if (ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE.equals(lastSegment.getType())
+				|| ClassTemplateTestDescriptor.FULLY_QUALIFIED_NESTED_CLASS_SEGMENT_TYPE.equals(
+					lastSegment.getType())) {
 			return resolveNestedClassUniqueId(context, uniqueId, this.predicates.isAnnotatedWithClassTemplate,
 				this::newNestedClassTemplateTestDescriptor);
 		}
@@ -210,14 +211,18 @@ class ClassSelectorResolver implements SelectorResolver {
 			Predicate<? super Class<?>> condition,
 			BiFunction<TestDescriptor, Class<?>, ClassBasedTestDescriptor> factory) {
 
-		String simpleClassName = uniqueId.getLastSegment().getValue();
 		return toResolution(context.addToParent(() -> selectUniqueId(uniqueId.removeLastSegment()), parent -> {
+			String className = uniqueId.getLastSegment().getValue();
+			String segmentType = uniqueId.getLastSegment().getType();
 			Class<?> parentTestClass = ((TestClassAware) parent).getTestClass();
-			return ReflectionSupport.findNestedClasses(parentTestClass,
-				this.predicates.isAnnotatedWithNestedAndValid.and(
-					where(Class::getSimpleName, isEqual(simpleClassName)))).stream() //
-					.findFirst() //
-					.filter(condition) //
+			if (segmentType.equals(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE)
+					|| segmentType.equals(ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE)) {
+				className = String.format("%s$%s", parentTestClass.getName(), className);
+			}
+			return ReflectionSupport.tryToLoadClass(className) //
+					.toOptional() //
+					.filter(testClass -> testClass.getEnclosingClass().isAssignableFrom(parentTestClass)) //
+					.filter(predicates.isAnnotatedWithNestedAndValid.and(condition)) //
 					.map(testClass -> factory.apply(parent, testClass));
 		}));
 	}
@@ -255,14 +260,26 @@ class ClassSelectorResolver implements SelectorResolver {
 
 	private ClassTemplateTestDescriptor newNestedClassTemplateTestDescriptor(TestDescriptor parent,
 			Class<?> testClass) {
-		return newClassTemplateTestDescriptor(parent, ClassTemplateTestDescriptor.NESTED_CLASS_SEGMENT_TYPE,
-			newNestedClassTestDescriptor(parent, testClass));
+		NestedClassTestDescriptor delegate = newNestedClassTestDescriptor(parent, testClass);
+		UniqueId.Segment lastSegment = delegate.getUniqueId().getLastSegment();
+		String segmentType = lastSegment.getType().equals(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE) //
+				? ClassTemplateTestDescriptor.SIMPLE_NESTED_CLASS_SEGMENT_TYPE //
+				: ClassTemplateTestDescriptor.FULLY_QUALIFIED_NESTED_CLASS_SEGMENT_TYPE;
+		return newClassTemplateTestDescriptor(parent, segmentType, delegate);
 	}
 
 	private NestedClassTestDescriptor newNestedClassTestDescriptor(TestDescriptor parent, Class<?> testClass) {
-		UniqueId uniqueId = parent.getUniqueId().append(NestedClassTestDescriptor.SEGMENT_TYPE,
-			testClass.getSimpleName());
+		UniqueId uniqueId = toNestedClassUniqueId(parent, testClass);
 		return new NestedClassTestDescriptor(uniqueId, testClass, () -> getEnclosingTestClasses(parent), configuration);
+	}
+
+	private static UniqueId toNestedClassUniqueId(TestDescriptor parent, Class<?> testClass) {
+		Class<?> parentTestClass = ((TestClassAware) parent).getTestClass();
+		UniqueId parentUniqueId = parent.getUniqueId();
+		if (parentTestClass.equals(testClass.getEnclosingClass())) {
+			return parentUniqueId.append(NestedClassTestDescriptor.SIMPLE_NAME_SEGMENT_TYPE, testClass.getSimpleName());
+		}
+		return parentUniqueId.append(NestedClassTestDescriptor.FULLY_QUALIFIED_NAME_SEGMENT_TYPE, testClass.getName());
 	}
 
 	private ClassTemplateTestDescriptor newClassTemplateTestDescriptor(TestDescriptor parent, String segmentType,
