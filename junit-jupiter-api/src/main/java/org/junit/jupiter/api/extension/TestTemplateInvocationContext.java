@@ -14,9 +14,11 @@ import static java.util.Collections.emptyList;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.apiguardian.api.API.Status.STABLE;
 
+import java.net.URI;
 import java.util.List;
 
 import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.store.Store;
 
 /**
@@ -80,6 +82,22 @@ public interface TestTemplateInvocationContext {
 	 */
 	@API(status = EXPERIMENTAL, since = "6.0")
 	default void prepareInvocation(ExtensionContext context) {
+	}
+
+	/**
+	 * Get the custom test source {@link URI} for this invocation.
+	 *
+	 * <p>The default implementation returns {@code null}, in which case the
+	 * framework generates the test source based on the {@code @TestTemplate}
+	 * method.
+	 *
+	 * @return the custom test source {@link URI} for this invocation; may be
+	 * {@code null}
+	 * @since 6.2
+	 */
+	@API(status = EXPERIMENTAL, since = "6.2")
+	default @Nullable URI testSourceUri() {
+		return null;
 	}
 
 }

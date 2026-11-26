@@ -47,6 +47,8 @@ repository on GitHub.
 
 * Test execution cancellation is now also checked between before callbacks and
   lifecycle methods such as `@BeforeAll` and `@BeforeEach` methods.
+* New `testSourceUri()` method in `TestTemplateInvocationContext` for supplying a custom
+  test source `URI` for a `@TestTemplate` invocation.
 
 
 [[v6.2.0-M2-junit-vintage]]

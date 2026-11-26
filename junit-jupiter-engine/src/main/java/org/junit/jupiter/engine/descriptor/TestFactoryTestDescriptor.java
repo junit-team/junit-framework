@@ -11,9 +11,6 @@
 package org.junit.jupiter.engine.descriptor;
 
 import static org.apiguardian.api.API.Status.INTERNAL;
-import static org.junit.jupiter.engine.descriptor.MethodSourceSupport.METHOD_SCHEME;
-import static org.junit.platform.engine.support.descriptor.ClassSource.CLASS_SCHEME;
-import static org.junit.platform.engine.support.descriptor.ClasspathResourceSource.CLASSPATH_SCHEME;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -37,14 +34,10 @@ import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.Reflecti
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.CollectionUtils;
-import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
-import org.junit.platform.engine.support.descriptor.ClassSource;
-import org.junit.platform.engine.support.descriptor.ClasspathResourceSource;
-import org.junit.platform.engine.support.descriptor.UriSource;
 
 /**
  * {@link org.junit.platform.engine.TestDescriptor TestDescriptor} for
@@ -184,17 +177,7 @@ public class TestFactoryTestDescriptor extends TestMethodTestDescriptor implemen
 	 * @since 5.3
 	 */
 	static TestSource fromUri(URI uri) {
-		Preconditions.notNull(uri, "URI must not be null");
-		if (CLASSPATH_SCHEME.equals(uri.getScheme())) {
-			return ClasspathResourceSource.from(uri);
-		}
-		if (CLASS_SCHEME.equals(uri.getScheme())) {
-			return ClassSource.from(uri);
-		}
-		if (METHOD_SCHEME.equals(uri.getScheme())) {
-			return MethodSourceSupport.from(uri);
-		}
-		return UriSource.from(uri);
+		return TestSourceSupport.fromUri(uri);
 	}
 
 	/**

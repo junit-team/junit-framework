@@ -44,6 +44,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.commons.util.UnrecoverableExceptions;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.MethodSource;
@@ -70,7 +71,12 @@ public abstract class MethodBasedTestDescriptor extends JupiterTestDescriptor
 
 	MethodBasedTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
 			JupiterConfiguration configuration) {
-		super(uniqueId, displayName, MethodSource.from(testClass, testMethod), configuration);
+		this(uniqueId, displayName, testClass, testMethod, MethodSource.from(testClass, testMethod), configuration);
+	}
+
+	MethodBasedTestDescriptor(UniqueId uniqueId, String displayName, Class<?> testClass, Method testMethod,
+			TestSource source, JupiterConfiguration configuration) {
+		super(uniqueId, displayName, source, configuration);
 		this.methodInfo = new MethodInfo(testClass, testMethod);
 	}
 

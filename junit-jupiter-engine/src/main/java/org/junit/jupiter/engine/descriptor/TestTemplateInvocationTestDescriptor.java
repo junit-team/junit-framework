@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apiguardian.api.API.Status.INTERNAL;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -31,7 +32,9 @@ import org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.Reflecti
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
 import org.junit.jupiter.engine.extension.MutableExtensionRegistry;
 import org.junit.platform.engine.TestDescriptor;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.hierarchical.ExclusiveResource;
 
 /**
@@ -53,10 +56,20 @@ public class TestTemplateInvocationTestDescriptor extends TestMethodTestDescript
 
 	TestTemplateInvocationTestDescriptor(UniqueId uniqueId, Class<?> testClass, Method templateMethod,
 			TestTemplateInvocationContext invocationContext, int index, JupiterConfiguration configuration) {
-		super(uniqueId, invocationContext.getDisplayName(index), testClass, templateMethod, configuration,
-			interceptorCall, asyncInterceptorCall);
+		super(uniqueId, invocationContext.getDisplayName(index), testClass, templateMethod,
+			determineTestSource(testClass, templateMethod, invocationContext), configuration, interceptorCall,
+			asyncInterceptorCall);
 		this.invocationContext = invocationContext;
 		this.index = index;
+	}
+
+	private static TestSource determineTestSource(Class<?> testClass, Method templateMethod,
+			TestTemplateInvocationContext invocationContext) {
+		URI testSourceUri = invocationContext.testSourceUri();
+		if (testSourceUri != null) {
+			return TestSourceSupport.fromUri(testSourceUri);
+		}
+		return MethodSource.from(testClass, templateMethod);
 	}
 
 	// --- JupiterTestDescriptor -----------------------------------------------

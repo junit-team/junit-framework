@@ -160,3 +160,80 @@ class MyResource : Store.CloseableResource, AutoCloseable {
 This ensures that your resource will be properly closed regardless of which JUnit Jupiter
 version is being used.
 ======
+
+[[constructor-parameters]]
+== Sharing State with Test Class Constructors
+
+When an extension resolves parameters for test class constructors, keep in mind that the
+point in time at which a test instance is created depends on the
+xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle]:
+
+* With the default `PER_METHOD` lifecycle, a new test instance is created for each test
+  method -- _after_ `{BeforeAllCallback}` extensions and `@BeforeAll` methods have been
+  invoked but _before_ `{BeforeEachCallback}` extensions and `@BeforeEach` methods.
+* With the `PER_CLASS` lifecycle, the test instance is created only once per test class
+  -- _before_ the `BeforeAllCallback` extensions and `@BeforeAll` methods of that class
+  are invoked, so that non-static `@BeforeAll` methods can be invoked on it.
+
+Consequently, a `{ParameterResolver}` should not rely on a value that a
+`BeforeAllCallback` puts into the `Store`: with the `PER_CLASS` lifecycle, that value
+does not exist yet when constructor parameters are resolved. Instead, both `beforeAll()`
+and `resolveParameter()` should obtain the value via a shared helper method that creates
+and initializes it lazily using `Store.computeIfAbsent(...)`. Whichever of them is
+invoked first then creates the value, and the other one reuses it.
+
+.Lazily creating a resource shared by `_beforeAll()_` and `_resolveParameter()_`
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
+----
+include::example$java/example/extensions/DatabaseExtension.java[tags=user_guide]
+----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/extensions/DatabaseExtension.kt[tags=user_guide]
+----
+--
+====
+<1> `beforeAll()` uses the same database. Data inserted here is visible to test methods
+    but -- with the `PER_CLASS` lifecycle -- not yet to the test class constructor.
+<2> Resolving a constructor parameter creates the database if `beforeAll()` has not been
+    invoked yet, which is the case for the `PER_CLASS` lifecycle.
+<3> Everything that constructor parameters depend on is initialized when the database
+    is created, regardless of which method creates it.
+
+The following test class uses the `PER_CLASS` lifecycle, so its constructor is invoked
+before `beforeAll()`. It works with the default `PER_METHOD` lifecycle as well.
+
+.A test class using the `_DatabaseExtension_`
+[tabs]
+====
+Java::
++
+--
+[source,java,indent=0]
+----
+include::example$java/example/DatabaseDemo.java[tags=user_guide]
+----
+--
+
+Kotlin::
++
+--
+[source,kotlin,indent=0]
+----
+include::example$kotlin/example/kotlin/DatabaseDemo.kt[tags=user_guide]
+----
+--
+====
+<1> The data inserted when the database was created is already available in the
+    constructor.
+<2> The data inserted by `beforeAll()` is available in test methods.
