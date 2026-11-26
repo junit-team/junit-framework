@@ -12,6 +12,8 @@ package org.junit.jupiter.engine.descriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.execution.JupiterEngineExecutionContext;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.ClasspathResourceSource;
@@ -39,6 +42,7 @@ import org.junit.platform.engine.support.descriptor.FilePosition;
 import org.junit.platform.engine.support.descriptor.FileSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.engine.support.descriptor.UriSource;
+import org.junit.platform.engine.support.hierarchical.Node.DynamicTestExecutor;
 import org.junit.platform.engine.support.hierarchical.OpenTest4JAwareThrowableCollector;
 
 /**
@@ -194,6 +198,27 @@ class TestFactoryTestDescriptorTests {
 			descriptor.invokeTestMethod(context, mock());
 
 			assertTrue(isClosed);
+		}
+
+		@Test
+		void dynamicTestsFromTestFactoriesShouldBeAwaitedWhenTheStreamThrows() throws Exception {
+			var exception = new IllegalStateException("cannot create b");
+			Stream<DynamicTest> dynamicTestStream = Stream.of("a", "b").map(name -> {
+				if (name.equals("b")) {
+					throw exception;
+				}
+				return DynamicTest.dynamicTest(name, () -> {
+				});
+			});
+			prepareMockForTestInstanceWithCustomStream(dynamicTestStream);
+			DynamicTestExecutor dynamicTestExecutor = mock();
+
+			descriptor.invokeTestMethod(context, dynamicTestExecutor);
+
+			var inOrder = inOrder(dynamicTestExecutor);
+			inOrder.verify(dynamicTestExecutor).execute(any(TestDescriptor.class));
+			inOrder.verify(dynamicTestExecutor).awaitFinished();
+			assertThat(context.getThrowableCollector().getThrowable()).isSameAs(exception);
 		}
 
 		private void prepareMockForTestInstanceWithCustomStream(Stream<?> stream) {

@@ -80,6 +80,10 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 				.orElseGet(node::getExecutionMode);
 	}
 
+	public TestDescriptor getTestDescriptor() {
+		return testDescriptor;
+	}
+
 	@Override
 	public String toString() {
 		return "NodeTestTask [" + testDescriptor + "]";
@@ -144,6 +148,7 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 		throwableCollector.execute(() -> {
 			node.around(context, ctx -> {
 				context = ctx;
+				final DynamicTestExecutor dynamicTestExecutor = new DefaultDynamicTestExecutor();
 				throwableCollector.execute(() -> {
 					// @formatter:off
 					List<NodeTestTask<C>> children = testDescriptor.getChildren().stream()
@@ -153,17 +158,16 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 
 					context = node.before(context);
 
-					final DynamicTestExecutor dynamicTestExecutor = new DefaultDynamicTestExecutor();
 					context = node.execute(context, dynamicTestExecutor);
 
 					if (!children.isEmpty()) {
 						children.forEach(child -> child.setParentContext(context));
 						taskContext.getExecutorService().invokeAll(children);
 					}
-
-					throwableCollector.execute(dynamicTestExecutor::awaitFinished);
 				});
 
+				// Await submitted dynamic tests even if execute() threw an exception
+				throwableCollector.execute(dynamicTestExecutor::awaitFinished);
 				throwableCollector.execute(() -> node.after(context));
 			});
 		});
