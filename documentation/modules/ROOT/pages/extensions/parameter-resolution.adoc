@@ -45,6 +45,14 @@ xref:writing-tests/test-instance-lifecycle.adoc[test instance lifecycle] is set 
 ====
 
 [TIP]
+.Sharing state with test class constructors
+====
+If a constructor parameter depends on state that is set up by another callback of your
+extension, such as `beforeAll()`, see
+xref:extensions/keeping-state-in-extensions.adoc#constructor-parameters[Sharing State with Test Class Constructors].
+====
+
+[TIP]
 .Parameter resolution for methods called from extensions
 ====
 Other extensions can also leverage registered `ParameterResolvers` for method and
