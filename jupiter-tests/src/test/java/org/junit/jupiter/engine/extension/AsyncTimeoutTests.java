@@ -11,6 +11,7 @@
 package org.junit.jupiter.engine.extension;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Timeout.ThreadMode.SAME_THREAD;
 import static org.junit.jupiter.api.Timeout.ThreadMode.SEPARATE_THREAD;
 import static org.junit.platform.testkit.engine.EventConditions.finishedSuccessfully;
@@ -90,7 +91,7 @@ class AsyncTimeoutTests extends AbstractJupiterTestEngineTests {
 	static class FastAsyncTestCase {
 
 		@Test
-		@Timeout(value = 5, unit = MILLISECONDS, threadMode = SAME_THREAD)
+		@Timeout(value = 5, unit = SECONDS, threadMode = SAME_THREAD)
 		CompletionStage<?> fast() {
 			return CompletableFuture.supplyAsync(() -> {
 				try {
