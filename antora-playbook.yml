@@ -6,8 +6,7 @@ antora:
       config_file: ./antora-assembler-html.yml
     - require: '@antora/pdf-extension'
       config_file: ./antora-assembler-pdf.yml
-    - require: '@antora/lunr-extension'
-      index_by_heading: true
+    - antora-pagefind-extension
     - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: junit
     - require: '@springio/antora-extensions/root-attachments-extension'

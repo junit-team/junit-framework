@@ -1,19 +1,21 @@
 {
   "name": "docs.junit.org",
   "scripts": {
-    "build": "npx antora antora-playbook.yml --log-level=info --clean --fetch --stacktrace"
+    "build": "npx antora antora-playbook.yml --log-level=info --clean --fetch --stacktrace",
+    "serve": "http-server build/site -a localhost -c-1 -p 8080"
   },
   "devDependencies": {
-    "antora": "3.2.3"
+    "antora": "3.2.3",
+    "http-server": "14.1.1"
   },
   "dependencies": {
     "@actions/cache": "^6.1.0",
     "@antora/collector-extension": "1.0.3",
     "@antora/html-single-extension": "1.0.1",
-    "@antora/lunr-extension": "1.0.0-alpha.13",
     "@antora/pdf-extension": "1.0.1",
     "@asciidoctor/tabs": "1.0.0-beta.6",
     "@springio/antora-extensions": "1.14.13",
-    "@springio/antora-xref-extension": "1.0.0-alpha.5"
+    "@springio/antora-xref-extension": "1.0.0-alpha.5",
+    "antora-pagefind-extension": "github:marcphilipp/antora-pagefind-extension#v0.1.6"
   }
 }
