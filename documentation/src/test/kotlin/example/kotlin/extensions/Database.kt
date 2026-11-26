@@ -23,5 +23,5 @@ class Database {
         data[key] = value
     }
 
-    fun find(key: String): String? = data[key]
+    fun find(key: String) = data[key]
 }
