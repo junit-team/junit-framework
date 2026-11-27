@@ -6,7 +6,9 @@ antora:
       config_file: ./antora-assembler-html.yml
     - require: '@antora/pdf-extension'
       config_file: ./antora-assembler-pdf.yml
-    - antora-pagefind-extension
+    - require: antora-pagefind-extension
+      excerpt_length: 40
+      excerpt_lines: 3
     - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: junit
     - require: '@springio/antora-extensions/root-attachments-extension'
