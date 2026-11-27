@@ -2,11 +2,11 @@
   "name": "docs.junit.org",
   "scripts": {
     "build": "npx antora antora-playbook.yml --log-level=info --clean --fetch --stacktrace",
-    "serve": "http-server build/site -a localhost -c-1 -p 8080"
+    "serve": "netlify dev --dir build/site --port 8080 --offline --no-open --internal-disable-edge-functions"
   },
   "devDependencies": {
     "antora": "3.2.3",
-    "http-server": "14.1.1"
+    "netlify-cli": "^27.20.1"
   },
   "dependencies": {
     "@actions/cache": "^6.1.0",
