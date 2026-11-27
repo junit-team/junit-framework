@@ -16,6 +16,6 @@
     "@asciidoctor/tabs": "1.0.0-beta.6",
     "@springio/antora-extensions": "1.14.13",
     "@springio/antora-xref-extension": "1.0.0-alpha.5",
-    "antora-pagefind-extension": "github:marcphilipp/antora-pagefind-extension#v0.1.7"
+    "antora-pagefind-extension": "github:marcphilipp/antora-pagefind-extension#v0.2.0"
   }
 }
