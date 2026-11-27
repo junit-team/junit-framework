@@ -6,7 +6,7 @@
   },
   "devDependencies": {
     "antora": "3.2.3",
-    "netlify-cli": "^27.20.1"
+    "netlify-cli": "27.20.1"
   },
   "dependencies": {
     "@actions/cache": "^6.1.0",
