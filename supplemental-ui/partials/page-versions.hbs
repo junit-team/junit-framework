@@ -1,0 +1,12 @@
+{{#with page.versions}}
+<div class="page-versions">
+  <button class="version-menu-toggle" title="Show other versions of page">{{@root.page.componentVersion.displayVersion}}</button>
+  <div class="version-menu">
+    {{#each (latest-patches this)}}
+    <a class="version
+      {{~#if (eq ./version @root.page.version)}} is-current{{/if~}}
+      {{~#if ./missing}} is-missing{{/if}}" href="{{{relativize ./url}}}">{{./displayVersion}}</a>
+    {{/each}}
+  </div>
+</div>
+{{/with}}
