@@ -57,6 +57,7 @@ import org.junit.jupiter.api.store.Store;
  * for details.
  *
  * @since 5.5
+ * @see AsyncInvocationInterceptor
  * @see Invocation
  * @see ReflectiveInvocationContext
  * @see ExtensionContext
@@ -227,6 +228,7 @@ public interface InvocationInterceptor extends TestInstantiationAwareExtension {
 	 *
 	 * @param <T> the result type
 	 * @since 5.5
+	 * @see AsyncInvocationInterceptor.AsyncInvocation
 	 */
 	@API(status = STABLE, since = "5.10")
 	interface Invocation<T extends @Nullable Object> {

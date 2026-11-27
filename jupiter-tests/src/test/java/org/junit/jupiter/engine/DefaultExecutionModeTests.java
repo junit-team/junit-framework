@@ -157,6 +157,44 @@ class DefaultExecutionModeTests extends AbstractJupiterTestEngineTests {
 	static class SameThreadTestCase extends TestCase {
 	}
 
+	@Test
+	void asyncTestMethodsAreImplicitlyConcurrent() {
+		var engineDescriptor = discoverTestsWithDefaultExecutionMode(AsyncTestCase.class, null);
+		var classDescriptor = getOnlyElement(engineDescriptor.getChildren());
+		// The test class itself has no explicit @Execution and its methods are
+		// async-returning -> the class-level default stays SAME_THREAD, but each
+		// async test method resolves implicitly to CONCURRENT.
+		assertThat(((Node<?>) classDescriptor).getExecutionMode()).isEqualTo(SAME_THREAD);
+		classDescriptor.getChildren().forEach(
+			child -> assertThat(((Node<?>) child).getExecutionMode()).isEqualTo(CONCURRENT));
+	}
+
+	@Test
+	void explicitExecutionModeOverridesAsyncImplicitConcurrent() {
+		var engineDescriptor = discoverTestsWithDefaultExecutionMode(ExplicitSameThreadAsyncTestCase.class, null);
+		var classDescriptor = getOnlyElement(engineDescriptor.getChildren());
+		// Class-level @Execution(SAME_THREAD) wins over the async implicit default.
+		classDescriptor.getChildren().forEach(
+			child -> assertThat(((Node<?>) child).getExecutionMode()).isEqualTo(SAME_THREAD));
+	}
+
+	static class AsyncTestCase {
+
+		@Test
+		java.util.concurrent.CompletionStage<?> async() {
+			return java.util.concurrent.CompletableFuture.completedFuture(null);
+		}
+	}
+
+	@Execution(org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD)
+	static class ExplicitSameThreadAsyncTestCase {
+
+		@Test
+		java.util.concurrent.CompletionStage<?> async() {
+			return java.util.concurrent.CompletableFuture.completedFuture(null);
+		}
+	}
+
 	static class OuterTestCase {
 		@Nested
 		class LevelOne {

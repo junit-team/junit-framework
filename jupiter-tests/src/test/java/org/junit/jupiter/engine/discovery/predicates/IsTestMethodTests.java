@@ -18,6 +18,9 @@ import static org.junit.platform.commons.util.CollectionUtils.getOnlyElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -54,6 +57,18 @@ class IsTestMethodTests {
 		Method method = method("publicTestMethodWithArgument", TestInfo.class);
 		// Ensure that somebody doesn't accidentally delete the public modifier again.
 		assertTrue(ModifierSupport.isPublic(method));
+		assertThat(isTestMethod).accepts(method);
+	}
+
+	@Test
+	void publicAsyncTestMethod() {
+		Method method = method("publicAsyncTestMethod");
+		assertThat(isTestMethod).accepts(method);
+	}
+
+	@Test
+	void publicFutureTestMethod() {
+		Method method = method("publicFutureTestMethod");
 		assertThat(isTestMethod).accepts(method);
 	}
 
@@ -197,6 +212,16 @@ class IsTestMethodTests {
 
 		@Test
 		public void publicTestMethod() {
+		}
+
+		@Test
+		public CompletionStage<?> publicAsyncTestMethod() {
+			return CompletableFuture.completedFuture("done");
+		}
+
+		@Test
+		public Future<?> publicFutureTestMethod() {
+			return CompletableFuture.completedFuture("done");
 		}
 
 		@Test

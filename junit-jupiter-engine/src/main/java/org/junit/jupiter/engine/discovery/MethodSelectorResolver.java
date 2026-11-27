@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.extension.AsyncReturnValueHandler;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
 import org.junit.jupiter.engine.descriptor.Filterable;
 import org.junit.jupiter.engine.descriptor.TestClassAware;
@@ -39,6 +40,7 @@ import org.junit.jupiter.engine.discovery.predicates.IsTestFactoryMethod;
 import org.junit.jupiter.engine.discovery.predicates.IsTestMethod;
 import org.junit.jupiter.engine.discovery.predicates.IsTestTemplateMethod;
 import org.junit.jupiter.engine.discovery.predicates.TestClassPredicates;
+import org.junit.jupiter.engine.extension.EarlyExtensionRegistry;
 import org.junit.platform.engine.DiscoveryIssue;
 import org.junit.platform.engine.DiscoveryIssue.Severity;
 import org.junit.platform.engine.DiscoverySelector;
@@ -65,11 +67,14 @@ class MethodSelectorResolver implements SelectorResolver {
 	private final DiscoveryIssueReporter issueReporter;
 	private final List<MethodType> methodTypes;
 
-	MethodSelectorResolver(JupiterConfiguration configuration, DiscoveryIssueReporter issueReporter) {
+	MethodSelectorResolver(JupiterConfiguration configuration, EarlyExtensionRegistry earlyExtensionRegistry,
+			DiscoveryIssueReporter issueReporter) {
 		this.configuration = configuration;
 		this.issueReporter = issueReporter;
-		this.methodTypes = MethodType.allPossibilities(issueReporter);
-		this.testClassPredicate = new TestClassPredicates(issueReporter).looksLikeNestedOrStandaloneTestClass;
+		List<AsyncReturnValueHandler> asyncReturnValueHandlers = earlyExtensionRegistry.getAsyncReturnValueHandlers();
+		this.methodTypes = MethodType.allPossibilities(issueReporter, asyncReturnValueHandlers);
+		this.testClassPredicate = new TestClassPredicates(issueReporter,
+			earlyExtensionRegistry).looksLikeNestedOrStandaloneTestClass;
 	}
 
 	@Override
@@ -173,15 +178,17 @@ class MethodSelectorResolver implements SelectorResolver {
 
 	private static class MethodType {
 
-		static List<MethodType> allPossibilities(DiscoveryIssueReporter issueReporter) {
+		static List<MethodType> allPossibilities(DiscoveryIssueReporter issueReporter,
+				List<AsyncReturnValueHandler> asyncReturnValueHandlers) {
 			return Arrays.asList( //
-				new MethodType(new IsTestMethod(issueReporter), TestMethodTestDescriptor::new,
+				new MethodType(new IsTestMethod(issueReporter, asyncReturnValueHandlers), TestMethodTestDescriptor::new,
 					TestMethodTestDescriptor.SEGMENT_TYPE), //
 				new MethodType(new IsTestFactoryMethod(issueReporter), TestFactoryTestDescriptor::new,
 					TestFactoryTestDescriptor.SEGMENT_TYPE, TestFactoryTestDescriptor.DYNAMIC_CONTAINER_SEGMENT_TYPE,
 					TestFactoryTestDescriptor.DYNAMIC_TEST_SEGMENT_TYPE), //
-				new MethodType(new IsTestTemplateMethod(issueReporter), TestTemplateTestDescriptor::new,
-					TestTemplateTestDescriptor.SEGMENT_TYPE, TestTemplateInvocationTestDescriptor.SEGMENT_TYPE) //
+				new MethodType(new IsTestTemplateMethod(issueReporter, asyncReturnValueHandlers),
+					TestTemplateTestDescriptor::new, TestTemplateTestDescriptor.SEGMENT_TYPE,
+					TestTemplateInvocationTestDescriptor.SEGMENT_TYPE) //
 			);
 		}
 

@@ -33,9 +33,11 @@ tasks.test {
 }
 
 val initializeAtBuildTime = mapOf<String, List<String>>(
-	// These need to be added to native-build-tools
+	// These need to be added to native-build-tools (JDK 21 and earlier).
 	"6.2" to listOf(
 		"org.junit.jupiter.api.store.Namespace",
+		"org.junit.jupiter.engine.execution.AsyncInvocationInterceptorChain",
+		"org.junit.jupiter.engine.execution.AsyncInterceptingExecutableInvoker",
 	),
 )
 

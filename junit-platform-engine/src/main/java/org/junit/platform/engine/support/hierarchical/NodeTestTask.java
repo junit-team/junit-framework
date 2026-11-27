@@ -21,9 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.platform.commons.JUnitException;
@@ -132,12 +138,65 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 						why the flag was not cleared by user code.""".formatted(this.testDescriptor.getDisplayName(),
 					this.testDescriptor.getUniqueId()));
 			}
-			finalizer.run();
+			try {
+				finalizer.run();
+			}
+			finally {
+				clearReferences();
+			}
 		}
+	}
 
-		// Clear reference to context to allow it to be garbage collected.
-		// See https://github.com/junit-team/junit-framework/issues/1578
+	/**
+	 * Execute the node without blocking on asynchronous lifecycle phases.
+	 * Preparation, skip checks, and cleanup retain their synchronous contracts.
+	 */
+	@Override
+	public CompletionStage<Outcome<C>> executeAsync() {
+		CompletionStage<Outcome<C>> flow;
+		try {
+			throwableCollector = taskContext.throwableCollectorFactory().create();
+			if (!taskContext.cancellationToken().isCancellationRequested()) {
+				prepare();
+			}
+			if (requiredThrowableCollector().isEmpty()) {
+				requiredThrowableCollector().execute(() -> skipResult = checkWhetherSkipped());
+			}
+			if (requiredThrowableCollector().isEmpty() && !requiredSkipResult().isSkipped()) {
+				taskContext.listener().executionStarted(testDescriptor);
+				started = true;
+				flow = executeRecursivelyAsync();
+			}
+			else {
+				flow = completedFuture(Outcome.continued(context));
+			}
+		}
+		catch (Throwable throwable) {
+			flow = CompletableFuture.failedFuture(throwable);
+		}
+		return flow.thenCompose(outcome -> {
+			if (outcome.unrecoverable() != null) {
+				return CompletableFuture.<Outcome<C>> failedFuture(outcome.unrecoverable());
+			}
+			if (context != null) {
+				cleanUp();
+			}
+			reportCompletion();
+			return completedFuture(outcome);
+		}).whenComplete((__, throwable) -> {
+			try {
+				finalizer.run();
+			}
+			finally {
+				clearReferences();
+			}
+		});
+	}
+
+	private void clearReferences() {
 		context = null;
+		parentContext = null;
+		throwableCollector = null;
 	}
 
 	private void prepare() {
@@ -186,6 +245,107 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 				throwableCollector.execute(() -> node.after(requiredContext()));
 			});
 		});
+	}
+
+	private CompletionStage<Outcome<C>> executeRecursivelyAsync() {
+		return phase(() -> node.aroundAsync(requiredContext(), ctx -> {
+			context = ctx;
+			return runRecursivelyAsync().thenCompose(outcome -> {
+				if (outcome.unrecoverable() != null) {
+					return CompletableFuture.failedFuture(outcome.unrecoverable());
+				}
+				return completedFuture(null);
+			});
+		}), __ -> {
+		});
+	}
+
+	private CompletionStage<Outcome<C>> runRecursivelyAsync() {
+		final var dynamicTestExecutor = new DefaultDynamicTestExecutor();
+		// Snapshot static children before before/execute can register dynamic tests.
+		final List<NodeTestTask<C>> children = testDescriptor.getChildren().stream().map(
+			descriptor -> new NodeTestTask<C>(taskContext, descriptor)).collect(toCollection(ArrayList::new));
+		return phase(() -> node.beforeAsync(requiredContext()), newContext -> context = newContext).thenCompose(
+			outcome -> {
+				if (outcome.unrecoverable() != null || outcome.failureOccurred()) {
+					return completedFuture(outcome);
+				}
+				return phase(() -> node.executeAsync(requiredContext(), dynamicTestExecutor),
+					newContext -> context = newContext);
+			}).thenCompose(outcome -> {
+				if (outcome.unrecoverable() != null || outcome.failureOccurred() || children.isEmpty()) {
+					return completedFuture(outcome);
+				}
+				children.forEach(child -> child.setParentContext(context));
+				return phase(() -> taskContext.executorService().invokeAllAsync(children), __ -> {
+				});
+			}).thenCompose(outcome -> {
+				if (outcome.unrecoverable() != null) {
+					return completedFuture(outcome);
+				}
+				// Drain dynamic tests even if before, execute, or static children failed.
+				return phase(dynamicTestExecutor::awaitFinishedAsync, __ -> {
+				});
+			}).thenCompose(outcome -> {
+				if (outcome.unrecoverable() != null) {
+					return completedFuture(outcome);
+				}
+				return phase(() -> node.afterAsync(requiredContext()), __ -> {
+				});
+			});
+	}
+
+	private <T> CompletionStage<Outcome<C>> phase(final Supplier<CompletionStage<T>> action, final Consumer<T> result) {
+		try {
+			return action.get().handle((value, throwable) -> {
+				if (throwable != null) {
+					return toOutcome(throwable);
+				}
+				try {
+					result.accept(value);
+					return Outcome.continued(context);
+				}
+				catch (Throwable failure) {
+					return toOutcome(failure);
+				}
+			});
+		}
+		catch (Throwable throwable) {
+			return completedFuture(toOutcome(throwable));
+		}
+	}
+
+	private Outcome<C> toOutcome(Throwable throwable) {
+		final var root = unwrap(throwable);
+		if (UnrecoverableExceptions.isUnrecoverable(root)) {
+			return Outcome.errored(root);
+		}
+		requiredThrowableCollector().execute(() -> ExceptionUtils.throwAsUncheckedException(root));
+		return Outcome.failedRecoverably();
+	}
+
+	private static Throwable unwrap(Throwable throwable) {
+		var current = throwable;
+		while ((current instanceof CompletionException || current instanceof ExecutionException)
+				&& current.getCause() != null) {
+			current = current.getCause();
+		}
+		return current;
+	}
+
+	record Outcome<C>(@Nullable C context, @Nullable Throwable unrecoverable, boolean failureOccurred) {
+
+		static <C> Outcome<C> continued(@Nullable C context) {
+			return new Outcome<>(context, null, false);
+		}
+
+		static <C> Outcome<C> failedRecoverably() {
+			return new Outcome<>(null, null, true);
+		}
+
+		static <C> Outcome<C> errored(Throwable unrecoverable) {
+			return new Outcome<>(null, unrecoverable, false);
+		}
 	}
 
 	private void cleanUp() {
@@ -239,6 +399,8 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 
 	private class DefaultDynamicTestExecutor implements DynamicTestExecutor {
 		private final Map<UniqueId, DynamicTaskState> unfinishedTasks = new ConcurrentHashMap<>();
+		private final Map<UniqueId, CompletableFuture<?>> pendingStages = new ConcurrentHashMap<>();
+		private final AtomicReference<@Nullable Throwable> executionFailure = new AtomicReference<>();
 
 		@Override
 		@SuppressWarnings("FutureReturnValueIgnored")
@@ -267,6 +429,28 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 				unfinishedTasks.put(uniqueId, DynamicTaskState.unscheduled());
 				var future = taskContext.executorService().submit(nodeTestTask);
 				unfinishedTasks.computeIfPresent(uniqueId, (__, state) -> DynamicTaskState.scheduled(future));
+				if (future instanceof CompletionStage<?> stage) {
+					// The task finalizer runs before its returned stage settles. Retain a
+					// separate completion signal until failures have been observed as well.
+					final var observed = new CompletableFuture<Void>();
+					pendingStages.put(uniqueId, observed);
+					stage.whenComplete((__, throwable) -> {
+						if (throwable == null || unwrap(throwable) instanceof CancellationException) {
+							observed.complete(null);
+						}
+						else {
+							final var failure = unwrap(throwable);
+							if (UnrecoverableExceptions.isUnrecoverable(failure)) {
+								executionFailure.set(failure);
+							}
+							else {
+								executionFailure.compareAndSet(null, failure);
+							}
+							observed.completeExceptionally(failure);
+						}
+						pendingStages.remove(uniqueId);
+					});
+				}
 				return future;
 			}
 		}
@@ -285,23 +469,54 @@ class NodeTestTask<C extends EngineExecutionContext> implements TestTask {
 				}
 			}
 		}
+
+		@Override
+		public CompletionStage<?> awaitFinishedAsync() {
+			final var stages = new ArrayList<CompletableFuture<?>>();
+			stages.addAll(pendingStages.values());
+			unfinishedTasks.values().stream().map(DynamicTaskState::awaitFinishedAsync).map(
+				stage -> stage.handle((__, throwable) -> {
+					if (throwable != null && !(unwrap(throwable) instanceof CancellationException)) {
+						throw ExceptionUtils.throwAsUncheckedException(unwrap(throwable));
+					}
+					return null;
+				}).toCompletableFuture()).forEach(stages::add);
+			return CompletableFuture.allOf(stages.toArray(CompletableFuture<?>[]::new)).handle((__, throwable) -> {
+				final var failure = executionFailure.get();
+				if (failure != null) {
+					throw ExceptionUtils.throwAsUncheckedException(failure);
+				}
+				if (throwable != null) {
+					throw ExceptionUtils.throwAsUncheckedException(unwrap(throwable));
+				}
+				return null;
+			});
+		}
 	}
 
-	@FunctionalInterface
-	private interface DynamicTaskState {
-
-		DynamicTaskState UNSCHEDULED = () -> {
-		};
+	private record DynamicTaskState(@Nullable Future<@Nullable Void> future) {
 
 		static DynamicTaskState unscheduled() {
-			return UNSCHEDULED;
+			return new DynamicTaskState(null);
 		}
 
 		static DynamicTaskState scheduled(Future<@Nullable Void> future) {
-			return future::get;
+			return new DynamicTaskState(future);
 		}
 
-		void awaitFinished() throws CancellationException, ExecutionException, InterruptedException;
+		void awaitFinished() throws ExecutionException, InterruptedException {
+			if (future != null) {
+				future.get();
+			}
+		}
+
+		CompletionStage<?> awaitFinishedAsync() {
+			if (future instanceof CompletionStage<?> stage) {
+				return stage;
+			}
+			// Only legacy services returning non-stage Future wrappers need a blocking fallback.
+			return AsyncTestExecution.synchronous(this::awaitFinished);
+		}
 	}
 
 }
